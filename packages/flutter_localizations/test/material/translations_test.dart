@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  for (String language in kMaterialSupportedLanguages) {
+  for (final String language in kMaterialSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = Locale(language);
 
@@ -143,7 +143,7 @@ void main() {
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'GB'));
-    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu 23 Jul');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu, 23 Jul');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es'));
@@ -439,7 +439,7 @@ void main() {
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations is MaterialLocalizationZhHant, true);
-    expect(localizations.alertDialogLabel, '快訊');
+    expect(localizations.alertDialogLabel, '通知');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '關閉');
     expect(localizations.okButtonLabel, '確定');
@@ -457,7 +457,7 @@ void main() {
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations is MaterialLocalizationZhHantHk, true);
-    expect(localizations.alertDialogLabel, '快訊');
+    expect(localizations.alertDialogLabel, '通知');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '關閉');
     expect(localizations.okButtonLabel, '確定');

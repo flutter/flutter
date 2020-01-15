@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -54,33 +54,31 @@ class _ContactItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map<Widget>((String line) => Text(line)).toList();
-    columnChildren.add(Text(lines.last, style: themeData.textTheme.caption));
-
-    final List<Widget> rowChildren = <Widget>[
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: columnChildren,
-        ),
-      ),
-    ];
-    if (icon != null) {
-      rowChildren.add(SizedBox(
-        width: 72.0,
-        child: IconButton(
-          icon: Icon(icon),
-          color: themeData.primaryColor,
-          onPressed: onPressed,
-        ),
-      ));
-    }
     return MergeSemantics(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: rowChildren,
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  ...lines.sublist(0, lines.length - 1).map<Widget>((String line) => Text(line)),
+                  Text(lines.last, style: themeData.textTheme.caption),
+                ],
+              ),
+            ),
+            if (icon != null)
+              SizedBox(
+                width: 72.0,
+                child: IconButton(
+                  icon: Icon(icon),
+                  color: themeData.primaryColor,
+                  onPressed: onPressed,
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -171,9 +169,9 @@ class ContactsDemoState extends State<ContactsDemo> {
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment(0.0, -1.0),
-                          end: Alignment(0.0, -0.4),
-                          colors: <Color>[Color(0x60000000), Color(0x00000000)],
+                          begin: Alignment.topCenter,
+                          end: Alignment(0, .35),
+                          colors: <Color>[Color(0xC0000000), Color(0x00000000)],
                         ),
                       ),
                     ),

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -96,7 +96,7 @@ class _NestedTabBarContainer extends StatelessWidget {
                 Container(color: Colors.grey),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -127,7 +127,12 @@ Widget buildFrame({
 typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabController controller);
 
 class TabControllerFrame extends StatefulWidget {
-  const TabControllerFrame({ this.length, this.initialIndex = 0, this.builder });
+  const TabControllerFrame({
+    Key key,
+    this.length,
+    this.initialIndex = 0,
+    this.builder,
+  }) : super(key: key);
 
   final int length;
   final int initialIndex;
@@ -252,6 +257,30 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
+  }, skip: isBrowser);
+
+  testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(fontFamily: 'Ahem'),
+        home: const Center(
+          child: Material(
+            child: Tab(
+              icon: SizedBox(
+                width: 10.0,
+                height: 10.0,
+              ),
+              iconMargin: EdgeInsets.symmetric(
+                horizontal: 100.0,
+              ),
+              text: 'x',
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
+    expect(tester.getSize(find.byType(Tab)), const Size(210.0, 72.0));
   }, skip: isBrowser);
 
   testWidgets('Tab sizing - icon and child', (WidgetTester tester) async {
@@ -978,8 +1007,7 @@ void main() {
     expect(tabController.index, 0);
   });
 
-  testWidgets('Nested TabBarView sets ScrollController pixels to non-null value '
-  'when disposed before it is set by the applyViewportDimension', (WidgetTester tester) async {
+  testWidgets('Can switch to non-neighboring tab in nested TabBarView without crashing', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/18756
     final TabController _mainTabController = TabController(length: 4, vsync: const TestVSync());
     final TabController _nestedTabController = TabController(length: 2, vsync: const TestVSync());
@@ -1009,7 +1037,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     // expect first tab to be selected
@@ -1614,15 +1642,19 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        actions: SemanticsAction.tap.index,
-                        flags: SemanticsFlag.isSelected.index,
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isSelected,
+                          SemanticsFlag.isFocusable,
+                        ],
                         label: 'TAB #0\nTab 1 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(0.0, 276.0, 0.0),
                       ),
                       TestSemantics(
                         id: 5,
-                        actions: SemanticsAction.tap.index,
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
                         label: 'TAB #1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
@@ -1878,15 +1910,19 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        actions: SemanticsAction.tap.index,
-                        flags: SemanticsFlag.isSelected.index,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isSelected,
+                          SemanticsFlag.isFocusable,
+                        ],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
                         label: 'Semantics override 0\nTab 1 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(0.0, 276.0, 0.0),
                       ),
                       TestSemantics(
                         id: 5,
-                        actions: SemanticsAction.tap.index,
+                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
                         label: 'Semantics override 1\nTab 2 of 2',
                         rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
@@ -2349,5 +2385,78 @@ void main() {
     expect(find.text('Tab0'), findsOneWidget);
     expect(find.text('Tab1'), findsOneWidget);
     expect(find.text('Tab2'), findsOneWidget);
+  });
+
+  testWidgets('DefaultTabController should allow for a length of zero', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/20292.
+    List<String> tabTextContent = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+              length: tabTextContent.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  title: const Text('Default TabBar Preview'),
+                  bottom: tabTextContent.isNotEmpty
+                    ? TabBar(
+                       isScrollable: true,
+                       tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
+                     )
+                    : null,
+                ),
+                body: tabTextContent.isNotEmpty
+                  ? TabBarView(
+                      children: tabTextContent.map((String textContent) => Tab(text: '$textContent\'s view')).toList()
+                    )
+                  : const Center(child: Text('No tabs')),
+                bottomNavigationBar: BottomAppBar(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      IconButton(
+                        key: const Key('Add tab'),
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            tabTextContent = List<String>.from(tabTextContent)
+                              ..add('Tab ${tabTextContent.length + 1}');
+                          });
+                        },
+                      ),
+                      IconButton(
+                        key: const Key('Delete tab'),
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          setState(() {
+                            tabTextContent = List<String>.from(tabTextContent)
+                              ..removeLast();
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Initializes with zero tabs properly
+    expect(find.text('No tabs'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('Add tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 1\'s view'), findsOneWidget);
+
+    // Dynamically updates to zero tabs properly
+    await tester.tap(find.byKey(const Key('Delete tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('No tabs'), findsOneWidget);
   });
 }

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,20 +12,19 @@ import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'desktop.dart';
 import 'fuchsia/fuchsia_device.dart';
-
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'vmservice.dart';
 import 'web/web_device.dart';
-import 'web/workflow.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
@@ -74,30 +73,19 @@ class DeviceManager {
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),
-  ] + _conditionalDesktopDevices + _conditionalWebDevices);
-
-  /// Only add desktop devices if the flag is enabled.
-  static List<DeviceDiscovery> get _conditionalDesktopDevices {
-    return flutterDesktopEnabled ? <DeviceDiscovery>[
-      MacOSDevices(),
-      LinuxDevices(),
-      WindowsDevices(),
-    ] : <DeviceDiscovery>[];
-  }
-
-  /// Only add web devices if the flag is enabled.
-  static List<DeviceDiscovery> get _conditionalWebDevices {
-    return flutterWebEnabled ? <DeviceDiscovery>[
-      WebDevices(),
-    ] : <DeviceDiscovery>[];
-  }
+    MacOSDevices(),
+    LinuxDevices(),
+    WindowsDevices(),
+    WebDevices(),
+  ]);
 
   String _specifiedDeviceId;
 
   /// A user-specified device ID.
   String get specifiedDeviceId {
-    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') {
       return null;
+    }
     return _specifiedDeviceId;
   }
 
@@ -130,8 +118,9 @@ class DeviceManager {
     }
 
     // Match on a id or name starting with [deviceId].
-    for (Device device in devices.where(startsWithDeviceId))
+    for (final Device device in devices.where(startsWithDeviceId)) {
       yield device;
+    }
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
@@ -147,8 +136,8 @@ class DeviceManager {
 
   /// Return the list of all connected devices.
   Stream<Device> getAllConnectedDevices() async* {
-    for (DeviceDiscovery discoverer in _platformDiscoverers) {
-      for (Device device in await discoverer.devices) {
+    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
+      for (final Device device in await discoverer.devices) {
         yield device;
       }
     }
@@ -162,14 +151,14 @@ class DeviceManager {
   /// Get diagnostics about issues with any connected devices.
   Future<List<String>> getDeviceDiagnostics() async {
     return <String>[
-      for (DeviceDiscovery discoverer in _platformDiscoverers)
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
         ...await discoverer.getDiagnostics(),
     ];
   }
 
   /// Find and return a list of devices based on the current project and environment.
   ///
-  /// Returns a list of deviecs specified by the user.
+  /// Returns a list of devices specified by the user.
   ///
   /// * If the user specified '-d all', then return all connected devices which
   /// support the current project, except for fuchsia and web.
@@ -189,10 +178,11 @@ class DeviceManager {
     // compilers, and web requires an entirely different resident runner.
     if (hasSpecifiedAllDevices) {
       devices = <Device>[
-        for (Device device in devices)
-          if (await device.targetPlatform != TargetPlatform.fuchsia &&
+        for (final Device device in devices)
+          if (await device.targetPlatform != TargetPlatform.fuchsia_arm64 &&
+              await device.targetPlatform != TargetPlatform.fuchsia_x64 &&
               await device.targetPlatform != TargetPlatform.web_javascript)
-            device
+            device,
       ];
     }
 
@@ -201,10 +191,16 @@ class DeviceManager {
     // 'android' folder then don't attempt to launch with an Android device.
     if (devices.length > 1 && !hasSpecifiedDeviceId) {
       devices = <Device>[
-        for (Device device in devices)
+        for (final Device device in devices)
           if (isDeviceSupportedForProject(device, flutterProject))
-            device
+            device,
       ];
+    } else if (devices.length == 1 &&
+             !hasSpecifiedDeviceId &&
+             !isDeviceSupportedForProject(devices.single, flutterProject)) {
+      // If there is only a single device but it is not supported, then return
+      // early.
+      return <Device>[];
     }
 
     // If there are still multiple devices and the user did not specify to run
@@ -225,7 +221,7 @@ class DeviceManager {
 
   /// Returns whether the device is supported for the project.
   ///
-  /// This exists to allow the check to be overriden for google3 clients.
+  /// This exists to allow the check to be overridden for google3 clients.
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
@@ -256,28 +252,32 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   final String name;
   ItemListNotifier<Device> _items;
-  Poller _poller;
+  Timer _timer;
 
   Future<List<Device>> pollingGetDevices();
 
   void startPolling() {
-    if (_poller == null) {
+    if (_timer == null) {
       _items ??= ItemListNotifier<Device>();
-
-      _poller = Poller(() async {
-        try {
-          final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
-          _items.updateWithNewList(devices);
-        } on TimeoutException {
-          printTrace('Device poll timed out. Will retry.');
-        }
-      }, _pollingInterval);
+      _timer = _initTimer();
     }
   }
 
+  Timer _initTimer() {
+    return Timer(_pollingInterval, () async {
+      try {
+        final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+        _items.updateWithNewList(devices);
+      } on TimeoutException {
+        globals.printTrace('Device poll timed out. Will retry.');
+      }
+      _timer = _initTimer();
+    });
+  }
+
   void stopPolling() {
-    _poller?.cancel();
-    _poller = null;
+    _timer?.cancel();
+    _timer = null;
   }
 
   @override
@@ -303,7 +303,6 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 }
 
 abstract class Device {
-
   Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
 
   final String id;
@@ -345,7 +344,8 @@ abstract class Device {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
       default:
         return false;
     }
@@ -355,16 +355,16 @@ abstract class Device {
   bool isSupportedForProject(FlutterProject flutterProject);
 
   /// Check if a version of the given app is already installed
-  Future<bool> isAppInstalled(ApplicationPackage app);
+  Future<bool> isAppInstalled(covariant ApplicationPackage app);
 
   /// Check if the latest build of the [app] is already installed.
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app);
+  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app);
 
   /// Install an app package on the current device
-  Future<bool> installApp(ApplicationPackage app);
+  Future<bool> installApp(covariant ApplicationPackage app);
 
   /// Uninstall an app package from the current device
-  Future<bool> uninstallApp(ApplicationPackage app);
+  Future<bool> uninstallApp(covariant ApplicationPackage app);
 
   /// Check if the device is supported by Flutter
   bool isSupported();
@@ -381,7 +381,7 @@ abstract class Device {
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  DeviceLogReader getLogReader({ ApplicationPackage app });
+  DeviceLogReader getLogReader({ covariant ApplicationPackage app });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -396,20 +396,14 @@ abstract class Device {
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
-  ///
-  /// If [usesTerminalUi] is true, Flutter Tools may attempt to prompt the
-  /// user to resolve fixable issues such as selecting a signing certificate
-  /// for iOS device deployment. Set to false if stdin cannot be read from while
-  /// attempting to start the app.
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    covariant ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    bool usesTerminalUi = true,
   });
 
   /// Whether this device implements support for hot reload.
@@ -426,8 +420,19 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
+  /// Whether the device supports the '--fast-start' development mode.
+  bool get supportsFastStart => false;
+
   /// Stop an app package on the current device.
-  Future<bool> stopApp(ApplicationPackage app);
+  Future<bool> stopApp(covariant ApplicationPackage app);
+
+  /// Query the current application memory usage..
+  ///
+  /// If the device does not support this callback, an empty map
+  /// is returned.
+  Future<MemoryInfo> queryMemoryInfo() {
+    return Future<MemoryInfo>.value(const MemoryInfo.empty());
+  }
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
@@ -435,24 +440,25 @@ abstract class Device {
   int get hashCode => id.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
       return true;
-    if (other is! Device)
-      return false;
-    return id == other.id;
+    }
+    return other is Device
+        && other.id == id;
   }
 
   @override
   String toString() => name;
 
   static Stream<String> descriptions(List<Device> devices) async* {
-    if (devices.isEmpty)
+    if (devices.isEmpty) {
       return;
+    }
 
     // Extract device information
     final List<List<String>> table = <List<String>>[];
-    for (Device device in devices) {
+    for (final Device device in devices) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
@@ -470,19 +476,43 @@ abstract class Device {
     // Calculate column widths
     final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (List<String> row in table) {
+    for (final List<String> row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
-    for (List<String> row in table) {
+    for (final List<String> row in table) {
       yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
     }
   }
 
   static Future<void> printDevices(List<Device> devices) async {
-    await descriptions(devices).forEach(printStatus);
+    await descriptions(devices).forEach(globals.printStatus);
   }
+
+  /// Clean up resources allocated by device
+  ///
+  /// For example log readers or port forwarders.
+  Future<void> dispose();
+}
+
+/// Information about an application's memory usage.
+abstract class MemoryInfo {
+  /// Const constructor to allow subclasses to be const.
+  const MemoryInfo();
+
+  /// Create a [MemoryInfo] object with no information.
+  const factory MemoryInfo.empty() = _NoMemoryInfo;
+
+  /// Convert the object to a JSON representation suitable for serialization.
+  Map<String, Object> toJson();
+}
+
+class _NoMemoryInfo implements MemoryInfo {
+  const _NoMemoryInfo();
+
+  @override
+  Map<String, Object> toJson() => <String, Object>{};
 }
 
 class DebuggingOptions {
@@ -496,13 +526,26 @@ class DebuggingOptions {
     this.traceSkia = false,
     this.traceSystrace = false,
     this.dumpSkpOnShaderCompilation = false,
+    this.cacheSkSL = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
-    this.observatoryPort,
+    this.hostVmServicePort,
+    this.deviceVmServicePort,
+    this.initializePlatform = true,
+    this.hostname,
+    this.port,
+    this.webEnableExposeUrl,
+    this.vmserviceOutFile,
+    this.fastStart = false,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo)
-    : debuggingEnabled = false,
+  DebuggingOptions.disabled(this.buildInfo, {
+      this.initializePlatform = true,
+      this.port,
+      this.hostname,
+      this.webEnableExposeUrl,
+      this.cacheSkSL = false,
+    }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
       dartFlags = '',
@@ -513,7 +556,10 @@ class DebuggingOptions {
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
-      observatoryPort = null;
+      hostVmServicePort = null,
+      deviceVmServicePort = null,
+      vmserviceOutFile = null,
+      fastStart = false;
 
   final bool debuggingEnabled;
 
@@ -526,11 +572,21 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool traceSystrace;
   final bool dumpSkpOnShaderCompilation;
+  final bool cacheSkSL;
   final bool useTestFonts;
   final bool verboseSystemLogs;
-  final int observatoryPort;
+  /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
+  final bool initializePlatform;
+  final int hostVmServicePort;
+  final int deviceVmServicePort;
+  final String port;
+  final String hostname;
+  final bool webEnableExposeUrl;
+  /// A file where the vmservice URL should be written after the application is started.
+  final String vmserviceOutFile;
+  final bool fastStart;
 
-  bool get hasObservatoryPort => observatoryPort != null;
+  bool get hasObservatoryPort => hostVmServicePort != null;
 }
 
 class LaunchResult {
@@ -547,8 +603,9 @@ class LaunchResult {
   @override
   String toString() {
     final StringBuffer buf = StringBuffer('started=$started');
-    if (observatoryUri != null)
+    if (observatoryUri != null) {
       buf.write(', observatory=$observatoryUri');
+    }
     return buf.toString();
   }
 }
@@ -559,10 +616,17 @@ class ForwardedPort {
 
   final int hostPort;
   final int devicePort;
-  final dynamic context;
+  final Process context;
 
   @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
+
+  /// Kill subprocess (if present) used in forwarding.
+  void dispose() {
+    if (context != null) {
+      context.kill();
+    }
+  }
 }
 
 /// Forward ports from the host machine to the device.
@@ -578,6 +642,9 @@ abstract class DevicePortForwarder {
 
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
+
+  /// Cleanup allocated resources, like forwardedPorts
+  Future<void> dispose();
 }
 
 /// Read the log for a particular device.
@@ -587,11 +654,18 @@ abstract class DeviceLogReader {
   /// A broadcast stream where each element in the string is a line of log output.
   Stream<String> get logLines;
 
+  /// Some logs can be obtained from a VM service stream.
+  /// Set this after the VM services are connected.
+  VMService connectedVMService;
+
   @override
   String toString() => name;
 
   /// Process ID of the app on the device.
   int appPid;
+
+  // Clean up resources allocated by log reader e.g. subprocesses
+  void dispose();
 }
 
 /// Describes an app running on the device.
@@ -612,7 +686,13 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   int appPid;
 
   @override
+  VMService connectedVMService;
+
+  @override
   Stream<String> get logLines => const Stream<String>.empty();
+
+  @override
+  void dispose() { }
 }
 
 // A portforwarder which does not support forwarding ports.
@@ -627,4 +707,7 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async { }
+
+  @override
+  Future<void> dispose() async { }
 }

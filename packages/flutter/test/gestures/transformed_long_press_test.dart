@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -39,9 +39,9 @@ void main() {
                 width: 100,
                 height: 150,
                 color: Colors.red,
-              )
+              ),
           ),
-        )
+        ),
     );
 
     await tester.longPressAt(tester.getCenter(find.byKey(redContainer)));
@@ -87,10 +87,10 @@ void main() {
                   width: 100,
                   height: 150,
                   color: Colors.red,
-                )
+                ),
             ),
           ),
-        )
+        ),
     );
 
     TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(redContainer)));
@@ -162,10 +162,10 @@ void main() {
                   width: 100,
                   height: 150,
                   color: Colors.red,
-                )
+                ),
             ),
           ),
-        )
+        ),
     );
 
     TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(redContainer)));

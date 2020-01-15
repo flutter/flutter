@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,7 +34,7 @@ class _ExampleWidgetState extends State<ExampleWidget> {
                 });
               },
             ),
-            _pressed ? GeneratedWidget() : const SizedBox(),
+            if (_pressed) GeneratedWidget() else const SizedBox(),
           ],
         ),
       ),
@@ -45,6 +45,6 @@ class _ExampleWidgetState extends State<ExampleWidget> {
 class GeneratedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Text(generated.message);
+    return Text(generated.message as String);
   }
 }

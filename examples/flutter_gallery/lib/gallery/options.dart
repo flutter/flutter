@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 
 import 'about.dart';
 import 'scales.dart';
-import 'themes.dart';
 
 class GalleryOptions {
   GalleryOptions({
-    this.theme,
+    this.themeMode,
     this.textScaleFactor,
+    this.visualDensity,
     this.textDirection = TextDirection.ltr,
     this.timeDilation = 1.0,
     this.platform,
@@ -20,8 +20,9 @@ class GalleryOptions {
     this.showPerformanceOverlay = false,
   });
 
-  final GalleryTheme theme;
+  final ThemeMode themeMode;
   final GalleryTextScaleValue textScaleFactor;
+  final GalleryVisualDensityValue visualDensity;
   final TextDirection textDirection;
   final double timeDilation;
   final TargetPlatform platform;
@@ -30,8 +31,9 @@ class GalleryOptions {
   final bool showOffscreenLayersCheckerboard;
 
   GalleryOptions copyWith({
-    GalleryTheme theme,
+    ThemeMode themeMode,
     GalleryTextScaleValue textScaleFactor,
+    GalleryVisualDensityValue visualDensity,
     TextDirection textDirection,
     double timeDilation,
     TargetPlatform platform,
@@ -40,8 +42,9 @@ class GalleryOptions {
     bool showOffscreenLayersCheckerboard,
   }) {
     return GalleryOptions(
-      theme: theme ?? this.theme,
+      themeMode: themeMode ?? this.themeMode,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      visualDensity: visualDensity ?? this.visualDensity,
       textDirection: textDirection ?? this.textDirection,
       timeDilation: timeDilation ?? this.timeDilation,
       platform: platform ?? this.platform,
@@ -52,23 +55,25 @@ class GalleryOptions {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final GalleryOptions typedOther = other;
-    return theme == typedOther.theme
-        && textScaleFactor == typedOther.textScaleFactor
-        && textDirection == typedOther.textDirection
-        && platform == typedOther.platform
-        && showPerformanceOverlay == typedOther.showPerformanceOverlay
-        && showRasterCacheImagesCheckerboard == typedOther.showRasterCacheImagesCheckerboard
-        && showOffscreenLayersCheckerboard == typedOther.showRasterCacheImagesCheckerboard;
+    return other is GalleryOptions
+        && other.themeMode == themeMode
+        && other.textScaleFactor == textScaleFactor
+        && other.visualDensity == visualDensity
+        && other.textDirection == textDirection
+        && other.platform == platform
+        && other.showPerformanceOverlay == showPerformanceOverlay
+        && other.showRasterCacheImagesCheckerboard == showRasterCacheImagesCheckerboard
+        && other.showOffscreenLayersCheckerboard == showRasterCacheImagesCheckerboard;
   }
 
   @override
   int get hashCode => hashValues(
-    theme,
+    themeMode,
     textScaleFactor,
+    visualDensity,
     textDirection,
     timeDilation,
     platform,
@@ -79,7 +84,7 @@ class GalleryOptions {
 
   @override
   String toString() {
-    return '$runtimeType($theme)';
+    return '$runtimeType($themeMode)';
   }
 }
 
@@ -189,9 +194,10 @@ class _Heading extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return _OptionsItem(
       child: DefaultTextStyle(
-        style: theme.textTheme.body1.copyWith(
+        style: theme.textTheme.title.copyWith(
           fontFamily: 'GoogleSans',
-          color: theme.accentColor,
+          color: theme.colorScheme.onPrimary,
+          fontWeight: FontWeight.w700,
         ),
         child: Semantics(
           child: Text(text),
@@ -202,25 +208,55 @@ class _Heading extends StatelessWidget {
   }
 }
 
-class _ThemeItem extends StatelessWidget {
-  const _ThemeItem(this.options, this.onOptionsChanged);
+class _ThemeModeItem extends StatelessWidget {
+  const _ThemeModeItem(this.options, this.onOptionsChanged);
 
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
+  static final Map<ThemeMode, String> modeLabels = <ThemeMode, String>{
+    ThemeMode.system: 'System Default',
+    ThemeMode.light: 'Light',
+    ThemeMode.dark: 'Dark',
+  };
+
   @override
   Widget build(BuildContext context) {
-    return _BooleanItem(
-      'Dark Theme',
-      options.theme == kDarkGalleryTheme,
-      (bool value) {
-        onOptionsChanged(
-          options.copyWith(
-            theme: value ? kDarkGalleryTheme : kLightGalleryTheme,
+    return _OptionsItem(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text('Theme'),
+                Text(
+                  '${modeLabels[options.themeMode]}',
+                  style: Theme.of(context).primaryTextTheme.body1,
+                ),
+              ],
+            ),
           ),
-        );
-      },
-      switchKey: const Key('dark_theme'),
+          PopupMenuButton<ThemeMode>(
+            padding: const EdgeInsetsDirectional.only(end: 16.0),
+            icon: const Icon(Icons.arrow_drop_down),
+            initialValue: options.themeMode,
+            itemBuilder: (BuildContext context) {
+              return ThemeMode.values.map<PopupMenuItem<ThemeMode>>((ThemeMode mode) {
+                return PopupMenuItem<ThemeMode>(
+                  value: mode,
+                  child: Text(modeLabels[mode]),
+                );
+              }).toList();
+            },
+            onSelected: (ThemeMode mode) {
+              onOptionsChanged(
+                options.copyWith(themeMode: mode),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -262,6 +298,52 @@ class _TextScaleFactorItem extends StatelessWidget {
             onSelected: (GalleryTextScaleValue scaleValue) {
               onOptionsChanged(
                 options.copyWith(textScaleFactor: scaleValue),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VisualDensityItem extends StatelessWidget {
+  const _VisualDensityItem(this.options, this.onOptionsChanged);
+
+  final GalleryOptions options;
+  final ValueChanged<GalleryOptions> onOptionsChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _OptionsItem(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text('Visual density'),
+                Text(
+                  '${options.visualDensity.label}',
+                  style: Theme.of(context).primaryTextTheme.body1,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuButton<GalleryVisualDensityValue>(
+            padding: const EdgeInsetsDirectional.only(end: 16.0),
+            icon: const Icon(Icons.arrow_drop_down),
+            itemBuilder: (BuildContext context) {
+              return kAllGalleryVisualDensityValues.map<PopupMenuItem<GalleryVisualDensityValue>>((GalleryVisualDensityValue densityValue) {
+                return PopupMenuItem<GalleryVisualDensityValue>(
+                  value: densityValue,
+                  child: Text(densityValue.label),
+                );
+              }).toList();
+            },
+            onSelected: (GalleryVisualDensityValue densityValue) {
+              onOptionsChanged(
+                options.copyWith(visualDensity: densityValue),
               );
             },
           ),
@@ -331,6 +413,8 @@ class _PlatformItem extends StatelessWidget {
         return 'Fuchsia';
       case TargetPlatform.iOS:
         return 'Cupertino';
+      case TargetPlatform.macOS:
+        return 'Material Desktop (macOS)';
     }
     assert(false);
     return null;
@@ -396,13 +480,10 @@ class GalleryOptionsPage extends StatelessWidget {
         options.showPerformanceOverlay == null)
       return const <Widget>[];
 
-    final List<Widget> items = <Widget>[
+    return <Widget>[
       const Divider(),
       const _Heading('Diagnostics'),
-    ];
-
-    if (options.showOffscreenLayersCheckerboard != null) {
-      items.add(
+      if (options.showOffscreenLayersCheckerboard != null)
         _BooleanItem(
           'Highlight offscreen layers',
           options.showOffscreenLayersCheckerboard,
@@ -410,10 +491,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showOffscreenLayersCheckerboard: value));
           },
         ),
-      );
-    }
-    if (options.showRasterCacheImagesCheckerboard != null) {
-      items.add(
+      if (options.showRasterCacheImagesCheckerboard != null)
         _BooleanItem(
           'Highlight raster cache images',
           options.showRasterCacheImagesCheckerboard,
@@ -421,10 +499,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showRasterCacheImagesCheckerboard: value));
           },
         ),
-      );
-    }
-    if (options.showPerformanceOverlay != null) {
-      items.add(
+      if (options.showPerformanceOverlay != null)
         _BooleanItem(
           'Show performance overlay',
           options.showPerformanceOverlay,
@@ -432,10 +507,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showPerformanceOverlay: value));
           },
         ),
-      );
-    }
-
-    return items;
+    ];
   }
 
   @override
@@ -448,12 +520,13 @@ class GalleryOptionsPage extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 124.0),
         children: <Widget>[
           const _Heading('Display'),
-          _ThemeItem(options, onOptionsChanged),
+          _ThemeModeItem(options, onOptionsChanged),
           _TextScaleFactorItem(options, onOptionsChanged),
+          _VisualDensityItem(options, onOptionsChanged),
           _TextDirectionItem(options, onOptionsChanged),
           _TimeDilationItem(options, onOptionsChanged),
           const Divider(),
-          const _Heading('Platform mechanics'),
+          const ExcludeSemantics(child: _Heading('Platform mechanics')),
           _PlatformItem(options, onOptionsChanged),
           ..._enabledDiagnosticItems(),
           const Divider(),

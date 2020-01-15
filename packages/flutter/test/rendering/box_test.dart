@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -64,13 +64,13 @@ void main() {
         '   RenderBox subclasses need to either override performLayout() to\n'
         '   set a size and lay out any children, or, set sizedByParent to\n'
         '   true so that performResize() sizes the render object.\n'
-      )
+      ),
     );
     expect(
       result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
       'RenderBox subclasses need to either override performLayout() to set a '
       'size and lay out any children, or, set sizedByParent to true so that '
-      'performResize() sizes the render object.'
+      'performResize() sizes the render object.',
     );
   });
 
@@ -128,7 +128,7 @@ void main() {
       'parentData field. Since RenderPadding does not in fact use that '
       'ParentData class for its children, it must provide an implementation '
       'of applyPaintTransform that supports the specific ParentData subclass '
-      'used by its children (which apparently is ParentData).'
+      'used by its children (which apparently is ParentData).',
     );
 
   });
@@ -160,7 +160,7 @@ void main() {
           '   object).\n'
           '   Because this RenderBox has sizedByParent set to false, it must\n'
           '   set its size in performLayout().\n'
-        )
+        ),
       );
       expect(result.diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.hint), isEmpty);
     }
@@ -201,7 +201,7 @@ void main() {
           '   to be notified when the size changes and therefore attempts to\n'
           '   read that size are almost certainly a source of bugs. A different\n'
           '   approach should be used.\n'
-        )
+        ),
       );
       expect(result.diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).length, 2);
     }
@@ -302,7 +302,7 @@ void main() {
       padding: const EdgeInsets.all(10.0),
     );
     layout(paddedBox);
-    final BoxParentData parentData = coloredBox.parentData;
+    final BoxParentData parentData = coloredBox.parentData as BoxParentData;
     expect(parentData.offset.dx, isNot(equals(0.0)));
     paddedBox.child = null;
 
@@ -404,7 +404,7 @@ void main() {
       );
       expect(
         result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific height in mind, then pass double.infinity instead.'
+        'If you do not have a specific height in mind, then pass double.infinity instead.',
       );
     }
 
@@ -432,7 +432,7 @@ void main() {
         result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
         'If you perform computations on another height before passing it to '
         'getMinIntrinsicWidth, consider using math.max() or double.clamp() '
-        'to force the value into the valid range.'
+        'to force the value into the valid range.',
       );
     }
 
@@ -457,7 +457,7 @@ void main() {
       );
       expect(
         result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific width in mind, then pass double.infinity instead.'
+        'If you do not have a specific width in mind, then pass double.infinity instead.',
       );
     }
 
@@ -485,7 +485,7 @@ void main() {
         result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
         'If you perform computations on another width before passing it to '
         'getMinIntrinsicHeight, consider using math.max() or double.clamp() '
-        'to force the value into the valid range.'
+        'to force the value into the valid range.',
       );
     }
 
@@ -510,7 +510,7 @@ void main() {
       );
       expect(
         result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific height in mind, then pass double.infinity instead.'
+        'If you do not have a specific height in mind, then pass double.infinity instead.',
       );
     }
 
@@ -538,7 +538,7 @@ void main() {
         result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
         'If you perform computations on another height before passing it to '
         'getMaxIntrinsicWidth, consider using math.max() or double.clamp() '
-        'to force the value into the valid range.'
+        'to force the value into the valid range.',
       );
     }
 
@@ -563,7 +563,7 @@ void main() {
       );
       expect(
         result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-        'If you do not have a specific width in mind, then pass double.infinity instead.'
+        'If you do not have a specific width in mind, then pass double.infinity instead.',
       );
     }
 
@@ -591,7 +591,7 @@ void main() {
         result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
         'If you perform computations on another width before passing it to '
         'getMaxIntrinsicHeight, consider using math.max() or double.clamp() '
-        'to force the value into the valid range.'
+        'to force the value into the valid range.',
       );
     }
   });
@@ -629,7 +629,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData;
+    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
@@ -653,7 +653,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData;
+    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
@@ -955,7 +955,7 @@ void main() {
           'If you are trying to perform a hit test during the layout phase '
           'itself, make sure you only hit test nodes that have completed '
           'layout (e.g. the node\'s children, after their layout() method has '
-          'been called).'
+          'been called).',
         );
       }
 
@@ -991,10 +991,28 @@ void main() {
           result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
           'A RenderBox object must have an explicit size before it can be '
           'hit-tested. Make sure that the RenderBox in question sets its '
-          'size during layout.'
+          'size during layout.',
         );
       }
     });
+
+    test('localToGlobal with ancestor', () {
+      final RenderConstrainedBox innerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 50, height: 50));
+      final RenderPositionedBox innerCenter = RenderPositionedBox(alignment: Alignment.center, child: innerConstrained);
+      final RenderConstrainedBox outerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100, height: 100), child: innerCenter);
+      final RenderPositionedBox outerCentered = RenderPositionedBox(alignment: Alignment.center, child: outerConstrained);
+
+      layout(outerCentered);
+
+      expect(innerConstrained.localToGlobal(Offset.zero, ancestor: outerConstrained).dy, 25.0);
+    });
+  });
+
+  test('BoxConstraints parameters should be non-null', () {
+    expect(() => BoxConstraints(minWidth: null), throwsAssertionError);
+    expect(() => BoxConstraints(maxWidth: null), throwsAssertionError);
+    expect(() => BoxConstraints(minHeight: null), throwsAssertionError);
+    expect(() => BoxConstraints(maxHeight: null), throwsAssertionError);
   });
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,9 +16,12 @@ import 'will_pop_scope.dart';
 /// with a context whose ancestor is the [Form], or pass a [GlobalKey] to the
 /// [Form] constructor and call [GlobalKey.currentState].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
-/// This example shows a [Form] with one [TextFormField] and a [RaisedButton]. A
-/// [GlobalKey] is used here to identify the [Form] and validate input.
+/// {@tool sample --template=stateful_widget_scaffold}
+/// This example shows a [Form] with one [TextFormField] to enter an email
+/// address and a [RaisedButton] to submit the form. A [GlobalKey] is used here
+/// to identify the [Form] and validate input.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/form.png)
 ///
 /// ```dart
 /// final _formKey = GlobalKey<FormState>();
@@ -31,6 +34,9 @@ import 'will_pop_scope.dart';
 ///       crossAxisAlignment: CrossAxisAlignment.start,
 ///       children: <Widget>[
 ///         TextFormField(
+///           decoration: const InputDecoration(
+///             hintText: 'Enter your email',
+///           ),
 ///           validator: (value) {
 ///             if (value.isEmpty) {
 ///               return 'Please enter some text';
@@ -85,7 +91,7 @@ class Form extends StatefulWidget {
   /// form.save();
   /// ```
   static FormState of(BuildContext context) {
-    final _FormScope scope = context.inheritFromWidgetOfExactType(_FormScope);
+    final _FormScope scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
   }
 
@@ -171,7 +177,7 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       field.save();
   }
 
@@ -183,7 +189,7 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidate] property is true, the fields will all be
   /// revalidated after being reset.
   void reset() {
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       field.reset();
     _fieldDidChange();
   }
@@ -199,7 +205,7 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       hasError = !field.validate() || hasError;
     return !hasError;
   }

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,7 +38,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(popupMenuButtonKey));
@@ -108,7 +108,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(popupMenuButtonKey));
@@ -142,13 +142,13 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(dropdownMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    for (Element item in tester.elementList(find.text('menuItem')))
+    for (final Element item in tester.elementList(find.text('menuItem')))
       expect(Theme.of(item).brightness, equals(Brightness.light));
   });
 
@@ -176,7 +176,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('SHOW'));
@@ -213,7 +213,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('SHOW'));
@@ -251,7 +251,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('SHOW'));
@@ -268,7 +268,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(iconTheme: const IconThemeData(color: Colors.green, size: 10.0)),
         home: const Icon(Icons.computer),
-      )
+      ),
     );
 
     RenderParagraph glyphText = tester.renderObject(find.byType(RichText));
@@ -338,7 +338,7 @@ void main() {
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
         body1: fallback.primaryTextTheme.body1.copyWith(
           fontSize: _kMagicFontSize,
-        )
+        ),
       ),
     );
     expect(customTheme.primaryTextTheme.body1.fontSize, _kMagicFontSize);
@@ -390,8 +390,8 @@ void main() {
       ];
     }
 
-    for (TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
-      for (TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
+    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
+      for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
@@ -514,7 +514,7 @@ void main() {
 
         await testTheme(tester, ThemeData(
             iconTheme: const IconThemeData(color: materialIconColor),
-            cupertinoOverrideTheme: const CupertinoThemeData(primaryColor: cupertinoIconColor)
+            cupertinoOverrideTheme: const CupertinoThemeData(primaryColor: cupertinoIconColor),
         ));
 
         expect(buildCount, 1);
@@ -650,7 +650,7 @@ void main() {
 
 int testBuildCalled;
 class Test extends StatefulWidget {
-  const Test();
+  const Test({ Key key }) : super(key: key);
 
   @override
   _TestState createState() => _TestState();

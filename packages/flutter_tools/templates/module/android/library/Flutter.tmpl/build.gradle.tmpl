@@ -26,6 +26,9 @@ if (flutterVersionName == null) {
 apply plugin: 'com.android.library'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
+group '{{androidIdentifier}}'
+version '1.0'
+
 android {
     compileSdkVersion 28
 

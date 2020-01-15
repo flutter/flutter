@@ -3,7 +3,7 @@ name: I want help writing my application
 about: You have a question for how to achieve a particular effect, or you need help
   with using a particular API.
 title: ''
-labels: ''
+labels: 'created via support template'
 assignees: ''
 
 ---

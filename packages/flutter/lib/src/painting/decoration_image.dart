@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -136,19 +136,19 @@ class DecorationImage {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final DecorationImage typedOther = other;
-    return image == typedOther.image
-        && colorFilter == typedOther.colorFilter
-        && fit == typedOther.fit
-        && alignment == typedOther.alignment
-        && centerSlice == typedOther.centerSlice
-        && repeat == typedOther.repeat
-        && matchTextDirection == typedOther.matchTextDirection;
+    return other is DecorationImage
+        && other.image == image
+        && other.colorFilter == colorFilter
+        && other.fit == fit
+        && other.alignment == alignment
+        && other.centerSlice == centerSlice
+        && other.repeat == repeat
+        && other.matchTextDirection == matchTextDirection;
   }
 
   @override
@@ -156,22 +156,23 @@ class DecorationImage {
 
   @override
   String toString() {
-    final List<String> properties = <String>[];
-    properties.add('$image');
-    if (colorFilter != null)
-      properties.add('$colorFilter');
-    if (fit != null &&
-        !(fit == BoxFit.fill && centerSlice != null) &&
-        !(fit == BoxFit.scaleDown && centerSlice == null))
-      properties.add('$fit');
-    properties.add('$alignment');
-    if (centerSlice != null)
-      properties.add('centerSlice: $centerSlice');
-    if (repeat != ImageRepeat.noRepeat)
-      properties.add('$repeat');
-    if (matchTextDirection)
-      properties.add('match text direction');
-    return '$runtimeType(${properties.join(", ")})';
+    final List<String> properties = <String>[
+      '$image',
+      if (colorFilter != null)
+        '$colorFilter',
+      if (fit != null &&
+          !(fit == BoxFit.fill && centerSlice != null) &&
+          !(fit == BoxFit.scaleDown && centerSlice == null))
+        '$fit',
+      '$alignment',
+      if (centerSlice != null)
+        'centerSlice: $centerSlice',
+      if (repeat != ImageRepeat.noRepeat)
+        '$repeat',
+      if (matchTextDirection)
+        'match text direction',
+    ];
+    return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
 }
 
@@ -220,15 +221,15 @@ class DecorationImagePainter {
         // We check this first so that the assert will fire immediately, not just
         // when the image is ready.
         if (configuration.textDirection == null) {
-          throw FlutterError(
-            'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.\n'
-            'When DecorationImagePainter.paint() was called, there was no text direction provided '
-            'in the ImageConfiguration object to match.\n'
-            'The DecorationImage was:\n'
-            '  $_details\n'
-            'The ImageConfiguration was:\n'
-            '  $configuration'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('DecorationImage.matchTextDirection can only be used when a TextDirection is available.'),
+            ErrorDescription(
+              'When DecorationImagePainter.paint() was called, there was no text direction provided '
+              'in the ImageConfiguration object to match.'
+            ),
+            DiagnosticsProperty<DecorationImage>('The DecorationImage was', _details, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<ImageConfiguration>('The ImageConfiguration was', configuration, style: DiagnosticsTreeStyle.errorProperty),
+          ]);
         }
         return true;
       }());
@@ -290,7 +291,7 @@ class DecorationImagePainter {
 
   @override
   String toString() {
-    return '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
+    return '${objectRuntimeType(this, 'DecorationImagePainter')}(stream: $_imageStream, image: $_image) for $_details';
   }
 }
 
@@ -391,8 +392,8 @@ void paintImage({
       centerSlice.left + inputSize.width - centerSlice.right,
       centerSlice.top + inputSize.height - centerSlice.bottom,
     );
-    outputSize -= sliceBorder;
-    inputSize -= sliceBorder;
+    outputSize = outputSize - sliceBorder as Size;
+    inputSize = inputSize - sliceBorder as Size;
   }
   fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
   assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
@@ -442,14 +443,14 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
         canvas.drawImageRect(image, sourceRect, tileRect, paint);
     }
   } else {
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageNine(image, centerSlice, destinationRect, paint);
     } else {
-      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
         canvas.drawImageNine(image, centerSlice, tileRect, paint);
     }
   }

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -80,7 +80,7 @@ class ScrollPhysics {
   /// The returned object will combine some of the behaviors from this
   /// [ScrollPhysics] instance and some of the behaviors from [ancestor].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// In the following example, the [applyTo] method is used to combine the
   /// scroll physics of two [ScrollPhysics] objects, the resulting [ScrollPhysics]
@@ -259,7 +259,7 @@ class ScrollPhysics {
   double get dragStartDistanceMotionThreshold => parent?.dragStartDistanceMotionThreshold;
 
   /// Whether a viewport is allowed to change its scroll position implicitly in
-  /// responds to a call to [RenderObject.showOnScreen].
+  /// response to a call to [RenderObject.showOnScreen].
   ///
   /// [RenderObject.showOnScreen] is for example used to bring a text field
   /// fully on screen after it has received focus. This property controls
@@ -270,8 +270,8 @@ class ScrollPhysics {
   @override
   String toString() {
     if (parent == null)
-      return runtimeType.toString();
-    return '$runtimeType -> $parent';
+      return objectRuntimeType(this, 'ScrollPhsyics');
+    return '${objectRuntimeType(this, 'ScrollPhysics')} -> $parent';
   }
 }
 
@@ -422,17 +422,17 @@ class ClampingScrollPhysics extends ScrollPhysics {
   double applyBoundaryConditions(ScrollMetrics position, double value) {
     assert(() {
       if (value == position.pixels) {
-        throw FlutterError(
-          '$runtimeType.applyBoundaryConditions() was called redundantly.\n'
-          'The proposed new position, $value, is exactly equal to the current position of the '
-          'given ${position.runtimeType}, ${position.pixels}.\n'
-          'The applyBoundaryConditions method should only be called when the value is '
-          'going to actually change the pixels, otherwise it is redundant.\n'
-          'The physics object in question was:\n'
-          '  $this\n'
-          'The position object in question was:\n'
-          '  $position'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType.applyBoundaryConditions() was called redundantly.'),
+          ErrorDescription(
+            'The proposed new position, $value, is exactly equal to the current position of the '
+            'given ${position.runtimeType}, ${position.pixels}.\n'
+            'The applyBoundaryConditions method should only be called when the value is '
+            'going to actually change the pixels, otherwise it is redundant.'
+          ),
+          DiagnosticsProperty<ScrollPhysics>('The physics object in question was', this, style: DiagnosticsTreeStyle.errorProperty),
+          DiagnosticsProperty<ScrollMetrics>('The position object in question was', position, style: DiagnosticsTreeStyle.errorProperty)
+        ]);
       }
       return true;
     }());

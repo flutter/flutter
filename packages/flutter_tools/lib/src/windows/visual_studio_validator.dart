@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,20 +30,47 @@ class VisualStudioValidator extends DoctorValidator {
           visualStudio.fullVersion,
       )));
 
-      if (!visualStudio.hasNecessaryComponents) {
+      if (visualStudio.isPrerelease) {
+        messages.add(ValidationMessage(userMessages.visualStudioIsPrerelease));
+      }
+
+      // Messages for faulty installations.
+      if (!visualStudio.isAtLeastMinimumVersion) {
         status = ValidationType.partial;
-        final int majorVersion = int.tryParse(visualStudio.fullVersion.split('.')[0]);
+        messages.add(ValidationMessage.error(
+            userMessages.visualStudioTooOld(
+                visualStudio.minimumVersionDescription,
+                visualStudio.workloadDescription,
+                visualStudio.necessaryComponentDescriptions(),
+            ),
+        ));
+      } else if (visualStudio.isRebootRequired) {
+        status = ValidationType.partial;
+        messages.add(ValidationMessage.error(userMessages.visualStudioRebootRequired));
+      } else if (!visualStudio.isComplete) {
+        status = ValidationType.partial;
+        messages.add(ValidationMessage.error(userMessages.visualStudioIsIncomplete));
+      } else if (!visualStudio.isLaunchable) {
+        status = ValidationType.partial;
+        messages.add(ValidationMessage.error(userMessages.visualStudioNotLaunchable));
+      } else if (!visualStudio.hasNecessaryComponents) {
+        status = ValidationType.partial;
         messages.add(ValidationMessage.error(
             userMessages.visualStudioMissingComponents(
                 visualStudio.workloadDescription,
-                visualStudio.necessaryComponentDescriptions(majorVersion)
-            )
+                visualStudio.necessaryComponentDescriptions(),
+            ),
         ));
       }
       versionInfo = '${visualStudio.displayName} ${visualStudio.displayVersion}';
     } else {
       status = ValidationType.missing;
-      messages.add(ValidationMessage.error(userMessages.visualStudioMissing));
+      messages.add(ValidationMessage.error(
+        userMessages.visualStudioMissing(
+          visualStudio.workloadDescription,
+          visualStudio.necessaryComponentDescriptions(),
+        ),
+      ));
     }
 
     return ValidationResult(status, messages, statusInfo: versionInfo);

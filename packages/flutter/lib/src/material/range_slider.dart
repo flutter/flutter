@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -126,7 +126,7 @@ class RangeSlider extends StatefulWidget {
     this.labels,
     this.activeColor,
     this.inactiveColor,
-    this.semanticFormatterCallback
+    this.semanticFormatterCallback,
   }) : assert(values != null),
        assert(min != null),
        assert(max != null),
@@ -155,7 +155,7 @@ class RangeSlider extends StatefulWidget {
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// RangeSlider(
@@ -187,7 +187,7 @@ class RangeSlider extends StatefulWidget {
   /// The values passed will be the last [values] that the slider had before the
   /// change began.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// RangeSlider(
@@ -222,7 +222,7 @@ class RangeSlider extends StatefulWidget {
   /// [onChanged] for that). Rather, it should be used to know when the user has
   /// completed selecting a new [values] by ending a drag or a click.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// RangeSlider(
@@ -273,8 +273,9 @@ class RangeSlider extends StatefulWidget {
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
   /// Each label is rendered using the active [ThemeData]'s
-  /// [ThemeData.accentTextTheme.body2] text style, and can be overriden
-  /// by changing the [SliderThemeData.valueIndicatorTextStyle].
+  /// [ThemeData.textTheme.body2] text style, with the
+  /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text
+  /// style can be overridden with [SliderThemeData.valueIndicatorTextStyle].
   ///
   /// If null, then the value indicator will not be displayed.
   ///
@@ -309,7 +310,7 @@ class RangeSlider extends StatefulWidget {
   /// This is used by accessibility frameworks like TalkBack on Android to
   /// inform users what the currently selected value is with more context.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// In the example below, a slider for currency values is configured to
   /// announce a value with a currency label.
@@ -333,10 +334,28 @@ class RangeSlider extends StatefulWidget {
   final RangeSemanticFormatterCallback semanticFormatterCallback;
 
   // Touch width for the tap boundary of the slider thumbs.
-  static const double _minTouchTargetWidth = 48;
+  static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
   @override
   _RangeSliderState createState() => _RangeSliderState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('valueStart', values.start));
+    properties.add(DoubleProperty('valueEnd', values.end));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('onChangeStart', onChangeStart));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('onChangeEnd', onChangeEnd));
+    properties.add(DoubleProperty('min', min));
+    properties.add(DoubleProperty('max', max));
+    properties.add(IntProperty('divisions', divisions));
+    properties.add(StringProperty('labelStart', labels?.start));
+    properties.add(StringProperty('labelEnd', labels?.end));
+    properties.add(ColorProperty('activeColor', activeColor));
+    properties.add(ColorProperty('inactiveColor', inactiveColor));
+    properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
+  }
 }
 
 class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin {
@@ -373,17 +392,17 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController = AnimationController(
       duration: enableAnimationDuration,
       vsync: this,
-      value: widget.onChanged != null ? 1.0 : 0.0
+      value: widget.onChanged != null ? 1.0 : 0.0,
     );
     startPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.start)
+      value: _unlerp(widget.values.start),
     );
     endPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.end)
+      value: _unlerp(widget.values.end),
     );
   }
 
@@ -458,13 +477,13 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   // non-zero displacement is negative, then the left thumb is selected, and if its
   // positive, then the right thumb is selected.
   static final RangeThumbSelector _defaultRangeThumbSelector = (
-      TextDirection textDirection,
-      RangeValues values,
-      double tapValue,
-      Size thumbSize,
-      Size trackSize,
-      double dx, // The horizontal delta or displacement of the drag update.
-    ) {
+    TextDirection textDirection,
+    RangeValues values,
+    double tapValue,
+    Size thumbSize,
+    Size trackSize,
+    double dx, // The horizontal delta or displacement of the drag update.
+  ) {
     final double touchRadius = math.max(thumbSize.width, RangeSlider._minTouchTargetWidth) / 2;
     final bool inStartTouchTarget = (tapValue - values.start).abs() * trackSize.width < touchRadius;
     final bool inEndTouchTarget = (tapValue - values.end).abs() * trackSize.width < touchRadius;
@@ -630,7 +649,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class _RenderRangeSlider extends RenderBox {
+class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderRangeSlider({
     @required RangeValues values,
     int divisions,
@@ -931,6 +950,14 @@ class _RenderRangeSlider extends RenderBox {
   }
 
   @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    _startLabelPainter.markNeedsLayout();
+    _endLabelPainter.markNeedsLayout();
+    _updateLabelPainters();
+  }
+
+  @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _overlayAnimation.addListener(markNeedsPaint);
@@ -966,7 +993,7 @@ class _RenderRangeSlider extends RenderBox {
   }
 
   double _discretize(double value) {
-    double result = value.clamp(0.0, 1.0);
+    double result = value.clamp(0.0, 1.0) as double;
     if (isDiscrete) {
       result = (result * divisions).round() / divisions;
     }
@@ -978,7 +1005,7 @@ class _RenderRangeSlider extends RenderBox {
   }
 
   void _startInteraction(Offset globalPosition) {
-    final double tapValue = _getValueFromGlobalPosition(globalPosition).clamp(0.0, 1.0);
+    final double tapValue = _getValueFromGlobalPosition(globalPosition).clamp(0.0, 1.0) as double;
     _lastThumbSelection = sliderTheme.thumbSelector(textDirection, values, tapValue, _thumbSize, size, 0);
 
     if (_lastThumbSelection != null) {
@@ -1151,7 +1178,7 @@ class _RenderRangeSlider extends RenderBox {
         parentBox: this,
         offset: offset,
         sliderTheme: _sliderTheme,
-        isDiscrete: isDiscrete
+        isDiscrete: isDiscrete,
     );
     final Offset startThumbCenter = Offset(trackRect.left + startVisualPosition * trackRect.width, trackRect.center.dy);
     final Offset endThumbCenter = Offset(trackRect.left + endVisualPosition * trackRect.width, trackRect.center.dy);
@@ -1166,7 +1193,7 @@ class _RenderRangeSlider extends RenderBox {
         startThumbCenter: startThumbCenter,
         endThumbCenter: endThumbCenter,
         isDiscrete: isDiscrete,
-        isEnabled: isEnabled
+        isEnabled: isEnabled,
     );
 
     if (!_overlayAnimation.isDismissed) {
@@ -1381,10 +1408,10 @@ class _RenderRangeSlider extends RenderBox {
   }
 
   double _increaseValue(double value) {
-    return (value + _semanticActionUnit).clamp(0.0, 1.0);
+    return (value + _semanticActionUnit).clamp(0.0, 1.0) as double;
   }
 
   double _decreaseValue(double value) {
-    return (value - _semanticActionUnit).clamp(0.0, 1.0);
+    return (value - _semanticActionUnit).clamp(0.0, 1.0) as double;
   }
 }

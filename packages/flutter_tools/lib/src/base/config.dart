@@ -1,20 +1,34 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../convert.dart';
-import 'context.dart';
+import '../globals.dart' as globals;
 import 'file_system.dart';
-import 'platform.dart';
+import 'logger.dart';
+import 'utils.dart';
 
 class Config {
-  Config([File configFile]) {
-    _configFile = configFile ?? fs.file(fs.path.join(_userHomeDir(), '.flutter_settings'));
-    if (_configFile.existsSync())
-      _values = json.decode(_configFile.readAsStringSync());
+  Config([File configFile, Logger localLogger]) {
+    final Logger loggerInstance = localLogger ?? globals.logger;
+    _configFile = configFile ?? globals.fs.file(globals.fs.path.join(
+      fsUtils.userHomePath,
+      '.flutter_settings',
+    ));
+    if (_configFile.existsSync()) {
+      try {
+        _values = castStringKeyedMap(json.decode(_configFile.readAsStringSync()));
+      } on FormatException {
+        loggerInstance
+          ..printError('Failed to decode preferences in ${_configFile.path}.')
+          ..printError(
+              'You may need to reapply any previously saved configuration '
+              'with the "flutter config" command.',
+          );
+        _configFile.deleteSync();
+      }
+    }
   }
-
-  static Config get instance => context.get<Config>();
 
   File _configFile;
   String get configPath => _configFile.path;
@@ -42,9 +56,4 @@ class Config {
     json = '$json\n';
     _configFile.writeAsStringSync(json);
   }
-}
-
-String _userHomeDir() {
-  final String envKey = platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  return platform.environment[envKey] ?? '.';
 }

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,29 +22,75 @@ void main() {
     );
     layout(root, phase: EnginePhase.paint);
     expect(inner.isRepaintBoundary, isFalse);
-    expect(() => inner.layer, throwsAssertionError);
+    expect(inner.debugLayer, null);
     expect(boundary.isRepaintBoundary, isTrue);
-    expect(boundary.layer, isNotNull);
-    expect(boundary.layer.attached, isTrue); // this time it painted...
+    expect(boundary.debugLayer, isNotNull);
+    expect(boundary.debugLayer.attached, isTrue); // this time it painted...
 
     root.opacity = 0.0;
     pumpFrame(phase: EnginePhase.paint);
     expect(inner.isRepaintBoundary, isFalse);
-    expect(() => inner.layer, throwsAssertionError);
+    expect(inner.debugLayer, null);
     expect(boundary.isRepaintBoundary, isTrue);
-    expect(boundary.layer, isNotNull);
-    expect(boundary.layer.attached, isFalse); // this time it did not.
+    expect(boundary.debugLayer, isNotNull);
+    expect(boundary.debugLayer.attached, isFalse); // this time it did not.
 
     root.opacity = 0.5;
     pumpFrame(phase: EnginePhase.paint);
     expect(inner.isRepaintBoundary, isFalse);
-    expect(() => inner.layer, throwsAssertionError);
+    expect(inner.debugLayer, null);
     expect(boundary.isRepaintBoundary, isTrue);
-    expect(boundary.layer, isNotNull);
-    expect(boundary.layer.attached, isTrue); // this time it did again!
+    expect(boundary.debugLayer, isNotNull);
+    expect(boundary.debugLayer.attached, isTrue); // this time it did again!
   });
 
-  test('layer subtree dirtiness is correctly computed', () {
+  test('updateSubtreeNeedsAddToScene propagates Layer.alwaysNeedsAddToScene up the tree', () {
+    final ContainerLayer a = ContainerLayer();
+    final ContainerLayer b = ContainerLayer();
+    final ContainerLayer c = ContainerLayer();
+    final _TestAlwaysNeedsAddToSceneLayer d = _TestAlwaysNeedsAddToSceneLayer();
+    final ContainerLayer e = ContainerLayer();
+    final ContainerLayer f = ContainerLayer();
+
+    // Tree structure:
+    //        a
+    //       / \
+    //      b   c
+    //     / \
+    // (x)d   e
+    //   /
+    //  f
+    a.append(b);
+    a.append(c);
+    b.append(d);
+    b.append(e);
+    d.append(f);
+
+    a.debugMarkClean();
+    b.debugMarkClean();
+    c.debugMarkClean();
+    d.debugMarkClean();
+    e.debugMarkClean();
+    f.debugMarkClean();
+
+    expect(a.debugSubtreeNeedsAddToScene, false);
+    expect(b.debugSubtreeNeedsAddToScene, false);
+    expect(c.debugSubtreeNeedsAddToScene, false);
+    expect(d.debugSubtreeNeedsAddToScene, false);
+    expect(e.debugSubtreeNeedsAddToScene, false);
+    expect(f.debugSubtreeNeedsAddToScene, false);
+
+    a.updateSubtreeNeedsAddToScene();
+
+    expect(a.debugSubtreeNeedsAddToScene, true);
+    expect(b.debugSubtreeNeedsAddToScene, true);
+    expect(c.debugSubtreeNeedsAddToScene, false);
+    expect(d.debugSubtreeNeedsAddToScene, true);
+    expect(e.debugSubtreeNeedsAddToScene, false);
+    expect(f.debugSubtreeNeedsAddToScene, false);
+  });
+
+  test('updateSubtreeNeedsAddToScene propagates Layer._needsAddToScene up the tree', () {
     final ContainerLayer a = ContainerLayer();
     final ContainerLayer b = ContainerLayer();
     final ContainerLayer c = ContainerLayer();
@@ -52,53 +98,59 @@ void main() {
     final ContainerLayer e = ContainerLayer();
     final ContainerLayer f = ContainerLayer();
     final ContainerLayer g = ContainerLayer();
-
-    final PictureLayer h = PictureLayer(Rect.zero);
-    final PictureLayer i = PictureLayer(Rect.zero);
-    final PictureLayer j = PictureLayer(Rect.zero);
+    final List<ContainerLayer> allLayers = <ContainerLayer>[a, b, c, d, e, f, g];
 
     // The tree is like the following where b and j are dirty:
     //        a____
     //       /     \
     //   (x)b___    c
     //     / \  \   |
-    //    d   e  f  g
-    //   / \        |
-    //  h   i       j(x)
+    //    d   e  f  g(x)
     a.append(b);
     a.append(c);
     b.append(d);
     b.append(e);
     b.append(f);
-    d.append(h);
-    d.append(i);
     c.append(g);
-    g.append(j);
 
-    a.debugMarkClean();
+    for (final ContainerLayer layer in allLayers) {
+      expect(layer.debugSubtreeNeedsAddToScene, true);
+    }
+
+    for (final ContainerLayer layer in allLayers) {
+      layer.debugMarkClean();
+    }
+
+    for (final ContainerLayer layer in allLayers) {
+      expect(layer.debugSubtreeNeedsAddToScene, false);
+    }
+
     b.markNeedsAddToScene();
-    c.debugMarkClean();
-    d.debugMarkClean();
-    e.debugMarkClean();
-    f.debugMarkClean();
-    g.debugMarkClean();
-    h.debugMarkClean();
-    i.debugMarkClean();
-    j.markNeedsAddToScene();
+    a.updateSubtreeNeedsAddToScene();
 
+    expect(a.debugSubtreeNeedsAddToScene, true);
+    expect(b.debugSubtreeNeedsAddToScene, true);
+    expect(c.debugSubtreeNeedsAddToScene, false);
+    expect(d.debugSubtreeNeedsAddToScene, false);
+    expect(e.debugSubtreeNeedsAddToScene, false);
+    expect(f.debugSubtreeNeedsAddToScene, false);
+    expect(g.debugSubtreeNeedsAddToScene, false);
+
+    g.markNeedsAddToScene();
     a.updateSubtreeNeedsAddToScene();
 
     expect(a.debugSubtreeNeedsAddToScene, true);
     expect(b.debugSubtreeNeedsAddToScene, true);
     expect(c.debugSubtreeNeedsAddToScene, true);
-    expect(g.debugSubtreeNeedsAddToScene, true);
-    expect(j.debugSubtreeNeedsAddToScene, true);
-
     expect(d.debugSubtreeNeedsAddToScene, false);
     expect(e.debugSubtreeNeedsAddToScene, false);
     expect(f.debugSubtreeNeedsAddToScene, false);
-    expect(h.debugSubtreeNeedsAddToScene, false);
-    expect(i.debugSubtreeNeedsAddToScene, false);
+    expect(g.debugSubtreeNeedsAddToScene, true);
+
+    a.buildScene(SceneBuilder());
+    for (final ContainerLayer layer in allLayers) {
+      expect(layer.debugSubtreeNeedsAddToScene, false);
+    }
   });
 
   test('leader and follower layers are always dirty', () {
@@ -171,6 +223,38 @@ void main() {
     layer.updateSubtreeNeedsAddToScene();
     expect(layer.debugSubtreeNeedsAddToScene, true);
   }
+
+  List<String> _getDebugInfo(Layer layer) {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    layer.debugFillProperties(builder);
+    return builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+  }
+
+  test('ClipRectLayer prints clipBehavior in debug info', () {
+    expect(_getDebugInfo(ClipRectLayer()), contains('clipBehavior: Clip.hardEdge'));
+    expect(
+      _getDebugInfo(ClipRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
+
+  test('ClipRRectLayer prints clipBehavior in debug info', () {
+    expect(_getDebugInfo(ClipRRectLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(
+      _getDebugInfo(ClipRRectLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
+
+  test('ClipPathLayer prints clipBehavior in debug info', () {
+    expect(_getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(
+      _getDebugInfo(ClipPathLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
 
   test('mutating PictureLayer fields triggers needsAddToScene', () {
     final PictureLayer pictureLayer = PictureLayer(Rect.zero);
@@ -465,4 +549,27 @@ void main() {
       _testConflicts(layerA, layerB, expectedErrorCount: 1);
     });
   }, skip: isBrowser);
+
+  test('ContainerLayer.toImage can render interior layer', () {
+    final OffsetLayer parent = OffsetLayer();
+    final OffsetLayer child = OffsetLayer();
+    final OffsetLayer grandChild = OffsetLayer();
+    child.append(grandChild);
+    parent.append(child);
+
+    // This renders the layers and generates engine layers.
+    parent.buildScene(SceneBuilder());
+
+    // Causes grandChild to pass its engine layer as `oldLayer`
+    grandChild.toImage(const Rect.fromLTRB(0, 0, 10, 10));
+
+    // Ensure we can render the same scene again after rendering an interior
+    // layer.
+    parent.buildScene(SceneBuilder());
+  }, skip: isBrowser); // TODO(yjbanov): `toImage` doesn't work on the Web: https://github.com/flutter/flutter/issues/42767
+}
+
+class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {
+  @override
+  bool get alwaysNeedsAddToScene => true;
 }

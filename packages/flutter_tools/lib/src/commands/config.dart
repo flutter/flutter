@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,10 +6,11 @@ import 'dart:async';
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
+import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
-import '../globals.dart';
-import '../reporting/usage.dart';
+import '../globals.dart' as globals;
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -21,14 +22,15 @@ class ConfigCommand extends FlutterCommand {
     argParser.addFlag('clear-ios-signing-cert',
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
-    argParser.addOption('gradle-dir', help: 'The gradle install directory.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
+    argParser.addOption('build-dir', help: 'The relative path to override a projects build directory',
+        valueHelp: 'out/');
     argParser.addFlag('machine',
       negatable: false,
       hide: !verboseHelp,
       help: 'Print config values as json.');
-    for (Feature feature in allFeatures) {
+    for (final Feature feature in allFeatures) {
       if (feature.configSetting == null) {
         continue;
       }
@@ -67,12 +69,12 @@ class ConfigCommand extends FlutterCommand {
     // are available.
     final Map<String, Feature> featuresByName = <String, Feature>{};
     final String channel = FlutterVersion.instance.channel;
-    for (Feature feature in allFeatures) {
+    for (final Feature feature in allFeatures) {
       if (feature.configSetting != null) {
         featuresByName[feature.configSetting] = feature;
       }
     }
-    String values = config.keys
+    String values = globals.config.keys
         .map<String>((String key) {
           String configFooter = '';
           if (featuresByName.containsKey(key)) {
@@ -81,10 +83,11 @@ class ConfigCommand extends FlutterCommand {
               configFooter = '(Unavailable)';
             }
           }
-          return '  $key: ${config.getValue(key)} $configFooter';
+          return '  $key: ${globals.config.getValue(key)} $configFooter';
         }).join('\n');
-    if (values.isEmpty)
+    if (values.isEmpty) {
       values = '  No settings have been configured.';
+    }
     return
       '\nSettings:\n$values\n\n'
       'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
@@ -96,60 +99,74 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['machine']) {
+    if (boolArg('machine')) {
       await handleMachine();
-      return null;
+      return FlutterCommandResult.success();
     }
 
-    if (argResults['clear-features']) {
-      for (Feature feature in allFeatures) {
+    if (boolArg('clear-features')) {
+      for (final Feature feature in allFeatures) {
         if (feature.configSetting != null) {
-          config.removeValue(feature.configSetting);
+          globals.config.removeValue(feature.configSetting);
         }
       }
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (argResults.wasParsed('analytics')) {
-      final bool value = argResults['analytics'];
+      final bool value = boolArg('analytics');
+      // We send the analytics event *before* toggling the flag intentionally
+      // to be sure that opt-out events are sent correctly.
+      AnalyticsConfigEvent(enabled: value).send();
       flutterUsage.enabled = value;
-      printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
+      globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
-    if (argResults.wasParsed('gradle-dir'))
-      _updateConfig('gradle-dir', argResults['gradle-dir']);
+    if (argResults.wasParsed('android-sdk')) {
+      _updateConfig('android-sdk', stringArg('android-sdk'));
+    }
 
-    if (argResults.wasParsed('android-sdk'))
-      _updateConfig('android-sdk', argResults['android-sdk']);
+    if (argResults.wasParsed('android-studio-dir')) {
+      _updateConfig('android-studio-dir', stringArg('android-studio-dir'));
+    }
 
-    if (argResults.wasParsed('android-studio-dir'))
-      _updateConfig('android-studio-dir', argResults['android-studio-dir']);
-
-    if (argResults.wasParsed('clear-ios-signing-cert'))
+    if (argResults.wasParsed('clear-ios-signing-cert')) {
       _updateConfig('ios-signing-cert', '');
+    }
 
-    for (Feature feature in allFeatures) {
+    if (argResults.wasParsed('build-dir')) {
+      final String buildDir = stringArg('build-dir');
+      if (globals.fs.path.isAbsolute(buildDir)) {
+        throwToolExit('build-dir should be a relative path');
+      }
+      _updateConfig('build-dir', buildDir);
+    }
+
+    for (final Feature feature in allFeatures) {
       if (feature.configSetting == null) {
         continue;
       }
       if (argResults.wasParsed(feature.configSetting)) {
-        final bool keyValue = argResults[feature.configSetting];
-        config.setValue(feature.configSetting, keyValue);
-        printStatus('Setting "${feature.configSetting}" value to "$keyValue".');
+        final bool keyValue = boolArg(feature.configSetting);
+        globals.config.setValue(feature.configSetting, keyValue);
+        globals.printStatus('Setting "${feature.configSetting}" value to "$keyValue".');
       }
     }
 
-    if (argResults.arguments.isEmpty)
-      printStatus(usage);
+    if (argResults.arguments.isEmpty) {
+      globals.printStatus(usage);
+    } else {
+      globals.printStatus('\nYou may need to restart any open editors for them to read new settings.');
+    }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> handleMachine() async {
     // Get all the current values.
     final Map<String, dynamic> results = <String, dynamic>{};
-    for (String key in config.keys) {
-      results[key] = config.getValue(key);
+    for (final String key in globals.config.keys) {
+      results[key] = globals.config.getValue(key);
     }
 
     // Ensure we send any calculated ones, if overrides don't exist.
@@ -160,16 +177,16 @@ class ConfigCommand extends FlutterCommand {
       results['android-sdk'] = androidSdk.directory;
     }
 
-    printStatus(const JsonEncoder.withIndent('  ').convert(results));
+    globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
   void _updateConfig(String keyName, String keyValue) {
     if (keyValue.isEmpty) {
-      config.removeValue(keyName);
-      printStatus('Removing "$keyName" value.');
+      globals.config.removeValue(keyName);
+      globals.printStatus('Removing "$keyName" value.');
     } else {
-      config.setValue(keyName, keyValue);
-      printStatus('Setting "$keyName" value to "$keyValue".');
+      globals.config.setValue(keyName, keyValue);
+      globals.printStatus('Setting "$keyName" value to "$keyValue".');
     }
   }
 }

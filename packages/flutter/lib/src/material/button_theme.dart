@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -63,7 +63,7 @@ enum ButtonBarLayoutBehavior {
 ///    based on the ambient button theme.
 ///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
-class ButtonTheme extends InheritedWidget {
+class ButtonTheme extends InheritedTheme {
   /// Creates a button theme.
   ///
   /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
@@ -120,20 +120,54 @@ class ButtonTheme extends InheritedWidget {
   }) : assert(data != null),
        super(key: key, child: child);
 
+  // TODO(darrenaustin): remove after this deprecation warning has been on
+  // stable for a couple of releases.
+  // See https://github.com/flutter/flutter/issues/37333
+  //
   /// Creates a button theme that is appropriate for button bars, as used in
   /// dialog footers and in the headers of data tables.
   ///
-  /// This theme is denser, with a smaller [minWidth] and [padding], than the
-  /// default theme. Also, this theme uses [ButtonTextTheme.accent] rather than
-  /// [ButtonTextTheme.normal].
+  /// Deprecated. Please use [ButtonBarTheme] instead which offers more
+  /// flexibility to configure [ButtonBar] widgets.
   ///
-  /// For best effect, the label of the button at the edge of the container
-  /// should have text that ends up wider than 64.0 pixels. This ensures that
-  /// the alignment of the text matches the alignment of the edge of the
-  /// container.
+  /// To migrate instances of code that were just wrapping a [ButtonBar]:
   ///
-  /// For example, buttons at the bottom of [Dialog] or [Card] widgets use this
-  /// button theme.
+  /// ```dart
+  /// ButtonTheme.bar(
+  ///   child: ButtonBar(...)
+  /// );
+  /// ```
+  ///
+  /// you can just remove the `ButtonTheme.bar` as the defaults are now handled
+  /// by [ButtonBar] directly.
+  ///
+  /// If you have more complicated usages of `ButtonTheme.bar` like:
+  ///
+  /// ```dart
+  /// ButtonTheme.bar(
+  ///   padding: EdgeInsets.symmetric(horizontal: 10.0),
+  ///   textTheme: ButtonTextTheme.accent,
+  ///   child: ButtonBar(...),
+  /// );
+  /// ```
+  ///
+  /// you can remove the `ButtonTheme.bar` and move the parameters to the
+  /// [ButtonBar] instance directly:
+  ///
+  /// ```dart
+  /// ButtonBar(
+  ///   padding: EdgeInsets.symmetric(horizontal: 10.0),
+  ///   textTheme: ButtonTextTheme.accent,
+  ///   ...
+  /// );
+  /// ```
+  ///
+  /// You can also replace the defaults for all [ButtonBar] widgets by updating
+  /// [ThemeData.buttonBarTheme] for your app.
+  @Deprecated(
+    'Use ButtonBarTheme instead. '
+    'This feature was deprecated after v1.9.1.'
+  )
   ButtonTheme.bar({
     Key key,
     ButtonTextTheme textTheme = ButtonTextTheme.accent,
@@ -184,7 +218,7 @@ class ButtonTheme extends InheritedWidget {
   /// ButtonThemeData theme = ButtonTheme.of(context);
   /// ```
   static ButtonThemeData of(BuildContext context) {
-    final ButtonTheme inheritedButtonTheme = context.inheritFromWidgetOfExactType(ButtonTheme);
+    final ButtonTheme inheritedButtonTheme = context.dependOnInheritedWidgetOfExactType<ButtonTheme>();
     ButtonThemeData buttonTheme = inheritedButtonTheme?.data;
     if (buttonTheme?.colorScheme == null) { // if buttonTheme or buttonTheme.colorScheme is null
       final ThemeData theme = Theme.of(context);
@@ -197,6 +231,12 @@ class ButtonTheme extends InheritedWidget {
       }
     }
     return buttonTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final ButtonTheme ancestorTheme = context.findAncestorWidgetOfExactType<ButtonTheme>();
+    return identical(this, ancestorTheme) ? child : ButtonTheme.fromButtonThemeData(data: data, child: child);
   }
 
   @override
@@ -583,7 +623,7 @@ class ButtonThemeData extends Diagnosticable {
       case ButtonTextTheme.accent:
         return colorScheme.secondary;
 
-      case ButtonTextTheme.primary: {
+      case ButtonTextTheme.primary:
         final Color fillColor = getFillColor(button);
         final bool fillIsDark = fillColor != null
           ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
@@ -593,7 +633,6 @@ class ButtonThemeData extends Diagnosticable {
         if (button is FlatButton || button is OutlineButton)
           return colorScheme.primary;
         return Colors.black;
-      }
     }
 
     assert(false);
@@ -865,24 +904,24 @@ class ButtonThemeData extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ButtonThemeData typedOther = other;
-    return textTheme == typedOther.textTheme
-        && minWidth == typedOther.minWidth
-        && height == typedOther.height
-        && padding == typedOther.padding
-        && shape == typedOther.shape
-        && alignedDropdown == typedOther.alignedDropdown
-        && _buttonColor == typedOther._buttonColor
-        && _disabledColor == typedOther._disabledColor
-        && _focusColor == typedOther._focusColor
-        && _hoverColor == typedOther._hoverColor
-        && _highlightColor == typedOther._highlightColor
-        && _splashColor == typedOther._splashColor
-        && colorScheme == typedOther.colorScheme
-        && _materialTapTargetSize == typedOther._materialTapTargetSize;
+    return other is ButtonThemeData
+        && other.textTheme == textTheme
+        && other.minWidth == minWidth
+        && other.height == height
+        && other.padding == padding
+        && other.shape == shape
+        && other.alignedDropdown == alignedDropdown
+        && other._buttonColor == _buttonColor
+        && other._disabledColor == _disabledColor
+        && other._focusColor == _focusColor
+        && other._hoverColor == _hoverColor
+        && other._highlightColor == _highlightColor
+        && other._splashColor == _splashColor
+        && other.colorScheme == colorScheme
+        && other._materialTapTargetSize == _materialTapTargetSize;
   }
 
   @override

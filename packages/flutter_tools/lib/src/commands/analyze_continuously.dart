@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,12 +10,11 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../dart/sdk.dart' as sdk;
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
@@ -36,23 +35,23 @@ class AnalyzeContinuously extends AnalyzeBase {
   Future<void> analyze() async {
     List<String> directories;
 
-    if (argResults['flutter-repo']) {
+    if (argResults['flutter-repo'] as bool) {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
       directories = repoRoots;
       analysisTarget = 'Flutter repository';
 
-      printTrace('Analyzing Flutter repository:');
-      for (String projectPath in repoRoots) {
-        printTrace('  ${fs.path.relative(projectPath)}');
+      globals.printTrace('Analyzing Flutter repository:');
+      for (final String projectPath in repoRoots) {
+        globals.printTrace('  ${globals.fs.path.relative(projectPath)}');
       }
     } else {
-      directories = <String>[fs.currentDirectory.path];
-      analysisTarget = fs.currentDirectory.path;
+      directories = <String>[globals.fs.currentDirectory.path];
+      analysisTarget = globals.fs.currentDirectory.path;
     }
 
-    final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
+    final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
 
     final AnalysisServer server = AnalysisServer(sdkPath, directories);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
@@ -64,20 +63,23 @@ class AnalyzeContinuously extends AnalyzeBase {
     final int exitCode = await server.onExit;
 
     final String message = 'Analysis server exited with code $exitCode.';
-    if (exitCode != 0)
+    if (exitCode != 0) {
       throwToolExit(message, exitCode: exitCode);
-    printStatus(message);
+    }
+    globals.printStatus(message);
 
-    if (server.didServerErrorOccur)
+    if (server.didServerErrorOccur) {
       throwToolExit('Server error(s) occurred.');
+    }
   }
 
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {
     if (isAnalyzing) {
       analysisStatus?.cancel();
-      if (!firstAnalysis)
-        printStatus('\n');
-      analysisStatus = logger.startProgress('Analyzing $analysisTarget...', timeout: timeoutConfiguration.slowOperation);
+      if (!firstAnalysis) {
+        globals.printStatus('\n');
+      }
+      analysisStatus = globals.logger.startProgress('Analyzing $analysisTarget...', timeout: timeoutConfiguration.slowOperation);
       analyzedPaths.clear();
       analysisTimer = Stopwatch()..start();
     } else {
@@ -85,12 +87,12 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisStatus = null;
       analysisTimer.stop();
 
-      logger.printStatus(terminal.clearScreen(), newline: false);
+      globals.logger.printStatus(globals.terminal.clearScreen(), newline: false);
 
       // Remove errors for deleted files, sort, and print errors.
       final List<AnalysisError> errors = <AnalysisError>[];
-      for (String path in analysisErrors.keys.toList()) {
-        if (fs.isFileSync(path)) {
+      for (final String path in analysisErrors.keys.toList()) {
+        if (globals.fs.isFileSync(path)) {
           errors.addAll(analysisErrors[path]);
         } else {
           analysisErrors.remove(path);
@@ -103,17 +105,18 @@ class AnalyzeContinuously extends AnalyzeBase {
       final int undocumentedMembers = errors.where((AnalysisError error) {
         return error.code == 'public_member_api_docs';
       }).length;
-      if (!argResults['dartdocs']) {
+      if (!(argResults['dartdocs'] as bool)) {
         errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
         issueCount -= undocumentedMembers;
       }
 
       errors.sort();
 
-      for (AnalysisError error in errors) {
-        printStatus(error.toString());
-        if (error.code != null)
-          printTrace('error code: ${error.code}');
+      for (final AnalysisError error in errors) {
+        globals.printStatus(error.toString());
+        if (error.code != null) {
+          globals.printTrace('error code: ${error.code}');
+        }
       }
 
       dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
@@ -123,16 +126,17 @@ class AnalyzeContinuously extends AnalyzeBase {
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
 
-      if (firstAnalysis)
+      if (firstAnalysis) {
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
-      else if (issueDiff > 0)
+      } else if (issueDiff > 0) {
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found ($issueDiff new)';
-      else if (issueDiff < 0)
+      } else if (issueDiff < 0) {
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found (${-issueDiff} fixed)';
-      else if (issueCount != 0)
+      } else if (issueCount != 0) {
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
-      else
+      } else {
         errorsMessage = 'no issues found';
+      }
 
       String dartdocMessage;
       if (undocumentedMembers == 1) {
@@ -144,9 +148,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       final String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
       final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
       if (undocumentedMembers > 0) {
-        printStatus('$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
+        globals.printStatus('$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
       } else {
-        printStatus('$errorsMessage • analyzed $files in $seconds seconds');
+        globals.printStatus('$errorsMessage • analyzed $files in $seconds seconds');
       }
 
       if (firstAnalysis && isBenchmarking) {

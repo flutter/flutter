@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'interface_level.dart';
 import 'localizations.dart';
 import 'scrollbar.dart';
 
@@ -20,7 +21,6 @@ const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
   inherit: false,
   fontSize: 18.0,
   fontWeight: FontWeight.w600,
-  color: CupertinoColors.black,
   letterSpacing: 0.48,
   textBaseline: TextBaseline.alphabetic,
 );
@@ -30,7 +30,6 @@ const TextStyle _kCupertinoDialogContentStyle = TextStyle(
   inherit: false,
   fontSize: 13.4,
   fontWeight: FontWeight.w400,
-  color: CupertinoColors.black,
   height: 1.036,
   letterSpacing: -0.25,
   textBaseline: TextBaseline.alphabetic,
@@ -41,7 +40,6 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
   inherit: false,
   fontSize: 16.8,
   fontWeight: FontWeight.w400,
-  color: CupertinoColors.activeBlue,
   textBaseline: TextBaseline.alphabetic,
 );
 
@@ -51,35 +49,28 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 const double _kCupertinoDialogWidth = 270.0;
 const double _kAccessibilityCupertinoDialogWidth = 310.0;
 
-// _kCupertinoDialogBlurOverlayDecoration is applied to the blurred backdrop to
-// lighten the blurred image. Brightening is done to counteract the dark modal
-// barrier that appears behind the dialog. The overlay blend mode does the
-// brightening. The white color doesn't paint any white, it's just the basis
-// for the overlay blend mode.
-const BoxDecoration _kCupertinoDialogBlurOverlayDecoration = BoxDecoration(
-  color: CupertinoColors.white,
-  backgroundBlendMode: BlendMode.overlay,
-);
-
 const double _kBlurAmount = 20.0;
 const double _kEdgePadding = 20.0;
 const double _kMinButtonHeight = 45.0;
 const double _kMinButtonFontSize = 10.0;
-const double _kDialogCornerRadius = 12.0;
+const double _kDialogCornerRadius = 14.0;
 const double _kDividerThickness = 1.0;
 
-// Translucent white that is painted on top of the blurred backdrop as the
-// dialog's background color.
-const Color _kDialogColor = Color(0xC0FFFFFF);
+// A translucent color that is painted on top of the blurred backdrop as the
+// dialog's background color
+// Extracted from https://developer.apple.com/design/resources/.
+const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xCCF2F2F2),
+  darkColor: Color(0xBF1E1E1E),
+);
 
-// Translucent white that is painted on top of the blurred backdrop as the
+// Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
-const Color _kDialogPressedColor = Color(0x90FFFFFF);
-
-// Translucent white that is painted on top of the blurred backdrop in the
-// gap areas between the content section and actions section, as well as between
-// buttons.
-const Color _kButtonDividerColor = Color(0x40FFFFFF);
+// Eyeballed from iOS 13 beta simulator.
+const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFE1E1E1),
+  darkColor: Color(0xFF2E2E2E),
+);
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
@@ -138,6 +129,8 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.actions = const <Widget>[],
     this.scrollController,
     this.actionScrollController,
+    this.insetAnimationDuration = const Duration(milliseconds: 100),
+    this.insetAnimationCurve = Curves.decelerate,
   }) : assert(actions != null),
        super(key: key);
 
@@ -182,20 +175,27 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///    section when it is long.
   final ScrollController actionScrollController;
 
-  Widget _buildContent() {
-    final List<Widget> children = <Widget>[];
+  /// {@macro flutter.material.dialog.insetAnimationDuration}
+  final Duration insetAnimationDuration;
 
-    if (title != null || content != null) {
-      final Widget titleSection = _CupertinoAlertContentSection(
-        title: title,
-        content: content,
-        scrollController: scrollController,
-      );
-      children.add(Flexible(flex: 3, child: titleSection));
-    }
+  /// {@macro flutter.material.dialog.insetAnimationCurve}
+  final Curve insetAnimationCurve;
+
+  Widget _buildContent(BuildContext context) {
+    final List<Widget> children = <Widget>[
+      if (title != null || content != null)
+        Flexible(
+          flex: 3,
+          child: _CupertinoAlertContentSection(
+            title: title,
+            content: content,
+            scrollController: scrollController,
+          ),
+        ),
+    ];
 
     return Container(
-      color: _kDialogColor,
+      color: CupertinoDynamicColor.resolve(_kDialogColor, context),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -223,35 +223,51 @@ class CupertinoAlertDialog extends StatelessWidget {
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        // iOS does not shrink dialog content below a 1.0 scale factor
-        textScaleFactor: math.max(textScaleFactor, 1.0),
-      ),
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return Center(
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
-              width: isInAccessibilityMode
-                  ? _kAccessibilityCupertinoDialogWidth
-                  : _kCupertinoDialogWidth,
-              child: CupertinoPopupSurface(
-                isSurfacePainted: false,
-                child: Semantics(
-                  namesRoute: true,
-                  scopesRoute: true,
-                  explicitChildNodes: true,
-                  label: localizations.alertDialogLabel,
-                  child: _CupertinoDialogRenderWidget(
-                    contentSection: _buildContent(),
-                    actionsSection: _buildActions(),
+    return CupertinoUserInterfaceLevel(
+      data: CupertinoUserInterfaceLevelData.elevated,
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          // iOS does not shrink dialog content below a 1.0 scale factor
+          textScaleFactor: math.max(textScaleFactor, 1.0),
+        ),
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return AnimatedPadding(
+              padding: MediaQuery.of(context).viewInsets +
+                  const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+              duration: insetAnimationDuration,
+              curve: insetAnimationCurve,
+              child: MediaQuery.removeViewInsets(
+                removeLeft: true,
+                removeTop: true,
+                removeRight: true,
+                removeBottom: true,
+                context: context,
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
+                    width: isInAccessibilityMode
+                      ? _kAccessibilityCupertinoDialogWidth
+                      : _kCupertinoDialogWidth,
+                    child: CupertinoPopupSurface(
+                      isSurfacePainted: false,
+                      child: Semantics(
+                        namesRoute: true,
+                        scopesRoute: true,
+                        explicitChildNodes: true,
+                        label: localizations.alertDialogLabel,
+                        child: _CupertinoDialogRenderWidget(
+                          contentSection: _buildContent(context),
+                          actionsSection: _buildActions(),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -271,7 +287,10 @@ class CupertinoAlertDialog extends StatelessWidget {
 ///  * [CupertinoAlertDialog], which is a dialog with title, contents, and
 ///    actions.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-@Deprecated('Use CupertinoAlertDialog for alert dialogs. Use CupertinoPopupSurface for custom popups.')
+@Deprecated(
+  'Use CupertinoAlertDialog for alert dialogs. Use CupertinoPopupSurface for custom popups. '
+  'This feature was deprecated after v0.2.3.'
+)
 class CupertinoDialog extends StatelessWidget {
   /// Creates an iOS-style dialog.
   const CupertinoDialog({
@@ -338,11 +357,8 @@ class CupertinoPopupSurface extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
         child: Container(
-          decoration: _kCupertinoDialogBlurOverlayDecoration,
-          child: Container(
-            color: isSurfacePainted ? _kDialogColor : null,
-            child: child,
-          ),
+          color: isSurfacePainted ? CupertinoDynamicColor.resolve(_kDialogColor, context) : null,
+          child: child,
         ),
       ),
     );
@@ -368,12 +384,15 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
     return _RenderCupertinoDialog(
       dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
       isInAccessibilityMode: _isInAccessibilityMode(context),
+      dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
-    renderObject.isInAccessibilityMode = _isInAccessibilityMode(context);
+    renderObject
+      ..isInAccessibilityMode = _isInAccessibilityMode(context)
+      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
   }
 
   @override
@@ -389,10 +408,10 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   Element _actionsElement;
 
   @override
-  _CupertinoDialogRenderWidget get widget => super.widget;
+  _CupertinoDialogRenderWidget get widget => super.widget as _CupertinoDialogRenderWidget;
 
   @override
-  _RenderCupertinoDialog get renderObject => super.renderObject;
+  _RenderCupertinoDialog get renderObject => super.renderObject as _RenderCupertinoDialog;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -416,10 +435,10 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
     assert(slot != null);
     switch (slot) {
       case _AlertDialogSections.contentSection:
-        renderObject.contentSection = child;
+        renderObject.contentSection = child as RenderBox;
         break;
       case _AlertDialogSections.actionsSection:
-        renderObject.actionsSection = child;
+        renderObject.actionsSection = child as RenderBox;
         break;
     }
   }
@@ -489,10 +508,15 @@ class _RenderCupertinoDialog extends RenderBox {
     RenderBox actionsSection,
     double dividerThickness = 0.0,
     bool isInAccessibilityMode = false,
+    Color dividerColor,
   }) : _contentSection = contentSection,
        _actionsSection = actionsSection,
        _dividerThickness = dividerThickness,
-       _isInAccessibilityMode = isInAccessibilityMode;
+       _isInAccessibilityMode = isInAccessibilityMode,
+       _dividerPaint = Paint()
+        ..color = dividerColor
+        ..style = PaintingStyle.fill;
+
 
   RenderBox get contentSection => _contentSection;
   RenderBox _contentSection;
@@ -536,10 +560,17 @@ class _RenderCupertinoDialog extends RenderBox {
       : _kCupertinoDialogWidth;
 
   final double _dividerThickness;
+  final Paint _dividerPaint;
 
-  final Paint _dividerPaint = Paint()
-    ..color = _kButtonDividerColor
-    ..style = PaintingStyle.fill;
+  Color get dividerColor => _dividerPaint.color;
+  set dividerColor(Color newValue) {
+    if (dividerColor == newValue) {
+      return;
+    }
+
+    _dividerPaint.color = newValue;
+    markNeedsPaint();
+  }
 
   @override
   void attach(PipelineOwner owner) {
@@ -591,16 +622,10 @@ class _RenderCupertinoDialog extends RenderBox {
   }
 
   @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
-    if (contentSection != null) {
-      value.add(contentSection.toDiagnosticsNode(name: 'content'));
-    }
-    if (actionsSection != null) {
-      value.add(actionsSection.toDiagnosticsNode(name: 'actions'));
-    }
-    return value;
-  }
+  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
+    if (contentSection != null) contentSection.toDiagnosticsNode(name: 'content'),
+    if (actionsSection != null) actionsSection.toDiagnosticsNode(name: 'actions'),
+  ];
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -682,7 +707,7 @@ class _RenderCupertinoDialog extends RenderBox {
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
     assert(actionsSection.parentData is BoxParentData);
-    final BoxParentData actionParentData = actionsSection.parentData;
+    final BoxParentData actionParentData = actionsSection.parentData as BoxParentData;
     actionParentData.offset = Offset(0.0, contentSize.height + dividerThickness);
   }
 
@@ -744,13 +769,13 @@ class _RenderCupertinoDialog extends RenderBox {
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
     assert(actionsSection.parentData is BoxParentData);
-    final BoxParentData actionParentData = actionsSection.parentData;
+    final BoxParentData actionParentData = actionsSection.parentData as BoxParentData;
     actionParentData.offset = Offset(0.0, contentSize.height + dividerThickness);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final BoxParentData contentParentData = contentSection.parentData;
+    final BoxParentData contentParentData = contentSection.parentData as BoxParentData;
     contentSection.paint(context, offset + contentParentData.offset);
 
     final bool hasDivider = contentSection.size.height > 0.0 && actionsSection.size.height > 0.0;
@@ -758,7 +783,7 @@ class _RenderCupertinoDialog extends RenderBox {
       _paintDividerBetweenContentAndActions(context.canvas, offset);
     }
 
-    final BoxParentData actionsParentData = actionsSection.parentData;
+    final BoxParentData actionsParentData = actionsSection.parentData as BoxParentData;
     actionsSection.paint(context, offset + actionsParentData.offset);
   }
 
@@ -776,8 +801,8 @@ class _RenderCupertinoDialog extends RenderBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    final BoxParentData contentSectionParentData = contentSection.parentData;
-    final BoxParentData actionsSectionParentData = actionsSection.parentData;
+    final BoxParentData contentSectionParentData = contentSection.parentData as BoxParentData;
+    final BoxParentData actionsSectionParentData = actionsSection.parentData as BoxParentData;
     return result.addWithPaintOffset(
              offset: contentSectionParentData.offset,
              position: position,
@@ -838,26 +863,32 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    final List<Widget> titleContentGroup = <Widget>[];
-    if (title != null) {
-      titleContentGroup.add(Padding(
-        padding: EdgeInsets.only(
-          left: _kEdgePadding,
-          right: _kEdgePadding,
-          bottom: content == null ? _kEdgePadding : 1.0,
-          top: _kEdgePadding * textScaleFactor,
-        ),
-        child: DefaultTextStyle(
-          style: _kCupertinoDialogTitleStyle,
-          textAlign: TextAlign.center,
-          child: title,
-        ),
-      ));
+    if (title == null && content == null) {
+      return SingleChildScrollView(
+        controller: scrollController,
+        child: Container(width: 0.0, height: 0.0),
+      );
     }
 
-    if (content != null) {
-      titleContentGroup.add(
+    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    final List<Widget> titleContentGroup = <Widget>[
+      if (title != null)
+        Padding(
+          padding: EdgeInsets.only(
+            left: _kEdgePadding,
+            right: _kEdgePadding,
+            bottom: content == null ? _kEdgePadding : 1.0,
+            top: _kEdgePadding * textScaleFactor,
+          ),
+          child: DefaultTextStyle(
+            style: _kCupertinoDialogTitleStyle.copyWith(
+              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+            ),
+            textAlign: TextAlign.center,
+            child: title,
+          ),
+        ),
+      if (content != null)
         Padding(
           padding: EdgeInsets.only(
             left: _kEdgePadding,
@@ -866,20 +897,14 @@ class _CupertinoAlertContentSection extends StatelessWidget {
             top: title == null ? _kEdgePadding : 1.0,
           ),
           child: DefaultTextStyle(
-            style: _kCupertinoDialogContentStyle,
+            style: _kCupertinoDialogContentStyle.copyWith(
+              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+            ),
             textAlign: TextAlign.center,
             child: content,
           ),
         ),
-      );
-    }
-
-    if (titleContentGroup.isEmpty) {
-      return SingleChildScrollView(
-        controller: scrollController,
-        child: Container(width: 0.0, height: 0.0),
-      );
-    }
+    ];
 
     return CupertinoScrollbar(
       child: SingleChildScrollView(
@@ -995,7 +1020,7 @@ class _PressableActionButtonState extends State<_PressableActionButton> {
 // _ActionButtonParentData. _ActionButtonParentDataWidget is responsible for
 // updating the pressed state of an _ActionButtonParentData based on the
 // incoming [isPressed] property.
-class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoDialogActionsRenderWidget> {
+class _ActionButtonParentDataWidget extends ParentDataWidget<_ActionButtonParentData> {
   const _ActionButtonParentDataWidget({
     Key key,
     this.isPressed,
@@ -1007,7 +1032,7 @@ class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoDialogAct
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is _ActionButtonParentData);
-    final _ActionButtonParentData parentData = renderObject.parentData;
+    final _ActionButtonParentData parentData = renderObject.parentData as _ActionButtonParentData;
     if (parentData.isPressed != isPressed) {
       parentData.isPressed = isPressed;
 
@@ -1017,6 +1042,9 @@ class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoDialogAct
         targetParent.markNeedsPaint();
     }
   }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => _CupertinoDialogActionsRenderWidget;
 }
 
 // ParentData applied to individual action buttons that report whether or not
@@ -1038,6 +1066,7 @@ class _ActionButtonParentData extends MultiChildLayoutParentData {
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
+    Key key,
     this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
@@ -1045,7 +1074,8 @@ class CupertinoDialogAction extends StatelessWidget {
     @required this.child,
   }) : assert(child != null),
        assert(isDefaultAction != null),
-       assert(isDestructiveAction != null);
+       assert(isDestructiveAction != null),
+       super(key: key);
 
   /// The callback that is called when the button is tapped or otherwise
   /// activated.
@@ -1155,15 +1185,16 @@ class CupertinoDialogAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle style = _kCupertinoDialogActionStyle;
+    TextStyle style = _kCupertinoDialogActionStyle.copyWith(
+      color: CupertinoDynamicColor.resolve(
+        isDestructiveAction ?  CupertinoColors.systemRed : CupertinoColors.systemBlue,
+        context,
+      ),
+    );
     style = style.merge(textStyle);
 
     if (isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
-    }
-
-    if (isDestructiveAction) {
-      style = style.copyWith(color: CupertinoColors.destructiveRed);
     }
 
     if (!enabled) {
@@ -1229,15 +1260,22 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
         ? _kAccessibilityCupertinoDialogWidth
         : _kCupertinoDialogWidth,
       dividerThickness: _dividerThickness,
+      dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
+      dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
+      dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoDialogActions renderObject) {
-    renderObject.dialogWidth = _isInAccessibilityMode(context)
-      ? _kAccessibilityCupertinoDialogWidth
-      : _kCupertinoDialogWidth;
-    renderObject.dividerThickness = _dividerThickness;
+    renderObject
+      ..dialogWidth = _isInAccessibilityMode(context)
+        ? _kAccessibilityCupertinoDialogWidth
+        : _kCupertinoDialogWidth
+      ..dividerThickness = _dividerThickness
+      ..dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context)
+      ..dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context)
+      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
   }
 }
 
@@ -1282,7 +1320,19 @@ class _RenderCupertinoDialogActions extends RenderBox
     List<RenderBox> children,
     @required double dialogWidth,
     double dividerThickness = 0.0,
+    @required Color dialogColor,
+    @required Color dialogPressedColor,
+    @required Color dividerColor,
   }) : _dialogWidth = dialogWidth,
+       _buttonBackgroundPaint = Paint()
+        ..color = dialogColor
+        ..style = PaintingStyle.fill,
+        _pressedButtonBackgroundPaint = Paint()
+          ..color = dialogPressedColor
+          ..style = PaintingStyle.fill,
+        _dividerPaint = Paint()
+          ..color = dividerColor
+          ..style = PaintingStyle.fill,
        _dividerThickness = dividerThickness {
     addAll(children);
   }
@@ -1306,23 +1356,38 @@ class _RenderCupertinoDialogActions extends RenderBox
     }
   }
 
-  final Paint _buttonBackgroundPaint = Paint()
-    ..color = _kDialogColor
-    ..style = PaintingStyle.fill;
+  final Paint _buttonBackgroundPaint;
+  set dialogColor(Color value) {
+    if (value == _buttonBackgroundPaint.color)
+      return;
 
-  final Paint _pressedButtonBackgroundPaint = Paint()
-    ..color = _kDialogPressedColor
-    ..style = PaintingStyle.fill;
+    _buttonBackgroundPaint.color = value;
+    markNeedsPaint();
+  }
 
-  final Paint _dividerPaint = Paint()
-    ..color = _kButtonDividerColor
-    ..style = PaintingStyle.fill;
+  final Paint _pressedButtonBackgroundPaint;
+  set dialogPressedColor(Color value) {
+    if (value == _pressedButtonBackgroundPaint.color)
+      return;
+
+    _pressedButtonBackgroundPaint.color = value;
+    markNeedsPaint();
+  }
+
+  final Paint _dividerPaint;
+  set dividerColor(Color value) {
+    if (value == _dividerPaint.color)
+      return;
+
+    _dividerPaint.color = value;
+    markNeedsPaint();
+  }
 
   Iterable<RenderBox> get _pressedButtons sync* {
     RenderBox currentChild = firstChild;
     while (currentChild != null) {
       assert(currentChild.parentData is _ActionButtonParentData);
-      final _ActionButtonParentData parentData = currentChild.parentData;
+      final _ActionButtonParentData parentData = currentChild.parentData as _ActionButtonParentData;
       if (parentData.isPressed) {
         yield currentChild;
       }
@@ -1334,7 +1399,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     RenderBox currentChild = firstChild;
     while (currentChild != null) {
       assert(currentChild.parentData is _ActionButtonParentData);
-      final _ActionButtonParentData parentData = currentChild.parentData;
+      final _ActionButtonParentData parentData = currentChild.parentData as _ActionButtonParentData;
       if (parentData.isPressed) {
         return true;
       }
@@ -1507,7 +1572,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
         // The 2nd button needs to be offset to the right.
         assert(lastChild.parentData is MultiChildLayoutParentData);
-        final MultiChildLayoutParentData secondButtonParentData = lastChild.parentData;
+        final MultiChildLayoutParentData secondButtonParentData = lastChild.parentData as MultiChildLayoutParentData;
         secondButtonParentData.offset = Offset(firstChild.size.width + dividerThickness, 0.0);
 
         // Calculate our size based on the button sizes.
@@ -1518,7 +1583,7 @@ class _RenderCupertinoDialogActions extends RenderBox
               firstChild.size.height,
               lastChild.size.height,
             ),
-          )
+          ),
         );
       }
     } else {
@@ -1538,7 +1603,7 @@ class _RenderCupertinoDialogActions extends RenderBox
         );
 
         assert(child.parentData is MultiChildLayoutParentData);
-        final MultiChildLayoutParentData parentData = child.parentData;
+        final MultiChildLayoutParentData parentData = child.parentData as MultiChildLayoutParentData;
         parentData.offset = Offset(0.0, verticalOffset);
 
         verticalOffset += child.size.height;
@@ -1588,7 +1653,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       : Rect.zero;
 
     final List<Rect> pressedButtonRects = _pressedButtons.map<Rect>((RenderBox pressedButton) {
-      final MultiChildLayoutParentData buttonParentData = pressedButton.parentData;
+      final MultiChildLayoutParentData buttonParentData = pressedButton.parentData as MultiChildLayoutParentData;
 
       return Rect.fromLTWH(
         offset.dx + buttonParentData.offset.dx,
@@ -1651,14 +1716,13 @@ class _RenderCupertinoDialogActions extends RenderBox
     RenderBox prevChild;
     while (child != null) {
       assert(child.parentData is _ActionButtonParentData);
-      final _ActionButtonParentData currentButtonParentData = child.parentData;
+      final _ActionButtonParentData currentButtonParentData = child.parentData as _ActionButtonParentData;
       final bool isButtonPressed = currentButtonParentData.isPressed;
 
       bool isPrevButtonPressed = false;
       if (prevChild != null) {
         assert(prevChild.parentData is _ActionButtonParentData);
-        final _ActionButtonParentData previousButtonParentData = prevChild
-            .parentData;
+        final _ActionButtonParentData previousButtonParentData = prevChild.parentData as _ActionButtonParentData;
         isPrevButtonPressed = previousButtonParentData.isPressed;
       }
 
@@ -1708,7 +1772,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   void _drawButtons(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
-      final MultiChildLayoutParentData childParentData = child.parentData;
+      final MultiChildLayoutParentData childParentData = child.parentData as MultiChildLayoutParentData;
       context.paintChild(child, childParentData.offset + offset);
       child = childAfter(child);
     }

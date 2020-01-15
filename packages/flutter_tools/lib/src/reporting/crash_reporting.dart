@@ -1,19 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
-
-import '../base/io.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
-import '../globals.dart';
-
-import 'usage.dart';
+part of reporting;
 
 /// Tells crash backend that the error is from the Flutter CLI.
 const String _kProductId = 'Flutter_Tools';
@@ -55,6 +44,8 @@ class CrashReportSender {
 
   static CrashReportSender get instance => _instance ?? CrashReportSender._(http.Client());
 
+  bool _crashReportSent = false;
+
   /// Overrides the default [http.Client] with [client] for testing purposes.
   @visibleForTesting
   static void initializeWith(http.Client client) {
@@ -65,7 +56,7 @@ class CrashReportSender {
   final Usage _usage = Usage.instance;
 
   Uri get _baseUrl {
-    final String overrideUrl = platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
+    final String overrideUrl = globals.platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
 
     if (overrideUrl != null) {
       return Uri.parse(overrideUrl);
@@ -85,7 +76,12 @@ class CrashReportSender {
     @required dynamic error,
     @required StackTrace stackTrace,
     @required String getFlutterVersion(),
+    @required String command,
   }) async {
+    // Only send one crash report per run.
+    if (_crashReportSent) {
+      return;
+    }
     try {
       final String flutterVersion = getFlutterVersion();
 
@@ -94,7 +90,7 @@ class CrashReportSender {
         return;
       }
 
-      printStatus('Sending crash report to Google.');
+      globals.printTrace('Sending crash report to Google.');
 
       final Uri uri = _baseUrl.replace(
         queryParameters: <String, String>{
@@ -107,16 +103,16 @@ class CrashReportSender {
       req.fields['uuid'] = _usage.clientId;
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
-      req.fields['osName'] = platform.operatingSystem;
+      req.fields['osName'] = globals.platform.operatingSystem;
       req.fields['osVersion'] = os.name; // this actually includes version
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
+      req.fields['comments'] = command;
 
-      final String stackTraceWithRelativePaths = Chain.parse(stackTrace.toString()).terse.toString();
       req.files.add(http.MultipartFile.fromString(
         _kStackTraceFileField,
-        stackTraceWithRelativePaths,
+        stackTrace.toString(),
         filename: _kStackTraceFilename,
       ));
 
@@ -125,16 +121,17 @@ class CrashReportSender {
       if (resp.statusCode == 200) {
         final String reportId = await http.ByteStream(resp.stream)
             .bytesToString();
-        printStatus('Crash report sent (report ID: $reportId)');
+        globals.printTrace('Crash report sent (report ID: $reportId)');
+        _crashReportSent = true;
       } else {
-        printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
+        globals.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
     } catch (sendError, sendStackTrace) {
-      if (sendError is SocketException) {
-        printError('Failed to send crash report due to a network error: $sendError');
+      if (sendError is SocketException || sendError is HttpException) {
+        globals.printError('Failed to send crash report due to a network error: $sendError');
       } else {
         // If the sender itself crashes, just print. We did our best.
-        printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
+        globals.printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
       }
     }
   }

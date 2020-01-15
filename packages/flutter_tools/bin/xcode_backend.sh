@@ -1,5 +1,5 @@
-#!/bin/bash
-# Copyright 2016 The Chromium Authors. All rights reserved.
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -114,7 +114,6 @@ BuildApp() {
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
   fi
 
-  local bitcode_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
       EchoError "========================================================================"
@@ -131,9 +130,11 @@ BuildApp() {
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
     flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
-    if [[ $ENABLE_BITCODE == "YES" ]]; then
-      bitcode_flag="--bitcode"
-    fi
+  fi
+
+  local bitcode_flag=""
+  if [[ $ENABLE_BITCODE == "YES" ]]; then
+    bitcode_flag="--bitcode"
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
@@ -141,11 +142,10 @@ BuildApp() {
     mkdir "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
-    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
   else
     RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    RunCommand cp -- "${flutter_podspec}" "${derived_dir}"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
-    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
   fi
 
   RunCommand pushd "${project_path}" > /dev/null
@@ -201,27 +201,29 @@ BuildApp() {
 
     RunCommand cp -r -- "${app_framework}" "${derived_dir}"
 
-    StreamOutput " ├─Generating dSYM file..."
-    # Xcode calls `symbols` during app store upload, which uses Spotlight to
-    # find dSYM files for embedded frameworks. When it finds the dSYM file for
-    # `App.framework` it throws an error, which aborts the app store upload.
-    # To avoid this, we place the dSYM files in a folder ending with ".noindex",
-    # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
-    RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
-    RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
-      exit -1
-    fi
-    StreamOutput "done"
+    if [[ "${build_mode}" == "release" ]]; then
+      StreamOutput " ├─Generating dSYM file..."
+      # Xcode calls `symbols` during app store upload, which uses Spotlight to
+      # find dSYM files for embedded frameworks. When it finds the dSYM file for
+      # `App.framework` it throws an error, which aborts the app store upload.
+      # To avoid this, we place the dSYM files in a folder ending with ".noindex",
+      # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
+      RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
+      RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
+      if [[ $? -ne 0 ]]; then
+        EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
+        exit -1
+      fi
+      StreamOutput "done"
 
-    StreamOutput " ├─Stripping debug symbols..."
-    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to strip ${derived_dir}/App.framework/App."
-      exit -1
+      StreamOutput " ├─Stripping debug symbols..."
+      RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
+      if [[ $? -ne 0 ]]; then
+        EchoError "Failed to strip ${derived_dir}/App.framework/App."
+        exit -1
+      fi
+      StreamOutput "done"
     fi
-    StreamOutput "done"
 
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
@@ -235,6 +237,7 @@ BuildApp() {
 
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
         ${arch_flags} \
+        -fembed-bitcode-marker \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \

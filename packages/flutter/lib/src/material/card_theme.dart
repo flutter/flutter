@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -117,17 +117,17 @@ class CardTheme extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final CardTheme typedOther = other;
-    return typedOther.clipBehavior == clipBehavior
-        && typedOther.color == color
-        && typedOther.elevation == elevation
-        && typedOther.margin == margin
-        && typedOther.shape == shape;
+    return other is CardTheme
+        && other.clipBehavior == clipBehavior
+        && other.color == color
+        && other.elevation == elevation
+        && other.margin == margin
+        && other.shape == shape;
   }
 
   @override

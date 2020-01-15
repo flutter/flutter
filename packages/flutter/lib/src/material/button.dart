@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,13 +31,14 @@ class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
   /// The [shape], [elevation], [focusElevation], [hoverElevation],
-  /// [highlightElevation], [disabledElevation], [padding], [constraints], and
-  /// [clipBehavior] arguments must not be null. Additionally, [elevation],
-  /// [focusElevation], [hoverElevation], [highlightElevation], and
+  /// [highlightElevation], [disabledElevation], [padding], [constraints],
+  /// [autofocus], and [clipBehavior] arguments must not be null. Additionally,
+  /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], and
   /// [disabledElevation] must be non-negative.
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
+    this.onLongPress,
     this.onHighlightChanged,
     this.textStyle,
     this.fillColor,
@@ -51,13 +52,16 @@ class RawMaterialButton extends StatefulWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.padding = EdgeInsets.zero,
+    this.visualDensity = const VisualDensity(),
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
     this.clipBehavior = Clip.none,
     this.focusNode,
+    this.autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
+    this.enableFeedback = true,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
        assert(shape != null),
        assert(elevation != null && elevation >= 0.0),
@@ -69,12 +73,26 @@ class RawMaterialButton extends StatefulWidget {
        assert(constraints != null),
        assert(animationDuration != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
   ///
-  /// If this is set to null, the button will be disabled, see [enabled].
+  /// If this callback and [onLongPress] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
   final VoidCallback onPressed;
+
+  /// Called when the button is long-pressed.
+  ///
+  /// If this callback and [onPressed] are null, then the button will be disabled.
+  ///
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
+  final VoidCallback onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -168,7 +186,7 @@ class RawMaterialButton extends StatefulWidget {
   ///
   ///  * [elevation], the default elevation.
   ///  * [hoverElevation], the elevation when a pointer is hovering over the
-  ///  button.
+  ///    button.
   ///  * [focusElevation], the elevation when the button is focused.
   ///  * [disabledElevation], the elevation when the button is disabled.
   final double highlightElevation;
@@ -182,13 +200,23 @@ class RawMaterialButton extends StatefulWidget {
   ///
   ///  * [elevation], the default elevation.
   ///  * [hoverElevation], the elevation when a pointer is hovering over the
-  ///  button.
+  ///    button.
   ///  * [focusElevation], the elevation when the button is focused.
   ///  * [highlightElevation], the elevation when the button is pressed.
   final double disabledElevation;
 
   /// The internal padding for the button's [child].
   final EdgeInsetsGeometry padding;
+
+  /// Defines how compact the button's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all widgets
+  ///    within a [Theme].
+  final VisualDensity visualDensity;
 
   /// Defines the button's size.
   ///
@@ -220,8 +248,8 @@ class RawMaterialButton extends StatefulWidget {
   /// Whether the button is enabled or disabled.
   ///
   /// Buttons are disabled by default. To enable a button, set its [onPressed]
-  /// property to a non-null value.
-  bool get enabled => onPressed != null;
+  /// or [onLongPress] properties to a non-null value.
+  bool get enabled => onPressed != null || onLongPress != null;
 
   /// Configures the minimum size of the tap target.
   ///
@@ -232,16 +260,26 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
-  /// An optional focus node to use for requesting focus when pressed.
-  ///
-  /// If not supplied, the button will create and host its own [FocusNode].
-  ///
-  /// If supplied, the given focusNode will be _hosted_ by this widget. See
-  /// [FocusNode] for more information on what that implies.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
+
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool enableFeedback;
 
   @override
   _RawMaterialButtonState createState() => _RawMaterialButtonState();
@@ -327,38 +365,50 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   Widget build(BuildContext context) {
     final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
     final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
+    final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
+    final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
+    final EdgeInsetsGeometry padding = widget.padding.add(
+      EdgeInsets.only(
+        left: densityAdjustment.dx,
+        top: densityAdjustment.dy,
+        right: densityAdjustment.dx,
+        bottom: densityAdjustment.dy,
+      ),
+    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
-    final Widget result = Focus(
-      focusNode: widget.focusNode,
-      onFocusChange: _handleFocusedChanged,
-      child: ConstrainedBox(
-        constraints: widget.constraints,
-        child: Material(
-          elevation: _effectiveElevation,
-          textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
-          shape: effectiveShape,
-          color: widget.fillColor,
-          type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
-          animationDuration: widget.animationDuration,
-          clipBehavior: widget.clipBehavior,
-          child: InkWell(
-            onHighlightChanged: _handleHighlightChanged,
-            splashColor: widget.splashColor,
-            highlightColor: widget.highlightColor,
-            focusColor: widget.focusColor,
-            hoverColor: widget.hoverColor,
-            onHover: _handleHoveredChanged,
-            onTap: widget.onPressed,
-            customBorder: effectiveShape,
-            child: IconTheme.merge(
-              data: IconThemeData(color: effectiveTextColor),
-              child: Container(
-                padding: widget.padding,
-                child: Center(
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: widget.child,
-                ),
+    final Widget result = ConstrainedBox(
+      constraints: effectiveConstraints,
+      child: Material(
+        elevation: _effectiveElevation,
+        textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
+        shape: effectiveShape,
+        color: widget.fillColor,
+        type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
+        animationDuration: widget.animationDuration,
+        clipBehavior: widget.clipBehavior,
+        child: InkWell(
+          focusNode: widget.focusNode,
+          canRequestFocus: widget.enabled,
+          onFocusChange: _handleFocusedChanged,
+          autofocus: widget.autofocus,
+          onHighlightChanged: _handleHighlightChanged,
+          splashColor: widget.splashColor,
+          highlightColor: widget.highlightColor,
+          focusColor: widget.focusColor,
+          hoverColor: widget.hoverColor,
+          onHover: _handleHoveredChanged,
+          onTap: widget.onPressed,
+          onLongPress: widget.onLongPress,
+          enableFeedback: widget.enableFeedback,
+          customBorder: effectiveShape,
+          child: IconTheme.merge(
+            data: IconThemeData(color: effectiveTextColor),
+            child: Container(
+              padding: padding,
+              child: Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: widget.child,
               ),
             ),
           ),
@@ -368,7 +418,12 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     Size minSize;
     switch (widget.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        minSize = const Size(48.0, 48.0);
+        minSize = Size(
+          kMinInteractiveDimension + densityAdjustment.dx,
+          kMinInteractiveDimension + densityAdjustment.dy,
+        );
+        assert(minSize.width >= 0.0);
+        assert(minSize.height >= 0.0);
         break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
@@ -459,8 +514,8 @@ class _RenderInputPadding extends RenderShiftedBox {
       final double height = math.max(child.size.width, minSize.width);
       final double width = math.max(child.size.height, minSize.height);
       size = constraints.constrain(Size(height, width));
-      final BoxParentData childParentData = child.parentData;
-      childParentData.offset = Alignment.center.alongOffset(size - child.size);
+      final BoxParentData childParentData = child.parentData as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child.size as Offset);
     } else {
       size = Size.zero;
     }

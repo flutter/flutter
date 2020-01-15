@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -76,7 +76,7 @@ abstract class TableColumnWidth {
   double flex(Iterable<RenderBox> cells) => null;
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => '${objectRuntimeType(this, 'TableColumnWidth')}';
 }
 
 /// Sizes the column according to the intrinsic dimensions of all the
@@ -96,7 +96,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   @override
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
-    for (RenderBox cell in cells)
+    for (final RenderBox cell in cells)
       result = math.max(result, cell.getMinIntrinsicWidth(double.infinity));
     return result;
   }
@@ -104,7 +104,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   @override
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
-    for (RenderBox cell in cells)
+    for (final RenderBox cell in cells)
       result = math.max(result, cell.getMaxIntrinsicWidth(double.infinity));
     return result;
   }
@@ -115,7 +115,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double flex(Iterable<RenderBox> cells) => _flex;
 
   @override
-  String toString() => '$runtimeType(flex: ${_flex?.toStringAsFixed(1)})';
+  String toString() => '${objectRuntimeType(this, 'IntrinsicColumnWidth')}(flex: ${_flex?.toStringAsFixed(1)})';
 }
 
 /// Sizes the column to a specific number of pixels.
@@ -141,7 +141,7 @@ class FixedColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType(${debugFormatDouble(value)})';
+  String toString() => '${objectRuntimeType(this, 'FixedColumnWidth')}(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column to a fraction of the table's constraints' maxWidth.
@@ -173,7 +173,7 @@ class FractionColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '${objectRuntimeType(this, 'FractionColumnWidth')}($value)';
 }
 
 /// Sizes the column by taking a part of the remaining space once all
@@ -210,7 +210,7 @@ class FlexColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType(${debugFormatDouble(value)})';
+  String toString() => '${objectRuntimeType(this, 'FlexColumnWidth')}(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column such that it is the size that is the maximum of
@@ -261,7 +261,7 @@ class MaxColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($a, $b)';
+  String toString() => '${objectRuntimeType(this, 'MaxColumnWidth')}($a, $b)';
 }
 
 /// Sizes the column such that it is the size that is the minimum of
@@ -312,7 +312,7 @@ class MinColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($a, $b)';
+  String toString() => '${objectRuntimeType(this, 'MinColumnWidth')}($a, $b)';
 }
 
 /// Vertical alignment options for cells in [RenderTable] objects.
@@ -527,7 +527,7 @@ class RenderTable extends RenderBox {
       return;
     _rowDecorations = value;
     if (_rowDecorationPainters != null) {
-      for (BoxPainter painter in _rowDecorationPainters)
+      for (final BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
     }
     _rowDecorationPainters = _rowDecorations != null ? List<BoxPainter>(_rowDecorations.length) : null;
@@ -592,7 +592,7 @@ class RenderTable extends RenderBox {
         assert(_rows == 0);
         return;
       }
-      for (RenderBox oldChild in _children) {
+      for (final RenderBox oldChild in _children) {
         if (oldChild != null)
           dropChild(oldChild);
       }
@@ -645,7 +645,7 @@ class RenderTable extends RenderBox {
       setFlatChildren(0, null);
       return;
     }
-    for (RenderBox oldChild in _children) {
+    for (final RenderBox oldChild in _children) {
       if (oldChild != null)
         dropChild(oldChild);
     }
@@ -664,7 +664,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     _rows += 1;
     _children.addAll(cells);
-    for (RenderBox cell in cells) {
+    for (final RenderBox cell in cells) {
       if (cell != null)
         adoptChild(cell);
     }
@@ -695,7 +695,7 @@ class RenderTable extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child?.attach(owner);
   }
 
@@ -703,18 +703,18 @@ class RenderTable extends RenderBox {
   void detach() {
     super.detach();
     if (_rowDecorationPainters != null) {
-      for (BoxPainter painter in _rowDecorationPainters)
+      for (final BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
       _rowDecorationPainters = List<BoxPainter>(_rowDecorations.length);
     }
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child?.detach();
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
     assert(_children.length == rows * columns);
-    for (RenderBox child in _children) {
+    for (final RenderBox child in _children) {
       if (child != null)
         visitor(child);
     }
@@ -895,7 +895,10 @@ class RenderTable extends RenderBox {
     }
 
     // beyond this point, unflexedTableWidth is no longer valid
-    assert(() { unflexedTableWidth = null; return true; }());
+    assert(() {
+      unflexedTableWidth = null;
+      return true;
+    }());
 
     // 4. apply the maximum width of the table, shrinking columns as
     //    necessary, applying minimum column widths as we go
@@ -918,10 +921,7 @@ class RenderTable extends RenderBox {
       // columns shrinking them proportionally until we have no
       // available columns, then do the same to the non-flexible ones.
       int availableColumns = columns;
-      // Handle double precision errors which causes this loop to become
-      // stuck in certain configurations.
-      const double minimumDeficit = precisionErrorTolerance;
-      while (deficit > minimumDeficit && totalFlex > minimumDeficit) {
+      while (deficit > precisionErrorTolerance && totalFlex > precisionErrorTolerance) {
         double newTotalFlex = 0.0;
         for (int x = 0; x < columns; x += 1) {
           if (flexes[x] != null) {
@@ -943,31 +943,30 @@ class RenderTable extends RenderBox {
         }
         totalFlex = newTotalFlex;
       }
-      if (deficit > 0.0) {
+      while (deficit > precisionErrorTolerance && availableColumns > 0) {
         // Now we have to take out the remaining space from the
         // columns that aren't minimum sized.
         // To make this fair, we repeatedly remove equal amounts from
         // each column, clamped to the minimum width, until we run out
         // of columns that aren't at their minWidth.
-        do {
-          final double delta = deficit / availableColumns;
-          int newAvailableColumns = 0;
-          for (int x = 0; x < columns; x += 1) {
-            final double availableDelta = widths[x] - minWidths[x];
-            if (availableDelta > 0.0) {
-              if (availableDelta <= delta) {
-                // shrank to minimum
-                deficit -= widths[x] - minWidths[x];
-                widths[x] = minWidths[x];
-              } else {
-                deficit -= delta;
-                widths[x] -= delta;
-                newAvailableColumns += 1;
-              }
+        final double delta = deficit / availableColumns;
+        assert(delta != 0);
+        int newAvailableColumns = 0;
+        for (int x = 0; x < columns; x += 1) {
+          final double availableDelta = widths[x] - minWidths[x];
+          if (availableDelta > 0.0) {
+            if (availableDelta <= delta) {
+              // shrank to minimum
+              deficit -= widths[x] - minWidths[x];
+              widths[x] = minWidths[x];
+            } else {
+              deficit -= delta;
+              widths[x] -= delta;
+              newAvailableColumns += 1;
             }
           }
-          availableColumns = newAvailableColumns;
-        } while (deficit > 0.0 && availableColumns > 0);
+        }
+        availableColumns = newAvailableColumns;
       }
     }
     return widths;
@@ -1037,7 +1036,7 @@ class RenderTable extends RenderBox {
         final int xy = x + y * columns;
         final RenderBox child = _children[xy];
         if (child != null) {
-          final TableCellParentData childParentData = child.parentData;
+          final TableCellParentData childParentData = child.parentData as TableCellParentData;
           assert(childParentData != null);
           childParentData.x = x;
           childParentData.y = y;
@@ -1076,7 +1075,7 @@ class RenderTable extends RenderBox {
         final int xy = x + y * columns;
         final RenderBox child = _children[xy];
         if (child != null) {
-          final TableCellParentData childParentData = child.parentData;
+          final TableCellParentData childParentData = child.parentData as TableCellParentData;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               if (baselines[x] != null)
@@ -1111,7 +1110,7 @@ class RenderTable extends RenderBox {
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox child = _children[index];
       if (child != null) {
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
         final bool isHit = result.addWithPaintOffset(
           offset: childParentData.offset,
           position: position,
@@ -1157,7 +1156,7 @@ class RenderTable extends RenderBox {
     for (int index = 0; index < _children.length; index += 1) {
       final RenderBox child = _children[index];
       if (child != null) {
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
         context.paintChild(child, childParentData.offset + offset);
       }
     }

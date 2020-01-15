@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 import 'binary_messenger.dart';
+import 'binding.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
@@ -31,11 +32,12 @@ import 'message_codecs.dart';
 class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name], [codec] and [binaryMessenger].
   ///
-  /// None of [name], [codec], or [binaryMessenger] may be null.
-  const BasicMessageChannel(this.name, this.codec, { this.binaryMessenger = defaultBinaryMessenger })
-    : assert(name != null),
-      assert(codec != null),
-      assert(binaryMessenger != null);
+  /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
+  /// instance is used if [binaryMessenger] is null.
+  const BasicMessageChannel(this.name, this.codec, { BinaryMessenger binaryMessenger })
+      : assert(name != null),
+        assert(codec != null),
+        _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -44,7 +46,8 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  final BinaryMessenger binaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
+  final BinaryMessenger _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
   ///
@@ -118,11 +121,12 @@ class MethodChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// None of [name], [binaryMessenger], or [codec] may be null.
-  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), this.binaryMessenger = defaultBinaryMessenger ])
-    : assert(name != null),
-      assert(binaryMessenger != null),
-      assert(codec != null);
+  /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
+  /// instance is used if [binaryMessenger] is null.
+  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger binaryMessenger ])
+      : assert(name != null),
+        assert(codec != null),
+        _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -133,7 +137,24 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  final BinaryMessenger binaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
+  final BinaryMessenger _binaryMessenger;
+
+  @optionalTypeArgs
+  Future<T> _invokeMethod<T>(String method, { bool missingOk, dynamic arguments }) async {
+    assert(method != null);
+    final ByteData result = await binaryMessenger.send(
+      name,
+      codec.encodeMethodCall(MethodCall(method, arguments)),
+    );
+    if (result == null) {
+      if (missingOk) {
+        return null;
+      }
+      throw MissingPluginException('No implementation found for method $method on channel $name');
+    }
+    return codec.decodeEnvelope(result) as T;
+  }
 
   /// Invokes a [method] on this channel with the specified [arguments].
   ///
@@ -159,7 +180,7 @@ class MethodChannel {
   /// in Dart using a MethodChannel and how to implement those methods in Java
   /// (for Android) and Objective-C (for iOS).
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The code might be packaged up as a musical plugin, see
   /// <https://flutter.dev/developing-packages/>:
@@ -212,7 +233,7 @@ class MethodChannel {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Java (for Android):
   ///
@@ -252,7 +273,7 @@ class MethodChannel {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Objective-C (for iOS):
   ///
@@ -268,7 +289,7 @@ class MethodChannel {
   ///   } else if ([@"getSongs" isEqualToString:call.method]) {
   ///     NSArray* items = [BWPlayApi items];
   ///     NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
-  ///     for (BWPlayItem* item in items) {
+  ///     for (final BWPlayItem* item in items) {
   ///       [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
   ///     }
   ///     result(json);
@@ -304,17 +325,8 @@ class MethodChannel {
   ///  * <https://api.flutter.dev/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
-  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
-    assert(method != null);
-    final ByteData result = await binaryMessenger.send(
-      name,
-      codec.encodeMethodCall(MethodCall(method, arguments)),
-    );
-    if (result == null) {
-      throw MissingPluginException('No implementation found for method $method on channel $name');
-    }
-    final T typedResult = codec.decodeEnvelope(result);
-    return typedResult;
+  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) {
+    return _invokeMethod<T>(method, missingOk: false, arguments: arguments);
   }
 
   /// An implementation of [invokeMethod] that can return typed lists.
@@ -420,12 +432,7 @@ class OptionalMethodChannel extends MethodChannel {
 
   @override
   Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
-    try {
-      final T result = await super.invokeMethod<T>(method, arguments);
-      return result;
-    } on MissingPluginException {
-      return null;
-    }
+    return super._invokeMethod<T>(method, missingOk: true, arguments: arguments);
   }
 
   @override
@@ -462,14 +469,22 @@ class EventChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// Neither [name] nor [codec] may be null.
-  const EventChannel(this.name, [this.codec = const StandardMethodCodec()]);
+  /// Neither [name] nor [codec] may be null. The default [ServicesBinding.defaultBinaryMessenger]
+  /// instance is used if [binaryMessenger] is null.
+  const EventChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger binaryMessenger])
+      : assert(name != null),
+        assert(codec != null),
+        _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
 
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
+
+  /// The messenger used by this channel to send platform messages, not null.
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
+  final BinaryMessenger _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.
   ///
@@ -488,7 +503,7 @@ class EventChannel {
     final MethodChannel methodChannel = MethodChannel(name, codec);
     StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(onListen: () async {
-      defaultBinaryMessenger.setMessageHandler(name, (ByteData reply) async {
+      binaryMessenger.setMessageHandler(name, (ByteData reply) async {
         if (reply == null) {
           controller.close();
         } else {
@@ -511,7 +526,7 @@ class EventChannel {
         ));
       }
     }, onCancel: () async {
-      defaultBinaryMessenger.setMessageHandler(name, null);
+      binaryMessenger.setMessageHandler(name, null);
       try {
         await methodChannel.invokeMethod<void>('cancel', arguments);
       } catch (exception, stack) {

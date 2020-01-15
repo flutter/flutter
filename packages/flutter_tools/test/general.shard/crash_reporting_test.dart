@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,18 +8,19 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:http/http.dart';
-import 'package:http/testing.dart';
-
 import 'package:flutter_tools/runner.dart' as tools;
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/reporting/crash_reporting.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:pedantic/pedantic.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:http/http.dart';
+import 'package:http/testing.dart';
+import 'package:quiver/testing/async.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -33,6 +34,7 @@ void main() {
     setUp(() async {
       tools.crashFileSystem = MemoryFileSystem();
       setExitFunctionForTests((_) { });
+      MockCrashReportSender.sendCalls = 0;
     });
 
     tearDown(() {
@@ -57,6 +59,48 @@ void main() {
       Stdio: () => const _NoStderr(),
     });
 
+    testUsingContext('should print an explanatory message when there is a SocketException', () async {
+      final Completer<int> exitCodeCompleter = Completer<int>();
+      setExitFunctionForTests((int exitCode) {
+        exitCodeCompleter.complete(exitCode);
+      });
+
+      CrashReportSender.initializeWith(
+          CrashingCrashReportSender(const SocketException('no internets')));
+
+      unawaited(tools.run(
+        <String>['crash'],
+        <FlutterCommand>[_CrashAsyncCommand()],
+        reportCrashes: true,
+        flutterVersion: 'test-version',
+      ));
+      expect(await exitCodeCompleter.future, 1);
+      expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
+    }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
+    testUsingContext('should print an explanatory message when there is an HttpException', () async {
+      final Completer<int> exitCodeCompleter = Completer<int>();
+      setExitFunctionForTests((int exitCode) {
+        exitCodeCompleter.complete(exitCode);
+      });
+
+      CrashReportSender.initializeWith(
+          CrashingCrashReportSender(const HttpException('no internets')));
+
+      unawaited(tools.run(
+        <String>['crash'],
+        <FlutterCommand>[_CrashAsyncCommand()],
+        reportCrashes: true,
+        flutterVersion: 'test-version',
+      ));
+      expect(await exitCodeCompleter.future, 1);
+      expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
+    }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
     testUsingContext('should send crash reports when async throws', () async {
       final Completer<int> exitCodeCompleter = Completer<int>();
       setExitFunctionForTests((int exitCode) {
@@ -73,9 +117,40 @@ void main() {
         reportCrashes: true,
         flutterVersion: 'test-version',
       ));
-      expect(await exitCodeCompleter.future, equals(1));
+      expect(await exitCodeCompleter.future, 1);
       await verifyCrashReportSent(requestInfo);
     }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
+    testUsingContext('should send only one crash report when async throws many', () async {
+      final Completer<int> exitCodeCompleter = Completer<int>();
+      setExitFunctionForTests((int exitCode) {
+        if (!exitCodeCompleter.isCompleted) {
+          exitCodeCompleter.complete(exitCode);
+        }
+      });
+
+      final RequestInfo requestInfo = RequestInfo();
+      final MockCrashReportSender sender = MockCrashReportSender(requestInfo);
+      CrashReportSender.initializeWith(sender);
+
+      FakeAsync().run((FakeAsync time) {
+        time.elapse(const Duration(seconds: 1));
+        unawaited(tools.run(
+          <String>['crash'],
+          <FlutterCommand>[_MultiCrashAsyncCommand(crashes: 4)],
+          reportCrashes: true,
+          flutterVersion: 'test-version',
+        ));
+        time.elapse(const Duration(seconds: 1));
+        time.flushMicrotasks();
+      });
+      expect(await exitCodeCompleter.future, 1);
+      expect(MockCrashReportSender.sendCalls, 1);
+      await verifyCrashReportSent(requestInfo, crashes: 4);
+    }, overrides: <Type, Generator>{
+      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       Stdio: () => const _NoStderr(),
     });
 
@@ -106,8 +181,7 @@ void main() {
       expect(method, null);
       expect(uri, null);
 
-      final BufferLogger logger = context.get<Logger>();
-      expect(logger.statusText, '');
+      expect(testLogger.traceText, isNot(contains('Crash report sent')));
     }, overrides: <Type, Generator>{
       Stdio: () => const _NoStderr(),
     });
@@ -160,7 +234,9 @@ class RequestInfo {
   Map<String, String> fields;
 }
 
-Future<void> verifyCrashReportSent(RequestInfo crashInfo) async {
+Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
+  int crashes = 1,
+}) async {
   // Verify that we sent the crash report.
   expect(crashInfo.method, 'POST');
   expect(crashInfo.uri, Uri(
@@ -176,59 +252,69 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo) async {
   expect(crashInfo.fields['uuid'], '00000000-0000-4000-0000-000000000000');
   expect(crashInfo.fields['product'], 'Flutter_Tools');
   expect(crashInfo.fields['version'], 'test-version');
-  expect(crashInfo.fields['osName'], platform.operatingSystem);
+  expect(crashInfo.fields['osName'], globals.platform.operatingSystem);
   expect(crashInfo.fields['osVersion'], 'fake OS name and version');
   expect(crashInfo.fields['type'], 'DartError');
   expect(crashInfo.fields['error_runtime_type'], 'StateError');
   expect(crashInfo.fields['error_message'], 'Bad state: Test bad state error');
+  expect(crashInfo.fields['comments'], 'crash');
 
-  final BufferLogger logger = context.get<Logger>();
-  expect(logger.statusText, 'Sending crash report to Google.\n'
-      'Crash report sent (report ID: test-report-id)\n');
+  expect(testLogger.traceText, contains('Sending crash report to Google.'));
+  expect(testLogger.traceText, contains('Crash report sent (report ID: test-report-id)'));
 
   // Verify that we've written the crash report to disk.
   final List<String> writtenFiles =
   (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
       .map((FileSystemEntity e) => e.path).toList();
-  expect(writtenFiles, hasLength(1));
+  expect(writtenFiles, hasLength(crashes));
   expect(writtenFiles, contains('flutter_01.log'));
 }
 
 class MockCrashReportSender extends MockClient {
   MockCrashReportSender(RequestInfo crashInfo) : super((Request request) async {
-      crashInfo.method = request.method;
-      crashInfo.uri = request.url;
+    MockCrashReportSender.sendCalls++;
+    crashInfo.method = request.method;
+    crashInfo.uri = request.url;
 
-      // A very ad-hoc multipart request parser. Good enough for this test.
-      String boundary = request.headers['Content-Type'];
-      boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
-      crashInfo.fields = Map<String, String>.fromIterable(
-        utf8.decode(request.bodyBytes)
-            .split('--$boundary')
-            .map<List<String>>((String part) {
+    // A very ad-hoc multipart request parser. Good enough for this test.
+    String boundary = request.headers['Content-Type'];
+    boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
+    crashInfo.fields = Map<String, String>.fromIterable(
+      utf8.decode(request.bodyBytes)
+        .split('--$boundary')
+        .map<List<String>>((String part) {
           final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
-          if (nameMatch == null)
+          if (nameMatch == null) {
             return null;
+          }
           final String name = nameMatch[1];
           final String value = part.split('\n').skip(2).join('\n').trim();
           return <String>[name, value];
         })
-            .where((List<String> pair) => pair != null),
-        key: (dynamic key) {
-          final List<String> pair = key;
-          return pair[0];
-        },
-        value: (dynamic value) {
-          final List<String> pair = value;
-          return pair[1];
-        },
-      );
+        .where((List<String> pair) => pair != null),
+      key: (dynamic key) {
+        final List<String> pair = key as List<String>;
+        return pair[0];
+      },
+      value: (dynamic value) {
+        final List<String> pair = value as List<String>;
+        return pair[1];
+      },
+    );
 
-      return Response(
-        'test-report-id',
-        200,
-      );
-    });
+    return Response(
+      'test-report-id',
+      200,
+    );
+  });
+
+  static int sendCalls = 0;
+}
+
+class CrashingCrashReportSender extends MockClient {
+  CrashingCrashReportSender(Object exception) : super((Request request) async {
+    throw exception;
+  });
 }
 
 /// Throws a random error to simulate a CLI crash.
@@ -256,7 +342,7 @@ class _CrashCommand extends FlutterCommand {
 
     fn3();
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 
@@ -276,6 +362,41 @@ class _CrashAsyncCommand extends FlutterCommand {
     });
     return Completer<FlutterCommandResult>().future; // expect StateError
   }
+}
+
+/// Generates multiple asynchronous unhandled exceptions.
+class _MultiCrashAsyncCommand extends FlutterCommand {
+  _MultiCrashAsyncCommand({
+    int crashes = 1,
+  }) : _crashes = crashes;
+
+  final int _crashes;
+
+  @override
+  String get description => 'Simulates a crash';
+
+  @override
+  String get name => 'crash';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    for (int i = 0; i < _crashes; i++) {
+      Timer.run(() {
+        throw StateError('Test bad state error');
+      });
+    }
+    return Completer<FlutterCommandResult>().future; // expect StateError
+  }
+}
+
+/// A DoctorValidatorsProvider that overrides the default validators without
+/// overriding the doctor.
+class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
+  @override
+  List<DoctorValidator> get validators => <DoctorValidator>[];
+
+  @override
+  List<Workflow> get workflows => <Workflow>[];
 }
 
 class _NoStderr extends Stdio {

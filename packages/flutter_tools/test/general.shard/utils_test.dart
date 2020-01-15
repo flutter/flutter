@@ -1,8 +1,6 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:async';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -122,55 +120,6 @@ baz=qux
     });
   });
 
-  group('Poller', () {
-    const Duration kShortDelay = Duration(milliseconds: 100);
-
-    Poller poller;
-
-    tearDown(() {
-      poller?.cancel();
-    });
-
-    test('fires at start', () async {
-      bool called = false;
-      poller = Poller(() async {
-        called = true;
-      }, const Duration(seconds: 1));
-      expect(called, false);
-      await Future<void>.delayed(kShortDelay);
-      expect(called, true);
-    });
-
-    test('runs periodically', () async {
-      // Ensure we get the first (no-delay) callback, and one of the periodic callbacks.
-      int callCount = 0;
-      poller = Poller(() async {
-        callCount++;
-      }, Duration(milliseconds: kShortDelay.inMilliseconds ~/ 2));
-      expect(callCount, 0);
-      await Future<void>.delayed(kShortDelay);
-      expect(callCount, greaterThanOrEqualTo(2));
-    });
-
-    test('no quicker then the periodic delay', () async {
-      // Make sure that the poller polls at delay + the time it took to run the callback.
-      final Completer<Duration> completer = Completer<Duration>();
-      DateTime firstTime;
-      poller = Poller(() async {
-        if (firstTime == null)
-          firstTime = DateTime.now();
-        else
-          completer.complete(DateTime.now().difference(firstTime));
-
-        // introduce a delay
-        await Future<void>.delayed(kShortDelay);
-      }, kShortDelay);
-      final Duration duration = await completer.future;
-      expect(
-          duration, greaterThanOrEqualTo(Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
-    });
-  });
-
   group('Misc', () {
     test('snakeCase', () async {
       expect(snakeCase('abc'), equals('abc'));
@@ -204,13 +153,13 @@ baz=qux
         'wrapped and indentation preserved.';
     final FakeStdio fakeStdio = FakeStdio();
 
-    void testWrap(String description, Function body) {
+    void testWrap(String description, dynamic Function() body) {
       testUsingContext(description, body, overrides: <Type, Generator>{
         OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: _lineLength),
       });
     }
 
-    void testNoWrap(String description, Function body) {
+    void testNoWrap(String description, dynamic Function() body) {
       testUsingContext(description, body, overrides: <Type, Generator>{
         OutputPreferences: () => OutputPreferences(wrapText: false),
       });

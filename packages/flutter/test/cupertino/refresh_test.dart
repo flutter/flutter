@@ -1,6 +1,7 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -21,7 +22,7 @@ void main() {
 
   /// These two Functions are required to avoid tearing off of the MockHelper object,
   /// which is not supported when using Dart 2 runtime semantics.
-  final Function builder = (
+  final RefreshControlIndicatorBuilder builder = (
     BuildContext context,
     RefreshIndicatorMode refreshState,
     double pulledExtent,
@@ -38,9 +39,9 @@ void main() {
 
     when(mockHelper.builder(any, any, any, any, any))
       .thenAnswer((Invocation i) {
-        final double pulledExtent = i.positionalArguments[2];
-        final double refreshTriggerPullDistance = i.positionalArguments[3];
-        final double refreshIndicatorExtent = i.positionalArguments[4];
+        final double pulledExtent = i.positionalArguments[2] as double;
+        final double refreshTriggerPullDistance = i.positionalArguments[3] as double;
+        final double refreshIndicatorExtent = i.positionalArguments[4] as double;
         if (pulledExtent < 0.0) {
           throw TestFailure('The pulledExtent should never be less than 0.0');
         }
@@ -71,7 +72,7 @@ void main() {
     );
   }
 
-  final Function uiTestGroup = () {
+  final VoidCallback uiTestGroup = () {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -381,85 +382,86 @@ void main() {
         final FlutterError error = FlutterError('Oops');
         double errorCount = 0;
 
-        runZoned(() async {
-          refreshCompleter = Completer<void>.sync();
+        runZoned(
+          () async {
+            refreshCompleter = Completer<void>.sync();
 
-          await tester.pumpWidget(
-            Directionality(
-              textDirection: TextDirection.ltr,
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  CupertinoSliverRefreshControl(
-                    builder: builder,
-                    onRefresh: onRefresh,
-                  ),
-                  buildAListOfStuff(),
-                ],
+            await tester.pumpWidget(
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    CupertinoSliverRefreshControl(
+                      builder: builder,
+                      onRefresh: onRefresh,
+                    ),
+                    buildAListOfStuff(),
+                  ],
+                ),
               ),
-            ),
-          );
+            );
 
-          await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
-          await tester.pump();
-          // Let it start snapping back.
-          await tester.pump(const Duration(milliseconds: 50));
+            await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
+            await tester.pump();
+            // Let it start snapping back.
+            await tester.pump(const Duration(milliseconds: 50));
 
-          verifyInOrder(<void>[
-            mockHelper.builder(
+            verifyInOrder(<void>[
+              mockHelper.builder(
+                any,
+                RefreshIndicatorMode.armed,
+                150.0,
+                100.0, // Default value.
+                60.0, // Default value.
+              ),
+              mockHelper.refreshTask(),
+              mockHelper.builder(
+                any,
+                RefreshIndicatorMode.armed,
+                argThat(moreOrLessEquals(127.10396988577114)),
+                100.0, // Default value.
+                60.0, // Default value.
+              ),
+            ]);
+
+            // Reaches refresh state and sliver's at 60.0 in height after a while.
+            await tester.pump(const Duration(seconds: 1));
+            verify(mockHelper.builder(
               any,
-              RefreshIndicatorMode.armed,
-              150.0,
+              RefreshIndicatorMode.refresh,
+              60.0,
               100.0, // Default value.
               60.0, // Default value.
-            ),
-            mockHelper.refreshTask(),
-            mockHelper.builder(
+            ));
+
+            // Stays in that state forever until future completes.
+            await tester.pump(const Duration(seconds: 1000));
+            verifyNoMoreInteractions(mockHelper);
+            expect(
+              tester.getTopLeft(find.widgetWithText(Container, '0')),
+              const Offset(0.0, 60.0),
+            );
+
+            refreshCompleter.completeError(error);
+            await tester.pump();
+
+            verify(mockHelper.builder(
               any,
-              RefreshIndicatorMode.armed,
-              argThat(moreOrLessEquals(127.10396988577114)),
+              RefreshIndicatorMode.done,
+              60.0,
               100.0, // Default value.
               60.0, // Default value.
-            ),
-          ]);
+            ));
+            verifyNoMoreInteractions(mockHelper);
+          },
+          onError: (dynamic e) {
+            expect(e, error);
+            expect(errorCount, 0);
+            errorCount++;
+          },
+        );
 
-          // Reaches refresh state and sliver's at 60.0 in height after a while.
-          await tester.pump(const Duration(seconds: 1));
-          verify(mockHelper.builder(
-            any,
-            RefreshIndicatorMode.refresh,
-            60.0,
-            100.0, // Default value.
-            60.0, // Default value.
-          ));
-
-          // Stays in that state forever until future completes.
-          await tester.pump(const Duration(seconds: 1000));
-          verifyNoMoreInteractions(mockHelper);
-          expect(
-            tester.getTopLeft(find.widgetWithText(Container, '0')),
-            const Offset(0.0, 60.0),
-          );
-
-          refreshCompleter.completeError(error);
-          await tester.pump();
-
-          verify(mockHelper.builder(
-            any,
-            RefreshIndicatorMode.done,
-            60.0,
-            100.0, // Default value.
-            60.0, // Default value.
-          ));
-          verifyNoMoreInteractions(mockHelper);
-        },
-        onError: (dynamic e) {
-          expect(e, error);
-          expect(errorCount, 0);
-          errorCount++;
-        }
-      );
-
-      debugDefaultTargetPlatformOverride = null;
+        debugDefaultTargetPlatformOverride = null;
       },
     );
 
@@ -1026,9 +1028,33 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       },
     );
+
+    testWidgets('Should not crash when dragged', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                onRefresh: () async => Future<void>.delayed(const Duration(days: 2000)),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.dragFrom(const Offset(100, 10), const Offset(0.0, 50.0), touchSlopY: 0);
+      await tester.pump();
+
+      await tester.dragFrom(const Offset(100, 10), const Offset(0, 500), touchSlopY: 0);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    });
   };
 
-  final Function stateMachineTestGroup = () {
+  final VoidCallback stateMachineTestGroup = () {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -1403,6 +1429,50 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       },
     );
+
+    testWidgets('buildSimpleRefreshIndicator dark mode', (WidgetTester tester) async {
+      const CupertinoDynamicColor color = CupertinoColors.inactiveGray;
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.light),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Builder(
+              builder: (BuildContext context) {
+                return CupertinoSliverRefreshControl.buildSimpleRefreshIndicator(
+                  context,
+                  RefreshIndicatorMode.drag,
+                  10, 10, 10,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.widget<Icon>(find.byType(Icon)).color.value, color.color.value);
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Builder(
+              builder: (BuildContext context) {
+                return CupertinoSliverRefreshControl.buildSimpleRefreshIndicator(
+                  context,
+                  RefreshIndicatorMode.drag,
+                  10, 10, 10,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.widget<Icon>(find.byType(Icon)).color.value, color.darkColor.value);
+    });
   };
 
   group('UI tests long list', uiTestGroup);
@@ -1419,6 +1489,36 @@ void main() {
   // Test the internal state machine directly to make sure the UI aren't just
   // correct by coincidence.
   group('state machine test short list', stateMachineTestGroup);
+
+  testWidgets(
+    'Does not crash when paintExtent > remainingPaintExtent',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/46871.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: <Widget>[
+              const CupertinoSliverRefreshControl(),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => const SizedBox(height: 100),
+                  childCount: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Drag the content down far enough so that
+      // geometry.paintExent > constraints.maxPaintExtent
+      await tester.dragFrom(const Offset(10, 10), const Offset(0, 500));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+  });
 }
 
 class MockHelper extends Mock {

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,8 @@
 /// Asynchronous computations are represented by [Future]s and [Stream]s.
 
 import 'dart:async' show Future, Stream, StreamSubscription;
+
+import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
@@ -262,18 +264,16 @@ class AsyncSnapshot<T> {
   bool get hasError => error != null;
 
   @override
-  String toString() => '$runtimeType($connectionState, $data, $error)';
+  String toString() => '${objectRuntimeType(this, 'AsyncSnapshot')}($connectionState, $data, $error)';
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (other is! AsyncSnapshot<T>)
-      return false;
-    final AsyncSnapshot<T> typedOther = other;
-    return connectionState == typedOther.connectionState
-        && data == typedOther.data
-        && error == typedOther.error;
+    return other is AsyncSnapshot<T>
+        && other.connectionState == connectionState
+        && other.data == data
+        && other.error == error;
   }
 
   @override
@@ -339,27 +339,112 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// as the builder will always be called before the stream listener has a chance
 /// to be processed.
 ///
-/// {@tool sample}
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/stream_builder.mp4}
 ///
-/// This sample shows a [StreamBuilder] configuring a text label to show the
-/// latest bid received for a lot in an auction. Assume the `_lot` field is
-/// set by a selector elsewhere in the UI.
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/stream_builder_error.mp4}
+///
+/// {@tool sample --template=stateful_widget_material}
+///
+/// This sample shows a [StreamBuilder] that listens to a Stream that emits bids
+/// for an auction. Every time the StreamBuilder receives a bid from the Stream,
+/// it will display the price of the bid below an icon. If the Stream emits an
+/// error, the error is displayed below an error icon. When the Stream finishes
+/// emitting bids, the final price is displayed.
 ///
 /// ```dart
-/// StreamBuilder<int>(
-///   stream: _lot?.bids, // a Stream<int> or null
-///   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-///     if (snapshot.hasError)
-///       return Text('Error: ${snapshot.error}');
-///     switch (snapshot.connectionState) {
-///       case ConnectionState.none: return Text('Select lot');
-///       case ConnectionState.waiting: return Text('Awaiting bids...');
-///       case ConnectionState.active: return Text('\$${snapshot.data}');
-///       case ConnectionState.done: return Text('\$${snapshot.data} (closed)');
-///     }
-///     return null; // unreachable
-///   },
-/// )
+/// Stream<int> _bids = (() async* {
+///   await Future<void>.delayed(Duration(seconds: 1));
+///   yield 1;
+///   await Future<void>.delayed(Duration(seconds: 1));
+/// })();
+///
+/// Widget build(BuildContext context) {
+///   return Container(
+///     alignment: FractionalOffset.center,
+///     color: Colors.white,
+///     child: StreamBuilder<int>(
+///       stream: _bids,
+///       builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+///         List<Widget> children;
+///
+///         if (snapshot.hasError) {
+///           children = <Widget>[
+///             Icon(
+///               Icons.error_outline,
+///               color: Colors.red,
+///               size: 60,
+///             ),
+///             Padding(
+///               padding: const EdgeInsets.only(top: 16),
+///               child: Text('Error: ${snapshot.error}'),
+///             )
+///           ];
+///         } else {
+///           switch (snapshot.connectionState) {
+///             case ConnectionState.none:
+///               children = <Widget>[
+///                 Icon(
+///                   Icons.info,
+///                   color: Colors.blue,
+///                   size: 60,
+///                 ),
+///                 const Padding(
+///                   padding: EdgeInsets.only(top: 16),
+///                   child: Text('Select a lot'),
+///                 )
+///               ];
+///               break;
+///             case ConnectionState.waiting:
+///               children = <Widget>[
+///                 SizedBox(
+///                   child: const CircularProgressIndicator(),
+///                   width: 60,
+///                   height: 60,
+///                 ),
+///                 const Padding(
+///                   padding: EdgeInsets.only(top: 16),
+///                   child: Text('Awaiting bids...'),
+///                 )
+///               ];
+///               break;
+///             case ConnectionState.active:
+///               children = <Widget>[
+///                 Icon(
+///                   Icons.check_circle_outline,
+///                   color: Colors.green,
+///                   size: 60,
+///                 ),
+///                 Padding(
+///                   padding: const EdgeInsets.only(top: 16),
+///                   child: Text('\$${snapshot.data}'),
+///                 )
+///               ];
+///               break;
+///             case ConnectionState.done:
+///               children = <Widget>[
+///                 Icon(
+///                   Icons.info,
+///                   color: Colors.blue,
+///                   size: 60,
+///                 ),
+///                 Padding(
+///                   padding: const EdgeInsets.only(top: 16),
+///                   child: Text('\$${snapshot.data} (closed)'),
+///                 )
+///               ];
+///               break;
+///           }
+///         }
+///
+///         return Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           crossAxisAlignment: CrossAxisAlignment.center,
+///           children: children,
+///         );
+///       },
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
@@ -489,30 +574,77 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 ///
-/// {@tool sample}
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/future_builder.mp4}
 ///
-/// This sample shows a [FutureBuilder] configuring a text label to show the
-/// state of an asynchronous calculation returning a string. Assume the
-/// `_calculation` field is set by pressing a button elsewhere in the UI.
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/future_builder_error.mp4}
+///
+/// {@tool sample --template=stateful_widget_material}
+///
+/// This sample shows a [FutureBuilder] that displays a loading spinner while it
+/// loads data. It displays a success icon and text if the [Future] completes
+/// with a result, or an error icon and text if the [Future] completes with an
+/// error. Assume the `_calculation` field is set by pressing a button elsewhere
+/// in the UI.
 ///
 /// ```dart
-/// FutureBuilder<String>(
-///   future: _calculation, // a previously-obtained Future<String> or null
-///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-///     switch (snapshot.connectionState) {
-///       case ConnectionState.none:
-///         return Text('Press button to start.');
-///       case ConnectionState.active:
-///       case ConnectionState.waiting:
-///         return Text('Awaiting result...');
-///       case ConnectionState.done:
-///         if (snapshot.hasError)
-///           return Text('Error: ${snapshot.error}');
-///         return Text('Result: ${snapshot.data}');
-///     }
-///     return null; // unreachable
-///   },
-/// )
+/// Future<String> _calculation = Future<String>.delayed(
+///   Duration(seconds: 2),
+///   () => 'Data Loaded',
+/// );
+///
+/// Widget build(BuildContext context) {
+///   return FutureBuilder<String>(
+///     future: _calculation, // a previously-obtained Future<String> or null
+///     builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+///       List<Widget> children;
+///
+///       if (snapshot.hasData) {
+///         children = <Widget>[
+///           Icon(
+///             Icons.check_circle_outline,
+///             color: Colors.green,
+///             size: 60,
+///           ),
+///           Padding(
+///             padding: const EdgeInsets.only(top: 16),
+///             child: Text('Result: ${snapshot.data}'),
+///           )
+///         ];
+///       } else if (snapshot.hasError) {
+///         children = <Widget>[
+///           Icon(
+///             Icons.error_outline,
+///             color: Colors.red,
+///             size: 60,
+///           ),
+///           Padding(
+///             padding: const EdgeInsets.only(top: 16),
+///             child: Text('Error: ${snapshot.error}'),
+///           )
+///         ];
+///       } else {
+///         children = <Widget>[
+///           SizedBox(
+///             child: CircularProgressIndicator(),
+///             width: 60,
+///             height: 60,
+///           ),
+///           const Padding(
+///             padding: EdgeInsets.only(top: 16),
+///             child: Text('Awaiting result...'),
+///           )
+///         ];
+///       }
+///       return Center(
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           crossAxisAlignment: CrossAxisAlignment.center,
+///           children: children,
+///         ),
+///       );
+///     },
+///   );
+/// }
 /// ```
 /// {@end-tool}
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed

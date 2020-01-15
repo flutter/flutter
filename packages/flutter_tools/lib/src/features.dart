@@ -1,12 +1,11 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
 
-import 'base/config.dart';
 import 'base/context.dart';
-import 'base/platform.dart';
+import 'globals.dart' as globals;
 import 'version.dart';
 
 /// The current [FeatureFlags] implementation.
@@ -17,7 +16,7 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>();
 /// The interface used to determine if a particular [Feature] is enabled.
 ///
 /// The rest of the tools code should use this class instead of looking up
-/// features directly. To faciliate rolls to google3 and other clients, all
+/// features directly. To facilitate rolls to google3 and other clients, all
 /// flags should be provided with a default implementation here. Clients that
 /// use this class should extent instead of implement, so that new flags are
 /// picked up automatically.
@@ -25,19 +24,27 @@ class FeatureFlags {
   const FeatureFlags();
 
   /// Whether flutter desktop for linux is enabled.
-  bool get isLinuxEnabled => _isEnabled(flutterLinuxDesktopFeature);
+  bool get isLinuxEnabled => isEnabled(flutterLinuxDesktopFeature);
 
   /// Whether flutter desktop for macOS is enabled.
-  bool get isMacOSEnabled => _isEnabled(flutterMacOSDesktopFeature);
+  bool get isMacOSEnabled => isEnabled(flutterMacOSDesktopFeature);
 
   /// Whether flutter web is enabled.
-  bool get isWebEnabled => _isEnabled(flutterWebFeature);
+  bool get isWebEnabled => isEnabled(flutterWebFeature);
 
   /// Whether flutter desktop for Windows is enabled.
-  bool get isWindowsEnabled => _isEnabled(flutterWindowsDesktopFeature);
+  bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
 
-  // Calculate whether a particular feature is enabled for the current channel.
-  static bool _isEnabled(Feature feature) {
+  /// Whether the Android embedding V2 is enabled.
+  bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
+
+  /// Whether the web incremental compiler is enabled.
+  bool get isWebIncrementalCompilerEnabled => isEnabled(flutterWebIncrementalCompiler);
+
+  /// Whether a particular feature is enabled for the current channel.
+  ///
+  /// Prefer using one of the specific getters above instead of this API.
+  bool isEnabled(Feature feature) {
     final String currentChannel = FlutterVersion.instance.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
@@ -45,13 +52,13 @@ class FeatureFlags {
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = Config.instance.getValue(feature.configSetting);
+      final bool configOverride = globals.config.getValue(feature.configSetting) as bool;
       if (configOverride != null) {
         isEnabled = configOverride;
       }
     }
     if (feature.environmentOverride != null) {
-      if (platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
+      if (globals.platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
         isEnabled = true;
       }
     }
@@ -65,11 +72,13 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
+  flutterAndroidEmbeddingV2Feature,
+  flutterWebIncrementalCompiler,
 ];
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature(
-  name: 'Flutter Web',
+  name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureChannelSetting(
@@ -80,14 +89,22 @@ const Feature flutterWebFeature = Feature(
     available: true,
     enabledByDefault: false,
   ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
 );
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter Desktop for macOS',
+  name: 'Flutter for desktop on macOS',
   configSetting: 'enable-macos-desktop',
-  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  environmentOverride: 'FLUTTER_MACOS',
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
@@ -95,9 +112,9 @@ const Feature flutterMacOSDesktopFeature = Feature(
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter Desktop for Linux',
+  name: 'Flutter for desktop on Linux',
   configSetting: 'enable-linux-desktop',
-  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  environmentOverride: 'FLUTTER_LINUX',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -106,10 +123,48 @@ const Feature flutterLinuxDesktopFeature = Feature(
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter Desktop for Windows',
+  name: 'Flutter for desktop on Windows',
   configSetting: 'enable-windows-desktop',
-  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  environmentOverride: 'FLUTTER_WINDOWS',
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
+/// The [Feature] for generating projects using the new Android embedding.
+const Feature flutterAndroidEmbeddingV2Feature = Feature(
+  name: 'flutter create generates projects using the Android embedding V2',
+  environmentOverride: 'ENABLE_ANDROID_EMBEDDING_V2',
+  configSetting: 'enable-android-embedding-v2',
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  stable: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+);
+
+/// The [Feature] for using the incremental compiler instead of build runner.
+const Feature flutterWebIncrementalCompiler = Feature(
+  name: 'Enable the incremental compiler for web builds',
+  configSetting: 'enable-web-incremental-compiler',
+  environmentOverride: 'WEB_INCREMENTAL_COMPILER',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
@@ -121,7 +176,7 @@ const Feature flutterWindowsDesktopFeature = Feature(
 /// a "safe" value, such as being off.
 ///
 /// The top level feature settings can be provided to apply to all channels.
-/// Otherwise, more specific settings take precidence over higher level
+/// Otherwise, more specific settings take precedence over higher level
 /// settings.
 class Feature {
   /// Creates a [Feature].
@@ -169,7 +224,8 @@ class Feature {
     if (configSetting == null) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer('Enable or disable $name on ');
+    final StringBuffer buffer = StringBuffer('Enable or disable $name. '
+        'This setting will take effect on ');
     final List<String> channels = <String>[
       if (master.available) 'master',
       if (dev.available) 'dev',
@@ -178,8 +234,12 @@ class Feature {
     ];
     if (channels.length == 1) {
       buffer.write('the ${channels.single} channel.');
+    } else if (channels.length == 2) {
+      buffer.write('the ${channels.join(' and ')} channels.');
     } else {
-      buffer.write('${channels.join(', ')} channels.');
+      final String prefix = (channels.toList()
+        ..removeLast()).join(', ');
+      buffer.write('the $prefix, and ${channels.last} channels.');
     }
     return buffer.toString();
   }
@@ -209,7 +269,7 @@ class FeatureChannelSetting {
 
   /// Whether the feature is available on this channel.
   ///
-  /// If not provded, defaults to `false`. This implies that the feature
+  /// If not provided, defaults to `false`. This implies that the feature
   /// cannot be enabled even by the settings below.
   final bool available;
 

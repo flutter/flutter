@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,11 +65,11 @@ Future<bool> run(List<String> arguments) async {
     exit(1);
   }
 
-  final int repeat = int.tryParse(parsedArguments['repeat']);
-  final bool skipOnFetchFailure = parsedArguments['skip-on-fetch-failure'];
-  final bool skipTemplate = parsedArguments['skip-template'];
-  final bool verbose = parsedArguments['verbose'];
-  final bool help = parsedArguments['help'];
+  final int repeat = int.tryParse(parsedArguments['repeat'] as String);
+  final bool skipOnFetchFailure = parsedArguments['skip-on-fetch-failure'] as bool;
+  final bool skipTemplate = parsedArguments['skip-template'] as bool;
+  final bool verbose = parsedArguments['verbose'] as bool;
+  final bool help = parsedArguments['help'] as bool;
   final List<File> files = parsedArguments
     .rest
     .expand((String path) => Glob(path).listSync())
@@ -102,7 +102,7 @@ Future<bool> run(List<String> arguments) async {
     print('');
   }
 
-  for (File file in files) {
+  for (final File file in files) {
     if (verbose)
       print('Processing ${file.path}...');
     TestFile instructions;
@@ -127,7 +127,7 @@ Future<bool> run(List<String> arguments) async {
     try {
       bool success;
       bool showContacts = false;
-      for (String fetchCommand in instructions.fetch) {
+      for (final String fetchCommand in instructions.fetch) {
         success = await shell(fetchCommand, checkout, verbose: verbose, silentFailure: skipOnFetchFailure);
         if (!success) {
           if (skipOnFetchFailure) {
@@ -153,7 +153,7 @@ Future<bool> run(List<String> arguments) async {
         for (int iteration = 0; iteration < repeat; iteration += 1) {
           if (verbose && repeat > 1)
             print('Round ${iteration + 1} of $repeat.');
-          for (String testCommand in instructions.tests) {
+          for (final String testCommand in instructions.tests) {
             success = await shell(testCommand, tests, verbose: verbose);
             if (!success) {
               print('ERROR: One or more tests from ${path.basenameWithoutExtension(file.path)} failed.');
@@ -197,7 +197,7 @@ class TestFile {
     final List<String> fetch = <String>[];
     final List<Directory> update = <Directory>[];
     final List<String> test = <String>[];
-    for (String line in file.readAsLinesSync().map((String line) => line.trim())) {
+    for (final String line in file.readAsLinesSync().map((String line) => line.trim())) {
       if (line.isEmpty) {
         // blank line
       } else if (line.startsWith('#')) {
@@ -210,13 +210,25 @@ class TestFile {
         update.add(Directory(line.substring(7)));
       } else if (line.startsWith('test=')) {
         test.add(line.substring(5));
+      } else if (line.startsWith('test.windows=')) {
+        if (Platform.isWindows)
+          test.add(line.substring(13));
+      } else if (line.startsWith('test.macos=')) {
+        if (Platform.isMacOS)
+          test.add(line.substring(11));
+      } else if (line.startsWith('test.linux=')) {
+        if (Platform.isLinux)
+          test.add(line.substring(11));
+      } else if (line.startsWith('test.posix=')) {
+        if (Platform.isLinux || Platform.isMacOS)
+          test.add(line.substring(11));
       } else {
         throw FormatException('${errorPrefix}Unexpected directive:\n$line');
       }
     }
     if (contacts.isEmpty)
       throw FormatException('${errorPrefix}No contacts specified. At least one contact e-mail address must be specified.');
-    for (String email in contacts) {
+    for (final String email in contacts) {
       if (!email.contains(_email) || email.endsWith('@example.com'))
         throw FormatException('${errorPrefix}The following e-mail address appears to be an invalid e-mail address: $email');
     }
@@ -231,7 +243,7 @@ class TestFile {
     if (update.isEmpty)
       throw FormatException('${errorPrefix}No "update" directives specified. At least one directory must be specified. (It can be "." to just upgrade the root of the repository.)');
     if (test.isEmpty)
-      throw FormatException('${errorPrefix}No "test" directives specified. At least one command must be specified to run tests.');
+      throw FormatException('${errorPrefix}No "test" directives specified for this platform. At least one command must be specified to run tests on each of Windows, MacOS, and Linux.');
     return TestFile._(
       List<String>.unmodifiable(contacts),
       List<String>.unmodifiable(fetch),

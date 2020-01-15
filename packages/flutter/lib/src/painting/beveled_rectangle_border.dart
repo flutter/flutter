@@ -1,8 +1,10 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
@@ -125,7 +127,7 @@ class BeveledRectangleBorder extends ShapeBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-      final Path path = getOuterPath(rect, textDirection: textDirection)
+        final Path path = getOuterPath(rect, textDirection: textDirection)
           ..addPath(getInnerPath(rect, textDirection: textDirection), Offset.zero);
         canvas.drawPath(path, side.toPaint());
         break;
@@ -133,12 +135,12 @@ class BeveledRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final BeveledRectangleBorder typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius;
+    return other is BeveledRectangleBorder
+        && other.side == side
+        && other.borderRadius == borderRadius;
   }
 
   @override
@@ -146,6 +148,6 @@ class BeveledRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '${objectRuntimeType(this, 'BeveledRectangleBorder')}($side, $borderRadius)';
   }
 }

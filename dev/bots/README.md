@@ -91,8 +91,8 @@ The typical cycle for editing a recipe is:
    existing expected output to match the new output. Verify completely new test
    cases by altering the `GenTests` method of the recipe. The recipe is required
    to have 100% test coverage.
-3. Run `led get-builder 'luci.flutter.prod:BUILDER_NAME' | led edit -p 'revision="GIT_HASH"' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and 
-   `GIT_HASH` is the hash to build (which is important for the engine but not 
+3. Run `led get-builder 'luci.flutter.prod:BUILDER_NAME' | led edit -p 'revision="GIT_HASH"' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
+   `GIT_HASH` is the hash to build (which is important for the engine but not
    for the framework).
 4. To submit a CL, you need a local branch first (`git checkout -b [some branch name]`).
 5. Upload the patch (`git commit`, `git cl upload`) and send it to someone in
@@ -205,21 +205,21 @@ For example To remove a published package corresponding to the git hash
 see what it will do:
 
 ```
-$ dart ./unpublish_pacakge.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+$ dart ./unpublish_package.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 And once you've verified the output of the dry run to be sure it is what you
 want to do, run:
 
 ```
-$ dart ./unpublish_pacakge.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+$ dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
 and it will actually perform the actions. You will of course need to have access
 to the cloud storage server and have gsutil installed in order to perform this
 operation. Only runs on Linux or macOS systems.
 
-See `dart ./unpublish_pacakge.dart --help` for more details.
+See `dart ./unpublish_package.dart --help` for more details.
 
 Once the package is unpublished, it will not be available from the website for
 download, and will not be rebuilt (even though there is a tagged revision in the

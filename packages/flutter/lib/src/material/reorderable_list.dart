@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,7 +25,9 @@ import 'material_localizations.dart';
 /// [ReorderableListView] will need to account for this when inserting before
 /// [newIndex].
 ///
-/// {@tool sample}
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
+///
+/// {@tool snippet}
 ///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
@@ -50,10 +52,13 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// those children that are actually visible.
 ///
 /// All [children] must have a key.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
   ReorderableListView({
+    Key key,
     this.header,
     @required this.children,
     @required this.onReorder,
@@ -66,7 +71,8 @@ class ReorderableListView extends StatefulWidget {
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
-       );
+       ),
+       super(key: key);
 
   /// A non-reorderable header widget to show before the list.
   ///
@@ -526,7 +532,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           return _dragging == toAccept && toAccept != toWrap.key;
         },
         onAccept: (Key accepted) { },
-        onLeave: (Key leaving) { },
+        onLeave: (Object leaving) { },
       );
     });
   }
@@ -536,13 +542,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     assert(debugCheckHasMaterialLocalizations(context));
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      final List<Widget> wrappedChildren = <Widget>[];
-      if (widget.header != null) {
-        wrappedChildren.add(widget.header);
-      }
-      for (int i = 0; i < widget.children.length; i += 1) {
-        wrappedChildren.add(_wrap(widget.children[i], i, constraints));
-      }
       const Key endWidgetKey = Key('DraggableList - End Widget');
       Widget finalDropArea;
       switch (widget.scrollDirection) {
@@ -562,25 +561,19 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           );
           break;
       }
-      if (widget.reverse) {
-        wrappedChildren.insert(0, _wrap(
-          finalDropArea,
-          widget.children.length,
-          constraints),
-        );
-      } else {
-        wrappedChildren.add(_wrap(
-          finalDropArea,
-          widget.children.length,
-          constraints),
-        );
-      }
       return SingleChildScrollView(
         scrollDirection: widget.scrollDirection,
-        child: _buildContainerForScrollDirection(children: wrappedChildren),
         padding: widget.padding,
         controller: _scrollController,
         reverse: widget.reverse,
+        child: _buildContainerForScrollDirection(
+          children: <Widget>[
+            if (widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+            if (widget.header != null) widget.header,
+            for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
+            if (!widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+          ],
+        ),
       );
     });
   }

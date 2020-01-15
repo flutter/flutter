@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,8 @@ class OffscreenRenderView extends RenderView {
 class OffscreenWidgetTree {
   OffscreenWidgetTree() {
     renderView.attach(pipelineOwner);
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
+    pipelineOwner.requestVisualUpdate();
   }
 
   final RenderView renderView = OffscreenRenderView();
@@ -65,9 +66,15 @@ class Trigger {
 }
 
 class TriggerableWidget extends StatefulWidget {
-  const TriggerableWidget({ this.trigger, this.counter });
+  const TriggerableWidget({
+    Key key,
+    this.trigger,
+    this.counter,
+  }) : super(key: key);
+
   final Trigger trigger;
   final Counter counter;
+
   @override
   TriggerableState createState() => TriggerableState();
 }

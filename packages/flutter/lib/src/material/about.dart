@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,6 +33,77 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
+/// {@tool sample --template=stateless_widget_material}
+///
+/// This sample shows two ways to open [AboutDialog]. The first one
+/// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
+///
+/// ```dart
+///
+///  Widget build(BuildContext context) {
+///    final TextStyle textStyle = Theme.of(context).textTheme.body1;
+///    final List<Widget> aboutBoxChildren = <Widget>[
+///      SizedBox(height: 24),
+///      RichText(
+///        text: TextSpan(
+///          children: <TextSpan>[
+///            TextSpan(
+///              style: textStyle,
+///              text: 'Flutter is Google’s UI toolkit for building beautiful, '
+///              'natively compiled applications for mobile, web, and desktop '
+///              'from a single codebase. Learn more about Flutter at '
+///            ),
+///            TextSpan(
+///              style: textStyle.copyWith(color: Theme.of(context).accentColor),
+///              text: 'https://flutter.dev'
+///            ),
+///            TextSpan(
+///              style: textStyle,
+///              text: '.'
+///            ),
+///          ],
+///        ),
+///      ),
+///    ];
+///
+///    return Scaffold(
+///      appBar: AppBar(
+///        title: Text('Show About Example'),
+///      ),
+///      drawer: Drawer(
+///        child: SingleChildScrollView(
+///          child: SafeArea(
+///            child: AboutListTile(
+///              icon: Icon(Icons.info),
+///              applicationIcon: FlutterLogo(),
+///              applicationName: 'Show About Example',
+///              applicationVersion: 'August 2019',
+///              applicationLegalese: '© 2014 The Flutter Authors',
+///              aboutBoxChildren: aboutBoxChildren,
+///            ),
+///          ),
+///        ),
+///      ),
+///      body: Center(
+///        child: RaisedButton(
+///          child: Text('Show About Example'),
+///          onPressed: () {
+///            showAboutDialog(
+///              context: context,
+///              applicationIcon: FlutterLogo(),
+///              applicationName: 'Show About Example',
+///              applicationVersion: 'August 2019',
+///              applicationLegalese: '© 2014 The Flutter Authors',
+///              children: aboutBoxChildren,
+///            );
+///          },
+///        ),
+///      ),
+///    );
+///}
+/// ```
+/// {@end-tool}
+///
 class AboutListTile extends StatelessWidget {
   /// Creates a list tile for showing an about box.
   ///
@@ -41,13 +112,14 @@ class AboutListTile extends StatelessWidget {
   /// values default to the empty string.
   const AboutListTile({
     Key key,
-    this.icon = const Icon(null),
+    this.icon,
     this.child,
     this.applicationName,
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
     this.aboutBoxChildren,
+    this.dense,
   }) : super(key: key);
 
   /// The icon to show for this drawer item.
@@ -106,14 +178,23 @@ class AboutListTile extends StatelessWidget {
   /// Defaults to nothing.
   final List<Widget> aboutBoxChildren;
 
+  /// Whether this list tile is part of a vertically dense list.
+  ///
+  /// If this property is null, then its value is based on [ListTileTheme.dense].
+  ///
+  /// Dense list tiles default to a smaller height.
+  final bool dense;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     return ListTile(
       leading: icon,
-      title: child ??
-        Text(MaterialLocalizations.of(context).aboutListTileTitle(applicationName ?? _defaultApplicationName(context))),
+      title: child ?? Text(MaterialLocalizations.of(context).aboutListTileTitle(
+        applicationName ?? _defaultApplicationName(context),
+      )),
+      dense: dense,
       onTap: () {
         showAboutDialog(
           context: context,
@@ -142,8 +223,8 @@ class AboutListTile extends StatelessWidget {
 /// The licenses shown on the [LicensePage] are those returned by the
 /// [LicenseRegistry] API, which can be used to add more licenses to the list.
 ///
-/// The `context` argument is passed to [showDialog], the documentation for
-/// which discusses how it is used.
+/// The [context] and [useRootNavigator] arguments are passed to [showDialog],
+/// the documentation for which discusses how it is used.
 void showAboutDialog({
   @required BuildContext context,
   String applicationName,
@@ -151,10 +232,13 @@ void showAboutDialog({
   Widget applicationIcon,
   String applicationLegalese,
   List<Widget> children,
+  bool useRootNavigator = true,
 }) {
   assert(context != null);
+  assert(useRootNavigator != null);
   showDialog<void>(
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {
       return AboutDialog(
         applicationName: applicationName,
@@ -170,7 +254,13 @@ void showAboutDialog({
 /// Displays a [LicensePage], which shows licenses for software used by the
 /// application.
 ///
-/// The arguments correspond to the properties on [LicensePage].
+/// The application arguments correspond to the properties on [LicensePage].
+///
+/// The `context` argument is used to look up the [Navigator] for the page.
+///
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// page to the [Navigator] furthest from or nearest to the given `context`. It
+/// is `false` by default.
 ///
 /// If the application has a [Drawer], consider using [AboutListTile] instead
 /// of calling this directly.
@@ -186,15 +276,17 @@ void showLicensePage({
   String applicationVersion,
   Widget applicationIcon,
   String applicationLegalese,
+  bool useRootNavigator = false,
 }) {
   assert(context != null);
-  Navigator.push(context, MaterialPageRoute<void>(
+  assert(useRootNavigator != null);
+  Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
       applicationIcon: applicationIcon,
       applicationLegalese: applicationLegalese,
-    )
+    ),
   ));
 }
 
@@ -396,7 +488,7 @@ class _LicensePageState extends State<LicensePage> {
       debugFlowId = flow.id;
       return true;
     }());
-    await for (LicenseEntry license in LicenseRegistry.licenses) {
+    await for (final LicenseEntry license in LicenseRegistry.licenses) {
       if (!mounted) {
         return;
       }
@@ -431,7 +523,7 @@ class _LicensePageState extends State<LicensePage> {
             textAlign: TextAlign.center,
           ),
         ));
-        for (LicenseParagraph paragraph in paragraphs) {
+        for (final LicenseParagraph paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
             _licenses.add(Padding(
               padding: const EdgeInsets.only(top: 16.0),
@@ -499,7 +591,7 @@ class _LicensePageState extends State<LicensePage> {
                       child: Center(
                         child: CircularProgressIndicator(),
                       ),
-                    )
+                    ),
                 ],
               ),
             ),
@@ -517,7 +609,7 @@ String _defaultApplicationName(BuildContext context) {
   // someone really wants their application title to change dynamically, they
   // can provide an explicit applicationName to the widgets defined in this
   // file, instead of relying on the default.
-  final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
+  final Title ancestorTitle = context.findAncestorWidgetOfExactType<Title>();
   return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }
 

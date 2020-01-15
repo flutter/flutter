@@ -1,9 +1,12 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import 'package:collection/collection.dart' show SetEquality;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,10 +59,10 @@ void main() {
 
   testWidgets('Theme attributes cascade', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
-      primaryColor: CupertinoColors.destructiveRed,
+      primaryColor: CupertinoColors.systemRed,
     ));
 
-    expect(theme.textTheme.actionTextStyle.color, CupertinoColors.destructiveRed);
+    expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemRed.color));
   });
 
   testWidgets('Dependent attribute can be overridden from cascaded value', (WidgetTester tester) async {
@@ -71,9 +74,9 @@ void main() {
     ));
 
     // The brightness still cascaded down to the background color.
-    expect(theme.scaffoldBackgroundColor, CupertinoColors.black);
+    expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
     // But not to the font color which we overrode.
-    expect(theme.textTheme.textStyle.color, CupertinoColors.black);
+    expect(theme.textTheme.textStyle.color, isSameColorAs(CupertinoColors.black));
   });
 
   testWidgets(
@@ -125,34 +128,135 @@ void main() {
       );
 
       final CupertinoThemeData theme = await testTheme(tester, originalTheme.copyWith(
-        primaryColor: CupertinoColors.activeGreen,
+        primaryColor: CupertinoColors.systemGreen,
       ));
 
       expect(theme.brightness, Brightness.dark);
-      expect(theme.primaryColor, CupertinoColors.activeGreen);
+      expect(theme.primaryColor, isSameColorAs(CupertinoColors.systemGreen.darkColor));
       // Now check calculated derivatives.
-      expect(theme.textTheme.actionTextStyle.color, CupertinoColors.activeGreen);
-      expect(theme.scaffoldBackgroundColor, CupertinoColors.black);
+      expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemGreen.darkColor));
+      expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
     },
   );
 
   testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
-      const Color primaryColor = CupertinoColors.destructiveRed;
-      const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
+    const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
+    const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
-      final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
+    final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
 
-      expect(resultingIconTheme.color, themeData.primaryColor);
+    expect(resultingIconTheme.color, isSameColorAs(primaryColor));
+
+    // Works in dark mode if primaryColor is a CupertinoDynamicColor.
+    final Color darkColor = (await testIconTheme(
+      tester,
+      themeData.copyWith(brightness: Brightness.dark),
+    )).color;
+
+    expect(darkColor, isSameColorAs(primaryColor.darkColor));
   });
 
   testWidgets('IconTheme.of creates a dependency on iconTheme', (WidgetTester tester) async {
-      IconThemeData iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.destructiveRed));
+    IconThemeData iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.destructiveRed));
 
-      expect(buildCount, 1);
-      expect(iconTheme.color, CupertinoColors.destructiveRed);
+    expect(buildCount, 1);
+    expect(iconTheme.color, CupertinoColors.destructiveRed);
 
-      iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.activeOrange));
-      expect(buildCount, 2);
-      expect(iconTheme.color, CupertinoColors.activeOrange);
+    iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.activeOrange));
+    expect(buildCount, 2);
+    expect(iconTheme.color, CupertinoColors.activeOrange);
   });
+
+  testWidgets('CupertinoTheme diagnostics', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const CupertinoThemeData().debugFillProperties(builder);
+
+    final Set<String> description = builder.properties
+      .map((DiagnosticsNode node) => node.name.toString())
+      .toSet();
+
+    expect(
+      const SetEquality<String>().equals(
+        description,
+        <String>{ 'brightness',
+          'primaryColor',
+          'primaryContrastingColor',
+          'barBackgroundColor',
+          'scaffoldBackgroundColor',
+          'textStyle',
+          'actionTextStyle',
+          'tabLabelTextStyle',
+          'navTitleTextStyle',
+          'navLargeTitleTextStyle',
+          'navActionTextStyle',
+          'pickerTextStyle',
+          'dateTimePickerTextStyle',
+        }
+      ),
+      isTrue,
+    );
+  });
+
+  testWidgets('CupertinoTheme.toStringDeep uses single-line style', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/47651.
+    expect(
+      const CupertinoTheme(
+        data: CupertinoThemeData(primaryColor: Color(0x00000000)),
+        child: SizedBox(),
+      ).toStringDeep().trimRight(),
+      isNot(contains('\n')),
+    );
+  });
+
+  Brightness currentBrightness;
+  void colorMatches(Color componentColor, CupertinoDynamicColor expectedDynamicColor) {
+    switch (currentBrightness) {
+      case Brightness.light:
+        expect(componentColor, isSameColorAs(expectedDynamicColor.color));
+        break;
+      case Brightness.dark:
+        expect(componentColor, isSameColorAs(expectedDynamicColor.darkColor));
+        break;
+    }
+  }
+
+  final VoidCallback dynamicColorsTestGroup = () {
+    testWidgets('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
+      final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
+      final CupertinoThemeData theme = await testTheme(tester, data);
+
+      expect(data.primaryColor, isSameColorAs(CupertinoColors.systemRed));
+      colorMatches(theme.primaryColor, CupertinoColors.systemRed);
+    });
+
+    testWidgets('CupertinoTheme.of resolves default values', (WidgetTester tester) async {
+      const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
+      final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: primaryColor);
+
+      const CupertinoDynamicColor barBackgroundColor = CupertinoDynamicColor.withBrightness(
+        color: Color(0xF0F9F9F9),
+        darkColor: Color(0xF01D1D1D),
+      );
+
+      final CupertinoThemeData theme = await testTheme(tester, data);
+
+      colorMatches(theme.primaryContrastingColor, CupertinoColors.systemBackground);
+      colorMatches(theme.barBackgroundColor, barBackgroundColor);
+      colorMatches(theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
+      colorMatches(theme.textTheme.textStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.actionTextStyle.color, primaryColor);
+      colorMatches(theme.textTheme.tabLabelTextStyle.color, CupertinoColors.inactiveGray);
+      colorMatches(theme.textTheme.navTitleTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.navLargeTitleTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.navActionTextStyle.color, primaryColor);
+      colorMatches(theme.textTheme.pickerTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.dateTimePickerTextStyle.color, CupertinoColors.label);
+    });
+  };
+
+  currentBrightness = Brightness.light;
+  group('light colors', dynamicColorsTestGroup);
+
+  currentBrightness = Brightness.dark;
+  group('dark colors', dynamicColorsTestGroup);
 }

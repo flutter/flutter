@@ -10,6 +10,8 @@
 # for performing pushes to production, and so this image is quite a bit larger
 # than strictly needed for just building Flutter apps.
 
+# Note: updating past stretch (Debian 9) will bump Java past version 8,
+# which will break the Android SDK.
 FROM debian:stretch
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
@@ -51,7 +53,7 @@ RUN bash "${NODEJS_INSTALL}/nodejs_install.sh"
 # Install the rest of the dependencies.
 RUN apt-get install -y --no-install-recommends \
   locales \
-  golang \
+  gcc \
   ruby \
   ruby-dev \
   nodejs \
@@ -105,26 +107,35 @@ RUN dpkg-query -L nodejs
 RUN /usr/bin/npm --verbose install -g firebase-tools
 # TODO(dnfield): Remove this once Firebase has a fix upstream for
 # https://github.com/flutter/flutter/issues/34435
-COPY patch_firebase.sh /root/patch_firebase.sh
+COPY ci/docker_linux/patch_firebase.sh /root/patch_firebase.sh
 RUN /root/patch_firebase.sh
 
+# Install golang more recent than in repo (necessary for dashing to build)
+RUN curl 'https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz' | tar xvz
+ENV GOBINARY=/go/bin/go
+
 # Install dashing
-# This is why we need golang installed.
 RUN mkdir -p /opt/gopath/bin
 ENV GOPATH=/opt/gopath
 ENV PATH="${GOPATH}/bin:${PATH}"
-RUN go get -u github.com/technosophos/dashing
+RUN $GOBINARY get -u github.com/technosophos/dashing
 
 # Set locale to en_US
 RUN locale-gen en_US "en_US.UTF-8" && dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
 
-# Install coveralls and Firebase
-# This is why we need ruby installed.
+# Install fastlane via pinned Gemfile & Gemfile.lock
 # Skip all the documentation (-N) since it's just on CI.
-RUN gem install coveralls -N
 RUN gem install bundler -N
-# Install fastlane which is used on Linux to build and deploy Android
-# builds to the Play Store.
-RUN gem install fastlane -N
 
+# Gemfile last edited 1/6/2019 (update to trigger a rebuild of Docker image)
+COPY ci/docker_linux/Gemfile /Gemfile
+COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
+
+RUN bundle install --system
+
+# Install goldctl, for Golden testing
+# Last updated 1/8/19 (update to rebuild Dockerfile with latest goldctl)
+COPY bots/download_goldctl.sh /download_goldctl.sh
+ENV GOLDCTL '/depot_tools/goldctl'
+RUN /download_goldctl.sh

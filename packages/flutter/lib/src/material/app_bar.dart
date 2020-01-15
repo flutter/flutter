@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -89,7 +89,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows an [AppBar] with two simple actions. The first action
 /// opens a [SnackBar], while the second action navigates to a new page.
@@ -214,7 +214,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
   /// will use a [BackButton] that calls [Navigator.maybePop].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following code shows how the drawer button could be manually specified
   /// instead of relying on [automaticallyImplyLeading]:
@@ -253,7 +253,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// If leading widget is not null, this parameter has no effect.
   final bool automaticallyImplyLeading;
 
-  /// The primary widget displayed in the appbar.
+  /// The primary widget displayed in the app bar.
   ///
   /// Typically a [Text] widget containing a description of the current contents
   /// of the app.
@@ -380,19 +380,20 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// A size whose height is the sum of [kToolbarHeight] and the [bottom] widget's
   /// preferred height.
   ///
-  /// [Scaffold] uses this this size to set its app bar's height.
+  /// [Scaffold] uses this size to set its app bar's height.
   @override
   final Size preferredSize;
 
-  bool _getEffectiveCenterTitle(ThemeData themeData) {
+  bool _getEffectiveCenterTitle(ThemeData theme) {
     if (centerTitle != null)
       return centerTitle;
-    assert(themeData.platform != null);
-    switch (themeData.platform) {
+    assert(theme.platform != null);
+    switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return false;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return actions == null || actions.length < 2;
     }
     return null;
@@ -417,7 +418,7 @@ class _AppBarState extends State<AppBar> {
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
-    final ThemeData themeData = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
@@ -429,16 +430,16 @@ class _AppBarState extends State<AppBar> {
 
     IconThemeData overallIconTheme = widget.iconTheme
       ?? appBarTheme.iconTheme
-      ?? themeData.primaryIconTheme;
+      ?? theme.primaryIconTheme;
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
     TextStyle centerStyle = widget.textTheme?.title
       ?? appBarTheme.textTheme?.title
-      ?? themeData.primaryTextTheme.title;
+      ?? theme.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1
       ?? appBarTheme.textTheme?.body1
-      ?? themeData.primaryTextTheme.body1;
+      ?? theme.primaryTextTheme.body1;
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -477,12 +478,13 @@ class _AppBarState extends State<AppBar> {
     Widget title = widget.title;
     if (title != null) {
       bool namesRoute;
-      switch (defaultTargetPlatform) {
+      switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-           namesRoute = true;
-           break;
+          namesRoute = true;
+          break;
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           break;
       }
       title = DefaultTextStyle(
@@ -491,7 +493,7 @@ class _AppBarState extends State<AppBar> {
         overflow: TextOverflow.ellipsis,
         child: Semantics(
           namesRoute: namesRoute,
-          child: title,
+          child: _AppBarTitleBox(child: title),
           header: true,
         ),
       );
@@ -524,7 +526,7 @@ class _AppBarState extends State<AppBar> {
       leading: leading,
       middle: title,
       trailing: actions,
-      centerMiddle: widget._getEffectiveCenterTitle(themeData),
+      centerMiddle: widget._getEffectiveCenterTitle(theme),
       middleSpacing: widget.titleSpacing,
     );
 
@@ -552,10 +554,13 @@ class _AppBarState extends State<AppBar> {
               child: appBar,
             ),
           ),
-          widget.bottomOpacity == 1.0 ? widget.bottom : Opacity(
-            opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
-            child: widget.bottom,
-          ),
+          if (widget.bottomOpacity == 1.0)
+            widget.bottom
+          else
+            Opacity(
+              opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
+              child: widget.bottom,
+            ),
         ],
       );
     }
@@ -584,7 +589,7 @@ class _AppBarState extends State<AppBar> {
     }
     final Brightness brightness = widget.brightness
       ?? appBarTheme.brightness
-      ?? themeData.primaryColorBrightness;
+      ?? theme.primaryColorBrightness;
     final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
       ? SystemUiOverlayStyle.light
       : SystemUiOverlayStyle.dark;
@@ -596,7 +601,7 @@ class _AppBarState extends State<AppBar> {
         child: Material(
           color: widget.backgroundColor
             ?? appBarTheme.color
-            ?? themeData.primaryColor,
+            ?? theme.primaryColor,
           elevation: widget.elevation
             ?? appBarTheme.elevation
             ?? _defaultElevation,
@@ -643,7 +648,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   }
 
   RenderSliverFloatingPersistentHeader _headerRenderer() {
-    return context.ancestorRenderObjectOfType(const TypeMatcher<RenderSliverFloatingPersistentHeader>());
+    return context.findAncestorRenderObjectOfType<RenderSliverFloatingPersistentHeader>();
   }
 
   void _isScrollingListener() {
@@ -687,6 +692,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.floating,
     @required this.pinned,
     @required this.snapConfiguration,
+    @required this.stretchConfiguration,
     @required this.shape,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
@@ -726,6 +732,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final FloatingHeaderSnapConfiguration snapConfiguration;
 
   @override
+  final OverScrollHeaderStretchConfiguration stretchConfiguration;
+
+  @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
 
@@ -741,7 +750,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     //    1   |    1     |        0       ||  1.0
     //    1   |    1     |        1       ||  fade
     final double toolbarOpacity = !pinned || (floating && bottom != null)
-      ? ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0)
+      ? ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0) as double
       : 1.0;
 
     final Widget appBar = FlexibleSpaceBar.createSettings(
@@ -769,7 +778,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         titleSpacing: titleSpacing,
         shape: shape,
         toolbarOpacity: toolbarOpacity,
-        bottomOpacity: pinned ? 1.0 : (visibleMainHeight / _bottomHeight).clamp(0.0, 1.0),
+        bottomOpacity: pinned ? 1.0 : ((visibleMainHeight / _bottomHeight).clamp(0.0, 1.0) as double),
       ),
     );
     return floating ? _FloatingAppBar(child: appBar) : appBar;
@@ -797,7 +806,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || topPadding != oldDelegate.topPadding
         || pinned != oldDelegate.pinned
         || floating != oldDelegate.floating
-        || snapConfiguration != oldDelegate.snapConfiguration;
+        || snapConfiguration != oldDelegate.snapConfiguration
+        || stretchConfiguration != oldDelegate.stretchConfiguration;
   }
 
   @override
@@ -825,7 +835,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
 /// specified then it is stacked behind the toolbar and the bottom widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This is an example that could be included in a [CustomScrollView]'s
 /// [CustomScrollView.slivers] list:
@@ -911,6 +921,9 @@ class SliverAppBar extends StatefulWidget {
     this.floating = false,
     this.pinned = false,
     this.snap = false,
+    this.stretch = false,
+    this.stretchTriggerOffset = 100.0,
+    this.onStretchTrigger,
     this.shape,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
@@ -919,7 +932,9 @@ class SliverAppBar extends StatefulWidget {
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),
+       assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
+       assert(stretchTriggerOffset > 0.0),
        super(key: key);
 
   /// A widget to display before the [title].
@@ -939,7 +954,7 @@ class SliverAppBar extends StatefulWidget {
   /// If leading widget is not null, this parameter has no effect.
   final bool automaticallyImplyLeading;
 
-  /// The primary widget displayed in the appbar.
+  /// The primary widget displayed in the app bar.
   ///
   /// Typically a [Text] widget containing a description of the current contents
   /// of the app.
@@ -951,7 +966,7 @@ class SliverAppBar extends StatefulWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Scaffold(
@@ -984,7 +999,7 @@ class SliverAppBar extends StatefulWidget {
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
 
-  /// This widget appears across the bottom of the appbar.
+  /// This widget appears across the bottom of the app bar.
   ///
   /// Typically a [TabBar]. Only widgets that implement [PreferredSizeWidget] can
   /// be used at the bottom of an app bar.
@@ -1129,10 +1144,9 @@ class SliverAppBar extends StatefulWidget {
   ///    behavior of the app bar in combination with [floating].
   final bool pinned;
 
-  /// The material's shape as well its shadow.
+  /// The material's shape as well as its shadow.
   ///
-  /// A shadow is only displayed if the [elevation] is greater than
-  /// zero.
+  /// A shadow is only displayed if the [elevation] is greater than zero.
   final ShapeBorder shape;
 
   /// If [snap] and [floating] are true then the floating app bar will "snap"
@@ -1143,7 +1157,7 @@ class SliverAppBar extends StatefulWidget {
   /// a scroll dismisses the app bar, the animation will slide the app bar
   /// completely out of view.
   ///
-  /// Snapping only applies when the app bar is floating, not when the appbar
+  /// Snapping only applies when the app bar is floating, not when the app bar
   /// appears at the top of its scroll view.
   ///
   /// ## Animated Examples
@@ -1162,6 +1176,21 @@ class SliverAppBar extends StatefulWidget {
   ///    behavior of the app bar in combination with [pinned] and [floating].
   final bool snap;
 
+  /// Whether the app bar should stretch to fill the over-scroll area.
+  ///
+  /// The app bar can still expand and contract as the user scrolls, but it will
+  /// also stretch when the user over-scrolls.
+  final bool stretch;
+
+  /// The offset of overscroll required to activate [onStretchTrigger].
+  ///
+  /// This defaults to 100.0.
+  final double stretchTriggerOffset;
+
+  /// The callback function to be executed when a user over-scrolls to the
+  /// offset specified by [stretchTriggerOffset].
+  final AsyncCallback onStretchTrigger;
+
   @override
   _SliverAppBarState createState() => _SliverAppBarState();
 }
@@ -1170,6 +1199,7 @@ class SliverAppBar extends StatefulWidget {
 // by the floating appbar snap animation (via FloatingHeaderSnapConfiguration).
 class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
   FloatingHeaderSnapConfiguration _snapConfiguration;
+  OverScrollHeaderStretchConfiguration _stretchConfiguration;
 
   void _updateSnapConfiguration() {
     if (widget.snap && widget.floating) {
@@ -1183,10 +1213,22 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     }
   }
 
+  void _updateStretchConfiguration() {
+    if (widget.stretch) {
+      _stretchConfiguration = OverScrollHeaderStretchConfiguration(
+        stretchTriggerOffset: widget.stretchTriggerOffset,
+        onStretchTrigger: widget.onStretchTrigger,
+      );
+    } else {
+      _stretchConfiguration = null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _updateSnapConfiguration();
+    _updateStretchConfiguration();
   }
 
   @override
@@ -1194,6 +1236,8 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     super.didUpdateWidget(oldWidget);
     if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
       _updateSnapConfiguration();
+    if (widget.stretch != oldWidget.stretch)
+      _updateStretchConfiguration();
   }
 
   @override
@@ -1233,8 +1277,43 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           pinned: widget.pinned,
           shape: widget.shape,
           snapConfiguration: _snapConfiguration,
+          stretchConfiguration: _stretchConfiguration,
         ),
       ),
     );
+  }
+}
+
+// Layout the AppBar's title with unconstrained height, vertically
+// center it within its (NavigationToolbar) parent, and allow the
+// parent to constrain the title's actual height.
+class _AppBarTitleBox extends SingleChildRenderObjectWidget {
+  const _AppBarTitleBox({ Key key, @required Widget child }) : assert(child != null), super(key: key, child: child);
+
+  @override
+  _RenderAppBarTitleBox createRenderObject(BuildContext context) {
+    return _RenderAppBarTitleBox(
+      textDirection: Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderAppBarTitleBox renderObject) {
+    renderObject.textDirection = Directionality.of(context);
+  }
+}
+
+class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
+  _RenderAppBarTitleBox({
+    RenderBox child,
+    TextDirection textDirection,
+  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
+
+  @override
+  void performLayout() {
+    final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
+    child.layout(innerConstraints, parentUsesSize: true);
+    size = constraints.constrain(child.size);
+    alignChild();
   }
 }

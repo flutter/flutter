@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,25 +11,27 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
+
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mocks.dart' as mocks;
 import '../../src/pubspec_schema.dart';
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
 void main() {
-  group('xcodebuild versioning', () {
-    MockProcessManager mockProcessManager;
+  group('xcodebuild commands', () {
+    mocks.MockProcessManager mockProcessManager;
     XcodeProjectInterpreter xcodeProjectInterpreter;
     FakePlatform macOS;
     FileSystem fs;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
+      mockProcessManager = mocks.MockProcessManager();
       xcodeProjectInterpreter = XcodeProjectInterpreter();
       macOS = fakePlatform('macos');
       fs = MemoryFileSystem();
@@ -38,9 +40,9 @@ void main() {
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -78,8 +80,8 @@ void main() {
 
     testUsingOsxContext('majorVersion returns major version', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.majorVersion, 8);
+          .thenReturn(ProcessResult(1, 0, 'Xcode 10.3.3\nBuild version 8E3004b', ''));
+      expect(xcodeProjectInterpreter.majorVersion, 10);
     });
 
     testUsingOsxContext('majorVersion is null when version has unexpected format', () {
@@ -144,12 +146,133 @@ void main() {
       expect(xcodeProjectInterpreter.isInstalled, isTrue);
     });
 
-    testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () {
-      when(mockProcessManager.runSync(argThat(contains(xcodebuild))))
+    testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () async {
+      when(mockProcessManager.runSync(
+               argThat(contains(xcodebuild)),
+               workingDirectory: anyNamed('workingDirectory'),
+               environment: anyNamed('environment')))
           .thenReturn(ProcessResult(0, 1, '', ''));
-      expect(xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+      expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+    });
+
+    testUsingContext('build settings flakes', () async {
+      const Duration delay = Duration(seconds: 1);
+      mockProcessManager.processFactory = mocks.flakyProcessFactory(
+        flakes: 1,
+        delay: delay + const Duration(seconds: 1),
+      );
+      expect(await xcodeProjectInterpreter.getBuildSettings(
+                 '', '', timeout: delay),
+             const <String, String>{});
+      // build settings times out and is killed once, then succeeds.
+      verify(mockProcessManager.killPid(any)).called(1);
+      // The verbose logs should tell us something timed out.
+      expect(testLogger.traceText, contains('timed out'));
+    }, overrides: <Type, Generator>{
+      Platform: () => macOS,
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingOsxContext('build settings contains Flutter Xcode environment variables', () async {
+      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
+        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+        'FLUTTER_XCODE_ARCHS': 'arm64'
+      });
+      when(mockProcessManager.runSync(<String>[
+        xcodebuild,
+        '-project',
+        macOS.pathSeparator,
+        '-target',
+        '',
+        '-showBuildSettings',
+        'CODE_SIGN_STYLE=Manual',
+        'ARCHS=arm64'
+      ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')))
+        .thenReturn(ProcessResult(1, 0, '', ''));
+      expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+    });
+
+    testUsingOsxContext('clean contains Flutter Xcode environment variables', () async {
+      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
+        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+        'FLUTTER_XCODE_ARCHS': 'arm64'
+      });
+      when(mockProcessManager.runSync(
+        any,
+        workingDirectory: anyNamed('workingDirectory')))
+        .thenReturn(ProcessResult(1, 0, '', ''));
+      xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Runner');
+      final List<dynamic> captured = verify(mockProcessManager.runSync(
+        captureAny,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'))).captured;
+      expect(captured.first, <String>[
+        xcodebuild,
+        '-workspace',
+        'workspace_path',
+        '-scheme',
+        'Runner',
+        '-quiet',
+        'clean',
+        'CODE_SIGN_STYLE=Manual',
+        'ARCHS=arm64'
+      ]);
     });
   });
+
+  group('xcodebuild -list', () {
+    mocks.MockProcessManager mockProcessManager;
+    FakePlatform macOS;
+    FileSystem fs;
+
+    setUp(() {
+      mockProcessManager = mocks.MockProcessManager();
+      macOS = fakePlatform('macos');
+      fs = MemoryFileSystem();
+      fs.file(xcodebuild).createSync(recursive: true);
+    });
+
+    void testUsingOsxContext(String description, dynamic testMethod()) {
+      testUsingContext(description, testMethod, overrides: <Type, Generator>{
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
+      });
+    }
+
+    testUsingOsxContext('getInfo returns something when xcodebuild -list succeeds', () async {
+      const String workingDirectory = '/';
+      when(mockProcessManager.run(
+        <String>[xcodebuild, '-list'],
+        environment: anyNamed('environment'),
+        workingDirectory: workingDirectory),
+      ).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(1, 0, '', ''));
+      });
+      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
+      expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
+    });
+
+    testUsingOsxContext('getInfo throws a tool exit when it is unable to find a project', () async {
+      const String workingDirectory = '/';
+      const String stderr = 'Useful Xcode failure message about missing project.';
+      when(mockProcessManager.run(
+        <String>[xcodebuild, '-list'],
+        environment: anyNamed('environment'),
+        workingDirectory: workingDirectory),
+      ).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(1, 66, '', stderr));
+      });
+      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
+      expect(
+          () async => await xcodeProjectInterpreter.getInfo(workingDirectory),
+          throwsToolExit(message: stderr));
+    });
+  });
+
   group('Xcode project properties', () {
     test('properties from default project can be parsed', () {
       const String output = '''
@@ -264,6 +387,27 @@ Information about project "Runner":
     });
   });
 
+  group('environmentVariablesAsXcodeBuildSettings', () {
+    FakePlatform platform;
+
+    setUp(() {
+      platform = fakePlatform('ignored');
+    });
+
+    testUsingContext('environment variables as Xcode build settings', () {
+      platform.environment = Map<String, String>.unmodifiable(<String, String>{
+        'Ignored': 'Bogus',
+        'FLUTTER_NOT_XCODE': 'Bogus',
+        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+        'FLUTTER_XCODE_ARCHS': 'arm64'
+      });
+      final List<String> environmentVariablesAsBuildSettings = environmentVariablesAsXcodeBuildSettings();
+      expect(environmentVariablesAsBuildSettings, <String>['CODE_SIGN_STYLE=Manual', 'ARCHS=arm64']);
+    }, overrides: <Type, Generator>{
+      Platform: () => platform
+    });
+  });
+
   group('updateGeneratedXcodeProperties', () {
     MockLocalEngineArtifacts mockArtifacts;
     MockProcessManager mockProcessManager;
@@ -281,9 +425,9 @@ Information about project "Runner":
     void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
-        ProcessManager: () => mockProcessManager,
         Platform: () => macOS,
         FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
       });
     }
 
@@ -304,6 +448,12 @@ Information about project "Runner":
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('ARCHS=armv7'), isTrue);
+
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      expect(buildPhaseScript.existsSync(), isTrue);
+
+      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
+      expect(buildPhaseScriptContents.contains('ARCHS=armv7'), isTrue);
     });
 
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
@@ -322,6 +472,12 @@ Information about project "Runner":
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('TRACK_WIDGET_CREATION=true'), isTrue);
+
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      expect(buildPhaseScript.existsSync(), isTrue);
+
+      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
+      expect(buildPhaseScriptContents.contains('TRACK_WIDGET_CREATION=true'), isTrue);
     });
 
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
@@ -340,6 +496,12 @@ Information about project "Runner":
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('TRACK_WIDGET_CREATION=true'), isFalse);
+
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      expect(buildPhaseScript.existsSync(), isTrue);
+
+      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
+      expect(buildPhaseScriptContents.contains('TRACK_WIDGET_CREATION=true'), isFalse);
     });
 
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
@@ -395,6 +557,7 @@ Information about project "Runner":
       final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(propertyFor('FLUTTER_BUILD_NAME', localPropertiesFile), expectedBuildName);
       expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), expectedBuildNumber);
+      expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), isNotNull);
     }
 
     testUsingOsxContext('extract build name and number from pubspec.yaml', () async {
@@ -430,7 +593,7 @@ flutter:
         manifestString: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.0',
-        expectedBuildNumber: null,
+        expectedBuildNumber: '1.0.0',
       );
     });
 
@@ -449,6 +612,24 @@ flutter:
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '1',
+      );
+    });
+
+    testUsingOsxContext('allow build info to override build name with build number fallback', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2');
+      await checkBuildVersion(
+        manifestString: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.2',
+        expectedBuildNumber: '1.0.2',
       );
     });
 
@@ -522,10 +703,27 @@ flutter:
         expectedBuildNumber: '3',
       );
     });
+
+    testUsingOsxContext('default build name and number when version is missing', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
+      await checkBuildVersion(
+        manifestString: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.0',
+        expectedBuildNumber: '1',
+      );
+    });
   });
 }
 
-Platform fakePlatform(String name) {
+FakePlatform fakePlatform(String name) {
   return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 

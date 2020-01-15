@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -51,7 +51,7 @@ class ImageConfiguration {
     Locale locale,
     TextDirection textDirection,
     Size size,
-    String platform,
+    TargetPlatform platform,
   }) {
     return ImageConfiguration(
       bundle: bundle ?? this.bundle,
@@ -91,16 +91,16 @@ class ImageConfiguration {
   static const ImageConfiguration empty = ImageConfiguration();
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ImageConfiguration typedOther = other;
-    return typedOther.bundle == bundle
-        && typedOther.devicePixelRatio == devicePixelRatio
-        && typedOther.locale == locale
-        && typedOther.textDirection == textDirection
-        && typedOther.size == size
-        && typedOther.platform == platform;
+    return other is ImageConfiguration
+        && other.bundle == bundle
+        && other.devicePixelRatio == devicePixelRatio
+        && other.locale == locale
+        && other.textDirection == textDirection
+        && other.size == size
+        && other.platform == platform;
   }
 
   @override
@@ -152,6 +152,16 @@ class ImageConfiguration {
   }
 }
 
+/// Performs the decode process for use in [ImageProvider.load].
+///
+/// This callback allows decoupling of the `cacheWidth` and `cacheHeight`
+/// parameters from implementations of [ImageProvider] that do not use them.
+///
+/// See also:
+///
+///  * [ResizeImage], which uses this to override the `cacheWidth` and `cacheHeight` parameters.
+typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheWidth, int cacheHeight});
+
 /// Identifies an image without committing to the precise final asset. This
 /// allows a set of images to be identified and for the precise image to later
 /// be resolved based on the environment, e.g. the device pixel ratio.
@@ -172,7 +182,7 @@ class ImageConfiguration {
 ///
 /// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following shows the code required to write a widget that fully conforms
 /// to the [ImageProvider] and [Widget] protocols. (It is essentially a
@@ -312,8 +322,11 @@ abstract class ImageProvider<T> {
       }
       key.then<void>((T key) {
         obtainedKey = key;
-        final ImageStreamCompleter completer = PaintingBinding.instance
-            .imageCache.putIfAbsent(key, () => load(key), onError: handleError);
+        final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
+          key,
+          () => load(key, PaintingBinding.instance.instantiateImageCodec),
+          onError: handleError,
+        );
         if (completer != null) {
           stream.setCompleter(completer);
         }
@@ -336,7 +349,7 @@ abstract class ImageProvider<T> {
   /// The [configuration] is optional and defaults to
   /// [ImageConfiguration.empty].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following sample code shows how an image loaded using the [Image]
   /// widget can be evicted using a [NetworkImage] with a matching URL.
@@ -379,11 +392,18 @@ abstract class ImageProvider<T> {
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
+  ///
+  /// The [decode] callback provides the logic to obtain the codec for the
+  /// image.
+  ///
+  /// See also:
+  ///
+  ///  * [ResizeImage], for modifying the key to account for cache dimensions.
   @protected
-  ImageStreamCompleter load(T key);
+  ImageStreamCompleter load(T key, DecoderCallback decode);
 
   @override
-  String toString() => '$runtimeType()';
+  String toString() => '${objectRuntimeType(this, 'ImageConfiguration')}()';
 }
 
 /// Key for the image obtained by an [AssetImage] or [ExactAssetImage].
@@ -416,20 +436,20 @@ class AssetBundleImageKey {
   final double scale;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final AssetBundleImageKey typedOther = other;
-    return bundle == typedOther.bundle
-        && name == typedOther.name
-        && scale == typedOther.scale;
+    return other is AssetBundleImageKey
+        && other.bundle == bundle
+        && other.name == name
+        && other.scale == scale;
   }
 
   @override
   int get hashCode => hashValues(bundle, name, scale);
 
   @override
-  String toString() => '$runtimeType(bundle: $bundle, name: "$name", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'AssetBundleImageKey')}(bundle: $bundle, name: "$name", scale: $scale)';
 }
 
 /// A subclass of [ImageProvider] that knows about [AssetBundle]s.
@@ -444,9 +464,9 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image using [loadAsync].
   @override
-  ImageStreamCompleter load(AssetBundleImageKey key) {
+  ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, decode),
       scale: key.scale,
       informationCollector: () sync* {
         yield DiagnosticsProperty<ImageProvider>('Image provider', this);
@@ -460,17 +480,105 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ///
   /// This function is used by [load].
   @protected
-  Future<ui.Codec> _loadAsync(AssetBundleImageKey key) async {
+  Future<ui.Codec> _loadAsync(AssetBundleImageKey key, DecoderCallback decode) async {
     final ByteData data = await key.bundle.load(key.name);
     if (data == null)
       throw 'Unable to read data';
-    return await PaintingBinding.instance.instantiateImageCodec(data.buffer.asUint8List());
+    return await decode(data.buffer.asUint8List());
+  }
+}
+
+class _SizeAwareCacheKey {
+  const _SizeAwareCacheKey(this.providerCacheKey, this.width, this.height);
+
+  final Object providerCacheKey;
+
+  final int width;
+
+  final int height;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _SizeAwareCacheKey
+        && other.providerCacheKey == providerCacheKey
+        && other.width == width
+        && other.height == height;
+  }
+
+  @override
+  int get hashCode => hashValues(providerCacheKey, width, height);
+}
+
+/// Instructs Flutter to decode the image at the specified dimensions
+/// instead of at its native size.
+///
+/// This allows finer control of the size of the image in [ImageCache] and is
+/// generally used to reduce the memory footprint of [ImageCache].
+///
+/// The decoded image may still be displayed at sizes other than the
+/// cached size provided here.
+class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
+  /// Creates an ImageProvider that decodes the image to the specified size.
+  ///
+  /// The cached image will be directly decoded and stored at the resolution
+  /// defined by `width` and `height`. The image will lose detail and
+  /// use less memory if resized to a size smaller than the native size.
+  const ResizeImage(
+    this.imageProvider, {
+    this.width,
+    this.height,
+  }) : assert(width != null || height != null);
+
+  /// The [ImageProvider] that this class wraps.
+  final ImageProvider imageProvider;
+
+  /// The width the image should decode to and cache.
+  final int width;
+
+  /// The height the image should decode to and cache.
+  final int height;
+
+  /// Composes the `provider` in a [ResizeImage] only when `cacheWidth` and
+  /// `cacheHeight` are not both null.
+  ///
+  /// When `cacheWidth` and `cacheHeight` are both null, this will return the
+  /// `provider` directly.
+  static ImageProvider<dynamic> resizeIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
+    if (cacheWidth != null || cacheHeight != null) {
+      return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
+    }
+    return provider;
+  }
+
+  @override
+  ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
+    final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+      assert(
+        cacheWidth == null && cacheHeight == null,
+        'ResizeImage cannot be composed with another ImageProvider that applies cacheWidth or cacheHeight.'
+      );
+      return decode(bytes, cacheWidth: width, cacheHeight: height);
+    };
+    return imageProvider.load(key.providerCacheKey, decodeResize);
+  }
+
+  @override
+  Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) async {
+    final Object providerCacheKey = await imageProvider.obtainKey(configuration);
+    return _SizeAwareCacheKey(providerCacheKey, width, height);
   }
 }
 
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
+///
+/// When a network image is used on the Web platform, the [cacheWidth] and
+/// [cacheHeight] parameters of the [DecoderCallback] are ignored as the Web
+/// engine delegates image decoding of network images to the Web, which does
+/// not support custom decode sizes.
 ///
 /// See also:
 ///
@@ -496,7 +604,7 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   Map<String, String> get headers;
 
   @override
-  ImageStreamCompleter load(NetworkImage key);
+  ImageStreamCompleter load(NetworkImage key, DecoderCallback decode);
 }
 
 /// Decodes the given [File] object as an image, associating it with the given
@@ -525,9 +633,9 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  ImageStreamCompleter load(FileImage key) {
+  ImageStreamCompleter load(FileImage key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, decode),
       scale: key.scale,
       informationCollector: () sync* {
         yield ErrorDescription('Path: ${file?.path}');
@@ -535,30 +643,30 @@ class FileImage extends ImageProvider<FileImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(FileImage key) async {
+  Future<ui.Codec> _loadAsync(FileImage key, DecoderCallback decode) async {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
       return null;
 
-    return await PaintingBinding.instance.instantiateImageCodec(bytes);
+    return await decode(bytes);
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final FileImage typedOther = other;
-    return file?.path == typedOther.file?.path
-        && scale == typedOther.scale;
+    return other is FileImage
+        && other.file?.path == file?.path
+        && other.scale == scale;
   }
 
   @override
   int get hashCode => hashValues(file?.path, scale);
 
   @override
-  String toString() => '$runtimeType("${file?.path}", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'FileImage')}("${file?.path}", scale: $scale)';
 }
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the
@@ -593,33 +701,33 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  ImageStreamCompleter load(MemoryImage key) {
+  ImageStreamCompleter load(MemoryImage key, DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, decode),
       scale: key.scale,
     );
   }
 
-  Future<ui.Codec> _loadAsync(MemoryImage key) {
+  Future<ui.Codec> _loadAsync(MemoryImage key, DecoderCallback decode) {
     assert(key == this);
 
-    return PaintingBinding.instance.instantiateImageCodec(bytes);
+    return decode(bytes);
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final MemoryImage typedOther = other;
-    return bytes == typedOther.bytes
-        && scale == typedOther.scale;
+    return other is MemoryImage
+        && other.bytes == bytes
+        && other.scale == scale;
   }
 
   @override
   int get hashCode => hashValues(bytes.hashCode, scale);
 
   @override
-  String toString() => '$runtimeType(${describeIdentity(bytes)}, scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'MemoryImage')}(${describeIdentity(bytes)}, scale: $scale)';
 }
 
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
@@ -744,20 +852,20 @@ class ExactAssetImage extends AssetBundleImageProvider {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ExactAssetImage typedOther = other;
-    return keyName == typedOther.keyName
-        && scale == typedOther.scale
-        && bundle == typedOther.bundle;
+    return other is ExactAssetImage
+        && other.keyName == keyName
+        && other.scale == scale
+        && other.bundle == bundle;
   }
 
   @override
   int get hashCode => hashValues(keyName, scale, bundle);
 
   @override
-  String toString() => '$runtimeType(name: "$keyName", scale: $scale, bundle: $bundle)';
+  String toString() => '${objectRuntimeType(this, 'ExactAssetImage')}(name: "$keyName", scale: $scale, bundle: $bundle)';
 }
 
 // A completer used when resolving an image fails sync.
@@ -796,7 +904,7 @@ class NetworkImageLoadException implements Exception {
   /// A human-readable error message.
   final String _message;
 
-  /// Resolved URI of the requested image.
+  /// Resolved URL of the requested image.
   final Uri uri;
 
   @override

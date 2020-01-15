@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -158,6 +158,7 @@ enum DiagnosticsTreeStyle {
   /// the following line.
   ///
   /// See also:
+  ///
   ///  * [singleLine], which displays the same information but keeps the
   ///    property and value on the same line.
   errorProperty,
@@ -166,8 +167,8 @@ enum DiagnosticsTreeStyle {
   ///
   /// See also:
   ///
-  ///  * [DebugOverflowIndicator], which uses this style to display just the
-  ///    immediate children of a node.
+  ///  * [DebugOverflowIndicatorMixin], which uses this style to display just
+  ///    the immediate children of a node.
   shallow,
 
   /// Render only the children of a node truncating before the tree becomes too
@@ -326,9 +327,6 @@ class TextTreeConfiguration {
 
   /// Mandatory string to add after the properties of a node regardless of
   /// whether the node has any properties.
-  ///
-  /// See [headerLineTextConfiguration] for an example of using this field to
-  /// add a colon at the end of the header line.
   final String mandatoryAfterProperties;
 
   /// Property separator to add between properties.
@@ -515,7 +513,7 @@ final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
 ///    ╚═══════════
 /// ```
 ///
-/// /// See also:
+/// See also:
 ///
 ///  * [DiagnosticsTreeStyle.transition], uses this style for ASCII art display.
 final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
@@ -845,7 +843,7 @@ class _PrefixedStringBuilder {
     );
     int i = 0;
     final int length = lines.length;
-    for (String line in lines) {
+    for (final String line in lines) {
       i++;
       _writeLine(
         line,
@@ -866,7 +864,7 @@ class _PrefixedStringBuilder {
   ///
   /// This method wraps a sequence of text where only some spans of text can be
   /// used as wrap boundaries.
-   static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) sync* {
+  static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) sync* {
     if (message.length + startOffset < width) {
       // Nothing to do. The line doesn't wrap.
       yield message;
@@ -1056,12 +1054,12 @@ bool _isSingleLine(DiagnosticsTreeStyle style) {
   return style == DiagnosticsTreeStyle.singleLine;
 }
 
-/// Renderer that creates ascii art representations of trees of
+/// Renderer that creates ASCII art representations of trees of
 /// [DiagnosticsNode] objects.
 ///
 /// See also:
 ///
-/// * [DiagnosticsNode.toStringDeep], which uses a [TextRender] to return a
+///  * [DiagnosticsNode.toStringDeep], which uses a [TextTreeRenderer] to return a
 ///    string representation of this node and its descendants.
 class TextTreeRenderer {
   /// Creates a [TextTreeRenderer] object with the given arguments specifying
@@ -1097,8 +1095,8 @@ class TextTreeRenderer {
   /// single line style does not provide any meaningful style for how children
   /// should be connected to their parents.
   TextTreeConfiguration _childTextConfiguration(
-      DiagnosticsNode child,
-      TextTreeConfiguration textStyle,
+    DiagnosticsNode child,
+    TextTreeConfiguration textStyle,
   ) {
     final DiagnosticsTreeStyle childStyle = child?.style;
     return (_isSingleLine(childStyle) || childStyle == DiagnosticsTreeStyle.errorProperty) ? textStyle : child.textTreeConfiguration;
@@ -1134,7 +1132,7 @@ class TextTreeRenderer {
       const int maxLines = 25;
       int lines = 0;
       void visitor(DiagnosticsNode node) {
-        for (DiagnosticsNode child in node.getChildren()) {
+        for (final DiagnosticsNode child in node.getChildren()) {
           if (lines < maxLines) {
             depth += 1;
             descendants.add('$prefixOtherLines${"  " * depth}$child');
@@ -1290,8 +1288,7 @@ class TextTreeRenderer {
           if (!propertyRender.endsWith('\n'))
             builder.write('\n');
         }
-      } else
-      {
+      } else {
         final String propertyRender = render(property,
           prefixLineOne: '${builder.prefixOtherLines}${propertyStyle.prefixLineOne}',
           prefixOtherLines: '${builder.prefixOtherLines}${propertyStyle.childLinkSpace}${propertyStyle.prefixOtherLines}',
@@ -1386,7 +1383,7 @@ class TextTreeRenderer {
 /// Defines diagnostics data for a [value].
 ///
 /// For debug and profile modes, [DiagnosticsNode] provides a high quality
-/// multi-line string dump via [toStringDeep]. The core members are the [name],
+/// multiline string dump via [toStringDeep]. The core members are the [name],
 /// [toDescription], [getProperties], [value], and [getChildren]. All other
 /// members exist typically to provide hints for how [toStringDeep] and
 /// debugging tools should format output.
@@ -1589,9 +1586,9 @@ abstract class DiagnosticsNode {
   /// The provided `nodes` may be properties or children of the `parent`
   /// [DiagnosticsNode].
   static List<Map<String, Object>> toJsonList(
-      List<DiagnosticsNode> nodes,
-      DiagnosticsNode parent,
-      DiagnosticsSerializationDelegate delegate,
+    List<DiagnosticsNode> nodes,
+    DiagnosticsNode parent,
+    DiagnosticsSerializationDelegate delegate,
   ) {
     bool truncated = false;
     if (nodes == null)
@@ -1633,6 +1630,7 @@ abstract class DiagnosticsNode {
       return toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
 
     final String description = toDescription(parentConfiguration: parentConfiguration);
+    assert(description != null);
 
     if (name == null || name.isEmpty || !showName)
       return description;
@@ -1718,7 +1716,7 @@ abstract class DiagnosticsNode {
 
 /// Debugging message displayed like a property.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following two properties are better expressed using this
 /// [MessageProperty] class, rather than [StringProperty], as the intent is to
@@ -1730,7 +1728,7 @@ abstract class DiagnosticsNode {
 /// var usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// On the other hand, [StringProperty] is better suited when the property has a
 /// concrete value that is a string:
@@ -2057,7 +2055,7 @@ class PercentProperty extends DoubleProperty {
 /// when `visible` is false and nothing when visible is true, in contrast to
 /// `visible: true` or `visible: false`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// FlagProperty(
@@ -2067,7 +2065,7 @@ class PercentProperty extends DoubleProperty {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// [FlagProperty] should also be used instead of [DiagnosticsProperty<bool>]
 /// if showing the bool value would not clearly indicate the meaning of the
@@ -2217,20 +2215,28 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   );
 
   @override
-  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+  String valueToString({TextTreeConfiguration parentConfiguration}) {
     if (value == null)
       return value.toString();
 
     if (value.isEmpty)
       return ifEmpty ?? '[]';
 
+    final Iterable<String> formattedValues = value.map((T v) {
+      if (T == double && v is double) {
+        return debugFormatDouble(v);
+      } else {
+        return v.toString();
+      }
+    });
+
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Always display the value as a single line and enclose the iterable
       // value in brackets to avoid ambiguity.
-      return '[${value.join(', ')}]';
+      return '[${formattedValues.join(', ')}]';
     }
 
-    return value.join(_isSingleLine(style) ? ', ' : '\n');
+    return formattedValues.join(_isSingleLine(style) ? ', ' : '\n');
   }
 
   /// Priority level of the diagnostic used to control which diagnostics should
@@ -2300,13 +2306,17 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
 /// omitted, that is taken to mean that [level] should be
 /// [DiagnosticLevel.hidden] when [value] is non-null or null respectively.
 ///
-/// This kind of diagnostics property is typically used for values mostly opaque
+/// This kind of diagnostics property is typically used for opaque
 /// values, like closures, where presenting the actual object is of dubious
 /// value but where reporting the presence or absence of the value is much more
 /// useful.
 ///
 /// See also:
 ///
+///
+///  * [FlagsSummary], which provides similar functionality but accepts multiple
+///    flags under the same name, and is preferred if there are multiple such
+///    values that can fit into a same category (such as "listeners").
 ///  * [FlagProperty], which provides similar functionality describing whether
 ///    a [value] is true or false.
 class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
@@ -2404,6 +2414,106 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
     if (ifPresent != null)
       json['ifPresent'] = ifPresent;
     return json;
+  }
+}
+
+/// A summary of multiple properties, indicating whether each of them is present
+/// (non-null) or absent (null).
+///
+/// Each entry of [value] is described by its key. The eventual description will
+/// be a list of keys of non-null entries.
+///
+/// The [ifEmpty] describes the entire collection of [value] when it contains no
+/// non-null entries. If [ifEmpty] is omitted, [level] will be
+/// [DiagnosticLevel.hidden] when [value] contains no non-null entries.
+///
+/// This kind of diagnostics property is typically used for opaque
+/// values, like closures, where presenting the actual object is of dubious
+/// value but where reporting the presence or absence of the value is much more
+/// useful.
+///
+/// See also:
+///
+///  * [ObjectFlagProperty], which provides similar functionality but accepts
+///    only one flag, and is preferred if there is only one entry.
+///  * [IterableProperty], which provides similar functionality describing
+///    the values a collection of objects.
+class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
+  /// Create a summary for multiple properties, indicating whether each of them
+  /// is present (non-null) or absent (null).
+  ///
+  /// The [value], [showName], [showSeparator] and [level] arguments must not be
+  /// null.
+  FlagsSummary(
+    String name,
+    Map<String, T> value, {
+    String ifEmpty,
+    bool showName = true,
+    bool showSeparator = true,
+    DiagnosticLevel level  = DiagnosticLevel.info,
+  }) : assert(value != null),
+       assert(showName != null),
+       assert(showSeparator != null),
+       assert(level != null),
+       super(
+         name,
+         value,
+         ifEmpty: ifEmpty,
+         showName: showName,
+         showSeparator: showSeparator,
+         level: level,
+       );
+
+  @override
+  String valueToString({TextTreeConfiguration parentConfiguration}) {
+    assert(value != null);
+    if (!_hasNonNullEntry() && ifEmpty != null)
+      return ifEmpty;
+
+    final Iterable<String> formattedValues = _formattedValues();
+    if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
+      // Always display the value as a single line and enclose the iterable
+      // value in brackets to avoid ambiguity.
+      return '[${formattedValues.join(', ')}]';
+    }
+
+    return formattedValues.join(_isSingleLine(style) ? ', ' : '\n');
+  }
+
+  /// Priority level of the diagnostic used to control which diagnostics should
+  /// be shown and filtered.
+  ///
+  /// If [ifEmpty] is null and the [value] contains no non-null entries, then
+  /// level [DiagnosticLevel.hidden] is returned.
+  @override
+  DiagnosticLevel get level {
+    if (!_hasNonNullEntry() && ifEmpty == null)
+      return DiagnosticLevel.hidden;
+    return super.level;
+  }
+
+  @override
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
+    if (value.isNotEmpty)
+      json['values'] = _formattedValues().toList();
+    return json;
+  }
+
+  bool _hasNonNullEntry() => value.values.any((Object o) => o != null);
+
+  // An iterable of each entry's description in [value].
+  //
+  // For a non-null value, its description is its key.
+  //
+  // For a null value, it is omitted unless `includeEmtpy` is true and
+  // [ifEntryNull] contains a corresponding description.
+  Iterable<String> _formattedValues() sync* {
+    for (final MapEntry<String, T> entry in value.entries) {
+      if (entry.value != null) {
+        yield entry.key;
+      }
+    }
   }
 }
 
@@ -2557,7 +2667,11 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     json['defaultLevel'] = describeEnum(_defaultLevel);
     if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
-    if (value is num || value is String || value is bool || value == null)
+    if (v is num)
+      // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
+      // JSON.stringify replaces infinity and NaN with null.
+      json['value'] = v.isFinite ? v :  v.toString();
+    if (value is String || value is bool || value == null)
       json['value'] = value;
     return json;
   }
@@ -2855,7 +2969,7 @@ String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(obj
 ///
 /// Strips off the enum class name from the `enumEntry.toString()`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// enum Day {
@@ -2995,7 +3109,7 @@ mixin DiagnosticableMixin {
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
     return DiagnosticableNode<Diagnosticable>(
       name: name,
-      value: this,
+      value: this as Diagnosticable,
       style: style,
     );
   }
@@ -3075,7 +3189,7 @@ mixin DiagnosticableMixin {
   /// `toString` method implementation works fine using [DiagnosticsProperty]
   /// directly.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shows best practices for implementing [debugFillProperties]
   /// illustrating use of all common [DiagnosticsProperty] subclasses and all
@@ -3237,7 +3351,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
   ///
   /// `joiner` specifies the string which is place between each part obtained
   /// from [debugFillProperties]. Passing a string such as `'\n '` will result
-  /// in a multi-line string that indents the properties of the object below its
+  /// in a multiline string that indents the properties of the object below its
   /// name (as per [toString]).
   ///
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included

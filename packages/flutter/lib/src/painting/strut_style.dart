@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,7 +37,7 @@ import 'text_style.dart';
 ///
 /// Ascent is the font's spacing above the baseline without leading and
 /// descent is the spacing below the baseline without leading. Leading is
-/// split evenly betweenthe top and bottom. The values for `ascent` and
+/// split evenly between the top and bottom. The values for `ascent` and
 /// `descent` are provided by the font named by [fontFamily]. If no
 /// [fontFamily] or [fontFamilyFallback] is provided, then the platform's
 /// default family will be used.
@@ -122,7 +122,7 @@ import 'text_style.dart';
 ///
 /// ### Examples
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// In this simple case, the text will be rendered at font size 10, however,
 /// the vertical height of each line will be the strut height (Roboto in
 /// font size 30 * 1.5) as the text itself is shorter than the strut.
@@ -143,7 +143,7 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Here, strut is used to absorb the additional line height in the second line.
 /// The strut [height] was defined as 1.5 (the default font size is 14), which
 /// caused all lines to be laid out taller than without strut. This extra space
@@ -184,7 +184,7 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Here, strut is used to enable strange and overlapping text to achieve unique
 /// effects. The `M`s in lines 2 and 3 are able to extend above their lines and
 /// fill empty space in lines above. The [forceStrutHeight] is enabled and functions
@@ -227,7 +227,7 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example uses forceStrutHeight to create a 'drop cap' for the 'T' in 'The'.
 /// By locking the line heights to the metrics of the 14pt serif font, we are able
 /// to lay out a large 37pt 'T' on the second line to take up space on both the first
@@ -541,19 +541,19 @@ class StrutStyle extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final StrutStyle typedOther = other;
-    return fontFamily == typedOther.fontFamily &&
-           fontSize == typedOther.fontSize &&
-           fontWeight == typedOther.fontWeight &&
-           fontStyle == typedOther.fontStyle &&
-           height == typedOther.height &&
-           leading == typedOther.leading &&
-           forceStrutHeight == typedOther.forceStrutHeight;
+    return other is StrutStyle
+        && other.fontFamily == fontFamily
+        && other.fontSize == fontSize
+        && other.fontWeight == fontWeight
+        && other.fontStyle == fontStyle
+        && other.height == height
+        && other.leading == leading
+        && other.forceStrutHeight == forceStrutHeight;
   }
 
   @override
@@ -570,7 +570,7 @@ class StrutStyle extends Diagnosticable {
   }
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => '${objectRuntimeType(this, 'StrutStyle')}';
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
@@ -578,10 +578,11 @@ class StrutStyle extends Diagnosticable {
     super.debugFillProperties(properties);
     if (debugLabel != null)
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
-    final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
-    styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
-    styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
-    styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
+    final List<DiagnosticsNode> styles = <DiagnosticsNode>[
+      StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
+      IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null),
+      DoubleProperty('${prefix}size', fontSize, defaultValue: null),
+    ];
     String weightDescription;
     if (fontWeight != null) {
       weightDescription = 'w${fontWeight.index + 1}00';
@@ -597,7 +598,7 @@ class StrutStyle extends Diagnosticable {
     ));
     styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null));
+    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
     styles.forEach(properties.add);

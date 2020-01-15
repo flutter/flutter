@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,14 +59,16 @@ void main() {
 
   testWidgets('fling and tap to stop', (WidgetTester tester) async {
     final List<String> log = <String>[];
-
-    final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 250; i += 1)
-      textWidgets.add(GestureDetector(onTap: () { log.add('tap $i'); }, child: Text('$i', style: testFont)));
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down),
+        child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
+          children: List<Widget>.generate(250, (int i) => GestureDetector(
+            onTap: () { log.add('tap $i'); },
+            child: Text('$i', style: testFont),
+          )),
+        ),
       ),
     );
 
@@ -87,14 +89,16 @@ void main() {
 
   testWidgets('fling and wait and tap', (WidgetTester tester) async {
     final List<String> log = <String>[];
-
-    final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 250; i += 1)
-      textWidgets.add(GestureDetector(onTap: () { log.add('tap $i'); }, child: Text('$i', style: testFont)));
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down),
+        child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
+          children: List<Widget>.generate(250, (int i) => GestureDetector(
+            onTap: () { log.add('tap $i'); },
+            child: Text('$i', style: testFont),
+          )),
+        ),
       ),
     );
 

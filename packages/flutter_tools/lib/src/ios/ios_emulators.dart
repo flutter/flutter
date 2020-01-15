@@ -1,21 +1,20 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import 'ios_workflow.dart';
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
   @override
-  bool get supportsPlatform => platform.isMacOS;
+  bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
   bool get canListAnything => iosWorkflow.canListEmulators;
@@ -42,22 +41,25 @@ class IOSEmulator extends Emulator {
   @override
   Future<void> launch() async {
     Future<bool> launchSimulator(List<String> additionalArgs) async {
-      final List<String> args = <String>['open']
-          .followedBy(additionalArgs)
-          .followedBy(<String>['-a', xcode.getSimulatorPath()])
-          .toList();
+      final List<String> args = <String>[
+        'open',
+        ...additionalArgs,
+        '-a',
+        xcode.getSimulatorPath(),
+      ];
 
-      final RunResult launchResult = await runAsync(args);
+      final RunResult launchResult = await processUtils.run(args);
       if (launchResult.exitCode != 0) {
-        printError('$launchResult');
+        globals.printError('$launchResult');
         return false;
       }
       return true;
     }
 
     // First run with `-n` to force a device to boot if there isn't already one
-    if (!await launchSimulator(<String>['-n']))
+    if (!await launchSimulator(<String>['-n'])) {
       return;
+    }
 
     // Run again to force it to Foreground (using -n doesn't force existing
     // devices to the foreground)

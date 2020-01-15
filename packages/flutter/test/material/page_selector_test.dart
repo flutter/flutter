@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,7 +50,7 @@ List<Color> indicatorColors(WidgetTester tester) {
     find.descendant(
       of: find.byType(TabPageSelector),
       matching: find.byType(TabPageSelectorIndicator),
-    )
+    ),
   );
   return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
 }
@@ -212,7 +212,7 @@ void main() {
     ).evaluate();
 
     // Indicators get an 8 pixel margin, 16 + 8 = 24.
-    for (Element indicatorElement in indicatorElements)
+    for (final Element indicatorElement in indicatorElements)
       expect(indicatorElement.size, const Size(24.0, 24.0));
 
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);

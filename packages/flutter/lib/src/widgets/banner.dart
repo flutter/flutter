@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -69,7 +69,8 @@ class BannerPainter extends CustomPainter {
        assert(textDirection != null),
        assert(location != null),
        assert(color != null),
-       assert(textStyle != null);
+       assert(textStyle != null),
+       super(repaint: PaintingBinding.instance.systemFonts);
 
   /// The message to show in the banner.
   final String message;
@@ -83,8 +84,10 @@ class BannerPainter extends CustomPainter {
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
-  /// See also [layoutDirection], which controls the interpretation of values in
-  /// [location].
+  /// See also:
+  ///
+  ///  * [layoutDirection], which controls the interpretation of values in
+  ///    [location].
   final TextDirection textDirection;
 
   /// Where to show the banner (e.g., the upper right corner).
@@ -94,8 +97,9 @@ class BannerPainter extends CustomPainter {
   ///
   /// This value is used to interpret the [location] of the banner.
   ///
-  /// See also [textDirection], which controls the reading direction of the
-  /// [message].
+  /// See also:
+  ///
+  ///  * [textDirection], which controls the reading direction of the [message].
   final TextDirection layoutDirection;
 
   /// The color to paint behind the [message].
@@ -276,8 +280,9 @@ class Banner extends StatelessWidget {
   ///
   /// Defaults to the ambient [Directionality], if any.
   ///
-  /// See also [layoutDirection], which controls the interpretation of the
-  /// [location].
+  /// See also:
+  ///
+  ///  * [layoutDirection], which controls the interpretation of the [location].
   final TextDirection textDirection;
 
   /// Where to show the banner (e.g., the upper right corner).
@@ -289,8 +294,9 @@ class Banner extends StatelessWidget {
   ///
   /// Defaults to the ambient [Directionality], if any.
   ///
-  /// See also [textDirection], which controls the reading direction of the
-  /// [message].
+  /// See also:
+  ///
+  ///  * [textDirection], which controls the reading direction of the [message].
   final TextDirection layoutDirection;
 
   /// The color of the banner.
@@ -331,7 +337,7 @@ class Banner extends StatelessWidget {
 /// [MaterialApp] builds one of these by default.
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
-  /// Creates a checked mode banner.
+  /// Creates a const checked mode banner.
   const CheckedModeBanner({
     Key key,
     @required this.child,

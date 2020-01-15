@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -49,7 +49,7 @@ class _OverflowRegionData {
 /// overflows. It will print on the first occurrence, and once after each time that
 /// [reassemble] is called.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
@@ -217,15 +217,12 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       ));
     }
 
-    final List<String> overflows = <String>[];
-    if (overflow.left > 0.0)
-      overflows.add('${_formatPixels(overflow.left)} pixels on the left');
-    if (overflow.top > 0.0)
-      overflows.add('${_formatPixels(overflow.top)} pixels on the top');
-    if (overflow.bottom > 0.0)
-      overflows.add('${_formatPixels(overflow.bottom)} pixels on the bottom');
-    if (overflow.right > 0.0)
-      overflows.add('${_formatPixels(overflow.right)} pixels on the right');
+    final List<String> overflows = <String>[
+      if (overflow.left > 0.0) '${_formatPixels(overflow.left)} pixels on the left',
+      if (overflow.top > 0.0) '${_formatPixels(overflow.top)} pixels on the top',
+      if (overflow.bottom > 0.0) '${_formatPixels(overflow.bottom)} pixels on the bottom',
+      if (overflow.right > 0.0) '${_formatPixels(overflow.right)} pixels on the right',
+    ];
     String overflowText = '';
     assert(overflows.isNotEmpty,
         "Somehow $runtimeType didn't actually overflow like it thought it did.");
@@ -257,7 +254,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
           // handle a little more generically in GUI debugging clients in the
           // future.
           yield DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false);
-        }
+        },
       ),
     );
   }
@@ -285,9 +282,9 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     }
 
     final List<_OverflowRegionData> overflowRegions = _calculateOverflowRegions(overflow, containerRect);
-    for (_OverflowRegionData region in overflowRegions) {
+    for (final _OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
-      final TextSpan textSpan = _indicatorLabel[region.side.index].text;
+      final TextSpan textSpan = _indicatorLabel[region.side.index].text as TextSpan;
       if (textSpan?.text != region.label) {
         _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,

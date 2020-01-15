@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,10 +25,12 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ### Bold
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Here, a single line of text in a [Text] widget is given a specific style
 /// override. The style is mixed with the ambient [DefaultTextStyle] by the
 /// [Text] widget.
+///
+/// ![Applying the style in this way creates bold text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_bold.png)
 ///
 /// ```dart
 /// Text(
@@ -40,9 +42,11 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ### Italics
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// As in the previous example, the [Text] widget is given a specific style
 /// override which is implicitly mixed with the ambient [DefaultTextStyle].
+///
+/// ![This results in italicized text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_italics.png)
 ///
 /// ```dart
 /// Text(
@@ -68,6 +72,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// The [backgroundColor] is treated as a shorthand for
 /// `background: Paint()..color = backgroundColor`.
 ///
+/// ![This results in three lines of text that go from lighter to darker in color.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_opacity_and_color.png)
+///
 /// ```dart
 /// RichText(
 ///   text: TextSpan(
@@ -92,9 +98,11 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ### Size
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// In this example, the ambient [DefaultTextStyle] is explicitly manipulated to
 /// obtain a [TextStyle] that doubles the default font size.
+///
+/// ![This results in text that is twice as large as normal.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_size.png)
 ///
 /// ```dart
 /// Text(
@@ -116,7 +124,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The [height] property can be used to change the line height. Here, the line
 /// height is set to 5 times the font size, so that the text is very spaced out.
 /// Since the `fontSize` is set to 10, the final height of the line is
@@ -124,8 +132,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ```dart
 /// Text(
-///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
-///   style: TextStyle(fontSize: 10, height: 5.0),
+///   'Ladies and gentlemen, you coulda been anywhere in the world tonight, but you’re here with us in New York City.',
+///   style: TextStyle(height: 5, fontSize: 10),
 /// )
 /// ```
 /// {@end-tool}
@@ -134,14 +142,18 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
 ///
+/// See [StrutStyle] for further control of line height at the paragraph level.
+///
 /// ### Wavy red underline with black text
 ///
-/// {@tool sample}
-/// Styles can be combined. In this example, the misspelt word is drawn in black
-/// text and underlined with a wavy red line to indicate a spelling error. (The
-/// remainder is styled according to the Flutter default text styles, not the
-/// ambient [DefaultTextStyle], since no explicit style is given and [RichText]
-/// does not automatically use the ambient [DefaultTextStyle].)
+/// {@tool snippet}
+/// Styles can be combined. In this example, the misspelled word is drawn in
+/// black text and underlined with a wavy red line to indicate a spelling error.
+/// (The remainder is styled according to the Flutter default text styles, not
+/// the ambient [DefaultTextStyle], since no explicit style is given and
+/// [RichText] does not automatically use the ambient [DefaultTextStyle].)
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_wavy_red_underline.png)
 ///
 /// ```dart
 /// RichText(
@@ -166,9 +178,9 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// ### Borders and stroke
+/// ### Borders and stroke (Foreground)
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// To create bordered text, a [Paint] with [Paint.style] set to [PaintingStyle.stroke]
 /// should be provided as a [foreground] paint. The following example uses a [Stack]
 /// to produce a stroke and fill effect.
@@ -198,6 +210,34 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///       ),
 ///     ),
 ///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ### Gradients (Foreground)
+///
+/// {@tool snippet}
+/// The [foreground] property also allows effects such as gradients to be
+/// applied to the text. Here we provide a [Paint] with a [ui.Gradient]
+/// shader.
+///
+/// ![Text gradient](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_gradient.png)
+///
+/// ```dart
+/// Text(
+///   'Greetings, planet!',
+///   style: TextStyle(
+///     fontSize: 40,
+///     foreground: Paint()
+///       ..shader = ui.Gradient.linear(
+///         const Offset(0, 20),
+///         const Offset(150, 20),
+///         <Color>[
+///           Colors.red,
+///           Colors.yellow,
+///         ],
+///       )
+///   ),
 /// )
 /// ```
 /// {@end-tool}
@@ -235,7 +275,9 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// To select a custom font, create [TextStyle] using the [fontFamily]
 /// argument as shown in the example below:
 ///
-/// {@tool sample}
+/// {@tool snippet}
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_custom_fonts.png)
+///
 /// ```dart
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
@@ -280,7 +322,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// In this case, since the app locally defines the font, the TextStyle is
 /// created without the `package` argument:
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// ```dart
 /// const TextStyle(fontFamily: 'Raleway')
 /// ```
@@ -298,6 +340,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 ///  * [fontFamily]
 ///  * [fontFamilyFallback] in order of first to last.
+///  * System fallback fonts which will vary depending on platform.
 ///
 /// The glyph used will always be the first matching version in fallback order.
 ///
@@ -305,7 +348,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// families for multilingual text spans as well as separate fonts for glyphs such
 /// as emojis.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// In the following example, any glyphs not present in the font `Raleway` will be attempted
 /// to be resolved with `Noto Sans CJK SC`, and then with `Noto Color Emoji`:
 ///
@@ -506,13 +549,11 @@ class TextStyle extends Diagnosticable {
   ///
   /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
   ///
-  /// {@tool sample}
-  ///
   /// Examples of the resulting line heights from different values of `TextStyle.height`:
   ///
   /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
   ///
-  /// {@end-tool}
+  /// See [StrutStyle] for further control of line height at the paragraph level.
   final double height;
 
   /// The locale used to select region-specific glyphs.
@@ -568,7 +609,7 @@ class TextStyle extends Diagnosticable {
   /// The style in which to paint the text decorations (e.g., dashed).
   final TextDecorationStyle decorationStyle;
 
-  /// The thickness of the decoration stroke as a muliplier of the thickness
+  /// The thickness of the decoration stroke as a multiplier of the thickness
   /// defined by the font.
   ///
   /// The font provides a base stroke width for [decoration]s which scales off
@@ -577,7 +618,7 @@ class TextStyle extends Diagnosticable {
   /// a [decorationThickness] of 2.0 will draw a decoration twice as thick as
   /// the font defined decoration thickness.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// To achieve a bolded strike-through, we can apply a thicker stroke for the
   /// decoration.
   ///
@@ -592,7 +633,7 @@ class TextStyle extends Diagnosticable {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// We can apply a very thin and subtle wavy underline (perhaps, when words
   /// are misspelled) by using a [decorationThickness] < 1.0.
   ///
@@ -792,7 +833,7 @@ class TextStyle extends Diagnosticable {
       fontFamily: fontFamily ?? this.fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
-      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
+      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1) as int],
       fontStyle: fontStyle,
       letterSpacing: letterSpacing == null ? null : letterSpacing * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
@@ -1098,33 +1139,33 @@ class TextStyle extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final TextStyle typedOther = other;
-    return inherit == typedOther.inherit &&
-           color == typedOther.color &&
-           backgroundColor == typedOther.backgroundColor &&
-           fontFamily == typedOther.fontFamily &&
-           fontSize == typedOther.fontSize &&
-           fontWeight == typedOther.fontWeight &&
-           fontStyle == typedOther.fontStyle &&
-           letterSpacing == typedOther.letterSpacing &&
-           wordSpacing == typedOther.wordSpacing &&
-           textBaseline == typedOther.textBaseline &&
-           height == typedOther.height &&
-           locale == typedOther.locale &&
-           foreground == typedOther.foreground &&
-           background == typedOther.background &&
-           decoration == typedOther.decoration &&
-           decorationColor == typedOther.decorationColor &&
-           decorationStyle == typedOther.decorationStyle &&
-           decorationThickness == typedOther.decorationThickness &&
-           listEquals(shadows, typedOther.shadows) &&
-           listEquals(fontFeatures, typedOther.fontFeatures) &&
-           listEquals(fontFamilyFallback, typedOther.fontFamilyFallback);
+    return other is TextStyle
+        && other.inherit == inherit
+        && other.color == color
+        && other.backgroundColor == backgroundColor
+        && other.fontFamily == fontFamily
+        && other.fontSize == fontSize
+        && other.fontWeight == fontWeight
+        && other.fontStyle == fontStyle
+        && other.letterSpacing == letterSpacing
+        && other.wordSpacing == wordSpacing
+        && other.textBaseline == textBaseline
+        && other.height == height
+        && other.locale == locale
+        && other.foreground == foreground
+        && other.background == background
+        && other.decoration == decoration
+        && other.decorationColor == decorationColor
+        && other.decorationStyle == decorationStyle
+        && other.decorationThickness == decorationThickness
+        && listEquals(other.shadows, shadows)
+        && listEquals(other.fontFeatures, fontFeatures)
+        && listEquals(other.fontFamilyFallback, fontFamilyFallback);
   }
 
   @override
@@ -1154,7 +1195,7 @@ class TextStyle extends Diagnosticable {
   }
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => '${objectRuntimeType(this, 'TextStyle')}';
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
@@ -1162,12 +1203,13 @@ class TextStyle extends Diagnosticable {
     super.debugFillProperties(properties);
     if (debugLabel != null)
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
-    final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
-    styles.add(ColorProperty('${prefix}color', color, defaultValue: null));
-    styles.add(ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null));
-    styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
-    styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
-    styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
+    final List<DiagnosticsNode> styles = <DiagnosticsNode>[
+      ColorProperty('${prefix}color', color, defaultValue: null),
+      ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null),
+      StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
+      IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null),
+      DoubleProperty('${prefix}size', fontSize, defaultValue: null),
+    ];
     String weightDescription;
     if (fontWeight != null) {
       weightDescription = '${fontWeight.index + 1}00';

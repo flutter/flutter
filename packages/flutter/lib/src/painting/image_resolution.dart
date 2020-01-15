@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -219,11 +219,11 @@ class AssetImage extends AssetBundleImageProvider {
     if (jsonData == null)
       return SynchronousFuture<Map<String, List<String>>>(null);
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
-    final Map<String, dynamic> parsedJson = json.decode(jsonData);
+    final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest =
         Map<String, List<String>>.fromIterables(keys,
-          keys.map<List<String>>((String key) => List<String>.from(parsedJson[key])));
+          keys.map<List<String>>((String key) => List<String>.from(parsedJson[key] as List<dynamic>)));
     // TODO(ianh): convert that data structure to the right types.
     return SynchronousFuture<Map<String, List<String>>>(parsedManifest);
   }
@@ -233,7 +233,7 @@ class AssetImage extends AssetBundleImageProvider {
       return main;
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
     final SplayTreeMap<double, String> mapping = SplayTreeMap<double, String>();
-    for (String candidate in candidates)
+    for (final String candidate in candidates)
       mapping[_parseScale(candidate)] = candidate;
     // TODO(ianh): implement support for config.locale, config.textDirection,
     // config.size, config.platform (then document this over in the Image.asset
@@ -277,17 +277,17 @@ class AssetImage extends AssetBundleImageProvider {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final AssetImage typedOther = other;
-    return keyName == typedOther.keyName
-        && bundle == typedOther.bundle;
+    return other is AssetImage
+        && other.keyName == keyName
+        && other.bundle == bundle;
   }
 
   @override
   int get hashCode => hashValues(keyName, bundle);
 
   @override
-  String toString() => '$runtimeType(bundle: $bundle, name: "$keyName")';
+  String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
 }

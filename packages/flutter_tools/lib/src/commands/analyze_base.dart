@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
@@ -26,7 +26,7 @@ abstract class AnalyzeBase {
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile = fs.file(argResults['write']).openSync(mode: FileMode.write);
+        final RandomAccessFile resultsFile = globals.fs.file(argResults['write']).openSync(mode: FileMode.write);
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));
@@ -34,7 +34,7 @@ abstract class AnalyzeBase {
           resultsFile.close();
         }
       } catch (e) {
-        printError('Failed to save output to "${argResults['write']}": $e');
+        globals.printError('Failed to save output to "${argResults['write']}": $e');
       }
     }
   }
@@ -46,24 +46,26 @@ abstract class AnalyzeBase {
       'issues': errorCount,
       'missingDartDocs': membersMissingDocumentation,
     };
-    fs.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
-    printStatus('Analysis benchmark written to $benchmarkOut ($data).');
+    globals.fs.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
+    globals.printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 
-  bool get isBenchmarking => argResults['benchmark'];
+  bool get isBenchmarking => argResults['benchmark'] as bool;
 }
 
 /// Return true if [fileList] contains a path that resides inside the Flutter repository.
 /// If [fileList] is empty, then return true if the current directory resides inside the Flutter repository.
 bool inRepo(List<String> fileList) {
-  if (fileList == null || fileList.isEmpty)
-    fileList = <String>[fs.path.current];
-  final String root = fs.path.normalize(fs.path.absolute(Cache.flutterRoot));
-  final String prefix = root + fs.path.separator;
+  if (fileList == null || fileList.isEmpty) {
+    fileList = <String>[globals.fs.path.current];
+  }
+  final String root = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot));
+  final String prefix = root + globals.fs.path.separator;
   for (String file in fileList) {
-    file = fs.path.normalize(fs.path.absolute(file));
-    if (file == root || file.startsWith(prefix))
+    file = globals.fs.path.normalize(globals.fs.path.absolute(file));
+    if (file == root || file.startsWith(prefix)) {
       return true;
+    }
   }
   return false;
 }
@@ -83,12 +85,13 @@ class PackageDependency {
   }
   bool get hasConflict => values.length > 1;
   bool get hasConflictAffectingFlutterRepo {
-    assert(fs.path.isAbsolute(Cache.flutterRoot));
-    for (List<String> targetSources in values.values) {
-      for (String source in targetSources) {
-        assert(fs.path.isAbsolute(source));
-        if (fs.path.isWithin(Cache.flutterRoot, source))
+    assert(globals.fs.path.isAbsolute(Cache.flutterRoot));
+    for (final List<String> targetSources in values.values) {
+      for (final String source in targetSources) {
+        assert(globals.fs.path.isAbsolute(source));
+        if (globals.fs.path.isWithin(Cache.flutterRoot, source)) {
           return true;
+        }
       }
     }
     return false;
@@ -97,14 +100,15 @@ class PackageDependency {
     assert(hasConflict);
     final List<String> targets = values.keys.toList();
     targets.sort((String a, String b) => values[b].length.compareTo(values[a].length));
-    for (String target in targets) {
+    for (final String target in targets) {
       final int count = values[target].length;
       result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
       bool canonical = false;
-      for (String source in values[target]) {
+      for (final String source in values[target]) {
         result.writeln('    $source');
-        if (source == canonicalSource)
+        if (source == canonicalSource) {
           canonical = true;
+        }
       }
       if (canonical) {
         result.writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
@@ -128,24 +132,25 @@ class PackageDependencyTracker {
 
   /// Read the .packages file in [directory] and add referenced packages to [dependencies].
   void addDependenciesFromPackagesFileIn(Directory directory) {
-    final String dotPackagesPath = fs.path.join(directory.path, '.packages');
-    final File dotPackages = fs.file(dotPackagesPath);
+    final String dotPackagesPath = globals.fs.path.join(directory.path, '.packages');
+    final File dotPackages = globals.fs.file(dotPackagesPath);
     if (dotPackages.existsSync()) {
       // this directory has opinions about what we should be using
       final Iterable<String> lines = dotPackages
         .readAsStringSync()
         .split('\n')
         .where((String line) => !line.startsWith(RegExp(r'^ *#')));
-      for (String line in lines) {
+      for (final String line in lines) {
         final int colon = line.indexOf(':');
         if (colon > 0) {
           final String packageName = line.substring(0, colon);
-          final String packagePath = fs.path.fromUri(line.substring(colon+1));
+          final String packagePath = globals.fs.path.fromUri(line.substring(colon+1));
           // Ensure that we only add `analyzer` and dependent packages defined in the vended SDK (and referred to with a local
-          // fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored
+          // globals.fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored
           // since they would produce spurious conflicts.
-          if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..'))
-            add(packageName, fs.path.normalize(fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
+          if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..')) {
+            add(packageName, globals.fs.path.normalize(globals.fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
+          }
         }
       }
     }
@@ -160,17 +165,25 @@ class PackageDependencyTracker {
   }
 
   void checkForConflictingDependencies(Iterable<Directory> pubSpecDirectories, PackageDependencyTracker dependencies) {
-    for (Directory directory in pubSpecDirectories) {
-      final String pubSpecYamlPath = fs.path.join(directory.path, 'pubspec.yaml');
-      final File pubSpecYamlFile = fs.file(pubSpecYamlPath);
+    for (final Directory directory in pubSpecDirectories) {
+      final String pubSpecYamlPath = globals.fs.path.join(directory.path, 'pubspec.yaml');
+      final File pubSpecYamlFile = globals.fs.file(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
         // we are analyzing the actual canonical source for this package;
         // make sure we remember that, in case all the packages are actually
         // pointing elsewhere somehow.
-        final yaml.YamlMap pubSpecYaml = yaml.loadYaml(fs.file(pubSpecYamlPath).readAsStringSync());
-        final String packageName = pubSpecYaml['name'];
-        final String packagePath = fs.path.normalize(fs.path.absolute(fs.path.join(directory.path, 'lib')));
-        dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
+        final dynamic pubSpecYaml = yaml.loadYaml(globals.fs.file(pubSpecYamlPath).readAsStringSync());
+        if (pubSpecYaml is yaml.YamlMap) {
+          final dynamic packageName = pubSpecYaml['name'];
+          if (packageName is String) {
+            final String packagePath = globals.fs.path.normalize(globals.fs.path.absolute(globals.fs.path.join(directory.path, 'lib')));
+            dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
+          } else {
+            throwToolExit('pubspec.yaml is malformed. The name should be a String.');
+          }
+        } else {
+          throwToolExit('pubspec.yaml is malformed.');
+        }
       }
       dependencies.addDependenciesFromPackagesFileIn(directory);
     }
@@ -206,7 +219,7 @@ class PackageDependencyTracker {
   String generateConflictReport() {
     assert(hasConflicts);
     final StringBuffer result = StringBuffer();
-    for (String package in packages.keys.where((String package) => packages[package].hasConflict)) {
+    for (final String package in packages.keys.where((String package) => packages[package].hasConflict)) {
       result.writeln('Package "$package" has conflicts:');
       packages[package].describeConflict(result);
     }
@@ -215,8 +228,9 @@ class PackageDependencyTracker {
 
   Map<String, String> asPackageMap() {
     final Map<String, String> result = <String, String>{};
-    for (String package in packages.keys)
+    for (final String package in packages.keys) {
       result[package] = packages[package].target;
+    }
     return result;
   }
 }

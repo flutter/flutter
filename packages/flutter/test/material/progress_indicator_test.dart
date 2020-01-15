@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -182,7 +182,7 @@ void main() {
         child: Center(
           child: CircularProgressIndicator(value: 0.0),
         ),
-      )
+      ),
     );
 
     expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
@@ -197,7 +197,7 @@ void main() {
     await tester.pumpWidget(
       const Center(
         child: CircularProgressIndicator(value: null),
-      )
+      ),
     );
 
     expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
@@ -288,7 +288,7 @@ void main() {
             }
           ),
         ),
-      )
+      ),
     );
     expect(tester.hasRunningAnimations, isTrue);
 

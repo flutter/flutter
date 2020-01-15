@@ -1,9 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mockito/mockito.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -461,6 +462,32 @@ void main() {
         '                   android)\n',
       ),
     );
+
+    final RenderBox decoratedBox = tester.renderObject(find.byType(DecoratedBox).last);
+    final PaintingContext context = _MockPaintingContext();
+    final Canvas canvas = _MockCanvas();
+    int saveCount = 0;
+    when(canvas.getSaveCount()).thenAnswer((_) => saveCount++);
+    when(context.canvas).thenReturn(canvas);
+    FlutterError error;
+    try {
+      decoratedBox.paint(context, const Offset(0, 0));
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   BoxDecoration painter had mismatching save and restore calls.\n'
+      '   Before painting the decoration, the canvas save count was 0.\n'
+      '   After painting it, the canvas save count was 2. Every call to\n'
+      '   save() or saveLayer() must be matched by a call to restore().\n'
+      '   The decoration was:\n'
+      '     BoxDecoration(color: Color(0xffffff00))\n'
+      '   The painter was:\n'
+      '     BoxPainter for BoxDecoration(color: Color(0xffffff00))\n'
+    );
   });
 
   testWidgets('Can be placed in an infinite box', (WidgetTester tester) async {
@@ -471,4 +498,39 @@ void main() {
       ),
     );
   });
+
+  testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(Container(
+      clipBehavior: Clip.none,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: const SizedBox(),
+    ));
+
+    expect(
+      find.byType(ClipPath),
+      findsNothing,
+    );
+  });
+
+  testWidgets('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (WidgetTester tester) async {
+    final Container container = Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: const SizedBox(),
+    );
+
+    await tester.pumpWidget(container);
+
+    expect(
+      find.byType(ClipPath),
+      findsOneWidget,
+    );
+  });
 }
+
+class _MockPaintingContext extends Mock implements PaintingContext {}
+class _MockCanvas extends Mock implements Canvas {}

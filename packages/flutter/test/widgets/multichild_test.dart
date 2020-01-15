@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,14 +14,14 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
   ));
   expect(element, isNotNull);
   expect(element.renderObject is RenderStack, isTrue);
-  final RenderStack renderObject = element.renderObject;
+  final RenderStack renderObject = element.renderObject as RenderStack;
   try {
     RenderObject child = renderObject.firstChild;
-    for (BoxDecoration decoration in expectedDecorations) {
+    for (final BoxDecoration decoration in expectedDecorations) {
       expect(child is RenderDecoratedBox, isTrue);
-      final RenderDecoratedBox decoratedBox = child;
+      final RenderDecoratedBox decoratedBox = child as RenderDecoratedBox;
       expect(decoratedBox.decoration, equals(decoration));
-      final StackParentData decoratedBoxParentData = decoratedBox.parentData;
+      final StackParentData decoratedBoxParentData = decoratedBox.parentData as StackParentData;
       child = decoratedBoxParentData.nextSibling;
     }
     expect(child, isNull);
@@ -29,6 +29,13 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
     print(renderObject.toStringDeep());
     rethrow;
   }
+}
+
+class MockMultiChildRenderObjectWidget extends MultiChildRenderObjectWidget {
+  MockMultiChildRenderObjectWidget({ Key key, List<Widget> children }) : super(key: key, children: children);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => null;
 }
 
 void main() {
@@ -344,5 +351,18 @@ void main() {
     );
 
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/37136.
+  test('provides useful assertion message when one of the children is null', () {
+    bool assertionTriggered = false;
+    try {
+      MockMultiChildRenderObjectWidget(children: const <Widget>[null]);
+    } catch (e) {
+      expect(e.toString(), contains("MockMultiChildRenderObjectWidget's children must not contain any null values,"));
+      assertionTriggered = true;
+    }
+
+    expect(assertionTriggered, isTrue);
   });
 }

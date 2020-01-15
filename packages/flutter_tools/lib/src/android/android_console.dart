@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,8 +59,9 @@ class AndroidConsole {
     while (true) {
       final String text = await _queue.next;
       final String trimmedText = text.trim();
-      if (trimmedText == 'OK')
+      if (trimmedText == 'OK') {
         break;
+      }
       if (trimmedText.endsWith('\nOK')) {
         output.write(trimmedText.substring(0, trimmedText.length - 3));
         break;

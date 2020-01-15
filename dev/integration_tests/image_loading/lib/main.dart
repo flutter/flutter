@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,7 +42,7 @@ class _ImageLoaderState extends State<ImageLoader> {
   void initState() {
     // This is not an image, but we don't care since we're using a faked
     // http client.
-    final NetworkImage image = NetworkImage('https://github.com/flutter/flutter');
+    const NetworkImage image = NetworkImage('https://github.com/flutter/flutter');
     final ImageStream stream = image.resolve(ImageConfiguration.empty);
     ImageStreamListener listener;
     listener = ImageStreamListener(

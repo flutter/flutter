@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,22 +26,38 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, ProcessSignal, stderr, stdin, Stdout, stdout;
+import 'dart:io' as io
+  show
+    exit,
+    InternetAddress,
+    InternetAddressType,
+    IOSink,
+    NetworkInterface,
+    pid,
+    Process,
+    ProcessInfo,
+    ProcessSignal,
+    stderr,
+    stdin,
+    Stdin,
+    StdinException,
+    Stdout,
+    stdout;
 
 import 'package:meta/meta.dart';
 
+import '../globals.dart' as globals;
 import 'context.dart';
-import 'platform.dart';
 import 'process.dart';
 
 export 'dart:io'
     show
         BytesBuilder,
         CompressionOptions,
-        // Directory         NO! Use `file_system.dart`
+        // Directory,         NO! Use `file_system.dart`
         exitCode,
-        // File              NO! Use `file_system.dart`
-        // FileSystemEntity  NO! Use `file_system.dart`
+        // File,              NO! Use `file_system.dart`
+        // FileSystemEntity,  NO! Use `file_system.dart`
         gzip,
         HandshakeException,
         HttpClient,
@@ -51,6 +67,7 @@ export 'dart:io'
         HttpException,
         HttpHeaders,
         HttpRequest,
+        HttpResponse,
         HttpServer,
         HttpStatus,
         InternetAddress,
@@ -58,10 +75,12 @@ export 'dart:io'
         IOException,
         IOSink,
         // Link              NO! Use `file_system.dart`
+        // NetworkInterface  NO! Use `io.dart`
         pid,
         // Platform          NO! use `platform.dart`
         Process,
         ProcessException,
+        // ProcessInfo,      NO! use `io.dart`
         ProcessResult,
         // ProcessSignal     NO! Use [ProcessSignal] below.
         ProcessStartMode,
@@ -89,12 +108,27 @@ ExitFunction _exitFunction = _defaultExitFunction;
 
 /// Exits the process.
 ///
+/// Throws [AssertionError] if assertions are enabled and the dart:io exit
+/// is still active when called. This may indicate exit was called in
+/// a test without being configured correctly.
+///
 /// This is analogous to the `exit` function in `dart:io`, except that this
 /// function may be set to a testing-friendly value by calling
 /// [setExitFunctionForTests] (and then restored to its default implementation
 /// with [restoreExitFunction]). The default implementation delegates to
 /// `dart:io`.
-ExitFunction get exit => _exitFunction;
+ExitFunction get exit {
+  assert(
+    _exitFunction != io.exit || !_inUnitTest(),
+    'io.exit was called with assertions active in a unit test',
+  );
+  return _exitFunction;
+}
+
+// Whether the tool is executing in a unit test.
+bool _inUnitTest() {
+  return Zone.current[#test.declarer] != null;
+}
 
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
@@ -116,7 +150,12 @@ void restoreExitFunction() {
 /// Listening on signals that don't exist on the current platform is just a
 /// no-op. This is in contrast to [io.ProcessSignal], where listening to
 /// non-existent signals throws an exception.
-class ProcessSignal implements io.ProcessSignal {
+///
+/// This class does NOT implement io.ProcessSignal, because that class uses
+/// private fields. This means it cannot be used with, e.g., [Process.killPid].
+/// Alternative implementations of the relevant methods that take
+/// [ProcessSignal] instances are available on this class (e.g. "send").
+class ProcessSignal {
   @visibleForTesting
   const ProcessSignal(this._delegate);
 
@@ -129,9 +168,21 @@ class ProcessSignal implements io.ProcessSignal {
 
   final io.ProcessSignal _delegate;
 
-  @override
   Stream<ProcessSignal> watch() {
     return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
+  }
+
+  /// Sends the signal to the given process (identified by pid).
+  ///
+  /// Returns true if the signal was delivered, false otherwise.
+  ///
+  /// On Windows, this can only be used with [ProcessSignal.SIGTERM], which
+  /// terminates the process.
+  ///
+  /// This is implemented by sending the signal using [Process.killPid].
+  bool send(int pid) {
+    assert(!globals.platform.isWindows || this == ProcessSignal.SIGTERM);
+    return io.Process.killPid(pid, _delegate);
   }
 
   @override
@@ -147,8 +198,9 @@ class _PosixProcessSignal extends ProcessSignal {
 
   @override
   Stream<ProcessSignal> watch() {
-    if (platform.isWindows)
+    if (globals.platform.isWindows) {
       return const Stream<ProcessSignal>.empty();
+    }
     return super.watch();
   }
 }
@@ -161,12 +213,135 @@ class Stdio {
   io.IOSink get stderr => io.stderr;
 
   bool get hasTerminal => io.stdout.hasTerminal;
+
+  static bool _stdinHasTerminal;
+
+  /// Determines whether there is a terminal attached.
+  ///
+  /// [io.Stdin.hasTerminal] only covers a subset of cases. In this check the
+  /// echoMode is toggled on and off to catch cases where the tool running in
+  /// a docker container thinks there is an attached terminal. This can cause
+  /// runtime errors such as "inappropriate ioctl for device" if not handled.
+  bool get stdinHasTerminal {
+    if (_stdinHasTerminal != null) {
+      return _stdinHasTerminal;
+    }
+    if (stdin is! io.Stdin) {
+      return _stdinHasTerminal = false;
+    }
+    final io.Stdin ioStdin = stdin as io.Stdin;
+    if (!ioStdin.hasTerminal) {
+      return _stdinHasTerminal = false;
+    }
+    try {
+      final bool currentEchoMode = ioStdin.echoMode;
+      ioStdin.echoMode = !currentEchoMode;
+      ioStdin.echoMode = currentEchoMode;
+    } on io.StdinException {
+      return _stdinHasTerminal = false;
+    }
+    return _stdinHasTerminal = true;
+  }
+
   int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
   int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
   bool get supportsAnsiEscapes => hasTerminal && io.stdout.supportsAnsiEscapes;
 }
 
-Stdio get stdio => context.get<Stdio>() ?? const Stdio();
-io.Stdout get stdout => stdio.stdout;
-Stream<List<int>> get stdin => stdio.stdin;
-io.IOSink get stderr => stdio.stderr;
+io.Stdout get stdout => globals.stdio.stdout;
+Stream<List<int>> get stdin => globals.stdio.stdin;
+io.IOSink get stderr => globals.stdio.stderr;
+bool get stdinHasTerminal => globals.stdio.stdinHasTerminal;
+
+// TODO(zra): Move pid and writePidFile into `ProcessInfo`.
+void writePidFile(String pidFile) {
+  if (pidFile != null) {
+    // Write our pid to the file.
+    globals.fs.file(pidFile).writeAsStringSync(io.pid.toString());
+  }
+}
+
+/// An overridable version of io.ProcessInfo.
+abstract class ProcessInfo {
+  factory ProcessInfo() => _DefaultProcessInfo();
+
+  static ProcessInfo get instance => context.get<ProcessInfo>();
+
+  int get currentRss;
+
+  int get maxRss;
+}
+
+ProcessInfo get processInfo => ProcessInfo.instance;
+
+/// The default implementation of [ProcessInfo], which uses [io.ProcessInfo].
+class _DefaultProcessInfo implements ProcessInfo {
+  @override
+  int get currentRss => io.ProcessInfo.currentRss;
+
+  @override
+  int get maxRss => io.ProcessInfo.maxRss;
+}
+
+/// The return type for [listNetworkInterfaces].
+class NetworkInterface implements io.NetworkInterface {
+  NetworkInterface(this._delegate);
+
+  final io.NetworkInterface _delegate;
+
+  @override
+  List<io.InternetAddress> get addresses => _delegate.addresses;
+
+  @override
+  int get index => _delegate.index;
+
+  @override
+  String get name => _delegate.name;
+
+  @override
+  String toString() => "NetworkInterface('$name', $addresses)";
+}
+
+typedef NetworkInterfaceLister = Future<List<NetworkInterface>> Function({
+  bool includeLoopback,
+  bool includeLinkLocal,
+  io.InternetAddressType type,
+});
+
+NetworkInterfaceLister _networkInterfaceListerOverride;
+
+// Tests can set up a non-default network interface lister.
+@visibleForTesting
+void setNetworkInterfaceLister(NetworkInterfaceLister lister) {
+  _networkInterfaceListerOverride = lister;
+}
+
+@visibleForTesting
+void resetNetworkInterfaceLister() {
+  _networkInterfaceListerOverride = null;
+}
+
+/// This calls [NetworkInterface.list] from `dart:io` unless it is overridden by
+/// [setNetworkInterfaceLister] for a test. If it is overridden for a test,
+/// it should be reset with [resetNetworkInterfaceLister].
+Future<List<NetworkInterface>> listNetworkInterfaces({
+  bool includeLoopback = false,
+  bool includeLinkLocal = false,
+  io.InternetAddressType type = io.InternetAddressType.any,
+}) async {
+  if (_networkInterfaceListerOverride != null) {
+    return _networkInterfaceListerOverride(
+      includeLoopback: includeLoopback,
+      includeLinkLocal: includeLinkLocal,
+      type: type,
+    );
+  }
+  final List<io.NetworkInterface> interfaces = await io.NetworkInterface.list(
+    includeLoopback: includeLoopback,
+    includeLinkLocal: includeLinkLocal,
+    type: type,
+  );
+  return interfaces.map(
+    (io.NetworkInterface interface) => NetworkInterface(interface),
+  ).toList();
+}

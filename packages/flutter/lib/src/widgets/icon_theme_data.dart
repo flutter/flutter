@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,8 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+
+import 'framework.dart' show BuildContext;
 
 /// Defines the color, opacity, and size of icons.
 ///
@@ -54,6 +56,24 @@ class IconThemeData extends Diagnosticable {
     );
   }
 
+  /// Called by [IconTheme.of] to convert this instance to an [IconThemeData]
+  /// that fits the given [BuildContext].
+  ///
+  /// This method gives the ambient [IconThemeData] a chance to update itself,
+  /// after it's been retrieved by [IconTheme.of], and before being returned as
+  /// the final result. For instance, [CupertinoIconThemeData] overrides this method
+  /// to resolve [color], in case [color] is a [CupertinoDynamicColor] and needs
+  /// to be resolved against the given [BuildContext] before it can be used as a
+  /// regular [Color].
+  ///
+  /// The default implementation returns this [IconThemeData] as-is.
+  ///
+  /// See also:
+  ///
+  ///  * [CupertinoIconThemeData.resolve] an implementation that resolves
+  ///    [CupertinoIconThemeData.color] before returning.
+  IconThemeData resolve(BuildContext context) => this;
+
   /// Whether all the properties of this object are non-null.
   bool get isConcrete => color != null && opacity != null && size != null;
 
@@ -61,7 +81,7 @@ class IconThemeData extends Diagnosticable {
   final Color color;
 
   /// An opacity to apply to both explicit and default icon colors.
-  double get opacity => _opacity?.clamp(0.0, 1.0);
+  double get opacity => _opacity?.clamp(0.0, 1.0) as double;
   final double _opacity;
 
   /// The default size for icons.
@@ -80,13 +100,13 @@ class IconThemeData extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final IconThemeData typedOther = other;
-    return color == typedOther.color
-        && opacity == typedOther.opacity
-        && size == typedOther.size;
+    return other is IconThemeData
+        && other.color == color
+        && other.opacity == opacity
+        && other.size == size;
   }
 
   @override

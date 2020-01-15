@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,13 +6,13 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
+import 'constants.dart';
 import 'container.dart';
 import 'editable_text.dart';
 import 'framework.dart';
@@ -619,11 +619,6 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   }
 }
 
-/// The minimum size that a widget should be in order to be easily interacted
-/// with by the user.
-@visibleForTesting
-const double kMinInteractiveSize = 48.0;
-
 class _TextSelectionHandleOverlayState
     extends State<_TextSelectionHandleOverlay> with SingleTickerProviderStateMixin {
   Offset _dragPosition;
@@ -750,7 +745,7 @@ class _TextSelectionHandleOverlayState
 
     // Make sure the GestureDetector is big enough to be easily interactive.
     final Rect interactiveRect = handleRect.expandToInclude(
-      Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveSize / 2),
+      Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveDimension/ 2),
     );
     final RelativeRect padding = RelativeRect.fromLTRB(
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
@@ -824,8 +819,9 @@ class _TextSelectionHandleOverlayState
 ///
 /// See also:
 ///
-/// * [TextField], which implements this delegate for the Material textfield.
-/// * [CupertinoTextField], which implements this delegate for the Cupertino textfield.
+///  * [TextField], which implements this delegate for the Material textfield.
+///  * [CupertinoTextField], which implements this delegate for the Cupertino
+///    textfield.
 abstract class TextSelectionGestureDetectorBuilderDelegate {
   /// [GlobalKey] to the [EditableText] for which the
   /// [TextSelectionGestureDetectorBuilder] will build a [TextSelectionGestureDetector].
@@ -872,7 +868,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
 
-  /// Whether to show the selection tool bar.
+  /// Whether to show the selection toolbar.
   ///
   /// It is based on the signal source when a [onTapDown] is called. This getter
   /// will return true if current [onTapDown] event is triggered by a touch or
@@ -937,7 +933,7 @@ class TextSelectionGestureDetectorBuilder {
   /// Handler for [TextSelectionGestureDetector.onForcePressEnd].
   ///
   /// By default, it selects words in the range specified in [details] and shows
-  /// tool bar if it is necessary.
+  /// toolbar if it is necessary.
   ///
   /// This callback is only applicable when force press is enabled.
   ///
@@ -1022,7 +1018,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapEnd].
   ///
-  /// By default, it shows tool bar if necessary.
+  /// By default, it shows toolbar if necessary.
   ///
   /// See also:
   ///
@@ -1037,7 +1033,7 @@ class TextSelectionGestureDetectorBuilder {
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
   ///
   /// By default, it selects a word through [renderEditable.selectWord] if
-  /// selectionEnabled and shows tool bar if necessary.
+  /// selectionEnabled and shows toolbar if necessary.
   ///
   /// See also:
   ///
@@ -1103,7 +1099,7 @@ class TextSelectionGestureDetectorBuilder {
   Widget buildGestureDetector({
     Key key,
     HitTestBehavior behavior,
-    Widget child
+    Widget child,
   }) {
     return TextSelectionGestureDetector(
       key: key,

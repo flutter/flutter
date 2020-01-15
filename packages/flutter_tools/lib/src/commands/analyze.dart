@@ -1,10 +1,11 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import '../base/file_system.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
@@ -65,19 +66,14 @@ class AnalyzeCommand extends FlutterCommand {
   String get description => "Analyze the project's Dart code.";
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
-  @override
   bool get shouldRunPub {
     // If they're not analyzing the current project.
-    if (!argResults['current-package']) {
+    if (!boolArg('current-package')) {
       return false;
     }
 
     // Or we're not in a project directory.
-    if (!fs.file('pubspec.yaml').existsSync()) {
+    if (!globals.fs.file('pubspec.yaml').existsSync()) {
       return false;
     }
 
@@ -86,13 +82,12 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['watch']) {
+    if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),
       ).analyze();
-      return null;
     } else {
       await AnalyzeOnce(
         argResults,
@@ -100,7 +95,7 @@ class AnalyzeCommand extends FlutterCommand {
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
       ).analyze();
-      return null;
     }
+    return FlutterCommandResult.success();
   }
 }

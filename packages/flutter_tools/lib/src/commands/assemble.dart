@@ -1,29 +1,88 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
-import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../convert.dart';
-import '../globals.dart';
+import '../build_system/depfile.dart';
+import '../build_system/targets/android.dart';
+import '../build_system/targets/assets.dart';
+import '../build_system/targets/dart.dart';
+import '../build_system/targets/ios.dart';
+import '../build_system/targets/linux.dart';
+import '../build_system/targets/macos.dart';
+import '../build_system/targets/web.dart';
+import '../build_system/targets/windows.dart';
+import '../cache.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
-/// The [BuildSystem] instance.
-BuildSystem get buildSystem => context.get<BuildSystem>();
+/// All currently implemented targets.
+const List<Target> _kDefaultTargets = <Target>[
+  UnpackWindows(),
+  CopyAssets(),
+  KernelSnapshot(),
+  AotElfProfile(),
+  AotElfRelease(),
+  AotAssemblyProfile(),
+  AotAssemblyRelease(),
+  DebugMacOSFramework(),
+  DebugMacOSBundleFlutterAssets(),
+  ProfileMacOSBundleFlutterAssets(),
+  ReleaseMacOSBundleFlutterAssets(),
+  DebugBundleLinuxAssets(),
+  WebServiceWorker(),
+  DebugAndroidApplication(),
+  FastStartAndroidApplication(),
+  ProfileAndroidApplication(),
+  ReleaseAndroidApplication(),
+  // This is a one-off rule for bundle and aot compat.
+  CopyFlutterBundle(),
+  // Android ABI specific AOT rules.
+  androidArmProfileBundle,
+  androidArm64ProfileBundle,
+  androidx64ProfileBundle,
+  androidArmReleaseBundle,
+  androidArm64ReleaseBundle,
+  androidx64ReleaseBundle,
+];
 
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
   AssembleCommand() {
-    addSubcommand(AssembleRun());
-    addSubcommand(AssembleDescribe());
-    addSubcommand(AssembleListInputs());
-    addSubcommand(AssembleBuildDirectory());
+    argParser.addMultiOption(
+      'define',
+      abbr: 'd',
+      help: 'Allows passing configuration to a target with --define=target=key=value.',
+    );
+    argParser.addOption('depfile', help: 'A file path where a depfile will be written. '
+      'This contains all build inputs and outputs in a make style syntax'
+    );
+    argParser.addOption('build-inputs', help: 'A file path where a newline '
+        'separated file containing all inputs used will be written after a build.'
+        ' This file is not included as a build input or output. This file is not'
+        ' written if the build fails for any reason.');
+    argParser.addOption('build-outputs', help: 'A file path where a newline '
+        'separated file containing all outputs used will be written after a build.'
+        ' This file is not included as a build input or output. This file is not'
+        ' written if the build fails for any reason.');
+    argParser.addOption('output', abbr: 'o', help: 'A directory where output '
+        'files will be written. Must be either absolute or relative from the '
+        'root of the current Flutter project.',
+    );
+    argParser.addOption(kExtraGenSnapshotOptions);
+    argParser.addOption(
+      'resource-pool-size',
+      help: 'The maximum number of concurrent tasks the build system will run.',
+    );
   }
+
   @override
   String get description => 'Assemble and build flutter resources.';
 
@@ -31,191 +90,154 @@ class AssembleCommand extends FlutterCommand {
   String get name => 'assemble';
 
   @override
-  bool get isExperimental => true;
-
-  @override
-  Future<FlutterCommandResult> runCommand() {
-    return null;
-  }
-}
-
-abstract class AssembleBase extends FlutterCommand {
-  AssembleBase() {
-    argParser.addMultiOption(
-      'define',
-      abbr: 'd',
-      help: 'Allows passing configuration to a target with --define=target=key=value.'
-    );
-    argParser.addOption(
-      'build-mode',
-      allowed: const <String>[
-        'debug',
-        'profile',
-        'release',
-      ],
-    );
-    argParser.addOption(
-      'resource-pool-size',
-      help: 'The maximum number of concurrent tasks the build system will run.'
-    );
-  }
-
-  /// Returns the provided target platform.
-  ///
-  /// Throws a [ToolExit] if none is provided. This intentionally has no
-  /// default.
-  TargetPlatform get targetPlatform {
-    final String value = argResults['target-platform'] ?? 'darwin-x64';
-    if (value == null) {
-      throwToolExit('--target-platform is required for flutter assemble.');
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final FlutterProject futterProject = FlutterProject.current();
+    if (futterProject == null) {
+      return const <CustomDimensions, String>{};
     }
-    return getTargetPlatformForName(value);
-  }
-
-  /// Returns the provided build mode.
-  ///
-  /// Throws a [ToolExit] if none is provided. This intentionally has no
-  /// default.
-  BuildMode get buildMode {
-    final String value = argResults['build-mode'] ?? 'debug';
-    if (value == null) {
-      throwToolExit('--build-mode is required for flutter assemble.');
+    try {
+      final Environment localEnvironment = environment;
+      return <CustomDimensions, String>{
+        CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
+        CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
+      };
+    } catch (err) {
+      // We've failed to send usage.
     }
-    return getBuildModeForName(value);
+    return const <CustomDimensions, String>{};
   }
 
-  /// The name of the target we are describing or building.
-  String get targetName {
+  /// The target(s) we are building.
+  List<Target> get targets {
     if (argResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
     }
-    return argResults.rest.first;
+    final String name = argResults.rest.first;
+    final Map<String, Target> targetMap = <String, Target>{
+      for (final Target target in _kDefaultTargets)
+        target.name: target
+    };
+    final List<Target> results = <Target>[
+      for (final String targetName in argResults.rest)
+        if (targetMap.containsKey(targetName))
+          targetMap[targetName]
+    ];
+    if (results.isEmpty) {
+      throwToolExit('No target named "$name" defined.');
+    }
+    return results;
   }
 
   /// The environmental configuration for a build invocation.
   Environment get environment {
     final FlutterProject flutterProject = FlutterProject.current();
+    String output = stringArg('output');
+    if (output == null) {
+      throwToolExit('--output directory is required for assemble.');
+    }
+    // If path is relative, make it absolute from flutter project.
+    if (globals.fs.path.isRelative(output)) {
+      output = globals.fs.path.join(flutterProject.directory.path, output);
+    }
     final Environment result = Environment(
-      buildDir: fs.directory(getBuildDirectory()),
+      outputDir: globals.fs.directory(output),
+      buildDir: flutterProject.directory
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
-      defines: _parseDefines(argResults['define']),
+      defines: _parseDefines(stringsArg('define')),
+      cacheDir: globals.cache.getRoot(),
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     );
     return result;
   }
 
-  static Map<String, String> _parseDefines(List<String> values) {
+  Map<String, String> _parseDefines(List<String> values) {
     final Map<String, String> results = <String, String>{};
-    for (String chunk in values) {
-      final List<String> parts = chunk.split('=');
-      if (parts.length != 2) {
+    for (final String chunk in values) {
+      final int indexEquals = chunk.indexOf('=');
+      if (indexEquals == -1) {
         throwToolExit('Improperly formatted define flag: $chunk');
       }
-      final String key = parts[0];
-      final String value = parts[1];
+      final String key = chunk.substring(0, indexEquals);
+      final String value = chunk.substring(indexEquals + 1);
       results[key] = value;
+    }
+    // Workaround for extraGenSnapshot formatting.
+    if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
+      results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
     }
     return results;
   }
-}
-
-/// Execute a build starting from a target action.
-class AssembleRun extends AssembleBase {
-  @override
-  String get description => 'Execute the stages for a specified target.';
-
-  @override
-  String get name => 'run';
-
-  @override
-  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildResult result = await buildSystem.build(targetName, environment, BuildSystemConfig(
-      resourcePoolSize: argResults['resource-pool-size'],
+    final List<Target> targets = this.targets;
+    final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
+    final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
+      resourcePoolSize: argResults.wasParsed('resource-pool-size')
+        ? int.tryParse(stringArg('resource-pool-size'))
+        : null,
     ));
     if (!result.success) {
-      for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
-        printError('Target ${data.key} failed: ${data.value.exception}');
-        printError('${data.value.exception}');
+      for (final ExceptionMeasurement measurement in result.exceptions.values) {
+        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
       }
-      throwToolExit('build failed');
-    } else {
-      printStatus('build succeeded');
+      throwToolExit('build failed.');
     }
-    return null;
-  }
-}
-
-/// Fully describe a target and its dependencies.
-class AssembleDescribe extends AssembleBase {
-  @override
-  String get description => 'List the stages for a specified target.';
-
-  @override
-  String get name => 'describe';
-
-  @override
-  bool get isExperimental => true;
-
-  @override
-  Future<FlutterCommandResult> runCommand() {
-    try {
-      printStatus(
-        json.encode(buildSystem.describe(targetName, environment))
-      );
-    } on Exception catch (err, stackTrace) {
-      printTrace(stackTrace.toString());
-      throwToolExit(err.toString());
+    globals.printTrace('build succeeded.');
+    if (argResults.wasParsed('build-inputs')) {
+      writeListIfChanged(result.inputFiles, stringArg('build-inputs'));
     }
-    return null;
-  }
-}
-
-/// List input files for a target.
-class AssembleListInputs extends AssembleBase {
-  @override
-  String get description => 'List the inputs for a particular target.';
-
-  @override
-  String get name => 'inputs';
-
-  @override
-  bool get isExperimental => true;
-
-  @override
-  Future<FlutterCommandResult> runCommand() {
-    try {
-      final List<Map<String, Object>> results = buildSystem.describe(targetName, environment);
-      for (Map<String, Object> result in results) {
-        if (result['name'] == targetName) {
-          final List<String> inputs = result['inputs'];
-          inputs.forEach(printStatus);
-        }
-      }
-    } on Exception catch (err, stackTrace) {
-      printTrace(stackTrace.toString());
-      throwToolExit(err.toString());
+    if (argResults.wasParsed('build-outputs')) {
+      writeListIfChanged(result.outputFiles, stringArg('build-outputs'));
     }
-    return null;
+    if (argResults.wasParsed('depfile')) {
+      final File depfileFile = globals.fs.file(stringArg('depfile'));
+      final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+      depfile.writeToFile(globals.fs.file(depfileFile));
+    }
+    return FlutterCommandResult.success();
   }
 }
 
-/// Return the build directory for a configuiration.
-class AssembleBuildDirectory extends AssembleBase {
-  @override
-  String get description => 'List the inputs for a particular target.';
-
-  @override
-  String get name => 'build-dir';
-
-  @override
-  bool get isExperimental => true;
-
-  @override
-  Future<FlutterCommandResult> runCommand() {
-    printStatus(environment.buildDir.path);
-    return null;
+@visibleForTesting
+void writeListIfChanged(List<File> files, String path) {
+  final File file = globals.fs.file(path);
+  final StringBuffer buffer = StringBuffer();
+  // These files are already sorted.
+  for (final File file in files) {
+    buffer.writeln(file.path);
+  }
+  final String newContents = buffer.toString();
+  if (!file.existsSync()) {
+    file.writeAsStringSync(newContents);
+  }
+  final String currentContents = file.readAsStringSync();
+  if (currentContents != newContents) {
+    file.writeAsStringSync(newContents);
   }
 }
 
+class _CompositeTarget extends Target {
+  _CompositeTarget(this.dependencies);
+
+  @override
+  final List<Target> dependencies;
+
+  @override
+  String get name => '_composite';
+
+  @override
+  Future<void> build(Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
+}

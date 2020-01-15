@@ -1,8 +1,6 @@
 <<skip until matching line>>
 ══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
-The following assertion was thrown building
-RawGestureDetector-\[LabeledGlobalKey<RawGestureDetectorState>#.+\]\(state:
-RawGestureDetectorState#.+\(gestures: <none>, behavior: opaque\)\):
+The following assertion was thrown building Listener
 'package:flutter\/src\/painting\/basic_types\.dart': Failed assertion: line 223 pos 10: 'textDirection
 != null': is not true\.
 

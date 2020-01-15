@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,19 +19,18 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...debugAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
+          'lib/arm64-v8a/libapp.so',
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
@@ -46,19 +45,16 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-          'lib/armeabi-v7a/libflutter.so',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...debugAssets,
+          ...baseApkFiles,
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
@@ -73,19 +69,16 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-          'lib/armeabi-v7a/libflutter.so',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...debugAssets,
+          ...baseApkFiles,
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
@@ -99,19 +92,17 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
+          ...debugAssets,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
         ], apkFiles);
       });
 
@@ -122,26 +113,24 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
+          ...debugAssets,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
         ], apkFiles);
       });
 
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
-        final String errorMessage = validateSnapshotDependency(project, 'build/app.dill');
+        final String errorMessage = validateSnapshotDependency(project, 'kernel_blob.bin');
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
         }
@@ -189,7 +178,7 @@ Future<void> main() async {
         if (result.exitCode == 0)
           throw failure(
               'Gradle did not exit with error as expected', result);
-        final String output = result.stdout + '\n' + result.stderr;
+        final String output = '${result.stdout}\n${result.stderr}';
         if (output.contains('GradleException') ||
             output.contains('Failed to notify') ||
             output.contains('at org.gradle'))
@@ -208,7 +197,7 @@ Future<void> main() async {
         if (result.exitCode == 0)
           throw failure(
               'flutter build apk should fail when Gradle does', result);
-        final String output = result.stdout + '\n' + result.stderr;
+        final String output = '${result.stdout}\n${result.stderr}';
         if (!output.contains('Build failed') || !output.contains('builTypes'))
           throw failure(
               'flutter build apk output should contain a readable Gradle error message',

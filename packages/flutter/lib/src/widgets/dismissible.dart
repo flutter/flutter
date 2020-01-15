@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -159,10 +159,14 @@ class Dismissible extends StatefulWidget {
   /// Flinging is treated as being equivalent to dragging almost to 1.0, so
   /// flinging can dismiss an item past any threshold less than 1.0.
   ///
-  /// See also [direction], which controls the directions in which the items can
-  /// be dismissed. Setting a threshold of 1.0 (or greater) prevents a drag in
-  /// the given [DismissDirection] even if it would be allowed by the
-  /// [direction] property.
+  /// Setting a threshold of 1.0 (or greater) prevents a drag in the given
+  /// [DismissDirection] even if it would be allowed by the [direction]
+  /// property.
+  ///
+  /// See also:
+  ///
+  ///  * [direction], which controls the directions in which the items can
+  ///    be dismissed.
   final Map<DismissDirection, double> dismissThresholds;
 
   /// Defines the duration for card to dismiss or to come back to original position if not dismissed.
@@ -536,11 +540,13 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       assert(() {
         if (_resizeAnimation.status != AnimationStatus.forward) {
           assert(_resizeAnimation.status == AnimationStatus.completed);
-          throw FlutterError(
-            'A dismissed Dismissible widget is still part of the tree.\n'
-            'Make sure to implement the onDismissed handler and to immediately remove the Dismissible\n'
-            'widget from the application once that handler has fired.'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('A dismissed Dismissible widget is still part of the tree.'),
+            ErrorHint(
+              'Make sure to implement the onDismissed handler and to immediately remove the Dismissible '
+              'widget from the application once that handler has fired.'
+            )
+          ]);
         }
         return true;
       }());
@@ -562,22 +568,19 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     );
 
     if (background != null) {
-      final List<Widget> children = <Widget>[];
-
-      if (!_moveAnimation.isDismissed) {
-        children.add(Positioned.fill(
-          child: ClipRect(
-            clipper: _DismissibleClipper(
-              axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
-              moveAnimation: _moveAnimation,
+      content = Stack(children: <Widget>[
+        if (!_moveAnimation.isDismissed)
+          Positioned.fill(
+            child: ClipRect(
+              clipper: _DismissibleClipper(
+                axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
+                moveAnimation: _moveAnimation,
+              ),
+              child: background,
             ),
-            child: background,
           ),
-        ));
-      }
-
-      children.add(content);
-      content = Stack(children: children);
+        content,
+      ]);
     }
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(

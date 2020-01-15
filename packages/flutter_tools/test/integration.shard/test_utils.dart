@@ -1,13 +1,12 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 
@@ -15,24 +14,25 @@ import '../src/common.dart';
 /// underlying path to avoid issues with breakpoints/hot reload.
 /// https://github.com/flutter/flutter/pull/21741
 Directory createResolvedTempDirectorySync(String prefix) {
-  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_$prefix');
-  return fs.directory(tempDir.resolveSymbolicLinksSync());
+  assert(prefix.endsWith('.'));
+  final Directory tempDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_$prefix');
+  return globals.fs.directory(tempDirectory.resolveSymbolicLinksSync());
 }
 
 void writeFile(String path, String content) {
-  fs.file(path)
+  globals.fs.file(path)
     ..createSync(recursive: true)
     ..writeAsStringSync(content);
 }
 
 void writePackages(String folder) {
-  writeFile(fs.path.join(folder, '.packages'), '''
-test:${fs.path.join(fs.currentDirectory.path, 'lib')}/
+  writeFile(globals.fs.path.join(folder, '.packages'), '''
+test:${globals.fs.path.join(globals.fs.currentDirectory.path, 'lib')}/
 ''');
 }
 
 void writePubspec(String folder) {
-  writeFile(fs.path.join(folder, 'pubspec.yaml'), '''
+  writeFile(globals.fs.path.join(folder, 'pubspec.yaml'), '''
 name: test
 dependencies:
   flutter:
@@ -42,15 +42,12 @@ dependencies:
 
 Future<void> getPackages(String folder) async {
   final List<String> command = <String>[
-    fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
+    globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
     'pub',
     'get',
   ];
-  final Process process = await processManager.start(command, workingDirectory: folder);
-  final StringBuffer errorOutput = StringBuffer();
-  process.stderr.transform(utf8.decoder).listen(errorOutput.write);
-  final int exitCode = await process.exitCode;
-  if (exitCode != 0)
-    throw Exception(
-        'flutter pub get failed: ${errorOutput.toString()}');
+  final ProcessResult result = await globals.processManager.run(command, workingDirectory: folder);
+  if (result.exitCode != 0) {
+    throw Exception('flutter pub get failed: ${result.stderr}\n${result.stdout}');
+  }
 }

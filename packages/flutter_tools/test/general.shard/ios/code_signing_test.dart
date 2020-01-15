@@ -1,6 +1,7 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -12,7 +13,7 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -27,15 +28,18 @@ void main() {
     BuildableIOSApp app;
     AnsiTerminal testTerminal;
 
-    setUp(() {
+    setUp(() async {
       mockProcessManager = MockProcessManager();
       mockConfig = MockConfig();
       mockIosProject = MockIosProject();
-      when(mockIosProject.buildSettings).thenReturn(<String, String>{
-        'For our purposes': 'a non-empty build settings map is valid',
+      when(mockIosProject.buildSettings).thenAnswer((_) {
+        return Future<Map<String, String>>.value(<String, String>{
+          'For our purposes': 'a non-empty build settings map is valid',
+        });
       });
       testTerminal = TestTerminal();
-      app = BuildableIOSApp(mockIosProject);
+      testTerminal.usesTerminalUi = true;
+      app = await BuildableIOSApp.fromProject(mockIosProject);
     });
 
     testUsingContext('No auto-sign if Xcode project settings are not available', () async {
@@ -45,8 +49,10 @@ void main() {
     });
 
     testUsingContext('No discovery if development team specified in Xcode project', () async {
-      when(mockIosProject.buildSettings).thenReturn(<String, String>{
-        'DEVELOPMENT_TEAM': 'abc',
+      when(mockIosProject.buildSettings).thenAnswer((_) {
+        return Future<Map<String, String>>.value(<String, String>{
+          'DEVELOPMENT_TEAM': 'abc',
+        });
       });
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
       expect(signingConfigs, isNull);
@@ -58,8 +64,8 @@ void main() {
     });
 
     testUsingContext('No auto-sign if security or openssl not available', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsFail);
+      when(mockProcessManager.run(<String>['which', 'security']))
+          .thenAnswer((_) => Future<ProcessResult>.value(exitsFail));
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
       expect(signingConfigs, isNull);
     },
@@ -68,15 +74,21 @@ void main() {
     });
 
     testUsingContext('No valid code signing certificates shows instructions', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(<String>['which', 'openssl']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(
-      argThat(contains('find-identity')),
+      when(mockProcessManager.run(
+        <String>['which', 'security'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        <String>['which', 'openssl'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        argThat(contains('find-identity')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(exitsHappy);
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
 
 
       Map<String, String> signingConfigs;
@@ -94,39 +106,45 @@ void main() {
     });
 
     testUsingContext('Test single identity and certificate organization works', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(<String>['which', 'openssl']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(
-      argThat(contains('find-identity')),
+      when(mockProcessManager.run(
+        <String>['which', 'security'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        <String>['which', 'openssl'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        argThat(contains('find-identity')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
     1 valid identities found''',
         '',
-      ));
-      when(mockProcessManager.runSync(
+      )));
+      when(mockProcessManager.run(
         <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         'This is a mock certificate',
         '',
-      ));
+      )));
 
       final MockProcess mockProcess = MockProcess();
       final MockStdIn mockStdIn = MockStdIn();
       final MockStream mockStdErr = MockStream();
 
       when(mockProcessManager.start(
-      argThat(contains('openssl')),
+        argThat(contains('openssl')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockProcess));
@@ -153,16 +171,95 @@ void main() {
       OutputPreferences: () => OutputPreferences(wrapText: false),
     });
 
-    testUsingContext('Test multiple identity and certificate organization works', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(<String>['which', 'openssl']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(
-      argThat(contains('find-identity')),
+
+    testUsingContext('Test single identity (Catalina format) and certificate organization works', () async {
+      when(mockProcessManager.run(
+        <String>['which', 'security'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        <String>['which', 'openssl'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        argThat(contains('find-identity')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
+        1, // pid
+        0, // exitCode
+        '''
+1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "Apple Development: Profile 1 (1111AAAA11)"
+    1 valid identities found''',
+        '',
+      )));
+      when(mockProcessManager.run(
+        <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
+        1, // pid
+        0, // exitCode
+        'This is a mock certificate',
+        '',
+      )));
+
+      final MockProcess mockProcess = MockProcess();
+      final MockStdIn mockStdIn = MockStdIn();
+      final MockStream mockStdErr = MockStream();
+
+      when(mockProcessManager.start(
+        argThat(contains('openssl')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((Invocation invocation) => Future<Process>.value(mockProcess));
+
+      when(mockProcess.stdin).thenReturn(mockStdIn);
+      when(mockProcess.stdout)
+          .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+            Future<List<int>>.value(utf8.encode(
+              'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US'
+            ))
+          ));
+      when(mockProcess.stderr).thenAnswer((Invocation invocation) => mockStdErr);
+      when(mockProcess.exitCode).thenAnswer((_) async => 0);
+
+      Map<String, String> signingConfigs;
+      try {
+        signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      } catch (e) {
+        // This should not throw
+        expect(true, false);
+      }
+
+      expect(testLogger.statusText, contains('Apple Development: Profile 1 (1111AAAA11)'));
+      expect(testLogger.errorText, isEmpty);
+      verify(mockStdIn.write('This is a mock certificate'));
+      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '3333CCCC33'});
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      OutputPreferences: () => OutputPreferences(wrapText: false),
+    });
+
+    testUsingContext('Test multiple identity and certificate organization works', () async {
+      when(mockProcessManager.run(
+        <String>['which', 'security'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        <String>['which', 'openssl'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         '''
@@ -171,26 +268,26 @@ void main() {
 3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
     3 valid identities found''',
         '',
-      ));
+      )));
       mockTerminalStdInStream =
           Stream<String>.fromFuture(Future<String>.value('3'));
-      when(mockProcessManager.runSync(
+      when(mockProcessManager.run(
         <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         'This is a mock certificate',
         '',
-      ));
+      )));
 
       final MockProcess mockOpenSslProcess = MockProcess();
       final MockStdIn mockOpenSslStdIn = MockStdIn();
       final MockStream mockOpenSslStdErr = MockStream();
 
       when(mockProcessManager.start(
-      argThat(contains('openssl')),
+        argThat(contains('openssl')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockOpenSslProcess));
@@ -219,7 +316,7 @@ void main() {
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
 
-      verify(config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
+      verify(globals.config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -229,15 +326,22 @@ void main() {
     });
 
     testUsingContext('Test multiple identity in machine mode works', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(<String>['which', 'openssl']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(
-      argThat(contains('find-identity')),
+      testTerminal.usesTerminalUi = false;
+      when(mockProcessManager.run(
+        <String>['which', 'security'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        <String>['which', 'openssl'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        argThat(contains('find-identity')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         '''
@@ -246,26 +350,26 @@ void main() {
 3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
     3 valid identities found''',
           '',
-      ));
+      )));
       mockTerminalStdInStream =
         Stream<String>.fromFuture(Future<String>.error(Exception('Cannot read from StdIn')));
-      when(mockProcessManager.runSync(
+      when(mockProcessManager.run(
         <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         'This is a mock certificate',
         '',
-      ));
+      )));
 
       final MockProcess mockOpenSslProcess = MockProcess();
       final MockStdIn mockOpenSslStdIn = MockStdIn();
       final MockStream mockOpenSslStdErr = MockStream();
 
       when(mockProcessManager.start(
-      argThat(contains('openssl')),
+        argThat(contains('openssl')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockOpenSslProcess));
@@ -280,7 +384,7 @@ void main() {
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: false);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
       expect(
         testLogger.statusText,
@@ -298,15 +402,21 @@ void main() {
     });
 
     testUsingContext('Test saved certificate used', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(<String>['which', 'openssl']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(
-      argThat(contains('find-identity')),
+      when(mockProcessManager.run(
+        <String>['which', 'security'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        <String>['which', 'openssl'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        argThat(contains('find-identity')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         '''
@@ -315,24 +425,24 @@ void main() {
 3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
     3 valid identities found''',
         '',
-      ));
-      when(mockProcessManager.runSync(
+      )));
+      when(mockProcessManager.run(
         <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         'This is a mock certificate',
         '',
-      ));
+      )));
 
       final MockProcess mockOpenSslProcess = MockProcess();
       final MockStdIn mockOpenSslStdIn = MockStdIn();
       final MockStream mockOpenSslStdErr = MockStream();
 
       when(mockProcessManager.start(
-      argThat(contains('openssl')),
+        argThat(contains('openssl')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockOpenSslProcess));
@@ -346,7 +456,7 @@ void main() {
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
-      when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
+      when<String>(mockConfig.getValue('ios-signing-cert') as String).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
@@ -369,15 +479,21 @@ void main() {
     });
 
     testUsingContext('Test invalid saved certificate shows error and prompts again', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(<String>['which', 'openssl']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(
-      argThat(contains('find-identity')),
+      when(mockProcessManager.run(
+        <String>['which', 'security'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        <String>['which', 'openssl'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        argThat(contains('find-identity')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         '''
@@ -386,19 +502,19 @@ void main() {
 3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
     3 valid identities found''',
         '',
-      ));
+      )));
       mockTerminalStdInStream =
           Stream<String>.fromFuture(Future<String>.value('3'));
-      when(mockProcessManager.runSync(
+      when(mockProcessManager.run(
         <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
         1, // pid
         0, // exitCode
         'This is a mock certificate',
         '',
-      ));
+      )));
 
 
       final MockProcess mockOpenSslProcess = MockProcess();
@@ -406,7 +522,7 @@ void main() {
       final MockStream mockOpenSslStdErr = MockStream();
 
       when(mockProcessManager.start(
-      argThat(contains('openssl')),
+        argThat(contains('openssl')),
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockOpenSslProcess));
@@ -420,7 +536,7 @@ void main() {
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
-      when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Invalid Profile');
+      when<String>(mockConfig.getValue('ios-signing-cert') as String).thenReturn('iPhone Developer: Invalid Profile');
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
@@ -433,7 +549,7 @@ void main() {
         contains('Certificate choice "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
-      verify(config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
+      verify(globals.config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -442,15 +558,23 @@ void main() {
     });
 
     testUsingContext('find-identity failure', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(<String>['which', 'openssl']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(
-          argThat(contains('find-identity')),
-            environment: anyNamed('environment'),
-            workingDirectory: anyNamed('workingDirectory'),
-          )).thenReturn(ProcessResult(0, 1, '', ''));
+      when(mockProcessManager.run(
+        <String>['which', 'security'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        <String>['which', 'openssl'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(
+        ProcessResult(0, 1, '', '')
+      ));
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
       expect(signingConfigs, isNull);
@@ -462,15 +586,21 @@ void main() {
     });
 
     testUsingContext('find-certificate failure', () async {
-      when(mockProcessManager.runSync(<String>['which', 'security']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(<String>['which', 'openssl']))
-          .thenReturn(exitsHappy);
-      when(mockProcessManager.runSync(
-          argThat(contains('find-identity')),
-            environment: anyNamed('environment'),
-            workingDirectory: anyNamed('workingDirectory'),
-          )).thenReturn(ProcessResult(
+      when(mockProcessManager.run(
+        <String>['which', 'security'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        <String>['which', 'openssl'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
+      when(mockProcessManager.run(
+        argThat(contains('find-identity')),
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
             1, // pid
             0, // exitCode
             '''
@@ -479,14 +609,16 @@ void main() {
 3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
     3 valid identities found''',
             '',
-          ));
+      )));
       mockTerminalStdInStream =
           Stream<String>.fromFuture(Future<String>.value('3'));
-      when(mockProcessManager.runSync(
+      when(mockProcessManager.run(
         <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenReturn(ProcessResult(1, 1, '', '' ));
+      )).thenAnswer((_) => Future<ProcessResult>.value(
+        ProcessResult(1, 1, '', '' ))
+      );
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
       expect(signingConfigs, isNull);
@@ -522,6 +654,8 @@ class MockConfig extends Mock implements Config {}
 Stream<String> mockTerminalStdInStream;
 
 class TestTerminal extends AnsiTerminal {
+  TestTerminal() : super(stdio: globals.stdio, platform: globals.platform);
+
   @override
   String bolden(String message) => '<bold>$message</bold>';
 

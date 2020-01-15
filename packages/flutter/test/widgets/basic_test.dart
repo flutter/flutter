@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,7 +17,7 @@ void main() {
           elevation: 2.0,
           color: Color(0xFF0000FF),
           shadowColor: Color(0xFF00FF00),
-        )
+        ),
       );
       final RenderPhysicalShape renderObject = tester.renderObject(find.byType(PhysicalShape));
       expect(renderObject.clipper, const ShapeBorderClipper(shape: CircleBorder()));
@@ -34,7 +34,7 @@ void main() {
           color: const Color(0xFF0000FF),
           shadowColor: const Color(0xFF00FF00),
           child: Container(color: const Color(0xFF0000FF)),
-        )
+        ),
       );
 
       final RenderPhysicalShape renderPhysicalShape =
@@ -79,7 +79,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
       );
       expect(_pointerDown, isFalse);
       await tester.tap(find.byKey(key1));
@@ -109,7 +109,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
       );
       expect(_pointerDown, isFalse);
       await tester.tap(find.byKey(key1));
@@ -139,7 +139,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
       );
       expect(_pointerDown, isFalse);
       await tester.tap(find.byKey(key1));
@@ -168,7 +168,7 @@ void main() {
                   ),
                   Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                     key: key2,
-                    style: const TextStyle(fontSize: fontSize2)
+                    style: const TextStyle(fontSize: fontSize2),
                   ),
                 ],
               ),
@@ -230,7 +230,7 @@ class HitsRenderBox extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final HitTestResult hitTestResult = item;
+    final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
       (HitTestEntry entry) => entry.target == renderBox
     ).isNotEmpty;
@@ -250,7 +250,7 @@ class DoesNotHitRenderBox extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final HitTestResult hitTestResult = item;
+    final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
       (HitTestEntry entry) => entry.target == renderBox
     ).isEmpty;

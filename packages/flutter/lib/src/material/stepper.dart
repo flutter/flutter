@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -192,7 +192,7 @@ class Stepper extends StatefulWidget {
   /// This callback which takes in a context and two functions,[onStepContinue]
   /// and [onStepCancel]. These can be used to control the stepper.
   ///
-  /// {@tool snippet --template=stateless_widget_scaffold}
+  /// {@tool sample --template=stateless_widget_scaffold}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart
@@ -480,32 +480,27 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildHeaderText(int index) {
-    final List<Widget> children = <Widget>[
-      AnimatedDefaultTextStyle(
-        style: _titleStyle(index),
-        duration: kThemeAnimationDuration,
-        curve: Curves.fastOutSlowIn,
-        child: widget.steps[index].title,
-      ),
-    ];
-
-    if (widget.steps[index].subtitle != null)
-      children.add(
-        Container(
-          margin: const EdgeInsets.only(top: 2.0),
-          child: AnimatedDefaultTextStyle(
-            style: _subtitleStyle(index),
-            duration: kThemeAnimationDuration,
-            curve: Curves.fastOutSlowIn,
-            child: widget.steps[index].subtitle,
-          ),
-        ),
-      );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
-      children: children,
+      children: <Widget>[
+        AnimatedDefaultTextStyle(
+          style: _titleStyle(index),
+          duration: kThemeAnimationDuration,
+          curve: Curves.fastOutSlowIn,
+          child: widget.steps[index].title,
+        ),
+        if (widget.steps[index].subtitle != null)
+          Container(
+            margin: const EdgeInsets.only(top: 2.0),
+            child: AnimatedDefaultTextStyle(
+              style: _subtitleStyle(index),
+              duration: kThemeAnimationDuration,
+              curve: Curves.fastOutSlowIn,
+              child: widget.steps[index].subtitle,
+            ),
+          ),
+      ],
     );
   }
 
@@ -577,51 +572,46 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVertical() {
-    final List<Widget> children = <Widget>[];
-
-    for (int i = 0; i < widget.steps.length; i += 1) {
-      children.add(
-        Column(
-          key: _keys[i],
-          children: <Widget>[
-            InkWell(
-              onTap: widget.steps[i].state != StepState.disabled ? () {
-                // In the vertical case we need to scroll to the newly tapped
-                // step.
-                Scrollable.ensureVisible(
-                  _keys[i].currentContext,
-                  curve: Curves.fastOutSlowIn,
-                  duration: kThemeAnimationDuration,
-                );
-
-                if (widget.onStepTapped != null)
-                  widget.onStepTapped(i);
-              } : null,
-              child: _buildVerticalHeader(i),
-            ),
-            _buildVerticalBody(i),
-          ],
-        )
-      );
-    }
-
     return ListView(
       shrinkWrap: true,
       physics: widget.physics,
-      children: children,
+      children: <Widget>[
+        for (int i = 0; i < widget.steps.length; i += 1)
+          Column(
+            key: _keys[i],
+            children: <Widget>[
+              InkWell(
+                onTap: widget.steps[i].state != StepState.disabled ? () {
+                  // In the vertical case we need to scroll to the newly tapped
+                  // step.
+                  Scrollable.ensureVisible(
+                    _keys[i].currentContext,
+                    curve: Curves.fastOutSlowIn,
+                    duration: kThemeAnimationDuration,
+                  );
+
+                  if (widget.onStepTapped != null)
+                    widget.onStepTapped(i);
+                } : null,
+                canRequestFocus: widget.steps[i].state != StepState.disabled,
+                child: _buildVerticalHeader(i),
+              ),
+              _buildVerticalBody(i),
+            ],
+          ),
+      ],
     );
   }
 
   Widget _buildHorizontal() {
-    final List<Widget> children = <Widget>[];
-
-    for (int i = 0; i < widget.steps.length; i += 1) {
-      children.add(
+    final List<Widget> children = <Widget>[
+      for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
           onTap: widget.steps[i].state != StepState.disabled ? () {
             if (widget.onStepTapped != null)
               widget.onStepTapped(i);
           } : null,
+          canRequestFocus: widget.steps[i].state != StepState.disabled,
           child: Row(
             children: <Widget>[
               Container(
@@ -637,10 +627,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             ],
           ),
         ),
-      );
-
-      if (!_isLast(i)) {
-        children.add(
+        if (!_isLast(i))
           Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -648,9 +635,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               color: Colors.grey.shade400,
             ),
           ),
-        );
-      }
-    }
+      ],
+    ];
 
     return Column(
       children: <Widget>[
@@ -686,10 +672,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(() {
-      if (context.ancestorWidgetOfExactType(Stepper) != null)
+      if (context.findAncestorWidgetOfExactType<Stepper>() != null)
         throw FlutterError(
-          'Steppers must not be nested. The material specification advises '
-          'that one should avoid embedding steppers within steppers. '
+          'Steppers must not be nested.\n'
+          'The material specification advises that one should avoid embedding '
+          'steppers within steppers. '
           'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
         );
       return true;

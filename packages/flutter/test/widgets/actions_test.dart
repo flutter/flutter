@@ -1,9 +1,11 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,7 +40,7 @@ class TestDispatcher1 extends TestDispatcher {
 }
 
 void main() {
-  test('$Action passes parameters on when invoked.', () {
+  test('Action passes parameters on when invoked.', () {
     bool invoked = false;
     FocusNode passedNode;
     final TestAction action = TestAction(onInvoke: (FocusNode node, Intent invocation) {
@@ -52,7 +54,7 @@ void main() {
     expect(invoked, isTrue);
   });
   group(ActionDispatcher, () {
-    test('$ActionDispatcher invokes actions when asked.', () {
+    test('ActionDispatcher invokes actions when asked.', () {
       bool invoked = false;
       FocusNode passedNode;
       const ActionDispatcher dispatcher = ActionDispatcher();
@@ -94,7 +96,7 @@ void main() {
 
     setUp(clear);
 
-    testWidgets('$Actions widget can invoke actions with default dispatcher', (WidgetTester tester) async {
+    testWidgets('Actions widget can invoke actions with default dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       FocusNode passedNode;
@@ -124,7 +126,7 @@ void main() {
       expect(result, isTrue);
       expect(invoked, isTrue);
     });
-    testWidgets('$Actions widget can invoke actions with custom dispatcher', (WidgetTester tester) async {
+    testWidgets('Actions widget can invoke actions with custom dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const Intent intent = Intent(TestAction.key);
@@ -159,7 +161,7 @@ void main() {
       expect(invoked, isTrue);
       expect(invokedIntent, equals(intent));
     });
-    testWidgets('$Actions widget can invoke actions in ancestor dispatcher', (WidgetTester tester) async {
+    testWidgets('Actions can invoke actions in ancestor dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const Intent intent = Intent(TestAction.key);
@@ -200,7 +202,47 @@ void main() {
       expect(invokedAction, equals(testAction));
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
-    testWidgets('$Actions widget can be found with of', (WidgetTester tester) async {
+    testWidgets("Actions can invoke actions in ancestor dispatcher if a lower one isn't specified", (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      bool invoked = false;
+      const Intent intent = Intent(TestAction.key);
+      FocusNode passedNode;
+      final FocusNode testNode = FocusNode(debugLabel: 'Test Node');
+      final Action testAction = TestAction(
+        onInvoke: (FocusNode node, Intent invocation) {
+          invoked = true;
+          passedNode = node;
+        },
+      );
+
+      await tester.pumpWidget(
+        Actions(
+          dispatcher: TestDispatcher1(postInvoke: collect),
+          actions: <LocalKey, ActionFactory>{
+            TestAction.key: () => testAction,
+          },
+          child: Actions(
+            actions: const <LocalKey, ActionFactory>{},
+            child: Container(key: containerKey),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      final bool result = Actions.invoke(
+        containerKey.currentContext,
+        intent,
+        focusNode: testNode,
+      );
+      expect(passedNode, equals(testNode));
+      expect(invokedNode, equals(testNode));
+      expect(result, isTrue);
+      expect(invoked, isTrue);
+      expect(invokedIntent, equals(intent));
+      expect(invokedAction, equals(testAction));
+      expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
+    });
+    testWidgets('Actions widget can be found with of', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
 
@@ -214,27 +256,96 @@ void main() {
 
       await tester.pump();
       final ActionDispatcher dispatcher = Actions.of(
-        containerKey.currentContext, nullOk: true,
+        containerKey.currentContext,
+        nullOk: true,
       );
       expect(dispatcher, equals(testDispatcher));
     });
+    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      final GlobalKey containerKey = GlobalKey();
+      bool invoked = false;
+      const Intent intent = Intent(TestAction.key);
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      final Action testAction = TestAction(
+        onInvoke: (FocusNode node, Intent invocation) {
+          invoked = true;
+        },
+      );
+      bool hovering = false;
+      bool focusing = false;
+
+      Future<void> buildTest(bool enabled) async {
+        await tester.pumpWidget(
+          Center(
+            child: Actions(
+              dispatcher: TestDispatcher1(postInvoke: collect),
+              actions: const <LocalKey, ActionFactory>{},
+              child: FocusableActionDetector(
+                enabled: enabled,
+                focusNode: focusNode,
+                shortcuts: <LogicalKeySet, Intent>{
+                  LogicalKeySet(LogicalKeyboardKey.enter): intent,
+                },
+                actions: <LocalKey, ActionFactory>{
+                  TestAction.key: () => testAction,
+                },
+                onShowHoverHighlight: (bool value) => hovering = value,
+                onShowFocusHighlight: (bool value) => focusing = value,
+                child: Container(width: 100, height: 100, key: containerKey),
+              ),
+            ),
+          ),
+        );
+        return tester.pump();
+      }
+      await buildTest(true);
+      focusNode.requestFocus();
+      await tester.pump();
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(tester.getCenter(find.byKey(containerKey)));
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(hovering, isTrue);
+      expect(focusing, isTrue);
+      expect(invoked, isTrue);
+
+      invoked = false;
+      await buildTest(false);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(invoked, isFalse);
+      await buildTest(true);
+      expect(focusing, isFalse);
+      expect(hovering, isTrue);
+      await buildTest(false);
+      expect(focusing, isFalse);
+      expect(hovering, isFalse);
+      await gesture.moveTo(Offset.zero);
+      await buildTest(true);
+      expect(hovering, isFalse);
+      expect(focusing, isFalse);
+    });
   });
   group('Diagnostics', () {
-    testWidgets('default $Intent debugFillProperties', (WidgetTester tester) async {
+    testWidgets('default Intent debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       const Intent(ValueKey<String>('foo')).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        })
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description, equals(<String>['key: [<\'foo\'>]']));
     });
-    testWidgets('$CallbackAction debugFillProperties', (WidgetTester tester) async {
+    testWidgets('CallbackAction debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       CallbackAction(
@@ -251,26 +362,31 @@ void main() {
 
       expect(description, equals(<String>['intentKey: [<\'foo\'>]']));
     });
-    testWidgets('default $Actions debugFillProperties', (WidgetTester tester) async {
+    testWidgets('default Actions debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-      Actions(actions: const <LocalKey, ActionFactory>{}, child: Container()).debugFillProperties(builder);
+      Actions(
+        actions: const <LocalKey, ActionFactory>{},
+        dispatcher: const ActionDispatcher(),
+        child: Container(),
+      ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        })
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equals('actions: {}'));
     });
-    testWidgets('$Actions implements debugFillProperties', (WidgetTester tester) async {
+    testWidgets('Actions implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       Actions(
         key: const ValueKey<String>('foo'),
+        dispatcher: const ActionDispatcher(),
         actions: <LocalKey, ActionFactory>{
           const ValueKey<String>('bar'): () => TestAction(onInvoke: (FocusNode node, Intent intent) {}),
         },
@@ -279,8 +395,8 @@ void main() {
 
       final List<String> description = builder.properties
           .where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      })
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
           .map((DiagnosticsNode node) => node.toString())
           .toList();
 

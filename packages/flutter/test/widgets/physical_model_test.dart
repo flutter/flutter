@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -71,10 +71,10 @@ void main() {
     );
     await tester.pump();
 
-    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderPhysicalModel);
+    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
     expect(renderPhysicalModel.needsCompositing, true);
 
-    final PhysicalModelLayer physicalModelLayer = tester.layers.firstWhere((Layer layer) => layer is PhysicalModelLayer);
+    final PhysicalModelLayer physicalModelLayer = tester.layers.whereType<PhysicalModelLayer>().first;
     expect(physicalModelLayer.shadowColor, Colors.red);
     expect(physicalModelLayer.color, Colors.grey);
     expect(physicalModelLayer.elevation, 1.0);
@@ -110,11 +110,7 @@ void main() {
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile(
-        'physical_model_overflow.png',
-        version: null,
-      ),
-      skip: !isLinux,
+      matchesGoldenFile('physical_model_overflow.png'),
     );
   }, skip: isBrowser);
 
@@ -133,7 +129,7 @@ void main() {
       }
       debugDisableShadows = false;
       int count = 0;
-      final Function oldOnError = FlutterError.onError;
+      final void Function(FlutterErrorDetails) oldOnError = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
         count++;
       };
@@ -170,7 +166,7 @@ void main() {
             child: Material(
               elevation: 2.0,
               color: Colors.red,
-            )
+            ),
           ),
         ),
       ];
@@ -273,7 +269,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -311,7 +307,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -349,7 +345,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -414,7 +410,7 @@ void main() {
     //         │           │
     // ────────────────────────────
     testWidgets('non-rect partially overlapping, wrong painting order, check disabled', (WidgetTester tester) async {
-       final List<Widget> children = <Widget>[
+      final List<Widget> children = <Widget>[
         Positioned.fromRect(
           rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
@@ -434,7 +430,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
