@@ -66,12 +66,17 @@ may skip some commits. For example, Cirrus will only test the
 _last_ commit of a PR that's merged into the `master` branch. Chrome Infra may
 skip commits when they come in too fast.
 
-# Agent dashboard
+## Agent dashboard
 
 Agent statuses are available at https://flutter-dashboard.appspot.com/#/agents.
 
 A green agent is considered healthy and ready to receive new tasks to build. A
 red agent is broken and does not receive new tasks.
+
+## Performance dashboard
+
+Flutter benchmarks are available at
+https://flutter-dashboard.appspot.com/benchmarks.html.
 
 ## How the devicelab runs the tasks
 
