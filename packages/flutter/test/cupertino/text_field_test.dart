@@ -3946,8 +3946,6 @@ void main() {
   });
 
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -3973,13 +3971,9 @@ void main() {
         hasTapAction: true,
       ),
     );
-
-    handle.dispose();
   });
 
   testWidgets('Disabled Cupertino text field semantics', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -4006,7 +4000,5 @@ void main() {
         hasTapAction: false,
       ),
     );
-
-    handle.dispose();
   });
 }
