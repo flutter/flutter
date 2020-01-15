@@ -99,22 +99,27 @@ const List<String> kWebTestFileBlacklist = <String>[
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
 Future<void> main(List<String> args) async {
-  flutterTestArgs.addAll(args);
-  if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
-    print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
-  print('═' * 80);
-  await _runSmokeTests();
-  print('═' * 80);
-  await selectShard(const <String, ShardRunner>{
-    'add_to_app_tests': _runAddToAppTests,
-    'build_tests': _runBuildTests,
-    'framework_coverage': _runFrameworkCoverage,
-    'framework_tests': _runFrameworkTests,
-    'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
-    'tool_coverage': _runToolCoverage,
-    'tool_tests': _runToolTests,
-    'web_tests': _runWebTests,
-  });
+  print('$clock STARTING ANALYSIS');
+  try {
+    flutterTestArgs.addAll(args);
+    if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
+      print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
+    print('═' * 80);
+    await _runSmokeTests();
+    print('═' * 80);
+    await selectShard(const <String, ShardRunner>{
+      'add_to_app_tests': _runAddToAppTests,
+      'build_tests': _runBuildTests,
+      'framework_tests': _runFrameworkTests,
+      'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
+      'tool_coverage': _runToolCoverage,
+      'tool_tests': _runToolTests,
+      'web_tests': _runWebTests,
+    });
+  } on ExitException catch (error) {
+    error.apply();
+  }
+  print('$clock ${bold}Test successful.$reset');
 }
 
 Future<void> _runSmokeTests() async {
@@ -444,7 +449,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
