@@ -561,15 +561,16 @@ void main() {
               home: Scaffold(body:Column(
                 key: const ValueKey<String>('column'),
                 children: <Widget>[
-                  const Text('Hello1', key: const ValueKey<String>('text1')),
+                  const Text('Hello1', key: ValueKey<String>('text1')),
                   Container(
-                      height:25.0,
+                      height: 25.0,
                       child: RichText(
                           key: const ValueKey<String>('text2'),
-                          text: const TextSpan(text: 'Hello2'))
+                          text: const TextSpan(text: 'Hello2')
+                      )
                   ),
                   Container(
-                      height:25.0,
+                      height: 25.0,
                       child: EditableText(
                           key: const ValueKey<String>('text3'),
                           controller: TextEditingController(text: 'Hello3'),
@@ -579,18 +580,19 @@ void main() {
                           backgroundCursorColor: Colors.black)
                   ),
                   Container(
-                      height:25.0,
+                      height: 25.0,
                       child: TextField(
                           key: const ValueKey<String>('text4'),
-                          controller: TextEditingController(text: 'Hello4'))
+                          controller: TextEditingController(text: 'Hello4')
+                      )
                   ),
                   Container(
-                      height:25.0,
+                      height: 25.0,
                       child: TextFormField(
                           key: const ValueKey<String>('text5'),
-                          controller: TextEditingController(text: 'Hello5'))
+                          controller: TextEditingController(text: 'Hello5')
+                      )
                   ),
-
                 ],
               ))
           )
@@ -602,7 +604,7 @@ void main() {
       expect(await getTextInternal(ByValueKey('text4')), 'Hello4');
       expect(await getTextInternal(ByValueKey('text5')), 'Hello5');
 
-      //Check if error thrown for other types
+      // Check if error thrown for other types
       final Map<String, String> arguments = GetText(ByValueKey('column'), timeout: const Duration(seconds: 1)).serialize();
       final Map<String, dynamic> response = await extension.call(arguments);
       expect(response['isError'], true);

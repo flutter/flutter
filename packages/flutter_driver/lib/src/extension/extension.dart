@@ -553,8 +553,9 @@ class FlutterDriverExtension {
       text = (widget as Text).data;
     } else if (widget.runtimeType == RichText) {
       final RichText richText = widget as RichText;
-      if (richText.text.runtimeType == TextSpan)
+      if (richText.text.runtimeType == TextSpan) {
         text = (richText.text as TextSpan).text;
+      }
     } else if (widget.runtimeType == TextField) {
       text = (widget as TextField).controller.text;
     } else if (widget.runtimeType == TextFormField) {
