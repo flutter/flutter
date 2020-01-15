@@ -41,9 +41,7 @@ const List<Target> _kDefaultTargets = <Target>[
   FastStartAndroidApplication(),
   ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
-  // These are one-off rules for bundle and aot compat
-  ReleaseCopyFlutterAotBundle(),
-  ProfileCopyFlutterAotBundle(),
+  // This is a one-off rule for bundle and aot compat.
   CopyFlutterBundle(),
   // Android ABI specific AOT rules.
   androidArmProfileBundle,
