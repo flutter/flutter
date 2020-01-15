@@ -561,35 +561,36 @@ void main() {
               home: Scaffold(body:Column(
                 key: const ValueKey<String>('column'),
                 children: <Widget>[
-                  Text('Hello1', key: ValueKey<String>('text1')),
+                  const Text('Hello1', key: const ValueKey<String>('text1')),
                   Container(
                       height:25.0,
                       child: RichText(
-                          key: ValueKey<String>('text2'),
-                          text: TextSpan(text: 'Hello2'))
+                          key: const ValueKey<String>('text2'),
+                          text: const TextSpan(text: 'Hello2'))
                   ),
                   Container(
                       height:25.0,
                       child: EditableText(
-                          key: ValueKey<String>('text3'),
+                          key: const ValueKey<String>('text3'),
                           controller: TextEditingController(text: 'Hello3'),
                           focusNode: FocusNode(),
-                          style: TextStyle(),
+                          style: const TextStyle(),
                           cursorColor: Colors.red,
                           backgroundCursorColor: Colors.black)
                   ),
                   Container(
                       height:25.0,
                       child: TextField(
-                          key: ValueKey<String>('text4'),
+                          key: const ValueKey<String>('text4'),
                           controller: TextEditingController(text: 'Hello4'))
                   ),
                   Container(
                       height:25.0,
                       child: TextFormField(
-                          key: ValueKey<String>('text5'),
+                          key: const ValueKey<String>('text5'),
                           controller: TextEditingController(text: 'Hello5'))
                   ),
+
                 ],
               ))
           )

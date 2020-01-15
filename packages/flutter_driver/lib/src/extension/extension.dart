@@ -545,28 +545,29 @@ class FlutterDriverExtension {
   Future<GetTextResult> _getText(Command command) async {
     final GetText getTextCommand = command as GetText;
     final Finder target = await _waitForElement(_createFinder(getTextCommand.finder));
-    // TODO(yjbanov): support more ways to read text
+
     final Widget widget = target.evaluate().single.widget;
-    switch (widget.runtimeType) {
-      case RichText:
-        final RichText richText = widget as RichText;
-        if (richText.text.runtimeType == TextSpan)
-          return GetTextResult((richText.text as TextSpan).text);
-        break;
-      case EditableText:
-        return GetTextResult((widget as EditableText).controller.text);
-      case TextField:
-        return GetTextResult((widget as TextField).controller.text);
-      case TextFormField:
-        return GetTextResult((widget as TextFormField).controller.text);
-      case Text:
-        return GetTextResult((widget as Text).data);
-      default:
-        break;
+    String text;
+
+    if (widget.runtimeType == Text) {
+      text = (widget as Text).data;
+    } else if (widget.runtimeType == RichText) {
+      final RichText richText = widget as RichText;
+      if (richText.text.runtimeType == TextSpan)
+        text = (richText.text as TextSpan).text;
+    } else if (widget.runtimeType == TextField) {
+      text = (widget as TextField).controller.text;
+    } else if (widget.runtimeType == TextFormField) {
+      text = (widget as TextFormField).controller.text;
+    } else if (widget.runtimeType == EditableText) {
+      text = (widget as EditableText).controller.text;
     }
 
-    throw UnsupportedError(
-        'Type '+widget.runtimeType.toString()+' is currently not supported by getText');
+    if (text == null) {
+      throw UnsupportedError('Type ${widget.runtimeType.toString()} is currently not supported by getText');
+    }
+
+    return GetTextResult(text);
   }
 
   Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {
