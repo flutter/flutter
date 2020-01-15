@@ -3234,7 +3234,7 @@ TEST_F(EmbedderTest, PlatformViewMutatorsAreValidWithPixelRatio) {
           FlutterPlatformView platform_view = *layers[1]->platform_view;
           platform_view.struct_size = sizeof(platform_view);
           platform_view.identifier = 42;
-          platform_view.mutations_count = 4;
+          platform_view.mutations_count = 3;
 
           FlutterLayer layer = {};
           layer.struct_size = sizeof(layer);
@@ -3369,8 +3369,7 @@ TEST_F(EmbedderTest,
               case kFlutterPlatformViewMutationTypeTransformation:
                 mutation.type = kFlutterPlatformViewMutationTypeTransformation;
                 mutation.transformation =
-                    FlutterTransformationMake(SkMatrix::Concat(
-                        root_surface_transformation, SkMatrix::MakeScale(2.0)));
+                    FlutterTransformationMake(root_surface_transformation);
 
                 break;
             }
@@ -3587,6 +3586,88 @@ TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
               });
 
           ASSERT_TRUE(clip_assertions_checked);
+        }
+
+        latch.Signal();
+      });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 400;
+  event.height = 300;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+}
+
+TEST_F(EmbedderTest, ComplexClipsAreCorrectlyCalculated) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(1024, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("scene_builder_with_complex_clips");
+
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 1024).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  fml::AutoResetWaitableEvent latch;
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 3u);
+
+        {
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 42;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(600.0, 1024.0);
+          layer.offset = FlutterPointMake(0.0, -256.0);
+
+          ASSERT_EQ(*layers[1], layer);
+
+          const auto** mutations = platform_view.mutations;
+
+          ASSERT_EQ(mutations[0]->type,
+                    kFlutterPlatformViewMutationTypeTransformation);
+          ASSERT_EQ(SkMatrixMake(mutations[0]->transformation),
+                    root_surface_transformation);
+
+          ASSERT_EQ(mutations[1]->type,
+                    kFlutterPlatformViewMutationTypeClipRect);
+          ASSERT_EQ(SkRectMake(mutations[1]->clip_rect),
+                    SkRect::MakeLTRB(0.0, 0.0, 1024.0, 600.0));
+
+          ASSERT_EQ(mutations[2]->type,
+                    kFlutterPlatformViewMutationTypeTransformation);
+          ASSERT_EQ(SkMatrixMake(mutations[2]->transformation),
+                    SkMatrix::MakeTrans(512.0, 0.0));
+
+          ASSERT_EQ(mutations[3]->type,
+                    kFlutterPlatformViewMutationTypeClipRect);
+          ASSERT_EQ(SkRectMake(mutations[3]->clip_rect),
+                    SkRect::MakeLTRB(0.0, 0.0, 512.0, 600.0));
+
+          ASSERT_EQ(mutations[4]->type,
+                    kFlutterPlatformViewMutationTypeTransformation);
+          ASSERT_EQ(SkMatrixMake(mutations[4]->transformation),
+                    SkMatrix::MakeTrans(-256.0, 0.0));
+
+          ASSERT_EQ(mutations[5]->type,
+                    kFlutterPlatformViewMutationTypeClipRect);
+          ASSERT_EQ(SkRectMake(mutations[5]->clip_rect),
+                    SkRect::MakeLTRB(0.0, 0.0, 1024.0, 600.0));
         }
 
         latch.Signal();
