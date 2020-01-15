@@ -116,24 +116,31 @@ void main() {
       ),
     );
 
-    expect(tabsBuilt, const <int>[0]);
+    // Tab#0 is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(tabsBuilt, const <int>[0, 0]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
+    tabsBuilt.clear();
 
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
 
     // Both tabs are built but only one is onstage.
-    expect(tabsBuilt, const <int>[0, 0, 1]);
+    expect(tabsBuilt, const <int>[0, 1]);
     expect(find.text('Page 1', skipOffstage: false), isOffstage);
     expect(find.text('Page 2'), findsOneWidget);
+    tabsBuilt.clear();
 
     await tester.tap(find.text('Tab 1'));
     await tester.pump();
 
-    expect(tabsBuilt, const <int>[0, 0, 1, 0, 1]);
+    expect(tabsBuilt, const <int>[0, 1]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2', skipOffstage: false), isOffstage);
+    tabsBuilt.clear();
   });
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
@@ -555,7 +562,11 @@ void main() {
       ),
     );
 
-    expect(tabsBuilt, const <int>[0]);
+    // Tab#0 is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(tabsBuilt, const <int>[0, 0]);
     // selectedTabs list is appended to on onTap callbacks. We didn't tap
     // any tabs yet.
     expect(selectedTabs, const <int>[]);

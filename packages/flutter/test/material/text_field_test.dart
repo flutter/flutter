@@ -3821,7 +3821,7 @@ void main() {
         return null;
       });
 
-    await tester.pumpWidget(
+    await tester.pumpWidgetLegacy(
       MaterialApp(
         home: Material(
           child: RawKeyboardListener(
@@ -3893,7 +3893,7 @@ void main() {
         return null;
       });
 
-    await tester.pumpWidget(
+    await tester.pumpWidgetLegacy(
       MaterialApp(
         home: Material(
           child: RawKeyboardListener(
@@ -4008,7 +4008,7 @@ void main() {
         maxLines: 3,
       );
 
-    await tester.pumpWidget(
+    await tester.pumpWidgetLegacy(
       MaterialApp(
         home: Material(
           child: RawKeyboardListener(

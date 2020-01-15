@@ -23,18 +23,26 @@ void main() {
       ),
     );
     expect(endCount, 0);
-    expect(values, <int>[10]);
+    // TweenAnimationBuilder is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(values, <int>[10, 10]);
+    values.clear();
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[10, 60]);
+    expect(values, <int>[60]);
+    values.clear();
 
     await tester.pump(const Duration(milliseconds: 501));
     expect(endCount, 1);
-    expect(values, <int>[10, 60, 110]);
+    expect(values, <int>[110]);
+    values.clear();
 
     await tester.pump(const Duration(milliseconds: 500));
     expect(endCount, 1);
-    expect(values, <int>[10, 60, 110]);
+    expect(values, <int>[]);
+    values.clear();
   });
 
   testWidgets('No initial animation when begin=null', (WidgetTester tester) async {
@@ -98,18 +106,27 @@ void main() {
     }
 
     await tester.pumpWidget(buildWidget(tween: IntTween(begin: 0, end: 100)));
-    expect(values, <int>[0]);
+    // TweenAnimationBuilder is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(values, <int>[0, 0]);
+    values.clear();
     await tester.pump(const Duration(seconds: 2)); // finish first animation.
-    expect(values, <int>[0, 100]);
+    expect(values, <int>[100]);
+    values.clear();
 
     await tester.pumpWidget(buildWidget(tween: IntTween(begin: 100, end: 200)));
-    expect(values, <int>[0, 100, 100]);
+    expect(values, <int>[100]);
+    values.clear();
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 100, 100, 150]);
+    expect(values, <int>[150]);
+    values.clear();
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 100, 100, 150, 200]);
+    expect(values, <int>[200]);
+    values.clear();
   });
 
   testWidgets('Curve is respected', (WidgetTester tester) async {
@@ -127,7 +144,11 @@ void main() {
     }
 
     await tester.pumpWidget(buildWidget(tween: IntTween(begin: 0, end: 100), curve: Curves.easeInExpo));
-    expect(values, <int>[0]);
+    // TweenAnimationBuilder is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(values, <int>[0, 0]);
     await tester.pump(const Duration(milliseconds: 500));
     expect(values.last, lessThan(50));
     expect(values.last, greaterThan(0));
@@ -156,18 +177,27 @@ void main() {
     }
 
     await tester.pumpWidget(buildWidget(tween: IntTween(begin: 0, end: 100), duration: const Duration(seconds: 1)));
-    expect(values, <int>[0]);
+    // In the first pump, TweenAnimationBuilder is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(values, <int>[0, 0]);
+    values.clear();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 50]);
+    expect(values, <int>[50]);
+    values.clear();
 
     await tester.pump(const Duration(seconds: 2)); // finish animation.
-
+    expect(values, <int>[100]);
     values.clear();
+
     // Update duration (and tween to re-trigger animation).
     await tester.pumpWidget(buildWidget(tween: IntTween(begin: 100, end: 200), duration: const Duration(seconds: 2)));
     expect(values, <int>[100]);
+    values.clear();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[100, 125]);
+    expect(values, <int>[125]);
+    values.clear();
   });
 
   testWidgets('Child is integrated into tree', (WidgetTester tester) async {
@@ -205,22 +235,30 @@ void main() {
       await tester.pumpWidget(buildWidget(
         tween: IntTween(begin: 0, end: 100),
       ));
-      expect(values, <int>[0]);
+      // TweenAnimationBuilder is built twice, initiated in the following places:
+      //
+      // 1. `WidgetsBinding.attachRootWidget()`.
+      // 2. `WidgetsBinding.drawFrame()`.
+      expect(values, <int>[0, 0]);
+      values.clear();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50]);
+      expect(values, <int>[50]);
+      values.clear();
 
       // Change tween
       await tester.pumpWidget(buildWidget(
         tween: IntTween(begin: 200, end: 300),
       ));
-      expect(values, <int>[0, 50, 50]); // gapless: animation continues where it left off.
+      expect(values, <int>[50]); // gapless: animation continues where it left off.
+      values.clear();
 
       await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50, 50, 175]); // 175 = halfway between 50 and new target 300.
+      expect(values, <int>[175]); // 175 = halfway between 50 and new target 300.
+      values.clear();
 
       // Run animation to end
       await tester.pump(const Duration(seconds: 2));
-      expect(values, <int>[0, 50, 50, 175, 300]);
+      expect(values, <int>[300]);
       values.clear();
     });
 
@@ -249,7 +287,11 @@ void main() {
       ));
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(seconds: 2));
-      expect(values, <int>[0, 50, 50, 175, 300]);
+      // In the first pump, TweenAnimationBuilder is built twice, initiated in the following places:
+      //
+      // 1. `WidgetsBinding.attachRootWidget()`.
+      // 2. `WidgetsBinding.drawFrame()`.
+      expect(values, <int>[0, 0, 50, 50, 175, 300]);
       values.clear();
     });
   });
@@ -275,7 +317,11 @@ void main() {
       tween: tween1,
     ));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 50]);
+    // In the first pump, TweenAnimationBuilder is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(values, <int>[0, 0, 50]);
     values.clear();
 
     // Change tween
@@ -312,7 +358,11 @@ void main() {
       curve: Curves.linear,
     ));
     await tester.pump(const Duration(seconds: 2));
-    expect(values, <int>[0, 100]);
+    // In the first pump, TweenAnimationBuilder is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(values, <int>[0, 0, 100]);
     values.clear();
 
     await tester.pumpWidget(buildWidget(
@@ -341,7 +391,11 @@ void main() {
     ));
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 50, 100]);
+    // In the first pump, TweenAnimationBuilder is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(values, <int>[0, 0, 50, 100]);
     values.clear();
 
     await tester.pumpWidget(buildWidget(
@@ -369,22 +423,32 @@ void main() {
       tween: IntTween(begin: 0, end: 100),
     ));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 50]);
-    await tester.pumpWidget(buildWidget(
-      tween: IntTween(begin: 200, end: 300),
-    ));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 50, 50, 175]);
-
-    await tester.pumpWidget(buildWidget(
-      tween: IntTween(begin: 200, end: 300),
-    ));
-    expect(values, <int>[0, 50, 50, 175, 175]);
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 50, 50, 175, 175, 300]);
-
+    // In the first pump, TweenAnimationBuilder is built twice, initiated in the following places:
+    //
+    // 1. `WidgetsBinding.attachRootWidget()`.
+    // 2. `WidgetsBinding.drawFrame()`.
+    expect(values, <int>[0, 0, 50]);
     values.clear();
+    await tester.pumpWidget(buildWidget(
+      tween: IntTween(begin: 200, end: 300),
+    ));
+    expect(values, <int>[50]);
+    values.clear();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(values, <int>[175]);
+    values.clear();
+
+    await tester.pumpWidget(buildWidget(
+      tween: IntTween(begin: 200, end: 300),
+    ));
+    expect(values, <int>[175]);
+    values.clear();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(values, <int>[300]);
+    values.clear();
+
     await tester.pump(const Duration(seconds: 2));
-    expect(values, everyElement(300));
+    expect(values, <int>[300]);
+    values.clear();
   });
 }

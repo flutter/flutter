@@ -404,6 +404,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   TestWidgetsFlutterBinding get binding => super.binding as TestWidgetsFlutterBinding;
 
+  bool _firstPumpWidget = true;
+
   /// Renders the UI from the given [widget].
   ///
   /// Calls [runApp] with the given widget, then triggers a frame and flushes
@@ -438,7 +440,22 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return TestAsyncUtils.guard<void>(() {
       binding.attachRootWidget(widget);
       binding.scheduleFrame();
+      if (_firstPumpWidget) {
+        _firstPumpWidget = false;
+        // Emulate what `RenderObjectToWidgetAdapter.attachToRenderTree` does
+        // when it builds a new tree from scratch.
+        binding.buildOwner.buildScope(binding.renderViewElement);
+      }
       return binding.pump(duration, phase);
+    });
+  }
+
+  @Deprecated('Use WidgetTester.pumpWidget() instead.')
+  Future<void> pumpWidgetLegacy(Widget widget) {
+    return TestAsyncUtils.guard<void>(() {
+      binding.attachRootWidget(widget);
+      binding.scheduleFrame();
+      return binding.pump();
     });
   }
 
