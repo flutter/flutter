@@ -3,18 +3,33 @@
 // found in the LICENSE file.
 import 'dart:io' as io;
 import 'package:image/image.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import 'environment.dart';
 import 'utils.dart';
 
+/// How to compares pixels within the image.
+///
+/// Keep this enum in sync with the one defined in `golden_tester.dart`.
+enum PixelComparison {
+  /// Allows minor blur and anti-aliasing differences by comparing a 3x3 grid
+  /// surrounding the pixel rather than direct 1:1 comparison.
+  fuzzy,
+
+  /// Compares one pixel at a time.
+  ///
+  /// Anti-aliasing or blur will result in higher diff rate.
+  precise,
+}
+
 void main(List<String> args) {
   final io.File fileA = io.File(args[0]);
   final io.File fileB = io.File(args[1]);
   final Image imageA = decodeNamedImage(fileA.readAsBytesSync(), 'a.png');
   final Image imageB = decodeNamedImage(fileB.readAsBytesSync(), 'b.png');
-  final ImageDiff diff = ImageDiff(golden: imageA, other: imageB);
+  final ImageDiff diff = ImageDiff(golden: imageA, other: imageB, pixelComparison: PixelComparison.fuzzy);
   print('Diff: ${(diff.rate * 100).toStringAsFixed(4)}%');
 }
 
@@ -28,6 +43,9 @@ class ImageDiff {
   /// The image being compared
   final Image other;
 
+  /// Algorithm used for comparing pixels.
+  final PixelComparison pixelComparison;
+
   /// The output of the comparison
   /// Pixels in the output image can have 3 different colors depending on the comparison
   /// between golden pixels and other pixels:
@@ -40,7 +58,11 @@ class ImageDiff {
   /// This gets set to 1 (100% difference) when golden and other aren't the same size.
   double get rate => _wrongPixels / _pixelCount;
 
-  ImageDiff({ Image this.golden, Image this.other }) {
+  ImageDiff({
+    @required this.golden,
+    @required this.other,
+    @required this.pixelComparison,
+  }) {
     _computeDiff();
   }
 
@@ -84,26 +106,44 @@ class ImageDiff {
     return values.reduce((a, b) => a + b) ~/ values.length;
   }
 
-  /// Reads the RGBA values of the average of the 3x3 box of pixels centered at [x] and [y].
-  static List<int> _getFuzzyRgb(Image image, int x, int y) {
-    final List<int> pixels = <int>[
-      _reflectedPixel(image, x - 1, y - 1),
-      _reflectedPixel(image, x - 1, y),
-      _reflectedPixel(image, x - 1, y + 1),
+  /// The value of the pixel at [x] and [y] coordinates.
+  ///
+  /// If [pixelComparison] is [PixelComparison.precise], reads the RGB value of
+  /// the pixel.
+  ///
+  /// If [pixelComparison] is [PixelComparison.fuzzy], reads the RGB values of
+  /// the average of the 3x3 box of pixels centered at [x] and [y].
+  List<int> _getPixelRgbForComparison(Image image, int x, int y) {
+    switch (pixelComparison) {
+      case PixelComparison.fuzzy:
+        final List<int> pixels = <int>[
+          _reflectedPixel(image, x - 1, y - 1),
+          _reflectedPixel(image, x - 1, y),
+          _reflectedPixel(image, x - 1, y + 1),
 
-      _reflectedPixel(image, x, y - 1),
-      _reflectedPixel(image, x, y),
-      _reflectedPixel(image, x, y + 1),
+          _reflectedPixel(image, x, y - 1),
+          _reflectedPixel(image, x, y),
+          _reflectedPixel(image, x, y + 1),
 
-      _reflectedPixel(image, x + 1, y - 1),
-      _reflectedPixel(image, x + 1, y),
-      _reflectedPixel(image, x + 1, y + 1),
-    ];
-    return <int>[
-      _average(pixels.map((p) => getRed(p))),
-      _average(pixels.map((p) => getGreen(p))),
-      _average(pixels.map((p) => getBlue(p))),
-    ];
+          _reflectedPixel(image, x + 1, y - 1),
+          _reflectedPixel(image, x + 1, y),
+          _reflectedPixel(image, x + 1, y + 1),
+        ];
+        return <int>[
+          _average(pixels.map((p) => getRed(p))),
+          _average(pixels.map((p) => getGreen(p))),
+          _average(pixels.map((p) => getBlue(p))),
+        ];
+      case PixelComparison.precise:
+        final int pixel = image.getPixel(x, y);
+        return <int>[
+          getRed(pixel),
+          getGreen(pixel),
+          getBlue(pixel),
+        ];
+      default:
+        throw 'Unrecognized pixel comparison value: ${pixelComparison}';
+    }
   }
 
   void _computeDiff() {
@@ -117,10 +157,11 @@ class ImageDiff {
       for(int y = 0; y < goldenHeight; y++) {
         for (int x = 0; x < goldenWidth; x++) {
           final bool isExactlySame = golden.getPixel(x, y) == other.getPixel(x, y);
-          final List<int> goldenPixel = _getFuzzyRgb(golden, x, y);
-          final List<int> otherPixel = _getFuzzyRgb(other, x, y);
+          final List<int> goldenPixel = _getPixelRgbForComparison(golden, x, y);
+          final List<int> otherPixel = _getPixelRgbForComparison(other, x, y);
           final double colorDistance = Color.distance(goldenPixel, otherPixel, false) / _maxTheoreticalColorDistance;
-          if (isExactlySame || colorDistance < _kColorDistanceThreshold) {
+          final bool isFuzzySame = colorDistance < _kColorDistanceThreshold;
+          if (isExactlySame || isFuzzySame) {
             diff.setPixel(x, y, _colorOk);
           } else {
             final int goldenLuminance = getLuminanceRgb(goldenPixel[0], goldenPixel[1], goldenPixel[2]);

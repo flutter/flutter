@@ -79,15 +79,17 @@ class PersistedClipRect extends PersistedContainerSurface
   @override
   void apply() {
     rootElement.style
-      ..transform = 'translate(${rect.left}px, ${rect.top}px)'
+      ..left = '${rect.left}px'
+      ..top = '${rect.top}px'
       ..width = '${rect.right - rect.left}px'
       ..height = '${rect.bottom - rect.top}px';
 
     // Translate the child container in the opposite direction to compensate for
     // the shift in the coordinate system introduced by the translation of the
     // rootElement. Clipping in Flutter has no effect on the coordinate system.
-    childContainer.style.transform =
-        'translate(${-rect.left}px, ${-rect.top}px)';
+    childContainer.style
+     ..left = '${-rect.left}px'
+     ..top = '${-rect.top}px';
   }
 
   @override
@@ -126,7 +128,8 @@ class PersistedClipRRect extends PersistedContainerSurface
   @override
   void apply() {
     rootElement.style
-      ..transform = 'translate(${rrect.left}px, ${rrect.top}px)'
+      ..left = '${rrect.left}px'
+      ..top = '${rrect.top}px'
       ..width = '${rrect.width}px'
       ..height = '${rrect.height}px'
       ..borderTopLeftRadius = '${rrect.tlRadiusX}px'
@@ -137,8 +140,9 @@ class PersistedClipRRect extends PersistedContainerSurface
     // Translate the child container in the opposite direction to compensate for
     // the shift in the coordinate system introduced by the translation of the
     // rootElement. Clipping in Flutter has no effect on the coordinate system.
-    childContainer.style.transform =
-        'translate(${-rrect.left}px, ${-rrect.top}px)';
+    childContainer.style
+     ..left = '${-rrect.left}px'
+     ..top = '${-rrect.top}px';
   }
 
   @override
@@ -218,12 +222,14 @@ class PersistedPhysicalShape extends PersistedContainerSurface
           '${roundRect.brRadiusX}px ${roundRect.blRadiusX}px';
       final html.CssStyleDeclaration style = rootElement.style;
       style
-        ..transform = 'translate(${roundRect.left}px, ${roundRect.top}px)'
+        ..left = '${roundRect.left}px'
+        ..top = '${roundRect.top}px'
         ..width = '${roundRect.width}px'
         ..height = '${roundRect.height}px'
         ..borderRadius = borderRadius;
-      childContainer.style.transform =
-          'translate(${-roundRect.left}px, ${-roundRect.top}px)';
+      childContainer.style
+        ..left = '${-roundRect.left}px'
+        ..top = '${-roundRect.top}px';
       if (clipBehavior != ui.Clip.none) {
         style.overflow = 'hidden';
       }
@@ -233,12 +239,14 @@ class PersistedPhysicalShape extends PersistedContainerSurface
       if (rect != null) {
         final html.CssStyleDeclaration style = rootElement.style;
         style
-          ..transform = 'translate(${rect.left}px, ${rect.top}px)'
+          ..left = '${rect.left}px'
+          ..top = '${rect.top}px'
           ..width = '${rect.width}px'
           ..height = '${rect.height}px'
           ..borderRadius = '';
-        childContainer.style.transform =
-            'translate(${-rect.left}px, ${-rect.top}px)';
+        childContainer.style
+          ..left = '${-rect.left}px'
+          ..top = '${-rect.top}px';
         if (clipBehavior != ui.Clip.none) {
           style.overflow = 'hidden';
         }
@@ -254,11 +262,14 @@ class PersistedPhysicalShape extends PersistedContainerSurface
           final double left = ellipse.x - rx;
           final double top = ellipse.y - ry;
           style
-            ..transform = 'translate(${left}px, ${top}px)'
+            ..left = '${left}px'
+            ..top = '${top}px'
             ..width = '${rx * 2}px'
             ..height = '${ry * 2}px'
             ..borderRadius = borderRadius;
-          childContainer.style.transform = 'translate(${-left}px, ${-top}px)';
+          childContainer.style
+            ..left = '${-left}px'
+            ..top = '${-top}px';
           if (clipBehavior != ui.Clip.none) {
             style.overflow = 'hidden';
           }
@@ -281,12 +292,14 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     final html.CssStyleDeclaration rootElementStyle = rootElement.style;
     rootElementStyle
       ..overflow = ''
-      ..transform = 'translate(${bounds.left}px, ${bounds.top}px)'
+      ..left = '${bounds.left}px'
+      ..top = '${bounds.top}px'
       ..width = '${bounds.width}px'
       ..height = '${bounds.height}px'
       ..borderRadius = '';
-    childContainer.style.transform =
-        'translate(${-bounds.left}px, ${-bounds.top}px)';
+    childContainer.style
+      ..left = '-${bounds.left}px'
+      ..top = '-${bounds.top}px';
   }
 
   @override
@@ -305,6 +318,8 @@ class PersistedPhysicalShape extends PersistedContainerSurface
       // rect/rrect and arbitrary path.
       final html.CssStyleDeclaration style = rootElement.style;
       style.transform = '';
+      style.left = '';
+      style.top = '';
       style.borderRadius = '';
       domRenderer.setElementStyle(rootElement, 'clip-path', '');
       domRenderer.setElementStyle(rootElement, '-webkit-clip-path', '');

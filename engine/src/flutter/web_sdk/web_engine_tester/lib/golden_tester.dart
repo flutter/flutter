@@ -20,9 +20,36 @@ Future<dynamic> _callScreenshotServer(dynamic requestData) async {
   return json.decode(request.responseText);
 }
 
+/// How to compare pixels within the image.
+///
+/// Keep this enum in sync with the one defined in `goldens.dart`.
+enum PixelComparison {
+  /// Allows minor blur and anti-aliasing differences by comparing a 3x3 grid
+  /// surrounding the pixel rather than direct 1:1 comparison.
+  fuzzy,
+
+  /// Compares one pixel at a time.
+  ///
+  /// Anti-aliasing or blur will result in higher diff rate.
+  precise,
+}
+
 /// Attempts to match the current browser state with the screenshot [filename].
+///
+/// If [write] is true, will overwrite the golden file and fail the test. Use
+/// it to update golden files.
+///
+/// If [region] is not null, the golden will only include the part contained by
+/// the rectangle.
+///
+/// [maxDiffRate] specifies the tolerance to the number of non-matching pixels
+/// before the test is considered as failing. If [maxDiffRate] is null, applies
+/// a default value defined in `test_platform.dart`.
+///
+/// [pixelComparison] determines the algorithm used to compare pixels. Uses
+/// fuzzy comparison by default.
 Future<void> matchGoldenFile(String filename,
-    {bool write = false, Rect region = null, double maxDiffRate = null}) async {
+    {bool write = false, Rect region = null, double maxDiffRate = null, PixelComparison pixelComparison = PixelComparison.fuzzy}) async {
   Map<String, dynamic> serverParams = <String, dynamic>{
     'filename': filename,
     'write': write,
@@ -33,7 +60,8 @@ Future<void> matchGoldenFile(String filename,
             'y': region.top,
             'width': region.width,
             'height': region.height
-          }
+          },
+    'pixelComparison': pixelComparison.toString(),
   };
   if (maxDiffRate != null) {
     serverParams['maxdiffrate'] = maxDiffRate;
