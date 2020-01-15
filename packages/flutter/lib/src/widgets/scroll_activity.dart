@@ -507,7 +507,7 @@ class BallisticScrollActivity extends ScrollActivity {
     TickerProvider vsync,
   ) : super(delegate) {
     _controller = AnimationController.unbounded(
-      debugLabel: kDebugMode ? '$runtimeType' : null,
+      debugLabel: kDebugMode ? '${objectRuntimeType(this, 'BallisticScrollActivity')}' : null,
       vsync: vsync,
     )
       ..addListener(_tick)
@@ -604,7 +604,7 @@ class DrivenScrollActivity extends ScrollActivity {
     _completer = Completer<void>();
     _controller = AnimationController.unbounded(
       value: from,
-      debugLabel: '$runtimeType',
+      debugLabel: '${objectRuntimeType(this, 'DrivenScrollActivity')}',
       vsync: vsync,
     )
       ..addListener(_tick)

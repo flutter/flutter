@@ -29,10 +29,9 @@ void main() {
       globals.fs.directory('cache').createSync();
       final Directory outputs = globals.fs.directory('outputs')
           ..createSync();
-      environment = Environment(
+      environment = Environment.test(
+        globals.fs.currentDirectory,
         outputDir: outputs,
-        projectDir: globals.fs.currentDirectory,
-        buildDir: globals.fs.directory('build'),
       );
       visitor = SourceVisitor(environment);
       environment.buildDir.createSync(recursive: true);

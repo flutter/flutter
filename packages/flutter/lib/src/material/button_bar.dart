@@ -64,6 +64,7 @@ class ButtonBar extends StatelessWidget {
     this.buttonPadding,
     this.buttonAlignedDropdown,
     this.layoutBehavior,
+    this.overflowDirection,
     this.children = const <Widget>[],
   }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
        assert(buttonHeight == null || buttonHeight >= 0.0),
@@ -126,6 +127,22 @@ class ButtonBar extends StatelessWidget {
   /// If that is null, it will default [ButtonBarLayoutBehavior.padded].
   final ButtonBarLayoutBehavior layoutBehavior;
 
+  /// Defines the vertical direction of a [ButtonBar]'s children if it
+  /// overflows.
+  ///
+  /// If [children] do not fit into a single row, then they
+  /// are arranged in a column. The first action is at the top of the
+  /// column if this property is set to [VerticalDirection.down], since it
+  /// "starts" at the top and "ends" at the bottom. On the other hand,
+  /// the first action will be at the bottom of the column if this
+  /// property is set to [VerticalDirection.up], since it "starts" at the
+  /// bottom and "ends" at the top.
+  ///
+  /// If null then it will use the surrounding
+  /// [ButtonBarTheme.overflowDirection]. If that is null, it will
+  /// default to [VerticalDirection.down].
+  final VerticalDirection overflowDirection;
+
   /// The buttons to arrange horizontally.
   ///
   /// Typically [RaisedButton] or [FlatButton] widgets.
@@ -152,6 +169,7 @@ class ButtonBar extends StatelessWidget {
       child: _ButtonBarRow(
         mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
+        overflowDirection: overflowDirection ?? barTheme.overflowDirection ?? VerticalDirection.down,
         children: children.map<Widget>((Widget child) {
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: paddingUnit),
@@ -206,7 +224,7 @@ class _ButtonBarRow extends Flex {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection textDirection,
-    VerticalDirection verticalDirection = VerticalDirection.down,
+    VerticalDirection overflowDirection = VerticalDirection.down,
     TextBaseline textBaseline,
   }) : super(
     children: children,
@@ -215,7 +233,7 @@ class _ButtonBarRow extends Flex {
     mainAxisAlignment: mainAxisAlignment,
     crossAxisAlignment: crossAxisAlignment,
     textDirection: textDirection,
-    verticalDirection: verticalDirection,
+    verticalDirection: overflowDirection,
     textBaseline: textBaseline,
   );
 
@@ -312,8 +330,16 @@ class _RenderButtonBarRow extends RenderFlex {
       super.performLayout();
     } else {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
-      RenderBox child = firstChild;
+      RenderBox child;
       double currentHeight = 0.0;
+      switch (verticalDirection) {
+        case VerticalDirection.down:
+          child = firstChild;
+          break;
+        case VerticalDirection.up:
+          child = lastChild;
+          break;
+      }
 
       while (child != null) {
         final FlexParentData childParentData = child.parentData as FlexParentData;
@@ -357,7 +383,14 @@ class _RenderButtonBarRow extends RenderFlex {
             break;
         }
         currentHeight += child.size.height;
-        child = childParentData.nextSibling;
+        switch (verticalDirection) {
+          case VerticalDirection.down:
+            child = childParentData.nextSibling;
+            break;
+          case VerticalDirection.up:
+            child = childParentData.previousSibling;
+            break;
+        }
       }
       size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
     }

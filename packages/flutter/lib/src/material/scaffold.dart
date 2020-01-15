@@ -178,7 +178,7 @@ class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
 
   @override
   String toString() {
-    return '$runtimeType(begin: $begin, end: $end, progress: $progress)';
+    return '${objectRuntimeType(this, '_TransitionSnapshotFabLocation')}(begin: $begin, end: $end, progress: $progress)';
   }
 }
 

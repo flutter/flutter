@@ -76,7 +76,7 @@ abstract class TableColumnWidth {
   double flex(Iterable<RenderBox> cells) => null;
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => '${objectRuntimeType(this, 'TableColumnWidth')}';
 }
 
 /// Sizes the column according to the intrinsic dimensions of all the
@@ -115,7 +115,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double flex(Iterable<RenderBox> cells) => _flex;
 
   @override
-  String toString() => '$runtimeType(flex: ${_flex?.toStringAsFixed(1)})';
+  String toString() => '${objectRuntimeType(this, 'IntrinsicColumnWidth')}(flex: ${_flex?.toStringAsFixed(1)})';
 }
 
 /// Sizes the column to a specific number of pixels.
@@ -141,7 +141,7 @@ class FixedColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType(${debugFormatDouble(value)})';
+  String toString() => '${objectRuntimeType(this, 'FixedColumnWidth')}(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column to a fraction of the table's constraints' maxWidth.
@@ -173,7 +173,7 @@ class FractionColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '${objectRuntimeType(this, 'FractionColumnWidth')}($value)';
 }
 
 /// Sizes the column by taking a part of the remaining space once all
@@ -210,7 +210,7 @@ class FlexColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType(${debugFormatDouble(value)})';
+  String toString() => '${objectRuntimeType(this, 'FlexColumnWidth')}(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column such that it is the size that is the maximum of
@@ -261,7 +261,7 @@ class MaxColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($a, $b)';
+  String toString() => '${objectRuntimeType(this, 'MaxColumnWidth')}($a, $b)';
 }
 
 /// Sizes the column such that it is the size that is the minimum of
@@ -312,7 +312,7 @@ class MinColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($a, $b)';
+  String toString() => '${objectRuntimeType(this, 'MinColumnWidth')}($a, $b)';
 }
 
 /// Vertical alignment options for cells in [RenderTable] objects.
