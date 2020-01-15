@@ -232,7 +232,7 @@ void main() {
     expect(stateKey.currentState.value, equals('three'));
   });
 
-  testWidgets('DropdownButtonFormFieldState internal InputDecorator isEmpty property behaviour is correct', (WidgetTester tester) async {
+  testWidgets("DropdownButtonFormField's InputDecorator isEmpty behavior is correct", (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
 
     await tester.pumpWidget(
@@ -240,7 +240,7 @@ void main() {
         home: Material(
           child: DropdownButtonFormField<String>(
             key: stateKey,
-            decoration: InputDecoration(labelText: 'label', alignLabelWithHint: true),
+            decoration: const InputDecoration(labelText: 'label', alignLabelWithHint: true),
             onChanged: (String newValue) {},
             items: menuItems.map((String value) {
               return DropdownMenuItem<String>(
@@ -288,6 +288,9 @@ void main() {
     expect(stateKey.currentState.value, equals('three'));
     // [InputDecorator] isEmpty property is now false.
     expect((tester.widget(find.byType(InputDecorator)) as InputDecorator).isEmpty, equals(false));
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
   });
 
   testWidgets('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
