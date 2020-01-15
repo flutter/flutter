@@ -70,7 +70,7 @@ class RawMaterialButton extends StatefulWidget {
        assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(disabledElevation != null && disabledElevation >= 0.0),
        assert(padding != null),
-       assert(constraints == null || constraints.debugAssertIsValid()),
+       assert(constraints != null),
        assert(animationDuration != null),
        assert(clipBehavior != null),
        assert(autofocus != null),

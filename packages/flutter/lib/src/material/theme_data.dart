@@ -1815,7 +1815,8 @@ class VisualDensity extends Diagnosticable {
     );
   }
 
-  /// Calculate effective constraints for a widget with constraints [constraints].
+  /// Return a copy of [constraints] whose minimum width and height have been
+  /// updated with the [baseSizeAdjustment].
   BoxConstraints effectiveConstraints(BoxConstraints constraints){
     assert(constraints != null && constraints.debugAssertIsValid());
     return constraints.copyWith(

@@ -160,7 +160,6 @@ class IconButton extends StatelessWidget {
        assert(alignment != null),
        assert(autofocus != null),
        assert(icon != null),
-       assert(constraints == null || constraints.debugAssertIsValid()),
        super(key: key);
 
   /// The size of the icon inside the button.
@@ -290,7 +289,7 @@ class IconButton extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool enableFeedback;
 
-  /// Box constraints for the button.
+  /// Optional size constraints for the button.
   ///
   /// When unspecified, defaults to:
   /// ```dart
@@ -301,6 +300,10 @@ class IconButton extends StatelessWidget {
   /// ```
   /// where [kMinInteractiveDimension] is 48.0, and then with visual density
   /// applied.
+  ///
+  /// The default constraints ensure that the button is accessible.
+  /// Specifying this parameter enables creation of buttons smaller than
+  /// the minimum size, but it is not recommended.
   ///
   /// The visual density uses the [visualDensity] parameter if specified,
   /// and `Theme.of(context).visualDensity` otherwise.
