@@ -112,20 +112,6 @@ void EmbedderLayers::PushPlatformViewLayer(
 
     std::vector<const FlutterPlatformViewMutation*> mutations_array;
 
-    if (std::distance(mutators.Bottom(), mutators.Top()) > 0) {
-      // If there are going to be any mutations, they must first take into
-      // account the transformation for the device pixel ratio and root surface
-      // transformation.
-      auto base_xformation =
-          SkMatrix::Concat(root_surface_transformation_,
-                           SkMatrix::MakeScale(device_pixel_ratio_));
-      if (!base_xformation.isIdentity()) {
-        mutations_array.push_back(
-            mutations_referenced_.emplace_back(ConvertMutation(base_xformation))
-                .get());
-      }
-    }
-
     for (auto i = mutators.Bottom(); i != mutators.Top(); ++i) {
       const auto& mutator = *i;
       switch (mutator->GetType()) {
@@ -164,10 +150,19 @@ void EmbedderLayers::PushPlatformViewLayer(
       }
     }
 
-    if (mutations_array.size() > 0) {
+    if (!mutations_array.empty()) {
+      // If there are going to be any mutations, they must first take into
+      // account the root surface transformation.
+      if (!root_surface_transformation_.isIdentity()) {
+        mutations_array.push_back(
+            mutations_referenced_
+                .emplace_back(ConvertMutation(root_surface_transformation_))
+                .get());
+      }
+
       auto mutations =
           std::make_unique<std::vector<const FlutterPlatformViewMutation*>>(
-              mutations_array);
+              mutations_array.rbegin(), mutations_array.rend());
       mutations_arrays_referenced_.emplace_back(std::move(mutations));
 
       view.mutations_count = mutations_array.size();

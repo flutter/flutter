@@ -662,6 +662,23 @@ void scene_builder_with_clips() {
   window.scheduleFrame();
 }
 
+@pragma('vm:entry-point')
+void scene_builder_with_complex_clips() {
+  window.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+
+    builder.pushClipRect(Rect.fromLTRB(0.0, 0.0, 1024.0, 600.0));
+    builder.pushOffset(512.0, 0.0);
+    builder.pushClipRect(Rect.fromLTRB(0.0, 0.0, 512.0, 600.0));
+    builder.pushOffset(-256.0, 0.0);
+    builder.pushClipRect(Rect.fromLTRB(0.0, 0.0, 1024.0, 600.0));
+    builder.addPlatformView(42, width: 1024.0, height: 600.0);
+
+    builder.addPicture(Offset(0.0, 0.0), CreateGradientBox(Size(1024.0, 600.0)));
+    window.render(builder.build());
+  };
+  window.scheduleFrame();
+}
 
 void sendObjectToNativeCode(dynamic object) native 'SendObjectToNativeCode';
 
