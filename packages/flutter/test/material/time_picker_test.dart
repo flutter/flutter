@@ -261,6 +261,7 @@ void _tests() {
     WidgetTester tester,
     bool alwaysUse24HourFormat, {
     TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
+    double textScaleFactor = 1.0,
   }) async {
     await tester.pumpWidget(
       Localizations(
@@ -270,7 +271,10 @@ void _tests() {
           DefaultWidgetsLocalizations.delegate,
         ],
         child: MediaQuery(
-          data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
+          data: MediaQueryData(
+            alwaysUse24HourFormat: alwaysUse24HourFormat,
+            textScaleFactor: textScaleFactor,
+          ),
           child: Material(
             child: Directionality(
               textDirection: TextDirection.ltr,
@@ -688,6 +692,54 @@ void _tests() {
 
     expect(rootObserver.pickerCount, 0);
     expect(nestedObserver.pickerCount, 1);
+  });
+
+  testWidgets('no overflow with largest text scale',
+      (WidgetTester tester) async {
+    Widget buildFrame(double textScaleFactor) {
+      return MaterialApp(
+        home: Material(
+          child: MediaQuery(
+            data: MediaQueryData(textScaleFactor: textScaleFactor),
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return RaisedButton(
+                    child: const Text('X'),
+                    onPressed: () {
+                      showTimePicker(
+                        context: context,
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                        builder: (BuildContext context, Widget child) {
+                          return child;
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await mediaQueryBoilerplate(tester, false,
+        textScaleFactor: 1.0,
+        initialTime: const TimeOfDay(hour: 7, minute: 41));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.text('41')).height, equals(50));
+
+    await tester.tap(find.text('OK')); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    await mediaQueryBoilerplate(tester, false,
+        textScaleFactor: 2.0,
+        initialTime: const TimeOfDay(hour: 7, minute: 41));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.text('41')).height, equals(100));
   });
 }
 
