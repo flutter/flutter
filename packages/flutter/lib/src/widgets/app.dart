@@ -1364,6 +1364,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(_debugCheckLocalizations(appLocale));
     return Shortcuts(
       shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+      debugLabel: '<Default WidgetsApp Shortcuts>',
       child: Actions(
         actions: widget.actions ?? WidgetsApp.defaultActions,
         child: DefaultFocusTraversal(

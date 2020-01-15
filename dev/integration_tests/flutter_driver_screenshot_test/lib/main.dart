@@ -71,28 +71,20 @@ class _MyHomePageState extends State<_MyHomePage> {
   Future<String> _handleDriverMessage(String message) async {
     switch (message) {
       case 'device_model':
-        String target;
+        final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
         switch (Theme.of(context).platform) {
           case TargetPlatform.iOS:
-            target = 'ios';
-            break;
-          case TargetPlatform.android:
-            target = 'android';
-            break;
-          default:
-            target = 'unsupported';
-            break;
-        }
-        final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-        if (target == 'ios') {
-          final IosDeviceInfo iosDeviceInfo = await deviceInfo.iosInfo;
-          if (iosDeviceInfo.isPhysicalDevice) {
-            return iosDeviceInfo.utsname.machine;
-          } else {
+            final IosDeviceInfo iosDeviceInfo = await deviceInfo.iosInfo;
+            if (iosDeviceInfo.isPhysicalDevice) {
+              return iosDeviceInfo.utsname.machine;
+            }
             return 'sim_' + iosDeviceInfo.name;
-          }
-        } else if (target == 'android') {
-          return (await deviceInfo.androidInfo).model;
+          case TargetPlatform.android:
+            return (await deviceInfo.androidInfo).model;
+          case TargetPlatform.fuchsia:
+            return 'fuchsia';
+          default:
+            return 'unsupported';
         }
         break;
     }

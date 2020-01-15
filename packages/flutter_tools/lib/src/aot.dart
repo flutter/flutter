@@ -210,8 +210,8 @@ class AotBuilder {
       ? const ProfileCopyFlutterAotBundle()
       : const ReleaseCopyFlutterAotBundle();
 
-    final BuildResult result = await buildSystem.build(target, Environment(
-      projectDir: flutterProject.directory,
+    final BuildResult result = await buildSystem.build(target, Environment.test(
+      flutterProject.directory,
       outputDir: globals.fs.directory(outputDir),
       buildDir: flutterProject.directory
         .childDirectory('.dart_tool')

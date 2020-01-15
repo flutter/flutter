@@ -214,7 +214,7 @@ class HSVColor {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     return other is HSVColor
@@ -398,7 +398,7 @@ class HSLColor {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     return other is HSLColor
@@ -441,7 +441,7 @@ class ColorSwatch<T> extends Color {
   Color operator [](T index) => _swatch[index];
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)

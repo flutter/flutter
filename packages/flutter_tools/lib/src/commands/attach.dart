@@ -11,7 +11,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
@@ -178,7 +177,7 @@ class AttachCommand extends FlutterCommand {
         Artifacts: () => overrideArtifacts,
     });
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> _attachToDevice(Device device) async {
@@ -218,7 +217,7 @@ class AttachCommand extends FlutterCommand {
         if (module == null) {
           throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
         }
-        usesIpv6 = await device.ipv6;
+        usesIpv6 = device.ipv6;
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);

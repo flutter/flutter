@@ -91,10 +91,10 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///    `addRepaintBoundaries`.
 ///
 ///  * Using [AutomaticKeepAlive] widgets (inserted by default in
-///    [SliverChildListDelegate] or [SliverChildListDelegate]). Instead of
-///    unconditionally caching the child element subtree when scrolling
-///    off-screen like [KeepAlive], [AutomaticKeepAlive] can let whether to
-///    cache the subtree be determined by descendant logic in the subtree.
+///    [SliverChildListDelegate] or [SliverChildListDelegate]).
+///    [AutomaticKeepAlive] allows descendant widgets to control whether the
+///    subtree is actually kept alive or not. This behavior is in contrast with
+///    [KeepAlive], which will unconditionally keep the subtree alive.
 ///
 ///    As an example, the [EditableText] widget signals its sliver child element
 ///    subtree to stay alive while its text field has input focus. If it doesn't
@@ -1554,7 +1554,7 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// In practice, the simplest way to deal with these notifications is to mix
 /// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
 /// for that mixin class for details.
-class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
+class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   /// Marks a child as needing to remain alive.
   ///
   /// The [child] and [keepAlive] arguments must not be null.
@@ -1589,6 +1589,9 @@ class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
   // go away _unless_ we do a layout).
   @override
   bool debugCanApplyOutOfTurn() => keepAlive;
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => SliverWithKeepAliveWidget;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

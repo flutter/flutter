@@ -270,7 +270,7 @@ class TestCommand extends FastFlutterCommand {
     if (result != 0) {
       throwToolExit(null);
     }
-    return const FlutterCommandResult(ExitStatus.success);
+    return FlutterCommandResult.success();
   }
 
   Future<void> _buildTestAsset() async {
