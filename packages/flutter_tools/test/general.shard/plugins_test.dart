@@ -268,13 +268,6 @@ dependencies:
 
     group('refreshPlugins', () {
       testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () {
-        when(iosProject.existsSync()).thenReturn(true);
-        when(androidProject.existsSync()).thenReturn(true);
-        when(macosProject.existsSync()).thenReturn(true);
-        when(windowsProject.existsSync()).thenReturn(true);
-        when(linuxProject.existsSync()).thenReturn(true);
-        when(webProject.existsSync()).thenReturn(true);
-
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
