@@ -320,7 +320,7 @@ class Typography extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final Typography defaultTypography = Typography.material2018();
+    final Typography defaultTypography = Typography.material2014();
     properties.add(DiagnosticsProperty<TextTheme>('black', black, defaultValue: defaultTypography.black));
     properties.add(DiagnosticsProperty<TextTheme>('white', white, defaultValue: defaultTypography.white));
     properties.add(DiagnosticsProperty<TextTheme>('englishLike', englishLike, defaultValue: defaultTypography.englishLike));

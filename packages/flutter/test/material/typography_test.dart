@@ -51,7 +51,7 @@ void main() {
 
   testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    Typography.material2018(
+    Typography.material2014(
       platform: TargetPlatform.android,
       black: Typography.blackCupertino,
       white: Typography.whiteCupertino,
@@ -64,7 +64,7 @@ void main() {
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
       .map((DiagnosticsNode node) => node.name).toList();
 
-    expect(nonDefaultPropertyNames, <String>['black', 'white']);
+    expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
 
   test('englishLike2018 TextTheme matches Material Design spec', () {
