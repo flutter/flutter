@@ -154,6 +154,7 @@ class IconButton extends StatelessWidget {
     this.autofocus = false,
     this.tooltip,
     this.enableFeedback = true,
+    this.constraints,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
@@ -288,6 +289,26 @@ class IconButton extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool enableFeedback;
 
+  /// Optional size constraints for the button.
+  ///
+  /// When unspecified, defaults to:
+  /// ```dart
+  /// const BoxConstraints(
+  ///   minWidth: kMinInteractiveDimension,
+  ///   minHeight: kMinInteractiveDimension,
+  /// )
+  /// ```
+  /// where [kMinInteractiveDimension] is 48.0, and then with visual density
+  /// applied.
+  ///
+  /// The default constraints ensure that the button is accessible.
+  /// Specifying this parameter enables creation of buttons smaller than
+  /// the minimum size, but it is not recommended.
+  ///
+  /// The visual density uses the [visualDensity] parameter if specified,
+  /// and `Theme.of(context).visualDensity` otherwise.
+  final BoxConstraints constraints;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -298,9 +319,16 @@ class IconButton extends StatelessWidget {
     else
       currentColor = disabledColor ?? theme.disabledColor;
 
-    final Offset densityAdjustment = (visualDensity ?? theme.visualDensity).baseSizeAdjustment;
+    final VisualDensity effectiveVisualDensity = visualDensity ?? theme.visualDensity;
+
+    final BoxConstraints unadjustedConstraints = constraints ?? const BoxConstraints(
+      minWidth: _kMinButtonSize,
+      minHeight: _kMinButtonSize,
+    );
+    final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
+
     Widget result = ConstrainedBox(
-      constraints: BoxConstraints(minWidth: _kMinButtonSize + densityAdjustment.dx, minHeight: _kMinButtonSize + densityAdjustment.dy),
+      constraints: adjustedConstraints,
       child: Padding(
         padding: padding,
         child: SizedBox(
