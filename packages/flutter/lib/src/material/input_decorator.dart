@@ -2094,7 +2094,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         textDirection: decoration.hintTextDirection,
         textAlign: decoration.hintTextAlign,
         overflow: TextOverflow.ellipsis,
-        textAlign: textAlign,
         maxLines: decoration.hintMaxLines,
       ),
     );
