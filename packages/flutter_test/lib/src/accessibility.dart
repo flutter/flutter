@@ -227,10 +227,18 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       double fontSize;
       bool isBold;
       final String text = (data.label?.isEmpty == true) ? data.value : data.label;
-      final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
+      final List<Element> elements = find.byWidgetPredicate((Widget widget) {
+        if (widget is Text) {
+          return widget.data.contains(text);
+        }
+        if (widget is EditableText) {
+          return widget.controller.value.text.contains(text);
+        }
+        return false;
+      }).hitTestable().evaluate().toList();
       Rect paintBounds;
-      if (elements.length == 1) {
-        final Element element = elements.single;
+      if (elements.isNotEmpty) {
+        final Element element = elements.first;
         final RenderBox renderObject = element.renderObject as RenderBox;
         element.renderObject.paintBounds;
         paintBounds = Rect.fromPoints(
@@ -252,12 +260,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         } else {
           assert(false);
         }
-      } else if (elements.length > 1) {
-        return Evaluation.fail('Multiple nodes with the same label: ${data.label}\n');
       } else {
-        // If we can't find the text node then assume the label does not
-        // correspond to actual text.
-        return result;
+        return Evaluation.fail('Unable to find element matching semantic node: $data');
       }
 
       if (_isNodeOffScreen(paintBounds, tester.binding.window)) {

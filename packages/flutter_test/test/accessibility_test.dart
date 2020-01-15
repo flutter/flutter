@@ -7,6 +7,36 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('text contrast guideline', () {
+    testWidgets('white text on white background with merge semantics', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: MergeSemantics(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const <Widget>[
+                  Text(
+                    'I am text one',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  Text(
+                    'And I am text two',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+
     testWidgets('black text on white background - Text Widget - direct style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
@@ -132,7 +162,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('label without corresponding text is skipped', (WidgetTester tester) async {
+    testWidgets('label without corresponding text fails', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         Semantics(
@@ -147,7 +177,7 @@ void main() {
       ));
 
       final Evaluation result = await textContrastGuideline.evaluate(tester);
-      expect(result.passed, true);
+      expect(result.passed, false);
       handle.dispose();
     });
 
