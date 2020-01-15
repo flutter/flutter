@@ -262,10 +262,10 @@ html.Element _drawParagraphElement(
     ..width = '${paragraph.width}px';
 
   if (transform != null) {
-    paragraphStyle
-      ..transformOrigin = '0 0 0'
-      ..transform =
-          matrix4ToCssTransform3d(transformWithOffset(transform, offset));
+    setElementTransform(
+      paragraphElement,
+      transformWithOffset(transform, offset).storage,
+    );
   }
 
   final ParagraphGeometricStyle style = paragraph._geometricStyle;

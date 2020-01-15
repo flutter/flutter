@@ -15,13 +15,16 @@ import 'package:web_engine_tester/golden_tester.dart';
 final Rect region = Rect.fromLTWH(0, 0, 500, 100);
 
 void main() async {
-  debugShowClipLayers = true;
-
-  setUp(() {
+  setUp(() async {
+    debugShowClipLayers = true;
     SurfaceSceneBuilder.debugForgetFrameScene();
     for (html.Node scene in html.document.querySelectorAll('flt-scene')) {
       scene.remove();
     }
+
+    await webOnlyInitializePlatform();
+    webOnlyFontCollection.debugRegisterTestFonts();
+    await webOnlyFontCollection.ensureFontsLoaded();
   });
 
   test('pushClipRect', () async {
@@ -54,7 +57,8 @@ void main() async {
 
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('compositing_clip_rect_with_offset_and_transform.png', region: region);
+    await matchGoldenFile('compositing_clip_rect_with_offset_and_transform.png',
+        region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('pushClipRRect', () async {
@@ -95,7 +99,8 @@ void main() async {
 
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('compositing_shifted_physical_shape_clip.png', region: region);
+    await matchGoldenFile('compositing_shifted_physical_shape_clip.png',
+        region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('pushImageFilter', () async {
@@ -235,7 +240,8 @@ void _testCullRectComputation() {
     builder.pop(); // pushClipRect
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('compositing_cull_rect_fills_layer_clip.png', region: region);
+    await matchGoldenFile('compositing_cull_rect_fills_layer_clip.png',
+        region: region);
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(40, 40, 70, 70));
@@ -263,7 +269,9 @@ void _testCullRectComputation() {
     builder.pop(); // pushClipRect
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('compositing_cull_rect_intersects_clip_and_paint_bounds.png', region: region);
+    await matchGoldenFile(
+        'compositing_cull_rect_intersects_clip_and_paint_bounds.png',
+        region: region);
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(50, 40, 70, 70));
@@ -293,7 +301,8 @@ void _testCullRectComputation() {
     builder.pop(); // pushClipRect
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('compositing_cull_rect_offset_inside_layer_clip.png', region: region);
+    await matchGoldenFile('compositing_cull_rect_offset_inside_layer_clip.png',
+        region: region);
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect,
@@ -493,7 +502,8 @@ void _testCullRectComputation() {
 
     await matchGoldenFile('compositing_3d_rotate1.png', region: region);
 
-    final PersistedStandardPicture picture = enumeratePictures().single; // ignore: unused_local_variable
+    // ignore: unused_local_variable
+    final PersistedStandardPicture picture = enumeratePictures().single;
     // TODO(https://github.com/flutter/flutter/issues/40395):
     //   Needs ability to set iframe to 500,100 size. Current screen seems to be 500,500.
     // expect(
@@ -504,6 +514,91 @@ void _testCullRectComputation() {
     //           -140, -140, screenWidth - 360.0, screenHeight + 40.0)),
     // );
   }, timeout: const Timeout(Duration(seconds: 10)));
+
+  // This test reproduces text blurriness when two pieces of text appear inside
+  // two nested clips:
+  //
+  //   ┌───────────────────────┐
+  //   │   text in outer clip  │
+  //   │ ┌────────────────────┐│
+  //   │ │ text in inner clip ││
+  //   │ └────────────────────┘│
+  //   └───────────────────────┘
+  //
+  // This test clips using layers. See a similar test in `canvas_golden_test.dart`,
+  // which clips using canvas.
+  //
+  // More details: https://github.com/flutter/flutter/issues/32274
+  test(
+    'renders clipped text with high quality',
+    () async {
+      // To reproduce blurriness we need real clipping.
+      debugShowClipLayers = false;
+      final Paragraph paragraph =
+          (ParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto'))..addText('Am I blurry?')).build();
+      paragraph.layout(const ParagraphConstraints(width: 1000));
+
+      final Rect canvasSize = Rect.fromLTRB(
+        0,
+        0,
+        paragraph.maxIntrinsicWidth + 16,
+        2 * paragraph.height + 32,
+      );
+      final Rect outerClip =
+          Rect.fromLTRB(0.5, 0.5, canvasSize.right, canvasSize.bottom);
+      final Rect innerClip = Rect.fromLTRB(0.5, canvasSize.bottom / 2 + 0.5,
+          canvasSize.right, canvasSize.bottom);
+      final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+
+      builder.pushClipRect(outerClip);
+
+      {
+        final EnginePictureRecorder recorder = PictureRecorder();
+        final RecordingCanvas canvas = recorder.beginRecording(outerClip);
+        canvas.drawParagraph(paragraph, const Offset(8.5, 8.5));
+        final Picture picture = recorder.endRecording();
+        expect(canvas.hasArbitraryPaint, false);
+
+        builder.addPicture(
+          Offset.zero,
+          picture,
+        );
+      }
+
+      builder.pushClipRect(innerClip);
+      {
+        final EnginePictureRecorder recorder = PictureRecorder();
+        final RecordingCanvas canvas = recorder.beginRecording(innerClip);
+        canvas.drawParagraph(paragraph, Offset(8.5, 8.5 + innerClip.top));
+        final Picture picture = recorder.endRecording();
+        expect(canvas.hasArbitraryPaint, false);
+
+        builder.addPicture(
+          Offset.zero,
+          picture,
+        );
+      }
+      builder.pop(); // inner clip
+      builder.pop(); // outer clip
+
+      final html.Element sceneElement = builder.build().webOnlyRootElement;
+      expect(
+        sceneElement.querySelectorAll('p').map<String>((e) => e.innerText).toList(),
+        <String>['Am I blurry?', 'Am I blurry?'],
+        reason: 'Expected to render text using HTML',
+      );
+      html.document.body.append(sceneElement);
+
+      await matchGoldenFile(
+        'compositing_draw_high_quality_text.png',
+        region: canvasSize,
+        maxDiffRate: 0.0,
+        pixelComparison: PixelComparison.precise,
+      );
+    },
+    timeout: const Timeout(Duration(seconds: 10)),
+    testOn: 'chrome',
+  );
 }
 
 void _drawTestPicture(SceneBuilder builder) {

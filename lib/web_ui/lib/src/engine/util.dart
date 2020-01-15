@@ -59,11 +59,71 @@ String matrix4ToCssTransform3d(Matrix4 matrix) {
   return float64ListToCssTransform3d(matrix.storage);
 }
 
-/// Returns `true` is the [matrix] describes an identity transformation.
-bool isIdentityFloat64ListTransform(Float64List matrix) {
+/// Applies a transform to the [element].
+///
+/// There are several ways to transform an element. This function chooses
+/// between CSS "transform", "left", "top" or no transform, depending on the
+/// [matrix4] and the current device's screen properties. This function
+/// attempts to avoid issues with text blurriness on low pixel density screens.
+///
+/// See also:
+///  * https://github.com/flutter/flutter/issues/32274
+///  * https://bugs.chromium.org/p/chromium/issues/detail?id=1040222
+void setElementTransform(html.Element element, Float64List matrix4) {
+  final TransformKind transformKind = transformKindOf(matrix4);
+
+  // On low device-pixel ratio screens using CSS "transform" causes text blurriness
+  // at least on Blink browsers. We therefore prefer using CSS "left" and "top" instead.
+  final bool isHighDevicePixelRatioScreen = EngineWindow.browserDevicePixelRatio > 1.0;
+
+  if (transformKind == TransformKind.complex || isHighDevicePixelRatioScreen) {
+    final String cssTransform = float64ListToCssTransform3d(matrix4);
+    element.style
+      ..transformOrigin = '0 0 0'
+      ..transform = cssTransform
+      ..top = null
+      ..left = null;
+  } else if (transformKind == TransformKind.translation2d) {
+    final double ty = matrix4[13];
+    final double tx = matrix4[12];
+    element.style
+      ..transformOrigin = null
+      ..transform = null
+      ..left = '${tx}px'
+      ..top = '${ty}px';
+  } else {
+    assert(transformKind == TransformKind.identity);
+    element.style
+      ..transformOrigin = null
+      ..transform = null
+      ..left = null
+      ..top = null;
+  }
+}
+
+/// The kind of effect a transform matrix performs.
+enum TransformKind {
+  /// No effect.
+  identity,
+
+  /// A translation along either X or Y axes, or both.
+  translation2d,
+
+  /// All other kinds of transforms.
+  complex,
+}
+
+/// Detects the kind of transform the [matrix] performs.
+TransformKind transformKindOf(Float64List matrix) {
   assert(matrix.length == 16);
   final Float64List m = matrix;
-  return m[0] == 1.0 &&
+  final double ty = m[13];
+  final double tx = m[12];
+
+  // If matrix contains scaling, rotation, z translation or
+  // perspective transform, it is not considered simple.
+  final bool isSimpleTransform =
+      m[0] == 1.0 &&
       m[1] == 0.0 &&
       m[2] == 0.0 &&
       m[3] == 0.0 &&
@@ -75,10 +135,26 @@ bool isIdentityFloat64ListTransform(Float64List matrix) {
       m[9] == 0.0 &&
       m[10] == 1.0 &&
       m[11] == 0.0 &&
-      m[12] == 0.0 &&
-      m[13] == 0.0 &&
-      m[14] == 0.0 &&
+      // m[12] - x translation is simple
+      // m[13] - y translation is simple
+      m[14] == 0.0 &&  // z translation is NOT simple
       m[15] == 1.0;
+
+  if (!isSimpleTransform) {
+    return TransformKind.complex;
+  }
+
+  if (ty != 0.0 || tx != 0.0) {
+    return TransformKind.translation2d;
+  }
+
+  return TransformKind.identity;
+}
+
+/// Returns `true` is the [matrix] describes an identity transformation.
+bool isIdentityFloat64ListTransform(Float64List matrix) {
+  assert(matrix.length == 16);
+  return transformKindOf(matrix) == TransformKind.identity;
 }
 
 /// Converts [matrix] to CSS transform value.
