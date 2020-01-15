@@ -1883,11 +1883,15 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   void initState() {
     super.initState();
+
+    final bool labelIsInitiallyFloating = widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always
+        // ignore: deprecated_member_use_from_same_package
+        || (widget.decoration.hasFloatingPlaceholder && widget._labelShouldWithdraw);
+
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
-      // ignore: deprecated_member_use_from_same_package
-      value: widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always || (widget.decoration.hasFloatingPlaceholder && widget._labelShouldWithdraw) ? 1.0 : 0.0,
+      value: labelIsInitiallyFloating ? 1.0 : 0.0
     );
     _floatingLabelController.addListener(_handleChange);
 
@@ -1928,7 +1932,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   bool get isFocused => widget.isFocused && decoration.enabled;
   bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
-  bool get _floatingLabelEnabled => decoration.hasFloatingPlaceholder && decoration.floatingLabelBehavior != FloatingLabelBehavior.never;  // ignore: deprecated_member_use_from_same_package
+  bool get _floatingLabelEnabled {
+    // ignore: deprecated_member_use_from_same_package
+    return decoration.hasFloatingPlaceholder && decoration.floatingLabelBehavior != FloatingLabelBehavior.never;
+  }
 
   @override
   void didUpdateWidget(InputDecorator old) {
@@ -1936,11 +1943,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (widget.decoration != old.decoration)
       _effectiveDecoration = null;
 
-    // ignore: deprecated_member_use_from_same_package
-    final bool floatBehaviourChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
+    final bool floatBehaviourChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior
+        // ignore: deprecated_member_use_from_same_package
+        || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviourChanged) {
-      if ((widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always) && _floatingLabelEnabled)
+      if (_floatingLabelEnabled
+          && (widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always))
         _floatingLabelController.forward();
       else
         _floatingLabelController.reverse();
@@ -2481,7 +2490,7 @@ class InputDecoration {
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
        // ignore: deprecated_member_use_from_same_package
-       assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
+       assert(!(!hasFloatingPlaceholder && floatingLabelBehavior == FloatingLabelBehavior.always),
             'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
        isCollapsed = false;
 
