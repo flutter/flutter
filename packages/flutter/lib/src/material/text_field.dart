@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -322,6 +324,8 @@ class TextField extends StatefulWidget {
     this.cursorWidth = 2.0,
     this.cursorRadius,
     this.cursorColor,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
@@ -602,6 +606,10 @@ class TextField extends StatefulWidget {
   /// Defaults to [ThemeData.cursorColor] or [CupertinoTheme.primaryColor]
   /// depending on [ThemeData.platform].
   final Color cursorColor;
+
+
+  final ui.BoxHeightStyle selectionHeightStyle;
+  final ui.BoxWidthStyle selectionWidthStyle;
 
   /// The appearance of the keyboard.
   ///
@@ -1003,6 +1011,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         cursorWidth: widget.cursorWidth,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
+        selectionHeightStyle: widget.selectionHeightStyle,
+        selectionWidthStyle: widget.selectionWidthStyle,
         cursorOpacityAnimates: cursorOpacityAnimates,
         cursorOffset: cursorOffset,
         paintCursorAboveText: paintCursorAboveText,
