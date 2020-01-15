@@ -4012,19 +4012,39 @@ String _concatStrings({
 abstract class SemanticsSortKey extends Diagnosticable implements Comparable<SemanticsSortKey> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
+  ///
+  /// The [name] argument is optional.
   const SemanticsSortKey({this.name});
 
   /// An optional name that will make this sort key only order itself
   /// with respect to other sort keys of the same [name], as long as
   /// they are of the same [runtimeType].
+  ///
+  /// Sort keys that have different types are sorted only by name.  If they have
+  /// different types and identical names, then they are sorted arbitrarily, but
+  /// consistently. The arbitrary ordering could change if the app is
+  /// recompiled, so if consistent ordering is required, then apply a name or
+  /// other sort criteria.
   final String name;
 
   @override
   int compareTo(SemanticsSortKey other) {
-    // The sorting algorithm must not compare incomparable keys.
-    assert(runtimeType == other.runtimeType);
-    assert(name == other.name);
-    return doCompare(other);
+    // The sorting algorithm must not compare incomparable keys. If the name and
+    // the type are identical, then defer to the subclass implementation for
+    // ordering.
+    if (name == other.name) {
+      if (other.runtimeType == runtimeType) {
+        return doCompare(other);
+      } else {
+        // If the names are the same, but the types are different, then sort by
+        // type hash code to provide a consistent (but arbitrary) ordering.
+        return runtimeType.hashCode.compareTo(other.runtimeType.hashCode);
+      }
+    }
+
+    // Keys that don't share the same type and/or name are sorted only by name.
+    final int nameComparison = (name ?? '').compareTo(other.name ?? '');
+    return nameComparison;
   }
 
   /// The implementation of [compareTo].
