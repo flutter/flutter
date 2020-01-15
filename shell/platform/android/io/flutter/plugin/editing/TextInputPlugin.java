@@ -235,7 +235,8 @@ public class TextInputPlugin {
             view,
             inputTarget.id,
             textInputChannel,
-            mEditable
+            mEditable,
+            outAttrs
         );
         outAttrs.initialSelStart = Selection.getSelectionStart(mEditable);
         outAttrs.initialSelEnd = Selection.getSelectionEnd(mEditable);
