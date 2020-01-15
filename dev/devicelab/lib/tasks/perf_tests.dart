@@ -719,6 +719,7 @@ class ReportedDurationTest {
       print('launching $project$test on device...');
       await flutter('run', options: <String>[
         '--verbose',
+        '--no-fast-start',
         '--${_reportedDurationTestToString(flavor)}',
         '--no-resident',
         '-d', device.deviceId,
