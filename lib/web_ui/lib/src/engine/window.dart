@@ -99,8 +99,14 @@ class EngineWindow extends ui.Window {
   /// Simulates clicking the browser's back button.
   Future<void> webOnlyBack() => _browserHistory.back();
 
+  /// Lazily initialized when the `defaultRouteName` getter is invoked.
+  ///
+  /// The reason for the lazy initialization is to give enough time for the app to set [locationStrategy]
+  /// in `lib/src/ui/initialization.dart`.
+  String _defaultRouteName;
+
   @override
-  String get defaultRouteName => _browserHistory.currentPath;
+  String get defaultRouteName => _defaultRouteName ??= _browserHistory.currentPath;
 
   /// Change the strategy to use for handling browser history location.
   /// Setting this member will automatically update [_browserHistory].
