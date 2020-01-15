@@ -229,10 +229,10 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       final String text = (data.label?.isEmpty == true) ? data.value : data.label;
       final List<Element> elements = find.byWidgetPredicate((Widget widget) {
         if (widget is Text) {
-          return widget.data.contains(text);
+          return text.contains(widget.data);
         }
         if (widget is EditableText) {
-          return widget.controller.value.text.contains(text);
+          return text.contains(widget.controller.value.text);
         }
         return false;
       }).hitTestable().evaluate().toList();
