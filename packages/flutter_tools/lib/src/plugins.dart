@@ -328,9 +328,6 @@ List<Plugin> findPlugins(FlutterProject project) {
       list.add(<String, dynamic>{
         'name': plugin.name,
         'path': fsUtils.escapePath(plugin.path),
-        'dependencies': <String>[
-          ...plugin.dependencies.where(pluginNames.contains)
-        ]
       });
     }
     return list;
@@ -346,7 +343,6 @@ List<Plugin> findPlugins(FlutterProject project) {
 ///       {
 ///         "name": "test",
 ///         "path": "test_path",
-///         "dependencies": []
 ///       }
 ///     ],
 ///     "android": [],
@@ -377,8 +373,6 @@ List<Plugin> findPlugins(FlutterProject project) {
 ///   "date_created": "1970-01-01 00:00:00.000",
 ///   "version": "0.0.0-unknown"
 /// }
-/// Note that the dependencyGraph object is kept for backwards compatibility and will be removed once migration
-/// is complete.
 ///
 /// Finally, returns [true] if .flutter-plugins-dependencies has changed,
 /// otherwise returns [false].
@@ -411,7 +405,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
 
   result['info'] =  'This is a generated file; do not edit or check into version control.';
   result['plugins'] = pluginsMap;
-  result['dependencyGraph'] = _createLegacyPluginDependencyGraph(plugins);
+  result['dependencyGraph'] = _createPluginDependencyGraph(plugins);
   result['date_created'] = systemClock.now().toString();
   result['version'] = flutterVersion.frameworkVersion;
 
@@ -422,7 +416,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   return oldPluginFileContent != pluginFileContent;
 }
 
-List<dynamic> _createLegacyPluginDependencyGraph(List<Plugin> plugins) {
+List<dynamic> _createPluginDependencyGraph(List<Plugin> plugins) {
   final List<dynamic> directAppDependencies = <dynamic>[];
   final Set<String> pluginNames = <String>{};
   for (final Plugin plugin in plugins) {
