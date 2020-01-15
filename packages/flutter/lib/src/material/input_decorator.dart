@@ -2488,9 +2488,6 @@ class InputDecoration {
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
-       // ignore: deprecated_member_use_from_same_package
-       assert(!(!hasFloatingPlaceholder && floatingLabelBehavior == FloatingLabelBehavior.always),
-            'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
        isCollapsed = false;
 
   /// Defines an [InputDecorator] that is the same size as the input field.
