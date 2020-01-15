@@ -11,6 +11,7 @@ import 'package:yaml/yaml.dart';
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/time.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -18,7 +19,6 @@ import 'globals.dart' as globals;
 import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
-import 'base/time.dart';
 import 'version.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
