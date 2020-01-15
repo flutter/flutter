@@ -811,7 +811,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  bool get semanticsDismissible => false;
+  bool get semanticsDismissible => true;
 
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
