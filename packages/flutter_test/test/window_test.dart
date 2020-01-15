@@ -274,6 +274,5 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   @override
   final bool reduceMotion;
 
-  @override
   final bool highContrast;
 }
