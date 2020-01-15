@@ -821,7 +821,7 @@ void main() {
     expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
   });
 
-  testWidgets('hit testing', (WidgetTester tester) async {
+  testWidgets('entries below opaque entries are ignored for hit testing', (WidgetTester tester) async {
     final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
     int bottomTapCount = 0;
     await tester.pumpWidget(
@@ -884,7 +884,7 @@ void main() {
     expect(bottomTapCount, 1);
   });
 
-  testWidgets('semantics', (WidgetTester tester) async {
+  testWidgets('Semantics of entries below opaque entries are ignored', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
     await tester.pumpWidget(
@@ -917,6 +917,29 @@ void main() {
     expect(semantics, isNot(includesNodeWith(label: 'bottom')));
 
     semantics.dispose();
+  });
+
+  testWidgets('Can used Positioned within OverlayEntry', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return const Positioned(
+                  left: 145,
+                  top: 123,
+                  child: Text('positioned child'),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.text('positioned child')), const Offset(145, 123));
   });
 }
 
