@@ -232,7 +232,7 @@ void main() {
     expect(stateKey.currentState.value, equals('three'));
   });
 
-  testWidgets('DropdownButtonFormFieldState internal InputDecorator isEmpty property is correct', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormFieldState internal InputDecorator isEmpty property behaviour is correct', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
 
     await tester.pumpWidget(
@@ -240,7 +240,7 @@ void main() {
         home: Material(
           child: DropdownButtonFormField<String>(
             key: stateKey,
-            hint: const Text('Hint'),
+            decoration: InputDecoration(labelText: 'label', alignLabelWithHint: true),
             onChanged: (String newValue) {},
             items: menuItems.map((String value) {
               return DropdownMenuItem<String>(
@@ -253,13 +253,19 @@ void main() {
       )
     );
 
+    // isEmpty: true causes the label to be aligned with the input text
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 44.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 60.0);
+
     // [FormField] value is initially null.
     expect(stateKey.currentState.value, equals(null));
     // [InputDecorator] isEmpty property is true.
     expect((tester.widget(find.byType(InputDecorator)) as InputDecorator).isEmpty, equals(true));
 
     // Tap [DropdownButton] to open dropdown menu.
-    await tester.tap(find.text('Hint'));
+    await tester.tap(find.text('label'));
     await tester.pumpAndSettle();
 
     // Tap outside the [DropdownButton] to close dropdown menu without selecting an option.
@@ -272,7 +278,7 @@ void main() {
     expect((tester.widget(find.byType(InputDecorator)) as InputDecorator).isEmpty, equals(true));
 
     // Tap [DropdownButton] to open dropdown menu.
-    await tester.tap(find.text('Hint'));
+    await tester.tap(find.text('label'));
     await tester.pumpAndSettle();
     // Tap [DropdownMenuItem] for an item other than the initial item.
     await tester.tap(find.text('three').last);
