@@ -4,19 +4,22 @@
 
 package com.example.platformchannel;
 
-import static org.junit.Assert.*;
-
 import android.app.Instrumentation;
 import android.graphics.Bitmap;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import io.flutter.view.FlutterView;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import io.flutter.view.FlutterView;
+
+import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {

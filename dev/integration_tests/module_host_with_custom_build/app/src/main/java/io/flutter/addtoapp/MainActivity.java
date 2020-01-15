@@ -5,7 +5,9 @@
 package io.flutter.addtoapp;
 
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import io.flutter.facade.Flutter;
 
 public class MainActivity extends AppCompatActivity {

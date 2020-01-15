@@ -5,9 +5,11 @@
 package com.example.release_smoke_test;
 
 import androidx.test.rule.ActivityTestRule;
-import dev.flutter.plugins.instrumentationadapter.FlutterRunner;
+
 import org.junit.Rule;
 import org.junit.runner.RunWith;
+
+import dev.flutter.plugins.instrumentationadapter.FlutterRunner;
 
 @RunWith(FlutterRunner.class)
 public class MainActivityTest {

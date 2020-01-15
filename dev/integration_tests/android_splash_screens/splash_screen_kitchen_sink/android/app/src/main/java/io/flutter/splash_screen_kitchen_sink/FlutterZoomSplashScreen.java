@@ -6,8 +6,8 @@ package io.flutter.splash_screen_kitchen_sink;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 

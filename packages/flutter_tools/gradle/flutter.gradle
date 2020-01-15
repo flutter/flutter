@@ -1,18 +1,8 @@
-import static groovy.io.FileType.FILES
-
-import com.android.builder.model.AndroidProject
 import com.android.build.OutputFile
+import com.android.builder.model.AndroidProject
 import groovy.json.JsonSlurper
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 import org.apache.tools.ant.taskdefs.condition.Os
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
-import org.gradle.api.Project
-import org.gradle.api.Plugin
-import org.gradle.api.Task
+import org.gradle.api.*
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Copy
@@ -20,6 +10,10 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
+
+import java.nio.file.Paths
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 buildscript {
     repositories {

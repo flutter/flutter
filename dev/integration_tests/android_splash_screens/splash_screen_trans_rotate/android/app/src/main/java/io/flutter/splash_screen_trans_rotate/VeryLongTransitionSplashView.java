@@ -13,8 +13,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
-import androidx.annotation.Nullable;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * {@code View} that appears entirely yellow and slowly fades away, upon request.

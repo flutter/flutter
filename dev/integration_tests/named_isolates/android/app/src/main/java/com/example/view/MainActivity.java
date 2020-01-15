@@ -4,20 +4,14 @@
 
 package com.example.view;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.TextView;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import io.flutter.plugin.common.BasicMessageChannel;
-import io.flutter.plugin.common.BasicMessageChannel.MessageHandler;
-import io.flutter.plugin.common.BasicMessageChannel.Reply;
-import io.flutter.plugin.common.StringCodec;
+
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterRunArguments;
 import io.flutter.view.FlutterView;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private FlutterView firstFlutterView;
