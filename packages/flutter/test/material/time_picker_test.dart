@@ -696,8 +696,12 @@ void _tests() {
 
   testWidgets('text scale affects certain elements and not others',
       (WidgetTester tester) async {
-    await mediaQueryBoilerplate(tester, false, textScaleFactor: 1.0,
-        initialTime: const TimeOfDay(hour: 7, minute: 41));
+    await mediaQueryBoilerplate(
+        tester,
+        false,
+        textScaleFactor: 1.0,
+        initialTime: const TimeOfDay(hour: 7, minute: 41),
+    );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
@@ -708,8 +712,12 @@ void _tests() {
     await tester.pumpAndSettle();
 
     // Verify that the time display is not affected by text scale.
-    await mediaQueryBoilerplate(tester, false, textScaleFactor: 2.0,
-        initialTime: const TimeOfDay(hour: 7, minute: 41));
+    await mediaQueryBoilerplate(
+        tester,
+        false,
+        textScaleFactor: 2.0,
+        initialTime: const TimeOfDay(hour: 7, minute: 41),
+    );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
@@ -720,8 +728,12 @@ void _tests() {
     await tester.pumpAndSettle();
 
     // Verify that text scale for AM/PM is at most 2x.
-    await mediaQueryBoilerplate(tester, false, textScaleFactor: 3.0,
-        initialTime: const TimeOfDay(hour: 7, minute: 41));
+    await mediaQueryBoilerplate(
+        tester,
+        false,
+        textScaleFactor: 3.0,
+        initialTime: const TimeOfDay(hour: 7, minute: 41),
+    );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 

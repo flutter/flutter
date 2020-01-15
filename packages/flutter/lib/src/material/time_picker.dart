@@ -263,7 +263,11 @@ class _DayPeriodControl extends StatelessWidget {
               heightFactor: 1,
               child: Semantics(
                 selected: amSelected,
-                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle, textScaleFactor: buttonTextScaleFactor),
+                child: Text(
+                    materialLocalizations.anteMeridiemAbbreviation,
+                    style: amStyle,
+                    textScaleFactor: buttonTextScaleFactor,
+                ),
               ),
             ),
           ),
@@ -286,7 +290,11 @@ class _DayPeriodControl extends StatelessWidget {
               heightFactor: 1,
               child: Semantics(
                 selected: !amSelected,
-                child: Text(materialLocalizations.postMeridiemAbbreviation, style: pmStyle, textScaleFactor: buttonTextScaleFactor),
+                child: Text(
+                    materialLocalizations.postMeridiemAbbreviation,
+                    style: pmStyle,
+                    textScaleFactor: buttonTextScaleFactor,
+                ),
               ),
             ),
           ),
@@ -385,7 +393,12 @@ class _HourControl extends StatelessWidget {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
-            child: Text(formattedHour, style: hourStyle, textAlign: TextAlign.end, textScaleFactor: 1.0,),
+            child: Text(
+              formattedHour,
+              style: hourStyle,
+              textAlign: TextAlign.end,
+              textScaleFactor: 1.0,
+            ),
           ),
         ),
       ),
