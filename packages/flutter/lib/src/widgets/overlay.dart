@@ -619,22 +619,22 @@ class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return RenderStack.getIntrinsicDimension(firstChild, (RenderBox child) => child.getMinIntrinsicWidth(height));
+    return RenderStack.getIntrinsicDimension(_firstOnstageChild, (RenderBox child) => child.getMinIntrinsicWidth(height));
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return RenderStack.getIntrinsicDimension(firstChild, (RenderBox child) => child.getMaxIntrinsicWidth(height));
+    return RenderStack.getIntrinsicDimension(_firstOnstageChild, (RenderBox child) => child.getMaxIntrinsicWidth(height));
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return RenderStack.getIntrinsicDimension(firstChild, (RenderBox child) => child.getMinIntrinsicHeight(width));
+    return RenderStack.getIntrinsicDimension(_firstOnstageChild, (RenderBox child) => child.getMinIntrinsicHeight(width));
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return RenderStack.getIntrinsicDimension(firstChild, (RenderBox child) => child.getMaxIntrinsicHeight(width));
+    return RenderStack.getIntrinsicDimension(_firstOnstageChild, (RenderBox child) => child.getMaxIntrinsicHeight(width));
   }
 
   @override

@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   testWidgets('OverflowEntries context contains Overlay', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
@@ -817,6 +819,104 @@ void main() {
     expect(tester.state<StatefulTestState>(find.byKey(bottom, skipOffstage: false)).rebuildCount, 1);
     expect(tester.state<StatefulTestState>(find.byKey(middle)).rebuildCount, 1);
     expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
+  });
+
+  testWidgets('hit testing', (WidgetTester tester) async {
+    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    int bottomTapCount = 0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              maintainState: true,
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    bottomTapCount++;
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(bottomTapCount, 0);
+    await tester.tap(find.byKey(overlayKey));
+    expect(bottomTapCount, 1);
+
+    overlayKey.currentState.insert(OverlayEntry(
+      maintainState: true,
+      opaque: true,
+      builder: (BuildContext context) {
+        return Container();
+      },
+    ));
+    await tester.pump();
+
+    // Bottom is offstage and does not receive tap events.
+    expect(find.byType(GestureDetector), findsNothing);
+    expect(find.byType(GestureDetector, skipOffstage: false), findsOneWidget);
+    await tester.tap(find.byKey(overlayKey));
+    expect(bottomTapCount, 1);
+
+    int topTapCount = 0;
+    overlayKey.currentState.insert(OverlayEntry(
+      maintainState: true,
+      opaque: true,
+      builder: (BuildContext context) {
+        return GestureDetector(
+          onTap: () {
+            topTapCount++;
+          },
+        );
+      },
+    ));
+    await tester.pump();
+
+    expect(topTapCount, 0);
+    await tester.tap(find.byKey(overlayKey));
+    expect(topTapCount, 1);
+    expect(bottomTapCount, 1);
+  });
+
+  testWidgets('semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              maintainState: true,
+              builder: (BuildContext context) {
+                return const Text('bottom');
+              },
+            ),
+            OverlayEntry(
+              maintainState: true,
+              opaque: true,
+              builder: (BuildContext context) {
+                return const Text('top');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.text('bottom'), findsNothing);
+    expect(find.text('bottom', skipOffstage: false), findsOneWidget);
+    expect(find.text('top'), findsOneWidget);
+    expect(semantics, includesNodeWith(label: 'top'));
+    expect(semantics, isNot(includesNodeWith(label: 'bottom')));
+
+    semantics.dispose();
   });
 }
 
