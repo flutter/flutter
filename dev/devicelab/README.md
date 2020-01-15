@@ -7,7 +7,8 @@ This package contains the code for test framework and the tests. More generally
 the tests are referred to as "tasks" in the API, but since we primarily use it
 for testing, this document refers to them as "tests".
 
-Devicelab results are available at https://flutter-dashboard.appspot.com.
+Current statuses for the devicelab are available at
+https://flutter-dashboard.appspot.com.
 
 # Dashboards
 
@@ -78,7 +79,7 @@ red agent is broken and does not receive new tasks.
 Flutter benchmarks are available at
 https://flutter-dashboard.appspot.com/benchmarks.html.
 
-## How the devicelab runs the tasks
+# How the devicelab runs tasks
 
 The devicelab agents have a small script installed on them that continuously
 asks the CI server for tasks to run. When the server finds a suitable task for
