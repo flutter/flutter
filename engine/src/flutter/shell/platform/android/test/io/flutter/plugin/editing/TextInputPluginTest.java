@@ -4,32 +4,44 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.provider.Settings;
 import android.util.SparseIntArray;
-import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.view.KeyEvent;
+import android.view.View;
 
 import java.nio.ByteBuffer;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
+import org.junit.Test;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowBuild;
 import org.robolectric.shadows.ShadowInputMethodManager;
 
-import io.flutter.embedding.engine.FlutterJNI;
+import org.mockito.ArgumentCaptor;
+
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.platform.PlatformViewsController;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -38,8 +50,22 @@ import static org.mockito.Mockito.verify;
 @Config(manifest = Config.NONE, shadows = TextInputPluginTest.TestImm.class, sdk = 27)
 @RunWith(RobolectricTestRunner.class)
 public class TextInputPluginTest {
+    // Verifies the method and arguments for a captured method call.
+    private void verifyMethodCall(ByteBuffer buffer, String methodName, String[] expectedArgs) throws JSONException {
+        buffer.rewind();
+        MethodCall methodCall = JSONMethodCodec.INSTANCE.decodeMethodCall(buffer);
+        assertEquals(methodName, methodCall.method);
+        if (expectedArgs != null) {
+            JSONArray args = methodCall.arguments();
+            assertEquals(expectedArgs.length, args.length());
+            for (int i = 0; i < args.length(); i++) {
+                assertEquals(expectedArgs[i], args.get(i).toString());
+            }
+        }
+    }
+
     @Test
-    public void textInputPlugin_RequestsReattachOnCreation() {
+    public void textInputPlugin_RequestsReattachOnCreation() throws JSONException {
         // Initialize a general TextInputPlugin.
         InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
         TestImm testImm = Shadow.extract(RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
@@ -50,8 +76,12 @@ public class TextInputPluginTest {
         DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
         TextInputPlugin textInputPlugin = new TextInputPlugin(testView, dartExecutor, mock(PlatformViewsController.class));
 
-        ByteBuffer message = JSONMethodCodec.INSTANCE.encodeMethodCall(new MethodCall("TextInputClient.requestExistingInputState", null));
-        verify(dartExecutor, times(1)).send("flutter/textinput", message, null);
+        ArgumentCaptor<String> channelCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<ByteBuffer> bufferCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
+
+        verify(dartExecutor, times(1)).send(channelCaptor.capture(), bufferCaptor.capture(), any(BinaryMessenger.BinaryReply.class));
+        assertEquals("flutter/textinput", channelCaptor.getValue());
+        verifyMethodCall(bufferCaptor.getValue(), "TextInputClient.requestExistingInputState", null);
     }
 
     @Test
@@ -153,6 +183,40 @@ public class TextInputPluginTest {
         // There's a pending restart since we initialized the text input client. Flush that now.
         textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("", 0, 0));
         assertEquals(1, testImm.getRestartCount(testView));
+    }
+
+    @Test
+    public void inputConnection_createsActionFromEnter() throws JSONException {
+        TestImm testImm = Shadow.extract(RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+        FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+        View testView = new View(RuntimeEnvironment.application);
+        DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
+        TextInputPlugin textInputPlugin = new TextInputPlugin(testView, dartExecutor, mock(PlatformViewsController.class));
+        textInputPlugin.setTextInputClient(
+            0,
+            new TextInputChannel.Configuration(
+                false, false, true, TextInputChannel.TextCapitalization.NONE,
+                new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false), null, null));
+        // There's a pending restart since we initialized the text input client. Flush that now.
+        textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("", 0, 0));
+
+        ArgumentCaptor<String> channelCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<ByteBuffer> bufferCaptor = ArgumentCaptor.forClass(ByteBuffer.class);
+        verify(dartExecutor, times(1)).send(channelCaptor.capture(), bufferCaptor.capture(), any(BinaryMessenger.BinaryReply.class));
+        assertEquals("flutter/textinput", channelCaptor.getValue());
+        verifyMethodCall(bufferCaptor.getValue(), "TextInputClient.requestExistingInputState", null);
+        InputConnection connection = textInputPlugin.createInputConnection(testView, new EditorInfo());
+
+        connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
+        verify(dartExecutor, times(2)).send(channelCaptor.capture(), bufferCaptor.capture(), any(BinaryMessenger.BinaryReply.class));
+        assertEquals("flutter/textinput", channelCaptor.getValue());
+        verifyMethodCall(bufferCaptor.getValue(), "TextInputClient.performAction", new String[] {"0", "TextInputAction.done"});
+        connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
+
+        connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_NUMPAD_ENTER));
+        verify(dartExecutor, times(3)).send(channelCaptor.capture(), bufferCaptor.capture(), any(BinaryMessenger.BinaryReply.class));
+        assertEquals("flutter/textinput", channelCaptor.getValue());
+        verifyMethodCall(bufferCaptor.getValue(), "TextInputClient.performAction", new String[] {"0", "TextInputAction.done"});
     }
 
     @Implements(InputMethodManager.class)
