@@ -1140,8 +1140,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_didAutoFocus && widget.autofocus) {
-      FocusScope.of(context).autofocus(widget.focusNode);
       _didAutoFocus = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          FocusScope.of(context).autofocus(widget.focusNode);
+        }
+      });
     }
   }
 

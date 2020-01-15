@@ -4137,6 +4137,39 @@ void main() {
     }
     expect(tester.testTextInput.editingState['text'], 'flutter is the best!...');
   });
+
+  testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: testText);
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        maxLines: 10,
+        controller: controller,
+        showSelectionHandles: true,
+        autofocus: true,
+        focusNode: FocusNode(),
+        style: Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        backgroundCursorColor: Colors.grey,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        textAlign: TextAlign.right,
+        onSelectionChanged: (TextSelection newSelection, SelectionChangedCause newCause) {
+        },
+      ),
+    ));
+
+
+    await tester.pumpAndSettle(); // Wait for autofocus to take effect.
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isNull);
+  });
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {
