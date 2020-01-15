@@ -330,7 +330,7 @@ List<Plugin> findPlugins(FlutterProject project) {
 
 /// Writes the .flutter-plugins-dependencies file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
-/// file looks something like this (orderof keys is not guaranteed):
+/// file looks something like this (order of keys is not guaranteed):
 /// {
 ///   "info": "This is a generated file; do not edit or check into version control.",
 ///   "plugins": {
