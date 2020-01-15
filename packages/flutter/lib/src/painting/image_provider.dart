@@ -982,7 +982,7 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
   Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
 
   @override
-  String toString() => '$runtimeType(imageProvider: $imageProvider)';
+  String toString() => '${objectRuntimeType(this, 'DeferringImageProvider')}(imageProvider: $imageProvider)';
 }
 
 // A completer used when resolving an image fails sync.
