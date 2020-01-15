@@ -793,4 +793,3 @@ class _TestSearchDelegatePrimaryColor extends SearchDelegate<String> {
     return <Widget>[];
   }
 }
-
