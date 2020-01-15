@@ -105,10 +105,11 @@ dartdevc:
       uri: "../dart-sdk/lib/indexed_db/dart2js/indexed_db_dart2js.dart"
 
     js:
-      uri: "../dart-sdk/lib/_internal/js_dev_runtime/lib/js/dart2js/js_dart2js.dart"
+      uri: "../dart-sdk/lib/js/js.dart"
+      patches: "../dart-sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart"    
 
     js_util:
-      uri: "../dart-sdk/lib/_internal/js_dev_runtime/lib/js_util/dart2js/js_util_dart2js.dart"
+      uri: "../dart-sdk/lib/js_util/js_util.dart"
 
     svg:
       uri: "../dart-sdk/lib/svg/dart2js/svg_dart2js.dart"
@@ -179,14 +180,15 @@ dart2js:
       supported: false
 
     js:
-      uri: "../dart-sdk/lib/js/dart2js/js_dart2js.dart"
+      uri: "../dart-sdk/lib/js/js.dart"
+      patches: "../dart-sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart"    
 
     _js:
       uri: "../dart-sdk/lib/js/_js.dart"
       patches: "../dart-sdk/lib/js/_js_client.dart"
 
     js_util:
-      uri: "../dart-sdk/lib/js_util/dart2js/js_util_dart2js.dart"
+      uri: "../dart-sdk/lib/js_util/js_util.dart"
 
     math:
       uri: "../dart-sdk/lib/math/math.dart"
