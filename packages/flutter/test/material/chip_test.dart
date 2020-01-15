@@ -1659,6 +1659,9 @@ void main() {
                             label: 'Delete',
                             actions: <SemanticsAction>[SemanticsAction.tap],
                             textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                            ],
                           ),
                         ],
                       ),
