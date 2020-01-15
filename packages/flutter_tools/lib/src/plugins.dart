@@ -327,7 +327,7 @@ List<Plugin> findPlugins(FlutterProject project) {
     for (final Plugin plugin in platformPlugins) {
       list.add(<String, dynamic>{
         'name': plugin.name,
-        'path': escapePath(plugin.path),
+        'path': fsUtils.escapePath(plugin.path),
         'dependencies': <String>[
           ...plugin.dependencies.where(pluginNames.contains)
         ]
@@ -461,7 +461,7 @@ bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins
   final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
 
   for (final Plugin plugin in plugins) {
-    flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
+    flutterPluginsBuffer.write('${plugin.name}=${fsUtils.escapePath(plugin.path)}\n');
   }
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
