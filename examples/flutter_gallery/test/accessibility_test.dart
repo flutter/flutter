@@ -765,5 +765,27 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(tester, meetsGuideline(textContrastGuideline));
     });
+
+    testWidgets('options menu - dark theme', (WidgetTester tester) async {
+      await tester.pumpWidget(const GalleryApp(testMode: true));
+      await tester.tap(find.byTooltip('Toggle options page'));
+      await tester.pumpAndSettle();
+
+      // Toggle dark mode.
+      final Finder themeToggleContainer = find.ancestor(
+        of: find.text('Theme'),
+        matching: find.byType(Container),
+      );
+      final Finder themeMenuButton = find.descendant(
+        of: themeToggleContainer,
+        matching: find.byIcon(Icons.arrow_drop_down),
+      );
+      await tester.tap(themeMenuButton);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Dark'));
+      await tester.pumpAndSettle();
+
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    });
   });
 }
