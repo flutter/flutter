@@ -386,19 +386,27 @@ Future<void> _runFrameworkTests() async {
     print('${green}Running packages/flutter tests for$reset: ${cyan}test/widgets/$reset');
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--track-widget-creation'],
+      options: <String>['--track-widget-creation', '--coverage'],
       tableData: bigqueryApi?.tabledata,
       tests: <String>[ path.join('test', 'widgets') + path.separator ],
     );
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--no-track-widget-creation'],
+      options: <String>['--no-track-widget-creation', '--coverage'],
       tableData: bigqueryApi?.tabledata,
       tests: <String>[ path.join('test', 'widgets') + path.separator ],
     );
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--no-track-widget-creation'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(
+      path.join(flutterRoot, 'examples', 'flutter_gallery'),
+      options: <String>['--track-widget-creation', '--coverage'],
+      tableData: bigqueryApi?.tabledata,
+    );
+    await _runFlutterTest(
+      path.join(flutterRoot, 'examples', 'flutter_gallery'),
+      options: <String>['--no-track-widget-creation', '--coverage'],
+      tableData: bigqueryApi?.tabledata,
+    );
   }
 
   Future<void> runLibraries() async {
@@ -411,13 +419,13 @@ Future<void> _runFrameworkTests() async {
     print('${green}Running packages/flutter tests$reset for: $cyan${tests.join(", ")}$reset');
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--track-widget-creation'],
+      options: <String>['--track-widget-creation', '--coverage'],
       tableData: bigqueryApi?.tabledata,
       tests: tests,
     );
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
-      options: <String>['--no-track-widget-creation'],
+      options: <String>['--no-track-widget-creation', '--coverage'],
       tableData: bigqueryApi?.tabledata,
       tests: tests,
     );
@@ -429,20 +437,21 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), options: const <String>['--coverage'], tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'),
+      options: const <String>['--coverage'],
       tableData: bigqueryApi?.tabledata,
       environment: <String, String>{
         'FLUTTER_EXPERIMENTAL_BUILD': 'true',
@@ -450,31 +459,10 @@ Future<void> _runFrameworkTests() async {
     );
   }
 
-  Future<void> runCoverage() async {
-    final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
-    if (!coverageFile.existsSync()) {
-      print('${red}Coverage file not found.$reset');
-      print('Expected to find: $cyan${coverageFile.absolute}$reset');
-      print('This file is normally obtained by running `${green}flutter update-packages$reset`.');
-      exit(1);
-    }
-    coverageFile.deleteSync();
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
-      options: const <String>['--coverage'],
-    );
-    if (!coverageFile.existsSync()) {
-      print('${red}Coverage file not found.$reset');
-      print('Expected to find: $cyan${coverageFile.absolute}$reset');
-      print('This file should have been generated by the `${green}flutter test --coverage$reset` script, but was not.');
-      exit(1);
-    }
-  }
-
   await selectSubshard(<String, ShardRunner>{
     'widgets': runWidgets,
     'libraries': runLibraries,
     'misc': runMisc,
-    'coverage': runCoverage,
   });
 }
 
