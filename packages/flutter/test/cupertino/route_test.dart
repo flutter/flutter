@@ -1083,8 +1083,7 @@ void main() {
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap]));
-    expect(semantics, includesNodeWith(label: 'Dismiss'));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap], label: 'Dismiss'));
     debugDefaultTargetPlatformOverride = null;
   });
 }
