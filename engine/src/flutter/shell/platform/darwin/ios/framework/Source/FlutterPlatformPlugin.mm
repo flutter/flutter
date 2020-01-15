@@ -166,17 +166,22 @@ using namespace flutter;
 }
 
 - (void)setSystemChromeSystemUIOverlayStyle:(NSDictionary*)message {
-  NSString* style = message[@"statusBarBrightness"];
-  if (style == (id)[NSNull null])
+  NSString* brightness = message[@"statusBarBrightness"];
+  if (brightness == (id)[NSNull null])
     return;
 
   UIStatusBarStyle statusBarStyle;
-  if ([style isEqualToString:@"Brightness.dark"])
+  if ([brightness isEqualToString:@"Brightness.dark"]) {
     statusBarStyle = UIStatusBarStyleLightContent;
-  else if ([style isEqualToString:@"Brightness.light"])
-    statusBarStyle = UIStatusBarStyleDefault;
-  else
+  } else if ([brightness isEqualToString:@"Brightness.light"]) {
+    if (@available(iOS 13, *)) {
+      statusBarStyle = UIStatusBarStyleDarkContent;
+    } else {
+      statusBarStyle = UIStatusBarStyleDefault;
+    }
+  } else {
     return;
+  }
 
   NSNumber* infoValue = [[NSBundle mainBundle]
       objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"];
