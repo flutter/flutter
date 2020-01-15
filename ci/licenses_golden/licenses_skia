@@ -1,4 +1,4 @@
-Signature: 1be5b0d1b99a2a4a52c12af73a8a0c65
+Signature: 7fc2b40e3b7c31334c33b189e882db74
 
 UNUSED LICENSES:
 
@@ -3679,7 +3679,6 @@ FILE: ../../../third_party/skia/gm/crosscontextimage.cpp
 FILE: ../../../third_party/skia/gm/dftext_blob_persp.cpp
 FILE: ../../../third_party/skia/gm/drrect_small_inner.cpp
 FILE: ../../../third_party/skia/gm/encode_alpha_jpeg.cpp
-FILE: ../../../third_party/skia/gm/etc1.cpp
 FILE: ../../../third_party/skia/gm/flippity.cpp
 FILE: ../../../third_party/skia/gm/highcontrastfilter.cpp
 FILE: ../../../third_party/skia/gm/hsl.cpp
@@ -5189,6 +5188,188 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../third_party/skia/docs/examples/BlendModes.cpp + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/docs/examples/BlendModes.cpp
+FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTab.cpp
+FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTabs.cpp
+FILE: ../../../third_party/skia/docs/examples/DCIToXYZD50.cpp
+FILE: ../../../third_party/skia/docs/examples/Octopus_Generator.cpp
+FILE: ../../../third_party/skia/docs/examples/PaintDump.cpp
+FILE: ../../../third_party/skia/docs/examples/SKIA_LOGO.cpp
+FILE: ../../../third_party/skia/docs/examples/SKIA_LOGO_svg.cpp
+FILE: ../../../third_party/skia/docs/examples/SkFontMgr_example.cpp
+FILE: ../../../third_party/skia/docs/examples/SkFontMgr_example2.cpp
+FILE: ../../../third_party/skia/docs/examples/SkImage_to_PPM_ascii.cpp
+FILE: ../../../third_party/skia/docs/examples/SkImage_to_PPM_binary.cpp
+FILE: ../../../third_party/skia/docs/examples/SkParsePath_FromSVGString.cpp
+FILE: ../../../third_party/skia/docs/examples/SkParsePath_ToSVGString.cpp
+FILE: ../../../third_party/skia/docs/examples/SkPath_arcTo_example.cpp
+FILE: ../../../third_party/skia/docs/examples/SkPath_arcto_conic_parametric.cpp
+FILE: ../../../third_party/skia/docs/examples/SkPath_arcto_conic_parametric2.cpp
+FILE: ../../../third_party/skia/docs/examples/SkPath_cubicTo_example.cpp
+FILE: ../../../third_party/skia/docs/examples/SkPath_cubicTo_example_parametric.cpp
+FILE: ../../../third_party/skia/docs/examples/SkPath_quadTo_example.cpp
+FILE: ../../../third_party/skia/docs/examples/SkPath_quadTo_example_parametric.cpp
+FILE: ../../../third_party/skia/docs/examples/SmoothBezierSplineInterpolation.cpp
+FILE: ../../../third_party/skia/docs/examples/UnicornPoop.cpp
+FILE: ../../../third_party/skia/docs/examples/UnpremulBugs.cpp
+FILE: ../../../third_party/skia/docs/examples/UnpremulGPU.cpp
+FILE: ../../../third_party/skia/docs/examples/alpha_bitmap_color_filter_mask_filter.cpp
+FILE: ../../../third_party/skia/docs/examples/alphaimage_shader_colorfilter.cpp
+FILE: ../../../third_party/skia/docs/examples/backdrop_blur_with_rrect_clip.cpp
+FILE: ../../../third_party/skia/docs/examples/bezier_curves.cpp
+FILE: ../../../third_party/skia/docs/examples/blur4444.cpp
+FILE: ../../../third_party/skia/docs/examples/blur_alpha_img.cpp
+FILE: ../../../third_party/skia/docs/examples/blurbug.cpp
+FILE: ../../../third_party/skia/docs/examples/bug5252.cpp
+FILE: ../../../third_party/skia/docs/examples/bug583299.cpp
+FILE: ../../../third_party/skia/docs/examples/bug6495.cpp
+FILE: ../../../third_party/skia/docs/examples/bug7573.cpp
+FILE: ../../../third_party/skia/docs/examples/bug767834.cpp
+FILE: ../../../third_party/skia/docs/examples/bugoftheday.cpp
+FILE: ../../../third_party/skia/docs/examples/checker_board.cpp
+FILE: ../../../third_party/skia/docs/examples/color_filter_vs_colorFilterImageFilter_saveLayer.cpp
+FILE: ../../../third_party/skia/docs/examples/compose_path.cpp
+FILE: ../../../third_party/skia/docs/examples/convex_overstroke_linear_approx_curve.cpp
+FILE: ../../../third_party/skia/docs/examples/convex_overstroke_quad.cpp
+FILE: ../../../third_party/skia/docs/examples/count_verbs.cpp
+FILE: ../../../third_party/skia/docs/examples/crbug_663246.cpp
+FILE: ../../../third_party/skia/docs/examples/crbug_918512.cpp
+FILE: ../../../third_party/skia/docs/examples/cubics_are_horrible.cpp
+FILE: ../../../third_party/skia/docs/examples/default.cpp
+FILE: ../../../third_party/skia/docs/examples/default2.cpp
+FILE: ../../../third_party/skia/docs/examples/default3.cpp
+FILE: ../../../third_party/skia/docs/examples/discrete_path.cpp
+FILE: ../../../third_party/skia/docs/examples/dither1.cpp
+FILE: ../../../third_party/skia/docs/examples/draw_a8_bitmap.cpp
+FILE: ../../../third_party/skia/docs/examples/draw_image_nine_blur_mask.cpp
+FILE: ../../../third_party/skia/docs/examples/draw_patch.cpp
+FILE: ../../../third_party/skia/docs/examples/draw_pixel_array.cpp
+FILE: ../../../third_party/skia/docs/examples/draw_pixel_array_nocopy.cpp
+FILE: ../../../third_party/skia/docs/examples/draw_pixel_array_with_copy.cpp
+FILE: ../../../third_party/skia/docs/examples/draw_text_fails.cpp
+FILE: ../../../third_party/skia/docs/examples/draw_vertices.cpp
+FILE: ../../../third_party/skia/docs/examples/drawarcs.cpp
+FILE: ../../../third_party/skia/docs/examples/example3ps.cpp
+FILE: ../../../third_party/skia/docs/examples/f16to8888busted.cpp
+FILE: ../../../third_party/skia/docs/examples/f16to8888drawImageBug.cpp
+FILE: ../../../third_party/skia/docs/examples/failing_example.cpp
+FILE: ../../../third_party/skia/docs/examples/fivearcs.cpp
+FILE: ../../../third_party/skia/docs/examples/flag_us_1792.cpp
+FILE: ../../../third_party/skia/docs/examples/flag_us_1960.cpp
+FILE: ../../../third_party/skia/docs/examples/fluttershadow.cpp
+FILE: ../../../third_party/skia/docs/examples/gamma_mask_filter.cpp
+FILE: ../../../third_party/skia/docs/examples/getLocalBounds_broken.cpp
+FILE: ../../../third_party/skia/docs/examples/getLocalBounds_working.cpp
+FILE: ../../../third_party/skia/docs/examples/gpu8888diff.cpp
+FILE: ../../../third_party/skia/docs/examples/gpuconicbug.cpp
+FILE: ../../../third_party/skia/docs/examples/homogeneous.cpp
+FILE: ../../../third_party/skia/docs/examples/image_subsets_get_different_uids.cpp
+FILE: ../../../third_party/skia/docs/examples/image_to_bitmap_does_not_preserve_genid.cpp
+FILE: ../../../third_party/skia/docs/examples/inlinepixmapconstructor.cpp
+FILE: ../../../third_party/skia/docs/examples/issue640176.cpp
+FILE: ../../../third_party/skia/docs/examples/kLow_SkFilterQuality.cpp
+FILE: ../../../third_party/skia/docs/examples/maddash.cpp
+FILE: ../../../third_party/skia/docs/examples/makeRasterImage_fail.cpp
+FILE: ../../../third_party/skia/docs/examples/mapradius.cpp
+FILE: ../../../third_party/skia/docs/examples/massive_coordinates_svg.cpp
+FILE: ../../../third_party/skia/docs/examples/measure_text_bounds.cpp
+FILE: ../../../third_party/skia/docs/examples/no_gpu_blur.cpp
+FILE: ../../../third_party/skia/docs/examples/not_path_gradient.cpp
+FILE: ../../../third_party/skia/docs/examples/pathmeasure.cpp
+FILE: ../../../third_party/skia/docs/examples/pathops.cpp
+FILE: ../../../third_party/skia/docs/examples/persp_text_2.cpp
+FILE: ../../../third_party/skia/docs/examples/picture_shader.cpp
+FILE: ../../../third_party/skia/docs/examples/purplestamp.cpp
+FILE: ../../../third_party/skia/docs/examples/radial_gradient_test.cpp
+FILE: ../../../third_party/skia/docs/examples/redwhiteonblue.cpp
+FILE: ../../../third_party/skia/docs/examples/rotations.cpp
+FILE: ../../../third_party/skia/docs/examples/setimagefilter.cpp
+FILE: ../../../third_party/skia/docs/examples/shader.cpp
+FILE: ../../../third_party/skia/docs/examples/shader_alphaimage.cpp
+FILE: ../../../third_party/skia/docs/examples/skbug6031.cpp
+FILE: ../../../third_party/skia/docs/examples/skbug_237_drawImageRect.cpp
+FILE: ../../../third_party/skia/docs/examples/skbug_237_drawImage_with_blur.cpp
+FILE: ../../../third_party/skia/docs/examples/skbug_5648.cpp
+FILE: ../../../third_party/skia/docs/examples/skbug_633528.cpp
+FILE: ../../../third_party/skia/docs/examples/skcanvas_paint.cpp
+FILE: ../../../third_party/skia/docs/examples/skcanvas_square.cpp
+FILE: ../../../third_party/skia/docs/examples/skcanvas_star.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_2pt.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_bitmap_shader.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_blur_mask_filter.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_blur_mask_filter_2.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_color_table_filter.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_compose.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_compose_path_effect.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_compose_shader.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_corner_path_effects.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_dash_path_effect.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_discrete_path_effect.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_line_2d_path_effect.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_matrix_color_filter.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_mix.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_path_1d_path_effect.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_path_2d_path_effect.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_perlin.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_radial.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_shader.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_skia.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_sum_path_effect.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_sweep.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_turb.cpp
+FILE: ../../../third_party/skia/docs/examples/skpaint_xfer.cpp
+FILE: ../../../third_party/skia/docs/examples/star.cpp
+FILE: ../../../third_party/skia/docs/examples/star2.cpp
+FILE: ../../../third_party/skia/docs/examples/stroke_closed_degenerate_path.cpp
+FILE: ../../../third_party/skia/docs/examples/strokerect_gm.cpp
+FILE: ../../../third_party/skia/docs/examples/subset_example.cpp
+FILE: ../../../third_party/skia/docs/examples/sum_path_effect.cpp
+FILE: ../../../third_party/skia/docs/examples/sweep_gradient_talk_1.cpp
+FILE: ../../../third_party/skia/docs/examples/sweep_gradient_talk_2.cpp
+FILE: ../../../third_party/skia/docs/examples/sweep_gradient_talk_lots.cpp
+FILE: ../../../third_party/skia/docs/examples/text_only.cpp
+FILE: ../../../third_party/skia/docs/examples/text_rendering.cpp
+FILE: ../../../third_party/skia/docs/examples/text_shadow.cpp
+FILE: ../../../third_party/skia/docs/examples/unexpected_setAlphaType.cpp
+FILE: ../../../third_party/skia/docs/examples/upscale_checkerboard.cpp
+FILE: ../../../third_party/skia/docs/examples/weird_RRect_bug.cpp
+FILE: ../../../third_party/skia/docs/examples/zero_off_dashing.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2020 Google LLC.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
 ORIGIN: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp
@@ -5370,6 +5551,7 @@ ORIGIN: ../../../third_party/skia/gm/3d.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/3d.cpp
 FILE: ../../../third_party/skia/gm/bicubic.cpp
+FILE: ../../../third_party/skia/gm/compressed_textures.cpp
 FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
 FILE: ../../../third_party/skia/include/private/SkM44.h
 FILE: ../../../third_party/skia/modules/skottie/src/Camera.cpp
@@ -6818,4 +7000,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ====================================================================================================
-Total license count: 55
+Total license count: 56
