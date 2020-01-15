@@ -464,7 +464,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 }
 
 /// Defines the behaviour of the floating label
-enum FloatLabelBehavior {
+enum FloatingLabelBehavior {
   /// The label will always be positioned within the content, or hidden.
   never,
   /// The label will float when the input is focused, or has content.
@@ -1887,7 +1887,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       duration: _kTransitionDuration,
       vsync: this,
       // ignore: deprecated_member_use_from_same_package
-      value: widget.decoration.floatLabelBehavior == FloatLabelBehavior.always || (widget.decoration.hasFloatingPlaceholder && widget._labelShouldWithdraw) ? 1.0 : 0.0,
+      value: widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always || (widget.decoration.hasFloatingPlaceholder && widget._labelShouldWithdraw) ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
 
@@ -1928,7 +1928,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   bool get isFocused => widget.isFocused && decoration.enabled;
   bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
-  bool get _floatLabelEnabled => decoration.hasFloatingPlaceholder && decoration.floatLabelBehavior != FloatLabelBehavior.never;  // ignore: deprecated_member_use_from_same_package
+  bool get _floatingLabelEnabled => decoration.hasFloatingPlaceholder && decoration.floatingLabelBehavior != FloatingLabelBehavior.never;  // ignore: deprecated_member_use_from_same_package
 
   @override
   void didUpdateWidget(InputDecorator old) {
@@ -1937,10 +1937,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       _effectiveDecoration = null;
 
     // ignore: deprecated_member_use_from_same_package
-    final bool floatBehaviourChanged = widget.decoration.floatLabelBehavior != old.decoration.floatLabelBehavior || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
+    final bool floatBehaviourChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviourChanged) {
-      if ((widget._labelShouldWithdraw || widget.decoration.floatLabelBehavior == FloatLabelBehavior.always) && _floatLabelEnabled)
+      if ((widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always) && _floatingLabelEnabled)
         _floatingLabelController.forward();
       else
         _floatingLabelController.reverse();
@@ -2036,7 +2036,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   bool get _hasInlineLabel => !widget._labelShouldWithdraw && decoration.labelText != null;
 
   // If the label is a floating placeholder, it's always shown.
-  bool get _shouldShowLabel => _hasInlineLabel || _floatLabelEnabled;
+  bool get _shouldShowLabel => _hasInlineLabel || _floatingLabelEnabled;
 
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
@@ -2446,11 +2446,11 @@ class InputDecoration {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatLabelBehaviour instead. '
+      'Use floatingLabelBehaviour instead. '
       'This feature was deprecated after v1.13.2.'
     )
     this.hasFloatingPlaceholder = true, // ignore: deprecated_member_use_from_same_package
-    this.floatLabelBehavior = FloatLabelBehavior.auto,
+    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
@@ -2481,8 +2481,8 @@ class InputDecoration {
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
        // ignore: deprecated_member_use_from_same_package
-       assert(!(!hasFloatingPlaceholder && identical(floatLabelBehavior, FloatLabelBehavior.always)),
-            'hasFloatingPlaceholder=false conflicts with FloatLabelBehavior.always'),
+       assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
+            'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
        isCollapsed = false;
 
   /// Defines an [InputDecorator] that is the same size as the input field.
@@ -2493,12 +2493,12 @@ class InputDecoration {
   const InputDecoration.collapsed({
     @required this.hintText,
     @Deprecated(
-      'Use floatLabelBehaviour instead. '
+      'Use floatingLabelBehaviour instead. '
       'This feature was deprecated after v1.13.2.'
     )
     // ignore: deprecated_member_use_from_same_package
     this.hasFloatingPlaceholder = true,
-    this.floatLabelBehavior = FloatLabelBehavior.auto,
+    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.hintStyle,
     this.filled = false,
     this.fillColor,
@@ -2508,8 +2508,8 @@ class InputDecoration {
     this.enabled = true,
   }) : assert(enabled != null),
        // ignore: deprecated_member_use_from_same_package
-       assert(!(!hasFloatingPlaceholder && identical(floatLabelBehavior, FloatLabelBehavior.always)),
-        'hasFloatingPlaceholder=false conflicts with FloatLabelBehavior.always'),
+       assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
+        'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always'),
        icon = null,
        labelText = null,
        labelStyle = null,
@@ -2667,27 +2667,27 @@ class InputDecoration {
   /// Defaults to true.
   ///
   @Deprecated(
-    'Use floatLabelBehaviour instead. '
+    'Use floatingLabelBehaviour instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
 
-  /// {@template flutter.material.inputDecoration.floatLabelBehavior}
+  /// {@template flutter.material.inputDecoration.floatingLabelBehavior}
   /// Defines how the floating label should be displayed.
   ///
-  /// When [FloatLabelBehavior.auto] the label will float to the top only when
+  /// When [FloatingLabelBehavior.auto] the label will float to the top only when
   /// the field is focused or has some text content, otherwise it will appear
   /// in the field in place of the content.
   ///
-  /// When [FloatLabelBehavior.always] the label will always float at the top
+  /// When [FloatingLabelBehavior.always] the label will always float at the top
   /// of the field above the content.
   ///
-  /// When [FloatLabelBehavior.never] the label will always appear in an empty
+  /// When [FloatingLabelBehavior.never] the label will always appear in an empty
   /// field in place of the content.
   ///
-  /// Defaults to [FloatLabelBehavior.auto].
+  /// Defaults to [FloatingLabelBehavior.auto].
   /// {@endtemplate}
-  final FloatLabelBehavior floatLabelBehavior;
+  final FloatingLabelBehavior floatingLabelBehavior;
 
   /// Whether the input [child] is part of a dense form (i.e., uses less vertical
   /// space).
@@ -3139,7 +3139,7 @@ class InputDecoration {
     TextStyle errorStyle,
     int errorMaxLines,
     bool hasFloatingPlaceholder,
-    FloatLabelBehavior floatLabelBehavior,
+    FloatingLabelBehavior floatingLabelBehavior,
     bool isDense,
     EdgeInsetsGeometry contentPadding,
     Widget prefixIcon,
@@ -3182,7 +3182,7 @@ class InputDecoration {
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
-      floatLabelBehavior: floatLabelBehavior ?? this.floatLabelBehavior,
+      floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       prefixIcon: prefixIcon ?? this.prefixIcon,
@@ -3227,7 +3227,7 @@ class InputDecoration {
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? theme.hasFloatingPlaceholder,
-      floatLabelBehavior: floatLabelBehavior ?? theme.floatLabelBehavior,
+      floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
@@ -3268,7 +3268,7 @@ class InputDecoration {
         && other.errorMaxLines == errorMaxLines
         // ignore: deprecated_member_use_from_same_package
         && other.hasFloatingPlaceholder == hasFloatingPlaceholder
-        && other.floatLabelBehavior == floatLabelBehavior
+        && other.floatingLabelBehavior == floatingLabelBehavior
         && other.isDense == isDense
         && other.contentPadding == contentPadding
         && other.isCollapsed == isCollapsed
@@ -3314,7 +3314,7 @@ class InputDecoration {
       errorStyle,
       errorMaxLines,
       hasFloatingPlaceholder,// ignore: deprecated_member_use_from_same_package
-      floatLabelBehavior,
+      floatingLabelBehavior,
       isDense,
       contentPadding,
       isCollapsed,
@@ -3362,7 +3362,7 @@ class InputDecoration {
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
       // ignore: deprecated_member_use_from_same_package
       if (hasFloatingPlaceholder == false) 'hasFloatingPlaceholder: false',
-      if (floatLabelBehavior != null) 'floatLabelBehavior: $floatLabelBehavior',
+      if (floatingLabelBehavior != null) 'floatingLabelBehavior: $floatingLabelBehavior',
       if (isDense ?? false) 'isDense: $isDense',
       if (contentPadding != null) 'contentPadding: $contentPadding',
       if (isCollapsed) 'isCollapsed: $isCollapsed',
@@ -3419,12 +3419,12 @@ class InputDecorationTheme extends Diagnosticable {
     this.errorStyle,
     this.errorMaxLines,
     @Deprecated(
-      'Use floatLabelBehaviour instead. '
+      'Use floatingLabelBehaviour instead. '
       'This feature was deprecated after v1.13.2.'
     )
     // ignore: deprecated_member_use_from_same_package
     this.hasFloatingPlaceholder = true,
-    this.floatLabelBehavior = FloatLabelBehavior.auto,
+    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.isDense = false,
     this.contentPadding,
     this.isCollapsed = false,
@@ -3447,8 +3447,8 @@ class InputDecorationTheme extends Diagnosticable {
        assert(filled != null),
        assert(alignLabelWithHint != null),
        // ignore: deprecated_member_use_from_same_package
-       assert(!(!hasFloatingPlaceholder && identical(floatLabelBehavior, FloatLabelBehavior.always)),
-        'hasFloatingPlaceholder=false conflicts with FloatLabelBehavior.always');
+       assert(!(!hasFloatingPlaceholder && identical(floatingLabelBehavior, FloatingLabelBehavior.always)),
+        'hasFloatingPlaceholder=false conflicts with FloatingLabelBehavior.always');
 
   /// The style to use for [InputDecoration.labelText] when the label is
   /// above (i.e., vertically adjacent to) the input field.
@@ -3514,13 +3514,13 @@ class InputDecorationTheme extends Diagnosticable {
   ///
   /// Defaults to true.
   @Deprecated(
-    'Use floatLabelBehaviour instead. '
+    'Use floatingLabelBehaviour instead. '
     'This feature was deprecated after v1.13.2.'
   )
   final bool hasFloatingPlaceholder;
 
-  /// {@macro flutter.material.inputDecoration.floatLabelBehavior}
-  final FloatLabelBehavior floatLabelBehavior;
+  /// {@macro flutter.material.inputDecoration.floatingLabelBehavior}
+  final FloatingLabelBehavior floatingLabelBehavior;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses
   /// less vertical space).
@@ -3769,11 +3769,11 @@ class InputDecorationTheme extends Diagnosticable {
     TextStyle errorStyle,
     int errorMaxLines,
     @Deprecated(
-      'Use floatLabelBehaviour instead. '
+      'Use floatingLabelBehaviour instead. '
       'This feature was deprecated after v1.13.2.'
     )
     bool hasFloatingPlaceholder,
-    FloatLabelBehavior floatLabelBehavior,
+    FloatingLabelBehavior floatingLabelBehavior,
     bool isDense,
     EdgeInsetsGeometry contentPadding,
     bool isCollapsed,
@@ -3801,7 +3801,7 @@ class InputDecorationTheme extends Diagnosticable {
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
-      floatLabelBehavior: floatLabelBehavior ?? this.floatLabelBehavior,
+      floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
       isCollapsed: isCollapsed ?? this.isCollapsed,
@@ -3833,7 +3833,7 @@ class InputDecorationTheme extends Diagnosticable {
       errorMaxLines,
       // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder,
-      floatLabelBehavior,
+      floatingLabelBehavior,
       isDense,
       contentPadding,
       isCollapsed,
@@ -3873,7 +3873,7 @@ class InputDecorationTheme extends Diagnosticable {
         && other.prefixStyle == prefixStyle
         && other.suffixStyle == suffixStyle
         && other.counterStyle == counterStyle
-        && other.floatLabelBehavior == floatLabelBehavior
+        && other.floatingLabelBehavior == floatingLabelBehavior
         && other.filled == filled
         && other.fillColor == fillColor
         && other.focusColor == focusColor
@@ -3900,7 +3900,7 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     // ignore: deprecated_member_use_from_same_package
     properties.add(DiagnosticsProperty<bool>('hasFloatingPlaceholder', hasFloatingPlaceholder, defaultValue: defaultTheme.hasFloatingPlaceholder));
-    properties.add(DiagnosticsProperty<FloatLabelBehavior>('floatLabelBehavior', floatLabelBehavior, defaultValue: defaultTheme.floatLabelBehavior));
+    properties.add(DiagnosticsProperty<FloatingLabelBehavior>('floatingLabelBehavior', floatingLabelBehavior, defaultValue: defaultTheme.floatingLabelBehavior));
     properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
     properties.add(DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));

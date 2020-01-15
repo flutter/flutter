@@ -155,14 +155,14 @@ void main() {
 
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
 
-    // The label appears above the input text when there is no content and floatLabelBehavior is always
+    // The label appears above the input text when there is no content and floatingLabelBehavior is always
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatLabelBehavior: FloatLabelBehavior.always
+          floatingLabelBehavior: FloatingLabelBehavior.always
         ),
       ),
     );
@@ -170,14 +170,14 @@ void main() {
 
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
 
-    // The label appears within the input text when there is content and floatLabelBehavior is never
+    // The label appears within the input text when there is content and floatingLabelBehavior is never
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: false,
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          floatLabelBehavior: FloatLabelBehavior.never
+          floatingLabelBehavior: FloatingLabelBehavior.never
         ),
       ),
     );
@@ -2735,7 +2735,7 @@ void main() {
     );
     expect(
       child.toString(),
-      "InputDecorator-[<'key'>](decoration: InputDecoration(floatLabelBehavior: FloatLabelBehavior.auto), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
+      "InputDecorator-[<'key'>](decoration: InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.auto), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
 
@@ -3567,7 +3567,7 @@ void main() {
       errorMaxLines: 5,
       // ignore: deprecated_member_use_from_same_package
       hasFloatingPlaceholder: false,
-      floatLabelBehavior: FloatLabelBehavior.never,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
       contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
       prefixStyle: TextStyle(),
       suffixStyle: TextStyle(),
@@ -3593,7 +3593,7 @@ void main() {
       'hintStyle: TextStyle(<all styles inherited>)',
       'errorMaxLines: 5',
       'hasFloatingPlaceholder: false',
-      'floatLabelBehavior: FloatLabelBehavior.never',
+      'floatingLabelBehavior: FloatingLabelBehavior.never',
       'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
       'prefixStyle: TextStyle(<all styles inherited>)',
       'suffixStyle: TextStyle(<all styles inherited>)',
