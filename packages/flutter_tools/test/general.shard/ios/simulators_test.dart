@@ -49,7 +49,8 @@ void main() {
       final IOSSimulator simulator = IOSSimulator('123');
       final DevicePortForwarder portFowarder = simulator.portForwarder;
       portFowarder.forward(123);
-      expect(portFowarder.forwardedPorts.length, 1);
+      portFowarder.forward(124);
+      expect(portFowarder.forwardedPorts.length, 2);
       try {
         portFowarder.dispose();
       } catch (e) {
