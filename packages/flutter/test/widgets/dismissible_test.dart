@@ -733,6 +733,29 @@ void main() {
     expect(confirmDismissDirection, DismissDirection.endToStart);
   });
 
+  testWidgets('Dismissible with a null direction does not get dismissed', (WidgetTester tester) async {
+    dismissDirection = null;
+
+    await tester.pumpWidget(buildTest());
+    expect(dismissedItems, isEmpty);
+    expect(find.text('0'), findsOneWidget);
+
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
+    expect(dismissedItems, isEmpty);
+    expect(find.text('0'), findsOneWidget);
+  });
+
+  testWidgets('Dismissible cannot have a null child and direction', (WidgetTester tester) async {
+    expect(
+      () => Dismissible(
+        key: const ObjectKey(0),
+        child: null,
+        direction: null,
+      ),
+      throwsAssertionError,
+    );
+  });
+  
   testWidgets('setState that does not remove the Dismissible from tree should throws Error', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
