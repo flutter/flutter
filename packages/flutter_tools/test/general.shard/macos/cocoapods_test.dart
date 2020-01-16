@@ -345,7 +345,7 @@ void main() {
         );
         fail('ToolExit expected');
       } catch(e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
         verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
           workingDirectory: anyNamed('workingDirectory'),
@@ -394,7 +394,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         );
         fail('ToolExit expected');
       } catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
         expect(
           testLogger.errorText,
           contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"),

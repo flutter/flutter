@@ -322,7 +322,7 @@ void main() {
       ),
     );
     final dynamic exception = tester.takeException();
-    expect(exception is String, isTrue);
+    expect(exception, isA<String>());
     expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
     expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsNothing);
@@ -474,7 +474,7 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, isInstanceOf<NavigatorState>());
+    expect(key.currentState, isA<NavigatorState>());
     await tester.pumpWidget(const MaterialApp(
       color: Color(0xFF112233),
       home: Placeholder(),
@@ -485,7 +485,7 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, isInstanceOf<NavigatorState>());
+    expect(key.currentState, isA<NavigatorState>());
   });
 
   testWidgets('Has default material and cupertino localizations', (WidgetTester tester) async {

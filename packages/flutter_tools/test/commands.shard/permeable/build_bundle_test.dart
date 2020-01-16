@@ -4,7 +4,6 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
@@ -109,7 +108,7 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=windows-x64',
-    ]), throwsA(isInstanceOf<ToolExit>()));
+    ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -127,7 +126,7 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=linux-x64',
-    ]), throwsA(isInstanceOf<ToolExit>()));
+    ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -145,7 +144,7 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=darwin-x64',
-    ]), throwsA(isInstanceOf<ToolExit>()));
+    ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),

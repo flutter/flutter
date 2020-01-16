@@ -76,7 +76,7 @@ void main() {
   group('goldenFileComparator', () {
     test('is initialized by test framework', () {
       expect(goldenFileComparator, isNotNull);
-      expect(goldenFileComparator, isInstanceOf<LocalFileComparator>());
+      expect(goldenFileComparator, isA<LocalFileComparator>());
       final LocalFileComparator comparator = goldenFileComparator as LocalFileComparator;
       expect(comparator.basedir.path, contains('flutter_test'));
     });

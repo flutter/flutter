@@ -6,7 +6,6 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -127,7 +126,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -206,7 +205,7 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'macos']),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });

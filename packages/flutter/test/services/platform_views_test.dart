@@ -27,7 +27,7 @@ void main() {
             layoutDirection: TextDirection.ltr,
           ).setSize(const Size(100.0, 100.0));
         },
-        throwsA(isInstanceOf<PlatformException>()),
+        throwsA(isA<PlatformException>()),
       );
     });
 
@@ -55,7 +55,7 @@ void main() {
       expect(
           () => PlatformViewsService.initAndroidView(
               id: 0, viewType: 'web', layoutDirection: TextDirection.ltr).setSize(const Size(100.0, 100.0)),
-          throwsA(isInstanceOf<PlatformException>()));
+          throwsA(isA<PlatformException>()));
     });
 
     test('dispose Android view', () async {
@@ -170,7 +170,7 @@ void main() {
             layoutDirection: TextDirection.ltr,
           );
         },
-        throwsA(isInstanceOf<PlatformException>()),
+        throwsA(isA<PlatformException>()),
       );
     });
 
@@ -199,7 +199,7 @@ void main() {
       expect(
             () => PlatformViewsService.initUiKitView(
             id: 0, viewType: 'web', layoutDirection: TextDirection.ltr),
-        throwsA(isInstanceOf<PlatformException>()),
+        throwsA(isA<PlatformException>()),
       );
     });
 
@@ -228,7 +228,7 @@ void main() {
           () async {
             await viewController.dispose();
           },
-          throwsA(isInstanceOf<PlatformException>()),
+          throwsA(isA<PlatformException>()),
       );
     });
   });

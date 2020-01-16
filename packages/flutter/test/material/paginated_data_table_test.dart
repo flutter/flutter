@@ -164,7 +164,7 @@ void main() {
 
     // the column overflows because we're forcing it to 600 pixels high
     final dynamic exception = tester.takeException();
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
 
@@ -252,7 +252,7 @@ void main() {
     ));
     // the column overflows because we're forcing it to 600 pixels high
     final dynamic exception = tester.takeException();
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     expect(exception.diagnostics.first.toString(), contains('A RenderFlex overflowed by'));
 

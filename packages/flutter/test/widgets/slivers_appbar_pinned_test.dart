@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   final RenderSliver target = key.currentContext.findRenderObject() as RenderSliver;
-  expect(target.parent, isInstanceOf<RenderViewport>());
+  expect(target.parent, isA<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
