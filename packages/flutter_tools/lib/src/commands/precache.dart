@@ -6,7 +6,7 @@ import 'dart:async';
 
 import '../cache.dart';
 import '../features.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -60,13 +60,13 @@ class PrecacheCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (boolArg('all-platforms')) {
-      cache.includeAllPlatforms = true;
+      globals.cache.includeAllPlatforms = true;
     }
     if (boolArg('use-unsigned-mac-binaries')) {
-      cache.useUnsignedMacBinaries = true;
+      globals.cache.useUnsignedMacBinaries = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
-    for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
+    for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
       if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
@@ -83,11 +83,11 @@ class PrecacheCommand extends FlutterCommand {
       }
     }
     final bool forceUpdate = boolArg('force');
-    if (forceUpdate || !cache.isUpToDate()) {
-      await cache.updateAll(requiredArtifacts);
+    if (forceUpdate || !globals.cache.isUpToDate()) {
+      await globals.cache.updateAll(requiredArtifacts);
     } else {
-      printStatus('Already up-to-date.');
+      globals.printStatus('Already up-to-date.');
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 }

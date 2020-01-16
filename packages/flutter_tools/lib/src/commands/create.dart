@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
-import 'package:linter/src/utils.dart' as linter_utils; // ignore: implementation_imports
+import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../android/android.dart' as android;
@@ -21,7 +20,7 @@ import '../convert.dart';
 import '../dart/pub.dart';
 import '../doctor.dart';
 import '../features.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -45,7 +44,7 @@ enum _ProjectType {
 
 _ProjectType _stringToProjectType(String value) {
   _ProjectType result;
-  for (_ProjectType type in _ProjectType.values) {
+  for (final _ProjectType type in _ProjectType.values) {
     if (value == getEnumName(type)) {
       result = type;
       break;
@@ -177,7 +176,7 @@ class CreateCommand extends FlutterCommand {
       if (!projectDir.existsSync()) {
         return null;
       }
-      final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
+      final File metadataFile = globals.fs.file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));
       if (!metadataFile.existsSync()) {
         return null;
       }
@@ -191,7 +190,7 @@ class CreateCommand extends FlutterCommand {
     }
 
     bool exists(List<String> path) {
-      return fs.directory(fs.path.joinAll(<String>[projectDir.absolute.path, ...path])).existsSync();
+      return globals.fs.directory(globals.fs.path.joinAll(<String>[projectDir.absolute.path, ...path])).existsSync();
     }
 
     // If it exists, the project type in the metadata is definitive.
@@ -244,7 +243,7 @@ class CreateCommand extends FlutterCommand {
   /// [outputFilePath].
   Future<void> _writeSamplesJson(String outputFilePath) async {
     try {
-      final File outputFile = fs.file(outputFilePath);
+      final File outputFile = globals.fs.file(outputFilePath);
       if (outputFile.existsSync()) {
         throwToolExit('File "$outputFilePath" already exists', exitCode: 1);
       }
@@ -254,7 +253,7 @@ class CreateCommand extends FlutterCommand {
       }
       else {
         outputFile.writeAsStringSync(samplesJson);
-        printStatus('Wrote samples JSON to "$outputFilePath"');
+        globals.printStatus('Wrote samples JSON to "$outputFilePath"');
       }
     } catch (e) {
       throwToolExit('Failed to write samples JSON to "$outputFilePath": $e', exitCode: 2);
@@ -298,7 +297,7 @@ class CreateCommand extends FlutterCommand {
       Cache.releaseLockEarly();
 
       await _writeSamplesJson(stringArg('list-samples'));
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (argResults.rest.isEmpty) {
@@ -307,7 +306,7 @@ class CreateCommand extends FlutterCommand {
 
     if (argResults.rest.length > 1) {
       String message = 'Multiple output directories specified.';
-      for (String arg in argResults.rest) {
+      for (final String arg in argResults.rest) {
         if (arg.startsWith('-')) {
           message += '\nTry moving $arg to be immediately following $name';
           break;
@@ -321,21 +320,21 @@ class CreateCommand extends FlutterCommand {
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
     }
 
-    final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
+    final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
 
-    final String flutterPackagesDirectory = fs.path.join(flutterRoot, 'packages');
-    final String flutterPackagePath = fs.path.join(flutterPackagesDirectory, 'flutter');
-    if (!fs.isFileSync(fs.path.join(flutterPackagePath, 'pubspec.yaml'))) {
+    final String flutterPackagesDirectory = globals.fs.path.join(flutterRoot, 'packages');
+    final String flutterPackagePath = globals.fs.path.join(flutterPackagesDirectory, 'flutter');
+    if (!globals.fs.isFileSync(globals.fs.path.join(flutterPackagePath, 'pubspec.yaml'))) {
       throwToolExit('Unable to find package:flutter in $flutterPackagePath', exitCode: 2);
     }
 
-    final String flutterDriverPackagePath = fs.path.join(flutterRoot, 'packages', 'flutter_driver');
-    if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml'))) {
+    final String flutterDriverPackagePath = globals.fs.path.join(flutterRoot, 'packages', 'flutter_driver');
+    if (!globals.fs.isFileSync(globals.fs.path.join(flutterDriverPackagePath, 'pubspec.yaml'))) {
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
     }
 
-    final Directory projectDir = fs.directory(argResults.rest.first);
-    final String projectDirPath = fs.path.normalize(projectDir.absolute.path);
+    final Directory projectDir = globals.fs.directory(argResults.rest.first);
+    final String projectDirPath = globals.fs.path.normalize(projectDir.absolute.path);
 
     String sampleCode;
     if (argResults['sample'] != null) {
@@ -373,7 +372,7 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(error);
     }
 
-    final String projectName = stringArg('project-name') ?? fs.path.basename(projectDirPath);
+    final String projectName = stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
     error = _validateProjectName(projectName);
     if (error != null) {
       throwToolExit(error);
@@ -393,18 +392,18 @@ class CreateCommand extends FlutterCommand {
       macos: featureFlags.isMacOSEnabled,
     );
 
-    final String relativeDirPath = fs.path.relative(projectDirPath);
+    final String relativeDirPath = globals.fs.path.relative(projectDirPath);
     if (!projectDir.existsSync() || projectDir.listSync().isEmpty) {
-      printStatus('Creating project $relativeDirPath... androidx: ${boolArg('androidx')}');
+      globals.printStatus('Creating project $relativeDirPath... androidx: ${boolArg('androidx')}');
     } else {
       if (sampleCode != null && !overwrite) {
         throwToolExit('Will not overwrite existing project in $relativeDirPath: '
           'must specify --overwrite for samples to overwrite.');
       }
-      printStatus('Recreating project $relativeDirPath...');
+      globals.printStatus('Recreating project $relativeDirPath...');
     }
 
-    final Directory relativeDir = fs.directory(projectDirPath);
+    final Directory relativeDir = globals.fs.directory(projectDirPath);
     int generatedFileCount = 0;
     switch (template) {
       case _ProjectType.app:
@@ -423,36 +422,36 @@ class CreateCommand extends FlutterCommand {
     if (sampleCode != null) {
       generatedFileCount += _applySample(relativeDir, sampleCode);
     }
-    printStatus('Wrote $generatedFileCount files.');
-    printStatus('\nAll done!');
+    globals.printStatus('Wrote $generatedFileCount files.');
+    globals.printStatus('\nAll done!');
     final String application = sampleCode != null ? 'sample application' : 'application';
     if (generatePackage) {
-      final String relativeMainPath = fs.path.normalize(fs.path.join(
+      final String relativeMainPath = globals.fs.path.normalize(globals.fs.path.join(
         relativeDirPath,
         'lib',
         '${templateContext['projectName']}.dart',
       ));
-      printStatus('Your package code is in $relativeMainPath');
+      globals.printStatus('Your package code is in $relativeMainPath');
     } else if (generateModule) {
-      final String relativeMainPath = fs.path.normalize(fs.path.join(
+      final String relativeMainPath = globals.fs.path.normalize(globals.fs.path.join(
           relativeDirPath,
           'lib',
           'main.dart',
       ));
-      printStatus('Your module code is in $relativeMainPath.');
+      globals.printStatus('Your module code is in $relativeMainPath.');
     } else {
       // Run doctor; tell the user the next steps.
       final FlutterProject project = FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
-      final String relativeAppPath = fs.path.normalize(fs.path.relative(app.directory.path));
-      final String relativeAppMain = fs.path.join(relativeAppPath, 'lib', 'main.dart');
-      final String relativePluginPath = fs.path.normalize(fs.path.relative(projectDirPath));
-      final String relativePluginMain = fs.path.join(relativePluginPath, 'lib', '$projectName.dart');
+      final String relativeAppPath = globals.fs.path.normalize(globals.fs.path.relative(app.directory.path));
+      final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
+      final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
+      final String relativePluginMain = globals.fs.path.join(relativePluginPath, 'lib', '$projectName.dart');
       if (doctor.canLaunchAnything) {
         // Let them know a summary of the state of their tooling.
         await doctor.summary();
 
-        printStatus('''
+        globals.printStatus('''
 In order to run your $application, type:
 
   \$ cd $relativeAppPath
@@ -461,7 +460,7 @@ In order to run your $application, type:
 Your $application code is in $relativeAppMain.
 ''');
         if (generatePlugin) {
-          printStatus('''
+          globals.printStatus('''
 Your plugin code is in $relativePluginMain.
 
 Host platform code is in the "android" and "ios" directories under $relativePluginPath.
@@ -469,22 +468,21 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 ''');
         }
       } else {
-        printStatus("You'll need to install additional components before you can run "
+        globals.printStatus("You'll need to install additional components before you can run "
             'your Flutter app:');
-        printStatus('');
+        globals.printStatus('');
 
         // Give the user more detailed analysis.
         await doctor.diagnose();
-        printStatus('');
-        printStatus("After installing components, run 'flutter doctor' in order to "
+        globals.printStatus('');
+        globals.printStatus("After installing components, run 'flutter doctor' in order to "
             're-validate your setup.');
-        printStatus("When complete, type 'flutter run' from the '$relativeAppPath' "
+        globals.printStatus("When complete, type 'flutter run' from the '$relativeAppPath' "
             'directory in order to launch your app.');
-        printStatus('Your $application code is in $relativeAppMain');
+        globals.printStatus('Your $application code is in $relativeAppMain');
       }
     }
-
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
@@ -493,7 +491,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         ? stringArg('description')
         : 'A new flutter module project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
+    generatedCount += _renderTemplate(globals.fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.create,
@@ -603,7 +601,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     bool web = false,
     bool macos = false,
   }) {
-    flutterRoot = fs.path.normalize(flutterRoot);
+    flutterRoot = globals.fs.path.normalize(flutterRoot);
 
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
@@ -652,8 +650,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   int _injectGradleWrapper(FlutterProject project) {
     int filesCreated = 0;
-    copyDirectorySync(
-      cache.getArtifactDirectory('gradle_wrapper'),
+    fsUtils.copyDirectorySync(
+      globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
       onFileCopied: (File sourceFile, File destinationFile) {
         filesCreated++;
@@ -749,12 +747,97 @@ const Set<String> _packageDependencies = <String>{
   'yaml',
 };
 
+// A valid Dart identifier.
+// https://dart.dev/guides/language/language-tour#important-concepts
+final RegExp _identifierRegExp = RegExp('[a-zA-Z_][a-zA-Z0-9_]*');
+
+// non-contextual dart keywords.
+//' https://dart.dev/guides/language/language-tour#keywords
+const Set<String> _keywords = <String>{
+  'abstract',
+  'as',
+  'assert',
+  'async',
+  'await',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'covariant',
+  'default',
+  'deferred',
+  'do',
+  'dynamic',
+  'else',
+  'enum',
+  'export',
+  'extends',
+  'extension',
+  'external',
+  'factory',
+  'false',
+  'final',
+  'finally',
+  'for',
+  'function',
+  'get',
+  'hide',
+  'if',
+  'implements',
+  'import',
+  'in',
+  'inout',
+  'interface',
+  'is',
+  'late',
+  'library',
+  'mixin',
+  'native',
+  'new',
+  'null',
+  'of',
+  'on',
+  'operator',
+  'out',
+  'part',
+  'patch',
+  'required',
+  'rethrow',
+  'return',
+  'set',
+  'show',
+  'source',
+  'static',
+  'super',
+  'switch',
+  'sync',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'typedef',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+};
+
+/// Whether [name] is a valid Pub package.
+@visibleForTesting
+bool isValidPackageName(String name) {
+  final Match match = _identifierRegExp.matchAsPrefix(name);
+  return match != null && match.end == name.length && !_keywords.contains(name);
+}
+
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!linter_utils.isValidPackageName(projectName)) {
-    final String packageNameDetails = package_names.PubPackageNames().details;
-    return '"$projectName" is not a valid Dart package name.\n\n$packageNameDetails';
+  if (!isValidPackageName(projectName)) {
+    return '"$projectName" is not a valid Dart package name.\n\n'
+      'See https://dart.dev/tools/pub/pubspec#name for more information.';
   }
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
@@ -766,14 +849,14 @@ String _validateProjectName(String projectName) {
 /// Return null if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
 String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite = false }) {
-  if (fs.path.isWithin(flutterRoot, dirPath)) {
+  if (globals.fs.path.isWithin(flutterRoot, dirPath)) {
     return 'Cannot create a project within the Flutter SDK. '
       "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
   }
 
   // If the destination directory is actually a file, then we refuse to
   // overwrite, on the theory that the user probably didn't expect it to exist.
-  if (fs.isFileSync(dirPath)) {
+  if (globals.fs.isFileSync(dirPath)) {
     return "Invalid project name: '$dirPath' - refers to an existing file."
         '${overwrite ? ' Refusing to overwrite a file with a directory.' : ''}';
   }
@@ -782,7 +865,7 @@ String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite 
     return null;
   }
 
-  final FileSystemEntityType type = fs.typeSync(dirPath);
+  final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
   if (type != FileSystemEntityType.notFound) {
     switch (type) {

@@ -12,6 +12,7 @@ import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
 class FirstWidget extends StatelessWidget {
+  const FirstWidget({ Key key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -27,6 +28,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatefulWidget {
+  const SecondWidget({ Key key }) : super(key: key);
   @override
   SecondWidgetState createState() => SecondWidgetState();
 }
@@ -47,7 +49,7 @@ class SecondWidgetState extends State<SecondWidget> {
 typedef ExceptionCallback = void Function(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
-  const ThirdWidget({ this.targetKey, this.onException });
+  const ThirdWidget({ Key key, this.targetKey, this.onException }) : super(key: key);
 
   final Key targetKey;
   final ExceptionCallback onException;
@@ -94,8 +96,8 @@ class OnTapPage extends StatelessWidget {
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(), // X
-      '/second': (BuildContext context) => SecondWidget(), // Y
+      '/': (BuildContext context) => const FirstWidget(), // X
+      '/second': (BuildContext context) => const SecondWidget(), // Y
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -153,7 +155,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
@@ -510,8 +512,8 @@ void main() {
 
     final TestObserver observer = TestObserver()
       ..onRemoved = (Route<dynamic> route, Route<dynamic> previous) {
-        removedRoute = route;
-        previousRoute = previous;
+        removedRoute = route as Route<String>;
+        previousRoute = previous as Route<String>;
       };
 
     await tester.pumpWidget(MaterialApp(
@@ -1025,7 +1027,7 @@ void main() {
     );
 
     final dynamic exception = tester.takeException();
-    expect(exception is String, isTrue);
+    expect(exception, isA<String>());
     expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
 
     // Only the root route should've been pushed.
@@ -1044,9 +1046,9 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
-      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -1071,9 +1073,9 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
-      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(

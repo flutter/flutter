@@ -7,6 +7,7 @@ import 'package:pool/pool.dart';
 import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../devfs.dart';
+import '../../globals.dart' as globals;
 import '../../plugins.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -34,12 +35,17 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
     assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = fs.file(outputDirectory.uri.resolve(entry.key));
+        // This will result in strange looking files, for example files with `/`
+        // on Windows or files that end up getting URI encoded such as `#.ext`
+        // to `%23.ext`.  However, we have to keep it this way since the
+        // platform channels in the framework will URI encode these values,
+        // and the native APIs will look for files this way.
+        final File file = globals.fs.file(globals.fs.path.join(outputDirectory.path, entry.key));
         outputs.add(file);
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
-          inputs.add(fs.file(content.file.path));
+          inputs.add(globals.fs.file(content.file.path));
           await (content.file as File).copy(file.path);
         } else {
           await file.writeAsBytes(await entry.value.contentsAsBytes());
@@ -118,8 +124,8 @@ class FlutterPlugins extends Target {
     final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
     final List<Plugin> plugins = findPlugins(project);
     final String pluginManifest = plugins
-        .map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}')
-        .join('\n');
+      .map<String>((Plugin p) => '${p.name}=${fsUtils.escapePath(p.path)}')
+      .join('\n');
     final File flutterPluginsFile = environment.projectDir.childFile('.flutter-plugins');
     if (!flutterPluginsFile.existsSync() || flutterPluginsFile.readAsStringSync() != pluginManifest) {
       flutterPluginsFile.writeAsStringSync(pluginManifest);

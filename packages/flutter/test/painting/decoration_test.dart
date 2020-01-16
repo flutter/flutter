@@ -98,13 +98,13 @@ void main() {
     const BoxDecoration a = BoxDecoration(color: Color(0xFFFFFFFF));
     const BoxDecoration b = BoxDecoration(color: Color(0x00000000));
 
-    BoxDecoration c = Decoration.lerp(a, b, 0.0);
+    BoxDecoration c = Decoration.lerp(a, b, 0.0) as BoxDecoration;
     expect(c.color, equals(a.color));
 
-    c = Decoration.lerp(a, b, 0.25);
+    c = Decoration.lerp(a, b, 0.25) as BoxDecoration;
     expect(c.color, equals(Color.lerp(const Color(0xFFFFFFFF), const Color(0x00000000), 0.25)));
 
-    c = Decoration.lerp(a, b, 1.0);
+    c = Decoration.lerp(a, b, 1.0) as BoxDecoration;
     expect(c.color, equals(b.color));
   });
 
@@ -223,10 +223,10 @@ void main() {
     final Invocation call = canvas.invocations.singleWhere((Invocation call) => call.memberName == #drawImageNine);
     expect(call.isMethod, isTrue);
     expect(call.positionalArguments, hasLength(4));
-    expect(call.positionalArguments[0], isInstanceOf<TestImage>());
+    expect(call.positionalArguments[0], isA<TestImage>());
     expect(call.positionalArguments[1], const Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
-    expect(call.positionalArguments[3], isInstanceOf<Paint>());
+    expect(call.positionalArguments[3], isA<Paint>());
     expect(call.positionalArguments[3].isAntiAlias, false);
     expect(call.positionalArguments[3].colorFilter, colorFilter);
     expect(call.positionalArguments[3].filterQuality, FilterQuality.low);
@@ -253,11 +253,11 @@ void main() {
     }
     expect(error, isNotNull);
     expect(error.diagnostics.length, 4);
-    expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<DecorationImage>>());
-    expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ImageConfiguration>>());
+    expect(error.diagnostics[2], isA<DiagnosticsProperty<DecorationImage>>());
+    expect(error.diagnostics[3], isA<DiagnosticsProperty<ImageConfiguration>>());
     expect(error.toStringDeep(),
       'FlutterError\n'
-      '   ImageDecoration.matchTextDirection can only be used when a\n'
+      '   DecorationImage.matchTextDirection can only be used when a\n'
       '   TextDirection is available.\n'
       '   When DecorationImagePainter.paint() was called, there was no text\n'
       '   direction provided in the ImageConfiguration object to match.\n'
@@ -375,10 +375,10 @@ void main() {
   });
 
   test('Decoration.lerp with unrelated decorations', () {
-    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.0), isInstanceOf<FlutterLogoDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
-    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.25), isInstanceOf<FlutterLogoDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
-    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.75), isInstanceOf<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
-    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 1.0), isInstanceOf<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.0), isA<FlutterLogoDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.25), isA<FlutterLogoDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.75), isA<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 1.0), isA<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
   });
 
   test('paintImage BoxFit.none scale test', () {
@@ -406,7 +406,7 @@ void main() {
       expect(call.isMethod, isTrue);
       expect(call.positionalArguments, hasLength(4));
 
-      expect(call.positionalArguments[0], isInstanceOf<TestImage>());
+      expect(call.positionalArguments[0], isA<TestImage>());
 
       // sourceRect should contain all pixels of the source image
       expect(call.positionalArguments[1], Offset.zero & imageSize);
@@ -420,7 +420,7 @@ void main() {
       );
       expect(call.positionalArguments[2], expectedTileRect);
 
-      expect(call.positionalArguments[3], isInstanceOf<Paint>());
+      expect(call.positionalArguments[3], isA<Paint>());
     }
   });
 
@@ -450,7 +450,7 @@ void main() {
       expect(call.isMethod, isTrue);
       expect(call.positionalArguments, hasLength(4));
 
-      expect(call.positionalArguments[0], isInstanceOf<TestImage>());
+      expect(call.positionalArguments[0], isA<TestImage>());
 
       // sourceRect should contain all pixels of the source image
       expect(call.positionalArguments[1], Offset.zero & imageSize);
@@ -464,7 +464,7 @@ void main() {
       );
       expect(call.positionalArguments[2], expectedTileRect);
 
-      expect(call.positionalArguments[3], isInstanceOf<Paint>());
+      expect(call.positionalArguments[3], isA<Paint>());
     }
   });
 
@@ -493,7 +493,7 @@ void main() {
     expect(call.isMethod, isTrue);
     expect(call.positionalArguments, hasLength(4));
 
-    expect(call.positionalArguments[0], isInstanceOf<TestImage>());
+    expect(call.positionalArguments[0], isA<TestImage>());
 
     // sourceRect should contain all pixels of the source image
     expect(call.positionalArguments[1], Offset.zero & imageSize);
@@ -507,7 +507,7 @@ void main() {
     );
     expect(call.positionalArguments[2], expectedTileRect);
 
-    expect(call.positionalArguments[3], isInstanceOf<Paint>());
+    expect(call.positionalArguments[3], isA<Paint>());
   });
 
   test('paintImage boxFit, scale and alignment test', () {
@@ -521,7 +521,7 @@ void main() {
       BoxFit.scaleDown,
     ];
 
-    for (BoxFit boxFit in boxFits) {
+    for (final BoxFit boxFit in boxFits) {
       final TestCanvas canvas = TestCanvas(<Invocation>[]);
 
       const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);

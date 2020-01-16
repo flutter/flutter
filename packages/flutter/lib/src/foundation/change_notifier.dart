@@ -200,7 +200,7 @@ class ChangeNotifier implements Listenable {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
       final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
-      for (VoidCallback listener in localListeners) {
+      for (final VoidCallback listener in localListeners) {
         try {
           if (_listeners.contains(listener))
             listener();

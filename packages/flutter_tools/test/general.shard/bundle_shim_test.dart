@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -35,15 +34,15 @@ void main() {
     await buildWithAssemble(
       buildMode: BuildMode.debug,
       flutterProject: FlutterProject.current(),
-      mainPath: fs.path.join('lib', 'main.dart'),
+      mainPath: globals.fs.path.join('lib', 'main.dart'),
       outputDir: 'example',
       targetPlatform: TargetPlatform.ios,
       depfilePath: 'example.d',
       precompiled: false,
     );
-    expect(fs.file(fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
-    expect(fs.file(fs.path.join('example', 'LICENSE')).existsSync(), true);
-    expect(fs.file(fs.path.join('example.d')).existsSync(), false);
+    expect(globals.fs.file(globals.fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
+    expect(globals.fs.file(globals.fs.path.join('example', 'LICENSE')).existsSync(), true);
+    expect(globals.fs.file(globals.fs.path.join('example.d')).existsSync(), false);
   }));
 
   test('Handles build system failure', () => testbed.run(() {
@@ -62,7 +61,7 @@ void main() {
       targetPlatform: TargetPlatform.linux_x64,
       depfilePath: 'example.d',
       precompiled: false,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
   }));
 }
 

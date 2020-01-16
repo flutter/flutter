@@ -288,11 +288,11 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    final RenderSliver sliverA = a.parent;
-    final RenderSliver sliverB = b.parent;
-    final RenderSliver sliverC = c.parent;
-    final RenderSliver sliverD = d.parent;
-    final RenderSliver sliverE = e.parent;
+    final RenderSliver sliverA = a.parent as RenderSliver;
+    final RenderSliver sliverB = b.parent as RenderSliver;
+    final RenderSliver sliverC = c.parent as RenderSliver;
+    final RenderSliver sliverD = d.parent as RenderSliver;
+    final RenderSliver sliverE = e.parent as RenderSliver;
 
     expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
     expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(400.0, 0.0));
@@ -947,9 +947,7 @@ void main() {
         'SliverConstraints is not valid:\n'
         '  The "scrollOffset" is NaN.\n'
         '  The "overlap" is NaN.\n'
-        '  The "remainingPaintExtent" is NaN.\n'
         '  The "crossAxisExtent" is NaN.\n'
-        '  The "viewportMainAxisExtent" is NaN.\n'
         '  The "scrollOffset" is NaN, expected greater than or equal to zero.\n'
         '  The "viewportMainAxisExtent" is NaN, expected greater than or equal to zero.\n'
         '  The "remainingPaintExtent" is NaN, expected greater than or equal to zero.\n'

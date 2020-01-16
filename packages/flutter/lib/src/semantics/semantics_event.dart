@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 /// An event sent by the application to notify interested listeners that
@@ -46,9 +47,9 @@ abstract class SemanticsEvent {
     final List<String> pairs = <String>[];
     final Map<String, dynamic> dataMap = getDataMap();
     final List<String> sortedKeys = dataMap.keys.toList()..sort();
-    for (String key in sortedKeys)
+    for (final String key in sortedKeys)
       pairs.add('$key: ${dataMap[key]}');
-    return '$runtimeType(${pairs.join(', ')})';
+    return '${objectRuntimeType(this, 'SemanticsEvent')}(${pairs.join(', ')})';
   }
 }
 

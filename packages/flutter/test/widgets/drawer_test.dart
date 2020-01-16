@@ -328,6 +328,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(semantics, includesNodeWith(label: 'Dismiss'));
 
     semantics.dispose();
 
@@ -357,6 +358,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+    expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
 
     semantics.dispose();
   });

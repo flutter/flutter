@@ -205,7 +205,7 @@ void main() {
 
   test('Should synthesize kPrimaryButton for stylus', () {
     final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
-    for (PointerDeviceKind kind in <PointerDeviceKind>[
+    for (final PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.stylus,
       PointerDeviceKind.invertedStylus,
     ]) {
@@ -268,7 +268,7 @@ void main() {
 
   test('Should not synthesize kPrimaryButton for mouse', () {
     final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
-    for (PointerDeviceKind kind in <PointerDeviceKind>[
+    for (final PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.mouse,
     ]) {
       final ui.PointerDataPacket packet = ui.PointerDataPacket(

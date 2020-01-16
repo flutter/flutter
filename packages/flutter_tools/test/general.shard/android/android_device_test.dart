@@ -11,16 +11,15 @@ import 'package:flutter_tools/src/android/android_console.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -44,45 +43,6 @@ class MockAndroidApk extends Mock implements AndroidApk {
   File get file => MockFile();
 }
 
-class MockProcessUtils extends Mock implements ProcessUtils {
-  @override
-  Future<RunResult> run(
-      List<String> cmd, {
-        bool throwOnError = false,
-        RunResultChecker whiteListFailures,
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-        Map<String, String> environment,
-        Duration timeout,
-        int timeoutRetries = 0,
-      }) async {
-    if (cmd.contains('version')) {
-      return RunResult(ProcessResult(0, 0, 'Android Debug Bridge version 1.0.41', ''), cmd);
-    }
-    if (cmd.contains('android.intent.action.RUN')) {
-      _runCmd = cmd;
-    }
-    return RunResult(ProcessResult(0, 0, '', ''), cmd);
-  }
-
-  @override
-  Future<int> stream(
-      List<String> cmd, {
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-        String prefix = '',
-        bool trace = false,
-        RegExp filter,
-        StringConverter mapFunction,
-        Map<String, String> environment,
-      }) async {
-    return 0;
-  }
-
-  List<String> _runCmd;
-  List<String> get runCmd => _runCmd;
-}
-
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 
 void main() {
@@ -97,13 +57,11 @@ void main() {
       MockAndroidApk mockApk;
       MockProcessManager mockProcessManager;
       MockAndroidSdk mockAndroidSdk;
-      MockProcessUtils mockProcessUtils;
 
       setUp(() {
         mockApk = MockAndroidApk();
         mockProcessManager = MockProcessManager();
         mockAndroidSdk = MockAndroidSdk();
-        mockProcessUtils = MockProcessUtils();
       });
 
       testUsingContext('succeeds with --cache-sksl', () async {
@@ -111,8 +69,8 @@ void main() {
         final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
 
         final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-        Config.instance.setValue('android-sdk', sdkDir.path);
-        final File adbExe = fs.file(getAdbPath(androidSdk));
+        globals.config.setValue('android-sdk', sdkDir.path);
+        final File adbExe = globals.fs.file(getAdbPath(androidSdk));
 
         when(mockAndroidSdk.licensesAvailable).thenReturn(true);
         when(mockAndroidSdk.latestVersion).thenReturn(MockAndroidSdkVersion());
@@ -124,6 +82,20 @@ void main() {
         )).thenAnswer((_) async {
           return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', '');
         });
+        when(mockProcessManager.run(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')
+        )).thenAnswer((_) async {
+          return ProcessResult(0, 0, '', '');
+        });
+        when(mockProcessManager.start(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')
+        )).thenAnswer((_) async {
+          return FakeProcess();
+        });
 
         final LaunchResult launchResult = await device.startApp(
           mockApk,
@@ -134,18 +106,14 @@ void main() {
           ),
           platformArgs: <String, dynamic>{},
         );
-        expect(launchResult.started, isTrue);
 
-        final int cmdIndex = mockProcessUtils.runCmd.indexOf('cache-sksl');
-        expect(
-            mockProcessUtils.runCmd.sublist(cmdIndex - 1, cmdIndex + 2),
-            equals(<String>['--ez', 'cache-sksl', 'true']),
-        );
+        expect(launchResult.started, isTrue);
+        expect(verify(mockProcessManager.run(captureAny)).captured.last.join(','),
+          contains(<String>['--ez', 'cache-sksl', 'true'].join(',')));
       }, overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => mockProcessManager,
-        ProcessUtils: () => mockProcessUtils,
       });
 
       testUsingContext('can run a release build on x64', () async {
@@ -153,8 +121,8 @@ void main() {
         final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
 
         final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-        Config.instance.setValue('android-sdk', sdkDir.path);
-        final File adbExe = fs.file(getAdbPath(androidSdk));
+        globals.config.setValue('android-sdk', sdkDir.path);
+        final File adbExe = globals.fs.file(getAdbPath(androidSdk));
 
         when(mockAndroidSdk.licensesAvailable).thenReturn(true);
         when(mockAndroidSdk.latestVersion).thenReturn(MockAndroidSdkVersion());
@@ -165,6 +133,20 @@ void main() {
           stderrEncoding: latin1,
         )).thenAnswer((_) async {
           return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]\n[ro.product.cpu.abi]: [x86_64]', '');
+        });
+        when(mockProcessManager.run(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')
+        )).thenAnswer((_) async {
+          return ProcessResult(0, 0, '', '');
+        });
+        when(mockProcessManager.start(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')
+        )).thenAnswer((_) async {
+          return FakeProcess();
         });
 
         final LaunchResult launchResult = await device.startApp(
@@ -180,7 +162,6 @@ void main() {
         AndroidSdk: () => mockAndroidSdk,
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => mockProcessManager,
-        ProcessUtils: () => mockProcessUtils,
       });
     });
   });
@@ -194,9 +175,9 @@ void main() {
 
     testUsingContext('throws on missing adb path', () {
       final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
-      final File adbExe = fs.file(getAdbPath(androidSdk));
+      final File adbExe = globals.fs.file(getAdbPath(androidSdk));
       when(mockProcessManager.runSync(
         <String>[adbExe.path, 'devices', '-l'],
       )).thenThrow(ArgumentError(adbExe.path));
@@ -209,9 +190,9 @@ void main() {
 
     testUsingContext('throws on failing adb', () {
       final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
-      final File adbExe = fs.file(getAdbPath(androidSdk));
+      final File adbExe = globals.fs.file(getAdbPath(androidSdk));
       when(mockProcessManager.runSync(
         <String>[adbExe.path, 'devices', '-l'],
       )).thenThrow(ProcessException(adbExe.path, <String>['devices', '-l']));
@@ -497,7 +478,7 @@ Use the 'android' tool to install them:
   });
 
   testUsingContext('isSupportedForProject is true on module project', () async {
-    fs.file('pubspec.yaml')
+    globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
 name: example
@@ -505,7 +486,7 @@ name: example
 flutter:
   module: {}
 ''');
-    fs.file('.packages').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
@@ -515,9 +496,9 @@ flutter:
   });
 
   testUsingContext('isSupportedForProject is true with editable host app', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.directory('android').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.directory('android').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
@@ -527,8 +508,8 @@ flutter:
   });
 
   testUsingContext('isSupportedForProject is false with no host app and no module', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), false);
@@ -652,7 +633,7 @@ flutter:
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
 
-      expect(forwarder.forward(123, hostPort: 456), throwsA(isInstanceOf<ProcessException>()));
+      expect(forwarder.forward(123, hostPort: 456), throwsA(isA<ProcessException>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

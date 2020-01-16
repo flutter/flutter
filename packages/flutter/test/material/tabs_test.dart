@@ -127,7 +127,12 @@ Widget buildFrame({
 typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabController controller);
 
 class TabControllerFrame extends StatefulWidget {
-  const TabControllerFrame({ this.length, this.initialIndex = 0, this.builder });
+  const TabControllerFrame({
+    Key key,
+    this.length,
+    this.initialIndex = 0,
+    this.builder,
+  }) : super(key: key);
 
   final int length;
   final int initialIndex;
@@ -252,6 +257,30 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
+  }, skip: isBrowser);
+
+  testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(fontFamily: 'Ahem'),
+        home: const Center(
+          child: Material(
+            child: Tab(
+              icon: SizedBox(
+                width: 10.0,
+                height: 10.0,
+              ),
+              iconMargin: EdgeInsets.symmetric(
+                horizontal: 100.0,
+              ),
+              text: 'x',
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
+    expect(tester.getSize(find.byType(Tab)), const Size(210.0, 72.0));
   }, skip: isBrowser);
 
   testWidgets('Tab sizing - icon and child', (WidgetTester tester) async {

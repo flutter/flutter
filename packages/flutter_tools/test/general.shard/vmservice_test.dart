@@ -7,10 +7,12 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
@@ -167,6 +169,7 @@ class MockPeer implements rpc.Peer {
 void main() {
   MockStdio mockStdio;
   group('VMService', () {
+
     setUp(() {
       mockStdio = MockStdio();
     });
@@ -188,8 +191,13 @@ void main() {
         expect(mockStdio.writtenToStderr.join(''), '');
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: OutputPreferences.test(),
+        stdio: mockStdio,
+        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        timeoutConfiguration: const TimeoutConfiguration(),
+        platform: FakePlatform(),
+      ),
       WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
 
@@ -263,8 +271,13 @@ void main() {
         expect(mockStdio.writtenToStderr.join(''), '');
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+        platform: FakePlatform(),
+      ),
     });
 
     testUsingContext('registers hot UI method', () {
@@ -276,8 +289,13 @@ void main() {
         expect(mockPeer.registeredMethods, contains('reloadMethod'));
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+        platform: FakePlatform(),
+      ),
     });
 
     testUsingContext('registers flutterMemoryInfo service', () {
@@ -290,8 +308,13 @@ void main() {
         expect(mockPeer.registeredMethods, contains('flutterMemoryInfo'));
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+        platform: FakePlatform(),
+      ),
     });
   });
 }

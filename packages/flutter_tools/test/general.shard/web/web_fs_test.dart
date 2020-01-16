@@ -7,19 +7,20 @@ import 'package:build_daemon/data/build_status.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
+import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -30,7 +31,7 @@ void main() {
   MockHttpMultiServer mockHttpMultiServer;
   MockBuildDaemonClient mockBuildDaemonClient;
   MockOperatingSystemUtils mockOperatingSystemUtils;
-  MockProcessUtils mockProcessUtils;
+  MockProcessManager mockProcessManager;
   bool lastInitializePlatform;
   dynamic lastAddress;
   int lastPort;
@@ -45,7 +46,7 @@ void main() {
     mockBuildDaemonClient = MockBuildDaemonClient();
     mockOperatingSystemUtils = MockOperatingSystemUtils();
     mockDwds = MockDwds();
-    mockProcessUtils = MockProcessUtils();
+    mockProcessManager = MockProcessManager();
     when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release'), initializePlatform: anyNamed('initializePlatform')))
       .thenAnswer((Invocation invocation) async {
         lastInitializePlatform = invocation.namedArguments[#initializePlatform] as bool;
@@ -54,15 +55,14 @@ void main() {
     when(mockOperatingSystemUtils.findFreePort()).thenAnswer((Invocation _) async {
       return 1234;
     });
-    when(mockProcessUtils.stream(
+    when(mockProcessManager.start(
       any,
       workingDirectory: anyNamed('workingDirectory'),
-      mapFunction: anyNamed('mapFunction'),
       environment: anyNamed('environment'),
     )).thenAnswer((Invocation invocation) async {
       final String workingDirectory = invocation.namedArguments[#workingDirectory] as String;
-      fs.file(fs.path.join(workingDirectory, '.packages')).createSync(recursive: true);
-      return 0;
+      globals.fs.file(globals.fs.path.join(workingDirectory, '.packages')).createSync(recursive: true);
+      return FakeProcess();
     });
     when(mockBuildDaemonClient.buildResults).thenAnswer((Invocation _) {
       return Stream<BuildResults>.fromFuture(Future<BuildResults>.value(
@@ -81,19 +81,19 @@ void main() {
     when(mockBuildDaemonCreator.assetServerPort(any)).thenReturn(4321);
     testbed = Testbed(
       setup: () {
-        fs.file(fs.path.join('packages', 'flutter_tools', 'pubspec.yaml'))
+        globals.fs.file(globals.fs.path.join('packages', 'flutter_tools', 'pubspec.yaml'))
           ..createSync(recursive: true)
           ..setLastModifiedSync(DateTime(1991, 08, 23));
         // Create an empty .packages file so we can read it when we check for
-        // plugins on WebFs.start()
-        fs.file('.packages').createSync();
+        // plugins on Webglobals.fs.start()
+        globals.fs.file('.packages').createSync();
       },
       overrides: <Type, Generator>{
         Pub: () => MockPub(),
         OperatingSystemUtils: () => mockOperatingSystemUtils,
         BuildDaemonCreator: () => mockBuildDaemonCreator,
         ChromeLauncher: () => mockChromeLauncher,
-        ProcessUtils: () => mockProcessUtils,
+        ProcessManager: () => mockProcessManager,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
           lastAddress = address;
           lastPort = port;
@@ -121,7 +121,7 @@ void main() {
     final FlutterProject flutterProject = FlutterProject.current();
     await WebFs.start(
       skipDwds: false,
-      target: fs.path.join('lib', 'main.dart'),
+      target: globals.fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: true,
@@ -152,7 +152,7 @@ void main() {
     final FlutterProject flutterProject = FlutterProject.current();
     await WebFs.start(
       skipDwds: false,
-      target: fs.path.join('lib', 'main.dart'),
+      target: globals.fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
@@ -174,7 +174,7 @@ void main() {
     final FlutterProject flutterProject = FlutterProject.current();
     final WebFs webFs = await WebFs.start(
       skipDwds: false,
-      target: fs.path.join('lib', 'main.dart'),
+      target: globals.fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
@@ -208,7 +208,7 @@ void main() {
 
     expect(WebFs.start(
       skipDwds: false,
-      target: fs.path.join('lib', 'main.dart'),
+      target: globals.fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
@@ -216,7 +216,7 @@ void main() {
       port: '1234',
       urlTunneller: null,
       dartDefines: const <String>[],
-    ), throwsA(isInstanceOf<Exception>()));
+    ), throwsException);
   }));
 }
 
@@ -226,5 +226,5 @@ class MockDwds extends Mock implements Dwds {}
 class MockHttpMultiServer extends Mock implements HttpMultiServer {}
 class MockChromeLauncher extends Mock implements ChromeLauncher {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-class MockProcessUtils extends Mock implements ProcessUtils {}
 class MockPub extends Mock implements Pub {}
+class MockProcessManager extends Mock implements ProcessManager {}

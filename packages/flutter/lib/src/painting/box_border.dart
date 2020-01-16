@@ -243,7 +243,7 @@ abstract class BoxBorder extends ShapeBorder {
 ///
 /// The sides are represented by [BorderSide] objects.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// All four borders the same, two-pixel wide solid white:
 ///
@@ -251,7 +251,7 @@ abstract class BoxBorder extends ShapeBorder {
 /// Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The border for a material design divider:
 ///
@@ -259,7 +259,7 @@ abstract class BoxBorder extends ShapeBorder {
 /// Border(bottom: BorderSide(color: Theme.of(context).dividerColor))
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// A 1990s-era "OK" button:
 ///
@@ -325,6 +325,19 @@ class Border extends BoxBorder {
         right = side,
         bottom = side,
         left = side;
+
+  /// Creates a border with symmetrical vertical and horizontal sides.
+  ///
+  /// All arguments default to [BorderSide.none] and must not be null.
+  const Border.symmetric({
+    BorderSide vertical = BorderSide.none,
+    BorderSide horizontal = BorderSide.none,
+  }) : assert(vertical != null),
+       assert(horizontal != null),
+       left = horizontal,
+       top = vertical,
+       right = horizontal,
+       bottom = vertical;
 
   /// A uniform border with all sides the same color and width.
   ///
@@ -514,10 +527,10 @@ class Border extends BoxBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is Border
         && other.top == top
@@ -532,14 +545,14 @@ class Border extends BoxBorder {
   @override
   String toString() {
     if (isUniform)
-      return '$runtimeType.all($top)';
+      return '${objectRuntimeType(this, 'Border')}.all($top)';
     final List<String> arguments = <String>[
       if (top != BorderSide.none) 'top: $top',
       if (right != BorderSide.none) 'right: $right',
       if (bottom != BorderSide.none) 'bottom: $bottom',
       if (left != BorderSide.none) 'left: $left',
     ];
-    return '$runtimeType(${arguments.join(", ")})';
+    return '${objectRuntimeType(this, 'Border')}(${arguments.join(", ")})';
   }
 }
 
@@ -818,10 +831,10 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is BorderDirectional
         && other.top == top
@@ -841,6 +854,6 @@ class BorderDirectional extends BoxBorder {
       if (end != BorderSide.none) 'end: $end',
       if (bottom != BorderSide.none) 'bottom: $bottom',
     ];
-    return '$runtimeType(${arguments.join(", ")})';
+    return '${objectRuntimeType(this, 'BorderDirectional')}(${arguments.join(", ")})';
   }
 }

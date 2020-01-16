@@ -29,7 +29,7 @@ enum BorderStyle {
 /// Note that setting [BorderSide.width] to 0.0 will result in hairline
 /// rendering. A more involved explanation is present in [BorderSide.width].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
 /// a [BoxDecoration] and a [Border], to decorate some [Text]. In this example,
@@ -252,10 +252,10 @@ class BorderSide {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is BorderSide
         && other.color == color
@@ -267,7 +267,7 @@ class BorderSide {
   int get hashCode => hashValues(color, width, style);
 
   @override
-  String toString() => '$runtimeType($color, ${width.toStringAsFixed(1)}, $style)';
+  String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
 }
 
 /// Base class for shape outlines.
@@ -488,7 +488,7 @@ abstract class ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType()';
+    return '${objectRuntimeType(this, 'ShapeBorder')}()';
   }
 }
 
@@ -603,17 +603,17 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
-    for (ShapeBorder border in borders) {
+    for (final ShapeBorder border in borders) {
       border.paint(canvas, rect, textDirection: textDirection);
       rect = border.dimensions.resolve(textDirection).deflateRect(rect);
     }
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is _CompoundBorder
         && listEquals<ShapeBorder>(other.borders, borders);

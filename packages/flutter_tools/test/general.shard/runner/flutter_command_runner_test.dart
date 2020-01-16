@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -35,6 +34,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
+      Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     });
 
     setUp(() {
@@ -75,7 +75,7 @@ void main() {
         final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
         when(version.ensureVersionFile()).thenThrow(const FileSystemException());
 
-        expect(() async => await runner.run(<String>['dummy']), throwsA(isA<ToolExit>()));
+        expect(() async => await runner.run(<String>['dummy']), throwsToolExit());
 
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -165,7 +165,11 @@ void main() {
     });
 
     group('getRepoPackages', () {
+      String oldFlutterRoot;
+
       setUp(() {
+        oldFlutterRoot = Cache.flutterRoot;
+        Cache.flutterRoot = _kFlutterRoot;
         fs.directory(fs.path.join(_kFlutterRoot, 'examples'))
             .createSync(recursive: true);
         fs.directory(fs.path.join(_kFlutterRoot, 'packages'))
@@ -177,6 +181,10 @@ void main() {
             .createSync();
         fs.file(fs.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
             .createSync();
+      });
+
+      tearDown(() {
+        Cache.flutterRoot = oldFlutterRoot;
       });
 
       testUsingContext('', () {

@@ -17,13 +17,14 @@ class GalleryDemoCategory {
   final IconData icon;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is GalleryDemoCategory
-        && other.name == name && other.icon == icon;
+        && other.name == name
+        && other.icon == icon;
   }
 
   @override
@@ -579,9 +580,7 @@ final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
     },
   );
 
-final Map<String, String> kDemoDocumentationUrl =
-    Map<String, String>.fromIterable(
-      kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null),
-      key: (dynamic demo) => (demo as GalleryDemo).routeName,
-      value: (dynamic demo) => (demo as GalleryDemo).documentationUrl,
-    );
+final Map<String, String> kDemoDocumentationUrl = <String, String>{
+  for (final GalleryDemo demo in kAllGalleryDemos)
+    if (demo.documentationUrl != null) demo.routeName: demo.documentationUrl,
+};

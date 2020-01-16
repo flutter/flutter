@@ -12,6 +12,7 @@ library foundation;
 export 'package:meta/meta.dart' show
   immutable,
   mustCallSuper,
+  nonVirtual,
   optionalTypeArgs,
   protected,
   required,
@@ -46,10 +47,12 @@ export 'src/foundation/isolates.dart';
 export 'src/foundation/key.dart';
 export 'src/foundation/licenses.dart';
 export 'src/foundation/node.dart';
+export 'src/foundation/object.dart';
 export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';
 export 'src/foundation/profile.dart';
 export 'src/foundation/serialization.dart';
+export 'src/foundation/stack_frame.dart';
 export 'src/foundation/synchronous_future.dart';
 export 'src/foundation/unicode.dart';

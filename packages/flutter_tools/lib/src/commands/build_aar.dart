@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
+import '../android/gradle_utils.dart';
 import '../base/common.dart';
 import '../base/os.dart';
 import '../build_info.dart';
@@ -85,6 +87,9 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (androidSdk == null) {
+      exitWithNoSdkMessage();
+    }
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
 
     final Iterable<AndroidArch> targetArchitectures =
@@ -96,7 +101,7 @@ class BuildAarCommand extends BuildSubCommand {
       ? stringArg('build-number')
       : '1.0';
 
-    for (String buildMode in const <String>['debug', 'profile', 'release']) {
+    for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(AndroidBuildInfo(
           BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor')),
@@ -114,7 +119,7 @@ class BuildAarCommand extends BuildSubCommand {
       outputDirectoryPath: stringArg('output-dir'),
       buildNumber: buildNumber,
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 
   /// Returns the [FlutterProject] which is determined from the remaining command-line

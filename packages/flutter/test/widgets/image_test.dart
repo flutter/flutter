@@ -37,14 +37,14 @@ void main() {
       null,
       EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final TestImageProvider imageProvider2 = TestImageProvider();
@@ -60,7 +60,7 @@ void main() {
       EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
   });
 
@@ -79,14 +79,14 @@ void main() {
       null,
       EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final TestImageProvider imageProvider2 = TestImageProvider();
@@ -103,7 +103,7 @@ void main() {
       EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
   });
 
@@ -119,14 +119,14 @@ void main() {
       null,
       EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final TestImageProvider imageProvider2 = TestImageProvider();
@@ -140,7 +140,7 @@ void main() {
       EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
   });
 
@@ -157,14 +157,14 @@ void main() {
       null,
       EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final TestImageProvider imageProvider2 = TestImageProvider();
@@ -179,7 +179,7 @@ void main() {
       EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
   });
 
@@ -717,7 +717,7 @@ void main() {
         null,
         EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
@@ -725,7 +725,7 @@ void main() {
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final ui.Image oldImage = renderImage.image;
@@ -742,7 +742,7 @@ void main() {
         EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
     expect(renderImage.image, isNot(equals(oldImage)));
   });
@@ -1101,14 +1101,14 @@ void main() {
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(Padding), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-    expect(tester.widget<Padding>(find.byType(Padding)).child, isInstanceOf<RawImage>());
+    expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     await tester.pump();
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(Padding), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-    expect(tester.widget<Center>(find.byType(Center)).child, isInstanceOf<Padding>());
-    expect(tester.widget<Padding>(find.byType(Padding)).child, isInstanceOf<RawImage>());
+    expect(tester.widget<Center>(find.byType(Center)).child, isA<Padding>());
+    expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
   }, skip: isBrowser);
 
   testWidgets('Image state handles loadingBuilder update from null to non-null', (WidgetTester tester) async {
@@ -1240,7 +1240,7 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
       _currentImage = imageInfo;
     }
     final List<ImageStreamListener> localListeners = listeners.toList();
-    for (ImageStreamListener listener in localListeners) {
+    for (final ImageStreamListener listener in localListeners) {
       if (imageInfo != null) {
         listener.onImage(imageInfo, false);
       }
