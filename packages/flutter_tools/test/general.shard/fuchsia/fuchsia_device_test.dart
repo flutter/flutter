@@ -325,7 +325,7 @@ void main() {
   });
 
   group('screenshot', () {
-      MockProcessManager mockProcessManager;
+    MockProcessManager mockProcessManager;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
