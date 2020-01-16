@@ -210,7 +210,7 @@ class FormState extends State<Form> {
     return !hasError;
   }
 
-  /// Check whether all the field in this form is valid without changing
+  /// Check whether all the fields in this form are valid without changing
   /// the display state.
   bool isValid() {
     return _fields.fold(true, (prev, field) => prev && field.isValid);

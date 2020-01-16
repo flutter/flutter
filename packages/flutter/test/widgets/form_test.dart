@@ -137,7 +137,7 @@ void main() {
     await checkErrorText('');
   });
 
-  testWidgets('IsValid returns true when all of the fields is valid', (WidgetTester tester) async {
+  testWidgets('IsValid returns true when all of the fields are valid', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final validString = 'Valid string';
     String validator(s) => s == validString ? null : 'Error text';
