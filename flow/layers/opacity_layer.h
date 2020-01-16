@@ -5,42 +5,15 @@
 #ifndef FLUTTER_FLOW_LAYERS_OPACITY_LAYER_H_
 #define FLUTTER_FLOW_LAYERS_OPACITY_LAYER_H_
 
-#include "flutter/flow/layers/elevated_container_layer.h"
-#if defined(OS_FUCHSIA)
-#include "flutter/flow/layers/fuchsia_system_composited_layer.h"
-#endif
+#include "flutter/flow/layers/container_layer.h"
 
 namespace flutter {
-
-#if !defined(OS_FUCHSIA)
-class OpacityLayerBase : public ContainerLayer {
- public:
-  static bool can_system_composite() { return false; }
-
-  OpacityLayerBase(SkColor color, SkAlpha opacity, float elevation)
-      : color_(color), opacity_(opacity) {}
-
-  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
-
-  void set_dimensions(SkRRect rrect) {}
-
-  SkColor color() const { return color_; }
-  SkAlpha opacity() const { return opacity_; }
-  float elevation() const { return 0; }
-
- private:
-  SkColor color_;
-  SkAlpha opacity_;
-};
-#else
-using OpacityLayerBase = FuchsiaSystemCompositedLayer;
-#endif
 
 // Don't add an OpacityLayer with no children to the layer tree. Painting an
 // OpacityLayer is very costly due to the saveLayer call. If there's no child,
 // having the OpacityLayer or not has the same effect. In debug_unopt build,
 // |Preroll| will assert if there are no children.
-class OpacityLayer : public OpacityLayerBase {
+class OpacityLayer : public ContainerLayer {
  public:
   // An offset is provided here because OpacityLayer.addToScene method in the
   // Flutter framework can take an optional offset argument.
@@ -57,15 +30,20 @@ class OpacityLayer : public OpacityLayerBase {
   void Add(std::shared_ptr<Layer> layer) override;
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+
+  void Paint(PaintContext& context) const override;
+
 #if defined(OS_FUCHSIA)
   void UpdateScene(SceneUpdateContext& context) override;
-#endif
-  void Paint(PaintContext& context) const override;
+#endif  // defined(OS_FUCHSIA)
 
  private:
   ContainerLayer* GetChildContainer() const;
 
+  SkAlpha alpha_;
   SkPoint offset_;
+  SkRRect frameRRect_;
+  float total_elevation_ = 0.0f;
 
   FML_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
 };
