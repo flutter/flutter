@@ -79,8 +79,8 @@ class Form extends StatefulWidget {
     this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
-  }) : assert(child != null),
-       super(key: key);
+  })  : assert(child != null),
+        super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
   ///
@@ -91,7 +91,8 @@ class Form extends StatefulWidget {
   /// form.save();
   /// ```
   static FormState of(BuildContext context) {
-    final _FormScope scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
+    final _FormScope scope =
+        context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
   }
 
@@ -142,8 +143,7 @@ class FormState extends State<Form> {
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
-    if (widget.onChanged != null)
-      widget.onChanged();
+    if (widget.onChanged != null) widget.onChanged();
     _forceRebuild();
   }
 
@@ -163,8 +163,7 @@ class FormState extends State<Form> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.autovalidate)
-      _validate();
+    if (widget.autovalidate) _validate();
     return WillPopScope(
       onWillPop: widget.onWillPop,
       child: _FormScope(
@@ -177,8 +176,7 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (final FormFieldState<dynamic> field in _fields)
-      field.save();
+    for (final FormFieldState<dynamic> field in _fields) field.save();
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its
@@ -189,8 +187,7 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidate] property is true, the fields will all be
   /// revalidated after being reset.
   void reset() {
-    for (final FormFieldState<dynamic> field in _fields)
-      field.reset();
+    for (final FormFieldState<dynamic> field in _fields) field.reset();
     _fieldDidChange();
   }
 
@@ -209,6 +206,12 @@ class FormState extends State<Form> {
       hasError = !field.validate() || hasError;
     return !hasError;
   }
+
+  /// Check whether all the field in this form is valid without changing
+  /// the display state.
+  bool isValid() {
+    return _fields.fold(true, (prev, field) => prev && field.isValid);
+  }
 }
 
 class _FormScope extends InheritedWidget {
@@ -217,9 +220,9 @@ class _FormScope extends InheritedWidget {
     Widget child,
     FormState formState,
     int generation,
-  }) : _formState = formState,
-       _generation = generation,
-       super(key: key, child: child);
+  })  : _formState = formState,
+        _generation = generation,
+        super(key: key, child: child);
 
   final FormState _formState;
 
@@ -285,8 +288,8 @@ class FormField<T> extends StatefulWidget {
     this.initialValue,
     this.autovalidate = false,
     this.enabled = true,
-  }) : assert(builder != null),
-       super(key: key);
+  })  : assert(builder != null),
+        super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
@@ -349,10 +352,12 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// True if this field has any validation errors.
   bool get hasError => _errorText != null;
 
+  /// True if the current value is valid without changing the state.
+  bool get isValid => widget.validator?.call(_value) == null;
+
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
-    if (widget.onSaved != null)
-      widget.onSaved(value);
+    if (widget.onSaved != null) widget.onSaved(value);
   }
 
   /// Resets the field to its initial value.
@@ -373,8 +378,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   void _validate() {
-    if (widget.validator != null)
-      _errorText = widget.validator(_value);
+    if (widget.validator != null) _errorText = widget.validator(_value);
   }
 
   /// Updates this field's state to the new value. Useful for responding to
@@ -416,8 +420,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   @override
   Widget build(BuildContext context) {
     // Only autovalidate if the widget is also enabled
-    if (widget.autovalidate && widget.enabled)
-      _validate();
+    if (widget.autovalidate && widget.enabled) _validate();
     Form.of(context)?._register(this);
     return widget.builder(this);
   }
