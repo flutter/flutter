@@ -118,38 +118,6 @@ void main() {
     expect(_getRawMaterialButton(tester).splashColor, splashColor);
   });
 
-  // The feature checked by this test has been deprecated, see
-  // https://flutter.dev/go/remove-fab-accent-theme-dependency. This test will be
-  // removed in the future.
-  testWidgets('FloatingActionButton foreground color uses iconAccentTheme if no widget or widget theme color is specified', (WidgetTester tester) async {
-    final DebugPrintCallback oldPrint = debugPrint;
-    final List<String> log = <String>[];
-    debugPrint = (String message, { int wrapWidth }) {
-      log.add(message);
-    };
-
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        floatingActionButton: Theme(
-          data: ThemeData().copyWith(
-            accentIconTheme: const IconThemeData(color: Color(0xFACEFACE)),
-          ),
-          child: FloatingActionButton(
-            onPressed: () { },
-            child: const Icon(Icons.add),
-          ),
-        ),
-      ),
-    ));
-
-    debugPrint = oldPrint;
-
-    // Verify that a warning message is generated.
-    expect(log.first, contains('https://flutter.dev/docs/release/breaking-changes/fab_accent_dependency'));
-
-    expect(_getRichText(tester).text.style.color, const Color(0xFACEFACE));
-  });
-
   testWidgets('FloatingActionButton uses a custom shape when specified in the theme', (WidgetTester tester) async {
     const ShapeBorder customShape = BeveledRectangleBorder();
 
