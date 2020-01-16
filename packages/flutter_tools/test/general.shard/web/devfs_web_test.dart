@@ -68,7 +68,7 @@ void main() {
         closeCompleter.complete();
       });
       webAssetServer = WebAssetServer(
-          mockHttpServer, packages, onError: (dynamic error, StackTrace stackTrace) {
+          mockHttpServer, packages, InternetAddress.loopbackIPv4, onError: (dynamic error, StackTrace stackTrace) {
         closeCompleter.completeError(error, stackTrace);
       });
     });
