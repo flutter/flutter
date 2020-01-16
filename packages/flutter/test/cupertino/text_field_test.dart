@@ -3944,4 +3944,61 @@ void main() {
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
   });
+
+  testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(200, 200)),
+            child: const CupertinoTextField(),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(Semantics),
+        ).first,
+      ),
+      matchesSemantics(
+        isTextField: true,
+        isEnabled: true,
+        hasEnabledState: true,
+        hasTapAction: true,
+      ),
+    );
+  });
+
+  testWidgets('Disabled Cupertino text field semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(200, 200)),
+            child: const CupertinoTextField(
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(Semantics),
+        ).first,
+      ),
+      matchesSemantics(
+        isEnabled: false,
+        hasEnabledState: true,
+        hasTapAction: false,
+      ),
+    );
+  });
 }
