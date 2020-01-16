@@ -61,6 +61,7 @@ const Duration _kFadeDuration = Duration(milliseconds: 165);
 ///
 /// See also:
 ///
+/// * [CupertinoSegmentedControl]
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
 class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
