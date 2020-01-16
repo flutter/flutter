@@ -32,7 +32,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// {@tool snippet}
 ///
 /// This sample shows how to supply your own caching logic and replace the
-/// global [imageCache] varible.
+/// global [imageCache] variable.
 ///
 /// ```dart
 /// /// This is the custom implementation of [ImageCache] where we can override
@@ -64,7 +64,6 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// }
 /// ```
 /// {@end-tool}
-
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
@@ -141,12 +140,13 @@ class ImageCache {
   }
 
   /// Evicts a single entry from the cache, returning true if successful.
-  /// Pending images waiting for completion are removed as well, returning true if successful.
+  /// Pending images waiting for completion are removed as well, returning true
+  /// if successful.
   ///
-  /// When a pending image is removed the listener on it is removed as well to prevent
-  /// it from adding itself to the cache if it eventually completes.
+  /// When a pending image is removed the listener on it is removed as well to
+  /// prevent it from adding itself to the cache if it eventually completes.
   ///
-  /// The [key] must be equal to an object used to cache an image in
+  /// The `key` must be equal to an object used to cache an image in
   /// [ImageCache.putIfAbsent].
   ///
   /// If the key is not immediately available, as is common, consider using
