@@ -334,17 +334,25 @@ dependencies:
 
         final Map<String, dynamic> plugins = jsonContent['plugins'] as Map<String, dynamic>;
         final List<dynamic> expectedPlugins = <dynamic>[
-          <String, String> {
+          <String, dynamic> {
             'name': 'plugin-a',
-            'path': '/.tmp_rand0/plugin.rand0/'
+            'path': '/.tmp_rand0/plugin.rand0/',
+            'dependencies': <String>[
+              'plugin-b',
+              'plugin-c'
+            ]
           },
-          <String, String> {
+          <String, dynamic> {
             'name': 'plugin-b',
-            'path': '/.tmp_rand0/plugin.rand1/'
+            'path': '/.tmp_rand0/plugin.rand1/',
+            'dependencies': <String>[
+              'plugin-c'
+            ]
           },
-          <String, String> {
+          <String, dynamic> {
             'name': 'plugin-c',
-            'path': '/.tmp_rand0/plugin.rand2/'
+            'path': '/.tmp_rand0/plugin.rand2/',
+            'dependencies': <String>[]
           },
         ];
         expect(plugins['ios'], expectedPlugins);

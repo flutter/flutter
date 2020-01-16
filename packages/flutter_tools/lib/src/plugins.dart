@@ -318,11 +318,13 @@ List<Plugin> findPlugins(FlutterProject project) {
       return p.platforms.containsKey(platformKey);
     });
 
+    final Set<String> pluginNames = plugins.map((Plugin plugin) => plugin.name).toSet();
     final List<Map<String, dynamic>> list = <Map<String, dynamic>>[];
     for (final Plugin plugin in platformPlugins) {
       list.add(<String, dynamic>{
         'name': plugin.name,
         'path': fsUtils.escapePath(plugin.path),
+        'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
       });
     }
     return list;
@@ -338,6 +340,10 @@ List<Plugin> findPlugins(FlutterProject project) {
 ///       {
 ///         "name": "test",
 ///         "path": "test_path",
+///         "dependencies": [
+///           "plugin-a",
+///           "plugin-b"
+///         ]
 ///       }
 ///     ],
 ///     "android": [],
@@ -368,6 +374,7 @@ List<Plugin> findPlugins(FlutterProject project) {
 ///   "date_created": "1970-01-01 00:00:00.000",
 ///   "version": "0.0.0-unknown"
 /// }
+///
 ///
 /// Finally, returns [true] if .flutter-plugins-dependencies has changed,
 /// otherwise returns [false].
@@ -400,7 +407,10 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
 
   result['info'] =  'This is a generated file; do not edit or check into version control.';
   result['plugins'] = pluginsMap;
-  result['dependencyGraph'] = _createPluginDependencyGraph(plugins);
+  /// The dependencyGraph object is kept for backwards compatibility, but
+  /// should be removed once migration is complete.
+  /// https://github.com/flutter/flutter/issues/48918
+  result['dependencyGraph'] = _createPluginLegacyDependencyGraph(plugins);
   result['date_created'] = systemClock.now().toString();
   result['version'] = flutterVersion.frameworkVersion;
 
@@ -411,7 +421,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   return oldPluginFileContent != pluginFileContent;
 }
 
-List<dynamic> _createPluginDependencyGraph(List<Plugin> plugins) {
+List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
   final List<dynamic> directAppDependencies = <dynamic>[];
 
   final Set<String> pluginNames = plugins.map((Plugin plugin) => plugin.name).toSet();
