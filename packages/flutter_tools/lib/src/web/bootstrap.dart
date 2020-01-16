@@ -55,6 +55,7 @@ window.\$hotReloadHook = function(modules) {
         // once we've reloaded every module, trigger the hot reload.
         if (reloadCount == modules.length) {
           require(["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
+            // See L81 below for an explanation.
             window.\$mainEntrypoint = app[Object.keys(app)[0]].main;
             window.\$hotReload(resolve);
           });
@@ -78,6 +79,11 @@ define("main_module", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   let voidToNull = () => (voidToNull = dart_sdk.dart.constFn(dart_sdk.dart.fnType(dart_sdk.core.Null, [dart_sdk.dart.void])))();
 
   // Attach the main entrypoint and hot reload functionality to the window.
+  // The app module will have a single property which contains the actual application
+  // code. The property name is based off of the entrypoint that is generated, for example
+  // the file `foo/bar/baz.dart` will generate a property named approximately
+  // `foo__bar__baz`. Rather than attempt to guess, we assume the first property of
+  // this object is the module.
   window.\$mainEntrypoint = app[Object.keys(app)[0]].main;
   if (window.\$hotReload == null) {
     window.\$hotReload = function(cb) {
