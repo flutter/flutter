@@ -55,17 +55,12 @@ void main() {
     when(notLinuxPlatform.isWindows).thenReturn(false);
   });
 
-  // Creates the mock files necessary to look like a Flutter project.
-  void setUpMockCoreProjectFiles() {
+  // Creates the mock files necessary to run a build.
+  void setUpMockProjectFilesForBuild() {
+    globals.fs.file('linux/build.sh').createSync(recursive: true);
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-  }
-
-  // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild() {
-    globals.fs.file(globals.fs.path.join('linux', 'Makefile')).createSync(recursive: true);
-    setUpMockCoreProjectFiles();
   }
 
   // Sets up mock expectation for running 'make'.
@@ -83,10 +78,9 @@ void main() {
   testUsingContext('Linux build fails when there is no linux project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    setUpMockCoreProjectFiles();
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
-    ), throwsToolExit(message: 'No Linux desktop project configured'));
+    ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => MemoryFileSystem(),

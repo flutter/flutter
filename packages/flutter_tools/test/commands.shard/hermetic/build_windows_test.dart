@@ -58,23 +58,10 @@ void main() {
     when(notWindowsPlatform.isWindows).thenReturn(false);
   });
 
-  // Creates the mock files necessary to look like a Flutter project.
-  void setUpMockCoreProjectFiles() {
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-  }
-
-  // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild() {
-    globals.fs.file(solutionPath).createSync(recursive: true);
-    setUpMockCoreProjectFiles();
-  }
-
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    setUpMockProjectFilesForBuild();
+    globals.fs.file(solutionPath).createSync(recursive: true);
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
     ), throwsA(isInstanceOf<ToolExit>()));
@@ -89,11 +76,10 @@ void main() {
   testUsingContext('Windows build fails when there is no windows project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    setUpMockCoreProjectFiles();
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
-    ), throwsToolExit(message: 'No Windows desktop project configured'));
+    ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
@@ -105,8 +91,11 @@ void main() {
   testUsingContext('Windows build fails on non windows platform', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    setUpMockProjectFilesForBuild();
+    globals.fs.file(solutionPath).createSync(recursive: true);
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
@@ -122,8 +111,11 @@ void main() {
   testUsingContext('Windows build does not spew stdout to status logger', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    setUpMockProjectFilesForBuild();
+    globals.fs.file(solutionPath).createSync(recursive: true);
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       r'C:\packages\flutter_tools\bin\vs_build.bat',
@@ -150,8 +142,11 @@ void main() {
   testUsingContext('Windows build invokes msbuild and writes generated files', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    setUpMockProjectFilesForBuild();
+    globals.fs.file(solutionPath).createSync(recursive: true);
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       r'C:\packages\flutter_tools\bin\vs_build.bat',
@@ -184,8 +179,11 @@ void main() {
   testUsingContext('Release build prints an under-construction warning', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    setUpMockProjectFilesForBuild();
+    globals.fs.file(solutionPath).createSync(recursive: true);
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       r'C:\packages\flutter_tools\bin\vs_build.bat',
