@@ -563,35 +563,36 @@ void main() {
                 children: <Widget>[
                   const Text('Hello1', key: ValueKey<String>('text1')),
                   Container(
-                      height: 25.0,
-                      child: RichText(
-                          key: const ValueKey<String>('text2'),
-                          text: const TextSpan(text: 'Hello2')
-                      )
+                    height: 25.0,
+                    child: RichText(
+                      key: const ValueKey<String>('text2'),
+                      text: const TextSpan(text: 'Hello2'),
+                    ),
                   ),
                   Container(
-                      height: 25.0,
-                      child: EditableText(
-                          key: const ValueKey<String>('text3'),
-                          controller: TextEditingController(text: 'Hello3'),
-                          focusNode: FocusNode(),
-                          style: const TextStyle(),
-                          cursorColor: Colors.red,
-                          backgroundCursorColor: Colors.black)
+                    height: 25.0,
+                    child: EditableText(
+                      key: const ValueKey<String>('text3'),
+                      controller: TextEditingController(text: 'Hello3'),
+                      focusNode: FocusNode(),
+                      style: const TextStyle(),
+                      cursorColor: Colors.red,
+                      backgroundCursorColor: Colors.black,
+                    ),
                   ),
                   Container(
-                      height: 25.0,
-                      child: TextField(
-                          key: const ValueKey<String>('text4'),
-                          controller: TextEditingController(text: 'Hello4')
-                      )
+                    height: 25.0,
+                    child: TextField(
+                      key: const ValueKey<String>('text4'),
+                      controller: TextEditingController(text: 'Hello4'),
+                    ),
                   ),
                   Container(
-                      height: 25.0,
-                      child: TextFormField(
-                          key: const ValueKey<String>('text5'),
-                          controller: TextEditingController(text: 'Hello5')
-                      )
+                    height: 25.0,
+                    child: TextFormField(
+                      key: const ValueKey<String>('text5'),
+                      controller: TextEditingController(text: 'Hello5'),
+                    ),
                   ),
                 ],
               ))
