@@ -2729,6 +2729,35 @@ class BuildOwner {
   }
 }
 
+// Methods to handle hot reloads replacements of Stateless/Stateful Widget types.
+
+// If a StatelessWidget has been transformed into a stateful one, then accessing
+// `StatelessElement.widget` will throw a `CastError`. Instead, we access the
+// private member `Element._widget`. For a subclass of Element this field will
+// be defined and properly calling the element lifecycle methods will populate
+// it as normal. For implementations of Element, the assertion will never be
+// called.
+
+// Verify that an Element's widget is non-null.
+bool _debugSafeVerifyNonNullWidget(Element element) {
+  return element._widget != null;
+}
+
+// Retrieve the key of an Element
+Key _safeRetrieveWidgetKey(Element element) {
+  Key key;
+  assert(() {
+    key = element._widget.key;
+    return true;
+  }());
+  if (kDebugMode) {
+    return key;
+  }
+  return element.widget.key;
+}
+
+///
+
 /// An instantiation of a [Widget] at a particular location in the tree.
 ///
 /// Widgets describe how to configure a subtree but the same widget can be used
@@ -3069,12 +3098,37 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return null;
     }
     if (child != null) {
-      if (child.widget == newWidget) {
+      bool canUpdate = true;
+      // When the type of a widget is changed better Stateful and Stateless via
+      // hot reload, the element tree will end up in a partially invalid state.
+      // That is, if the widget was a StatefulWidget and is now a StatelessWidget,
+      // then the element tree currently contains a StatefulElement that is incorrectly
+      // referencing a StatelessWidget (and likewise with StatelessElement).
+      //
+      // To avoid crashing due to type errors, we need to gently guide the invalid
+      // element out of the tree. To do so, we ensure that the `canUpdate` condition
+      // returns false which prevents us from trying to update the existing element
+      // incorrectly.
+      //
+      // For the case where the widget becomes Stateful, we also need to avoid
+      // accessing `StatelessElement.widget` as the cast on the getter will
+      // cause a type error to be thrown. Here we avoid that by short-circuiting
+      // the `Widget.canUpdate` check once `canUpdate` is false. There are three
+      // additional places where `Element.widget` is accessed that may throw
+      // a CastError. These are avoided by `_debugSafeVerifyNonNullWidget` and
+      // `_safeRetrieveWidgetKey`.
+      assert(() {
+        canUpdate = (child is StatelessElement && newWidget is StatefulWidget) ||
+                    (child is StatefulElement && newWidget is StatelessWidget);
+        return true;
+      }());
+      if (canUpdate && child.widget == newWidget) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         return child;
       }
-      if (Widget.canUpdate(child.widget, newWidget)) {
+      canUpdate = canUpdate && Widget.canUpdate(child.widget, newWidget);
+      if (canUpdate) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         child.update(newWidget);
@@ -3419,7 +3473,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   void deactivate() {
     assert(_debugLifecycleState == _ElementLifecycle.active);
-    assert(widget != null);
+    assert(_debugSafeVerifyNonNullWidget(this));
     assert(depth != null);
     assert(_active);
     if (_dependencies != null && _dependencies.isNotEmpty) {
@@ -3462,10 +3516,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
-    assert(widget != null);
+    assert(_debugSafeVerifyNonNullWidget(this));
     assert(depth != null);
     assert(!_active);
-    final Key key = widget.key;
+    final Key key = _safeRetrieveWidgetKey(this);
     if (key is GlobalKey) {
       key._unregister(this);
     }
