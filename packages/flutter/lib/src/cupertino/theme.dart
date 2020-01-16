@@ -82,8 +82,8 @@ class CupertinoTheme extends StatelessWidget {
   ///
   /// See also:
   ///
-  /// * [CupertinoUserInterfaceStyle], the [CupertinoThemeData] property that
-  ///   determines the [Brightness] of descendant Cupertino widgets.
+  /// * [CupertinoThemeData.brightness], the property takes precedence over
+  ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
   static Brightness brightnessOf(BuildContext context, { bool nullOk = false }) {
     final _InheritedCupertinoTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
     return inheritedTheme?.theme?.data?.brightness ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness;
@@ -197,10 +197,11 @@ class CupertinoThemeData extends Diagnosticable {
 
   final _CupertinoThemeDefaults _defaults;
 
-  /// The general brightness theme of the [CupertinoThemeData].
+  /// The brightness override for Cupertino descendants.
   ///
-  /// Defaults to null. Overrides the ambient [MediaQueryData.platformBrightness]
-  /// if a non-null [Brightness] is specified.
+  /// Defaults to null. If a non-null [Brightness] is specified, the value will
+  /// take precedence over the ambient [MediaQueryData.platformBrightness], when
+  /// determining the brightness of descendant Cupertino widgets.
   ///
   /// If coming from a Material [Theme] and unspecified, [brightness] will be
   /// derived from the Material [ThemeData]'s `brightness`.
