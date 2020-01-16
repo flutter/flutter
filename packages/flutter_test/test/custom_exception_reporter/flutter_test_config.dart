@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<void> main(FutureOr<void> testMain()) async {
   reportTestException = (FlutterErrorDetails details, String testDescription) {
-    expect(details.exception, isInstanceOf<StateError>());
+    expect(details.exception, isA<StateError>());
     expect(details.exception.message, 'foo');
     expect(testDescription, 'custom exception reporter');
   };

@@ -470,7 +470,7 @@ void main() {
     await tester.pumpAndSettle();
     // An exception should've been thrown because the `builder` returned null.
     final dynamic exception = tester.takeException();
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect(exception.toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   The builder for route "broken" returned null.\n'

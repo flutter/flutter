@@ -126,7 +126,7 @@ void main() {
       ..writeAsStringSync('testing');
 
     expect(() async => await const DebugMacOSBundleFlutterAssets().build(environment),
-        throwsA(isInstanceOf<Exception>()));
+        throwsException);
   }));
 
   test('debug macOS application creates correctly structured framework', () => testbed.run(() async {

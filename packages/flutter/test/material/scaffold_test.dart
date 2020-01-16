@@ -1824,7 +1824,7 @@ void main() {
           'the ScaffoldState rather than using the Scaffold.of() function.\n',
         ),
       );
-      expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+      expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
       expect(error.toStringDeep(),
         'FlutterError\n'
         '   Scaffold.of() called with a context that does not contain a\n'
@@ -1893,7 +1893,7 @@ void main() {
           'Scaffold.geometryOf().\n',
         ),
       );
-      expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+      expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
       expect(error.toStringDeep(),
         'FlutterError\n'
         '   Scaffold.geometryOf() called with a context that does not contain\n'

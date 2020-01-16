@@ -76,7 +76,7 @@ void main() {
 
       expect(testbed.run(() async {
         Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
-      }), throwsA(isInstanceOf<StateError>()));
+      }), throwsStateError);
     });
 
     test('Doesnt throw a StateError if Timer is left cleaned up', () async {

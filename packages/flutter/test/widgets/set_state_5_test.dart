@@ -29,6 +29,6 @@ class BadWidgetState extends State<BadWidget> {
 void main() {
   testWidgets('setState() catches being used inside a constructor', (WidgetTester tester) async {
     await tester.pumpWidget(const BadWidget());
-    expect(tester.takeException(), isInstanceOf<FlutterError>());
+    expect(tester.takeException(), isFlutterError);
   });
 }

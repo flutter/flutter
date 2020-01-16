@@ -111,7 +111,7 @@ void main() {
         ]);
         fail('Expect exception');
       } catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
       }
 
       final BufferLogger bufferLogger = globals.logger as BufferLogger;

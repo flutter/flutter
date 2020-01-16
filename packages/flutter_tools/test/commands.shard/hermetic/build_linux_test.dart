@@ -8,7 +8,6 @@ import 'package:platform/platform.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -101,7 +100,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -220,7 +219,7 @@ BINARY_NAME=fizz_bar
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'linux']),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });

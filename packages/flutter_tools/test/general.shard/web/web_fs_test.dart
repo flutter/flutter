@@ -216,7 +216,7 @@ void main() {
       port: '1234',
       urlTunneller: null,
       dartDefines: const <String>[],
-    ), throwsA(isInstanceOf<Exception>()));
+    ), throwsException);
   }));
 }
 

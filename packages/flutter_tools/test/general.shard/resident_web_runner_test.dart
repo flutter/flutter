@@ -926,7 +926,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -945,7 +945,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -964,7 +964,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -983,7 +983,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1002,7 +1002,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1021,7 +1021,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1041,7 +1041,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<Exception>()));
+    ), throwsException);
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1060,7 +1060,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1082,7 +1082,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<StateError>()));
+    ), throwsStateError);
 
     unhandledErrorCompleter.complete();
     await expectation;

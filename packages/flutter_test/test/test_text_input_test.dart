@@ -29,7 +29,7 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.done);
       fail('Expected a PlatformException, but it was not thrown.');
     } catch (e) {
-      expect(e, isInstanceOf<PlatformException>());
+      expect(e, isA<PlatformException>());
     }
   });
 }

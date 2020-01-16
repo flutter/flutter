@@ -75,7 +75,7 @@ void main() {
       expect(BuildMode.fromName('profile'), BuildMode.profile);
       expect(BuildMode.fromName('jit_release'), BuildMode.jitRelease);
       expect(BuildMode.fromName('release'), BuildMode.release);
-      expect(() => BuildMode.fromName('foo'), throwsA(isInstanceOf<ArgumentError>()));
+      expect(() => BuildMode.fromName('foo'), throwsArgumentError);
     });
   });
 }
