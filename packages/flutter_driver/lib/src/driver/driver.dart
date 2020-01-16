@@ -97,14 +97,14 @@ typedef DriverCreatorFunc = Future<FlutterDriver> Function(
 /// to create a FlutterDriver instance. By default, it will return either
 /// [WebFlutterDriver] or [VMServiceFlutterDriver].
 DriverCreatorFunc get driverCreator => _driverCreator;
-DriverCreatorFunc _driverCreator = _driverCreationFunc;
+DriverCreatorFunc _driverCreator = _driverCreatorFunc;
 /// Sets driverCreator function.
 set driverCreator(DriverCreatorFunc value) {
   assert(value != null);
   _driverCreator = value;
 }
 
-Future<FlutterDriver> _driverCreationFunc(
+Future<FlutterDriver> _driverCreatorFunc(
     String dartVmServiceUrl,
     bool printCommunication,
     bool logCommunicationToFile,
