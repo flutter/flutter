@@ -73,9 +73,10 @@ task:
     - name: framework_tests-widgets-linux
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
       environment:
-        # We use 3 CPUs because that's the minimum required to get framework_tests-widgets-linux
-        # running fast enough that it is not the long pole, as of OCtober 2019.
-        CPU: 3
+        # We use 4 CPUs because that's the minimum required to get framework_tests-widgets-linux
+        # running fast enough that it is not the long pole, as of January 2020.
+        CPU: 4
+        MEMORY: 8G
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -83,10 +84,10 @@ task:
     - name: framework_tests-libraries-linux
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
       environment:
-        # We use 3 CPUs because that's the minimum required to get the
+        # We use 4 CPUs because that's the minimum required to get the
         # framework_tests-libraries-linux shard running fast enough that it is not the long pole, as
-        # of October 2019.
-        CPU: 3
+        # of January 2020.
+        CPU: 4
         MEMORY: 8G
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
