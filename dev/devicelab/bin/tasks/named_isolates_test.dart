@@ -25,6 +25,7 @@ void main() {
     section('Compile and run the tester app');
     Completer<void> firstNameFound = Completer<void>();
     Completer<void> secondNameFound = Completer<void>();
+    // Fast start is disabled due to https://github.com/flutter/flutter/issues/48971.
     final Process runProcess = await _run(device: device, command:
         <String>['run', '--disable-service-auth-codes', '--no-fast-start'], stdoutListener: (String line) {
       if (line.contains(_kFirstIsolateName)) {
