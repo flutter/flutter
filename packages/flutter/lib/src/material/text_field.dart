@@ -911,7 +911,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   void _handleHover(bool hovering) {
     if (hovering != _isHovering) {
       setState(() {
-        return _isHovering = hovering;
+        _isHovering = hovering;
       });
     }
   }

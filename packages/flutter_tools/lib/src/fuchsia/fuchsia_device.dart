@@ -139,7 +139,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   FuchsiaDevices() : super('Fuchsia devices');
 
   @override
-  bool get supportsPlatform => globals.platform.isLinux || globals.platform.isMacOS;
+  bool get supportsPlatform => isFuchsiaSupportedPlatform();
 
   @override
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
@@ -443,6 +443,39 @@ class FuchsiaDevice extends Device {
   }
 
   @override
+  bool get supportsScreenshot => isFuchsiaSupportedPlatform();
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    if (outputFile.basename.split('.').last != 'ppm') {
+      throw '${outputFile.path} must be a .ppm file';
+    }
+    final RunResult screencapResult = await shell('screencap > /tmp/screenshot.ppm');
+    if (screencapResult.exitCode != 0) {
+      throw 'Could not take a screenshot on device $name:\n$screencapResult';
+    }
+    try {
+      final RunResult scpResult =  await scp('/tmp/screenshot.ppm', outputFile.path);
+      if (scpResult.exitCode != 0) {
+        throw 'Failed to copy screenshot from device:\n$scpResult';
+      }
+    } finally {
+      try {
+        final RunResult deleteResult = await shell('rm /tmp/screenshot.ppm');
+        if (deleteResult.exitCode != 0) {
+          globals.printError(
+            'Failed to delete screenshot.ppm from the device:\n$deleteResult'
+          );
+        }
+      } catch (_) {
+        globals.printError(
+          'Failed to delete screenshot.ppm from the device'
+        );
+      }
+    }
+  }
+
+  @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform ??= await _queryTargetPlatform();
 
   @override
@@ -478,9 +511,6 @@ class FuchsiaDevice extends Device {
 
   @override
   void clearLogs() {}
-
-  @override
-  bool get supportsScreenshot => false;
 
   bool get ipv6 {
     try {
@@ -542,6 +572,21 @@ class FuchsiaDevice extends Device {
       fuchsiaArtifacts.sshConfig.absolute.path,
       id, // Device's IP address.
       command,
+    ]);
+  }
+
+  /// Transfer the file [origin] from the device to [destination].
+  Future<RunResult> scp(String origin, String destination) async {
+    if (fuchsiaArtifacts.sshConfig == null) {
+      throwToolExit('Cannot interact with device. No ssh config.\n'
+                    'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
+    }
+    return await processUtils.run(<String>[
+      'scp',
+      '-F',
+      fuchsiaArtifacts.sshConfig.absolute.path,
+      '$id:$origin',
+      destination,
     ]);
   }
 

@@ -18,9 +18,8 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      environment = Environment(
-        outputDir: globals.fs.currentDirectory,
-        projectDir: globals.fs.currentDirectory,
+      environment = Environment.test(
+        globals.fs.currentDirectory,
       );
       globals.fs.file(globals.fs.path.join('packages', 'flutter_tools', 'lib', 'src',
           'build_system', 'targets', 'assets.dart'))
@@ -78,9 +77,8 @@ flutter:
     globals.fs.file('pubspec.yaml')
       ..writeAsStringSync('name: foo\ndependencies:\n  foo: any\n');
 
-    await const FlutterPlugins().build(Environment(
-      outputDir: globals.fs.currentDirectory,
-      projectDir: globals.fs.currentDirectory,
+    await const FlutterPlugins().build(Environment.test(
+      globals.fs.currentDirectory,
     ));
 
     expect(globals.fs.file('.flutter-plugins').existsSync(), true);

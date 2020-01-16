@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -36,7 +37,12 @@ void main() {
       equals('Flutter.framework not found at ios_profile/Flutter.framework'),
     );
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+      fileSystem: memoryFileSystem,
+      cache: globals.cache,
+      platform: globals.platform,
+      processManager: mockProcessManager,
+    ),
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -60,7 +66,12 @@ void main() {
              'Expected a string like "Apple (LLVM|clang) #.#.# (clang-####.#.##.#)".'),
     );
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+      fileSystem: memoryFileSystem,
+      cache: globals.cache,
+      platform: globals.platform,
+      processManager: mockProcessManager,
+    ),
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
@@ -83,7 +94,12 @@ void main() {
     await validateBitcode(BuildMode.profile, TargetPlatform.ios);
 
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+      fileSystem: memoryFileSystem,
+      cache: globals.cache,
+      platform: globals.platform,
+      processManager: mockProcessManager,
+    ),
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
@@ -105,7 +121,12 @@ void main() {
 
     await validateBitcode(BuildMode.profile, TargetPlatform.ios);
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+      fileSystem: memoryFileSystem,
+      cache: globals.cache,
+      platform: globals.platform,
+      processManager: mockProcessManager,
+    ),
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
@@ -133,7 +154,12 @@ void main() {
              'of Xcode to at least 10.0.1.'),
     );
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+      fileSystem: memoryFileSystem,
+      cache: globals.cache,
+      platform: globals.platform,
+      processManager: mockProcessManager,
+    ),
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
@@ -157,7 +183,12 @@ void main() {
 
     expect(testLogger.statusText, '');
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+      fileSystem: memoryFileSystem,
+      cache: globals.cache,
+      platform: globals.platform,
+      processManager: mockProcessManager,
+    ),
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
@@ -181,7 +212,12 @@ void main() {
 
     expect(testLogger.statusText, '');
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+      fileSystem: memoryFileSystem,
+      cache: globals.cache,
+      platform: globals.platform,
+      processManager: mockProcessManager,
+    ),
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,

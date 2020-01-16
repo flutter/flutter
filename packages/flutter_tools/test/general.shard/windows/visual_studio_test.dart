@@ -48,14 +48,28 @@ void main() {
     },
   };
 
-  // A version of a response that doesn't include certain installation status
-  // information that might be missing in older Visual Studio versions.
-  const Map<String, dynamic> _missingStatusResponse = <String, dynamic>{
+  // A response for a VS installation that's too old.
+  const Map<String, dynamic> _tooOldResponse = <String, dynamic>{
     'installationPath': visualStudioPath,
     'displayName': 'Visual Studio Community 2017',
     'installationVersion': '15.9.28307.665',
+    'isRebootRequired': false,
+    'isComplete': true,
+    'isLaunchable': true,
+    'isPrerelease': false,
     'catalog': <String, dynamic>{
       'productDisplayVersion': '15.9.12',
+    },
+  };
+
+  // A version of a response that doesn't include certain installation status
+  // information that might be missing in older vswhere.
+  const Map<String, dynamic> _missingStatusResponse = <String, dynamic>{
+    'installationPath': visualStudioPath,
+    'displayName': 'Visual Studio Community 2017',
+    'installationVersion': '16.4.29609.76',
+    'catalog': <String, dynamic>{
+      'productDisplayVersion': '16.4.1',
     },
   };
 
@@ -108,13 +122,13 @@ void main() {
   // Sets whether or not a vswhere query with the required components will
   // return an installation.
   void setMockCompatibleVisualStudioInstallation(Map<String, dynamic>response) {
-    setMockVswhereResponse(_requiredComponents, null, response);
+    setMockVswhereResponse(_requiredComponents, <String>['-version', '16'], response);
   }
 
   // Sets whether or not a vswhere query with the required components will
   // return a pre-release installation.
   void setMockPrereleaseVisualStudioInstallation(Map<String, dynamic>response) {
-    setMockVswhereResponse(_requiredComponents, <String>['-prerelease'], response);
+    setMockVswhereResponse(_requiredComponents, <String>['-version', '16', '-prerelease'], response);
   }
 
   // Sets whether or not a vswhere query searching for 'all' and 'prerelease'
@@ -200,6 +214,7 @@ void main() {
 
       visualStudio = VisualStudio();
       expect(visualStudio.isInstalled, false);
+      expect(visualStudio.isAtLeastMinimumVersion, false);
       expect(visualStudio.hasNecessaryComponents, false);
       expect(visualStudio.isComplete, false);
       expect(visualStudio.isRebootRequired, false);
@@ -214,21 +229,25 @@ void main() {
       Platform: () => windowsPlatform,
     });
 
-    testUsingContext('necessaryComponentDescriptions suggest the right VS tools on major version 15', () {
+    testUsingContext('necessaryComponentDescriptions suggest the right VS tools on major version 16', () {
+      setMockCompatibleVisualStudioInstallation(_defaultResponse);
 
       visualStudio = VisualStudio();
-      final String toolsString = visualStudio.necessaryComponentDescriptions(15)[1];
-      expect(toolsString.contains('v141'), true);
+      final String toolsString = visualStudio.necessaryComponentDescriptions()[1];
+      expect(toolsString.contains('v142'), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFilesystem,
       ProcessManager: () => mockProcessManager,
       Platform: () => windowsPlatform,
     });
 
-    testUsingContext('necessaryComponentDescriptions suggest the right VS tools on major version != 15', () {
+    testUsingContext('necessaryComponentDescriptions suggest the right VS tools on an old version', () {
+      setMockCompatibleVisualStudioInstallation(null);
+      setMockPrereleaseVisualStudioInstallation(null);
+      setMockAnyVisualStudioInstallation(_tooOldResponse);
 
       visualStudio = VisualStudio();
-      final String toolsString = visualStudio.necessaryComponentDescriptions(16)[1];
+      final String toolsString = visualStudio.necessaryComponentDescriptions()[1];
       expect(toolsString.contains('v142'), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFilesystem,
@@ -262,6 +281,19 @@ void main() {
       Platform: () => windowsPlatform,
     });
 
+    testUsingContext('isInstalled returns true when VS is present but too old', () {
+      setMockCompatibleVisualStudioInstallation(null);
+      setMockPrereleaseVisualStudioInstallation(null);
+      setMockAnyVisualStudioInstallation(_tooOldResponse);
+
+      visualStudio = VisualStudio();
+      expect(visualStudio.isInstalled, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFilesystem,
+      ProcessManager: () => mockProcessManager,
+      Platform: () => windowsPlatform,
+    });
+
     testUsingContext('isInstalled returns true when a prerelease version of VS is present', () {
       setMockCompatibleVisualStudioInstallation(null);
       setMockAnyVisualStudioInstallation(null);
@@ -273,6 +305,20 @@ void main() {
       visualStudio = VisualStudio();
       expect(visualStudio.isInstalled, true);
       expect(visualStudio.isPrerelease, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFilesystem,
+      ProcessManager: () => mockProcessManager,
+      Platform: () => windowsPlatform,
+    });
+
+    testUsingContext('isAtLeastMinimumVersion returns false when the version found is too old', () {
+      setMockCompatibleVisualStudioInstallation(null);
+      setMockPrereleaseVisualStudioInstallation(null);
+      setMockAnyVisualStudioInstallation(_tooOldResponse);
+
+      visualStudio = VisualStudio();
+      expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, false);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFilesystem,
       ProcessManager: () => mockProcessManager,
@@ -421,6 +467,7 @@ void main() {
 
       visualStudio = VisualStudio();
       expect(visualStudio.isInstalled, true);
+      expect(visualStudio.isAtLeastMinimumVersion, true);
       expect(visualStudio.hasNecessaryComponents, true);
       expect(visualStudio.vcvarsPath, equals(vcvarsPath));
     }, overrides: <Type, Generator>{
