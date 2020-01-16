@@ -22,7 +22,12 @@ class _CustomPhysics extends ClampingScrollPhysics {
   }
 }
 
-Widget buildTest({ ScrollController controller, String title = 'TTTTTTTT' }) {
+Widget buildTest({
+  ScrollController controller,
+  String title = 'TTTTTTTT',
+  Key key,
+  bool expanded = true,
+}) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -38,6 +43,7 @@ Widget buildTest({ ScrollController controller, String title = 'TTTTTTTT' }) {
           body: DefaultTabController(
             length: 4,
             child: NestedScrollView(
+              key: key,
               dragStartBehavior: DragStartBehavior.down,
               controller: controller,
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -45,7 +51,7 @@ Widget buildTest({ ScrollController controller, String title = 'TTTTTTTT' }) {
                   SliverAppBar(
                     title: Text(title),
                     pinned: true,
-                    expandedHeight: 200.0,
+                    expandedHeight: expanded ? 200.0 : 0.0,
                     forceElevated: innerBoxIsScrolled,
                     bottom: const TabBar(
                       tabs: <Tab>[
@@ -802,104 +808,70 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('NestedScrollView exposes scroll controllers',
-          (WidgetTester tester) async {
+  testWidgets('NestedScrollView exposes scroll controllers', (WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
-
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: NestedScrollView(
-            key: globalKey,
-            body: Container(),
-            headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
-          ),
-        ),
-      ),
-    ));
+    await tester.pumpWidget(buildTest(key: globalKey));
 
     expect(globalKey.currentState.innerController, isNotNull);
     expect(globalKey.currentState.outerController, isNotNull);
   });
 
-  // One scrollExtent should be smaller than the height of the toolbar
-  // to ensure that the inner scroll controller is not scrolled in that case.
-  for (final double scrollExtent in const <double>[
-    kToolbarHeight - 9,
-    420,
-    1000,
-    1e4,
-  ]) {
-    testWidgets('NestedScrollViewState exposed scroll controllers work properly with a scroll extent of $scrollExtent', (WidgetTester tester) async {
-      final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
-      final ScrollController scrollController = ScrollController();
+  testWidgets('Scrolling by less than the header extent does not scroll the inner body', (WidgetTester tester) async {
 
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: Localizations(
-          locale: const Locale('en', 'US'),
-          delegates: const <LocalizationsDelegate<dynamic>>[
-            DefaultMaterialLocalizations.delegate,
-            DefaultWidgetsLocalizations.delegate,
-          ],
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: NestedScrollView(
-              controller: scrollController,
-              key: globalKey,
-              body: ListView.builder(
-                itemBuilder: (BuildContext context, int index) => Text('$index'),
-              ),
-              headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
-            ),
-          ),
-        ),
-      ));
+  });
 
-      // The scroll gesture should be taken where in the inner body, so the
-      // whole scroll view is scrolled.
-      final TestGesture gesture = await tester.startGesture(const Offset(
-        0.0,
-        kToolbarHeight + 1.0,
-      ));
-      await gesture.moveBy(Offset(0, -scrollExtent));
+  testWidgets('Scrolling by exactly the header extent scrolls the inner body', (WidgetTester tester) async {
 
-      await tester.pump();
+  });
 
-      expect(
-        globalKey.currentState.innerController.position.pixels +
-          globalKey.currentState.outerController.position.pixels,
-        scrollExtent,
-      );
+  testWidgets('Scrolling by greater than the header extent scrolls the inner body', (WidgetTester tester) async {
+    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
 
-      // The outer scroll view cannot scroll past its height, which should
-      // be kToolbarHeight as a SliverAppBar represents the outer body.
-      final double expectedOuterControllerExtent = scrollExtent > kToolbarHeight
-        ? kToolbarHeight
-        : scrollExtent;
-      expect(
-        globalKey.currentState.outerController.position.pixels,
-        expectedOuterControllerExtent,
-      );
+    await tester.pumpWidget(buildTest(
+      key: globalKey,
+      expanded: false,
+    ));
+    final double headerHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+    print(headerHeight);
+//    expect(
+//      headerHeight,
+//      200.0,
+//    );
+    print(globalKey.currentState.innerController.position.); //+
+    print(globalKey.currentState.outerController.position.pixels);//,
 
-      // The inner controller should only start scrolling once the outer
-      // controller has been scrolled to its full extent.
-      final double expectedInnerControllerExtent = scrollExtent < kToolbarHeight
-        ? 0.0
-        : scrollExtent - kToolbarHeight;
-      expect(
-        globalKey.currentState.innerController.position.pixels,
-        expectedInnerControllerExtent,
-      );
-    });
-  }
+    // Scroll beyond the extent of the header
+    final double scrollDistance = headerHeight + 300.0;
+    print('scrollDistance: $scrollDistance');
+    final TestGesture gesture = await tester.startGesture(Offset(
+      0,
+      headerHeight + 1,
+    ));
+    await gesture.moveBy(Offset(0, -scrollDistance));
+
+    await tester.pump();
+    //expect(
+    print(globalKey.currentState.innerController.position); //+
+    print(globalKey.currentState.outerController.position);//,
+    //  scrollDistance,
+    //);
+    final double collapsedHeaderHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+
+    // The outer scroll view cannot scroll past its height, which should
+    // be the collapsed headerHeight as a SliverAppBar represents the outer
+    // body.
+    expect(
+      globalKey.currentState.outerController.position.pixels,
+      collapsedHeaderHeight,
+    );
+
+    // The inner controller should only start scrolling once the outer
+    // controller has been scrolled to its full extent.
+    expect(
+      globalKey.currentState.innerController.position.pixels,
+      scrollDistance - collapsedHeaderHeight,
+    );
+  });
 
   testWidgets('NestedScrollViewState.outerController should correspond to NestedScrollView.controller', (WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
