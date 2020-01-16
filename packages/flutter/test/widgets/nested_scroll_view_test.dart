@@ -808,307 +808,402 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('NestedScrollView exposes scroll controllers', (WidgetTester tester) async {
-    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
-    await tester.pumpWidget(buildTest(key: globalKey));
-
-    expect(globalKey.currentState.innerController, isNotNull);
-    expect(globalKey.currentState.outerController, isNotNull);
-  });
-
-  testWidgets('Scrolling by less than the header extent does not scroll the inner body', (WidgetTester tester) async {
-
-  });
-
-  testWidgets('Scrolling by exactly the header extent scrolls the inner body', (WidgetTester tester) async {
-
-  });
-
-  testWidgets('Scrolling by greater than the header extent scrolls the inner body', (WidgetTester tester) async {
-    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
-
-    await tester.pumpWidget(buildTest(
-      key: globalKey,
-      expanded: false,
-    ));
-    final double headerHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
-    print(headerHeight);
-//    expect(
-//      headerHeight,
-//      200.0,
-//    );
-    print(globalKey.currentState.innerController.position.); //+
-    print(globalKey.currentState.outerController.position.pixels);//,
-
-    // Scroll beyond the extent of the header
-    final double scrollDistance = headerHeight + 300.0;
-    print('scrollDistance: $scrollDistance');
-    final TestGesture gesture = await tester.startGesture(Offset(
-      0,
-      headerHeight + 1,
-    ));
-    await gesture.moveBy(Offset(0, -scrollDistance));
-
-    await tester.pump();
-    //expect(
-    print(globalKey.currentState.innerController.position); //+
-    print(globalKey.currentState.outerController.position);//,
-    //  scrollDistance,
-    //);
-    final double collapsedHeaderHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
-
-    // The outer scroll view cannot scroll past its height, which should
-    // be the collapsed headerHeight as a SliverAppBar represents the outer
-    // body.
-    expect(
-      globalKey.currentState.outerController.position.pixels,
-      collapsedHeaderHeight,
-    );
-
-    // The inner controller should only start scrolling once the outer
-    // controller has been scrolled to its full extent.
-    expect(
-      globalKey.currentState.innerController.position.pixels,
-      scrollDistance - collapsedHeaderHeight,
-    );
-  });
-
-  testWidgets('NestedScrollViewState.outerController should correspond to NestedScrollView.controller', (WidgetTester tester) async {
-    final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
-    final ScrollController scrollController = ScrollController();
-
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: NestedScrollView(
-            controller: scrollController,
-            key: globalKey,
-            body: ListView.builder(
-              itemBuilder: (BuildContext context, int index) {
-                return Text('$index');
-              },
-            ),
-            headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
-          ),
-        ),
-      ),
-    ));
-
-    // The scrollController should be equal to the outerController defined in
-    // the state.
-    expect(
-      scrollController.position,
-      globalKey.currentState.outerController.position,
-    );
-  });
-
-  group('NestedScrollViewState controllers interactions', () {
-    testWidgets('inner body not scrolled, header fully expanded', (WidgetTester tester) async {
+  group('NestedScrollViewState exposes inner and outer controllers', () {
+    testWidgets('Scrolling by less than the outer extent does not scroll the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+      await tester.pumpWidget(buildTest(
+        key: globalKey,
+        expanded: false,
+      ));
 
-      await tester.pumpWidget(
-        NestedScrollViewWithGlobalKey(globalKey: globalKey)
-      );
+      double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      expect(appBarHeight, 104.0);
+      final double scrollExtent = appBarHeight - 50.0;
+      expect(globalKey.currentState.outerController.offset, 0.0);
+      expect(globalKey.currentState.innerController.offset, 0.0);
 
-      expect(globalKey.currentState.outerController.position.pixels, 0);
-      expect(globalKey.currentState.innerController.position.pixels, 0);
+      // The scroll gesture should occur in the inner body, so the whole
+      // scroll view is scrolled.
+      final TestGesture gesture = await tester.startGesture(Offset(
+        0.0,
+        appBarHeight + 1.0,
+      ));
+      await gesture.moveBy(Offset(0.0, -scrollExtent));
+      await tester.pump();
 
-      const double innerPosition = 0;
-      const double outerPosition = kToolbarHeight;
-
-      testModifyingInnerController(globalKey, innerPosition, outerPosition);
-      testModifyingOuterController(globalKey, innerPosition, outerPosition);
+      appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      // This is not an expanded AppBar.
+      expect(appBarHeight, 104.0);
+      // The outer scroll controller should show an offset of the applied
+      // scrollExtent.
+      expect(globalKey.currentState.outerController.offset, 54.0);
+      // the inner scroll controller should not have scrolled.
+      expect(globalKey.currentState.innerController.offset, 0.0);
     });
 
-    testWidgets('inner body scrolled, header fully expanded', (WidgetTester tester) async {
+    testWidgets('Scrolling by exactly the outer extent does not scroll the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+      await tester.pumpWidget(buildTest(
+        key: globalKey,
+        expanded: false,
+      ));
 
-      await tester.pumpWidget(
-        NestedScrollViewWithGlobalKey(globalKey: globalKey)
-      );
+      double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      expect(appBarHeight, 104.0);
+      final double scrollExtent = appBarHeight;
+      expect(globalKey.currentState.outerController.offset, 0.0);
+      expect(globalKey.currentState.innerController.offset, 0.0);
 
-      expect(globalKey.currentState.outerController.position.pixels, 0);
-      expect(globalKey.currentState.innerController.position.pixels, 0);
+      // The scroll gesture should occur in the inner body, so the whole
+      // scroll view is scrolled.
+      final TestGesture gesture = await tester.startGesture(Offset(
+        0.0,
+        appBarHeight + 1.0,
+      ));
+      await gesture.moveBy(Offset(0.0, -scrollExtent));
+      await tester.pump();
 
-      const double innerPosition = 1000;
-      const double outerPosition = kToolbarHeight;
-
-      testModifyingInnerController(globalKey, innerPosition, outerPosition);
-      testModifyingOuterController(globalKey, innerPosition, outerPosition);
+      appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      // This is not an expanded AppBar.
+      expect(appBarHeight, 104.0);
+      // The outer scroll controller should show an offset of the applied
+      // scrollExtent.
+      expect(globalKey.currentState.outerController.offset, 104.0);
+      // the inner scroll controller should not have scrolled.
+      expect(globalKey.currentState.innerController.offset, 0.0);
     });
 
-    testWidgets('inner body not scrolled, header not scrolled', (WidgetTester tester) async {
+    testWidgets('Scrolling by greater than the outer extent scrolls the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+      await tester.pumpWidget(buildTest(
+        key: globalKey,
+        expanded: false,
+      ));
 
-      await tester.pumpWidget(
-        NestedScrollViewWithGlobalKey(globalKey: globalKey)
+      double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      expect(appBarHeight, 104.0);
+      final double scrollExtent = appBarHeight + 50.0;
+      expect(globalKey.currentState.outerController.offset, 0.0);
+      expect(globalKey.currentState.innerController.offset, 0.0);
+
+      // The scroll gesture should occur in the inner body, so the whole
+      // scroll view is scrolled.
+      final TestGesture gesture = await tester.startGesture(Offset(
+        0.0,
+        appBarHeight + 1.0,
+      ));
+      await gesture.moveBy(Offset(0.0, -scrollExtent));
+      await tester.pump();
+
+      appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      // This is not an expanded AppBar.
+      expect(appBarHeight, 104.0);
+      // The outer scroll controller should show an offset of the applied
+      // scrollExtent.
+      expect(globalKey.currentState.outerController.offset, appBarHeight);
+      // the inner scroll controller should have scrolled equivalent to the
+      // difference between the applied scrollExtent and the outer extent.
+      expect(
+        globalKey.currentState.innerController.offset,
+        scrollExtent - appBarHeight,
       );
-
-      expect(globalKey.currentState.outerController.position.pixels, 0);
-      expect(globalKey.currentState.innerController.position.pixels, 0);
-
-      const double innerPosition = 0;
-      const double outerPosition = 0;
-
-      testModifyingInnerController(globalKey, innerPosition, outerPosition);
-      testModifyingOuterController(globalKey, innerPosition, outerPosition);
     });
 
-    testWidgets('inner body scrolled, header not scrolled', (WidgetTester tester) async {
+    testWidgets('scrolling by less than the expanded outer extent does not scroll the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+      await tester.pumpWidget(buildTest(key: globalKey));
 
-      await tester.pumpWidget(
-        NestedScrollViewWithGlobalKey(globalKey: globalKey)
-      );
+      double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      expect(appBarHeight, 200.0);
+      final double scrollExtent = appBarHeight - 50.0;
+      expect(globalKey.currentState.outerController.offset, 0.0);
+      expect(globalKey.currentState.innerController.offset, 0.0);
 
-      expect(globalKey.currentState.outerController.position.pixels, 0);
-      expect(globalKey.currentState.innerController.position.pixels, 0);
+      // The scroll gesture should occur in the inner body, so the whole
+      // scroll view is scrolled.
+      final TestGesture gesture = await tester.startGesture(Offset(
+        0.0,
+        appBarHeight + 1.0,
+      ));
+      await gesture.moveBy(Offset(0.0, -scrollExtent));
+      await tester.pump();
 
-      const double innerPosition = 1000;
-      const double outerPosition = 0;
-
-      testModifyingInnerController(globalKey, innerPosition, outerPosition);
-      testModifyingOuterController(globalKey, innerPosition, outerPosition);
+      appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      // This is an expanding AppBar.
+      expect(appBarHeight, 104.0);
+      // The outer scroll controller should show an offset of the applied
+      // scrollExtent.
+      expect(globalKey.currentState.outerController.offset, 150.0);
+      // the inner scroll controller should not have scrolled.
+      expect(globalKey.currentState.innerController.offset, 0.0);
     });
 
-    testWidgets('inner body not scrolled, header partially scrolled', (WidgetTester tester) async {
+    testWidgets('scrolling by exactly the expanded outer extent does not scroll the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+      await tester.pumpWidget(buildTest(key: globalKey));
 
-      await tester.pumpWidget(
-        NestedScrollViewWithGlobalKey(globalKey: globalKey)
-      );
+      double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      expect(appBarHeight, 200.0);
+      final double scrollExtent = appBarHeight;
+      expect(globalKey.currentState.outerController.offset, 0.0);
+      expect(globalKey.currentState.innerController.offset, 0.0);
 
-      expect(globalKey.currentState.outerController.position.pixels, 0);
-      expect(globalKey.currentState.innerController.position.pixels, 0);
+      // The scroll gesture should occur in the inner body, so the whole
+      // scroll view is scrolled.
+      final TestGesture gesture = await tester.startGesture(Offset(
+        0.0,
+        appBarHeight + 1.0,
+      ));
+      await gesture.moveBy(Offset(0.0, -scrollExtent));
+      await tester.pump();
 
-      const double innerPosition = 0;
-      const double outerPosition = kToolbarHeight / 3;
-
-      testModifyingInnerController(globalKey, innerPosition, outerPosition);
-      testModifyingOuterController(globalKey, innerPosition, outerPosition);
+      appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      // This is an expanding AppBar.
+      expect(appBarHeight, 104.0);
+      // The outer scroll controller should show an offset of the applied
+      // scrollExtent.
+      expect(globalKey.currentState.outerController.offset, 200.0);
+      // the inner scroll controller should not have scrolled.
+      expect(globalKey.currentState.innerController.offset, 0.0);
     });
 
-    testWidgets('inner body scrolled, header partially scrolled', (WidgetTester tester) async {
+    testWidgets('scrolling by greater than the expanded outer extent scrolls the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+      await tester.pumpWidget(buildTest(key: globalKey));
 
-      await tester.pumpWidget(
-        NestedScrollViewWithGlobalKey(globalKey: globalKey)
+      double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      expect(appBarHeight, 200.0);
+      final double scrollExtent = appBarHeight + 50.0;
+      expect(globalKey.currentState.outerController.offset, 0.0);
+      expect(globalKey.currentState.innerController.offset, 0.0);
+
+      // The scroll gesture should occur in the inner body, so the whole
+      // scroll view is scrolled.
+      final TestGesture gesture = await tester.startGesture(Offset(
+        0.0,
+        appBarHeight + 1.0,
+      ));
+      await gesture.moveBy(Offset(0.0, -scrollExtent));
+      await tester.pump();
+
+      appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      // This is an expanding AppBar.
+      expect(appBarHeight, 104.0);
+      // The outer scroll controller should show an offset of the applied
+      // scrollExtent.
+      expect(globalKey.currentState.outerController.offset, 200.0);
+      // the inner scroll controller should have scrolled equivalent to the
+      // difference between the applied scrollExtent and the outer extent.
+      expect(globalKey.currentState.innerController.offset, 50.0);
+    });
+
+    testWidgets('NestedScrollViewState.outerController should correspond to NestedScrollView.controller', (
+      WidgetTester tester) async {
+      final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+      final ScrollController scrollController = ScrollController();
+
+      await tester.pumpWidget(buildTest(
+        controller: scrollController,
+        key: globalKey,
+      ));
+
+      // Scroll to compare offsets between controllers.
+      final TestGesture gesture = await tester.startGesture(const Offset(
+        0.0,
+        100.0,
+      ));
+      await gesture.moveBy(const Offset(0.0, -100.0));
+      await tester.pump();
+
+      expect(
+        scrollController.offset,
+        globalKey.currentState.outerController.offset,
       );
+      expect(
+        tester.widget<NestedScrollView>(find.byType(NestedScrollView)).controller.offset,
+        globalKey.currentState.outerController.offset,
+      );
+    });
 
-      expect(globalKey.currentState.outerController.position.pixels, 0);
-      expect(globalKey.currentState.innerController.position.pixels, 0);
+    group('manipulating controllers when', () {
+      testWidgets('outer: not scrolled, inner: not scrolled', (WidgetTester tester) async {
+        final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
+        await tester.pumpWidget(buildTest(
+          key: globalKey1,
+          expanded: false,
+        ));
+        expect(globalKey1.currentState.outerController.position.pixels, 0.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 0.0);
+        final double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
 
-      const double innerPosition = 1000;
-      const double outerPosition = kToolbarHeight / 3;
+        // Manipulating Inner
+        globalKey1.currentState.innerController.jumpTo(100.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 100.0);
+        expect(
+          globalKey1.currentState.outerController.position.pixels,
+          appBarHeight,
+        );
+        globalKey1.currentState.innerController.jumpTo(0.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 0.0);
+        expect(
+          globalKey1.currentState.outerController.position.pixels,
+          appBarHeight,
+        );
 
-      testModifyingInnerController(globalKey, innerPosition, outerPosition);
-      testModifyingOuterController(globalKey, innerPosition, outerPosition);
+        // Reset
+        final GlobalKey<NestedScrollViewState> globalKey2 = GlobalKey();
+        await tester.pumpWidget(buildTest(
+          key: globalKey2,
+          expanded: false,
+        ));
+        expect(globalKey2.currentState.outerController.position.pixels, 0.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+
+        // Manipulating Outer
+        globalKey2.currentState.outerController.jumpTo(100.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 100.0);
+        globalKey2.currentState.outerController.jumpTo(0.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 0.0);
+      });
+
+      testWidgets('outer: not scrolled, inner: scrolled', (WidgetTester tester) async {
+        final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
+        await tester.pumpWidget(buildTest(
+          key: globalKey1,
+          expanded: false,
+        ));
+        expect(globalKey1.currentState.outerController.position.pixels, 0.0);
+        globalKey1.currentState.innerController.position.setPixels(10.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 10.0);
+        final double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+
+        // Manipulating Inner
+        globalKey1.currentState.innerController.jumpTo(100.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 100.0);
+        expect(
+          globalKey1.currentState.outerController.position.pixels,
+          appBarHeight,
+        );
+        globalKey1.currentState.innerController.jumpTo(0.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 0.0);
+        expect(
+          globalKey1.currentState.outerController.position.pixels,
+          appBarHeight,
+        );
+
+        // Reset
+        final GlobalKey<NestedScrollViewState> globalKey2 = GlobalKey();
+        await tester.pumpWidget(buildTest(
+          key: globalKey2,
+          expanded: false,
+        ));
+        expect(globalKey2.currentState.outerController.position.pixels, 0.0);
+        globalKey2.currentState.innerController.position.setPixels(10.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 10.0);
+
+        // Manipulating Outer
+        globalKey2.currentState.outerController.jumpTo(100.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 100.0);
+        globalKey2.currentState.outerController.jumpTo(0.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 0.0);
+      });
+
+      testWidgets('outer: scrolled, inner: not scrolled', (WidgetTester tester) async {
+        final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
+        await tester.pumpWidget(buildTest(
+          key: globalKey1,
+          expanded: false,
+        ));
+        expect(globalKey1.currentState.innerController.position.pixels, 0.0);
+        globalKey1.currentState.outerController.position.setPixels(10.0);
+        expect(globalKey1.currentState.outerController.position.pixels, 10.0);
+        final double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+
+        // Manipulating Inner
+        globalKey1.currentState.innerController.jumpTo(100.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 100.0);
+        expect(
+          globalKey1.currentState.outerController.position.pixels,
+          appBarHeight,
+        );
+        globalKey1.currentState.innerController.jumpTo(0.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 0.0);
+        expect(
+          globalKey1.currentState.outerController.position.pixels,
+          appBarHeight,
+        );
+
+        // Reset
+        final GlobalKey<NestedScrollViewState> globalKey2 = GlobalKey();
+        await tester.pumpWidget(buildTest(
+          key: globalKey2,
+          expanded: false,
+        ));
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+        globalKey2.currentState.outerController.position.setPixels(10.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 10.0);
+
+        // Manipulating Outer
+        globalKey2.currentState.outerController.jumpTo(100.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 100.0);
+        globalKey2.currentState.outerController.jumpTo(0.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 0.0);
+      });
+
+      testWidgets('outer: scrolled, inner: scrolled', (WidgetTester tester) async {
+        final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
+        await tester.pumpWidget(buildTest(
+          key: globalKey1,
+          expanded: false,
+        ));
+        globalKey1.currentState.innerController.position.setPixels(10.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 10.0);
+        globalKey1.currentState.outerController.position.setPixels(10.0);
+        expect(globalKey1.currentState.outerController.position.pixels, 10.0);
+        final double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+
+        // Manipulating Inner
+        globalKey1.currentState.innerController.jumpTo(100.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 100.0);
+        expect(
+          globalKey1.currentState.outerController.position.pixels,
+          appBarHeight,
+        );
+        globalKey1.currentState.innerController.jumpTo(0.0);
+        expect(globalKey1.currentState.innerController.position.pixels, 0.0);
+        expect(
+          globalKey1.currentState.outerController.position.pixels,
+          appBarHeight,
+        );
+
+        // Reset
+        final GlobalKey<NestedScrollViewState> globalKey2 = GlobalKey();
+        await tester.pumpWidget(buildTest(
+          key: globalKey2,
+          expanded: false,
+        ));
+        globalKey2.currentState.innerController.position.setPixels(10.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 10.0);
+        globalKey2.currentState.outerController.position.setPixels(10.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 10.0);
+
+        // Manipulating Outer
+        globalKey2.currentState.outerController.jumpTo(100.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 100.0);
+        globalKey2.currentState.outerController.jumpTo(0.0);
+        expect(globalKey2.currentState.innerController.position.pixels, 0.0);
+        expect(globalKey2.currentState.outerController.position.pixels, 0.0);
+      });
     });
   });
 }
-
-/// Modifying the inner controller should always push the outer controller
-/// to maxScrollExtent unless setPixels is used.
-void testModifyingInnerController(
-  GlobalKey<NestedScrollViewState> globalKey,
-  double innerPosition,
-  double outerPosition,
-) {
-  globalKey.currentState.innerController.position.setPixels(innerPosition);
-  globalKey.currentState.outerController.position.setPixels(outerPosition);
-
-  globalKey.currentState.innerController.jumpTo(5e2);
-
-  expect(globalKey.currentState.innerController.position.pixels, 5e2);
-  expect(
-    globalKey.currentState.outerController.position.pixels,
-    kToolbarHeight,
-  );
-
-  // Mirrors the previous statement but uses setPixels.
-  globalKey.currentState.innerController.position.setPixels(innerPosition);
-  globalKey.currentState.outerController.position.setPixels(outerPosition);
-
-  // setPixels should never modify the other controller.
-  globalKey.currentState.innerController.position.setPixels(5e2);
-
-  expect(globalKey.currentState.innerController.position.pixels, 5e2);
-  expect(globalKey.currentState.outerController.position.pixels, outerPosition);
-}
-
-/// Modifying the outer controller should always pull the inner controller
-/// fully back to zero unless setPixels is used.
-void testModifyingOuterController(
-  GlobalKey<NestedScrollViewState> globalKey,
-  double innerPosition,
-  double outerPosition,
-) {
-  globalKey.currentState.innerController.position.setPixels(innerPosition);
-  globalKey.currentState.outerController.position.setPixels(outerPosition);
-
-  globalKey.currentState.outerController.jumpTo(kToolbarHeight / 2);
-
-  expect(globalKey.currentState.innerController.position.pixels, 0);
-  expect(
-    globalKey.currentState.outerController.position.pixels,
-    kToolbarHeight / 2,
-  );
-
-  // Mirrors the previous statements but uses setPixels.
-  globalKey.currentState.innerController.position.setPixels(innerPosition);
-  globalKey.currentState.outerController.position.setPixels(outerPosition);
-
-  // setPixels should never modify the other controller.
-  globalKey.currentState.outerController.position.setPixels(kToolbarHeight / 2);
-
-  expect(globalKey.currentState.innerController.position.pixels, innerPosition);
-  expect(
-    globalKey.currentState.outerController.position.pixels,
-    kToolbarHeight / 2,
-  );
-}
-
-class NestedScrollViewWithGlobalKey extends StatelessWidget {
-  const NestedScrollViewWithGlobalKey({
-    Key key,
-    @required this.globalKey,
-  }) : assert(globalKey != null),
-       super(key: key);
-
-  final GlobalKey<NestedScrollViewState> globalKey;
-
-  @override
-  Widget build(_) => Directionality(
-    textDirection: TextDirection.ltr,
-    child: Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-      ],
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: NestedScrollView(
-          key: globalKey,
-          body: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
-              return Text('$index');
-            },
-          ),
-          headerSliverBuilder: (_, __) => <Widget>[const SliverAppBar()],
-        ),
-      ),
-    ),
-  );
-}
-
 
 class TestHeader extends SliverPersistentHeaderDelegate {
   const TestHeader({ this.key });
