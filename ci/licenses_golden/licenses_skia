@@ -1,4 +1,4 @@
-Signature: 7fc2b40e3b7c31334c33b189e882db74
+Signature: ea2a7a8e58c874125f48a454cf505ebf
 
 UNUSED LICENSES:
 
@@ -1267,6 +1267,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu18-C
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu18-Clang-Golo-GPU-QuadroP400-x86_64-Debug-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu18-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu18-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_PreAbandonGpuContext_SK_CPU_LIMIT_SSE41.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Debug-All-GpuTess.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Debug-All-NonNVPR.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-BonusConfigs.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-ReleaseAndAbandonGpuContext.json
@@ -5193,10 +5194,13 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/docs/examples/BlendModes.cpp
 FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTab.cpp
 FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTabs.cpp
+FILE: ../../../third_party/skia/docs/examples/Color_Wheel.cpp
 FILE: ../../../third_party/skia/docs/examples/DCIToXYZD50.cpp
 FILE: ../../../third_party/skia/docs/examples/Octopus_Generator.cpp
+FILE: ../../../third_party/skia/docs/examples/Octopus_Generator_Animated.cpp
 FILE: ../../../third_party/skia/docs/examples/PaintDump.cpp
 FILE: ../../../third_party/skia/docs/examples/SKIA_LOGO.cpp
+FILE: ../../../third_party/skia/docs/examples/SKIA_LOGO_ANIMATE.cpp
 FILE: ../../../third_party/skia/docs/examples/SKIA_LOGO_svg.cpp
 FILE: ../../../third_party/skia/docs/examples/SkFontMgr_example.cpp
 FILE: ../../../third_party/skia/docs/examples/SkFontMgr_example2.cpp
@@ -5209,9 +5213,12 @@ FILE: ../../../third_party/skia/docs/examples/SkPath_arcto_conic_parametric.cpp
 FILE: ../../../third_party/skia/docs/examples/SkPath_arcto_conic_parametric2.cpp
 FILE: ../../../third_party/skia/docs/examples/SkPath_cubicTo_example.cpp
 FILE: ../../../third_party/skia/docs/examples/SkPath_cubicTo_example_parametric.cpp
+FILE: ../../../third_party/skia/docs/examples/SkPath_cubicTo_example_parametric_animated.cpp
 FILE: ../../../third_party/skia/docs/examples/SkPath_quadTo_example.cpp
 FILE: ../../../third_party/skia/docs/examples/SkPath_quadTo_example_parametric.cpp
+FILE: ../../../third_party/skia/docs/examples/SkPath_quadTo_example_parametric_animated.cpp
 FILE: ../../../third_party/skia/docs/examples/SmoothBezierSplineInterpolation.cpp
+FILE: ../../../third_party/skia/docs/examples/Turtle.cpp
 FILE: ../../../third_party/skia/docs/examples/UnicornPoop.cpp
 FILE: ../../../third_party/skia/docs/examples/UnpremulBugs.cpp
 FILE: ../../../third_party/skia/docs/examples/UnpremulGPU.cpp
@@ -5270,6 +5277,7 @@ FILE: ../../../third_party/skia/docs/examples/image_to_bitmap_does_not_preserve_
 FILE: ../../../third_party/skia/docs/examples/inlinepixmapconstructor.cpp
 FILE: ../../../third_party/skia/docs/examples/issue640176.cpp
 FILE: ../../../third_party/skia/docs/examples/kLow_SkFilterQuality.cpp
+FILE: ../../../third_party/skia/docs/examples/l_system_plant.cpp
 FILE: ../../../third_party/skia/docs/examples/maddash.cpp
 FILE: ../../../third_party/skia/docs/examples/makeRasterImage_fail.cpp
 FILE: ../../../third_party/skia/docs/examples/mapradius.cpp
@@ -5281,13 +5289,17 @@ FILE: ../../../third_party/skia/docs/examples/pathmeasure.cpp
 FILE: ../../../third_party/skia/docs/examples/pathops.cpp
 FILE: ../../../third_party/skia/docs/examples/persp_text_2.cpp
 FILE: ../../../third_party/skia/docs/examples/picture_shader.cpp
+FILE: ../../../third_party/skia/docs/examples/pong.cpp
+FILE: ../../../third_party/skia/docs/examples/pong2.cpp
 FILE: ../../../third_party/skia/docs/examples/purplestamp.cpp
+FILE: ../../../third_party/skia/docs/examples/radial_gradient_shader_with_animated_color.cpp
 FILE: ../../../third_party/skia/docs/examples/radial_gradient_test.cpp
 FILE: ../../../third_party/skia/docs/examples/redwhiteonblue.cpp
 FILE: ../../../third_party/skia/docs/examples/rotations.cpp
 FILE: ../../../third_party/skia/docs/examples/setimagefilter.cpp
 FILE: ../../../third_party/skia/docs/examples/shader.cpp
 FILE: ../../../third_party/skia/docs/examples/shader_alphaimage.cpp
+FILE: ../../../third_party/skia/docs/examples/shapes_with_motion.cpp
 FILE: ../../../third_party/skia/docs/examples/skbug6031.cpp
 FILE: ../../../third_party/skia/docs/examples/skbug_237_drawImageRect.cpp
 FILE: ../../../third_party/skia/docs/examples/skbug_237_drawImage_with_blur.cpp
@@ -5296,6 +5308,7 @@ FILE: ../../../third_party/skia/docs/examples/skbug_633528.cpp
 FILE: ../../../third_party/skia/docs/examples/skcanvas_paint.cpp
 FILE: ../../../third_party/skia/docs/examples/skcanvas_square.cpp
 FILE: ../../../third_party/skia/docs/examples/skcanvas_star.cpp
+FILE: ../../../third_party/skia/docs/examples/skew_x_animated.cpp
 FILE: ../../../third_party/skia/docs/examples/skpaint_2pt.cpp
 FILE: ../../../third_party/skia/docs/examples/skpaint_bitmap_shader.cpp
 FILE: ../../../third_party/skia/docs/examples/skpaint_blur_mask_filter.cpp
@@ -5320,6 +5333,7 @@ FILE: ../../../third_party/skia/docs/examples/skpaint_sum_path_effect.cpp
 FILE: ../../../third_party/skia/docs/examples/skpaint_sweep.cpp
 FILE: ../../../third_party/skia/docs/examples/skpaint_turb.cpp
 FILE: ../../../third_party/skia/docs/examples/skpaint_xfer.cpp
+FILE: ../../../third_party/skia/docs/examples/software_bitmap_w_perspective.cpp
 FILE: ../../../third_party/skia/docs/examples/star.cpp
 FILE: ../../../third_party/skia/docs/examples/star2.cpp
 FILE: ../../../third_party/skia/docs/examples/stroke_closed_degenerate_path.cpp
@@ -6294,6 +6308,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/red_line.skp
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/test.png
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
