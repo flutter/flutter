@@ -596,11 +596,13 @@ class _RenderSwitch extends RenderToggleable {
   void _handleDragEnd(DragEndDetails details) {
     if (position.value >= 0.5)
       positionController.forward().whenComplete(() {
-        if (!value) positionController.reverse();
+        if (!value)
+          positionController.reverse();
       });
     else
       positionController.reverse().whenComplete(() {
-        if (value) positionController.forward();
+        if (value)
+          positionController.forward();
       });
     reactionController.reverse();
   }
