@@ -454,6 +454,18 @@ void main() {
     // transform -> clip
     _testFittedBoxWithClipRectLayer();
   });
+
+  test('RenderFractionalTranslation updates its semantics after its translation value is set', () {
+    final _TestMarkNeedsSemanticsUpdateCountingRenderFractionalTranslation box = _TestMarkNeedsSemanticsUpdateCountingRenderFractionalTranslation(
+      translation: const Offset(0.5, 0.5),
+    );
+    layout(box, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    expect(box.markNeedsSemanticsUpdateCallCount, 1);
+    box.translation = const Offset(0.4, 0.4);
+    expect(box.markNeedsSemanticsUpdateCallCount, 2);
+    box.translation = const Offset(0.3, 0.3);
+    expect(box.markNeedsSemanticsUpdateCallCount, 3);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -509,4 +521,19 @@ class _TestPathClipper extends CustomClipper<Path> {
   }
   @override
   bool shouldReclip(_TestPathClipper oldClipper) => false;
+}
+
+class _TestMarkNeedsSemanticsUpdateCountingRenderFractionalTranslation extends RenderFractionalTranslation {
+  _TestMarkNeedsSemanticsUpdateCountingRenderFractionalTranslation({
+    @required Offset translation,
+    RenderBox child,
+  }) : super(translation: translation, child: child);
+
+  int markNeedsSemanticsUpdateCallCount = 0;
+
+  @override
+  void markNeedsSemanticsUpdate() {
+    markNeedsSemanticsUpdateCallCount++;
+    super.markNeedsSemanticsUpdate();
+  }
 }
