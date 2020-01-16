@@ -519,5 +519,43 @@ TEST(ImageDecoderTest,
   ASSERT_EQ(webp_codec->getRepetitionCount(), 1);
 }
 
+TEST(ImageDecoderTest, VerifySimpleDecoding) {
+  auto data = OpenFixtureAsSkData("Horizontal.jpg");
+  auto image = SkImage::MakeFromEncoded(data);
+  ASSERT_TRUE(image != nullptr);
+  ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
+
+  ASSERT_EQ(ImageFromCompressedData(data, 6, 2, fml::tracing::TraceFlow(""))
+                ->dimensions(),
+            SkISize::Make(6, 2));
+}
+
+TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
+  auto data = OpenFixtureAsSkData("Horizontal.jpg");
+  auto image = SkImage::MakeFromEncoded(data);
+  ASSERT_TRUE(image != nullptr);
+  ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
+
+  auto decode = [data](std::optional<uint32_t> target_width,
+                       std::optional<uint32_t> target_height) {
+    return ImageFromCompressedData(data, target_width, target_height,
+                                   fml::tracing::TraceFlow(""));
+  };
+
+  auto expected_data = OpenFixtureAsSkData("Horizontal.png");
+  ASSERT_TRUE(expected_data != nullptr);
+  ASSERT_FALSE(expected_data->isEmpty());
+
+  auto assert_image = [&](auto decoded_image) {
+    ASSERT_EQ(decoded_image->dimensions(), SkISize::Make(300, 100));
+    ASSERT_TRUE(decoded_image->encodeToData(SkEncodedImageFormat::kPNG, 100)
+                    ->equals(expected_data.get()));
+  };
+
+  assert_image(decode(300, 100));
+  assert_image(decode(300, {}));
+  assert_image(decode({}, 100));
+}
+
 }  // namespace testing
 }  // namespace flutter

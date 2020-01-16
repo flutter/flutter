@@ -13,6 +13,7 @@
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/io_manager.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -67,6 +68,11 @@ class ImageDecoder {
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageDecoder);
 };
+
+sk_sp<SkImage> ImageFromCompressedData(sk_sp<SkData> data,
+                                       std::optional<uint32_t> target_width,
+                                       std::optional<uint32_t> target_height,
+                                       const fml::tracing::TraceFlow& flow);
 
 }  // namespace flutter
 

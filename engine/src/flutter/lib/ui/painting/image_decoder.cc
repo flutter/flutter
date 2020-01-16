@@ -4,11 +4,18 @@
 
 #include "flutter/lib/ui/painting/image_decoder.h"
 
+#include <algorithm>
+
 #include "flutter/fml/make_copyable.h"
-#include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/codec/SkCodec.h"
+#include "third_party/skia/src/codec/SkCodecImageGenerator.h"
 
 namespace flutter {
+namespace {
+
+constexpr double kAspectRatioChangedThreshold = 0.01;
+
+}  // namespace
 
 ImageDecoder::ImageDecoder(
     TaskRunners runners,
@@ -25,6 +32,10 @@ ImageDecoder::ImageDecoder(
 
 ImageDecoder::~ImageDecoder() = default;
 
+static double AspectRatio(const SkISize& size) {
+  return static_cast<double>(size.width()) / size.height();
+}
+
 // Get the updated dimensions of the image. If both dimensions are specified,
 // use them. If one of them is specified, respect the one that is and use the
 // aspect ratio to calculate the other. If neither dimension is specified, use
@@ -40,8 +51,7 @@ static SkISize GetResizedDimensions(SkISize current_size,
     return SkISize::Make(target_width.value(), target_height.value());
   }
 
-  const auto aspect_ratio =
-      static_cast<double>(current_size.width()) / current_size.height();
+  const auto aspect_ratio = AspectRatio(current_size);
 
   if (target_width) {
     return SkISize::Make(target_width.value(),
@@ -57,34 +67,52 @@ static SkISize GetResizedDimensions(SkISize current_size,
 }
 
 static sk_sp<SkImage> ResizeRasterImage(sk_sp<SkImage> image,
-                                        std::optional<uint32_t> target_width,
-                                        std::optional<uint32_t> target_height,
+                                        const SkISize& resized_dimensions,
                                         const fml::tracing::TraceFlow& flow) {
   FML_DCHECK(!image->isTextureBacked());
 
-  const auto resized_dimensions =
-      GetResizedDimensions(image->dimensions(), target_width, target_height);
+  TRACE_EVENT0("flutter", __FUNCTION__);
+  flow.Step(__FUNCTION__);
 
   if (resized_dimensions.isEmpty()) {
     FML_LOG(ERROR) << "Could not resize to empty dimensions.";
     return nullptr;
   }
 
-  if (resized_dimensions == image->dimensions()) {
-    // The resized dimesions are the same as the intrinsic dimensions of the
-    // image. There is nothing to do.
-    return image;
+  if (image->dimensions() == resized_dimensions) {
+    return image->makeRasterImage();
   }
 
-  TRACE_EVENT0("flutter", __FUNCTION__);
-  flow.Step(__FUNCTION__);
+  if (resized_dimensions.width() > image->dimensions().width() ||
+      resized_dimensions.height() > image->dimensions().height()) {
+    FML_LOG(WARNING) << "Image is being upsized from "
+                     << image->dimensions().width() << "x"
+                     << image->dimensions().height() << " to "
+                     << resized_dimensions.width() << "x"
+                     << resized_dimensions.height()
+                     << ". Are cache(Height|Width) used correctly?";
+    // TOOD(48885): consider exiting here, there's no good reason to support
+    // upsampling in a "caching"-optimization context..
+  }
 
-  const auto scaled_image_info = image->imageInfo().makeWH(
-      resized_dimensions.width(), resized_dimensions.height());
+  const bool aspect_ratio_changed =
+      std::abs(AspectRatio(resized_dimensions) -
+               AspectRatio(image->dimensions())) > kAspectRatioChangedThreshold;
+  if (aspect_ratio_changed) {
+    // This is probably a bug. If a user passes dimensions that change the
+    // aspect ratio in a "caching" context that's probably not working as
+    // intended and rather a signal that the API is hard to use.
+    FML_LOG(WARNING)
+        << "Aspect ratio changes. Are cache(Height|Width) used correctly?";
+  }
+
+  const auto scaled_image_info =
+      image->imageInfo().makeDimensions(resized_dimensions);
 
   SkBitmap scaled_bitmap;
   if (!scaled_bitmap.tryAllocPixels(scaled_image_info)) {
-    FML_LOG(ERROR) << "Could not allocate bitmap when attempting to scale.";
+    FML_LOG(ERROR) << "Failed to allocate memory for bitmap of size "
+                   << scaled_image_info.computeMinByteSize() << "B";
     return nullptr;
   }
 
@@ -122,31 +150,98 @@ static sk_sp<SkImage> ImageFromDecompressedData(
     return nullptr;
   }
 
-  return ResizeRasterImage(std::move(image), target_width, target_height, flow);
+  if (!target_width && !target_height) {
+    // No resizing requested. Just rasterize the image.
+    return image->makeRasterImage();
+  }
+
+  auto resized_dimensions =
+      GetResizedDimensions(image->dimensions(), target_width, target_height);
+
+  return ResizeRasterImage(std::move(image), resized_dimensions, flow);
 }
 
-static sk_sp<SkImage> ImageFromCompressedData(
-    sk_sp<SkData> data,
-    std::optional<uint32_t> target_width,
-    std::optional<uint32_t> target_height,
-    const fml::tracing::TraceFlow& flow) {
+sk_sp<SkImage> ImageFromCompressedData(sk_sp<SkData> data,
+                                       std::optional<uint32_t> target_width,
+                                       std::optional<uint32_t> target_height,
+                                       const fml::tracing::TraceFlow& flow) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   flow.Step(__FUNCTION__);
 
-  auto decoded_image = SkImage::MakeFromEncoded(data);
+  if (!target_width && !target_height) {
+    // No resizing requested. Just decode & rasterize the image.
+    return SkImage::MakeFromEncoded(data)->makeRasterImage();
+  }
 
-  if (!decoded_image) {
+  auto codec = SkCodec::MakeFromData(data);
+  if (codec == nullptr) {
     return nullptr;
   }
 
-  // Make sure to resolve all lazy images.
-  decoded_image = decoded_image->makeRasterImage();
+  const auto* codec_ptr = codec.get();
 
-  if (!decoded_image) {
+  // Note that we cannot read the dimensions from the codec since they don't
+  // respect image orientation provided e.g. in EXIF data.
+  auto image_generator = SkCodecImageGenerator::MakeFromCodec(std::move(codec));
+  const auto& source_dimensions = image_generator->getInfo().dimensions();
+
+  auto resized_dimensions =
+      GetResizedDimensions(source_dimensions, target_width, target_height);
+
+  // No resize needed.
+  if (resized_dimensions == source_dimensions) {
+    return SkImage::MakeFromEncoded(data)->makeRasterImage();
+  }
+
+  auto decode_dimensions = codec_ptr->getScaledDimensions(
+      std::max(static_cast<double>(resized_dimensions.width()) /
+                   source_dimensions.width(),
+               static_cast<double>(resized_dimensions.height()) /
+                   source_dimensions.height()));
+
+  // If the codec supports efficient sub-pixel decoding, decoded at a resolution
+  // close to the target resolution before resizing.
+  if (decode_dimensions != codec_ptr->dimensions()) {
+    if (source_dimensions != codec_ptr->dimensions()) {
+      decode_dimensions =
+          SkISize::Make(decode_dimensions.height(), decode_dimensions.width());
+    }
+
+    auto scaled_image_info =
+        image_generator->getInfo().makeDimensions(decode_dimensions);
+
+    SkBitmap scaled_bitmap;
+    if (!scaled_bitmap.tryAllocPixels(scaled_image_info)) {
+      FML_LOG(ERROR) << "Failed to allocate memory for bitmap of size "
+                     << scaled_image_info.computeMinByteSize() << "B";
+      return nullptr;
+    }
+
+    const auto& pixmap = scaled_bitmap.pixmap();
+    if (image_generator->getPixels(pixmap.info(), pixmap.writable_addr(),
+                                   pixmap.rowBytes())) {
+      // Marking this as immutable makes the MakeFromBitmap call share
+      // the pixels instead of copying.
+      scaled_bitmap.setImmutable();
+
+      auto decoded_image = SkImage::MakeFromBitmap(scaled_bitmap);
+      FML_DCHECK(decoded_image);
+      if (!decoded_image) {
+        FML_LOG(ERROR)
+            << "Could not create a scaled image from a scaled bitmap.";
+        return nullptr;
+      }
+      return ResizeRasterImage(std::move(decoded_image), resized_dimensions,
+                               flow);
+    }
+  }
+
+  auto image = SkImage::MakeFromEncoded(data);
+  if (!image) {
     return nullptr;
   }
 
-  return ResizeRasterImage(decoded_image, target_width, target_height, flow);
+  return ResizeRasterImage(std::move(image), resized_dimensions, flow);
 }
 
 static SkiaGPUObject<SkImage> UploadRasterImage(
