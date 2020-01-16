@@ -54,8 +54,7 @@ void main() {
       try {
         portFowarder.dispose();
       } catch (e) {
-        // This should not throw an exception
-        expect(true, false);
+        fail('Encountered exception: $e');
       }
       expect(portFowarder.forwardedPorts.length, 0);
     }, overrides: <Type, Generator>{
