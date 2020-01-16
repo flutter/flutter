@@ -240,6 +240,7 @@ void main() {
         home: Material(
           child: DropdownButtonFormField<String>(
             key: stateKey,
+            value: null,
             decoration: const InputDecoration(labelText: 'label', alignLabelWithHint: true),
             onChanged: (String newValue) {},
             items: menuItems.map((String value) {
@@ -253,11 +254,11 @@ void main() {
       )
     );
 
-    // isEmpty: true causes the label to be aligned with the input text
+    // isEmpty: true causes the label to be aligned with the input text if alignLabelWithHint is set to true
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, 44.0);
-    expect(tester.getTopLeft(find.text('label')).dy, 44.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 60.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 32.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 32.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 48.0);
 
     // [FormField] value is initially null.
     expect(stateKey.currentState.value, equals(null));
@@ -271,6 +272,10 @@ void main() {
     // Tap outside the [DropdownButton] to close dropdown menu without selecting an option.
     await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('label')).dy, 32.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 32.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 48.0);
 
     // [FormField] value is still null.
     expect(stateKey.currentState.value, equals(null));
@@ -291,6 +296,35 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+  });
+
+  testWidgets("DropdownButtonFormField InputDecorator label is aligned to centre of TextField when alignLabelWithHint is false", (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButtonFormField<String>(
+            key: stateKey,
+            value: null,
+            decoration: const InputDecoration(labelText: 'label', alignLabelWithHint: false),
+            onChanged: (String newValue) {},
+            items: menuItems.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+        ),
+      )
+    );
+
+    // isEmpty: true causes the label to be aligned with the centre of the TextField if alignLabelWithHint is set to false
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, 24.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 40.0);
   });
 
   testWidgets('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
