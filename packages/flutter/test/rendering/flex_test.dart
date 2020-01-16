@@ -388,7 +388,7 @@ void main() {
       exceptions.addAll(renderer.takeAllFlutterExceptions());
     });
     expect(exceptions, isNotEmpty);
-    expect(exceptions.first, isInstanceOf<FlutterError>());
+    expect(exceptions.first, isFlutterError);
   });
 
   test('MainAxisSize.min inside unconstrained', () {
@@ -416,7 +416,7 @@ void main() {
       exceptions.addAll(renderer.takeAllFlutterExceptions());
     });
     expect(exceptions, isNotEmpty);
-    expect(exceptions.first, isInstanceOf<FlutterError>());
+    expect(exceptions.first, isFlutterError);
   });
 
   test('MainAxisSize.min inside tightly constrained', () {

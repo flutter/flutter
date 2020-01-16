@@ -17,7 +17,6 @@ import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/base/terminal.dart';
-import 'src/base/utils.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;

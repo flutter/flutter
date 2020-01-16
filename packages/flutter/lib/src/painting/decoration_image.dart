@@ -172,7 +172,7 @@ class DecorationImage {
       if (matchTextDirection)
         'match text direction',
     ];
-    return '$runtimeType(${properties.join(", ")})';
+    return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
 }
 
@@ -291,7 +291,7 @@ class DecorationImagePainter {
 
   @override
   String toString() {
-    return '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
+    return '${objectRuntimeType(this, 'DecorationImagePainter')}(stream: $_imageStream, image: $_image) for $_details';
   }
 }
 

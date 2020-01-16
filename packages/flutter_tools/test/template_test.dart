@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -24,7 +23,7 @@ void main() {
     when(mockDirectory.createSync(recursive: true)).thenThrow(const FileSystemException());
 
     expect(() => template.render(mockDirectory, <String, Object>{}),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsToolExit());
   }));
 }
 

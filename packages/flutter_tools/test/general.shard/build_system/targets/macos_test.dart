@@ -67,10 +67,9 @@ void main() {
       globals.fs.file(globals.fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'sdk_ext',
           'vmservice_io.dart')).createSync(recursive: true);
 
-      environment = Environment(
-        outputDir: globals.fs.currentDirectory,
-        projectDir: globals.fs.currentDirectory,
-        defines: <String, String>{
+    environment = Environment.test(
+      globals.fs.currentDirectory,
+      defines: <String, String>{
           kBuildMode: 'debug',
           kTargetPlatform: 'darwin-x64',
         },
@@ -127,7 +126,7 @@ void main() {
       ..writeAsStringSync('testing');
 
     expect(() async => await const DebugMacOSBundleFlutterAssets().build(environment),
-        throwsA(isInstanceOf<Exception>()));
+        throwsException);
   }));
 
   test('debug macOS application creates correctly structured framework', () => testbed.run(() async {

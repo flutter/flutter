@@ -82,6 +82,8 @@ void main() {
           dartDefines: const <String>[],
           urlTunneller: null,
         ) as ResidentWebRunner;
+        globals.fs.currentDirectory.childFile('.packages')
+          ..writeAsStringSync('\n');
       },
       overrides: <Type, Generator>{
         WebFsFactory: () => ({
@@ -378,6 +380,8 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
     )).thenAnswer((Invocation invocation) async {
+      // Generated entrypoint file in temp dir.
+      expect(invocation.namedArguments[#mainPath], contains('entrypoint.dart'));
       return UpdateFSReport(success: true)
         ..invalidatedModules = <String>['example'];
     });
@@ -926,7 +930,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -945,7 +949,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -964,7 +968,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -983,7 +987,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1002,7 +1006,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1021,7 +1025,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1041,7 +1045,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<Exception>()));
+    ), throwsException);
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1060,7 +1064,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -1082,7 +1086,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<StateError>()));
+    ), throwsStateError);
 
     unhandledErrorCompleter.complete();
     await expectation;

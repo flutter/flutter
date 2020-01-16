@@ -48,7 +48,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
 
   @override
   void didReplace(Route<dynamic> oldRoute) {
-    expect(oldRoute, isInstanceOf<TestRoute>());
+    expect(oldRoute, isA<TestRoute>());
     final TestRoute castRoute = oldRoute as TestRoute;
     log('didReplace ${castRoute.name}');
     super.didReplace(castRoute);
@@ -65,7 +65,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
-    expect(nextRoute, isInstanceOf<TestRoute>());
+    expect(nextRoute, isA<TestRoute>());
     final TestRoute castRoute = nextRoute as TestRoute;
     log('didPopNext ${castRoute.name}');
     super.didPopNext(castRoute);
@@ -73,7 +73,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
 
   @override
   void didChangeNext(Route<dynamic> nextRoute) {
-    expect(nextRoute, anyOf(isNull, isInstanceOf<TestRoute>()));
+    expect(nextRoute, anyOf(isNull, isA<TestRoute>()));
     final TestRoute castRoute = nextRoute as TestRoute;
     log('didChangeNext ${castRoute?.name}');
     super.didChangeNext(castRoute);
@@ -874,8 +874,8 @@ void main() {
             builder: (BuildContext context) {
               return RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<dynamic>(
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
                           key: containerKey,
@@ -924,8 +924,8 @@ void main() {
             builder: (BuildContext context) {
               return RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    ModifiedReverseTransitionDurationRoute<dynamic>(
+                  Navigator.of(context).push<void>(
+                    ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
                           key: containerKey,
@@ -983,8 +983,8 @@ void main() {
             builder: (BuildContext context) {
               return RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    ModifiedReverseTransitionDurationRoute<dynamic>(
+                  Navigator.of(context).push<void>(
+                    ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
                           key: containerKey,

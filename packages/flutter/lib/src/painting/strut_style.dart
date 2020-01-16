@@ -570,7 +570,7 @@ class StrutStyle extends Diagnosticable {
   }
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => '${objectRuntimeType(this, 'StrutStyle')}';
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override

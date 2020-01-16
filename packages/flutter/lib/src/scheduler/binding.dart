@@ -335,19 +335,13 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         _setFramesEnabledState(true);
         break;
       case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
         _setFramesEnabledState(false);
-        break;
-      default:
         break;
     }
   }
 
   Future<String> _handleLifecycleMessage(String message) async {
-    // TODO(chunhtai): remove the workaround once the issue is fixed
-    // https://github.com/flutter/flutter/issues/39832
-    if (message == 'AppLifecycleState.detached')
-      return null;
-
     handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
     return null;
   }
@@ -360,6 +354,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         return AppLifecycleState.resumed;
       case 'AppLifecycleState.inactive':
         return AppLifecycleState.inactive;
+      case 'AppLifecycleState.detached':
+        return AppLifecycleState.detached;
     }
     return null;
   }
@@ -811,6 +807,11 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// Consider using [scheduleWarmUpFrame] instead if the goal is to update the
   /// rendering as soon as possible (e.g. at application startup).
   void scheduleForcedFrame() {
+    // TODO(chunhtai): Removes the if case once the issue is fixed
+    // https://github.com/flutter/flutter/issues/45131
+    if (!_framesEnabled)
+      return;
+
     if (_hasScheduledFrame)
       return;
     assert(() {
