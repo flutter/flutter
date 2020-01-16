@@ -545,9 +545,30 @@ class FlutterDriverExtension {
   Future<GetTextResult> _getText(Command command) async {
     final GetText getTextCommand = command as GetText;
     final Finder target = await _waitForElement(_createFinder(getTextCommand.finder));
-    // TODO(yjbanov): support more ways to read text
-    final Text text = target.evaluate().single.widget as Text;
-    return GetTextResult(text.data);
+
+    final Widget widget = target.evaluate().single.widget;
+    String text;
+
+    if (widget.runtimeType == Text) {
+      text = (widget as Text).data;
+    } else if (widget.runtimeType == RichText) {
+      final RichText richText = widget as RichText;
+      if (richText.text.runtimeType == TextSpan) {
+        text = (richText.text as TextSpan).text;
+      }
+    } else if (widget.runtimeType == TextField) {
+      text = (widget as TextField).controller.text;
+    } else if (widget.runtimeType == TextFormField) {
+      text = (widget as TextFormField).controller.text;
+    } else if (widget.runtimeType == EditableText) {
+      text = (widget as EditableText).controller.text;
+    }
+
+    if (text == null) {
+      throw UnsupportedError('Type ${widget.runtimeType.toString()} is currently not supported by getText');
+    }
+
+    return GetTextResult(text);
   }
 
   Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {
