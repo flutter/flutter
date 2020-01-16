@@ -79,6 +79,52 @@ const CommonFinders find = CommonFinders._();
 /// See also [FlutterDriver.waitFor].
 typedef EvaluatorFunction = dynamic Function();
 
+/// Creates a FlutterDriver instance.
+typedef DriverCreationFunc = Future<FlutterDriver> Function(
+    String dartVmServiceUrl,
+    bool printCommunication,
+    bool logCommunicationToFile,
+    int isolateNumber,
+    Pattern fuchsiaModuleTarget,
+    bool browser,
+    Duration timeout);
+
+/// Gets driverCreation function.
+///
+/// Allows users to use their own implementation of [FlutterDriver].
+///
+/// When calling [FlutterDriver.connect], driverCreation function will be
+/// executed to create a FlutterDriver instance. By default, it will use either
+/// [WebFlutterDriver] or [VMServiceFlutterDriver]
+DriverCreationFunc get driverCreation => _driverCreation;
+DriverCreationFunc _driverCreation = _driverCreationFunc;
+/// Sets driverCreation function.
+set driverCreation(DriverCreationFunc value) {
+  assert(value != null);
+  _driverCreation = value;
+}
+
+Future<FlutterDriver> _driverCreationFunc(
+    String dartVmServiceUrl,
+    bool printCommunication,
+    bool logCommunicationToFile,
+    int isolateNumber,
+    Pattern fuchsiaModuleTarget,
+    bool browser,
+    Duration timeout) async {
+  if (browser) {
+    return WebFlutterDriver.connectWeb(
+        hostUrl: dartVmServiceUrl, timeout: timeout);
+  }
+  return VMServiceFlutterDriver.connect(
+    dartVmServiceUrl: dartVmServiceUrl,
+    printCommunication: printCommunication,
+    logCommunicationToFile: logCommunicationToFile,
+    isolateNumber: isolateNumber,
+    fuchsiaModuleTarget: fuchsiaModuleTarget,
+  );
+}
+
 /// Drives a Flutter Application running in another process.
 abstract class FlutterDriver {
   /// Default constructor.
@@ -143,17 +189,14 @@ abstract class FlutterDriver {
     bool browser = false,
     Duration timeout,
   }) async {
-
-    if (browser) {
-      return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
-    }
-    return VMServiceFlutterDriver.connect(
-              dartVmServiceUrl: dartVmServiceUrl,
-              printCommunication: printCommunication,
-              logCommunicationToFile: logCommunicationToFile,
-              isolateNumber: isolateNumber,
-              fuchsiaModuleTarget: fuchsiaModuleTarget,
-    );
+    return driverCreation(
+        dartVmServiceUrl,
+        printCommunication,
+        logCommunicationToFile,
+        isolateNumber,
+        fuchsiaModuleTarget,
+        browser,
+        timeout);
   }
 
   /// Getter of appIsolate
