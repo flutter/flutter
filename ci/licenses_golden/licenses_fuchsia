@@ -1,4 +1,4 @@
-Signature: b64d8ad4aa50f93ce50526d660842891
+Signature: 01e2c434636b193a14c9202bcb6d33e9
 
 UNUSED LICENSES:
 
@@ -509,6 +509,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
@@ -1456,6 +1458,13 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/heap.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/secure_mem.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/control.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/activity.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/provider.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/state.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/tracker.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view_config.fidl
@@ -2190,6 +2199,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity.control/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.activity/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
@@ -3067,8 +3078,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device_watcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/stream.fidl
