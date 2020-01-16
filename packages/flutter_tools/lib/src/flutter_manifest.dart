@@ -204,7 +204,7 @@ class FlutterManifest {
       }
       final String stringAsset = asset as String;
       try {
-        results.add(Uri.parse(Uri.encodeFull(stringAsset)));
+        results.add(Uri(pathSegments: stringAsset.split('/')));
       } on FormatException {
         globals.printError('Asset manifest contains invalid uri: $asset.');
       }
