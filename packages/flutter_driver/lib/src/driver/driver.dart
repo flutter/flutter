@@ -95,7 +95,7 @@ typedef DriverCreationFunc = Future<FlutterDriver> Function(
 ///
 /// When calling [FlutterDriver.connect], driverCreation function will be
 /// executed to create a FlutterDriver instance. By default, it will use either
-/// [WebFlutterDriver] or [VMServiceFlutterDriver]
+/// [WebFlutterDriver] or [VMServiceFlutterDriver].
 DriverCreationFunc get driverCreation => _driverCreation;
 DriverCreationFunc _driverCreation = _driverCreationFunc;
 /// Sets driverCreation function.
@@ -152,6 +152,9 @@ abstract class FlutterDriver {
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
   ///
+  /// By default, it will use either [VMServiceFlutterDriver] or
+  /// [WebFlutterDriver].
+  ///
   /// `dartVmServiceUrl` is the URL to Dart observatory (a.k.a. VM service). If
   /// not specified, the URL specified by the `VM_SERVICE_URL` environment
   /// variable is used. One or the other must be specified.
@@ -174,8 +177,12 @@ abstract class FlutterDriver {
   /// to an isolate.
   ///
   /// `browser` specifies which FlutterDriver implementation to use. If not
-  /// speicifed or set to false, [VMServiceFlutterDriver] implementation
+  /// specified or set to false, [VMServiceFlutterDriver] implementation
   /// will be used. Otherwise, [WebFlutterDriver] implementation will be used.
+  ///
+  /// The implementation of this function can be overridden by setting [driverCreation].
+  /// Which would allow [FlutterDriver.connect] to connect to other implementations
+  /// of [FlutterDriver].
   ///
   /// The return value is a future. This method never times out, though it may
   /// fail (completing with an error). A timeout can be applied by the caller
