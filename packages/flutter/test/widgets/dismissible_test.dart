@@ -755,7 +755,6 @@ void main() {
       throwsAssertionError,
     );
   });
-  
   testWidgets('setState that does not remove the Dismissible from tree should throws Error', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
