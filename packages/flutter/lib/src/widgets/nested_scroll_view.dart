@@ -1445,7 +1445,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
       scrollExtent: childLayoutGeometry.scrollExtent - childLayoutGeometry.maxScrollObstructionExtent,
       paintExtent: childLayoutGeometry.paintExtent,
       paintOrigin: childLayoutGeometry.paintOrigin,
-      layoutExtent: childLayoutGeometry.paintExtent - childLayoutGeometry.maxScrollObstructionExtent,
+      layoutExtent: math.max(0, childLayoutGeometry.paintExtent - childLayoutGeometry.maxScrollObstructionExtent),
       maxPaintExtent: childLayoutGeometry.maxPaintExtent,
       maxScrollObstructionExtent: childLayoutGeometry.maxScrollObstructionExtent,
       hitTestExtent: childLayoutGeometry.hitTestExtent,
