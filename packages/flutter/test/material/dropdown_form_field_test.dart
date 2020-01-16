@@ -298,7 +298,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
   });
 
-  testWidgets("DropdownButtonFormField InputDecorator label is aligned to centre of TextField when alignLabelWithHint is false", (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField InputDecorator label is aligned to centre of TextField when alignLabelWithHint is false', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
 
     await tester.pumpWidget(
