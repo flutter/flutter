@@ -5,33 +5,18 @@
 #ifndef FLUTTER_FLOW_LAYERS_PHYSICAL_SHAPE_LAYER_H_
 #define FLUTTER_FLOW_LAYERS_PHYSICAL_SHAPE_LAYER_H_
 
-#include "flutter/flow/layers/elevated_container_layer.h"
-#if defined(OS_FUCHSIA)
-#include "flutter/flow/layers/fuchsia_system_composited_layer.h"
-#endif
+#include "flutter/flow/layers/container_layer.h"
 
 namespace flutter {
 
-#if !defined(OS_FUCHSIA)
-class PhysicalShapeLayerBase : public ElevatedContainerLayer {
+class PhysicalShapeLayer : public ContainerLayer {
  public:
-  static bool can_system_composite() { return false; }
+  PhysicalShapeLayer(SkColor color,
+                     SkColor shadow_color,
+                     float elevation,
+                     const SkPath& path,
+                     Clip clip_behavior);
 
-  PhysicalShapeLayerBase(SkColor color, float elevation)
-      : ElevatedContainerLayer(elevation), color_(color) {}
-
-  void set_dimensions(SkRRect rrect) {}
-  SkColor color() const { return color_; }
-
- private:
-  SkColor color_;
-};
-#else
-using PhysicalShapeLayerBase = FuchsiaSystemCompositedLayer;
-#endif
-
-class PhysicalShapeLayer : public PhysicalShapeLayerBase {
- public:
   static SkRect ComputeShadowBounds(const SkRect& bounds,
                                     float elevation,
                                     float pixel_ratio);
@@ -42,13 +27,8 @@ class PhysicalShapeLayer : public PhysicalShapeLayerBase {
                          bool transparentOccluder,
                          SkScalar dpr);
 
-  PhysicalShapeLayer(SkColor color,
-                     SkColor shadow_color,
-                     float elevation,
-                     const SkPath& path,
-                     Clip clip_behavior);
-
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+
   void Paint(PaintContext& context) const override;
 
   bool UsesSaveLayer() const {
@@ -59,8 +39,13 @@ class PhysicalShapeLayer : public PhysicalShapeLayerBase {
   void UpdateScene(SceneUpdateContext& context) override;
 #endif  // defined(OS_FUCHSIA)
 
+  float total_elevation() const { return total_elevation_; }
+
  private:
+  SkColor color_;
   SkColor shadow_color_;
+  float elevation_ = 0.0f;
+  float total_elevation_ = 0.0f;
   SkPath path_;
   bool isRect_;
   SkRRect frameRRect_;

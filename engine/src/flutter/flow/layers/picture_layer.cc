@@ -18,9 +18,12 @@ PictureLayer::PictureLayer(const SkPoint& offset,
       will_change_(will_change) {}
 
 void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  TRACE_EVENT0("flutter", "PictureLayer::Preroll");
   SkPicture* sk_picture = picture();
 
   if (auto* cache = context->raster_cache) {
+    TRACE_EVENT0("flutter", "PictureLayer::RasterCache (Preroll)");
+
     SkMatrix ctm = matrix;
     ctm.postTranslate(offset_.x(), offset_.y());
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
@@ -50,6 +53,8 @@ void PictureLayer::Paint(PaintContext& context) const {
     const SkMatrix& ctm = context.leaf_nodes_canvas->getTotalMatrix();
     RasterCacheResult result = context.raster_cache->Get(*picture(), ctm);
     if (result.is_valid()) {
+      TRACE_EVENT_INSTANT0("flutter", "raster cache hit");
+
       result.draw(*context.leaf_nodes_canvas);
       return;
     }

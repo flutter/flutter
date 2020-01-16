@@ -25,6 +25,8 @@ TransformLayer::TransformLayer(const SkMatrix& transform)
 }
 
 void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  TRACE_EVENT0("flutter", "TransformLayer::Preroll");
+
   SkMatrix child_matrix;
   child_matrix.setConcat(matrix, transform_);
   context->mutators_stack.PushTransform(transform_);
@@ -51,6 +53,7 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 #if defined(OS_FUCHSIA)
 
 void TransformLayer::UpdateScene(SceneUpdateContext& context) {
+  TRACE_EVENT0("flutter", "TransformLayer::UpdateScene");
   FML_DCHECK(needs_system_composite());
 
   SceneUpdateContext::Transform transform(context, transform_);
