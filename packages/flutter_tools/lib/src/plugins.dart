@@ -318,7 +318,7 @@ List<Plugin> findPlugins(FlutterProject project) {
       return p.platforms.containsKey(platformKey);
     });
 
-    final Set<String> pluginNames = plugins.map((Plugin plugin) => plugin.name).toSet();
+    final Set<String> pluginNames = platformPlugins.map((Plugin plugin) => plugin.name).toSet();
     final List<Map<String, dynamic>> list = <Map<String, dynamic>>[];
     for (final Plugin plugin in platformPlugins) {
       list.add(<String, dynamic>{
