@@ -155,6 +155,7 @@ if (current_toolchain == host_toolchain) {
     fixtures = [
       "fixtures/DashInNooglerHat.jpg",
       "fixtures/Horizontal.jpg",
+      "fixtures/Horizontal.png",
       "fixtures/hello_loop_2.gif",
       "fixtures/hello_loop_2.webp",
     ]
