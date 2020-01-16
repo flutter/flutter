@@ -811,5 +811,8 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   Future<void> dispose() async {
     final List<ForwardedPort> portsCopy = List<ForwardedPort>.from(_ports);
     portsCopy.forEach(unforward);
+    for (final ForwardedPort port in portsCopy) {
+      await unforward(port);
+    }
   }
 }
