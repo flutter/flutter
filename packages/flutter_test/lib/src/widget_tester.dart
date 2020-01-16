@@ -452,7 +452,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @Deprecated(
     'Use WidgetTester.pumpWidget() instead. '
-    'This feature was deprecated after v1.14.1'
+    'This feature was deprecated after v1.14.1.'
   )
   Future<void> pumpWidgetLegacy(Widget widget) {
     return TestAsyncUtils.guard<void>(() {
