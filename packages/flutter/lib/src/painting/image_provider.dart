@@ -272,7 +272,7 @@ abstract class ImageProvider<T> {
   ///
   /// Subclasses should implement [obtainKey] and [load], which are used by this
   /// method. If they need to manage the actual resolution of the image, they
-  /// should override [resolveForStream] instead.
+  /// should override [resolveForStream] instead of this method.
   @nonVirtual
   ImageStream resolve(ImageConfiguration configuration) {
     assert(configuration != null);
@@ -888,26 +888,45 @@ class ExactAssetImage extends AssetBundleImageProvider {
 }
 
 /// The action a [DeferringImageProvider] should take currently.
+///
+/// The [DeferringImageProvider.handleDeferringImageProviderAction] callback
+/// returns one of these values.
+///
+/// If [defer] is returned, the provider will run the callback again
+/// during the [SchedulerPhase.midFrameMicrotasks], which should typically be
+/// after animations have finished calculations at the beginning of the next
+/// frame.
+///
+/// If [cancel] is returned, the provider will stop calling the callback and
+/// will _not_ call the [ImageProvider.resolveForStream] method of the wrapped
+/// provider.
+///
+/// If [resolve] is returned, the provider will call `resolveForStream` of the
+/// wrapped provider.
 enum DeferringImageProviderAction {
   /// Indicates that the image is no longer needed, and the
   /// [DeferringImageProvider] should stop seeking to resolve the image.
   ///
   /// After returning this action, the [DeferringImageProvider] will not call
-  /// its [DeferringImageProvider.getNextAction] callback anymore.
+  /// its [DeferringImageProvider.handleDeferringImageProviderAction] callback anymore.
   cancel,
 
-  /// Indicates that the caller would like to defer the image and be called
-  /// again after the next [DeferringImageProvider.deferDuration] elapses (or
-  /// at the end of current task queue if the duration is [Duration.zero]).
+  /// Indicates that the caller would like to defer resolving the image and be
+  /// called again during the [SchedulerPhase.midFrameMicrotasks] of the next
+  /// frame.
   defer,
 
   /// Indicates that the [DeferringImageProvider] should attempt to resolve the
   /// image.
   ///
   /// After returning this action, the [DeferringImageProvider] will not call
-  /// its [DeferringImageProvider.getNextAction] callback anymore.
+  /// its [DeferringImageProvider.handleDeferringImageProviderAction] callback
+  /// anymore.
   resolve,
 }
+
+/// The signature of [DeferringImageProvider.handleDeferringImageProviderAction]
+typedef DeferringImageProviderActionCallback = DeferringImageProviderAction Function();
 
 /// An [ImageProvider] that can delay resolving an image using its wrapped
 /// [imageProvider] until an arbitrary condition is met.
@@ -919,20 +938,30 @@ enum DeferringImageProviderAction {
 /// resolving the image. This prevents the framework from over-utilizing
 /// hardware resources for images that will never be shown on screen.
 ///
-/// If the image is already in the cache, e.g. from [precacheImage] or because
-/// another provider has already resolved it, the [getNextAction] callback will
-/// never fire and the cached image is reused.
+/// The provider immediately tries to obtain the key for the image. Once the key
+/// is obtained, it does the following in a loop:
+///
+/// 1. Check whether the [ImageCache] has the image available. If so, call
+///    [ImageProvider.resolveForStream] immediately since it will not involve
+///    any additional decoding work than what is already done or scheduled, and
+///    then break the loop.
+///    In particular, this means that an image loaded via [precacheImage] or by
+///    another [ImageProvider] will be available without deferring.
+/// 2. Call the [handleDeferringImageProviderAction] callback. If it is cancel, break the loop
+///    without resolving the image. If it is resolve, break the loop and call
+///    [ImageProvider.resolveForStream] on the wrapped image provider. If it is
+///    defer, re-trigger the callback on the next frame during the
+///    [SchedulerPhase.midFrameMicrotasks].
 @immutable
 class DeferringImageProvider<T> extends ImageProvider<T> {
-
   /// Creates a new [DeferringImageProvider].
   ///
   /// All parameters must not be null.
   const DeferringImageProvider({
     @required this.imageProvider,
-    @required this.getNextAction,
+    @required this.handleDeferringImageProviderAction,
   }) : assert(imageProvider != null),
-       assert(getNextAction != null);
+       assert(handleDeferringImageProviderAction != null);
 
   /// The wrapped [ImageProvider] to delegate loading the image and creating
   /// a key for it.
@@ -941,29 +970,39 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
   /// cancelled.
   final ImageProvider<T> imageProvider;
 
-  /// A callback used by [resolve] to determine whether resolution should be
-  /// cancelled, deferred, or executed.
+  /// A callback used by [resolveForStream] to determine whether resolution
+  /// should be cancelled, deferred, or executed.
   ///
   /// This callback is never called if the [ImageCache] already has the image
   /// present, such as from [precacheImage] or another provider successfully
   /// loading it.
-  final DeferringImageProviderAction Function() getNextAction;
+  ///
+  /// This callback is called:
+  ///
+  /// 1. If the [ImageCache] does not contain this image already AND
+  /// 2. The key for the image has been obtained
+  ///
+  /// While it returns [DeferringImageProviderAction.defer], it schedules a new
+  /// call during the [SchedulerPhase.midFrameMicrotasks] of the next frame.
+  final DeferringImageProviderActionCallback handleDeferringImageProviderAction;
 
   @override
   void resolveForStream(ImageConfiguration configuration, ImageStream stream) {
+    bool deferCalledOnce = false;
     void deferredResolve(Object key) {
       if (PaintingBinding.instance.imageCache.containsKey(key)) {
         imageProvider.resolveForStream(configuration, stream);
         return;
       }
-      switch (getNextAction()) {
+      switch (handleDeferringImageProviderAction()) {
         case DeferringImageProviderAction.defer:
           // Get ourselves to the end of any frame callbacks at the beginning of
           // the next frame, which should be after the scroll animation has
           // updated our velocity value.
           SchedulerBinding.instance.scheduleFrameCallback((_) {
             scheduleMicrotask(() => deferredResolve(key));
-          });
+          }, rescheduling: deferCalledOnce);
+          deferCalledOnce = true;
           return;
         case DeferringImageProviderAction.cancel:
           return;

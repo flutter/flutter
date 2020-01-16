@@ -956,6 +956,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    assert(_imageStream != null);
     WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
     super.dispose();
@@ -1008,16 +1009,16 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   void _resolveImage() {
     final DeferringImageProvider<dynamic> provider = DeferringImageProvider<dynamic>(
       imageProvider: widget.image,
-      getNextAction: () {
+      handleDeferringImageProviderAction: () {
         // Did this element get disposed of (scrolled too far out of view before
         // scrolling slowed down enough to catch up)?
         if (!mounted) {
           return DeferringImageProviderAction.cancel;
         }
-        // Is it scrolling so fast that the image is unlikely stay around long
+        // Is it scrolling so fast that the image is unlikely to stay around long
         // enough to be worth decoding? If so, wait until the next task loop
         // to see if we've slowed down or disappeared.
-        // We're using the large of height or width of the window in physical
+        // We're using the larger of height or width of the window in physical
         // pixels. This operation compares physical pixels (the window
         // dimension) with logical pixels (the scrolling velocity). Using
         // logical window pixels results in being too aggressive about loading
@@ -1092,14 +1093,14 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _listenToStream() {
-    if (_isListeningToStream || _imageStream == null)
+    if (_isListeningToStream)
       return;
     _imageStream.addListener(_getListener());
     _isListeningToStream = true;
   }
 
   void _stopListeningToStream() {
-    if (!_isListeningToStream || _imageStream == null)
+    if (!_isListeningToStream)
       return;
     _imageStream.removeListener(_getListener());
     _isListeningToStream = false;

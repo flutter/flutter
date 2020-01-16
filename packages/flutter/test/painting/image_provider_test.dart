@@ -37,7 +37,7 @@ void main() {
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         final DeferringImageProvider<MemoryImage> imageProvider = DeferringImageProvider<MemoryImage>(
           imageProvider: MemoryImage(bytes),
-          getNextAction: () => DeferringImageProviderAction.cancel,
+          handleDeferringImageProviderAction: () => DeferringImageProviderAction.cancel,
         );
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
 
@@ -47,20 +47,20 @@ void main() {
 
       test('DeferringImageProvider does not cache while deferring until resolve', () async {
         bool defer = true;
-        int getNextActionCount = 0;
+        int handleDeferringImageProviderActionCount = 0;
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         SchedulerBinding.instance.debugAssertNoTransientCallbacks('Nothing registered yet');
         final DeferringImageProvider<MemoryImage> imageProvider = DeferringImageProvider<MemoryImage>(
           imageProvider: MemoryImage(bytes),
-          getNextAction: () {
-            getNextActionCount++;
-            expect(getNextActionCount, lessThan(3));
+          handleDeferringImageProviderAction: () {
+            handleDeferringImageProviderActionCount++;
+            expect(handleDeferringImageProviderActionCount, lessThan(3));
             return  defer ? DeferringImageProviderAction.defer : DeferringImageProviderAction.resolve;
           },
         );
-        expect(getNextActionCount, 0);
+        expect(handleDeferringImageProviderActionCount, 0);
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-        expect(getNextActionCount, 1);
+        expect(handleDeferringImageProviderActionCount, 1);
         expect(stream.completer, isNull);
         expect(imageCache.currentSize, 0);
         defer = false;
@@ -69,7 +69,7 @@ void main() {
         // binding to finish.
         await SchedulerBinding.instance.endOfFrame;
         SchedulerBinding.instance.debugAssertNoTransientCallbacks('Should not have registered again.');
-        expect(getNextActionCount, 2);
+        expect(handleDeferringImageProviderActionCount, 2);
         expect(imageCache.currentSize, 0);
 
         expect(stream.completer, isNotNull);
@@ -81,20 +81,20 @@ void main() {
 
       test('DeferringImageProvider can cancel after deferring', () async {
         bool defer = true;
-        int getNextActionCount = 0;
+        int handleDeferringImageProviderActionCount = 0;
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         SchedulerBinding.instance.debugAssertNoTransientCallbacks('Nothing registered yet');
         final DeferringImageProvider<MemoryImage> imageProvider = DeferringImageProvider<MemoryImage>(
           imageProvider: MemoryImage(bytes),
-          getNextAction: () {
-            getNextActionCount++;
-            expect(getNextActionCount, lessThan(3));
+          handleDeferringImageProviderAction: () {
+            handleDeferringImageProviderActionCount++;
+            expect(handleDeferringImageProviderActionCount, lessThan(3));
             return defer ? DeferringImageProviderAction.defer : DeferringImageProviderAction.cancel;
           }
         );
-        expect(getNextActionCount, 0);
+        expect(handleDeferringImageProviderActionCount, 0);
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-        expect(getNextActionCount, 1);
+        expect(handleDeferringImageProviderActionCount, 1);
         expect(stream.completer, isNull);
         expect(imageCache.currentSize, 0);
         defer = false;
@@ -103,12 +103,12 @@ void main() {
         // binding to finish.
         await SchedulerBinding.instance.endOfFrame;
         SchedulerBinding.instance.debugAssertNoTransientCallbacks('Should not have reigstered again.');
-        expect(getNextActionCount, 2);
+        expect(handleDeferringImageProviderActionCount, 2);
         expect(stream.completer, isNull);
         expect(imageCache.currentSize, 0);
       });
 
-      test('DeferringImageProvider uses precached image and does not call getNextAction', () async {
+      test('DeferringImageProvider uses precached image and does not call handleDeferringImageProviderAction', () async {
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         final MemoryImage imageProvider = MemoryImage(bytes);
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -122,7 +122,7 @@ void main() {
 
         final DeferringImageProvider<MemoryImage> deferringImageProvider = DeferringImageProvider<MemoryImage>(
           imageProvider: MemoryImage(bytes),
-          getNextAction: () => fail('Expected not to be called'),
+          handleDeferringImageProviderAction: () => fail('Expected not to be called'),
         );
         final ImageStream deferredStream = deferringImageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> deferredCompleter = Completer<void>();
