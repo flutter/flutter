@@ -80,7 +80,7 @@ const CommonFinders find = CommonFinders._();
 typedef EvaluatorFunction = dynamic Function();
 
 /// Creates a FlutterDriver instance.
-typedef DriverCreationFunc = Future<FlutterDriver> Function(
+typedef DriverCreatorFunc = Future<FlutterDriver> Function(
     String dartVmServiceUrl,
     bool printCommunication,
     bool logCommunicationToFile,
@@ -89,19 +89,19 @@ typedef DriverCreationFunc = Future<FlutterDriver> Function(
     bool browser,
     Duration timeout);
 
-/// Gets driverCreation function.
+/// Gets driverCreator function.
 ///
 /// Allows users to use their own implementation of [FlutterDriver].
 ///
-/// When calling [FlutterDriver.connect], driverCreation function will be
-/// executed to create a FlutterDriver instance. By default, it will use either
+/// When calling [FlutterDriver.connect], driverCreator will be executed
+/// to create a FlutterDriver instance. By default, it will return either
 /// [WebFlutterDriver] or [VMServiceFlutterDriver].
-DriverCreationFunc get driverCreation => _driverCreation;
-DriverCreationFunc _driverCreation = _driverCreationFunc;
-/// Sets driverCreation function.
-set driverCreation(DriverCreationFunc value) {
+DriverCreatorFunc get driverCreator => _driverCreator;
+DriverCreatorFunc _driverCreator = _driverCreationFunc;
+/// Sets driverCreator function.
+set driverCreator(DriverCreatorFunc value) {
   assert(value != null);
-  _driverCreation = value;
+  _driverCreator = value;
 }
 
 Future<FlutterDriver> _driverCreationFunc(
@@ -196,7 +196,7 @@ abstract class FlutterDriver {
     bool browser = false,
     Duration timeout,
   }) async {
-    return driverCreation(
+    return driverCreator(
         dartVmServiceUrl,
         printCommunication,
         logCommunicationToFile,
