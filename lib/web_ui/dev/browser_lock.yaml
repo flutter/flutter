@@ -6,3 +6,5 @@ chrome:
   Win: 695655
 firefox:
   version: '71.0'
+edge:
+  launcher_version: '1.2.0.0'

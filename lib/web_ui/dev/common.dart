@@ -88,9 +88,6 @@ class _WindowsBinding implements PlatformBinding {
   String getSafariSystemExecutablePath() =>
       throw UnsupportedError('Safari is not supported on Windows');
 
-  // TODO(nurhan): Add code to check and install MicrosoftEdgeLauncher
-  // if missing.
-  // See: https://github.com/flutter/flutter/issues/48823
   @override
   String getCommandToRunEdge() => 'MicrosoftEdgeLauncher';
 }
