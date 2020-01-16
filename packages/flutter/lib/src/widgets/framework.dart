@@ -3134,8 +3134,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           updateSlotForChild(child, newSlot);
         return child;
       }
-      canUpdate = canUpdate && Widget.canUpdate(child.widget, newWidget);
-      if (canUpdate) {
+      if (canUpdate && Widget.canUpdate(child.widget, newWidget)) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         child.update(newWidget);
