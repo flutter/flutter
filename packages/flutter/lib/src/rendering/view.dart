@@ -228,7 +228,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     try {
       final ui.SceneBuilder builder = ui.SceneBuilder();
       final ui.Scene scene = layer.buildScene(builder);
-      if (automaticSystemUiAdjustment)
+      if (automaticSystemUiAdjustment == true)
         _updateSystemChrome();
       _window.render(scene);
       scene.dispose();
