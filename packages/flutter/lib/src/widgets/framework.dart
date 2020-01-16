@@ -3106,7 +3106,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
     if (child != null) {
       bool canUpdate = true;
-      // When the type of a widget is changed better Stateful and Stateless via
+      // When the type of a widget is changed between Stateful and Stateless via
       // hot reload, the element tree will end up in a partially invalid state.
       // That is, if the widget was a StatefulWidget and is now a StatelessWidget,
       // then the element tree currently contains a StatefulElement that is incorrectly
