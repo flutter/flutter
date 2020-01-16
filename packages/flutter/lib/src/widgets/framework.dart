@@ -2740,14 +2740,21 @@ class BuildOwner {
 
 // Verify that an Element's widget is non-null.
 bool _debugSafeVerifyNonNullWidget(Element element) {
-  return element._widget != null;
+  if (element is StatelessElement) {
+    return element._widget != null;
+  }
+  return element.widget != null;
 }
 
 // Retrieve the key of an Element
 Key _safeRetrieveWidgetKey(Element element) {
   Key key;
   assert(() {
-    key = element._widget.key;
+    if (element is StatelessElement) {
+      key = element._widget.key;
+    } else {
+      key = element.widget.key;
+    }
     return true;
   }());
   if (kDebugMode) {
@@ -3118,8 +3125,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // a CastError. These are avoided by `_debugSafeVerifyNonNullWidget` and
       // `_safeRetrieveWidgetKey`.
       assert(() {
-        canUpdate = (child is StatelessElement && newWidget is StatefulWidget) ||
-                    (child is StatefulElement && newWidget is StatelessWidget);
+        canUpdate = !((child is StatelessElement && newWidget is StatefulWidget) ||
+                      (child is StatefulElement && newWidget is StatelessWidget));
         return true;
       }());
       if (canUpdate && child.widget == newWidget) {
