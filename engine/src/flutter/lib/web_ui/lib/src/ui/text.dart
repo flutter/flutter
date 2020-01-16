@@ -1132,6 +1132,14 @@ enum BoxHeightStyle {
   ///
   /// {@macro flutter.dart:ui.boxHeightStyle.includeLineSpacing}
   includeLineSpacingBottom,
+
+  /// Calculate box heights based on the metrics of this paragraph's [StrutStyle].
+  ///
+  /// Boxes based on the strut will have consistent heights throughout the
+  /// entire paragraph.  The top edge of each line will align with the bottom
+  /// edge of the previous line.  It is possible for glyphs to extend outside
+  /// these boxes.
+  strut,
 }
 
 /// Defines various ways to horizontally bound the boxes returned by
