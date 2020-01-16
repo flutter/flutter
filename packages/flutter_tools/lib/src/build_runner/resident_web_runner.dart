@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:build_daemon/client.dart';
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/compile.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -23,6 +22,7 @@ import '../base/os.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../compile.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../device.dart';
