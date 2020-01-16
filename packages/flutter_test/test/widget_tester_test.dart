@@ -590,6 +590,68 @@ void main() {
     expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
   });
 
+  group('pumpWidget', () {
+    testWidgets('pumpWidget layout after microtask', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+      void log(String message) {
+        logs.add(message);
+      }
+      await tester.pumpWidget(Container(child: LogWidget(log, key: UniqueKey())));
+
+      // Microtasks from `didChangeDependencies` and `build` should execute
+      // before "layout" happens. That's how `runApp()` behaves.
+      expect(logs, <String>[
+        'didChangeDependencies',
+        'build',
+        'didChangeDependencies::microtask',
+        'build::microtask',
+        'layout',
+      ]);
+      logs.clear();
+
+      await tester.pumpWidget(Container(child: LogWidget(log, key: UniqueKey())));
+      // The 2nd time, layout should happen before microtasks.
+      expect(logs, <String>[
+        'didChangeDependencies',
+        'build',
+        'layout',
+        'didChangeDependencies::microtask',
+        'build::microtask',
+      ]);
+      logs.clear();
+    });
+
+    testWidgets('pumpWidgetLegacy layout before microtask', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+      void log(String message) {
+        logs.add(message);
+      }
+      await tester.pumpWidgetLegacy(Container(child: LogWidget(log, key: UniqueKey())));
+
+      // Microtasks from `didChangeDependencies` and `build` should execute
+      // after "layout" happens. That's how the old implementation of `pumpWidget`
+      // used to behave.
+      expect(logs, <String>[
+        'didChangeDependencies',
+        'build',
+        'layout',
+        'didChangeDependencies::microtask',
+        'build::microtask',
+      ]);
+      logs.clear();
+
+      await tester.pumpWidgetLegacy(Container(child: LogWidget(log, key: UniqueKey())));
+      expect(logs, <String>[
+        'didChangeDependencies',
+        'build',
+        'layout',
+        'didChangeDependencies::microtask',
+        'build::microtask',
+      ]);
+      logs.clear();
+    });
+  });
+
   group('runAsync', () {
     testWidgets('works with no async calls', (WidgetTester tester) async {
       String value;
@@ -787,5 +849,64 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
   @override
   Widget build(BuildContext context) {
     return Container();
+  }
+}
+
+typedef LogCallback = void Function(String message);
+
+class LogWidget extends StatefulWidget {
+  const LogWidget(this.log, {Key key}) : super(key: key);
+
+  final LogCallback log;
+
+  @override
+  _LogWidgetState createState() => _LogWidgetState();
+}
+
+class _LogWidgetState extends State<LogWidget> {
+  @override
+  void didChangeDependencies() {
+    widget.log('didChangeDependencies');
+    scheduleMicrotask(() {
+      widget.log('didChangeDependencies::microtask');
+    });
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    widget.log('build');
+    scheduleMicrotask(() {
+      widget.log('build::microtask');
+    });
+    return LeafLogWidget(widget.log);
+  }
+}
+
+class LeafLogWidget extends LeafRenderObjectWidget {
+  const LeafLogWidget(this.log);
+
+  final LogCallback log;
+
+  @override
+  RenderLog createRenderObject(BuildContext context) {
+    return RenderLog(log);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderLog renderObject) {
+    renderObject.log = log;
+  }
+}
+
+class RenderLog extends RenderBox {
+  RenderLog(this.log);
+
+  LogCallback log;
+
+  @override
+  void performLayout() {
+    log('layout');
+    size = constraints.smallest;
   }
 }
