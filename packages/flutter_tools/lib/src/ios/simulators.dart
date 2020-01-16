@@ -809,6 +809,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    _ports.clear();
+    final List<ForwardedPort> portsCopy = List<ForwardedPort>.from(_ports);
+    portsCopy.forEach(unforward);
   }
 }
