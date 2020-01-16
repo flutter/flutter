@@ -456,7 +456,7 @@ void main() {
   });
 
   test('RenderFractionalTranslation updates its semantics after its translation value is set', () {
-    final _TestMarkNeedsSemanticsUpdateCountingRenderFractionalTranslation box = _TestMarkNeedsSemanticsUpdateCountingRenderFractionalTranslation(
+    final _TestSemanticsUpdateRenderFractionalTranslation box = _TestSemanticsUpdateRenderFractionalTranslation(
       translation: const Offset(0.5, 0.5),
     );
     layout(box, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
@@ -523,8 +523,8 @@ class _TestPathClipper extends CustomClipper<Path> {
   bool shouldReclip(_TestPathClipper oldClipper) => false;
 }
 
-class _TestMarkNeedsSemanticsUpdateCountingRenderFractionalTranslation extends RenderFractionalTranslation {
-  _TestMarkNeedsSemanticsUpdateCountingRenderFractionalTranslation({
+class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
+  _TestSemanticsUpdateRenderFractionalTranslation({
     @required Offset translation,
     RenderBox child,
   }) : super(translation: translation, child: child);
