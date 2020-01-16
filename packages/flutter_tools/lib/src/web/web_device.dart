@@ -133,13 +133,13 @@ class ChromeDevice extends Device {
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
-    final String url = platformArgs['uri'] as String;
-    _chrome = await chromeLauncher.launch(url,
+    final String uri = platformArgs['uri'] as String;
+    _chrome = await chromeLauncher.launch(uri,
       dataDir: globals.fs.currentDirectory
         .childDirectory('.dart_tool')
         .childDirectory('chrome-device'));
 
-    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': true});
+    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': uri, 'launched': true});
 
     return LaunchResult.succeeded(observatoryUri: null);
   }
@@ -257,13 +257,13 @@ class WebServerDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
-    final String url = platformArgs['uri'] as String;
+    final String uri = platformArgs['uri'] as String;
     if (debuggingOptions.startPaused) {
-      globals.printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
+      globals.printStatus('Waiting for connection from Dart debug extension at $uri', emphasis: true);
     } else {
-      globals.printStatus('$mainPath is being served at $url', emphasis: true);
+      globals.printStatus('$mainPath is being served at $uri', emphasis: true);
     }
-    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
+    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': uri, 'launched': false});
     return LaunchResult.succeeded(observatoryUri: null);
   }
 

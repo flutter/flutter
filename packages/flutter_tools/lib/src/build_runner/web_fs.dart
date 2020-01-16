@@ -333,13 +333,17 @@ class WebFs {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(assetServer.handle);
-    final HttpServer server = await httpMultiServerFactory(effectiveHostname, hostPort);
+    final InternetAddress internetAddress = (await InternetAddress.lookup(effectiveHostname)).first;
+    final HttpServer server = await httpMultiServerFactory(internetAddress, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     final WebFs webFS = WebFs(
       client,
       server,
       dwds,
-      'http://$effectiveHostname:$hostPort/',
+      // Format ipv6 hosts according to RFC 5952.
+      internetAddress.type == InternetAddressType.IPv4
+        ? '${internetAddress.address}:$hostPort'
+        : '[${internetAddress.address}]:$hostPort',
       assetServer,
       buildInfo.isDebug,
       flutterProject,
