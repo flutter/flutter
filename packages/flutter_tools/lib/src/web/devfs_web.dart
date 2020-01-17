@@ -277,6 +277,7 @@ class WebDevFS implements DevFS {
   Future<Uri> create() async {
     _webAssetServer = await WebAssetServer.start(hostname, port);
     final InternetAddress internetAddress = _webAssetServer.internetAddress;
+    // Format ipv6 hosts according to RFC 5952.
     return Uri.parse(
       internetAddress.type == InternetAddressType.IPv4
         ? '${internetAddress.address}:$port'
