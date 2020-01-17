@@ -20,7 +20,7 @@ void main() {
       color: const Color(0xFF112233),
       onGenerateRoute: generateRoute,
     ));
-    expect(key.currentState, isA<NavigatorState>());
+    expect(key.currentState, isInstanceOf<NavigatorState>());
     await tester.pumpWidget(WidgetsApp(
       color: const Color(0xFF112233),
       onGenerateRoute: generateRoute,
@@ -31,6 +31,6 @@ void main() {
       color: const Color(0xFF112233),
       onGenerateRoute: generateRoute,
     ));
-    expect(key.currentState, isA<NavigatorState>());
+    expect(key.currentState, isInstanceOf<NavigatorState>());
   });
 }

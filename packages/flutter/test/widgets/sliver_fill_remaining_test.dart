@@ -283,6 +283,7 @@ void main() {
       });
 
       testWidgets('alignment with a flexible works', (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
         final GlobalKey key = GlobalKey();
         final List<Widget> slivers = <Widget>[
           sliverBox,
@@ -346,10 +347,13 @@ void main() {
         );
         expect(tester.getBottomLeft(button).dy, lessThan(600.0));
         expect(tester.getCenter(button).dx, equals(400.0));
-      }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      });
 
       group('fillOverscroll: true, relevant platforms', () {
         testWidgets('child without size is sized by extent and overscroll', (WidgetTester tester) async {
+          debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
           final List<Widget> slivers = <Widget>[
             sliverBox,
             SliverFillRemaining(
@@ -374,9 +378,12 @@ void main() {
           await tester.pumpAndSettle();
           final RenderBox box3 = tester.renderObject<RenderBox>(find.byType(Container).last);
           expect(box3.size.height, equals(450));
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+          debugDefaultTargetPlatformOverride = null;
+        });
 
         testWidgets('child with smaller size is overridden and sized by extent and overscroll', (WidgetTester tester) async {
+          debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
             sliverBox,
@@ -421,9 +428,12 @@ void main() {
             tester.renderObject<RenderBox>(find.byKey(key)).size.height,
             equals(450),
           );
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+          debugDefaultTargetPlatformOverride = null;
+        });
 
         testWidgets('extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+          debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           final List<Widget> slivers = <Widget>[
@@ -463,10 +473,12 @@ void main() {
             tester.renderObject<RenderBox>(find.byKey(key)).size.height,
             equals(148.0),
           );
+
           // Check that the button alignment is true to expectations
           final Finder button = find.byType(RaisedButton);
           expect(tester.getBottomLeft(button).dy, equals(550.0));
           expect(tester.getCenter(button).dx, equals(400.0));
+          debugDefaultTargetPlatformOverride = null;
 
           // Drag for overscroll
           await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
@@ -486,9 +498,12 @@ void main() {
             tester.renderObject<RenderBox>(find.byKey(key)).size.height,
             equals(148.0),
           );
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+          debugDefaultTargetPlatformOverride = null;
+        });
 
         testWidgets('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+          debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
           final GlobalKey key = GlobalKey();
           final ScrollController controller = ScrollController();
           final List<Widget> slivers = <Widget>[
@@ -542,9 +557,12 @@ void main() {
             tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).last.decoration,
             amberBox,
           );
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+          debugDefaultTargetPlatformOverride = null;
+        });
 
         testWidgets('alignment with a flexible works with fillOverscroll', (WidgetTester tester) async {
+          debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
           final GlobalKey key = GlobalKey();
           final List<Widget> slivers = <Widget>[
             sliverBox,
@@ -630,7 +648,9 @@ void main() {
           );
           expect(tester.getBottomLeft(button).dy, equals(600.0));
           expect(tester.getCenter(button).dx, equals(400.0));
-        }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+          debugDefaultTargetPlatformOverride = null;
+        });
       });
 
       group('fillOverscroll: true, is ignored on irrevelant platforms', () {

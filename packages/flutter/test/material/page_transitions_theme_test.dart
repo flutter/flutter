@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,16 +11,11 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: Text('home')));
     final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
     expect(theme.builders, isNotNull);
-    for (final TargetPlatform platform in TargetPlatform.values) {
-      if (platform == TargetPlatform.fuchsia) {
-        // No builder on Fuchsia.
-        continue;
-      }
-      expect(theme.builders[platform], isNotNull, reason: 'theme builder for $platform is null');
-    }
+    expect(theme.builders[TargetPlatform.android], isNotNull);
+    expect(theme.builders[TargetPlatform.iOS], isNotNull);
   });
 
-  testWidgets('Default PageTranstionsTheme builds a CupertionPageTransition', (WidgetTester tester) async {
+  testWidgets('Default PageTranstionsTheme builds a CupertionPageTransition for iOS', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: FlatButton(
@@ -34,18 +28,19 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         routes: routes,
       ),
     );
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.iOS);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  });
 
   testWidgets('Default PageTranstionsTheme builds a _FadeUpwardsPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -60,6 +55,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
         routes: routes,
       ),
     );
@@ -71,16 +67,16 @@ void main() {
       );
     }
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.android);
     expect(findFadeUpwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findFadeUpwardsPageTransition(), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
 
-  testWidgets('pageTranstionsTheme override builds a _OpenUpwardsPageTransition', (WidgetTester tester) async {
+  testWidgets('pageTranstionsTheme override builds a _OpenUpwardsPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: FlatButton(
@@ -94,6 +90,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
+          platform: TargetPlatform.android,
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: <TargetPlatform, PageTransitionsBuilder>{
               TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(), // creates a _OpenUpwardsPageTransition
@@ -111,16 +108,16 @@ void main() {
       );
     }
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.android);
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
 
-  testWidgets('pageTranstionsTheme override builds a _ZoomPageTransition', (WidgetTester tester) async {
+  testWidgets('pageTranstionsTheme override builds a _ZoomPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: FlatButton(
@@ -134,6 +131,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
+          platform: TargetPlatform.android,
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: <TargetPlatform, PageTransitionsBuilder>{
               TargetPlatform.android: ZoomPageTransitionsBuilder(), // creates a _ZoomPageTransition
@@ -151,12 +149,12 @@ void main() {
       );
     }
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
+    expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.android);
     expect(findZoomPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findZoomPageTransition(), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
 }

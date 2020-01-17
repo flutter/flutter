@@ -17,7 +17,7 @@ void main() {
   test('parsePixels', () {
     expect(parsePixels('23px'), 23);
     expect(parsePixels('9px'), 9);
-    expect(() { parsePixels('9pt'); }, throwsArgumentError);
+    expect(() { parsePixels('9pt'); }, throwsA(isInstanceOf<ArgumentError>()));
   });
 
   test('parsePoints', () {

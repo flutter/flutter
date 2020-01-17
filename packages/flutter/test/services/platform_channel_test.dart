@@ -70,7 +70,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isCastError));
+      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isInstanceOf<CastError>()));
       expect(await channel.invokeListMethod<String>('sayHello', 'hello'), <String>['hello', 'world']);
     });
 
@@ -102,7 +102,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isCastError));
+      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isInstanceOf<CastError>()));
       expect(await channel.invokeMapMethod<String, String>('sayHello', 'hello'), <String, String>{'hello': 'world'});
     });
 
@@ -292,7 +292,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(events, isEmpty);
       expect(errors, hasLength(1));
-      expect(errors[0], isA<PlatformException>());
+      expect(errors[0], isInstanceOf<PlatformException>());
       final PlatformException error = errors[0] as PlatformException;
       expect(error.code, '404');
       expect(error.message, 'Not Found.');

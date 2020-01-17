@@ -409,14 +409,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ) {
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
-    // changed. Also, focusing an empty field is sent as a selection change even
-    // if the selection offset didn't change.
-    final bool focusingEmpty = nextSelection.baseOffset == 0
-      && nextSelection.extentOffset == 0
-      && !hasFocus;
-    if (nextSelection == selection
-        && cause != SelectionChangedCause.keyboard
-        && !focusingEmpty) {
+    // changed.
+    if (nextSelection == selection && cause != SelectionChangedCause.keyboard) {
       return;
     }
     if (onSelectionChanged != null) {

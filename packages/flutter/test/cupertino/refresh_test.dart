@@ -74,6 +74,8 @@ void main() {
 
   final VoidCallback uiTestGroup = () {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -94,9 +96,13 @@ void main() {
         tester.getTopLeft(find.widgetWithText(Container, '0')),
         const Offset(0.0, 0.0),
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets('calls the indicator builder when starting to overscroll', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -130,11 +136,15 @@ void main() {
         tester.getTopLeft(find.widgetWithText(Container, '0')),
         const Offset(0.0, 50.0),
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets(
       "don't call the builder if overscroll doesn't move slivers like on Android",
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -159,9 +169,14 @@ void main() {
           tester.getTopLeft(find.widgetWithText(Container, '0')),
           const Offset(0.0, 0.0),
         );
-    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets('let the builder update as canceled drag scrolls away', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -213,9 +228,13 @@ void main() {
         tester.getTopLeft(find.widgetWithText(Container, '0')),
         const Offset(0.0, 0.0),
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets('drag past threshold triggers refresh task', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       final List<MethodCall> platformCallLog = <MethodCall>[];
 
       SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -276,11 +295,14 @@ void main() {
         platformCallLog.last,
         isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.mediumImpact'),
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets(
       'refreshing task keeps the sliver expanded forever until done',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -348,11 +370,15 @@ void main() {
           60.0, // Default value.
         ));
         verifyNoMoreInteractions(mockHelper);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       'refreshing task keeps the sliver expanded forever until completes with error',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
         final FlutterError error = FlutterError('Oops');
         double errorCount = 0;
 
@@ -434,9 +460,14 @@ void main() {
             errorCount++;
           },
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets('expanded refreshing sliver scrolls normally', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       refreshIndicator = const Center(child: Text('-1'));
 
       await tester.pumpWidget(
@@ -510,9 +541,13 @@ void main() {
         tester.getRect(find.widgetWithText(Center, '0')),
         const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets('expanded refreshing sliver goes away when done', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       refreshIndicator = const Center(child: Text('-1'));
 
       await tester.pumpWidget(
@@ -581,9 +616,13 @@ void main() {
         tester.getRect(find.widgetWithText(Center, '0')),
         const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets('builder still called when sliver snapped back more than 90%', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       refreshIndicator = const Center(child: Text('-1'));
 
       await tester.pumpWidget(
@@ -665,11 +704,15 @@ void main() {
         60.0, // Default value.
       ));
       expect(find.text('-1'), findsOneWidget);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets(
       'retracting sliver during done cannot be pulled to refresh again until fully retracted',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -748,12 +791,17 @@ void main() {
           40.0,
           100.0, // Default value.
           60.0, // Default value.
-      ));
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+        ));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       'sliver held in overscroll when task finishes completes normally',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -800,7 +848,10 @@ void main() {
           tester.getRect(find.widgetWithText(Center, '0')),
           const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       'sliver scrolled away when task completes properly removes itself',
@@ -810,6 +861,8 @@ void main() {
           // the indicator can be scrolled away while refreshing.
           return;
         }
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -887,11 +940,16 @@ void main() {
           tester.getRect(find.widgetWithText(Center, '0')),
           const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       "don't do anything unless it can be overscrolled at the start of the list",
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -915,11 +973,16 @@ void main() {
         await tester.fling(find.byType(Container).first, const Offset(0.0, -200.0), 3000.0);
 
         verifyNoMoreInteractions(mockHelper);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       'without an onRefresh, builder is called with arm for one frame then sliver goes away',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -961,7 +1024,10 @@ void main() {
           tester.getRect(find.widgetWithText(Center, '0')),
           const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets('Should not crash when dragged', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -985,11 +1051,13 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    });
   };
 
   final VoidCallback stateMachineTestGroup = () {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1008,9 +1076,13 @@ void main() {
         CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets('goes to drag and returns to inactive in a small drag', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1039,9 +1111,13 @@ void main() {
         CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
         RefreshIndicatorMode.inactive,
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets('goes to armed the frame it passes the threshold', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1071,11 +1147,15 @@ void main() {
         CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
         RefreshIndicatorMode.armed,
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets(
       'goes to refresh the frame it crossed back the refresh threshold',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -1111,11 +1191,16 @@ void main() {
           CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.refresh,
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       'goes to done internally as soon as the task finishes',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -1158,11 +1243,16 @@ void main() {
           CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.done,
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       'goes back to inactive when retracting back past 10% of arming distance',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -1216,11 +1306,16 @@ void main() {
           CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
           RefreshIndicatorMode.inactive,
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       'goes back to inactive if already scrolled away when task completes',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -1275,11 +1370,16 @@ void main() {
           tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
           moreOrLessEquals(-145.0332383665717),
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       "don't have to build any indicators or occupy space during refresh",
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
         refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -1325,7 +1425,10 @@ void main() {
           CupertinoSliverRefreshControl.state(tester.element(find.byType(LayoutBuilder, skipOffstage: false))),
           RefreshIndicatorMode.inactive,
         );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets('buildSimpleRefreshIndicator dark mode', (WidgetTester tester) async {
       const CupertinoDynamicColor color = CupertinoColors.inactiveGray;

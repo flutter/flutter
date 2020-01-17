@@ -1250,14 +1250,16 @@ void main() {
         ));
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
+  });
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics - iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Theme(
-        data: ThemeData.light(),
+        data: ThemeData.light().copyWith(
+          platform: TargetPlatform.iOS,
+        ),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
@@ -1292,7 +1294,7 @@ void main() {
         ignoreTransform: true,
       ));
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  });
 
   testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1483,34 +1485,27 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
-      value = 0.5;
-      await tester.pumpWidget(buildFrame(platform));
-      expect(find.byType(Slider), findsOneWidget);
-      expect(find.byType(CupertinoSlider), findsOneWidget);
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
+    expect(find.byType(Slider), findsOneWidget);
+    expect(find.byType(CupertinoSlider), findsOneWidget);
 
-      expect(value, 0.5, reason: 'on ${describeEnum(platform)}');
-      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CupertinoSlider)));
-      // Drag to the right end of the track.
-      await gesture.moveBy(const Offset(600.0, 0.0));
-      expect(value, 1.0, reason: 'on ${describeEnum(platform)}');
-      await gesture.up();
-    }
+    expect(value, 0.5);
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CupertinoSlider)));
+    // Drag to the right end of the track.
+    await gesture.moveBy(const Offset(600.0, 0.0));
+    expect(value, 1.0);
 
-    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.android, TargetPlatform.fuchsia]) {
-      value = 0.5;
-      await tester.pumpWidget(buildFrame(platform));
-      await tester.pumpAndSettle(); // Finish the theme change animation.
-      expect(find.byType(Slider), findsOneWidget);
-      expect(find.byType(CupertinoSlider), findsNothing);
+    value = 0.5;
+    await tester.pumpWidget(buildFrame(TargetPlatform.android));
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+    expect(find.byType(Slider), findsOneWidget);
+    expect(find.byType(CupertinoSlider), findsNothing);
 
-      expect(value, 0.5, reason: 'on ${describeEnum(platform)}');
-      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Slider)));
-      // Drag to the right end of the track.
-      await gesture.moveBy(const Offset(600.0, 0.0));
-      expect(value, 1.0, reason: 'on ${describeEnum(platform)}');
-      await gesture.up();
-    }
+    expect(value, 0.5);
+    gesture = await tester.startGesture(tester.getCenter(find.byType(Slider)));
+    // Drag to the right end of the track.
+    await gesture.moveBy(const Offset(600.0, 0.0));
+    expect(value, 1.0);
   });
 
   testWidgets('Slider respects height from theme', (WidgetTester tester) async {

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -153,20 +152,6 @@ void main() {
     await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(Scrollbar), paints..rrect());
-    expect(find.byType(CupertinoScrollbar), paints..rrect());
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    await tester.pumpWidget(viewWithScroll(TargetPlatform.macOS));
-    await gesture.down(
-      tester.getCenter(find.byType(SingleChildScrollView)),
-    );
-    await gesture.moveBy(const Offset(0.0, -10.0));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(Scrollbar), paints..rrect());
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 
@@ -188,7 +173,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(viewWithScroll(debugDefaultTargetPlatformOverride));
+    await tester.pumpWidget(viewWithScroll(TargetPlatform.iOS));
     final TestGesture gesture = await tester.startGesture(
       tester.getCenter(find.byType(SingleChildScrollView))
     );
@@ -199,6 +184,6 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
     final CupertinoScrollbar scrollbar = find.byType(CupertinoScrollbar).evaluate().first.widget as CupertinoScrollbar;
     expect(scrollbar.controller, isNotNull);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  });
 
 }

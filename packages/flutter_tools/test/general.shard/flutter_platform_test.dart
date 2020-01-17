@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:meta/meta.dart';
@@ -20,13 +21,13 @@ void main() {
     testUsingContext('ensureConfiguration throws an error if an explicitObservatoryPort is specified and more than one test file', () async {
       final FlutterPlatform flutterPlatform = FlutterPlatform(buildMode: BuildMode.debug, shellPath: '/', explicitObservatoryPort: 1234);
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
-      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
+      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsA(isA<ToolExit>()));
     });
 
     testUsingContext('ensureConfiguration throws an error if a precompiled entrypoint is specified and more that one test file', () {
       final FlutterPlatform flutterPlatform = FlutterPlatform(buildMode: BuildMode.debug, shellPath: '/', precompiledDillPath: 'example.dill');
       flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
-      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsToolExit());
+      expect(() => flutterPlatform.loadChannel('test2.dart', MockSuitePlatform()), throwsA(isA<ToolExit>()));
     });
 
     group('The FLUTTER_TEST environment variable is passed to the test process', () {
@@ -49,7 +50,7 @@ void main() {
         await untilCalled(mockProcessManager.start(any, environment: anyNamed('environment')));
         final VerificationResult toVerify = verify(mockProcessManager.start(any, environment: captureAnyNamed('environment')));
         expect(toVerify.captured, hasLength(1));
-        expect(toVerify.captured.first, isA<Map<String, String>>());
+        expect(toVerify.captured.first, isInstanceOf<Map<String, String>>());
         return toVerify.captured.first as Map<String, String>;
       }
 
@@ -90,7 +91,7 @@ void main() {
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: true,
-      ), throwsAssertionError);
+      ), throwsA(isA<AssertionError>()));
 
       expect(() => installHook(
         buildMode: BuildMode.debug,
@@ -98,7 +99,7 @@ void main() {
         enableObservatory: false,
         startPaused: false,
         observatoryPort: 123,
-      ), throwsAssertionError);
+      ), throwsA(isA<AssertionError>()));
 
       FlutterPlatform capturedPlatform;
       final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};

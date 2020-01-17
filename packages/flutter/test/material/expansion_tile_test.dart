@@ -58,6 +58,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
+        platform: TargetPlatform.iOS,
         dividerColor: _dividerColor,
       ),
       home: Material(
@@ -153,7 +154,7 @@ void main() {
     expect(collapsedContainerDecoration.color, Colors.transparent);
     expect(collapsedContainerDecoration.border.top.color, _dividerColor);
     expect(collapsedContainerDecoration.border.bottom.color, _dividerColor);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  });
 
   testWidgets('ListTileTheme', (WidgetTester tester) async {
     final Key expandedTitleKey = UniqueKey();
@@ -164,6 +165,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
+          platform: TargetPlatform.iOS,
           accentColor: _accentColor,
           unselectedWidgetColor: _unselectedWidgetColor,
           textTheme: const TextTheme(subhead: TextStyle(color: _headerColor)),
@@ -212,7 +214,7 @@ void main() {
     expect(textColor(collapsedTitleKey), _accentColor);
     expect(iconColor(expandedIconKey), _unselectedWidgetColor);
     expect(iconColor(collapsedIconKey), _accentColor);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  });
 
   testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
     await tester.pumpWidget(

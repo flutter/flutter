@@ -728,7 +728,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object> jsonNode = chainNode['node'] as Map<String, Object>;
         expect(service.toObject(jsonNode['valueId'] as String), equals(element));
-        expect(service.toObject(jsonNode['objectId'] as String), isA<DiagnosticsNode>());
+        expect(service.toObject(jsonNode['objectId'] as String), isInstanceOf<DiagnosticsNode>());
 
         expect(chainNode['children'], isList);
         final List<Object> jsonChildren = chainNode['children'] as List<Object>;
@@ -744,7 +744,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object> childJson = jsonChildren[j] as Map<String, Object>;
           expect(service.toObject(childJson['valueId'] as String), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId'] as String), isA<DiagnosticsNode>());
+          expect(service.toObject(childJson['objectId'] as String), isInstanceOf<DiagnosticsNode>());
         }
       }
     });
@@ -761,7 +761,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object> propertyJson = propertiesJson[i] as Map<String, Object>;
         expect(service.toObject(propertyJson['valueId'] as String), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId'] as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId'] as String), isInstanceOf<DiagnosticsNode>());
       }
     });
 
@@ -790,7 +790,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object> propertyJson = propertiesJson[i] as Map<String, Object>;
         expect(service.toObject(propertyJson['valueId'] as String), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId'] as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId'] as String), isInstanceOf<DiagnosticsNode>());
       }
     });
 
@@ -1168,7 +1168,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object> jsonNode = chainNode['node'] as Map<String, Object>;
         expect(service.toObject(jsonNode['valueId'] as String), equals(element));
-        expect(service.toObject(jsonNode['objectId'] as String), isA<DiagnosticsNode>());
+        expect(service.toObject(jsonNode['objectId'] as String), isInstanceOf<DiagnosticsNode>());
 
         expect(chainNode['children'], isList);
         final List<Object> jsonChildren = chainNode['children'] as List<Object>;
@@ -1184,7 +1184,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object> childJson = jsonChildren[j] as Map<String, Object>;
           expect(service.toObject(childJson['valueId'] as String), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId'] as String), isA<DiagnosticsNode>());
+          expect(service.toObject(childJson['objectId'] as String), isInstanceOf<DiagnosticsNode>());
         }
       }
     });
@@ -1200,7 +1200,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object> propertyJson = propertiesJson[i] as Map<String, Object>;
         expect(service.toObject(propertyJson['valueId'] as String), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId'] as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId'] as String), isInstanceOf<DiagnosticsNode>());
       }
     });
 
@@ -1228,7 +1228,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object> propertyJson = propertiesJson[i] as Map<String, Object>;
         expect(service.toObject(propertyJson['valueId'] as String), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId'] as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId'] as String), isInstanceOf<DiagnosticsNode>());
       }
     });
 
@@ -1256,13 +1256,13 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object> childJson = childrenJson[i] as Map<String, Object>;
         expect(service.toObject(childJson['valueId'] as String), equals(children[i].value));
-        expect(service.toObject(childJson['objectId'] as String), isA<DiagnosticsNode>());
+        expect(service.toObject(childJson['objectId'] as String), isInstanceOf<DiagnosticsNode>());
         final List<Object> propertiesJson = childJson['properties'] as List<Object>;
         final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId'] as String) as DiagnosticsNode;
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
         for (final Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
           final Object property = service.toObject(propertyJson['objectId'] as String);
-          expect(property, isA<DiagnosticsNode>());
+          expect(property, isInstanceOf<DiagnosticsNode>());
           expect(expectedProperties, contains(property));
         }
       }
@@ -1294,7 +1294,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object> childJson = childrenJson[i] as Map<String, Object>;
         expect(service.toObject(childJson['valueId'] as String), equals(children[i].value));
-        expect(service.toObject(childJson['objectId'] as String), isA<DiagnosticsNode>());
+        expect(service.toObject(childJson['objectId'] as String), isInstanceOf<DiagnosticsNode>());
         final List<Object> propertiesJson = childJson['properties'] as List<Object>;
         for (final Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
           expect(propertyJson, isNot(contains('children')));
@@ -1303,7 +1303,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
         for (final Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
           final Object property = service.toObject(propertyJson['objectId'] as String);
-          expect(property, isA<DiagnosticsNode>());
+          expect(property, isInstanceOf<DiagnosticsNode>());
           expect(expectedProperties, contains(property));
         }
       }
@@ -1670,7 +1670,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       expect(rebuildEvents.length, equals(1));
       Map<Object, Object> event = rebuildEvents.removeLast();
-      expect(event['startTime'], isA<int>());
+      expect(event['startTime'], isInstanceOf<int>());
       List<int> data = event['events'] as List<int>;
       expect(data.length, equals(14));
       final int numDataEntries = data.length ~/ 2;
@@ -1712,7 +1712,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
       event = rebuildEvents.removeLast();
-      expect(event['startTime'], isA<int>());
+      expect(event['startTime'], isInstanceOf<int>());
       data = event['events'] as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
@@ -1748,7 +1748,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
       event = rebuildEvents.removeLast();
-      expect(event['startTime'], isA<int>());
+      expect(event['startTime'], isInstanceOf<int>());
       data = event['events'] as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
@@ -1782,7 +1782,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
       event = rebuildEvents.removeLast();
-      expect(event['startTime'], isA<int>());
+      expect(event['startTime'], isInstanceOf<int>());
       data = event['events'] as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
@@ -1799,7 +1799,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await tester.pump();
       expect(rebuildEvents.length, equals(1));
       event = rebuildEvents.removeLast();
-      expect(event['startTime'], isA<int>());
+      expect(event['startTime'], isInstanceOf<int>());
       data = event['events'] as List<int>;
       newLocations = event['newLocations'] as Map<String, List<int>>;
 
@@ -1872,7 +1872,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       expect(repaintEvents.length, equals(1));
       Map<Object, Object> event = repaintEvents.removeLast();
-      expect(event['startTime'], isA<int>());
+      expect(event['startTime'], isInstanceOf<int>());
       List<int> data = event['events'] as List<int>;
       expect(data.length, equals(18));
       final int numDataEntries = data.length ~/ 2;
@@ -1914,7 +1914,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await tester.pump();
       expect(repaintEvents.length, equals(1));
       event = repaintEvents.removeLast();
-      expect(event['startTime'], isA<int>());
+      expect(event['startTime'], isInstanceOf<int>());
       data = event['events'] as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));

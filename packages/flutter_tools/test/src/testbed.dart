@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/process.dart';
 
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -114,9 +113,6 @@ class Testbed {
       // Add the test-specific overrides
       ...?overrides,
     };
-    if (testOverrides.containsKey(ProcessUtils)) {
-      throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
-    }
     // Cache the original flutter root to restore after the test case.
     final String originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.

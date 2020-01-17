@@ -70,7 +70,7 @@ void main() {
   });
 
   test('exit throws a StateError if called without being overriden', () {
-    expect(() => exit(0), throwsAssertionError);
+    expect(() => exit(0), throwsA(isInstanceOf<AssertionError>()));
   });
 
   test('exit does not throw a StateError if overriden', () {

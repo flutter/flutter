@@ -1047,7 +1047,7 @@ PhysicalModelLayer _findPhysicalLayer(Element element) {
     object = object.parent as RenderObject;
   }
   expect(object.debugLayer, isNotNull);
-  expect(object.debugLayer.firstChild, isA<PhysicalModelLayer>());
+  expect(object.debugLayer.firstChild, isInstanceOf<PhysicalModelLayer>());
   final PhysicalModelLayer layer = object.debugLayer.firstChild as PhysicalModelLayer;
   final Layer child = layer.firstChild;
   return child is PhysicalModelLayer ? child : layer;

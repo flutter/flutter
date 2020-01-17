@@ -93,7 +93,7 @@ void main() {
     const Locale locale = Locale('fr');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
-    expect(localizations, isA<CupertinoLocalizationFr>());
+    expect(localizations is CupertinoLocalizationFr, true);
     expect(localizations.alertDialogLabel, 'Alerte');
     expect(localizations.datePickerHourSemanticsLabel(1), '1 heure');
     expect(localizations.datePickerHourSemanticsLabel(12), '12 heures');
@@ -108,7 +108,7 @@ void main() {
     const Locale locale = Locale('zh');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
-    expect(localizations, isA<CupertinoLocalizationZh>());
+    expect(localizations is CupertinoLocalizationZh, true);
     expect(localizations.alertDialogLabel, '提醒');
     expect(localizations.datePickerHourSemanticsLabel(1), '1 点');
     expect(localizations.datePickerHourSemanticsLabel(12), '12 点');

@@ -573,8 +573,7 @@ void main() {
                           SemanticsFlag.isTextField,
                           SemanticsFlag.isFocused,
                           SemanticsFlag.isHeader,
-                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
-                              debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS) SemanticsFlag.namesRoute,
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
@@ -623,7 +622,8 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('does not include routeName', (WidgetTester tester) async {
+    testWidgets('does not include routeName on iOS', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final SemanticsTester semantics = SemanticsTester(tester);
       final _TestSearchDelegate delegate = _TestSearchDelegate();
       await tester.pumpWidget(TestHomePage(
@@ -636,8 +636,9 @@ void main() {
       expect(semantics, hasSemantics(buildExpected(routeName: ''),
           ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
+      debugDefaultTargetPlatformOverride = null;
       semantics.dispose();
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    });
   });
 }
 

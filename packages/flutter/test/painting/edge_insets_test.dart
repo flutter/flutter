@@ -175,7 +175,7 @@ void main() {
 
   test('EdgeInsetsGeometry operators', () {
     final EdgeInsetsGeometry a = const EdgeInsetsDirectional.fromSTEB(1.0, 2.0, 3.0, 5.0).add(EdgeInsets.zero);
-    expect(a, isNot(isA<EdgeInsetsDirectional>()));
+    expect(a, isNot(isInstanceOf<EdgeInsetsDirectional>()));
     expect(a * 2.0, const EdgeInsetsDirectional.fromSTEB(2.0, 4.0, 6.0, 10.0));
     expect(a / 2.0, const EdgeInsetsDirectional.fromSTEB(0.5, 1.0, 1.5, 2.5));
     expect(a % 2.0, const EdgeInsetsDirectional.fromSTEB(1.0, 0.0, 1.0, 1.0));

@@ -4,8 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
-
+import '../flutter_test_alternative.dart';
 import 'rendering_tester.dart';
 
 void main() {
@@ -114,7 +113,7 @@ void main() {
       errors.addAll(renderer.takeAllFlutterErrorDetails());
     });
     expect(errors, hasLength(2));
-    expect(errors.first.exception, isFlutterError);
+    expect(errors.first.exception, isA<FlutterError>());
     expect(errors.first.exception.toStringDeep(),
       'FlutterError\n'
       '   RenderAspectRatio has unbounded constraints.\n'

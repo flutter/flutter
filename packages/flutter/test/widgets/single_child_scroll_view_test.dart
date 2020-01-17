@@ -72,7 +72,7 @@ void main() {
     ));
 
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    expect(scrollable.position, isA<TestScrollPosition>());
+    expect(scrollable.position, isInstanceOf<TestScrollPosition>());
   });
 
   testWidgets('Sets PrimaryScrollController when primary', (WidgetTester tester) async {

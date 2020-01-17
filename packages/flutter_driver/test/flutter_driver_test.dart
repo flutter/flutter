@@ -145,7 +145,8 @@ void main() {
 
     group('ByValueKey', () {
       test('restricts value types', () async {
-        expect(() => find.byValueKey(null), throwsDriverError);
+        expect(() => find.byValueKey(null),
+            throwsA(isInstanceOf<DriverError>()));
       });
 
       test('finds by ValueKey', () async {
@@ -194,7 +195,7 @@ void main() {
 
     group('tap', () {
       test('requires a target reference', () async {
-        expect(driver.tap(null), throwsDriverError);
+        expect(driver.tap(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the tap command', () async {
@@ -213,7 +214,7 @@ void main() {
 
     group('getText', () {
       test('requires a target reference', () async {
-        expect(driver.getText(null), throwsDriverError);
+        expect(driver.getText(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the getText command', () async {
@@ -255,7 +256,7 @@ void main() {
 
     group('waitFor', () {
       test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsDriverError);
+        expect(driver.waitFor(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the waitFor command', () async {
@@ -378,11 +379,11 @@ void main() {
 
     group('getOffset', () {
       test('requires a target reference', () async {
-        expect(driver.getCenter(null), throwsDriverError);
-        expect(driver.getTopLeft(null), throwsDriverError);
-        expect(driver.getTopRight(null), throwsDriverError);
-        expect(driver.getBottomLeft(null), throwsDriverError);
-        expect(driver.getBottomRight(null), throwsDriverError);
+        expect(driver.getCenter(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getTopLeft(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getTopRight(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getBottomLeft(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getBottomRight(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the getCenter command', () async {
@@ -645,7 +646,7 @@ void main() {
           await driver.waitFor(find.byTooltip('foo'));
           fail('expected an exception');
         } catch (error) {
-          expect(error, isA<DriverError>());
+          expect(error is DriverError, isTrue);
           expect(error.message, 'Error in Flutter application: {message: This is a failure}');
         }
       });
@@ -704,7 +705,7 @@ void main() {
     group('ByValueKey', () {
       test('restricts value types', () async {
         expect(() => find.byValueKey(null),
-            throwsDriverError);
+            throwsA(isInstanceOf<DriverError>()));
       });
 
       test('finds by ValueKey', () async {
@@ -756,7 +757,7 @@ void main() {
 
     group('tap', () {
       test('requires a target reference', () async {
-        expect(driver.tap(null), throwsDriverError);
+        expect(driver.tap(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the tap command', () async {
@@ -776,7 +777,7 @@ void main() {
 
     group('getText', () {
       test('requires a target reference', () async {
-        expect(driver.getText(null), throwsDriverError);
+        expect(driver.getText(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the getText command', () async {
@@ -800,7 +801,7 @@ void main() {
 
     group('waitFor', () {
       test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsDriverError);
+        expect(driver.waitFor(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the waitFor command', () async {
@@ -879,11 +880,11 @@ void main() {
 
     group('getOffset', () {
       test('requires a target reference', () async {
-        expect(driver.getCenter(null), throwsDriverError);
-        expect(driver.getTopLeft(null), throwsDriverError);
-        expect(driver.getTopRight(null), throwsDriverError);
-        expect(driver.getBottomLeft(null), throwsDriverError);
-        expect(driver.getBottomRight(null), throwsDriverError);
+        expect(driver.getCenter(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getTopLeft(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getTopRight(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getBottomLeft(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getBottomRight(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the getCenter command', () async {
@@ -1001,27 +1002,27 @@ void main() {
     group('WebFlutterDriver Unimplemented error', () {
       test('forceGC', () async {
         expect(driver.forceGC(),
-            throwsA(isA<UnimplementedError>()));
+            throwsA(isInstanceOf<UnimplementedError>()));
       });
 
       test('getVmFlags', () async {
         expect(driver.getVmFlags(),
-            throwsA(isA<UnimplementedError>()));
+            throwsA(isInstanceOf<UnimplementedError>()));
       });
 
       test('waitUntilFirstFrameRasterized', () async {
         expect(driver.waitUntilFirstFrameRasterized(),
-            throwsA(isA<UnimplementedError>()));
+            throwsA(isInstanceOf<UnimplementedError>()));
       });
 
       test('appIsoloate', () async {
         expect(() => driver.appIsolate.invokeExtension('abc', <String, String>{'abc': '123'}),
-            throwsA(isA<UnsupportedError>()));
+            throwsA(isInstanceOf<UnsupportedError>()));
       });
 
       test('serviceClient', () async {
         expect(() => driver.serviceClient.getVM(),
-            throwsA(isA<UnsupportedError>()));
+            throwsA(isInstanceOf<UnsupportedError>()));
       });
     });
   });
@@ -1037,13 +1038,13 @@ void main() {
 
     test('tracing', () async {
       expect(driver.traceAction(() async { return Future<dynamic>.value(); }),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isInstanceOf<UnimplementedError>()));
       expect(driver.startTracing(),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isInstanceOf<UnimplementedError>()));
       expect(driver.stopTracingAndDownloadTimeline(),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isInstanceOf<UnimplementedError>()));
       expect(driver.clearTimeline(),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isInstanceOf<UnimplementedError>()));
     });
   });
 }
@@ -1053,7 +1054,7 @@ void main() {
 /// script will be in the following format:
 //   window.flutterDriver('[actual script]')
 String _checkAndEncode(dynamic script) {
-  expect(script, isA<String>());
+  expect(script is String, isTrue);
   expect(script.startsWith(_kWebScriptPrefix), isTrue);
   expect(script.endsWith(_kWebScriptSuffix), isTrue);
   // Strip prefix and suffix

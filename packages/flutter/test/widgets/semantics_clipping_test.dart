@@ -40,7 +40,7 @@ void main() {
     ));
 
     final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
+    expect(exception, isInstanceOf<FlutterError>());
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
@@ -102,7 +102,7 @@ void main() {
     ));
 
     final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
+    expect(exception, isInstanceOf<FlutterError>());
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
