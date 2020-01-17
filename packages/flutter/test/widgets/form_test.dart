@@ -139,8 +139,8 @@ void main() {
 
   testWidgets('IsValid returns true when all of the fields are valid', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    final validString = 'Valid string';
-    String validator(s) => s == validString ? null : 'Error text';
+    const String validString = 'Valid string';
+    String validator(String s) => s == validString ? null : 'Error text';
 
     Widget builder() {
       return MaterialApp(
@@ -153,7 +153,7 @@ void main() {
                 child: Form(
                   key: formKey,
                   child: ListView(
-                    children: [
+                    children: <Widget>[
                       TextFormField(
                         initialValue: validString,
                         validator: validator,
@@ -181,8 +181,8 @@ void main() {
 
   testWidgets('IsValid returns false when one of the fields is invalid', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    final validString = 'Valid string';
-    String validator(s) => s == validString ? null : 'Error text';
+    const String validString = 'Valid string';
+    String validator(String s) => s == validString ? null : 'Error text';
 
     Widget builder() {
       return MaterialApp(
@@ -195,7 +195,7 @@ void main() {
                 child: Form(
                   key: formKey,
                   child: ListView(
-                    children: [
+                    children: <Widget>[
                       TextFormField(
                         initialValue: '',
                         validator: validator,

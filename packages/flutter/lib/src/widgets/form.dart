@@ -213,7 +213,10 @@ class FormState extends State<Form> {
   /// Check whether all the fields in this form are valid without changing
   /// the display state.
   bool isValid() {
-    return _fields.fold(true, (prev, field) => prev && field.isValid);
+    return _fields.fold(
+      true,
+      (bool prev, FormFieldState<dynamic> field) => prev && field.isValid,
+    );
   }
 }
 
