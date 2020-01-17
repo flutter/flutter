@@ -68,9 +68,11 @@ class CustomContrastGuideline extends AccessibilityGuideline {
 
       final Rect originalPaintBounds = renderObject.paintBounds;
 
+      final Rect inflatedPaintBounds = originalPaintBounds.inflate(4.0);
+
       final Rect paintBounds = Rect.fromPoints(
-        renderObject.localToGlobal(originalPaintBounds.topLeft - const Offset(4.0, 4.0)),
-        renderObject.localToGlobal(originalPaintBounds.bottomRight + const Offset(4.0, 4.0)),
+        renderObject.localToGlobal(inflatedPaintBounds.topLeft),
+        renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
       );
 
       if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
