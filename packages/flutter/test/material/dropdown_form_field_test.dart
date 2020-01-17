@@ -240,7 +240,7 @@ void main() {
         home: Material(
           child: DropdownButtonFormField<String>(
             key: stateKey,
-            value: null,
+            value: null, // setting value to null sets isEmpty to true
             decoration: const InputDecoration(labelText: 'label', alignLabelWithHint: true),
             onChanged: (String newValue) {},
             items: menuItems.map((String value) {
@@ -298,7 +298,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
   });
 
-  testWidgets('DropdownButtonFormField InputDecorator label is aligned to centre of TextField when alignLabelWithHint is false', (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField InputDecorator label is aligned to center of TextField when alignLabelWithHint is false', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
 
     await tester.pumpWidget(
@@ -306,7 +306,7 @@ void main() {
         home: Material(
           child: DropdownButtonFormField<String>(
             key: stateKey,
-            value: null,
+            value: null, // setting value to null sets isEmpty to true
             decoration: const InputDecoration(labelText: 'label', alignLabelWithHint: false),
             onChanged: (String newValue) {},
             items: menuItems.map((String value) {
@@ -320,7 +320,7 @@ void main() {
       )
     );
 
-    // isEmpty: true causes the label to be aligned with the centre of the TextField if alignLabelWithHint is set to false
+    // isEmpty: true causes the label to be aligned with the center of the TextField if alignLabelWithHint is set to false
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('label')).dy, 24.0);
