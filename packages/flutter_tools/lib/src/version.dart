@@ -16,6 +16,8 @@ import 'cache.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 
+FlutterVersion get flutterVersion => context.get<FlutterVersion>();
+
 class FlutterVersion {
   FlutterVersion([this._clock = const SystemClock()]) {
     _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '));
