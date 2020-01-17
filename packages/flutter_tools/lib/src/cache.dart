@@ -511,7 +511,16 @@ abstract class CachedArtifact extends ArtifactSet {
       }
     }
     await updateInner();
-    cache.setStampFor(stampName, version);
+    try {
+      cache.setStampFor(stampName, version);
+    } on FileSystemException catch (err) {
+      globals.printError(
+        'The new artifact "$name" was downloaded, but Flutter failed to update '
+        'its stamp file, receiving the error "$err". '
+        'Flutter can continue, but the artifact may be re-downloaded on '
+        'subsequent invocations until the problem is resolved.',
+      );
+    }
     _removeDownloadedFiles();
   }
 
