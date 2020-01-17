@@ -1,4 +1,4 @@
-Signature: 44f46a78ddddd9fd8b69e83fb77505af
+Signature: 1b431972d9ced09c15d9af9f36e19fa9
 
 UNUSED LICENSES:
 
@@ -7757,6 +7757,7 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
+FILE: ../../../third_party/dart/runtime/observatory/bin/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/vm/field_table.cc
 FILE: ../../../third_party/dart/runtime/vm/field_table.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
@@ -8403,7 +8404,6 @@ FILE: ../../../third_party/dart/runtime/lib/vmservice.cc
 FILE: ../../../third_party/dart/runtime/observatory/lib/allocation_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/cli.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/debugger.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/sample_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/allocation_profile/allocation_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/app/analytics.dart
@@ -8929,7 +8929,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/retaining_p
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/source_link.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/strongly_reachable_instances.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/vm_connect_target.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/heap_snapshot/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/exceptions.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/allocation_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/breakpoint.dart
@@ -8944,7 +8943,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/flag.
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/frame.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/function.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/guarded.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/heap_space.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/icdata.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/inbound_references.dart
