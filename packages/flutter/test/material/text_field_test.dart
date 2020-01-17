@@ -857,6 +857,27 @@ void main() {
     expect(handle.opacity.value, equals(1.0));
   });
 
+
+  testWidgets('Long pressing a field with selection 0,0 shows the selection menu', (WidgetTester tester) async {
+    await tester.pumpWidget(overlay(
+      child: TextField(
+        controller: TextEditingController.fromValue(
+          const TextEditingValue(
+            selection: TextSelection(baseOffset: 0, extentOffset: 0),
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('PASTE'), findsNothing);
+
+    final Offset emptyPos = textOffsetToPosition(tester, 0);
+    await tester.longPressAt(emptyPos, pointer: 7);
+    await tester.pumpAndSettle();
+
+    expect(find.text('PASTE'), findsOneWidget);
+  });
+
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
