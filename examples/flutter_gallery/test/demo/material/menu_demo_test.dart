@@ -12,6 +12,6 @@ void main() {
       home: MenuDemo(),
     ));
 
-    // TODO: Implement test.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
   });
 }
