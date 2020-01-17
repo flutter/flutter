@@ -66,14 +66,17 @@ class CustomContrastGuideline extends AccessibilityGuideline {
     Evaluation evaluateElement(Element element) {
       final RenderBox renderObject = element.renderObject as RenderBox;
 
+      final Rect originalPaintBounds = renderObject.paintBounds;
+
       final Rect paintBounds = Rect.fromPoints(
-        renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
-        renderObject.localToGlobal(element.renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
+        renderObject.localToGlobal(originalPaintBounds.topLeft - const Offset(4.0, 4.0)),
+        renderObject.localToGlobal(originalPaintBounds.bottomRight + const Offset(4.0, 4.0)),
       );
 
       if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
         return const Evaluation.pass();
       }
+
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
       if (subset.isEmpty) {
@@ -102,15 +105,6 @@ class CustomContrastGuideline extends AccessibilityGuideline {
     }
 
     return result;
-  }
-
-  // Skip routes which might have labels, and nodes without any text.
-  bool _shouldSkipNode(SemanticsData data) {
-    if (data.hasFlag(ui.SemanticsFlag.scopesRoute))
-      return true;
-    if (data.label?.trim()?.isEmpty == true && data.value?.trim()?.isEmpty == true)
-      return true;
-    return false;
   }
 
   // Returns a rect that is entirely on screen, or null if it is too far off.
