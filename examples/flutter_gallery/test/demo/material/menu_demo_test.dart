@@ -141,7 +141,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
   }
 
   @override
-  String get description => 'Text contrast should follow WCAG guidelines';
+  String get description => 'Contrast should follow WCAG guidelines';
 }
 
 class _ContrastReport {
