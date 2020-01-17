@@ -74,7 +74,8 @@ void setElementTransform(html.Element element, Float64List matrix4) {
 
   // On low device-pixel ratio screens using CSS "transform" causes text blurriness
   // at least on Blink browsers. We therefore prefer using CSS "left" and "top" instead.
-  final bool isHighDevicePixelRatioScreen = EngineWindow.browserDevicePixelRatio > 1.0;
+  final bool isHighDevicePixelRatioScreen =
+      EngineWindow.browserDevicePixelRatio > 1.0;
 
   if (transformKind == TransformKind.complex || isHighDevicePixelRatioScreen) {
     final String cssTransform = float64ListToCssTransform3d(matrix4);
@@ -122,8 +123,7 @@ TransformKind transformKindOf(Float64List matrix) {
 
   // If matrix contains scaling, rotation, z translation or
   // perspective transform, it is not considered simple.
-  final bool isSimpleTransform =
-      m[0] == 1.0 &&
+  final bool isSimpleTransform = m[0] == 1.0 &&
       m[1] == 0.0 &&
       m[2] == 0.0 &&
       m[3] == 0.0 &&
@@ -137,7 +137,7 @@ TransformKind transformKindOf(Float64List matrix) {
       m[11] == 0.0 &&
       // m[12] - x translation is simple
       // m[13] - y translation is simple
-      m[14] == 0.0 &&  // z translation is NOT simple
+      m[14] == 0.0 && // z translation is NOT simple
       m[15] == 1.0;
 
   if (!isSimpleTransform) {
@@ -312,18 +312,20 @@ int _clipIdCounter = 0;
 /// Calling this method updates [_clipIdCounter]. The HTML id of the generated
 /// clip is set to "svgClip${_clipIdCounter}", e.g. "svgClip123".
 String _pathToSvgClipPath(ui.Path path,
-    {double offsetX = 0, double offsetY = 0}) {
+    {double offsetX = 0,
+    double offsetY = 0,
+    double scaleX = 1.0,
+    double scaleY = 1.0}) {
   _clipIdCounter += 1;
-  final ui.Rect bounds = path.getBounds();
   final StringBuffer sb = StringBuffer();
-  sb.write('<svg width="${bounds.right}" height="${bounds.bottom}" '
+  sb.write('<svg width="0" height="0" '
       'style="position:absolute">');
   sb.write('<defs>');
 
   final String clipId = 'svgClip$_clipIdCounter';
-  sb.write('<clipPath id=$clipId>');
+  sb.write('<clipPath id=$clipId clipPathUnits="objectBoundingBox">');
 
-  sb.write('<path fill="#FFFFFF" d="');
+  sb.write('<path transform="scale($scaleX, $scaleY)" fill="#FFFFFF" d="');
   pathToSvg(path, sb, offsetX: offsetX, offsetY: offsetY);
   sb.write('"></path></clipPath></defs></svg');
   return sb.toString();
