@@ -256,7 +256,7 @@ void main() {
 
     // isEmpty: true causes the label to be aligned with the input text if alignLabelWithHint is set to true
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, 32.0);
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
     expect(tester.getTopLeft(find.text('label')).dy, 32.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 48.0);
 
@@ -273,7 +273,6 @@ void main() {
     await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.text('label')).dy, 32.0);
     expect(tester.getTopLeft(find.text('label')).dy, 32.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 48.0);
 
@@ -294,8 +293,9 @@ void main() {
     // [InputDecorator] isEmpty property is now false.
     expect((tester.widget(find.byType(InputDecorator)) as InputDecorator).isEmpty, equals(false));
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+    expect(tester.getTopLeft(find.text('three')).dy, 32.0);
+    expect(tester.getBottomLeft(find.text('three')).dy, 48.0);
   });
 
   testWidgets('DropdownButtonFormField InputDecorator label is aligned to center of TextField when alignLabelWithHint is false', (WidgetTester tester) async {
@@ -322,7 +322,7 @@ void main() {
 
     // isEmpty: true causes the label to be aligned with the center of the TextField if alignLabelWithHint is set to false
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, 24.0);
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
     expect(tester.getTopLeft(find.text('label')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 40.0);
   });
