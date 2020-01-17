@@ -76,7 +76,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
       );
 
       final List<int> subset = _subsetFromRect(byteData, paintBounds, image.width, image.height);
-      // Node was too far off screen.
+
       if (subset.isEmpty) {
         return const Evaluation.pass();
       }
