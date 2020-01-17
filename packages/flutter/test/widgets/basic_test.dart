@@ -163,8 +163,8 @@ void main() {
                     key: fractionalTranslationKey,
                     translation: offset,
                     transformHitTests: true,
-                    child: Listener(
-                      onPointerDown: (PointerDownEvent event) {
+                    child: GestureDetector(
+                      onTap: () {
                         setState(() {
                           offset = const Offset(0.8, 0.8);
                         });
@@ -187,7 +187,6 @@ void main() {
       );
 
       await tester.pump();
-      debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
       expect(
         tester.getSemantics(find.byKey(textKey)).transform,
         Matrix4(
