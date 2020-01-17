@@ -148,29 +148,35 @@ void main() {
 
     testWidgets('semantics bounds are updated', (WidgetTester tester) async {
       final GlobalKey fractionalTranslationKey = GlobalKey();
-      final GlobalKey sizedBoxKey = GlobalKey();
+      final GlobalKey textKey = GlobalKey();
       Offset offset = const Offset(0.4, 0.4);
 
       await tester.pumpWidget(
         StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Center(
-              child: FractionalTranslation(
-                key: fractionalTranslationKey,
-                translation: offset,
-                transformHitTests: true,
-                child: Listener(
-                  onPointerDown: (PointerDownEvent event) {
-                    setState(() {
-                      offset = const Offset(0.8, 0.8);
-                    });
-                  },
-                  child: SizedBox(
-                    key: sizedBoxKey,
-                    width: 100.0,
-                    height: 100.0,
-                    child: Container(
-                      color: const Color(0xFF0000FF)
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Semantics(
+                  explicitChildNodes: true,
+                  child: FractionalTranslation(
+                    key: fractionalTranslationKey,
+                    translation: offset,
+                    transformHitTests: true,
+                    child: Listener(
+                      onPointerDown: (PointerDownEvent event) {
+                        setState(() {
+                          offset = const Offset(0.8, 0.8);
+                        });
+                      },
+                      child: SizedBox(
+                        width: 100.0,
+                        height: 100.0,
+                        child: Text(
+                          'foo',
+                          key: textKey,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -179,14 +185,30 @@ void main() {
           },
         )
       );
-      expect(tester.getSemantics(find.byKey(fractionalTranslationKey)), matchesSemantics(
-        size: const Size(100, 100),
-      ));
-//      await tester.tap(find.byKey(key1));
-//      await tester.pump();
-//      expect(tester.getSemantics(find.byKey(key1)), matchesSemantics(
-//        rect: Rect.fromPoints(Offset.zero, Offset.zero),
-//      ));
+
+      await tester.pump();
+      debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
+      expect(
+        tester.getSemantics(find.byKey(textKey)).transform,
+        Matrix4(
+          3.0, 0.0, 0.0, 0.0,
+          0.0, 3.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0,
+          1170.0, 870.0, 0.0, 1.0,
+        ),
+      );
+
+      await tester.tap(find.byKey(fractionalTranslationKey));
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(textKey)).transform,
+        Matrix4(
+          3.0, 0.0, 0.0, 0.0,
+          0.0, 3.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0,
+          1290.0, 990.0, 0.0, 1.0,
+        ),
+      );
     });
   });
 
