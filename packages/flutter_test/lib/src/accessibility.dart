@@ -345,6 +345,10 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   String get description => 'Text contrast should follow WCAG guidelines';
 }
 
+/// A class that reports the contrast ratio of a part of the screen.
+///
+/// Commonly used in accessibility testing to obtain the contrast ratio of
+/// text widgets and other types of widgets.
 class ContrastReport {
   factory ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
