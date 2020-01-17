@@ -53,7 +53,6 @@ class CustomContrastGuideline extends AccessibilityGuideline {
     });
 
     Evaluation evaluateElement(Element element) {
-      final Element element = elements.single;
       final RenderBox renderObject = element.renderObject as RenderBox;
 
       final Rect paintBounds = Rect.fromPoints(
