@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
@@ -376,8 +377,7 @@ List<Plugin> findPlugins(FlutterProject project) {
 /// }
 ///
 ///
-/// Finally, returns [true] if .flutter-plugins-dependencies has changed,
-/// otherwise returns [false].
+/// Finally, returns [true] if the plugins list has changed, otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
@@ -414,11 +414,17 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   result['date_created'] = systemClock.now().toString();
   result['version'] = flutterVersion.frameworkVersion;
 
-  final String oldPluginFileContent = _readFileContent(pluginsFile);
+  // Only notify if the plugins list has changed. [date_created] will always be different,
+  // [version] is not relevant for this check.
+  final String oldPluginsFileStringContent = _readFileContent(pluginsFile);
+  bool pluginsChanged = true;
+  if (oldPluginsFileStringContent != null) {
+    pluginsChanged = oldPluginsFileStringContent.contains(pluginsMap.toString());
+  }
   final String pluginFileContent = json.encode(result);
   pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
 
-  return oldPluginFileContent != pluginFileContent;
+  return pluginsChanged;
 }
 
 List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
@@ -444,7 +450,6 @@ List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
 ///
 /// Finally, returns [true] if .flutter-plugins has changed, otherwise returns [false].
 bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
-
   final File pluginsFile = project.flutterPluginsFile;
   if (plugins.isEmpty) {
     if (pluginsFile.existsSync()) {

@@ -79,6 +79,13 @@ void main() {
       when(linuxProject.pluginConfigKey).thenReturn('linux');
       when(linuxProject.existsSync()).thenReturn(false);
 
+      when(mockClock.now()).thenAnswer(
+        (Invocation _) => DateTime(1970, 1, 1)
+      );
+      when(mockVersion.frameworkVersion).thenAnswer(
+        (Invocation _) => '1.0.0'
+      );
+
       // Set up a simple .packages file for all the tests to use, pointing to one package.
       dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
       packagesFile = fs.file(fs.path.join(flutterProject.directory.path, PackageMap.globalPackagesPath));
@@ -414,25 +421,33 @@ dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        SystemClock: () => mockClock,
+        FlutterVersion: () => mockVersion
       });
 
-      testUsingContext('Changes to the plugin json list invalidates the Cocoapod lockfiles', () {
-        simulatePodInstallRun(iosProject);
-        simulatePodInstallRun(macosProject);
+      testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () {
         configureDummyPackageAsPlugin();
-
         when(iosProject.existsSync()).thenReturn(true);
         when(macosProject.existsSync()).thenReturn(true);
 
+        // First call will create the .flutter-plugins-dependencies and the legacy .flutter-plugins file.
+        // Since there was no plugins list, the lock files will be invalidated.
+        // The second call is where the plugins list is compared to the existing one, and if there is no change,
+        // the podfiles shouldn't be invalidated.
         refreshPluginsList(flutterProject);
-        expect(iosProject.podManifestLock.existsSync(), false);
-        expect(macosProject.podManifestLock.existsSync(), false);
+        simulatePodInstallRun(iosProject);
+        simulatePodInstallRun(macosProject);
+
+        refreshPluginsList(flutterProject);
+        expect(iosProject.podManifestLock.existsSync(), true);
+        expect(macosProject.podManifestLock.existsSync(), true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        SystemClock: () => mockClock,
+        FlutterVersion: () => mockVersion
       });
     });
-
 
     group('injectPlugins', () {
       MockFeatureFlags featureFlags;
