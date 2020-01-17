@@ -1,4 +1,4 @@
-Signature: daf7414f9d4d0fe29ac09aba866fe9dc
+Signature: a45e8cb586951e2210be9bcf9d3beae2
 
 UNUSED LICENSES:
 
@@ -5085,8 +5085,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.cp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpRedEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpRedEffect.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrCenterWedgePatchGen.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrCenterWedgePatchGen.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrCoverShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrCoverShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrGpuTessellationPathRenderer.cpp
@@ -5568,6 +5566,8 @@ FILE: ../../../third_party/skia/gm/bicubic.cpp
 FILE: ../../../third_party/skia/gm/compressed_textures.cpp
 FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
 FILE: ../../../third_party/skia/include/private/SkM44.h
+FILE: ../../../third_party/skia/modules/skottie/src/Animator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/Animator.h
 FILE: ../../../third_party/skia/modules/skottie/src/Camera.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Camera.h
 FILE: ../../../third_party/skia/modules/skottie/src/Transform.cpp
@@ -5575,6 +5575,8 @@ FILE: ../../../third_party/skia/modules/skottie/src/Transform.h
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/src/core/SkCanvasMatrix.h
 FILE: ../../../third_party/skia/src/core/SkM44.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathParser.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathParser.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google Inc.
 
