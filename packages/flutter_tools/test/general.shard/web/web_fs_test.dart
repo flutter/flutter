@@ -178,15 +178,15 @@ void main() {
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
-      hostname: 'foo',
+      hostname: 'localhost',
       port: '1234',
       urlTunneller: null,
       dartDefines: const <String>[],
     );
 
-    expect(webFs.uri, contains('foo:1234'));
+    expect(webFs.uri, contains('[::1]:1234'));
     expect(lastPort, 1234);
-    expect(lastAddress, contains('foo'));
+    expect(lastAddress.address.toString(), '::1');
   }));
 
   test('Throws exception if build fails', () => testbed.run(() async {

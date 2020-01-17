@@ -46,9 +46,7 @@ class WebAssetServer {
   /// trace.
   static Future<WebAssetServer> start(String hostname, int port) async {
     try {
-      final InternetAddress address = hostname == 'localhost'
-        ? InternetAddress.loopbackIPv4
-        : (await InternetAddress.lookup(hostname)).first;
+      final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final Packages packages =
           await loadPackagesFile(Uri.base.resolve('.packages'));
