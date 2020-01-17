@@ -1,4 +1,4 @@
-Signature: 36c16cb51bd27b35b207ef17101dc705
+Signature: 44f46a78ddddd9fd8b69e83fb77505af
 
 UNUSED LICENSES:
 
@@ -7757,6 +7757,9 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
+FILE: ../../../third_party/dart/runtime/vm/field_table.cc
+FILE: ../../../third_party/dart/runtime/vm/field_table.h
+FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/js_patch.dart
