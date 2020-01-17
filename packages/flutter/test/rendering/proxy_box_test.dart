@@ -81,21 +81,25 @@ void main() {
   });
 
   test('RenderPhysicalModel compositing on non-Fuchsia', () {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    for (final TargetPlatform platform in TargetPlatform.values) {
+      if (platform == TargetPlatform.fuchsia) {
+        continue;
+      }
+      debugDefaultTargetPlatformOverride = platform;
 
-    final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
-    layout(root, phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
+      final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
+      layout(root, phase: EnginePhase.composite);
+      expect(root.needsCompositing, isTrue);
 
-    // Flutter now composites physical shapes on all platforms.
-    root.elevation = 1.0;
-    pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
+      // Flutter now composites physical shapes on all platforms.
+      root.elevation = 1.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isTrue);
 
-    root.elevation = 0.0;
-    pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
-
+      root.elevation = 0.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isTrue);
+    }
     debugDefaultTargetPlatformOverride = null;
   });
 
@@ -121,44 +125,53 @@ void main() {
   });
 
   group('RenderPhysicalShape', () {
-    setUp(() {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    });
-
     test('shape change triggers repaint', () {
-      final RenderPhysicalShape root = RenderPhysicalShape(
-        color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shape: CircleBorder()),
-      );
-      layout(root, phase: EnginePhase.composite);
-      expect(root.debugNeedsPaint, isFalse);
+      for (final TargetPlatform platform in TargetPlatform.values) {
+        if (platform == TargetPlatform.fuchsia) {
+          continue;
+        }
+        debugDefaultTargetPlatformOverride = platform;
 
-      // Same shape, no repaint.
-      root.clipper = const ShapeBorderClipper(shape: CircleBorder());
-      expect(root.debugNeedsPaint, isFalse);
+        final RenderPhysicalShape root = RenderPhysicalShape(
+          color: const Color(0xffff00ff),
+          clipper: const ShapeBorderClipper(shape: CircleBorder()),
+        );
+        layout(root, phase: EnginePhase.composite);
+        expect(root.debugNeedsPaint, isFalse);
 
-      // Different shape triggers repaint.
-      root.clipper = const ShapeBorderClipper(shape: StadiumBorder());
-      expect(root.debugNeedsPaint, isTrue);
+        // Same shape, no repaint.
+        root.clipper = const ShapeBorderClipper(shape: CircleBorder());
+        expect(root.debugNeedsPaint, isFalse);
+
+        // Different shape triggers repaint.
+        root.clipper = const ShapeBorderClipper(shape: StadiumBorder());
+        expect(root.debugNeedsPaint, isTrue);
+      }
+      debugDefaultTargetPlatformOverride = null;
     });
 
     test('compositing on non-Fuchsia', () {
-      final RenderPhysicalShape root = RenderPhysicalShape(
-        color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shape: CircleBorder()),
-      );
-      layout(root, phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
+      for (final TargetPlatform platform in TargetPlatform.values) {
+        if (platform == TargetPlatform.fuchsia) {
+          continue;
+        }
+        debugDefaultTargetPlatformOverride = platform;
+        final RenderPhysicalShape root = RenderPhysicalShape(
+          color: const Color(0xffff00ff),
+          clipper: const ShapeBorderClipper(shape: CircleBorder()),
+        );
+        layout(root, phase: EnginePhase.composite);
+        expect(root.needsCompositing, isTrue);
 
-      // On non-Fuchsia platforms, we composite physical shape layers
-      root.elevation = 1.0;
-      pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
+        // On non-Fuchsia platforms, we composite physical shape layers
+        root.elevation = 1.0;
+        pumpFrame(phase: EnginePhase.composite);
+        expect(root.needsCompositing, isTrue);
 
-      root.elevation = 0.0;
-      pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
-
+        root.elevation = 0.0;
+        pumpFrame(phase: EnginePhase.composite);
+        expect(root.needsCompositing, isTrue);
+      }
       debugDefaultTargetPlatformOverride = null;
     });
   });
