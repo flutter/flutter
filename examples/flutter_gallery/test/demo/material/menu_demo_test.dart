@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gallery/demo/material/menu_demo.dart';
+import 'package:flutter_gallery/gallery/themes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter/rendering.dart';
@@ -16,6 +17,7 @@ import 'package:flutter/semantics.dart';
 void main() {
   testWidgets('Menu icon satisfies accessibility contrast ratio guidelines', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: kLightGalleryTheme,
       home: const MenuDemo(),
     ));
 
@@ -24,16 +26,7 @@ void main() {
     final List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList()
         + find.byIcon(Icons.more_horiz).evaluate().toList();
 
-    await tester.pump(Duration(seconds: 15));
-
-    print(elements);
-
     await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: elements)));
-
-    /* for (final element in elements) {
-      print((element.renderObject as RenderBox).localToGlobal(element.renderObject.paintBounds.topLeft));
-    } */
-
   });
 }
 
