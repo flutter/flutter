@@ -51,6 +51,8 @@ class CustomContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
+    // Obtain rendered image.
+
     final RenderView renderView = tester.binding.renderView;
     final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
     ui.Image image;
@@ -60,6 +62,8 @@ class CustomContrastGuideline extends AccessibilityGuideline {
       image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.window.devicePixelRatio);
       return image.toByteData();
     });
+
+    // How to evaluate a single element.
 
     Evaluation evaluateElement(Element element) {
       final RenderBox renderObject = element.renderObject as RenderBox;
@@ -94,6 +98,8 @@ class CustomContrastGuideline extends AccessibilityGuideline {
         );
       }
     }
+
+    // Collate all evaluations into a final evaluation, then return.
 
     Evaluation result = const Evaluation.pass();
 
