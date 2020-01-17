@@ -21,9 +21,9 @@ void main() {
 
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    final List<Element> elements = find.byWidgetPredicate((widget) => widget is Icon).evaluate().toList();
+    final List<Element> icons = find.byWidgetPredicate((widget) => widget is Icon).evaluate().toList();
 
-    await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: elements)));
+    await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: icons)));
   });
 
   testWidgets('Menu icon satisfies accessibility contrast ratio guidelines, dark mode', (WidgetTester tester) async {
