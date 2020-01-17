@@ -89,10 +89,10 @@ class CustomContrastGuideline extends AccessibilityGuideline {
       } else {
         return Evaluation.fail(
             '$element:\nExpected contrast ratio of at least '
-                '$kMinimumRatio but found ${contrastRatio.toStringAsFixed(2)} '
-                'The computed light color was: ${report.lightColor}, '
-                'The computed dark color was: ${report.darkColor}\n'
-                'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html'
+            '$kMinimumRatio but found ${contrastRatio.toStringAsFixed(2)} \n'
+            'The computed light color was: ${report.lightColor}, '
+            'The computed dark color was: ${report.darkColor}\n'
+            'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html\n'
         );
       }
     }
