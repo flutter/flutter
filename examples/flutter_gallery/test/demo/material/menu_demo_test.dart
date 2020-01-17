@@ -12,6 +12,13 @@ void main() {
       home: MenuDemo(),
     ));
 
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    // await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList();
+
+    for (final element in elements) {
+      print((element.renderObject as RenderBox).localToGlobal(element.renderObject.paintBounds.topLeft));
+    }
+
   });
 }
