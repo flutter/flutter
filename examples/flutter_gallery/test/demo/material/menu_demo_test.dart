@@ -125,10 +125,14 @@ class CustomContrastGuideline extends AccessibilityGuideline {
   List<int> _subsetFromRect(ByteData data, Rect paintBounds, int width, int height) {
     // TODO: make more efficient.
 
-    final int leftX = paintBounds.left.floor();
-    final int rightX = paintBounds.right.ceil();
-    final int topY = paintBounds.top.floor();
-    final int bottomY = paintBounds.bottom.ceil();
+    final Rect truePaintBounds = paintBounds.intersect(
+      Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
+    );
+
+    final int leftX   = truePaintBounds.left.floor();
+    final int rightX  = truePaintBounds.right.ceil();
+    final int topY    = truePaintBounds.top.floor();
+    final int bottomY = truePaintBounds.bottom.ceil();
 
     final List<int> buffer = <int>[];
 
@@ -139,9 +143,9 @@ class CustomContrastGuideline extends AccessibilityGuideline {
       final int b = data.getUint8(offset + 2);
       final int a = data.getUint8(offset + 3);
       final int color = (((a & 0xff) << 24) |
-          ((r & 0xff) << 16) |
-          ((g & 0xff) << 8)  |
-          ((b & 0xff) << 0)) & 0xFFFFFFFF;
+                         ((r & 0xff) << 16) |
+                         ((g & 0xff) << 8)  |
+                         ((b & 0xff) << 0)) & 0xFFFFFFFF;
       return color;
     }
 
