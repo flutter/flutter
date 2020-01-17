@@ -81,11 +81,9 @@ abstract class OffsetBase {
   /// the right-hand-side operand respectively. Returns false otherwise.
   @override
   bool operator ==(dynamic other) {
-    if (other is! OffsetBase)
-      return false;
-    final OffsetBase typedOther = other;
-    return _dx == typedOther._dx &&
-           _dy == typedOther._dy;
+    return other is OffsetBase
+        && other._dx == _dx
+        && other._dy == _dy;
   }
 
   @override
@@ -327,11 +325,9 @@ class Offset extends OffsetBase {
   /// Compares two Offsets for equality.
   @override
   bool operator ==(dynamic other) {
-    if (other is! Offset)
-      return false;
-    final Offset typedOther = other;
-    return dx == typedOther.dx &&
-           dy == typedOther.dy;
+    return other is Offset
+        && other.dx == dx
+        && other.dy == dy;
   }
 
   @override
@@ -595,11 +591,9 @@ class Size extends OffsetBase {
   // We don't compare the runtimeType because of _DebugSize in the framework.
   @override
   bool operator ==(dynamic other) {
-    if (other is! Size)
-      return false;
-    final Size typedOther = other;
-    return _dx == typedOther._dx &&
-           _dy == typedOther._dy;
+    return other is Size
+        && other._dx == _dx
+        && other._dy == _dy;
   }
 
   @override
@@ -877,11 +871,11 @@ class Rect {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final Rect typedOther = other;
-    return left   == typedOther.left   &&
-           top    == typedOther.top    &&
-           right  == typedOther.right  &&
-           bottom == typedOther.bottom;
+    return other is Rect
+        && other.left   == left
+        && other.top    == top
+        && other.right  == right
+        && other.bottom == bottom;
   }
 
   @override
@@ -999,8 +993,10 @@ class Radius {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final Radius typedOther = other;
-    return typedOther.x == x && typedOther.y == y;
+
+    return other is Radius
+        && other.x == x
+        && other.y == y;
   }
 
   @override
@@ -1594,19 +1590,19 @@ class RRect {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final RRect typedOther = other;
-    return left      == typedOther.left      &&
-           top       == typedOther.top       &&
-           right     == typedOther.right     &&
-           bottom    == typedOther.bottom    &&
-           tlRadiusX == typedOther.tlRadiusX &&
-           tlRadiusY == typedOther.tlRadiusY &&
-           trRadiusX == typedOther.trRadiusX &&
-           trRadiusY == typedOther.trRadiusY &&
-           blRadiusX == typedOther.blRadiusX &&
-           blRadiusY == typedOther.blRadiusY &&
-           brRadiusX == typedOther.brRadiusX &&
-           brRadiusY == typedOther.brRadiusY;
+    return other is RRect
+        && other.left      == left
+        && other.top       == top
+        && other.right     == right
+        && other.bottom    == bottom
+        && other.tlRadiusX == tlRadiusX
+        && other.tlRadiusY == tlRadiusY
+        && other.trRadiusX == trRadiusX
+        && other.trRadiusY == trRadiusY
+        && other.blRadiusX == blRadiusX
+        && other.blRadiusY == blRadiusY
+        && other.brRadiusX == brRadiusX
+        && other.brRadiusY == brRadiusY;
   }
 
   @override

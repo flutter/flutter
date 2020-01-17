@@ -10,5 +10,5 @@ double lerpDouble(num a, num b, double t) {
     return null;
   a ??= 0.0;
   b ??= 0.0;
-  return a + (b - a) * t;
+  return a + (b - a) * t as double;
 }

@@ -83,7 +83,7 @@ class FontWeight {
     assert(t != null);
     if (a == null && b == null)
       return null;
-    return values[lerpDouble(a?.index ?? normal.index, b?.index ?? normal.index, t).round().clamp(0, 8)];
+    return values[lerpDouble(a?.index ?? normal.index, b?.index ?? normal.index, t).round().clamp(0, 8) as int];
   }
 
   @override
@@ -300,9 +300,9 @@ class FontFeature {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final FontFeature typedOther = other;
-    return feature == typedOther.feature
-           && value == typedOther.value;
+    return other is FontFeature
+        && other.feature == feature
+        && other.value == value;
   }
 
   @override
@@ -387,10 +387,8 @@ class TextDecoration {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! TextDecoration)
-      return false;
-    final TextDecoration typedOther = other;
-    return _mask == typedOther._mask;
+    return other is TextDecoration
+        && other._mask == _mask;
   }
 
   @override
@@ -680,30 +678,20 @@ class TextStyle {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! TextStyle)
-      return false;
-    final TextStyle typedOther = other;
-    if (_fontFamily != typedOther._fontFamily ||
-        _fontSize != typedOther._fontSize ||
-        _letterSpacing != typedOther._letterSpacing ||
-        _wordSpacing != typedOther._wordSpacing ||
-        _height != typedOther._height ||
-        _decorationThickness != typedOther._decorationThickness ||
-        _locale != typedOther._locale ||
-        _background != typedOther._background ||
-        _foreground != typedOther._foreground)
-     return false;
-    for (int index = 0; index < _encoded.length; index += 1) {
-      if (_encoded[index] != typedOther._encoded[index])
-        return false;
-    }
-    if (!_listEquals<Shadow>(_shadows, typedOther._shadows))
-      return false;
-    if (!_listEquals<String>(_fontFamilyFallback, typedOther._fontFamilyFallback))
-      return false;
-    if (!_listEquals<FontFeature>(_fontFeatures, typedOther._fontFeatures))
-      return false;
-    return true;
+    return other is TextStyle
+        && other._fontFamily == _fontFamily
+        && other._fontSize == _fontSize
+        && other._letterSpacing == _letterSpacing
+        && other._wordSpacing == _wordSpacing
+        && other._height == _height
+        && other._decorationThickness == _decorationThickness
+        && other._locale == _locale
+        && other._background == _background
+        && other._foreground == _foreground
+        && _listEquals<int>(other._encoded, _encoded)
+        && _listEquals<Shadow>(other._shadows, _shadows)
+        && _listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback)
+        && _listEquals<FontFeature>(other._fontFeatures, _fontFeatures);
   }
 
   @override
@@ -920,19 +908,14 @@ class ParagraphStyle {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final ParagraphStyle typedOther = other;
-    if (_fontFamily != typedOther._fontFamily ||
-        _fontSize != typedOther._fontSize ||
-        _height != typedOther._height ||
-        _strutStyle != typedOther._strutStyle ||
-        _ellipsis != typedOther._ellipsis ||
-        _locale != typedOther._locale)
-     return false;
-    for (int index = 0; index < _encoded.length; index += 1) {
-      if (_encoded[index] != typedOther._encoded[index])
-        return false;
-    }
-    return true;
+    return other is ParagraphStyle
+        && other._fontFamily == _fontFamily
+        && other._fontSize == _fontSize
+        && other._height == _height
+        && other._strutStyle == _strutStyle
+        && other._ellipsis == _ellipsis
+        && other._locale == _locale
+        && _listEquals<int>(other._encoded, _encoded);
   }
 
   @override
@@ -1101,18 +1084,10 @@ class StrutStyle {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final StrutStyle typedOther = other;
-    if (_fontFamily != typedOther._fontFamily)
-     return false;
-    final Int8List encodedList = _encoded.buffer.asInt8List();
-    final Int8List otherEncodedList = typedOther._encoded.buffer.asInt8List();
-    for (int index = 0; index < _encoded.lengthInBytes; index += 1) {
-      if (encodedList[index] != otherEncodedList[index])
-        return false;
-    }
-    if (!_listEquals<String>(_fontFamilyFallback, typedOther._fontFamilyFallback))
-      return false;
-    return true;
+    return other is StrutStyle
+        && other._fontFamily == _fontFamily
+        && _listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback)
+        && _listEquals<int>(other._encoded.buffer.asInt8List(), _encoded.buffer.asInt8List());
   }
 
   @override
@@ -1228,6 +1203,7 @@ class TextBox {
   );
 
   @pragma('vm:entry-point')
+  // ignore: unused_element
   TextBox._(
     this.left,
     this.top,
@@ -1282,12 +1258,12 @@ class TextBox {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final TextBox typedOther = other;
-    return typedOther.left == left
-        && typedOther.top == top
-        && typedOther.right == right
-        && typedOther.bottom == bottom
-        && typedOther.direction == direction;
+    return other is TextBox
+        && other.left == left
+        && other.top == top
+        && other.right == right
+        && other.bottom == bottom
+        && other.direction == direction;
   }
 
   @override
@@ -1392,9 +1368,9 @@ class TextPosition {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final TextPosition typedOther = other;
-    return typedOther.offset == offset
-        && typedOther.affinity == affinity;
+    return other is TextPosition
+        && other.offset == offset
+        && other.affinity == affinity;
   }
 
   @override
@@ -1476,11 +1452,9 @@ class TextRange {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! TextRange)
-      return false;
-    final TextRange typedOther = other;
-    return typedOther.start == start
-        && typedOther.end == end;
+    return other is TextRange
+        && other.start == start
+        && other.end == end;
   }
 
   @override
@@ -1530,8 +1504,8 @@ class ParagraphConstraints {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ParagraphConstraints typedOther = other;
-    return typedOther.width == width;
+    return other is ParagraphConstraints
+        && other.width == width;
   }
 
   @override
@@ -1683,6 +1657,7 @@ class LineMetrics {
   });
 
   @pragma('vm:entry-point')
+  // ignore: unused_element
   LineMetrics._(
     this.hardBreak,
     this.ascent,

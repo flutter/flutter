@@ -89,8 +89,8 @@ void main() {
     // Test driver.
     final ReceivePort testReceivePort = ReceivePort();
     testReceivePort.listen(expectAsync1<void, dynamic>((dynamic response) {
-      final int code = response[0];
-      final String message = response[1];
+      final int code = response[0] as int;
+      final String message = response[1] as String;
       switch (code) {
         case kStartCode:
           break;

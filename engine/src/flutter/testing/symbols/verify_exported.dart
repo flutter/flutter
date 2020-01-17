@@ -35,7 +35,7 @@ void main(List<String> arguments) {
     throw UnimplementedError('Script only support running on Linux or MacOS.');
   }
   final String nmPath = p.join(buildToolsPath, platform, 'clang', 'bin', 'llvm-nm');
-  assert(new Directory(outPath).existsSync());
+  assert(Directory(outPath).existsSync());
 
   final Iterable<String> releaseBuilds = Directory(outPath).listSync()
       .where((FileSystemEntity entity) => entity is Directory)
@@ -58,7 +58,7 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
   int failures = 0;
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'Flutter.framework', 'Flutter');
-    if (!new File(libFlutter).existsSync()) {
+    if (!File(libFlutter).existsSync()) {
       print('SKIPPING: $libFlutter does not exist.');
       continue;
     }
@@ -90,7 +90,7 @@ int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
   int failures = 0;
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'libflutter.so');
-    if (!new File(libFlutter).existsSync()) {
+    if (!File(libFlutter).existsSync()) {
       print('SKIPPING: $libFlutter does not exist.');
       continue;
     }

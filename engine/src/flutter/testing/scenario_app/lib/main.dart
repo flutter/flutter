@@ -76,13 +76,15 @@ Future<String> _getTimelineData() async {
   final Uri vmServiceTimelineUri = info.serverUri.resolve('getVMTimeline');
   final Map<String, dynamic> cpuTimelineJson = await _getJson(cpuProfileTimelineUri);
   final Map<String, dynamic> vmServiceTimelineJson = await _getJson(vmServiceTimelineUri);
-  final Map<String, dynamic> cpuResult = cpuTimelineJson['result'].cast<String, dynamic>();
-  final Map<String, dynamic> vmServiceResult =
-      vmServiceTimelineJson['result'].cast<String, dynamic>();
+  final Map<String, dynamic> cpuResult = cpuTimelineJson['result'] as Map<String, dynamic>;
+  final Map<String, dynamic> vmServiceResult = vmServiceTimelineJson['result'] as Map<String, dynamic>;
 
   return json.encode(<String, dynamic>{
     'stackFrames': cpuResult['stackFrames'],
-    'traceEvents': <dynamic>[...cpuResult['traceEvents'], ...vmServiceResult['traceEvents']],
+    'traceEvents': <dynamic>[
+      ...cpuResult['traceEvents'] as List<dynamic>,
+      ...vmServiceResult['traceEvents'] as List<dynamic>,
+    ],
   });
 }
 
@@ -94,7 +96,7 @@ Future<Map<String, dynamic>> _getJson(Uri uri) async {
     return null;
   }
   final String data = await utf8.decodeStream(response);
-  return json.decode(data);
+  return json.decode(data) as Map<String, dynamic>;
 }
 
 void _onBeginFrame(Duration duration) {
