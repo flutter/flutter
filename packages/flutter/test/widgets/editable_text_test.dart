@@ -3757,7 +3757,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
-  testWidgets('text selection handle visibility', (WidgetTester tester) async {
+  testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
     // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
     final TextEditingController controller = TextEditingController(text: testText);
@@ -3772,7 +3774,7 @@ void main() {
               showSelectionHandles: true,
               controller: controller,
               focusNode: FocusNode(),
-              style: Typography(platform: debugDefaultTargetPlatformOverride).black.subhead,
+              style: Typography(platform: TargetPlatform.iOS).black.subhead,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: cupertinoTextSelectionControls,
@@ -3922,7 +3924,9 @@ void main() {
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+    debugDefaultTargetPlatformOverride = null;
+  }, skip: isBrowser);
 
   testWidgets('scrolling doesn\'t bounce', (WidgetTester tester) async {
     // 3 lines of text, where the last line overflows and requires scrolling.

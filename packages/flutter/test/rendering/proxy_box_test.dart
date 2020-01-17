@@ -81,25 +81,21 @@ void main() {
   });
 
   test('RenderPhysicalModel compositing on non-Fuchsia', () {
-    for (final TargetPlatform platform in TargetPlatform.values) {
-      if (platform == TargetPlatform.fuchsia) {
-        continue;
-      }
-      debugDefaultTargetPlatformOverride = platform;
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-      final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
-      layout(root, phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
+    final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
+    layout(root, phase: EnginePhase.composite);
+    expect(root.needsCompositing, isTrue);
 
-      // Flutter now composites physical shapes on all platforms.
-      root.elevation = 1.0;
-      pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
+    // Flutter now composites physical shapes on all platforms.
+    root.elevation = 1.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isTrue);
 
-      root.elevation = 0.0;
-      pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
-    }
+    root.elevation = 0.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isTrue);
+
     debugDefaultTargetPlatformOverride = null;
   });
 
@@ -125,53 +121,44 @@ void main() {
   });
 
   group('RenderPhysicalShape', () {
+    setUp(() {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    });
+
     test('shape change triggers repaint', () {
-      for (final TargetPlatform platform in TargetPlatform.values) {
-        if (platform == TargetPlatform.fuchsia) {
-          continue;
-        }
-        debugDefaultTargetPlatformOverride = platform;
+      final RenderPhysicalShape root = RenderPhysicalShape(
+        color: const Color(0xffff00ff),
+        clipper: const ShapeBorderClipper(shape: CircleBorder()),
+      );
+      layout(root, phase: EnginePhase.composite);
+      expect(root.debugNeedsPaint, isFalse);
 
-        final RenderPhysicalShape root = RenderPhysicalShape(
-          color: const Color(0xffff00ff),
-          clipper: const ShapeBorderClipper(shape: CircleBorder()),
-        );
-        layout(root, phase: EnginePhase.composite);
-        expect(root.debugNeedsPaint, isFalse);
+      // Same shape, no repaint.
+      root.clipper = const ShapeBorderClipper(shape: CircleBorder());
+      expect(root.debugNeedsPaint, isFalse);
 
-        // Same shape, no repaint.
-        root.clipper = const ShapeBorderClipper(shape: CircleBorder());
-        expect(root.debugNeedsPaint, isFalse);
-
-        // Different shape triggers repaint.
-        root.clipper = const ShapeBorderClipper(shape: StadiumBorder());
-        expect(root.debugNeedsPaint, isTrue);
-      }
-      debugDefaultTargetPlatformOverride = null;
+      // Different shape triggers repaint.
+      root.clipper = const ShapeBorderClipper(shape: StadiumBorder());
+      expect(root.debugNeedsPaint, isTrue);
     });
 
     test('compositing on non-Fuchsia', () {
-      for (final TargetPlatform platform in TargetPlatform.values) {
-        if (platform == TargetPlatform.fuchsia) {
-          continue;
-        }
-        debugDefaultTargetPlatformOverride = platform;
-        final RenderPhysicalShape root = RenderPhysicalShape(
-          color: const Color(0xffff00ff),
-          clipper: const ShapeBorderClipper(shape: CircleBorder()),
-        );
-        layout(root, phase: EnginePhase.composite);
-        expect(root.needsCompositing, isTrue);
+      final RenderPhysicalShape root = RenderPhysicalShape(
+        color: const Color(0xffff00ff),
+        clipper: const ShapeBorderClipper(shape: CircleBorder()),
+      );
+      layout(root, phase: EnginePhase.composite);
+      expect(root.needsCompositing, isTrue);
 
-        // On non-Fuchsia platforms, we composite physical shape layers
-        root.elevation = 1.0;
-        pumpFrame(phase: EnginePhase.composite);
-        expect(root.needsCompositing, isTrue);
+      // On non-Fuchsia platforms, we composite physical shape layers
+      root.elevation = 1.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isTrue);
 
-        root.elevation = 0.0;
-        pumpFrame(phase: EnginePhase.composite);
-        expect(root.needsCompositing, isTrue);
-      }
+      root.elevation = 0.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isTrue);
+
       debugDefaultTargetPlatformOverride = null;
     });
   });
@@ -467,6 +454,18 @@ void main() {
     // transform -> clip
     _testFittedBoxWithClipRectLayer();
   });
+
+  test('RenderFractionalTranslation updates its semantics after its translation value is set', () {
+    final _TestSemanticsUpdateRenderFractionalTranslation box = _TestSemanticsUpdateRenderFractionalTranslation(
+      translation: const Offset(0.5, 0.5),
+    );
+    layout(box, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    expect(box.markNeedsSemanticsUpdateCallCount, 1);
+    box.translation = const Offset(0.4, 0.4);
+    expect(box.markNeedsSemanticsUpdateCallCount, 2);
+    box.translation = const Offset(0.3, 0.3);
+    expect(box.markNeedsSemanticsUpdateCallCount, 3);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -503,7 +502,7 @@ void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(renderObject.debugLayer, null);
   layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
   final Layer layer = renderObject.debugLayer;
-  expect(layer, isA<L>());
+  expect(layer, isInstanceOf<L>());
   expect(layer, isNotNull);
 
   // Mark for repaint otherwise pumpFrame is a noop.
@@ -522,4 +521,19 @@ class _TestPathClipper extends CustomClipper<Path> {
   }
   @override
   bool shouldReclip(_TestPathClipper oldClipper) => false;
+}
+
+class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
+  _TestSemanticsUpdateRenderFractionalTranslation({
+    @required Offset translation,
+    RenderBox child,
+  }) : super(translation: translation, child: child);
+
+  int markNeedsSemanticsUpdateCallCount = 0;
+
+  @override
+  void markNeedsSemanticsUpdate() {
+    markNeedsSemanticsUpdateCallCount++;
+    super.markNeedsSemanticsUpdate();
+  }
 }

@@ -12,6 +12,7 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -71,7 +72,7 @@ void main() {
     testUsingContext('throws tool exit when lockfile open fails', () async {
       when(mockFileSystem.file(argThat(endsWith('lockfile')))).thenReturn(mockFile);
       when(mockFile.openSync(mode: anyNamed('mode'))).thenThrow(const FileSystemException());
-      expect(() async => await Cache.lock(), throwsToolExit());
+      expect(() async => await Cache.lock(), throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -230,7 +231,7 @@ void main() {
         'FLUTTER_STORAGE_BASE_URL': ' http://foo',
       });
       final Cache cache = Cache();
-      expect(() => cache.storageBaseUrl, throwsToolExit());
+      expect(() => cache.storageBaseUrl, throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => MockPlatform(),
     });

@@ -33,7 +33,7 @@ void main() {
     }
     expect(error, isNotNull);
     expect(error.diagnostics.length, 3);
-    expect(error.diagnostics.last, isA<DiagnosticsProperty<Ticker>>());
+    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
     expect(
       error.toStringDeep(),
       startsWith(

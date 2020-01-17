@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
@@ -86,26 +85,20 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
-      value = false;
-      await tester.pumpWidget(buildFrame(platform));
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
-      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    expect(value, isFalse);
 
-      await tester.tap(find.byType(SwitchListTile));
-      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
-    }
+    await tester.tap(find.byType(SwitchListTile));
+    expect(value, isTrue);
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia ]) {
-      value = false;
-      await tester.pumpWidget(buildFrame(platform));
-      await tester.pumpAndSettle(); // Finish the theme change animation.
+    await tester.pumpWidget(buildFrame(TargetPlatform.android));
+    await tester.pumpAndSettle(); // Finish the theme change animation.
 
-      expect(find.byType(CupertinoSwitch), findsNothing);
-      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
-      await tester.tap(find.byType(SwitchListTile));
-      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
-    }
+    expect(find.byType(CupertinoSwitch), findsNothing);
+    expect(value, isTrue);
+    await tester.tap(find.byType(SwitchListTile));
+    expect(value, isFalse);
   });
 
   testWidgets('SwitchListTile contentPadding', (WidgetTester tester) async {

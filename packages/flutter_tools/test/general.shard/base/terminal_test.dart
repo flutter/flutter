@@ -120,7 +120,7 @@ void main() {
         <String>['a', 'b', 'c'],
         prompt: 'Please choose something',
         logger: null,
-      ), throwsStateError);
+      ), throwsA(isInstanceOf<StateError>()));
     });
 
     testWithoutContext('character prompt', () async {

@@ -8,12 +8,8 @@ import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
-import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart' as globals;
@@ -54,59 +50,18 @@ class AndroidEmulator extends Emulator {
 
   @override
   Future<void> launch() async {
-    final Process process = await processUtils.start(
-      <String>[getEmulatorPath(androidSdk), '-avd', id],
+    final Future<void> launchResult = processUtils.run(
+      <String>[getEmulatorPath(), '-avd', id],
+      throwOnError: true,
     );
-
-    // Record output from the emulator process.
-    final List<String> stdoutList = <String>[];
-    final List<String> stderrList = <String>[];
-    final StreamSubscription<String> stdoutSubscription = process.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen(stdoutList.add);
-    final StreamSubscription<String> stderrSubscription = process.stderr
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen(stderrList.add);
-    final Future<void> stdioFuture = waitGroup<void>(<Future<void>>[
-      stdoutSubscription.asFuture<void>(),
-      stderrSubscription.asFuture<void>(),
+    // The emulator continues running on a successful launch, so if it hasn't
+    // quit within 3 seconds we assume that's a success and just return. This
+    // means that on a slow machine, a failure that takes more than three
+    // seconds won't be recognized as such... :-/
+    return Future.any<void>(<Future<void>>[
+      launchResult,
+      Future<void>.delayed(const Duration(seconds: 3)),
     ]);
-
-    // The emulator continues running on success, so we don't wait for the
-    // process to complete before continuing. However, if the process fails
-    // after the startup phase (3 seconds), then we only echo its output if
-    // its error code is non-zero and its stderr is non-empty.
-    bool earlyFailure = true;
-    unawaited(process.exitCode.then((int status) async {
-      if (status == 0) {
-        globals.printTrace('The Android emulator exited successfully');
-        return;
-      }
-      // Make sure the process' stdout and stderr are drained.
-      await stdioFuture;
-      unawaited(stdoutSubscription.cancel());
-      unawaited(stderrSubscription.cancel());
-      if (stdoutList.isNotEmpty) {
-        globals.printTrace('Android emulator stdout:');
-        stdoutList.forEach(globals.printTrace);
-      }
-      if (!earlyFailure && stderrList.isEmpty) {
-        globals.printStatus('The Android emulator exited with code $status');
-        return;
-      }
-      final String when = earlyFailure ? 'during startup' : 'after startup';
-      globals.printError('The Android emulator exited with code $status $when');
-      globals.printError('Android emulator stderr:');
-      stderrList.forEach(globals.printError);
-      globals.printError('Address these issues and try again.');
-    }));
-
-    // Wait a few seconds for the emulator to start.
-    await Future<void>.delayed(const Duration(seconds: 3));
-    earlyFailure = false;
-    return;
   }
 }
 

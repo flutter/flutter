@@ -22,8 +22,8 @@ void main() {
         'Card, Dialog, Drawer, or Scaffold.\n',
       ),
     );
-    expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
-    expect(error.diagnostics[4], isA<DiagnosticsBlock>());
+    expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics[4], isInstanceOf<DiagnosticsBlock>());
     expect(error.toStringDeep(),
       'FlutterError\n'
       '   No Material widget found.\n'
@@ -60,8 +60,8 @@ void main() {
         'add a Localization widget with a MaterialLocalizations delegate.\n',
       ),
     );
-    expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
-    expect(error.diagnostics[5], isA<DiagnosticsBlock>());
+    expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics[5], isInstanceOf<DiagnosticsBlock>());
     expect(error.toStringDeep(),
       'FlutterError\n'
       '   No MaterialLocalizations found.\n'
@@ -97,8 +97,8 @@ void main() {
     expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 5);
-    expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
-    expect(error.diagnostics[3], isA<DiagnosticsBlock>());
+    expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics[3], isInstanceOf<DiagnosticsBlock>());
     expect(error.diagnostics[4].level, DiagnosticLevel.hint);
     expect(
       error.diagnostics[4].toStringDeep(),

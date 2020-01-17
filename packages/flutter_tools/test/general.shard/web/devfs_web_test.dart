@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -79,7 +80,7 @@ void main() {
   });
 
   test('Throws a tool exit if bind fails with a SocketException', () => testbed.run(() async {
-    expect(WebAssetServer.start('hello', 1234), throwsToolExit());
+    expect(WebAssetServer.start('hello', 1234), throwsA(isInstanceOf<ToolExit>()));
   }));
 
   test('Can catch exceptions through the onError callback', () => testbed.run(() async {
@@ -91,7 +92,7 @@ void main() {
     when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
     requestController.add(request);
 
-    expect(closeCompleter.future, throwsStateError);
+    expect(closeCompleter.future, throwsA(isInstanceOf<StateError>()));
   }));
 
   test('Handles against malformed manifest', () => testbed.run(() async {

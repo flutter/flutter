@@ -84,7 +84,7 @@ void main() {
       testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
           () { IOSDevice('device-123'); },
-          throwsAssertionError,
+          throwsA(isInstanceOf<AssertionError>()),
         );
       }, overrides: <Type, Generator>{
         Platform: () => platform,
@@ -788,7 +788,7 @@ void main() {
             .thenAnswer((Invocation invocation) => Future<String>.value(''));
         expect(
             () async { await IOSDevice.getAttachedDevices(); },
-            throwsA(isA<UnsupportedError>()),
+            throwsA(isInstanceOf<UnsupportedError>()),
         );
       }, overrides: <Type, Generator>{
         IMobileDevice: () => mockIMobileDevice,

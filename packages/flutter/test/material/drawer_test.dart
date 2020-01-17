@@ -57,8 +57,9 @@ void main() {
     expect(find.text('header'), findsOneWidget);
   });
 
-  testWidgets('Drawer dismiss barrier has label', (WidgetTester tester) async {
+  testWidgets('Drawer dismiss barrier has label on iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -79,9 +80,10 @@ void main() {
     ));
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+    debugDefaultTargetPlatformOverride = null;
+  });
 
-  testWidgets('Drawer dismiss barrier has no label', (WidgetTester tester) async {
+  testWidgets('Drawer dismiss barrier has no label on Android', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const MaterialApp(
@@ -103,7 +105,7 @@ void main() {
     )));
 
     semantics.dispose();
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
 
   testWidgets('Scaffold drawerScrimColor', (WidgetTester tester) async {
     // The scrim is a Container within a Semantics node labeled "Dismiss",

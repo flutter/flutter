@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -248,7 +249,7 @@ void main() {
         .thenAnswer((Invocation invocation) async {
           return OperationResult(1, 'fail', fatal: true);
         });
-      expect(terminalHandler.processTerminalInput('r'), throwsToolExit());
+      expect(terminalHandler.processTerminalInput('r'), throwsA(isInstanceOf<ToolExit>()));
     });
 
     testUsingContext('r - hotReload unsupported', () async {
@@ -291,7 +292,7 @@ void main() {
         .thenAnswer((Invocation invocation) async {
           return OperationResult(1, 'fail', fatal: true);
         });
-      expect(() => terminalHandler.processTerminalInput('R'), throwsToolExit());
+      expect(() => terminalHandler.processTerminalInput('R'), throwsA(isInstanceOf<ToolExit>()));
     });
 
     testUsingContext('R - hot restart unsupported', () async {

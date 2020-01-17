@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
@@ -62,7 +63,7 @@ void main() {
         const GitTagVersion.unknown(),
         flutterVersion,
       );
-      expect(result, throwsToolExit());
+      expect(result, throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => fakePlatform,
     });
@@ -88,7 +89,7 @@ void main() {
         gitTagVersion,
         flutterVersion,
       );
-      expect(result, throwsToolExit());
+      expect(result, throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => fakePlatform,
     });

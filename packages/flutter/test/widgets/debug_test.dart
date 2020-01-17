@@ -74,7 +74,7 @@ void main() {
           } finally {
             expect(error, isNotNull);
             expect(error.diagnostics.length, 4);
-            expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
+            expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
             expect(
               error.toStringDeep(),
               equalsIgnoringHashCodes(
@@ -106,7 +106,7 @@ void main() {
           } finally {
             expect(error, isNotNull);
             expect(error.diagnostics.length, 5);
-            expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
+            expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
             expect(error.diagnostics.last.level, DiagnosticLevel.hint);
             expect(
               error.diagnostics.last.toStringDeep(),
@@ -147,7 +147,7 @@ void main() {
     } finally {
       expect(error, isNotNull);
       expect(error.diagnostics.length, 4);
-      expect(error.diagnostics[1], isA<DiagnosticsProperty<Widget>>());
+      expect(error.diagnostics[1], isInstanceOf<DiagnosticsProperty<Widget>>());
       expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
       expect(
         error.diagnostics[1].toStringDeep(),
@@ -190,7 +190,7 @@ void main() {
     } finally {
       expect(error, isNotNull);
       expect(error.diagnostics.length, 3);
-      expect(error.diagnostics[1], isA<DiagnosticsProperty<Widget>>());
+      expect(error.diagnostics[1], isInstanceOf<DiagnosticsProperty<Widget>>());
       expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
       expect(
         error.diagnostics[1].toStringDeep(),

@@ -38,7 +38,7 @@ void main() {
       when(mockProcessManager.run(<String>['false'])).thenAnswer(
           (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(0, 1, '', '')));
       expect(() async => await processUtils.run(<String>['false'], throwOnError: true),
-             throwsA(isA<ProcessException>()));
+             throwsA(isInstanceOf<ProcessException>()));
     });
   });
 
@@ -236,7 +236,7 @@ void main() {
         <String>['dummy'],
         timeout: delay - const Duration(milliseconds: 500),
         timeoutRetries: 0,
-      ), throwsA(isA<ProcessException>()));
+      ), throwsA(isInstanceOf<ProcessException>()));
     });
   });
 

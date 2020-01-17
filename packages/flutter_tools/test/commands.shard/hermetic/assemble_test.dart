@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -52,7 +53,7 @@ void main() {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
     expect(commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']),
-      throwsToolExit());
+      throwsA(isInstanceOf<ToolExit>()));
   });
 
   testbed.test('Throws ToolExit if called with non-existent rule', () async {
@@ -63,7 +64,7 @@ void main() {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
     expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']),
-      throwsToolExit());
+      throwsA(isInstanceOf<ToolExit>()));
   });
 
   testbed.test('Does not log stack traces during build failure', () async {
@@ -77,7 +78,7 @@ void main() {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
     await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
-      throwsToolExit());
+      throwsA(isInstanceOf<ToolExit>()));
     expect(testLogger.errorText, contains('bar'));
     expect(testLogger.errorText, isNot(contains(testStackTrace.toString())));
   });

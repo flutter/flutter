@@ -325,12 +325,6 @@ void main() {
 
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
-
-    await tester.pumpWidget(build(TargetPlatform.macOS));
-    await tester.pumpAndSettle(); // Run theme change animation.
-
-    expect(find.byIcon(Icons.more_vert), findsNothing);
-    expect(find.byIcon(Icons.more_horiz), findsOneWidget);
   });
 
   group('PopupMenuButton with Icon', () {
@@ -351,7 +345,7 @@ void main() {
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
         );
-      }, throwsAssertionError);
+      }, throwsA(isInstanceOf<AssertionError>()));
     });
 
     testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {

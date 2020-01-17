@@ -16,7 +16,7 @@ void main() {
         find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement)
       );
       expect(element, isNotNull);
-      expect(element.renderObject, isA<RenderDecoratedBox>());
+      expect(element.renderObject is RenderDecoratedBox, isTrue);
       final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(expectedDecoration));
     }

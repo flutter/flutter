@@ -1356,7 +1356,7 @@ plugin1=${plugin1.path}
           localGradleErrors: const <GradleHandledError>[],
         );
       },
-      throwsA(isA<ProcessException>()));
+      throwsA(isInstanceOf<ProcessException>()));
 
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,

@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -43,6 +44,45 @@ class MockAndroidApk extends Mock implements AndroidApk {
   File get file => MockFile();
 }
 
+class MockProcessUtils extends Mock implements ProcessUtils {
+  @override
+  Future<RunResult> run(
+      List<String> cmd, {
+        bool throwOnError = false,
+        RunResultChecker whiteListFailures,
+        String workingDirectory,
+        bool allowReentrantFlutter = false,
+        Map<String, String> environment,
+        Duration timeout,
+        int timeoutRetries = 0,
+      }) async {
+    if (cmd.contains('version')) {
+      return RunResult(ProcessResult(0, 0, 'Android Debug Bridge version 1.0.41', ''), cmd);
+    }
+    if (cmd.contains('android.intent.action.RUN')) {
+      _runCmd = cmd;
+    }
+    return RunResult(ProcessResult(0, 0, '', ''), cmd);
+  }
+
+  @override
+  Future<int> stream(
+      List<String> cmd, {
+        String workingDirectory,
+        bool allowReentrantFlutter = false,
+        String prefix = '',
+        bool trace = false,
+        RegExp filter,
+        StringConverter mapFunction,
+        Map<String, String> environment,
+      }) async {
+    return 0;
+  }
+
+  List<String> _runCmd;
+  List<String> get runCmd => _runCmd;
+}
+
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 
 void main() {
@@ -57,11 +97,13 @@ void main() {
       MockAndroidApk mockApk;
       MockProcessManager mockProcessManager;
       MockAndroidSdk mockAndroidSdk;
+      MockProcessUtils mockProcessUtils;
 
       setUp(() {
         mockApk = MockAndroidApk();
         mockProcessManager = MockProcessManager();
         mockAndroidSdk = MockAndroidSdk();
+        mockProcessUtils = MockProcessUtils();
       });
 
       testUsingContext('succeeds with --cache-sksl', () async {
@@ -82,20 +124,6 @@ void main() {
         )).thenAnswer((_) async {
           return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', '');
         });
-        when(mockProcessManager.run(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
-          return ProcessResult(0, 0, '', '');
-        });
-        when(mockProcessManager.start(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
-          return FakeProcess();
-        });
 
         final LaunchResult launchResult = await device.startApp(
           mockApk,
@@ -106,14 +134,18 @@ void main() {
           ),
           platformArgs: <String, dynamic>{},
         );
-
         expect(launchResult.started, isTrue);
-        expect(verify(mockProcessManager.run(captureAny)).captured.last.join(','),
-          contains(<String>['--ez', 'cache-sksl', 'true'].join(',')));
+
+        final int cmdIndex = mockProcessUtils.runCmd.indexOf('cache-sksl');
+        expect(
+            mockProcessUtils.runCmd.sublist(cmdIndex - 1, cmdIndex + 2),
+            equals(<String>['--ez', 'cache-sksl', 'true']),
+        );
       }, overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => mockProcessManager,
+        ProcessUtils: () => mockProcessUtils,
       });
 
       testUsingContext('can run a release build on x64', () async {
@@ -134,20 +166,6 @@ void main() {
         )).thenAnswer((_) async {
           return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]\n[ro.product.cpu.abi]: [x86_64]', '');
         });
-        when(mockProcessManager.run(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
-          return ProcessResult(0, 0, '', '');
-        });
-        when(mockProcessManager.start(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
-          return FakeProcess();
-        });
 
         final LaunchResult launchResult = await device.startApp(
           mockApk,
@@ -162,6 +180,7 @@ void main() {
         AndroidSdk: () => mockAndroidSdk,
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => mockProcessManager,
+        ProcessUtils: () => mockProcessUtils,
       });
     });
   });
@@ -633,7 +652,7 @@ flutter:
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
 
-      expect(forwarder.forward(123, hostPort: 456), throwsA(isA<ProcessException>()));
+      expect(forwarder.forward(123, hostPort: 456), throwsA(isInstanceOf<ProcessException>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

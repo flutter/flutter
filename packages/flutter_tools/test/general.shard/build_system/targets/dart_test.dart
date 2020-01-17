@@ -113,7 +113,7 @@ flutter_tools:lib/''');
     final BuildResult result = await buildSystem.build(const KernelSnapshot(),
         androidEnvironment..defines.remove(kBuildMode));
 
-    expect(result.exceptions.values.single.exception, isA<MissingDefineException>());
+    expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
   test('kernel_snapshot handles null result from kernel compilation', () => testbed.run(() async {
@@ -141,7 +141,7 @@ flutter_tools:lib/''');
     });
     final BuildResult result = await buildSystem.build(const KernelSnapshot(), androidEnvironment);
 
-    expect(result.exceptions.values.single.exception, isA<Exception>());
+    expect(result.exceptions.values.single.exception, isInstanceOf<Exception>());
   }));
 
   test('kernel_snapshot does not use track widget creation on profile builds', () => testbed.run(() async {
@@ -283,35 +283,35 @@ flutter_tools:lib/''');
     final BuildResult result = await buildSystem.build(const AotElfProfile(),
         androidEnvironment..defines.remove(kBuildMode));
 
-    expect(result.exceptions.values.single.exception, isA<MissingDefineException>());
+    expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
   test('aot_elf_profile throws error if missing target platform', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const AotElfProfile(),
         androidEnvironment..defines.remove(kTargetPlatform));
 
-    expect(result.exceptions.values.single.exception, isA<MissingDefineException>());
+    expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
   test('aot_assembly_profile throws error if missing build mode', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(),
         iosEnvironment..defines.remove(kBuildMode));
 
-    expect(result.exceptions.values.single.exception, isA<MissingDefineException>());
+    expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
   test('aot_assembly_profile throws error if missing target platform', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(),
         iosEnvironment..defines.remove(kTargetPlatform));
 
-    expect(result.exceptions.values.single.exception, isA<MissingDefineException>());
+    expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
   test('aot_assembly_profile throws error if built for non-iOS platform', () => testbed.run(() async {
     final BuildResult result = await buildSystem
         .build(const AotAssemblyProfile(), androidEnvironment);
 
-    expect(result.exceptions.values.single.exception, isA<Exception>());
+    expect(result.exceptions.values.single.exception, isInstanceOf<Exception>());
   }));
 
   test('aot_assembly_profile will lipo binaries together when multiple archs are requested', () => testbed.run(() async {
