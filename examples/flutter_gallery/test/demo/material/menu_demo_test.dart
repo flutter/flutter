@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -83,7 +82,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
         return const Evaluation.pass();
       }
 
-      final _ContrastReport report = _ContrastReport(subset);
+      final ContrastReport report = ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
 
       if (contrastRatio - kMinimumRatio >= kTolerance) {
@@ -146,78 +145,4 @@ class CustomContrastGuideline extends AccessibilityGuideline {
 
   @override
   String get description => 'Contrast should follow WCAG guidelines';
-}
-
-class _ContrastReport {
-  factory _ContrastReport(List<int> colors) {
-    final Map<int, int> colorHistogram = <int, int>{};
-    for (final int color in colors) {
-      colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
-    }
-    if (colorHistogram.length == 1) {
-      final Color hslColor = Color(colorHistogram.keys.first);
-      return _ContrastReport._(hslColor, hslColor);
-    }
-    // to determine the lighter and darker color, partition the colors
-    // by lightness and then choose the mode from each group.
-    double averageLightness = 0.0;
-    for (final int color in colorHistogram.keys) {
-      final HSLColor hslColor = HSLColor.fromColor(Color(color));
-      averageLightness += hslColor.lightness * colorHistogram[color];
-    }
-    averageLightness /= colors.length;
-    assert(averageLightness != double.nan);
-    int lightColor = 0;
-    int darkColor = 0;
-    int lightCount = 0;
-    int darkCount = 0;
-    // Find the most frequently occurring light and dark color.
-    for (final MapEntry<int, int> entry in colorHistogram.entries) {
-      final HSLColor color = HSLColor.fromColor(Color(entry.key));
-      final int count = entry.value;
-      if (color.lightness <= averageLightness && count > darkCount) {
-        darkColor = entry.key;
-        darkCount = count;
-      } else if (color.lightness > averageLightness && count > lightCount) {
-        lightColor = entry.key;
-        lightCount = count;
-      }
-    }
-    assert (lightColor != 0 && darkColor != 0);
-    return _ContrastReport._(Color(lightColor), Color(darkColor));
-  }
-
-  const _ContrastReport._(this.lightColor, this.darkColor);
-
-  final Color lightColor;
-  final Color darkColor;
-
-  /// Computes the contrast ratio as defined by the WCAG.
-  ///
-  /// source: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  double contrastRatio() {
-    return (_luminance(lightColor) + 0.05) / (_luminance(darkColor) + 0.05);
-  }
-
-  /// Relative luminance calculation.
-  ///
-  /// Based on https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-  static double _luminance(Color color) {
-    double r = color.red / 255.0;
-    double g = color.green / 255.0;
-    double b = color.blue / 255.0;
-    if (r <= 0.03928)
-      r /= 12.92;
-    else
-      r = math.pow((r + 0.055)/ 1.055, 2.4).toDouble();
-    if (g <= 0.03928)
-      g /= 12.92;
-    else
-      g = math.pow((g + 0.055)/ 1.055, 2.4).toDouble();
-    if (b <= 0.03928)
-      b /= 12.92;
-    else
-      b = math.pow((b + 0.055)/ 1.055, 2.4).toDouble();
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  }
 }

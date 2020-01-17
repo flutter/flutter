@@ -268,7 +268,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       if (subset.isEmpty) {
         return result;
       }
-      final _ContrastReport report = _ContrastReport(subset);
+      final ContrastReport report = ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
@@ -345,15 +345,15 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   String get description => 'Text contrast should follow WCAG guidelines';
 }
 
-class _ContrastReport {
-  factory _ContrastReport(List<int> colors) {
+class ContrastReport {
+  factory ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
     for (final int color in colors) {
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
     }
     if (colorHistogram.length == 1) {
       final Color hslColor = Color(colorHistogram.keys.first);
-      return _ContrastReport._(hslColor, hslColor);
+      return ContrastReport._(hslColor, hslColor);
     }
     // to determine the lighter and darker color, partition the colors
     // by lightness and then choose the mode from each group.
@@ -381,10 +381,10 @@ class _ContrastReport {
       }
     }
     assert (lightColor != 0 && darkColor != 0);
-    return _ContrastReport._(Color(lightColor), Color(darkColor));
+    return ContrastReport._(Color(lightColor), Color(darkColor));
   }
 
-  const _ContrastReport._(this.lightColor, this.darkColor);
+  const ContrastReport._(this.lightColor, this.darkColor);
 
   final Color lightColor;
   final Color darkColor;
