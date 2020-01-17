@@ -141,7 +141,6 @@ class ChromeLauncher {
         ...<String>['--headless', '--disable-gpu', '--no-sandbox'],
       url,
     ];
-    globals.printStatus(args.join('\n'));
 
     final Process process = await globals.processManager.start(args);
 
