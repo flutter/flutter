@@ -15,9 +15,23 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 
 void main() {
-  testWidgets('Menu icon satisfies accessibility contrast ratio guidelines', (WidgetTester tester) async {
+  testWidgets('Menu icon satisfies accessibility contrast ratio guidelines, light mode', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: kLightGalleryTheme,
+      home: const MenuDemo(),
+    ));
+
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    final List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList()
+        + find.byIcon(Icons.more_horiz).evaluate().toList();
+
+    await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: elements)));
+  });
+
+  testWidgets('Menu icon satisfies accessibility contrast ratio guidelines, dark mode', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: kDarkGalleryTheme,
       home: const MenuDemo(),
     ));
 
