@@ -71,7 +71,7 @@ List<int> saveCompilationTrace() {
   final dynamic result = _saveCompilationTrace();
   if (result is Error)
     throw result;
-  return result;
+  return result as List<int>;
 }
 
 dynamic _saveCompilationTrace() native 'SaveCompilationTrace';

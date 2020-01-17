@@ -101,13 +101,13 @@ Future<int> starter(
     return 1;
   }
 
-  if (options['train']) {
+  if (options['train'] as bool) {
     if (!options.rest.isNotEmpty) {
       throw Exception('Must specify input.dart');
     }
 
     final String input = options.rest[0];
-    final String sdkRoot = options['sdk-root'];
+    final String sdkRoot = options['sdk-root'] as String;
     final Directory temp =
         Directory.systemTemp.createTempSync('train_frontend_server');
     try {
@@ -143,7 +143,7 @@ Future<int> starter(
 
   compiler ??= _FlutterFrontendCompiler(output,
       transformer: transformer,
-      unsafePackageSerialization: options['unsafe-package-serialization']);
+      unsafePackageSerialization: options['unsafe-package-serialization'] as bool);
 
   if (options.rest.isNotEmpty) {
     return await compiler.compile(options.rest[0], options) ? 0 : 254;

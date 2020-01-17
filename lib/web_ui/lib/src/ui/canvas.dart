@@ -81,6 +81,15 @@ class Vertices {
     engine.initWebGl();
   }
 
+  /// Creates a set of vertex data for use with [Canvas.drawVertices].
+  ///
+  /// The [mode] and [positions] parameters must not be null.
+  ///
+  /// If the [textureCoordinates] or [colors] parameters are provided, they must
+  /// be the same length as [positions].
+  ///
+  /// If the [indices] parameter is provided, all values in the list must be
+  /// valid index values for [positions].
   factory Vertices(
     VertexMode mode,
     List<Offset> positions, {
@@ -137,6 +146,24 @@ class Vertices {
     return list;
   }
 
+  /// Creates a set of vertex data for use with [Canvas.drawVertices], directly
+  /// using the encoding methods of [new Vertices].
+  ///
+  /// The [mode] parameter must not be null.
+  ///
+  /// The [positions] list is interpreted as a list of repeated pairs of x,y
+  /// coordinates. It must not be null.
+  ///
+  /// The [textureCoordinates] list is interpreted as a list of repeated pairs
+  /// of x,y coordinates, and must be the same length of [positions] if it
+  /// is not null.
+  ///
+  /// The [colors] list is interpreted as a list of RGBA encoded colors, similar
+  /// to [Color.value]. It must be half length of [positions] if it is not
+  /// null.
+  ///
+  /// If the [indices] list is provided, all values in the list must be
+  /// valid index values for [positions].
   factory Vertices.raw(
     VertexMode mode,
     Float32List positions, {
@@ -953,11 +980,18 @@ class Canvas {
     _canvas.drawVertices(vertices, blendMode, paint);
   }
 
-  //
-  // See also:
-  //
-  //  * [drawRawAtlas], which takes its arguments as typed data lists rather
-  //    than objects.
+  /// Draws part of an image - the [atlas] - onto the canvas.
+  ///
+  /// This method allows for optimization when you only want to draw part of an
+  /// image on the canvas, such as when using sprites or zooming. It is more
+  /// efficient than using clips or masks directly.
+  ///
+  /// All parameters must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [drawRawAtlas], which takes its arguments as typed data lists rather
+  ///    than objects.
   void drawAtlas(Image atlas, List<RSTransform> transforms, List<Rect> rects,
       List<Color> colors, BlendMode blendMode, Rect cullRect, Paint paint) {
     assert(atlas != null); // atlas is checked on the engine side
@@ -980,21 +1014,26 @@ class Canvas {
     throw UnimplementedError();
   }
 
-  //
-  // The `rstTransforms` argument is interpreted as a list of four-tuples, with
-  // each tuple being ([RSTransform.scos], [RSTransform.ssin],
-  // [RSTransform.tx], [RSTransform.ty]).
-  //
-  // The `rects` argument is interpreted as a list of four-tuples, with each
-  // tuple being ([Rect.left], [Rect.top], [Rect.right], [Rect.bottom]).
-  //
-  // The `colors` argument, which can be null, is interpreted as a list of
-  // 32-bit colors, with the same packing as [Color.value].
-  //
-  // See also:
-  //
-  //  * [drawAtlas], which takes its arguments as objects rather than typed
-  //    data lists.
+  /// Draws part of an image - the [atlas] - onto the canvas.
+  ///
+  /// This method allows for optimization when you only want to draw part of an
+  /// image on the canvas, such as when using sprites or zooming. It is more
+  /// efficient than using clips or masks directly.
+  ///
+  /// The [rstTransforms] argument is interpreted as a list of four-tuples, with
+  /// each tuple being ([RSTransform.scos], [RSTransform.ssin],
+  /// [RSTransform.tx], [RSTransform.ty]).
+  ///
+  /// The [rects] argument is interpreted as a list of four-tuples, with each
+  /// tuple being ([Rect.left], [Rect.top], [Rect.right], [Rect.bottom]).
+  ///
+  /// The [colors] argument, which can be null, is interpreted as a list of
+  /// 32-bit colors, with the same packing as [Color.value].
+  ///
+  /// See also:
+  ///
+  ///  * [drawAtlas], which takes its arguments as objects rather than typed
+  ///    data lists.
   void drawRawAtlas(Image atlas, Float32List rstTransforms, Float32List rects,
       Int32List colors, BlendMode blendMode, Rect cullRect, Paint paint) {
     assert(atlas != null); // atlas is checked on the engine side

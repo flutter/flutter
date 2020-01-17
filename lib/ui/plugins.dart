@@ -25,8 +25,8 @@ class CallbackHandle {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final CallbackHandle typedOther = other;
-    return _handle == typedOther._handle;
+    return other is CallbackHandle
+        && other._handle == _handle;
   }
 
   @override
