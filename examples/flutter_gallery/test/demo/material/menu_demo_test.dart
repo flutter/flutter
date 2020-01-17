@@ -22,8 +22,7 @@ void main() {
 
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    final List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList()
-        + find.byIcon(Icons.more_horiz).evaluate().toList();
+    final List<Element> elements = find.byWidgetPredicate((widget) => widget is Icon).evaluate().toList();
 
     await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: elements)));
   });
@@ -36,8 +35,7 @@ void main() {
 
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    final List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList()
-        + find.byIcon(Icons.more_horiz).evaluate().toList();
+    final List<Element> elements = find.byWidgetPredicate((widget) => widget is Icon).evaluate().toList();
 
     await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: elements)));
   });
