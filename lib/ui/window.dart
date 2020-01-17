@@ -483,8 +483,8 @@ class Locale {
   @override
   int get hashCode => hashValues(languageCode, scriptCode, countryCode);
 
-  static Locale cachedLocale;
-  static String cachedLocaleString;
+  static Locale _cachedLocale;
+  static String _cachedLocaleString;
 
   /// Returns a string representing the locale.
   ///
@@ -493,11 +493,11 @@ class Locale {
   /// purposes only. For parseable results, use [toLanguageTag] instead.
   @override
   String toString() {
-    if (!identical(cachedLocale, this)) {
-      cachedLocale = this;
-      cachedLocaleString = _rawToString('_');
+    if (!identical(_cachedLocale, this)) {
+      _cachedLocale = this;
+      _cachedLocaleString = _rawToString('_');
     }
-    return cachedLocaleString;
+    return _cachedLocaleString;
   }
 
   /// Returns a syntactically valid Unicode BCP47 Locale Identifier.
