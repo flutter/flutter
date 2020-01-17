@@ -2212,7 +2212,34 @@ class Path extends NativeFieldWrapperClass2 {
   }
   bool _op(Path path1, Path path2, int operation) native 'Path_op';
 
-  /// Creates a [PathMetrics] object for this path.
+  /// Creates a [PathMetrics] object for this path, which can describe various
+  /// properties about the contours of the path.
+  ///
+  /// A [Path] is made up of zero or more contours. A contour is made up of
+  /// connected curves and segments, created via methods like [lineTo],
+  /// [cubicTo], [arcTo], [quadraticBezierTo], their relative counterparts, as
+  /// well as the add* methods such as [addRect]. Creating a new [Path] starts
+  /// a new contour once it has any drawing instructions, and another new
+  /// contour is started for each [moveTo] instruction.
+  ///
+  /// A [PathMetric] object describes properties of an individual contour,
+  /// such as its length, whether it is closed, what the tangent vector of a
+  /// particular offset along the path is. It also provides a method for
+  /// creating sub-paths: [PathMetric.extractPath].
+  ///
+  /// Calculating [PathMetric] objects is not trivial. The [PathMetrics] object
+  /// returned by this method is a lazy [Iterable], meaning it only performs
+  /// calculations when the iterator is moved to the next [PathMetric]. Callers
+  /// that wish to memoize this iterable can easily do so by using
+  /// [Iterable.toList] on the result of this method. In particular, callers
+  /// looking for information about how many contours are in the path should
+  /// either store the result of `path.computeMetrics().length`, or should use
+  /// `path.computeMetrics().toList()` so they can repeatedly check the length,
+  /// since calling `Iterable.length` causes traversal of the entire iterable.
+  ///
+  /// In particular, callers should be aware that [PathMetrics.length] is the
+  /// number of contours, **not the length of the path**. To get the length of
+  /// a contour in a path, use [PathMetric.length].
   ///
   /// If `forceClosed` is set to true, the contours of the path will be measured
   /// as if they had been closed, even if they were not explicitly closed.
@@ -2281,8 +2308,9 @@ class Tangent {
 /// another [Path.lineTo] will contain two contours and thus be represented by
 /// two [PathMetric] objects.
 ///
-/// When iterating across a [PathMetrics]' contours, the [PathMetric] objects are only
-/// valid until the next one is obtained.
+/// This iterable does not memoize. Callers who need to traverse the list
+/// multiple times, or who need to randomly access elements of the list, should
+/// use [toList] on this object.
 class PathMetrics extends collection.IterableBase<PathMetric> {
   PathMetrics._(Path path, bool forceClosed) :
     _iterator = PathMetricIterator._(_PathMeasure(path, forceClosed));
@@ -2293,7 +2321,8 @@ class PathMetrics extends collection.IterableBase<PathMetric> {
   Iterator<PathMetric> get iterator => _iterator;
 }
 
-/// Tracks iteration from one segment of a path to the next for measurement.
+/// Used by [PathMetrics] to track iteration from one segment of a path to the
+/// next for measurement.
 class PathMetricIterator implements Iterator<PathMetric> {
   PathMetricIterator._(this._pathMeasure) : assert(_pathMeasure != null);
 
@@ -2317,15 +2346,16 @@ class PathMetricIterator implements Iterator<PathMetric> {
 /// Utilities for measuring a [Path] and extracting sub-paths.
 ///
 /// Iterate over the object returned by [Path.computeMetrics] to obtain
-/// [PathMetric] objects.
+/// [PathMetric] objects. Callers that want to randomly access elements or
+/// iterate multiple times should use `path.computeMetrics().toList()`, since
+/// [PathMetrics] does not memoize.
 ///
-/// Once created, the methods on this class will only be valid while the
-/// iterator is at the contour for which they were created. It will also only be
-/// valid for the path as it was specified when [Path.computeMetrics] was called.
-/// If additional contours are added or any contours are updated, the metrics
-/// need to be recomputed. Previously created metrics will still refer to a
-/// snapshot of the path at the time they were computed, rather than to the
-/// actual metrics for the new mutations to the path.
+/// Once created, the metrics are only valid for the path as it was specified
+/// when [Path.computeMetrics] was called. If additional contours are added or
+/// any contours are updated, the metrics need to be recomputed. Previously
+/// created metrics will still refer to a snapshot of the path at the time they
+/// were computed, rather than to the actual metrics for the new mutations to
+/// the path.
 class PathMetric {
   PathMetric._(this._measure)
     : assert(_measure != null),
@@ -2339,9 +2369,9 @@ class PathMetric {
   /// Whether the contour is closed.
   ///
   /// Returns true if the contour ends with a call to [Path.close] (which may
-  /// have been implied when using [Path.addRect]) or if `forceClosed` was
-  /// specified as true in the call to [Path.computeMetrics].  Returns false
-  /// otherwise.
+  /// have been implied when using methods like [Path.addRect]) or if
+  /// `forceClosed` was specified as true in the call to [Path.computeMetrics].
+  /// Returns false otherwise.
   final bool isClosed;
 
   /// The zero-based index of the contour.
@@ -3924,7 +3954,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// image on the canvas, such as when using sprites or zooming. It is more
   /// efficient than using clips or masks directly.
   ///
-  /// All parameters mmust not be null.
+  /// All parameters must not be null.
   ///
   /// See also:
   ///
