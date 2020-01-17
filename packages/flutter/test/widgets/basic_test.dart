@@ -186,7 +186,6 @@ void main() {
         )
       );
 
-      await tester.pump();
       expect(
         tester.getSemantics(find.byKey(textKey)).transform,
         Matrix4(
