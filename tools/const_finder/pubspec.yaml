@@ -1,0 +1,35 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: const_finder
+publish_to: none
+
+environment:
+  sdk: ">=2.4.0 <3.0.0"
+
+# Do not add any dependencies that require more than what is provided in
+# //third_party/dart/pkg or //third_party/dart/third_party/pkg.
+# In particular, package:test is not usable here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart
+
+dependencies:
+  args: any
+  meta: any
+  kernel: any
+
+dev_dependencies:
+  path: any
+
+dependency_overrides:
+  args:
+    path: ../../../third_party/dart/third_party/pkg/args
+  kernel:
+    path: ../../../third_party/dart/pkg/kernel
+  meta:
+    path: ../../../third_party/dart/pkg/meta
+  path:
+    path: ../../../third_party/dart/third_party/pkg/path

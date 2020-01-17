@@ -37,6 +37,7 @@ group("flutter") {
 
   if (current_toolchain == host_toolchain) {
     public_deps += [ "$flutter_root/shell/testing" ]
+    public_deps += [ "//flutter/tools/const_finder" ]
   }
 
   if (is_fuchsia && using_fuchsia_sdk) {
