@@ -121,6 +121,8 @@ class CustomContrastGuideline extends AccessibilityGuideline {
   }
 
   List<int> _subsetToRect(ByteData data, Rect paintBounds, int width, int height) {
+    // TODO: make more efficient.
+
     final int newWidth = paintBounds.size.width.ceil();
     final int newHeight = paintBounds.size.height.ceil();
     final int leftX = paintBounds.topLeft.dx.ceil();
