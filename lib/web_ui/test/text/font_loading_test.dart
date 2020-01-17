@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
@@ -36,7 +37,7 @@ Future<void> main() async {
       expect(_containsFontFamily('Blehm'), true);
     });
 
-    test('loads font should clear measurement caches', () async {
+    test('loading font should clear measurement caches', () async {
       final ui.ParagraphStyle style = ui.ParagraphStyle();
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(style);
       final ui.ParagraphConstraints constraints = ui.ParagraphConstraints(width: 30.0);
@@ -57,6 +58,26 @@ Future<void> main() async {
       // Verifies the font is loaded, and the cache is cleaned.
       expect(_containsFontFamily('Blehm'), true);
       expect(TextMeasurementService.rulerManager.rulers.length, 0);
+    });
+
+    test('loading font should send font change message', () async {
+      final ui.PlatformMessageCallback oldHandler = ui.window.onPlatformMessage;
+      String actualName;
+      String message;
+      window.onPlatformMessage = (String name, ByteData data, ui.PlatformMessageResponseCallback callback) {
+        actualName = name;
+        final buffer = data.buffer;
+        final Uint8List list = buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        message = utf8.decode(list);
+      };
+      final html.HttpRequest response = await html.HttpRequest.request(
+        _testFontUrl,
+        responseType: 'arraybuffer');
+      await ui.loadFontFromList(Uint8List.view(response.response),
+        fontFamily: 'Blehm');
+      window.onPlatformMessage = oldHandler;
+      expect(actualName, 'flutter/system');
+      expect(message, '{"type":"fontsChange"}');
     });
   });
 }
