@@ -988,7 +988,6 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
 
   @override
   void resolveForStream(ImageConfiguration configuration, ImageStream stream) {
-    bool deferCalledOnce = false;
     void deferredResolve(Object key) {
       if (PaintingBinding.instance.imageCache.containsKey(key)) {
         imageProvider.resolveForStream(configuration, stream);
@@ -1001,8 +1000,7 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
           // updated our velocity value.
           SchedulerBinding.instance.scheduleFrameCallback((_) {
             scheduleMicrotask(() => deferredResolve(key));
-          }, rescheduling: deferCalledOnce);
-          deferCalledOnce = true;
+          });
           return;
         case DeferringImageProviderAction.cancel:
           return;
