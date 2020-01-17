@@ -2,8 +2,10 @@ package io.flutter.plugin.editing;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.SparseIntArray;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -219,10 +221,37 @@ public class TextInputPluginTest {
         verifyMethodCall(bufferCaptor.getValue(), "TextInputClient.performAction", new String[] {"0", "TextInputAction.done"});
     }
 
+    @Test
+    public void inputConnection_finishComposingTextUpdatesIMM() throws JSONException {
+        TestImm testImm = Shadow.extract(RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+        FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+        View testView = new View(RuntimeEnvironment.application);
+        DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
+        TextInputPlugin textInputPlugin = new TextInputPlugin(testView, dartExecutor, mock(PlatformViewsController.class));
+        textInputPlugin.setTextInputClient(
+            0,
+            new TextInputChannel.Configuration(
+                false, false, true, TextInputChannel.TextCapitalization.NONE,
+                new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false), null, null));
+        // There's a pending restart since we initialized the text input client. Flush that now.
+        textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("", 0, 0));
+        InputConnection connection = textInputPlugin.createInputConnection(testView, new EditorInfo());
+
+        connection.finishComposingText();
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            CursorAnchorInfo.Builder builder = new CursorAnchorInfo.Builder();
+            builder.setComposingText(-1, "");
+            CursorAnchorInfo anchorInfo = builder.build();
+            assertEquals(testImm.getLastCursorAnchorInfo(), anchorInfo);
+        }
+    }
+
     @Implements(InputMethodManager.class)
     public static class TestImm extends ShadowInputMethodManager {
         private InputMethodSubtype currentInputMethodSubtype;
         private SparseIntArray restartCounter = new SparseIntArray();
+        private CursorAnchorInfo cursorAnchorInfo;
 
         public TestImm() {
         }
@@ -244,6 +273,15 @@ public class TextInputPluginTest {
 
         public int getRestartCount(View view) {
             return restartCounter.get(view.hashCode(), /*defaultValue=*/0);
+        }
+
+        @Implementation
+        public void updateCursorAnchorInfo(View view, CursorAnchorInfo cursorAnchorInfo) {
+            this.cursorAnchorInfo = cursorAnchorInfo;
+        }
+
+        public CursorAnchorInfo getLastCursorAnchorInfo() {
+            return cursorAnchorInfo;
         }
     }
 }
