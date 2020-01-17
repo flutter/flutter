@@ -32,11 +32,8 @@ class NavigationToolbar extends StatelessWidget {
     this.trailing,
     this.centerMiddle = true,
     this.middleSpacing = kMiddleSpacing,
-    this.defaultToolbarHeight,
-    this.centerIcons = true,
   }) : assert(centerMiddle != null),
        assert(middleSpacing != null),
-       assert(centerIcons != null),
        super(key: key);
 
   /// The default spacing around the [middle] widget in dp.
@@ -61,24 +58,6 @@ class NavigationToolbar extends StatelessWidget {
   /// Defaults to [kMiddleSpacing].
   final double middleSpacing;
 
-  /// The default height used for the [middle].
-  /// This value is only used when [AppBar.titleHeight] is used exclusively.
-  /// and [centerIcons] is false.
-  /// Used to get [kToolbarHeight] when using custom AppBar titleHeight.
-  /// If null, fallbacks to widget's size.
-  ///
-  /// Note: Kept nullable because [_PersistentNavigationBar] from cupertino also uses this.
-  final double defaultToolbarHeight;
-
-  /// Whether [leading] and [trailing] should always be placed vertically center.
-  /// If [AppBar.titleHeight] is not modified, this option has NO effect.
-  ///
-  /// If true, [leading] and [trailing] are always placed vertically center.
-  /// If false, icons will be placed on top.
-  ///
-  /// Defaults to true.
-  final bool centerIcons;
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
@@ -88,8 +67,6 @@ class NavigationToolbar extends StatelessWidget {
         centerMiddle: centerMiddle,
         middleSpacing: middleSpacing,
         textDirection: textDirection,
-        defaultToolbarHeight: defaultToolbarHeight,
-        centerIcons: centerIcons,
       ),
       children: <Widget>[
         if (leading != null) LayoutId(id: _ToolbarSlot.leading, child: leading),
@@ -111,11 +88,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     this.centerMiddle,
     @required this.middleSpacing,
     @required this.textDirection,
-    @required this.defaultToolbarHeight,
-    @required this.centerIcons,
   }) : assert(middleSpacing != null),
-       assert(textDirection != null),
-       assert(centerIcons != null);
+       assert(textDirection != null);
 
   // If false the middle widget should be start-justified within the space
   // between the leading and trailing widgets.
@@ -128,10 +102,6 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
   final TextDirection textDirection;
 
-  final double defaultToolbarHeight;
-
-  final bool centerIcons;
-
   @override
   void performLayout(Size size) {
     double leadingWidth = 0.0;
@@ -141,11 +111,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       final BoxConstraints constraints = BoxConstraints(
         minWidth: 0.0,
         maxWidth: size.width / 3.0, // The leading widget shouldn't take up more than 1/3 of the space.
-        minHeight: centerIcons ? size.height : math.min(size.height, defaultToolbarHeight ?? size.height),
-        // If icons to be centered, the height should be exactly the height of the bar,
-        // otherwise use minimum of widget height and [defaultToolbarHeight].
-        // If [defaultToolbarHeight] is null, fallback to widget height.
-        maxHeight: centerIcons ? size.height : math.min(size.height, defaultToolbarHeight ?? size.height),
+        minHeight: size.height, // The height should be exactly the height of the bar.
+        maxHeight: size.height,
       );
       leadingWidth = layoutChild(_ToolbarSlot.leading, constraints).width;
       double leadingX;
@@ -161,12 +128,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.trailing)) {
-      final BoxConstraints constraints = BoxConstraints(
-          minWidth: 0.0,
-          maxWidth: size.width,
-          minHeight: 0.0,
-          maxHeight: centerIcons ? size.height : math.min(size.height, defaultToolbarHeight ?? size.height),
-      );
+      final BoxConstraints constraints = BoxConstraints.loose(size);
       final Size trailingSize = layoutChild(_ToolbarSlot.trailing, constraints);
       double trailingX;
       switch (textDirection) {
@@ -177,8 +139,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
           trailingX = size.width - trailingSize.width;
           break;
       }
-      final double height = centerIcons ? size.height : math.min(size.height, defaultToolbarHeight ?? size.height);
-      final double trailingY = (height - trailingSize.height) / 2.0;
+      final double trailingY = (size.height - trailingSize.height) / 2.0;
       trailingWidth = trailingSize.width;
       positionChild(_ToolbarSlot.trailing, Offset(trailingX, trailingY));
     }
@@ -219,8 +180,6 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   bool shouldRelayout(_ToolbarLayout oldDelegate) {
     return oldDelegate.centerMiddle != centerMiddle
         || oldDelegate.middleSpacing != middleSpacing
-        || oldDelegate.defaultToolbarHeight != defaultToolbarHeight
-        || oldDelegate.centerIcons != centerIcons
         || oldDelegate.textDirection != textDirection;
   }
 }

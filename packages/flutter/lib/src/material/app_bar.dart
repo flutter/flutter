@@ -198,7 +198,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.excludeHeaderSemantics = false,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.titleHeight = kToolbarHeight,
-    this.centerIcons = true,
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
   }) : assert(automaticallyImplyLeading != null),
@@ -206,7 +205,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
        assert(primary != null),
        assert(titleSpacing != null),
        assert(titleHeight != null),
-       assert(centerIcons != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
        preferredSize = Size.fromHeight(titleHeight + (bottom?.preferredSize?.height ?? 0.0)),
@@ -411,15 +409,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// This value must not be null, and defaults to [kToolbarHeight].
   final double titleHeight;
 
-  /// Whether [leading] and [actions] should always be placed vertically center.
-  /// If [titleHeight] is not modified, this option has NO effect.
-  ///
-  /// If true, [leading] and [actions] are always placed vertically center.
-  /// If false, icons will be placed on top.
-  ///
-  /// Defaults to true.
-  final bool centerIcons;
-
   /// How opaque the toolbar part of the app bar is.
   ///
   /// A value of 1.0 is fully opaque, and a value of 0.0 is fully transparent.
@@ -599,8 +588,6 @@ class _AppBarState extends State<AppBar> {
       trailing: actions,
       centerMiddle: widget._getEffectiveCenterTitle(theme),
       middleSpacing: widget.titleSpacing,
-      defaultToolbarHeight: kToolbarHeight,
-      centerIcons: widget.centerIcons,
     );
 
     // If the toolbar is allocated less than titleHeight make it
@@ -762,7 +749,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.excludeHeaderSemantics,
     @required this.titleSpacing,
     @required this.titleHeight,
-    @required this.centerIcons,
     @required this.expandedHeight,
     @required this.collapsedHeight,
     @required this.topPadding,
@@ -773,7 +759,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.shape,
   }) : assert(primary || topPadding == 0.0),
        assert(titleHeight != null),
-       assert(centerIcons != null),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
   final Widget leading;
@@ -794,7 +779,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool excludeHeaderSemantics;
   final double titleSpacing;
   final double titleHeight;
-  final bool centerIcons;
   final double expandedHeight;
   final double collapsedHeight;
   final double topPadding;
@@ -860,7 +844,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         excludeHeaderSemantics: excludeHeaderSemantics,
         titleSpacing: titleSpacing,
         titleHeight: titleHeight,
-        centerIcons: centerIcons,
         shape: shape,
         toolbarOpacity: toolbarOpacity,
         bottomOpacity: pinned ? 1.0 : ((visibleMainHeight / _bottomHeight).clamp(0.0, 1.0) as double),
@@ -888,7 +871,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || centerTitle != oldDelegate.centerTitle
         || titleSpacing != oldDelegate.titleSpacing
         || titleHeight != oldDelegate.titleHeight
-        || centerIcons != oldDelegate.centerIcons
         || expandedHeight != oldDelegate.expandedHeight
         || topPadding != oldDelegate.topPadding
         || pinned != oldDelegate.pinned
@@ -1006,7 +988,6 @@ class SliverAppBar extends StatefulWidget {
     this.excludeHeaderSemantics = false,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.titleHeight = kToolbarHeight,
-    this.centerIcons = true,
     this.expandedHeight,
     this.floating = false,
     this.pinned = false,
@@ -1020,7 +1001,6 @@ class SliverAppBar extends StatefulWidget {
        assert(primary != null),
        assert(titleSpacing != null),
        assert(titleHeight != null),
-       assert(centerIcons != null),
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),
@@ -1188,15 +1168,6 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// This value must not be null, and defaults to [kToolbarHeight].
   final double titleHeight;
-
-  /// Whether [leading] and [actions] should always be placed vertically center.
-  /// If [titleHeight] is not modified, this option has NO effect.
-  ///
-  /// If true, [leading] and [actions] are always placed vertically center.
-  /// If false, icons will be placed on top.
-  ///
-  /// Defaults to true.
-  final bool centerIcons;
 
   /// The size of the app bar when it is fully expanded.
   ///
@@ -1383,7 +1354,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           excludeHeaderSemantics: widget.excludeHeaderSemantics,
           titleSpacing: widget.titleSpacing,
           titleHeight: widget.titleHeight,
-          centerIcons: widget.centerIcons,
           expandedHeight: widget.expandedHeight,
           collapsedHeight: collapsedHeight,
           topPadding: topPadding,
