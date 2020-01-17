@@ -47,6 +47,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
   const CustomContrastGuideline({@required this.elements});
 
   static const double kMinimumRatio = 4.5;
+  static const double kTolerance = -0.01;
 
   final List<Element> elements;
 
@@ -84,8 +85,8 @@ class CustomContrastGuideline extends AccessibilityGuideline {
 
       final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
-      const double delta = -0.01;
-      if (contrastRatio - kMinimumRatio >= delta) {
+
+      if (contrastRatio - kMinimumRatio >= kTolerance) {
         return const Evaluation.pass();
       } else {
         return Evaluation.fail(
