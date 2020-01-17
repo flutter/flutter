@@ -12,7 +12,6 @@ import 'package:flutter_gallery/gallery/themes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 
 void main() {
   testWidgets('Menu icon satisfies accessibility contrast ratio guidelines, light mode', (WidgetTester tester) async {
