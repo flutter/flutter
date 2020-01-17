@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:test/test.dart';
@@ -77,6 +79,23 @@ void main() {
       expect(const TextRange(start: 1, end: 2).textInside('hello'), equals('e'));
       expect(const TextRange(start: 5, end: 5).textInside('hello'), isEmpty);
       expect(const TextRange(start: 0, end: 5).textInside('hello'), equals('hello'));
+    });
+  });
+  group('loadFontFromList', () {
+    test('will send platform message after font is loaded', () async {
+      final PlatformMessageCallback oldHandler = window.onPlatformMessage;
+      String actualName;
+      String message;
+      window.onPlatformMessage = (String name, ByteData data, PlatformMessageResponseCallback callback) {
+        actualName = name;
+        final Uint8List list = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        message = utf8.decode(list);
+      };
+      final Uint8List fontData = Uint8List(0);
+      await loadFontFromList(fontData, fontFamily: 'fake');
+      window.onPlatformMessage = oldHandler;
+      expect(actualName, 'flutter/system');
+      expect(message, '{"type":"fontsChange"}');
     });
   });
 }
