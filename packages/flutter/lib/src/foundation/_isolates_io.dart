@@ -74,7 +74,7 @@ class _IsolateConfiguration<Q, R> {
   final String debugLabel;
   final int flowId;
 
-  FutureOr<R> apply() => callback(message);
+  R apply() => callback(message);
 }
 
 Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
