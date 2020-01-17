@@ -21,7 +21,7 @@ void main() {
       home: const MenuDemo(),
     ));
 
-    // await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
 
     final List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList()
         + find.byIcon(Icons.more_horiz).evaluate().toList();
