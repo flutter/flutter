@@ -77,7 +77,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
         return const Evaluation.pass();
       }
 
-      final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
+      final List<int> subset = _subsetFromRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
       if (subset.isEmpty) {
         return const Evaluation.pass();
@@ -120,7 +120,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
         || paintBounds.right > (window.physicalSize.width * window.devicePixelRatio)  + 50.0;
   }
 
-  List<int> _subsetToRect(ByteData data, Rect paintBounds, int width, int height) {
+  List<int> _subsetFromRect(ByteData data, Rect paintBounds, int width, int height) {
     // TODO: make more efficient.
 
     final int leftX = paintBounds.left.floor();
