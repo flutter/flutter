@@ -350,6 +350,16 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 /// Commonly used in accessibility testing to obtain the contrast ratio of
 /// text widgets and other types of widgets.
 class ContrastReport {
+  /// Generates a contrast report given a list of colors.
+  ///
+  /// Given a list of integers [colors], each representing the color of a pixel
+  /// on a part of the screen, generates a contrast ratio report.
+  /// Each colors is given in in ARGB format, as is the parameter for the
+  /// constructor [Color].
+  ///
+  /// The contrast ratio of the most frequent light color and the most
+  /// frequent dark color is calculated. Colors are divided into light and
+  /// dark colors based on their lightness as an [HSLColor].
   factory ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
     for (final int color in colors) {
@@ -390,7 +400,10 @@ class ContrastReport {
 
   const ContrastReport._(this.lightColor, this.darkColor);
 
+  /// The most frequently occurring light color.
   final Color lightColor;
+
+  /// The most frequently occurring dark color.
   final Color darkColor;
 
   /// Computes the contrast ratio as defined by the WCAG.
