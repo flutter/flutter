@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
