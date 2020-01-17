@@ -130,23 +130,25 @@ class CustomContrastGuideline extends AccessibilityGuideline {
 
     final List<int> buffer = <int>[];
 
-    // Data is stored in row major order.
-    for (int i = 0; i < data.lengthInBytes; i+=4) {
-      final int index = i ~/ 4;
-      final int dx = index % width;
-      final int dy = index ~/ width;
-      if (dx >= leftX && dx <= rightX && dy >= topY && dy <= bottomY) {
-        final int r = data.getUint8(i);
-        final int g = data.getUint8(i + 1);
-        final int b = data.getUint8(i + 2);
-        final int a = data.getUint8(i + 3);
-        final int color = (((a & 0xff) << 24) |
-        ((r & 0xff) << 16) |
-        ((g & 0xff) << 8)  |
-        ((b & 0xff) << 0)) & 0xFFFFFFFF;
-        buffer.add(color);
+    int _getPixel(ByteData data, int x, int y) {
+      final int offset = (y * width + x) * 4;
+      final int r = data.getUint8(offset);
+      final int g = data.getUint8(offset + 1);
+      final int b = data.getUint8(offset + 2);
+      final int a = data.getUint8(offset + 3);
+      final int color = (((a & 0xff) << 24) |
+          ((r & 0xff) << 16) |
+          ((g & 0xff) << 8)  |
+          ((b & 0xff) << 0)) & 0xFFFFFFFF;
+      return color;
+    }
+
+    for (int x = leftX; x < rightX; x ++) {
+      for (int y = topY; y < bottomY; y ++) {
+        buffer.add(_getPixel(data, x, y));
       }
     }
+
     return buffer;
   }
 
