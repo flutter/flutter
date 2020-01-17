@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter_test/flutter_test.dart' as prefix0;
 
 void main() {
   testWidgets('Menu icon satisfies accessibility contrast ratio guidelines', (WidgetTester tester) async {
@@ -22,7 +21,12 @@ void main() {
 
     // await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    final List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList();
+    final List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList()
+        + find.byIcon(Icons.more_horiz).evaluate().toList();
+
+    await tester.pump(Duration(seconds: 15));
+
+    print(elements);
 
     await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: elements)));
 
