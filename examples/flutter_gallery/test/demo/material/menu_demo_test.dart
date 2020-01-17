@@ -75,10 +75,6 @@ class CustomContrastGuideline extends AccessibilityGuideline {
         renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
       );
 
-      if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
-        return const Evaluation.pass();
-      }
-
       final List<int> subset = _subsetFromRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
       if (subset.isEmpty) {
@@ -108,18 +104,6 @@ class CustomContrastGuideline extends AccessibilityGuideline {
     }
 
     return result;
-  }
-
-  // Returns a rect that is entirely on screen, or null if it is too far off.
-  //
-  // Given a pixel buffer based on the physical window size, can we actually
-  // get all the data from this node? allow a small delta overlap before
-  // culling the node.
-  bool _isNodeOffScreen(Rect paintBounds, ui.Window window) {
-    return paintBounds.top < -50.0
-        || paintBounds.left <  -50.0
-        || paintBounds.bottom > (window.physicalSize.height * window.devicePixelRatio) + 50.0
-        || paintBounds.right > (window.physicalSize.width * window.devicePixelRatio)  + 50.0;
   }
 
   List<int> _subsetFromRect(ByteData data, Rect paintBounds, int width, int height) {
