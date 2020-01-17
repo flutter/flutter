@@ -5,6 +5,7 @@
 package io.flutter.plugin.editing;
 
 import android.content.Context;
+import android.os.Build;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.Layout;
@@ -14,6 +15,7 @@ import android.text.TextPaint;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
@@ -132,6 +134,24 @@ class InputConnectionAdaptor extends BaseInputConnection {
         updateEditingState();
         return result;
     }
+
+    @Override
+    public boolean finishComposingText() {
+        boolean result = super.finishComposingText();
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            // Update the keyboard with a reset/empty composing region. Critical on
+            // Samsung keyboards to prevent punctuation duplication.
+            CursorAnchorInfo.Builder builder = new CursorAnchorInfo.Builder();
+            builder.setComposingText(-1, "");
+            CursorAnchorInfo anchorInfo = builder.build();
+            mImm.updateCursorAnchorInfo(mFlutterView, anchorInfo);
+        }
+
+        updateEditingState();
+        return result;
+    }
+
 
     @Override
     public boolean setSelection(int start, int end) {
