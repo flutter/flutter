@@ -1,4 +1,4 @@
-Signature: 01e2c434636b193a14c9202bcb6d33e9
+Signature: 37b09b7842a94307a1251854f77ddecb
 
 UNUSED LICENSES:
 
@@ -3081,9 +3081,11 @@ LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/update.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device_watcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/stream.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 The Fuchsia Authors. All rights reserved.
 
