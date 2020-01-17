@@ -450,6 +450,14 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
+  /// This is the old implementation of [pumpWidget] that was replaced in
+  /// https://github.com/flutter/flutter/pull/48922.
+  ///
+  /// Differences are explained in the tests in `test/widget_tester_test.dart`.
+  ///
+  /// The only reason we still have this is because a few material text field
+  /// tests are failing with the new implementation of [pumpWidget]. See
+  /// https://github.com/flutter/flutter/issues/49077.
   @Deprecated(
     'Use WidgetTester.pumpWidget() instead. '
     'This feature was deprecated after v1.14.1.'

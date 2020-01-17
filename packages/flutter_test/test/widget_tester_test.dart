@@ -626,6 +626,7 @@ void main() {
       void log(String message) {
         logs.add(message);
       }
+      // ignore: deprecated_member_use_from_same_package
       await tester.pumpWidgetLegacy(Container(child: LogWidget(log, key: UniqueKey())));
 
       // Microtasks from `didChangeDependencies` and `build` should execute
@@ -640,6 +641,7 @@ void main() {
       ]);
       logs.clear();
 
+      // ignore: deprecated_member_use_from_same_package
       await tester.pumpWidgetLegacy(Container(child: LogWidget(log, key: UniqueKey())));
       expect(logs, <String>[
         'didChangeDependencies',

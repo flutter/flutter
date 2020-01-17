@@ -3821,6 +3821,7 @@ void main() {
         return null;
       });
 
+    // ignore: deprecated_member_use
     await tester.pumpWidgetLegacy(
       MaterialApp(
         home: Material(
@@ -3893,6 +3894,7 @@ void main() {
         return null;
       });
 
+    // ignore: deprecated_member_use
     await tester.pumpWidgetLegacy(
       MaterialApp(
         home: Material(
@@ -4008,6 +4010,7 @@ void main() {
         maxLines: 3,
       );
 
+    // ignore: deprecated_member_use
     await tester.pumpWidgetLegacy(
       MaterialApp(
         home: Material(
