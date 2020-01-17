@@ -107,8 +107,6 @@ class CustomContrastGuideline extends AccessibilityGuideline {
   }
 
   List<int> _subsetFromRect(ByteData data, Rect paintBounds, int width, int height) {
-    // TODO: make more efficient.
-
     final Rect truePaintBounds = paintBounds.intersect(
       Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
     );
