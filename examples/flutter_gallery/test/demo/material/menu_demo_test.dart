@@ -12,18 +12,19 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter_test/flutter_test.dart' as prefix0;
 
 void main() {
   testWidgets('Menu icon satisfies accessibility contrast ratio guidelines', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: MenuDemo(),
+      home: const MenuDemo(),
     ));
 
     // await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList();
+    final List<Element> elements = find.byIcon(Icons.more_vert).evaluate().toList();
 
-    await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements)));
+    await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: elements)));
 
     /* for (final element in elements) {
       print((element.renderObject as RenderBox).localToGlobal(element.renderObject.paintBounds.topLeft));
@@ -41,7 +42,6 @@ class CustomContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     final RenderView renderView = tester.binding.renderView;
     final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
     ui.Image image;
@@ -52,85 +52,46 @@ class CustomContrastGuideline extends AccessibilityGuideline {
       return image.toByteData();
     });
 
-    Future<Evaluation> evaluateNode(SemanticsNode node) async {
-      Evaluation result = const Evaluation.pass();
-      if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden))
-        return result;
-      final SemanticsData data = node.getSemanticsData();
-      final List<SemanticsNode> children = <SemanticsNode>[];
-      node.visitChildren((SemanticsNode child) {
-        children.add(child);
-        return true;
-      });
-      for (final SemanticsNode child in children) {
-        result += await evaluateNode(child);
-      }
-      if (_shouldSkipNode(data)) {
-        return result;
-      }
+    Evaluation evaluateElement(Element element) {
+      final Element element = elements.single;
+      final RenderBox renderObject = element.renderObject as RenderBox;
 
-      // We need to look up the inherited text properties to determine the
-      // contrast ratio based on text size/weight.
-      double fontSize;
-      bool isBold;
-      final String text = (data.label?.isEmpty == true) ? data.value : data.label;
-      final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
-      Rect paintBounds;
-      if (elements.length == 1) {
-        final Element element = elements.single;
-        final RenderBox renderObject = element.renderObject as RenderBox;
-        element.renderObject.paintBounds;
-        paintBounds = Rect.fromPoints(
-          renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
-          renderObject.localToGlobal(element.renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
-        );
-        final Widget widget = element.widget;
-        final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
-        if (widget is Text) {
-          TextStyle effectiveTextStyle = widget.style;
-          if (widget.style == null || widget.style.inherit) {
-            effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
-          }
-          fontSize = effectiveTextStyle.fontSize;
-          isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
-        } else if (widget is EditableText) {
-          isBold = widget.style.fontWeight == FontWeight.bold;
-          fontSize = widget.style.fontSize;
-        } else {
-          assert(false);
-        }
-      } else if (elements.length > 1) {
-        return Evaluation.fail('Multiple nodes with the same label: ${data.label}\n');
-      } else {
-        // If we can't find the text node then assume the label does not
-        // correspond to actual text.
-        return result;
-      }
+      final Rect paintBounds = Rect.fromPoints(
+        renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
+        renderObject.localToGlobal(element.renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
+      );
 
       if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
-        return result;
+        return const Evaluation.pass();
       }
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
       if (subset.isEmpty) {
-        return result;
+        return const Evaluation.pass();
       }
+
       final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
-      double targetContrastRatio;
       if (contrastRatio - kMinimumRatio >= delta) {
-        return result + const Evaluation.pass();
+        return const Evaluation.pass();
       }
-      return result + Evaluation.fail(
-          '$node:\nExpected contrast ratio of at least '
-              '$targetContrastRatio but found ${contrastRatio.toStringAsFixed(2)} for a font size of $fontSize. '
+      return Evaluation.fail(
+          '$element:\nExpected contrast ratio of at least '
+              '$kMinimumRatio but found ${contrastRatio.toStringAsFixed(2)} '
               'The computed light color was: ${report.lightColor}, '
               'The computed dark color was: ${report.darkColor}\n'
               'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html'
       );
     }
-    return evaluateNode(root);
+
+    Evaluation result = const Evaluation.pass();
+
+    for (final Element element in elements) {
+      result = result + evaluateElement(element);
+    }
+
+    return result;
   }
 
   // Skip routes which might have labels, and nodes without any text.
