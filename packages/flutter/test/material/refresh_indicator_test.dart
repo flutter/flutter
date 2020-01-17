@@ -387,8 +387,7 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('Refresh starts while scroll view moves back to 0.0 after overscroll on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+  testWidgets('Refresh starts while scroll view moves back to 0.0 after overscroll', (WidgetTester tester) async {
     refreshCalled = false;
     double lastScrollOffset;
     final ScrollController controller = ScrollController();
@@ -420,7 +419,5 @@ void main() {
     expect(controller.offset, greaterThan(lastScrollOffset));
     expect(controller.offset, lessThan(0.0));
     expect(refreshCalled, isTrue);
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 }
