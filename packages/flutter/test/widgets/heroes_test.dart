@@ -1614,10 +1614,7 @@ Future<void> main() async {
 
   testWidgets('Heroes do not transition on back gestures by default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
-      routes: routes,
+     routes: routes,
     ));
 
     expect(find.byKey(firstKey), isOnstage);
@@ -1652,14 +1649,11 @@ Future<void> main() async {
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Heroes can transition on gesture in one frame', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
       routes: routes,
     ));
 
@@ -1698,14 +1692,11 @@ Future<void> main() async {
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Heroes animate should hide destination hero and display original hero in case of dismissed', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
       routes: routes,
     ));
 
@@ -1737,7 +1728,7 @@ Future<void> main() async {
     expect(find.byKey(firstKey), findsNothing);
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -2298,9 +2289,6 @@ Future<void> main() async {
   testWidgets('Remove user gesture driven flights when the gesture is invalid', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
       routes: routes,
     ));
 
@@ -2324,7 +2312,7 @@ Future<void> main() async {
     // The simple route should still be on top.
     expect(find.byKey(simpleKey), findsOneWidget);
     expect(tester.takeException(), isNull);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Regression test for https://github.com/flutter/flutter/issues/40239.
   testWidgets(
