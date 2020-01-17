@@ -20,7 +20,6 @@ import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart' as xcode;
-import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'template.dart';
 
@@ -252,16 +251,6 @@ class FlutterProject {
   }
 }
 
-/// Base class for projects per platform.
-abstract class FlutterProjectPlatform {
-
-  /// Plugin's platform config key, e.g., "macos", "ios".
-  String get pluginConfigKey;
-
-  /// Whether the platform exists in the project.
-  bool existsSync();
-}
-
 /// Represents an Xcode-based sub-project.
 ///
 /// This defines interfaces common to iOS and macOS projects.
@@ -311,14 +300,11 @@ abstract class XcodeBasedProject {
 ///
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
-class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
+class IosProject implements XcodeBasedProject {
   IosProject.fromFlutter(this.parent);
 
   @override
   final FlutterProject parent;
-
-  @override
-  String get pluginConfigKey => IOSPlugin.kConfigKey;
 
   static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
@@ -588,14 +574,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
 ///
 /// Instances will reflect the contents of the `android/` sub-folder of
 /// Flutter applications and the `.android/` sub-folder of Flutter module projects.
-class AndroidProject extends FlutterProjectPlatform {
+class AndroidProject {
   AndroidProject._(this.parent);
 
   /// The parent of this project.
   final FlutterProject parent;
-
-  @override
-  String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
   static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\:\\s+[\'\"]kotlin-android[\'\"]\\s*\$');
@@ -644,7 +627,6 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   /// Whether the current flutter project has an Android sub-project.
-  @override
   bool existsSync() {
     return parent.isModule || _editableHostAppDirectory.existsSync();
   }
@@ -778,16 +760,12 @@ enum AndroidEmbeddingVersion {
 }
 
 /// Represents the web sub-project of a Flutter project.
-class WebProject extends FlutterProjectPlatform {
+class WebProject {
   WebProject._(this.parent);
 
   final FlutterProject parent;
 
-  @override
-  String get pluginConfigKey => WebPlugin.kConfigKey;
-
   /// Whether this flutter project has a web sub-project.
-  @override
   bool existsSync() {
     return parent.directory.childDirectory('web').existsSync()
       && indexFile.existsSync();
@@ -832,14 +810,11 @@ Match _firstMatchInFile(File file, RegExp regExp) {
 }
 
 /// The macOS sub project.
-class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
+class MacOSProject implements XcodeBasedProject {
   MacOSProject._(this.parent);
 
   @override
   final FlutterProject parent;
-
-  @override
-  String get pluginConfigKey => MacOSPlugin.kConfigKey;
 
   static const String _hostAppBundleName = 'Runner';
 
@@ -920,15 +895,11 @@ class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
 }
 
 /// The Windows sub project
-class WindowsProject extends FlutterProjectPlatform {
+class WindowsProject {
   WindowsProject._(this.project);
 
   final FlutterProject project;
 
-  @override
-  String get pluginConfigKey => WindowsPlugin.kConfigKey;
-
-  @override
   bool existsSync() => _editableDirectory.existsSync();
 
   Directory get _editableDirectory => project.directory.childDirectory('windows');
@@ -962,13 +933,10 @@ class WindowsProject extends FlutterProjectPlatform {
 }
 
 /// The Linux sub project.
-class LinuxProject extends FlutterProjectPlatform {
+class LinuxProject {
   LinuxProject._(this.project);
 
   final FlutterProject project;
-
-  @override
-  String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
   Directory get _editableDirectory => project.directory.childDirectory('linux');
 
@@ -982,7 +950,6 @@ class LinuxProject extends FlutterProjectPlatform {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
-  @override
   bool existsSync() => _editableDirectory.existsSync();
 
   /// The Linux project makefile.

@@ -2,17 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -27,22 +23,15 @@ void main() {
     MockMacOSProject macosProject;
     MockAndroidProject androidProject;
     MockWebProject webProject;
-    MockWindowsProject windowsProject;
-    MockLinuxProject linuxProject;
     File packagesFile;
     Directory dummyPackageDirectory;
-    SystemClock mockClock;
-    FlutterVersion mockVersion;
 
     setUp(() async {
       fs = MemoryFileSystem();
-      mockClock = MockClock();
-      mockVersion = MockFlutterVersion();
 
       // Add basic properties to the Flutter project and subprojects
       flutterProject = MockFlutterProject();
       when(flutterProject.directory).thenReturn(fs.directory('/'));
-      // TODO(franciscojma): Remove logic for .flutter-plugins it's deprecated.
       when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
       when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
       iosProject = MockIosProject();
@@ -50,34 +39,18 @@ void main() {
       when(iosProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('Runner'));
       when(iosProject.podfile).thenReturn(flutterProject.directory.childDirectory('ios').childFile('Podfile'));
       when(iosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('ios').childFile('Podfile.lock'));
-      when(iosProject.pluginConfigKey).thenReturn('ios');
-      when(iosProject.existsSync()).thenReturn(false);
       macosProject = MockMacOSProject();
       when(flutterProject.macos).thenReturn(macosProject);
       when(macosProject.podfile).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile'));
       when(macosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile.lock'));
-      when(macosProject.pluginConfigKey).thenReturn('macos');
-      when(macosProject.existsSync()).thenReturn(false);
       androidProject = MockAndroidProject();
       when(flutterProject.android).thenReturn(androidProject);
       when(androidProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('android').childDirectory('app'));
       when(androidProject.hostAppGradleRoot).thenReturn(flutterProject.directory.childDirectory('android'));
-      when(androidProject.pluginConfigKey).thenReturn('android');
-      when(androidProject.existsSync()).thenReturn(false);
       webProject = MockWebProject();
       when(flutterProject.web).thenReturn(webProject);
       when(webProject.libDirectory).thenReturn(flutterProject.directory.childDirectory('lib'));
       when(webProject.existsSync()).thenReturn(true);
-      when(webProject.pluginConfigKey).thenReturn('web');
-      when(webProject.existsSync()).thenReturn(false);
-      windowsProject = MockWindowsProject();
-      when(flutterProject.windows).thenReturn(windowsProject);
-      when(windowsProject.pluginConfigKey).thenReturn('windows');
-      when(windowsProject.existsSync()).thenReturn(false);
-      linuxProject = MockLinuxProject();
-      when(flutterProject.linux).thenReturn(linuxProject);
-      when(linuxProject.pluginConfigKey).thenReturn('linux');
-      when(linuxProject.existsSync()).thenReturn(false);
 
       // Set up a simple .packages file for all the tests to use, pointing to one package.
       dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
@@ -94,18 +67,6 @@ void main() {
       platforms:
         ios:
           pluginClass: FLESomePlugin
-        macos:
-          pluginClass: FLESomePlugin
-        windows:
-          pluginClass: FLESomePlugin
-        linux:
-          pluginClass: FLESomePlugin
-        web:
-          pluginClass: SomePlugin
-          fileName: lib/SomeFile.dart
-        android:
-          pluginClass: SomePlugin
-          package: AndroidPackage
   ''');
     }
 
@@ -278,8 +239,8 @@ dependencies:
 
       testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () {
         flutterProject.flutterPluginsFile.createSync();
-        flutterProject.flutterPluginsDependenciesFile.createSync();
-
+        when(iosProject.existsSync()).thenReturn(false);
+        when(macosProject.existsSync()).thenReturn(false);
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
@@ -290,8 +251,8 @@ dependencies:
 
       testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () {
         configureDummyPackageAsPlugin();
-        when(iosProject.existsSync()).thenReturn(true);
-
+        when(iosProject.existsSync()).thenReturn(false);
+        when(macosProject.existsSync()).thenReturn(false);
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
@@ -304,20 +265,11 @@ dependencies:
         createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
-        when(iosProject.existsSync()).thenReturn(true);
-
-        final DateTime dateCreated = DateTime(1970, 1, 1);
-        when(mockClock.now()).thenAnswer(
-          (Invocation _) => dateCreated
-        );
-        const String version = '1.0.0';
-        when(mockVersion.frameworkVersion).thenAnswer(
-          (Invocation _) => version
-        );
+        when(iosProject.existsSync()).thenReturn(false);
+        when(macosProject.existsSync()).thenReturn(false);
 
         refreshPluginsList(flutterProject);
 
-        // Verify .flutter-plugins-dependencies is configured correctly.
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         expect(flutterProject.flutterPluginsFile.readAsStringSync(),
@@ -327,79 +279,28 @@ dependencies:
           'plugin-c=/.tmp_rand0/plugin.rand2/\n'
           ''
         );
-
-        final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
-        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as  Map<String, dynamic>;
-        expect(jsonContent['info'], 'This is a generated file; do not edit or check into version control.');
-
-        final Map<String, dynamic> plugins = jsonContent['plugins'] as Map<String, dynamic>;
-        final List<dynamic> expectedPlugins = <dynamic>[
-          <String, dynamic> {
-            'name': 'plugin-a',
-            'path': '/.tmp_rand0/plugin.rand0/',
-            'dependencies': <String>[
-              'plugin-b',
-              'plugin-c'
-            ]
-          },
-          <String, dynamic> {
-            'name': 'plugin-b',
-            'path': '/.tmp_rand0/plugin.rand1/',
-            'dependencies': <String>[
-              'plugin-c'
-            ]
-          },
-          <String, dynamic> {
-            'name': 'plugin-c',
-            'path': '/.tmp_rand0/plugin.rand2/',
-            'dependencies': <String>[]
-          },
-        ];
-        expect(plugins['ios'], expectedPlugins);
-        expect(plugins['android'], expectedPlugins);
-        expect(plugins['macos'], <dynamic>[]);
-        expect(plugins['windows'], <dynamic>[]);
-        expect(plugins['linux'], <dynamic>[]);
-        expect(plugins['web'], <dynamic>[]);
-
-        final List<dynamic> expectedDependencyGraph = <dynamic>[
-          <String, dynamic> {
-            'name': 'plugin-a',
-            'dependencies': <String>[
-              'plugin-b',
-              'plugin-c'
-            ]
-          },
-          <String, dynamic> {
-            'name': 'plugin-b',
-            'dependencies': <String>[
-              'plugin-c'
-            ]
-          },
-          <String, dynamic> {
-            'name': 'plugin-c',
-            'dependencies': <String>[]
-          },
-        ];
-
-        expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
-        expect(jsonContent['date_created'], dateCreated.toString());
-        expect(jsonContent['version'], version);
-
-        // Make sure tests are updated if a new object is added/removed.
-        final List<String> expectedKeys = <String>[
-          'info',
-          'plugins',
-          'dependencyGraph',
-          'date_created',
-          'version',
-        ];
-        expect(jsonContent.keys, expectedKeys);
+        expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
+          '{'
+            '"_info":"// This is a generated file; do not edit or check into version control.",'
+            '"dependencyGraph":['
+              '{'
+                '"name":"plugin-a",'
+                '"dependencies":["plugin-b","plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-b",'
+                '"dependencies":["plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-c",'
+                '"dependencies":[]'
+              '}'
+            ']'
+          '}'
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-        SystemClock: () => mockClock,
-        FlutterVersion: () => mockVersion
       });
 
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
@@ -415,24 +316,7 @@ dependencies:
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
-
-      testUsingContext('Changes to the plugin json list invalidates the Cocoapod lockfiles', () {
-        simulatePodInstallRun(iosProject);
-        simulatePodInstallRun(macosProject);
-        configureDummyPackageAsPlugin();
-
-        when(iosProject.existsSync()).thenReturn(true);
-        when(macosProject.existsSync()).thenReturn(true);
-
-        refreshPluginsList(flutterProject);
-        expect(iosProject.podManifestLock.existsSync(), false);
-        expect(macosProject.podManifestLock.existsSync(), false);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
     });
-
 
     group('injectPlugins', () {
       MockFeatureFlags featureFlags;
@@ -716,7 +600,6 @@ dependencies:
       testUsingContext('Registrant for web doesn\'t escape slashes in imports', () async {
         when(flutterProject.isModule).thenReturn(true);
         when(featureFlags.isWebEnabled).thenReturn(true);
-        when(webProject.existsSync()).thenReturn(true);
 
         final Directory webPluginWithNestedFile =
             fs.systemTempDirectory.createTempSync('web_plugin_with_nested');
@@ -765,5 +648,3 @@ class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockWebProject extends Mock implements WebProject {}
-class MockWindowsProject extends Mock implements WindowsProject {}
-class MockLinuxProject extends Mock implements LinuxProject {}
