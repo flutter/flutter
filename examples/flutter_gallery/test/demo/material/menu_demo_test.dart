@@ -158,7 +158,6 @@ class CustomContrastGuideline extends AccessibilityGuideline {
   String get description => 'Text contrast should follow WCAG guidelines';
 }
 
-
 class _ContrastReport {
   factory _ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
