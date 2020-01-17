@@ -189,7 +189,6 @@ void main() {
                                 webFs.uri.toString().contains('127.0.0.1:1234');
     expect(hasExpectedUri, true);
     expect(lastPort, 1234);
-    expect(lastAddress.address.toString(), '::1');
   }));
 
   test('Throws exception if build fails', () => testbed.run(() async {
