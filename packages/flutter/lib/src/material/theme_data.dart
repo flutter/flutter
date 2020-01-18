@@ -1815,6 +1815,16 @@ class VisualDensity extends Diagnosticable {
     );
   }
 
+  /// Return a copy of [constraints] whose minimum width and height have been
+  /// updated with the [baseSizeAdjustment].
+  BoxConstraints effectiveConstraints(BoxConstraints constraints){
+    assert(constraints != null && constraints.debugAssertIsValid());
+    return constraints.copyWith(
+      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, double.infinity).toDouble(),
+      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, double.infinity).toDouble(),
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
