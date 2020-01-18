@@ -215,7 +215,7 @@ class DomRenderer {
         ..name = 'theme-color';
       html.document.head.append(theme);
     }
-    theme.content = color.toCssString();
+    theme.content = colorToCssString(color);
   }
 
   static const String defaultFontStyle = 'normal';

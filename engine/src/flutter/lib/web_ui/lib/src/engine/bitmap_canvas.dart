@@ -213,7 +213,7 @@ class BitmapCanvas extends EngineCanvas {
       contextHandle.fillStyle = paintStyle;
       contextHandle.strokeStyle = paintStyle;
     } else if (paint.color != null) {
-      final String colorString = paint.color.toCssString();
+      final String colorString = colorToCssString(paint.color);
       contextHandle.fillStyle = colorString;
       contextHandle.strokeStyle = colorString;
     } else {
@@ -561,7 +561,7 @@ class BitmapCanvas extends EngineCanvas {
       final ui.Color color = paint.color ?? ui.Color(0xFF000000);
       _canvasPool.contextHandle
         ..fillStyle = null
-        ..strokeStyle = color.toCssString();
+        ..strokeStyle = colorToCssString(color);
       _glRenderer.drawHairline(ctx, positions);
       restore();
       return;
