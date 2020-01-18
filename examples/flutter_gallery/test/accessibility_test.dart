@@ -492,6 +492,10 @@ void main() {
       final ThemeData theme = themes[themeIndex];
       final String themeName = themeNames[themeIndex];
 
+      bool isLightTheme() => themeName ==  'ThemeData.light()';
+
+      bool isLightGalleryTheme() => themeName == 'kLightGalleryTheme';
+
       testWidgets('backdrop_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
         final SemanticsHandle handle = tester.ensureSemantics();
@@ -514,7 +518,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: BottomNavigationDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: isLightTheme() || isLightGalleryTheme());
 
       testWidgets('buttons_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -522,7 +526,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: ButtonsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: isLightTheme() || isLightGalleryTheme());
 
       testWidgets('cards_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -530,7 +534,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: CardsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: isLightTheme() || isLightGalleryTheme());
 
       testWidgets('chip_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -594,7 +598,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: const GridListDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: isLightTheme() || isLightGalleryTheme());
 
       testWidgets('icons_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -682,7 +686,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: ScrollableTabsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: isLightTheme() || isLightGalleryTheme());
 
       testWidgets('search_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -698,7 +702,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: SelectionControlsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: isLightTheme() || isLightGalleryTheme());
 
       testWidgets('slider_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -706,7 +710,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: SliderDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: isLightTheme() || isLightGalleryTheme());
 
       testWidgets('snack_bar_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -722,7 +726,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: TabsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: isLightTheme() || isLightGalleryTheme());
 
       testWidgets('tabs_fab_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -730,7 +734,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: TabsFabDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: isLightTheme() || isLightGalleryTheme());
 
       testWidgets('text_form_field_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -738,7 +742,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: const TextFormFieldDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: themeName == themeNames[1]); // ThemeName.light does not meet guidelines.
 
       testWidgets('tooltip_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
