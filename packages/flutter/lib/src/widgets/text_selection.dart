@@ -904,6 +904,7 @@ class TextSelectionGestureDetectorBuilder {
     final PointerDeviceKind kind = details.kind;
     _shouldShowSelectionToolbar = kind == null
                               || kind == PointerDeviceKind.touch
+                              || kind == PointerDeviceKind.mouse
                               || kind == PointerDeviceKind.stylus;
   }
 
