@@ -1789,13 +1789,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
   bool showToolbar() {
-    // Web is using native dom elements to enable clipboard functionality of the
-    // toolbar: copy, paste, select, cut. It might also provide additional
-    // functionality depending on the browser (such as translate). Due to this
-    // we should not show a Flutter toolbar for the editable text elements.
-    if (kIsWeb) {
-      return false;
-    }
 
     if (_selectionOverlay == null || _selectionOverlay.toolbarIsVisible) {
       return false;
