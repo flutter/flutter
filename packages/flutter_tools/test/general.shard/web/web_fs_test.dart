@@ -32,11 +32,9 @@ void main() {
   MockOperatingSystemUtils mockOperatingSystemUtils;
   MockProcessUtils mockProcessUtils;
   bool lastInitializePlatform;
-  dynamic lastAddress;
   int lastPort;
 
   setUp(() {
-    lastAddress = null;
     lastPort = null;
     lastInitializePlatform = null;
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
@@ -95,7 +93,6 @@ void main() {
         ChromeLauncher: () => mockChromeLauncher,
         ProcessUtils: () => mockProcessUtils,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
-          lastAddress = address;
           lastPort = port;
           return mockHttpMultiServer;
         },
