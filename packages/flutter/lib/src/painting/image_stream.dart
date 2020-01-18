@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,9 +50,9 @@ class ImageInfo {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ImageInfo typedOther = other;
-    return typedOther.image == image
-        && typedOther.scale == scale;
+    return other is ImageInfo
+        && other.image == image
+        && other.scale == scale;
   }
 }
 
@@ -116,13 +116,13 @@ class ImageStreamListener {
   int get hashCode => hashValues(onImage, onChunk, onError);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ImageStreamListener typedOther = other;
-    return onImage == typedOther.onImage
-        && onChunk == typedOther.onChunk
-        && onError == typedOther.onError;
+    return other is ImageStreamListener
+        && other.onImage == onImage
+        && other.onChunk == onChunk
+        && other.onError == onError;
   }
 }
 
@@ -402,7 +402,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
         List<ImageStreamListener>.from(_listeners);
-    for (ImageStreamListener listener in localListeners) {
+    for (final ImageStreamListener listener in localListeners) {
       try {
         listener.onImage(image, false);
       } catch (exception, stack) {
@@ -469,7 +469,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     if (localErrorListeners.isEmpty) {
       FlutterError.reportError(_currentError);
     } else {
-      for (ImageErrorListener errorListener in localErrorListeners) {
+      for (final ImageErrorListener errorListener in localErrorListeners) {
         try {
           errorListener(exception, stack);
         } catch (exception, stack) {
@@ -604,7 +604,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
                 .map<ImageChunkListener>((ImageStreamListener listener) => listener.onChunk)
                 .where((ImageChunkListener chunkListener) => chunkListener != null)
                 .toList();
-            for (ImageChunkListener listener in localListeners) {
+            for (final ImageChunkListener listener in localListeners) {
               listener(event);
             }
           }

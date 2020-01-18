@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -48,7 +48,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample --template=freeform}
 /// This sample application uses an [AnimatedList] to create an effect when
 /// items are removed or added to the list.
 ///
@@ -263,8 +263,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// See also:
 ///
-/// * [SliverAnimatedList], a sliver that animates items when they are inserted
-///   or removed from a list.
+///  * [SliverAnimatedList], a sliver that animates items when they are inserted
+///    or removed from a list.
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted
   /// or removed.
@@ -388,7 +388,7 @@ class AnimatedList extends StatefulWidget {
   static AnimatedListState of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final AnimatedListState result = context.ancestorStateOfType(const TypeMatcher<AnimatedListState>());
+    final AnimatedListState result = context.findAncestorStateOfType<AnimatedListState>();
     if (nullOk || result != null)
       return result;
     throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -490,7 +490,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 /// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
 /// input callback.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample --template=freeform}
 /// This sample application uses a [SliverAnimatedList] to create an animated
 /// effect when items are removed or added to the list.
 ///
@@ -727,10 +727,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///
 /// See also:
 ///
-/// * [SliverList], which does not animate items when they are inserted or
-///   removed.
-/// * [AnimatedList], a non-sliver scrolling container that animates items when
-///   they are inserted or removed.
+///  * [SliverList], which does not animate items when they are inserted or
+///    removed.
+///  * [AnimatedList], a non-sliver scrolling container that animates items when
+///    they are inserted or removed.
 class SliverAnimatedList extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
@@ -774,7 +774,7 @@ class SliverAnimatedList extends StatefulWidget {
   static SliverAnimatedListState of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
     assert(nullOk != null);
-    final SliverAnimatedListState result = context.ancestorStateOfType(const TypeMatcher<SliverAnimatedListState>());
+    final SliverAnimatedListState result = context.findAncestorStateOfType<SliverAnimatedListState>();
     if (nullOk || result != null)
       return result;
     throw FlutterError(
@@ -828,7 +828,7 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
   @override
   void dispose() {
-    for (_ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
+    for (final _ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
       item.controller.dispose();
     }
     super.dispose();
@@ -852,7 +852,7 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
   int _indexToItemIndex(int index) {
     int itemIndex = index;
-    for (_ActiveItem item in _outgoingItems) {
+    for (final _ActiveItem item in _outgoingItems) {
       if (item.itemIndex <= itemIndex)
         itemIndex += 1;
       else
@@ -863,7 +863,7 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
   int _itemIndexToIndex(int itemIndex) {
     int index = itemIndex;
-    for (_ActiveItem item in _outgoingItems) {
+    for (final _ActiveItem item in _outgoingItems) {
       assert(item.itemIndex != itemIndex);
       if (item.itemIndex < itemIndex)
         index -= 1;
@@ -892,11 +892,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
     // Increment the incoming and outgoing item indices to account
     // for the insertion.
-    for (_ActiveItem item in _incomingItems) {
+    for (final _ActiveItem item in _incomingItems) {
       if (item.itemIndex >= itemIndex)
         item.itemIndex += 1;
     }
-    for (_ActiveItem item in _outgoingItems) {
+    for (final _ActiveItem item in _outgoingItems) {
       if (item.itemIndex >= itemIndex)
         item.itemIndex += 1;
     }
@@ -956,11 +956,11 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
       // Decrement the incoming and outgoing item indices to account
       // for the removal.
-      for (_ActiveItem item in _incomingItems) {
+      for (final _ActiveItem item in _incomingItems) {
         if (item.itemIndex > outgoingItem.itemIndex)
           item.itemIndex -= 1;
       }
-      for (_ActiveItem item in _outgoingItems) {
+      for (final _ActiveItem item in _outgoingItems) {
         if (item.itemIndex > outgoingItem.itemIndex)
           item.itemIndex -= 1;
       }

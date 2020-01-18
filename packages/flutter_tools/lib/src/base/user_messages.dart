@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ UserMessages get userMessages => context.get<UserMessages>();
 class UserMessages {
   // Messages used in FlutterValidator
   String flutterStatusInfo(String channel, String version, String os, String locale) =>
-      'Channel $channel, v$version, on $os, locale $locale';
+      'Channel ${channel ?? 'unknown'}, v${version ?? 'Unknown'}, on $os, locale $locale';
   String flutterVersion(String version, String flutterRoot) =>
       'Flutter version $version at $flutterRoot';
   String flutterRevision(String revision, String age, String date) =>
@@ -139,7 +139,8 @@ class UserMessages {
   String get xcodeEula => 'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.';
   String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
-      'Launch Xcode and install additional required components when prompted.';
+      'Launch Xcode and install additional required components when prompted or run:\n'
+      '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
       'Xcode not installed; this is necessary for iOS development.\n'
       'Download at https://developer.apple.com/xcode/download/.';
@@ -148,7 +149,8 @@ class UserMessages {
       'Download at: https://developer.apple.com/xcode/download/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
-      '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer';
+      '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\n'
+      '  sudo xcodebuild -runFirstLaunch';
 
   // Messages used in CocoaPodsValidator
   String cocoaPodsVersion(String version) => 'CocoaPods version $version';
@@ -194,7 +196,11 @@ class UserMessages {
   String visualStudioMissing(String workload, List<String> components) =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
-      'Please install the "$workload" workload, including following components:\n  ${components.join('\n  ')}';
+      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
+  String visualStudioTooOld(String minimumVersion, String workload, List<String> components) =>
+      'Visual Studio $minimumVersion or later is required.\n'
+      'Download at https://visualstudio.microsoft.com/downloads/.\n'
+      'Please install the "$workload" workload, including the following components:\n  ${components.join('\n  ')}';
   String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
       'supported by Flutter yet.';
   String get visualStudioNotLaunchable =>

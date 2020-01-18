@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -77,9 +77,9 @@ enum Orientation {
 ///
 /// See also:
 ///
-/// * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
-/// [CupertinoPageScaffold], all of which are informed by [padding],
-/// [viewPadding], and [viewInsets].
+///  * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
+///    [CupertinoPageScaffold], all of which are informed by [padding],
+///    [viewPadding], and [viewInsets].
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
@@ -174,8 +174,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this property
-  ///   and how it relates to [padding] and [viewPadding].
+  ///  * [ui.window], which provides some additional detail about this property
+  ///    and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
   /// The parts of the display that are partially obscured by system UI,
@@ -213,8 +213,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this
-  ///   property and how it relates to [padding] and [viewInsets].
+  ///  * [ui.window], which provides some additional detail about this
+  ///    property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
   /// The areas along the edges of the display where the system consumes
@@ -234,7 +234,7 @@ class MediaQueryData {
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool sample --template=stateful_widget_material}
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]
@@ -535,21 +535,21 @@ class MediaQueryData {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final MediaQueryData typedOther = other;
-    return typedOther.size == size
-        && typedOther.devicePixelRatio == devicePixelRatio
-        && typedOther.textScaleFactor == textScaleFactor
-        && typedOther.platformBrightness == platformBrightness
-        && typedOther.padding == padding
-        && typedOther.viewPadding == viewPadding
-        && typedOther.viewInsets == viewInsets
-        && typedOther.physicalDepth == physicalDepth
-        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
-        && typedOther.highContrast == highContrast
-        && typedOther.disableAnimations == disableAnimations
-        && typedOther.invertColors == invertColors
-        && typedOther.accessibleNavigation == accessibleNavigation
-        && typedOther.boldText == boldText;
+    return other is MediaQueryData
+        && other.size == size
+        && other.devicePixelRatio == devicePixelRatio
+        && other.textScaleFactor == textScaleFactor
+        && other.platformBrightness == platformBrightness
+        && other.padding == padding
+        && other.viewPadding == viewPadding
+        && other.viewInsets == viewInsets
+        && other.physicalDepth == physicalDepth
+        && other.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && other.highContrast == highContrast
+        && other.disableAnimations == disableAnimations
+        && other.invertColors == invertColors
+        && other.accessibleNavigation == accessibleNavigation
+        && other.boldText == boldText;
   }
 
   @override
@@ -574,7 +574,7 @@ class MediaQueryData {
 
   @override
   String toString() {
-    return '$runtimeType('
+    return '${objectRuntimeType(this, 'MediaQueryData')}('
              'size: $size, '
              'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
              'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
@@ -739,7 +739,7 @@ class MediaQuery extends InheritedWidget {
   /// See also:
   ///
   ///  * [MediaQueryData.viewPadding], the affected property of the
-  ///  [MediaQueryData].
+  ///    [MediaQueryData].
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
   factory MediaQuery.removeViewPadding({
@@ -790,7 +790,7 @@ class MediaQuery extends InheritedWidget {
   static MediaQueryData of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
+    final MediaQuery query = context.dependOnInheritedWidgetOfExactType<MediaQuery>();
     if (query != null)
       return query.data;
     if (nullOk)

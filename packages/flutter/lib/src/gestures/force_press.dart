@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,7 +43,6 @@ enum _ForceState {
 ///  * [ForcePressGestureRecognizer.onStart], [ForcePressGestureRecognizer.onPeak],
 ///    [ForcePressGestureRecognizer.onEnd], and [ForcePressGestureRecognizer.onUpdate]
 ///    which use [ForcePressDetails].
-///  * [ForcePressUpdateDetails], the details for [ForcePressUpdateCallback].
 class ForcePressDetails {
   /// Creates details for a [GestureForcePressStartCallback],
   /// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
@@ -152,7 +151,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// of [onStart] and/or [onPeak] and before the invocation of [onEnd], no
   /// matter what the pressure is during this time period. The position and
   /// pressure of the pointer is provided in the callback's `details` argument,
-  /// which is a [ForcePressUpdateDetails] object.
+  /// which is a [ForcePressDetails] object.
   GestureForcePressUpdateCallback onUpdate;
 
   /// A pointer is in contact with the screen and has just pressed with a force
@@ -190,7 +189,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// This function must always return values in the range 0.0 to 1.0 given a
   /// pressure that is between the minimum and maximum pressures. It may return
-  /// [double.NaN] for values that it does not want to support.
+  /// `double.NaN` for values that it does not want to support.
   ///
   /// By default, the function is a linear interpolation; however, changing the
   /// function could be useful to accommodate variations in the way different
@@ -217,7 +216,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     // If the device has a maximum pressure of less than or equal to 1, it
     // doesn't have touch pressure sensing capabilities. Do not participate
     // in the gesture arena.
-    if (!(event is PointerUpEvent) && event.pressureMax <= 1.0) {
+    if (event is! PointerUpEvent && event.pressureMax <= 1.0) {
       resolve(GestureDisposition.rejected);
     } else {
       startTrackingPointer(event.pointer, event.transform);
@@ -341,7 +340,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     // If the device incorrectly reports a pressure outside of pressureMin
     // and pressureMax, we still want this recognizer to respond normally.
     if (!value.isNaN)
-      value = value.clamp(0.0, 1.0);
+      value = value.clamp(0.0, 1.0) as double;
     return value;
   }
 

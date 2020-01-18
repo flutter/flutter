@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 
 import 'fuchsia_sdk.dart';
 
@@ -99,9 +99,9 @@ class FuchsiaPM {
     ]);
   }
 
-  /// Spawns an http server in a new process for serving Fuchisa packages.
+  /// Spawns an http server in a new process for serving Fuchsia packages.
   ///
-  /// The arguemnt [repoPath] should have previously been an arguemnt to
+  /// The argument [repoPath] should have previously been an argument to
   /// [newrepo]. The [host] should be the host reported by
   /// [FuchsiaDevFinder.resolve], and [port] should be an unused port for the
   /// http server to bind.
@@ -121,11 +121,11 @@ class FuchsiaPM {
     process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen(printTrace);
+        .listen(globals.printTrace);
     process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen(printError);
+        .listen(globals.printError);
     return process;
   }
 
@@ -187,25 +187,25 @@ class FuchsiaPackageServer {
 
   Process _process;
 
-  /// The url that can be used by the device to access this package server.
+  /// The URL that can be used by the device to access this package server.
   String get url => 'http://$_host:$_port';
 
   // The name used to reference the server by fuchsia-pkg:// urls.
   final String name;
 
-  /// Usees [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
+  /// Uses [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.
   ///
   /// Returns false if the repo could not be created or the server could not
   /// be spawned, and true otherwise.
   Future<bool> start() async {
     if (_process != null) {
-      printError('$this already started!');
+      globals.printError('$this already started!');
       return false;
     }
     // initialize a new repo.
     if (!await fuchsiaSdk.fuchsiaPM.newrepo(_repo)) {
-      printError('Failed to create a new package server repo');
+      globals.printError('Failed to create a new package server repo');
       return false;
     }
     _process = await fuchsiaSdk.fuchsiaPM.serve(_repo, _host, _port);
@@ -213,7 +213,7 @@ class FuchsiaPackageServer {
     unawaited(_process.exitCode.whenComplete(() {
       // If _process is null, then the server was stopped deliberately.
       if (_process != null) {
-        printError('Error running Fuchsia pm tool "serve" command');
+        globals.printError('Error running Fuchsia pm tool "serve" command');
       }
     }));
     return true;

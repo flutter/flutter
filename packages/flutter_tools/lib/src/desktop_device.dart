@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,12 +10,11 @@ import 'application_package.dart';
 import 'base/common.dart';
 import 'base/io.dart';
 import 'base/os.dart';
-import 'base/process_manager.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -95,11 +94,11 @@ abstract class DesktopDevice extends Device {
     final BuildMode buildMode = debuggingOptions?.buildInfo?.mode;
     final String executable = executablePathForDevice(package, buildMode);
     if (executable == null) {
-      printError('Unable to find executable to run');
+      globals.printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
 
-    final Process process = await processManager.start(<String>[
+    final Process process = await globals.processManager.start(<String>[
       executable,
     ]);
     _runningProcesses.add(process);
@@ -109,13 +108,17 @@ abstract class DesktopDevice extends Device {
       return LaunchResult.succeeded();
     }
     _deviceLogReader.initializeProcess(process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
+      devicePort: debuggingOptions?.deviceVmServicePort,
+      hostPort: debuggingOptions?.hostVmServicePort,
+      ipv6: ipv6,
+    );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       onAttached(package, buildMode, process);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
-      printError('Error waiting for a debug connection: $error');
+      globals.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {
       await observatoryDiscovery.cancel();
@@ -127,10 +130,15 @@ abstract class DesktopDevice extends Device {
     bool succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
     // set.
-    for (Process process in Set<Process>.from(_runningProcesses)) {
+    for (final Process process in Set<Process>.from(_runningProcesses)) {
       succeeded &= process.kill();
     }
     return succeeded;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await portForwarder?.dispose();
   }
 
   /// Builds the current project for this device, with the given options.
@@ -169,4 +177,9 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   String get name => 'desktop';
+
+  @override
+  void dispose() {
+    // Nothing to dispose.
+  }
 }

@@ -1,10 +1,9 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../base/file_system.dart';
-import '../base/platform.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 
 /// A class for representing depfile formats.
 class Depfile {
@@ -18,7 +17,7 @@ class Depfile {
     final String contents = file.readAsStringSync();
     final List<String> colonSeparated = contents.split(': ');
     if (colonSeparated.length != 2) {
-      printError('Invalid depfile: ${file.path}');
+      globals.printError('Invalid depfile: ${file.path}');
       return const Depfile(<File>[], <File>[]);
     }
     final List<File> inputs = _processList(colonSeparated[1].trim());
@@ -32,7 +31,7 @@ class Depfile {
   /// file must be manually specified.
   factory Depfile.parseDart2js(File file, File output) {
     final List<File> inputs = <File>[];
-    for (String rawUri in file.readAsLinesSync()) {
+    for (final String rawUri in file.readAsLinesSync()) {
       if (rawUri.trim().isEmpty) {
         continue;
       }
@@ -43,7 +42,7 @@ class Depfile {
       if (fileUri.scheme != 'file') {
         continue;
       }
-      inputs.add(fs.file(fileUri));
+      inputs.add(globals.fs.file(fileUri));
     }
     return Depfile(inputs, <File>[output]);
   }
@@ -73,8 +72,8 @@ class Depfile {
   }
 
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
-    for (File outputFile in files) {
-      if (platform.isWindows) {
+    for (final File outputFile in files) {
+      if (globals.platform.isWindows) {
         // Paths in a depfile have to be escaped on windows.
         final String escapedPath = outputFile.path.replaceAll(r'\', r'\\');
         buffer.write(' $escapedPath');
@@ -98,7 +97,7 @@ class Depfile {
     // The tool doesn't write duplicates to these lists. This call is an attempt to
     // be resillient to the outputs of other tools which write or user edits to depfiles.
         .toSet()
-        .map((String path) => fs.file(path))
+        .map((String path) => globals.fs.file(path))
         .toList();
   }
 }

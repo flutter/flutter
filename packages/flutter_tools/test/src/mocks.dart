@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,13 +6,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -21,6 +22,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -36,7 +38,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
     android: AndroidApk(
       id: 'io.flutter.android.mock',
-      file: fs.file('/mock/path/to/android/SkyShell.apk'),
+      file: globals.fs.file('/mock/path/to/android/SkyShell.apk'),
       versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
@@ -67,9 +69,9 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     bool withPlatformTools = true,
     bool withBuildTools = true,
   }) {
-    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
-    final String exe = platform.isWindows ? '.exe' : '';
-    final String bat = platform.isWindows ? '.bat' : '';
+    final Directory dir = globals.fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+    final String exe = globals.platform.isWindows ? '.exe' : '';
+    final String bat = globals.platform.isWindows ? '.bat' : '';
 
     _createDir(dir, 'licenses');
 
@@ -98,7 +100,7 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     }
 
     if (withNdkDir != null) {
-      final String ndkToolchainBin = fs.path.join(
+      final String ndkToolchainBin = globals.fs.path.join(
         'ndk-bundle',
         'toolchains',
         'arm-linux-androideabi-4.9',
@@ -106,24 +108,24 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
         withNdkDir,
         'bin',
       );
-      final String ndkCompiler = fs.path.join(
+      final String ndkCompiler = globals.fs.path.join(
         ndkToolchainBin,
         'arm-linux-androideabi-gcc',
       );
-      final String ndkLinker = fs.path.join(
+      final String ndkLinker = globals.fs.path.join(
         ndkToolchainBin,
         'arm-linux-androideabi-ld',
       );
       _createSdkFile(dir, ndkCompiler);
       _createSdkFile(dir, ndkLinker);
-      _createSdkFile(dir, fs.path.join('ndk-bundle', 'source.properties'), contents: '''
+      _createSdkFile(dir, globals.fs.path.join('ndk-bundle', 'source.properties'), contents: '''
 Pkg.Desc = Android NDK[]
 Pkg.Revision = $ndkVersion.1.5063045
 
 ''');
     }
     if (withNdkSysroot) {
-      final String armPlatform = fs.path.join(
+      final String armPlatform = globals.fs.path.join(
         'ndk-bundle',
         'platforms',
         'android-9',
@@ -144,7 +146,7 @@ Pkg.Revision = $ndkVersion.1.5063045
   }
 
   static void _createDir(Directory dir, String path) {
-    final Directory directory = fs.directory(fs.path.join(dir.path, path));
+    final Directory directory = globals.fs.directory(globals.fs.path.join(dir.path, path));
     directory.createSync(recursive: true);
   }
 
@@ -177,14 +179,15 @@ class MockProcessManager extends Mock implements ProcessManager {
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
+    final List<String> commands = command.cast<String>();
     if (!runSucceeds) {
-      final String executable = command[0];
-      final List<String> arguments = command.length > 1 ? command.sublist(1) : <String>[];
+      final String executable = commands[0];
+      final List<String> arguments = commands.length > 1 ? commands.sublist(1) : <String>[];
       throw ProcessException(executable, arguments);
     }
 
-    commands = command;
-    return Future<Process>.value(processFactory(command));
+    this.commands = commands;
+    return Future<Process>.value(processFactory(commands));
   }
 }
 
@@ -254,7 +257,7 @@ class MockProcess extends Mock implements Process {
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin ?? MemoryIOSink();
+       stdin = stdin as IOSink ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -272,7 +275,7 @@ class MockProcess extends Mock implements Process {
   final Stream<List<int>> stderr;
 }
 
-/// A fake process implemenation which can be provided all necessary values.
+/// A fake process implementation which can be provided all necessary values.
 class FakeProcess implements Process {
   FakeProcess({
     this.pid = 1,
@@ -281,7 +284,7 @@ class FakeProcess implements Process {
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin ?? MemoryIOSink();
+       stdin = stdin as IOSink ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -396,7 +399,7 @@ class MemoryIOSink implements IOSink {
   @override
   void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
     bool addSeparator = false;
-    for (dynamic object in objects) {
+    for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);
       }
@@ -534,6 +537,12 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
   bool isSupported() => true;
 
   @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsFlutterExit => false;
+
+  @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
@@ -563,16 +572,33 @@ class MockDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'MockLogReader';
 
-  final StreamController<String> _linesController = StreamController<String>.broadcast();
+  StreamController<String> _cachedLinesController;
+
+  final List<String> _lineQueue = <String>[];
+  StreamController<String> get _linesController {
+    _cachedLinesController ??= StreamController<String>
+      .broadcast(onListen: () {
+        _lineQueue.forEach(_linesController.add);
+        _lineQueue.clear();
+     });
+    return _cachedLinesController;
+  }
 
   @override
   Stream<String> get logLines => _linesController.stream;
 
-  void addLine(String line) => _linesController.add(line);
+  void addLine(String line) {
+    if (_linesController.hasListener) {
+      _linesController.add(line);
+    } else {
+      _lineQueue.add(line);
+    }
+  }
 
   @override
-  void dispose() {
-    _linesController.close();
+  Future<void> dispose() async {
+    _lineQueue.clear();
+    await _linesController.close();
   }
 }
 
@@ -651,8 +677,8 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   }
   @override
   Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
-    fs.file(outputPath).createSync(recursive: true);
-    fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
+    globals.fs.file(outputPath).createSync(recursive: true);
+    globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);
   }
 }

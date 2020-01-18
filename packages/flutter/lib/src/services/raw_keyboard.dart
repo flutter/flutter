@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -165,7 +165,7 @@ abstract class RawKeyEventData {
   /// event, and the keyboard side or sides that the key was on.
   Map<ModifierKey, KeyboardSide> get modifiersPressed {
     final Map<ModifierKey, KeyboardSide> result = <ModifierKey, KeyboardSide>{};
-    for (ModifierKey key in ModifierKey.values) {
+    for (final ModifierKey key in ModifierKey.values) {
       if (isModifierPressed(key)) {
         result[key] = getModifierSide(key);
       }
@@ -249,51 +249,51 @@ abstract class RawKeyEvent extends Diagnosticable {
   factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
     RawKeyEventData data;
 
-    final String keymap = message['keymap'];
+    final String keymap = message['keymap'] as String;
     switch (keymap) {
       case 'android':
         data = RawKeyEventDataAndroid(
-          flags: message['flags'] ?? 0,
-          codePoint: message['codePoint'] ?? 0,
-          keyCode: message['keyCode'] ?? 0,
-          plainCodePoint: message['plainCodePoint'] ?? 0,
-          scanCode: message['scanCode'] ?? 0,
-          metaState: message['metaState'] ?? 0,
-          eventSource: message['source'] ?? 0,
-          vendorId: message['vendorId'] ?? 0,
-          productId: message['productId'] ?? 0,
-          deviceId: message['deviceId'] ?? 0,
-          repeatCount: message['repeatCount'] ?? 0,
+          flags: message['flags'] as int ?? 0,
+          codePoint: message['codePoint'] as int ?? 0,
+          keyCode: message['keyCode'] as int ?? 0,
+          plainCodePoint: message['plainCodePoint'] as int ?? 0,
+          scanCode: message['scanCode'] as int ?? 0,
+          metaState: message['metaState'] as int ?? 0,
+          eventSource: message['source'] as int ?? 0,
+          vendorId: message['vendorId'] as int ?? 0,
+          productId: message['productId'] as int ?? 0,
+          deviceId: message['deviceId'] as int ?? 0,
+          repeatCount: message['repeatCount'] as int ?? 0,
         );
         break;
       case 'fuchsia':
         data = RawKeyEventDataFuchsia(
-          hidUsage: message['hidUsage'] ?? 0,
-          codePoint: message['codePoint'] ?? 0,
-          modifiers: message['modifiers'] ?? 0,
+          hidUsage: message['hidUsage'] as int ?? 0,
+          codePoint: message['codePoint'] as int ?? 0,
+          modifiers: message['modifiers'] as int ?? 0,
         );
         break;
       case 'macos':
         data = RawKeyEventDataMacOs(
-            characters: message['characters'] ?? '',
-            charactersIgnoringModifiers:
-                message['charactersIgnoringModifiers'] ?? '',
-            keyCode: message['keyCode'] ?? 0,
-            modifiers: message['modifiers'] ?? 0);
+            characters: message['characters'] as String ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String ?? '',
+            keyCode: message['keyCode'] as int ?? 0,
+            modifiers: message['modifiers'] as int ?? 0);
         break;
       case 'linux':
         data = RawKeyEventDataLinux(
-            keyHelper: KeyHelper(message['toolkit'] ?? ''),
-            unicodeScalarValues: message['unicodeScalarValues'] ?? 0,
-            keyCode: message['keyCode'] ?? 0,
-            scanCode: message['scanCode'] ?? 0,
-            modifiers: message['modifiers'] ?? 0);
+            keyHelper: KeyHelper(message['toolkit'] as String ?? ''),
+            unicodeScalarValues: message['unicodeScalarValues'] as int ?? 0,
+            keyCode: message['keyCode'] as int ?? 0,
+            scanCode: message['scanCode'] as int ?? 0,
+            modifiers: message['modifiers'] as int ?? 0,
+            isDown: message['type'] == 'keydown');
         break;
       case 'web':
         data = RawKeyEventDataWeb(
-          code: message['code'],
-          key: message['key'],
-          metaState: message['metaState'],
+          code: message['code'] as String,
+          key: message['key'] as String,
+          metaState: message['metaState'] as int,
         );
         break;
       default:
@@ -303,10 +303,10 @@ abstract class RawKeyEvent extends Diagnosticable {
         throw FlutterError('Unknown keymap for key events: $keymap');
     }
 
-    final String type = message['type'];
+    final String type = message['type'] as String;
     switch (type) {
       case 'keydown':
-        return RawKeyDownEvent(data: data, character: message['character']);
+        return RawKeyDownEvent(data: data, character: message['character'] as String);
       case 'keyup':
         return RawKeyUpEvent(data: data);
       default:
@@ -498,7 +498,7 @@ class RawKeyboard {
   }
 
   Future<dynamic> _handleKeyEvent(dynamic message) async {
-    final RawKeyEvent event = RawKeyEvent.fromMessage(message);
+    final RawKeyEvent event = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
     if (event == null) {
       return;
     }
@@ -523,7 +523,7 @@ class RawKeyboard {
     if (_listeners.isEmpty) {
       return;
     }
-    for (ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
+    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
       if (_listeners.contains(listener)) {
         listener(event);
       }
@@ -575,7 +575,7 @@ class RawKeyboard {
   void _synchronizeModifiers(RawKeyEvent event) {
     final Map<ModifierKey, KeyboardSide> modifiersPressed = event.data.modifiersPressed;
     final Set<LogicalKeyboardKey> modifierKeys = <LogicalKeyboardKey>{};
-    for (ModifierKey key in modifiersPressed.keys) {
+    for (final ModifierKey key in modifiersPressed.keys) {
       final Set<LogicalKeyboardKey> mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert(mappedKeys != null,
         'Platform key support for ${Platform.operatingSystem} is '
@@ -618,10 +618,12 @@ class _ModifierSidePair extends Object {
   final KeyboardSide side;
 
   @override
-  bool operator ==(dynamic other) {
-    return runtimeType == other.runtimeType
-        && modifier == other.modifier
-        && side == other.side;
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ModifierSidePair
+        && other.modifier == modifier
+        && other.side == side;
   }
 
   @override

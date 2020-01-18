@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -212,6 +212,8 @@ class DataCell {
 
 /// A material design data table.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ktTajqbhIcY}
+///
 /// Displaying data in a table is expensive, because to lay out the
 /// table all the data must be measured twice, once to negotiate the
 /// dimensions to use for each column, and once to actually lay out
@@ -222,6 +224,67 @@ class DataCell {
 /// target device), it is suggested that you use a
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
+///
+/// {@tool sample --template=stateless_widget_scaffold}
+///
+/// This sample shows how to display a [DataTable] with three columns: name, age, and
+/// role. The columns are defined by three [DataColumn] objects. The table
+/// contains three rows of data for three example users, the data for which
+/// is defined by three [DataRow] objects.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/data_table.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return DataTable(
+///     columns: const <DataColumn>[
+///       DataColumn(
+///         label: Text(
+///           'Name',
+///           style: TextStyle(fontStyle: FontStyle.italic),
+///         ),
+///       ),
+///       DataColumn(
+///         label: Text(
+///           'Age',
+///           style: TextStyle(fontStyle: FontStyle.italic),
+///         ),
+///       ),
+///       DataColumn(
+///         label: Text(
+///           'Role',
+///           style: TextStyle(fontStyle: FontStyle.italic),
+///         ),
+///       ),
+///     ],
+///     rows: const <DataRow>[
+///       DataRow(
+///         cells: <DataCell>[
+///           DataCell(Text('Sarah')),
+///           DataCell(Text('19')),
+///           DataCell(Text('Student')),
+///         ],
+///       ),
+///       DataRow(
+///         cells: <DataCell>[
+///           DataCell(Text('Janine')),
+///           DataCell(Text('43')),
+///           DataCell(Text('Professor')),
+///         ],
+///       ),
+///       DataRow(
+///         cells: <DataCell>[
+///           DataCell(Text('William')),
+///           DataCell(Text('27')),
+///           DataCell(Text('Associate Professor')),
+///         ],
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
 // TODO(ianh): Also suggest [ScrollingDataTable] once we have it.
 ///
 /// See also:
@@ -267,6 +330,7 @@ class DataTable extends StatelessWidget {
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
+    this.showCheckboxColumn = true,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
@@ -276,6 +340,7 @@ class DataTable extends StatelessWidget {
        assert(headingRowHeight != null),
        assert(horizontalMargin != null),
        assert(columnSpacing != null),
+       assert(showCheckboxColumn != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        _onlyTextColumn = _initOnlyTextColumn(columns),
@@ -345,6 +410,17 @@ class DataTable extends StatelessWidget {
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double columnSpacing;
 
+  /// {@template flutter.material.dataTable.showCheckboxColumn}
+  /// Whether the widget should display checkboxes for selectable rows.
+  ///
+  /// If true, a [CheckBox] will be placed at the beginning of each row that is
+  /// selectable. However, if [DataRow.onSelectChanged] is not set for any row,
+  /// checkboxes will not be placed, even if this value is true.
+  ///
+  /// If false, all rows will not display a [CheckBox].
+  /// {@endtemplate}
+  final bool showCheckboxColumn;
+
   /// The data to show in each row (excluding the row that contains
   /// the column headings).
   ///
@@ -378,7 +454,7 @@ class DataTable extends StatelessWidget {
     if (onSelectAll != null) {
       onSelectAll(checked);
     } else {
-      for (DataRow row in rows) {
+      for (final DataRow row in rows) {
         if ((row.onSelectChanged != null) && (row.selected != checked))
           row.onSelectChanged(checked);
       }
@@ -545,10 +621,10 @@ class DataTable extends StatelessWidget {
       border: Border(bottom: Divider.createBorderSide(context, width: 1.0)),
     );
 
-    final bool showCheckboxColumn = rows.any((DataRow row) => row.onSelectChanged != null);
-    final bool allChecked = showCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
+    final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);
+    final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
 
-    final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (showCheckboxColumn ? 1 : 0));
+    final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (displayCheckboxColumn ? 1 : 0));
     final List<TableRow> tableRows = List<TableRow>.generate(
       rows.length + 1, // the +1 is for the header row
       (int index) {
@@ -564,7 +640,7 @@ class DataTable extends StatelessWidget {
     int rowIndex;
 
     int displayColumnIndex = 0;
-    if (showCheckboxColumn) {
+    if (displayCheckboxColumn) {
       tableColumns[0] = FixedColumnWidth(horizontalMargin + Checkbox.width + horizontalMargin / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
         color: theme.accentColor,
@@ -572,7 +648,7 @@ class DataTable extends StatelessWidget {
         onCheckboxChanged: _handleSelectAll,
       );
       rowIndex = 1;
-      for (DataRow row in rows) {
+      for (final DataRow row in rows) {
         tableRows[rowIndex].children[0] = _buildCheckbox(
           color: theme.accentColor,
           checked: row.selected,
@@ -588,9 +664,9 @@ class DataTable extends StatelessWidget {
       final DataColumn column = columns[dataColumnIndex];
 
       double paddingStart;
-      if (dataColumnIndex == 0 && showCheckboxColumn) {
+      if (dataColumnIndex == 0 && displayCheckboxColumn) {
         paddingStart = horizontalMargin / 2.0;
-      } else if (dataColumnIndex == 0 && !showCheckboxColumn) {
+      } else if (dataColumnIndex == 0 && !displayCheckboxColumn) {
         paddingStart = horizontalMargin;
       } else {
         paddingStart = columnSpacing / 2.0;
@@ -623,7 +699,7 @@ class DataTable extends StatelessWidget {
         ascending: sortAscending,
       );
       rowIndex = 1;
-      for (DataRow row in rows) {
+      for (final DataRow row in rows) {
         final DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
           context: context,
@@ -687,14 +763,14 @@ class TableRowInkWell extends InkResponse {
       AbstractNode table = cell.parent;
       final Matrix4 transform = Matrix4.identity();
       while (table is RenderObject && table is! RenderTable) {
-        final RenderTable parentBox = table;
+        final RenderObject parentBox = table as RenderObject;
         parentBox.applyPaintTransform(cell, transform);
         assert(table == cell.parent);
-        cell = table;
+        cell = parentBox;
         table = table.parent;
       }
       if (table is RenderTable) {
-        final TableCellParentData cellParentData = cell.parentData;
+        final TableCellParentData cellParentData = cell.parentData as TableCellParentData;
         assert(cellParentData.y != null);
         final Rect rect = table.getRowBox(cellParentData.y);
         // The rect is in the table's coordinate space. We need to change it to the

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -62,11 +62,9 @@ class Velocity {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! Velocity)
-      return false;
-    final Velocity typedOther = other;
-    return pixelsPerSecond == typedOther.pixelsPerSecond;
+  bool operator ==(Object other) {
+    return other is Velocity
+        && other.pixelsPerSecond == pixelsPerSecond;
   }
 
   @override

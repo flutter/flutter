@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -86,7 +86,7 @@ class CupertinoScrollbar extends StatefulWidget {
   /// Here is an example of using the `controller` parameter to enable
   /// scrollbar dragging for multiple independent ListViews:
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// final ScrollController _controllerOne = ScrollController();
@@ -416,9 +416,9 @@ bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
   if (customPaintKey.currentContext == null) {
     return false;
   }
-  final CustomPaint customPaint = customPaintKey.currentContext.widget;
-  final ScrollbarPainter painter = customPaint.foregroundPainter;
-  final RenderBox renderBox = customPaintKey.currentContext.findRenderObject();
+  final CustomPaint customPaint = customPaintKey.currentContext.widget as CustomPaint;
+  final ScrollbarPainter painter = customPaint.foregroundPainter as ScrollbarPainter;
+  final RenderBox renderBox = customPaintKey.currentContext.findRenderObject() as RenderBox;
   final Offset localOffset = renderBox.globalToLocal(offset);
   return painter.hitTestInteractive(localOffset);
 }

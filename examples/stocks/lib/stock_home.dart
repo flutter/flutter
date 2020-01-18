@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -188,10 +188,10 @@ class StockHomeState extends State<StockHome> {
     showAboutDialog(context: context);
   }
 
-  Widget buildAppBar() {
+  AppBar buildAppBar() {
     return AppBar(
       elevation: 0.0,
-      title: Text(StockStrings.of(context).title()),
+      title: Text(StockStrings.of(context).title),
       actions: <Widget>[
         IconButton(
           icon: const Icon(Icons.search),
@@ -223,8 +223,8 @@ class StockHomeState extends State<StockHome> {
       ],
       bottom: TabBar(
         tabs: <Widget>[
-          Tab(text: StockStrings.of(context).market()),
-          Tab(text: StockStrings.of(context).portfolio()),
+          Tab(text: StockStrings.of(context).market),
+          Tab(text: StockStrings.of(context).portfolio),
         ],
       ),
     );
@@ -283,7 +283,7 @@ class StockHomeState extends State<StockHome> {
 
   static const List<String> portfolioSymbols = <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
 
-  Widget buildSearchBar() {
+  AppBar buildSearchBar() {
     return AppBar(
       leading: BackButton(
         color: Theme.of(context).accentColor,

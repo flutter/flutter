@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -123,12 +123,12 @@ class RoundedRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final RoundedRectangleBorder typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius;
+    return other is RoundedRectangleBorder
+        && other.side == side
+        && other.borderRadius == borderRadius;
   }
 
   @override
@@ -136,7 +136,7 @@ class RoundedRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '${objectRuntimeType(this, 'RoundedRectangleBorder')}($side, $borderRadius)';
   }
 }
 
@@ -283,13 +283,13 @@ class _RoundedRectangleToCircleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final _RoundedRectangleToCircleBorder typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius
-        && circleness == typedOther.circleness;
+    return other is _RoundedRectangleToCircleBorder
+        && other.side == side
+        && other.borderRadius == borderRadius
+        && other.circleness == circleness;
   }
 
   @override

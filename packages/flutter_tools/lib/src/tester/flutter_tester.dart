@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,20 +11,19 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
   factory FlutterTesterApp.fromCurrentDirectory() {
-    return FlutterTesterApp._(fs.currentDirectory);
+    return FlutterTesterApp._(globals.fs.currentDirectory);
   }
 
   FlutterTesterApp._(Directory directory)
@@ -110,12 +109,12 @@ class FlutterTesterDevice extends Device {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
 
     if (!buildInfo.isDebug) {
-      printError('This device only supports debug mode.');
+      globals.printError('This device only supports debug mode.');
       return LaunchResult.failed();
     }
 
-    final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-    if (!fs.isFileSync(shellPath)) {
+    final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
+    if (!globals.fs.isFileSync(shellPath)) {
       throwToolExit('Cannot find Flutter shell at $shellPath');
     }
 
@@ -134,14 +133,14 @@ class FlutterTesterDevice extends Device {
         command.add('--disable-service-auth-codes');
       }
       if (debuggingOptions.hasObservatoryPort) {
-        command.add('--observatory-port=${debuggingOptions.observatoryPort}');
+        command.add('--observatory-port=${debuggingOptions.hostVmServicePort}');
       }
     }
 
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
     final String applicationKernelFilePath = getKernelPathForTransformerOptions(
-      fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
+      globals.fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
     await BundleBuilder().build(
@@ -158,10 +157,10 @@ class FlutterTesterDevice extends Device {
     command.add(applicationKernelFilePath);
 
     try {
-      printTrace(command.join(' '));
+      globals.printTrace(command.join(' '));
 
       _isRunning = true;
-      _process = await processManager.start(command,
+      _process = await globals.processManager.start(command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
         },
@@ -187,13 +186,15 @@ class FlutterTesterDevice extends Device {
 
       final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(),
-        hostPort: debuggingOptions.observatoryPort,
+        hostPort: debuggingOptions.hostVmServicePort,
+        devicePort: debuggingOptions.deviceVmServicePort,
+        ipv6: ipv6,
       );
 
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
-      printError('Failed to launch $package: $error');
+      globals.printError('Failed to launch $package: $error');
       return LaunchResult.failed();
     }
   }
@@ -210,6 +211,12 @@ class FlutterTesterDevice extends Device {
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
+
+  @override
+  Future<void> dispose() async {
+    _logReader?.dispose();
+    await _portForwarder?.dispose();
+  }
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
@@ -248,6 +255,9 @@ class _FlutterTesterDeviceLogReader extends DeviceLogReader {
   String get name => 'flutter tester log reader';
 
   void addLine(String line) => _logLinesController.add(line);
+
+  @override
+  void dispose() {}
 }
 
 /// A fake port forwarder that doesn't do anything. Used by flutter tester
@@ -266,4 +276,7 @@ class _NoopPortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async { }
+
+  @override
+  Future<void> dispose() async { }
 }

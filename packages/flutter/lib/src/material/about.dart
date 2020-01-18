@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,7 +33,7 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool sample --template=stateless_widget_material}
 ///
 /// This sample shows two ways to open [AboutDialog]. The first one
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
@@ -78,7 +78,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2019 The Chromium Authors',
+///              applicationLegalese: '© 2014 The Flutter Authors',
 ///              aboutBoxChildren: aboutBoxChildren,
 ///            ),
 ///          ),
@@ -93,7 +93,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2019 The Chromium Authors',
+///              applicationLegalese: '© 2014 The Flutter Authors',
 ///              children: aboutBoxChildren,
 ///            );
 ///          },
@@ -488,7 +488,7 @@ class _LicensePageState extends State<LicensePage> {
       debugFlowId = flow.id;
       return true;
     }());
-    await for (LicenseEntry license in LicenseRegistry.licenses) {
+    await for (final LicenseEntry license in LicenseRegistry.licenses) {
       if (!mounted) {
         return;
       }
@@ -523,7 +523,7 @@ class _LicensePageState extends State<LicensePage> {
             textAlign: TextAlign.center,
           ),
         ));
-        for (LicenseParagraph paragraph in paragraphs) {
+        for (final LicenseParagraph paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
             _licenses.add(Padding(
               padding: const EdgeInsets.only(top: 16.0),
@@ -609,7 +609,7 @@ String _defaultApplicationName(BuildContext context) {
   // someone really wants their application title to change dynamically, they
   // can provide an explicit applicationName to the widgets defined in this
   // file, instead of relying on the default.
-  final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
+  final Title ancestorTitle = context.findAncestorWidgetOfExactType<Title>();
   return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }
 

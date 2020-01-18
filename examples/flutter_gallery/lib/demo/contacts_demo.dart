@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -169,9 +169,9 @@ class ContactsDemoState extends State<ContactsDemo> {
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment(0.0, -1.0),
-                          end: Alignment(0.0, -0.4),
-                          colors: <Color>[Color(0x60000000), Color(0x00000000)],
+                          begin: Alignment.topCenter,
+                          end: Alignment(0, .35),
+                          colors: <Color>[Color(0xC0000000), Color(0x00000000)],
                         ),
                       ),
                     ),

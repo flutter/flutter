@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -344,7 +344,7 @@ class RouteSettings {
   final Object arguments;
 
   @override
-  String toString() => '$runtimeType("$name", $arguments)';
+  String toString() => '${objectRuntimeType(this, 'RouteSettings')}("$name", $arguments)';
 }
 
 /// An interface for observing the behavior of a [Navigator].
@@ -625,7 +625,7 @@ class NavigatorObserver {
 /// in this situation, but it's a real world example where nested [Navigator]s
 /// are used.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample --template=freeform}
 /// The following example demonstrates how a nested [Navigator] can be used to
 /// present a standalone user registration journey.
 ///
@@ -854,7 +854,7 @@ class Navigator extends StatefulWidget {
   /// [Navigator.onUnknownRoute] to construct the route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -865,7 +865,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following example shows how to pass additional `arguments` to the
   /// route:
@@ -884,7 +884,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following example shows how to pass a custom Object to the route:
   ///
@@ -952,7 +952,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1007,7 +1007,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1068,7 +1068,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1106,7 +1106,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1149,7 +1149,7 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1200,7 +1200,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1364,7 +1364,7 @@ class Navigator extends StatefulWidget {
   /// false); returns false if there are no further previous routes.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage for closing a route is as follows:
   ///
@@ -1402,7 +1402,7 @@ class Navigator extends StatefulWidget {
   /// See [pop] for more details of the semantics of popping a route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1444,7 +1444,7 @@ class Navigator extends StatefulWidget {
   }
 
   /// Immediately remove a route from the navigator that most tightly encloses
-  /// the given context, and [Route.dispose] it. The route to be replaced is the
+  /// the given context, and [Route.dispose] it. The route to be removed is the
   /// one below the given `anchorRoute`.
   ///
   /// {@template flutter.widgets.navigator.removeRouteBelow}
@@ -1488,8 +1488,8 @@ class Navigator extends StatefulWidget {
     bool nullOk = false,
   }) {
     final NavigatorState navigator = rootNavigator
-        ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
-        : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+        ? context.findRootAncestorStateOfType<NavigatorState>()
+        : context.findAncestorStateOfType<NavigatorState>();
     assert(() {
       if (navigator == null && !nullOk) {
         throw FlutterError(
@@ -1521,7 +1521,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    for (NavigatorObserver observer in widget.observers) {
+    for (final NavigatorObserver observer in widget.observers) {
       assert(observer.navigator == null);
       observer._navigator = this;
     }
@@ -1535,7 +1535,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       final List<String> routeParts = initialRouteName.split('/');
       if (initialRouteName.isNotEmpty) {
         String routeName = '';
-        for (String part in routeParts) {
+        for (final String part in routeParts) {
           routeName += '/$part';
           plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: null));
         }
@@ -1564,7 +1564,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route ??= _routeNamed<Object>(Navigator.defaultRouteName, arguments: null);
       push(route);
     }
-    for (Route<dynamic> route in _history)
+    for (final Route<dynamic> route in _history)
       _initialOverlayEntries.addAll(route.overlayEntries);
   }
 
@@ -1572,14 +1572,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.observers != widget.observers) {
-      for (NavigatorObserver observer in oldWidget.observers)
+      for (final NavigatorObserver observer in oldWidget.observers)
         observer._navigator = null;
-      for (NavigatorObserver observer in widget.observers) {
+      for (final NavigatorObserver observer in widget.observers) {
         assert(observer.navigator == null);
         observer._navigator = this;
       }
     }
-    for (Route<dynamic> route in _history)
+    for (final Route<dynamic> route in _history)
       route.changedExternalState();
   }
 
@@ -1590,10 +1590,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _debugLocked = true;
       return true;
     }());
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer._navigator = null;
     final List<Route<dynamic>> doomed = _poppedRoutes.toList()..addAll(_history);
-    for (Route<dynamic> route in doomed)
+    for (final Route<dynamic> route in doomed)
       route.dispose();
     _poppedRoutes.clear();
     _history.clear();
@@ -1609,7 +1609,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   OverlayState get overlay => _overlayKey.currentState;
 
   OverlayEntry get _currentOverlayEntry {
-    for (Route<dynamic> route in _history.reversed) {
+    for (final Route<dynamic> route in _history.reversed) {
       if (route.overlayEntries.isNotEmpty)
         return route.overlayEntries.last;
     }
@@ -1626,7 +1626,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       isInitialRoute: _history.isEmpty,
       arguments: arguments,
     );
-    Route<T> route = widget.onGenerateRoute(settings);
+    Route<T> route = widget.onGenerateRoute(settings) as Route<T>;
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
@@ -1641,7 +1641,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }
         return true;
       }());
-      route = widget.onUnknownRoute(settings);
+      route = widget.onUnknownRoute(settings) as Route<T>;
       assert(() {
         if (route == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1665,7 +1665,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1691,7 +1691,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1717,7 +1717,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1744,7 +1744,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1767,7 +1767,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.push}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1796,7 +1796,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       oldRoute.didChangeNext(route);
       route.didChangePrevious(oldRoute);
     }
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
     RouteNotificationMessages.maybeNotifyRouteChange(_routePushedMethod, route, oldRoute);
     assert(() {
@@ -1853,7 +1853,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1896,7 +1896,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _history[index - 1].didChangeNext(newRoute);
       newRoute.didChangePrevious(_history[index - 1]);
     }
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     RouteNotificationMessages.maybeNotifyRouteChange(_routeReplacedMethod, newRoute, oldRoute);
     assert(() {
@@ -1912,7 +1912,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1956,8 +1956,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
     newRoute.didPush().whenCompleteOrCancel(() {
       if (mounted) {
-        for (Route<dynamic> removedRoute in removedRoutes) {
-          for (NavigatorObserver observer in widget.observers)
+        for (final Route<dynamic> removedRoute in removedRoutes) {
+          for (final NavigatorObserver observer in widget.observers)
             observer.didRemove(removedRoute, newPrecedingRoute);
           removedRoute.dispose();
         }
@@ -1969,7 +1969,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
     // Notify for newRoute
     newRoute.didChangeNext(null);
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didPush(newRoute, precedingRoute);
 
     assert(() {
@@ -2020,7 +2020,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _history[index - 1].didChangeNext(newRoute);
       newRoute.didChangePrevious(_history[index - 1]);
     }
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     RouteNotificationMessages.maybeNotifyRouteChange(_routeReplacedMethod, newRoute, oldRoute);
     oldRoute.dispose();
@@ -2073,7 +2073,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
   Future<bool> maybePop<T extends Object>([ T result ]) async {
-    final Route<T> route = _history.last;
+    final Route<T> route = _history.last as Route<T>;
     assert(route._navigator == this);
     final RoutePopDisposition disposition = await route.willPop();
     if (disposition != RoutePopDisposition.bubble && mounted) {
@@ -2088,7 +2088,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pop}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage for closing a route is as follows:
   ///
@@ -2098,7 +2098,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// }
   /// ```
   /// {@end-tool}
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// A dialog box might be closed with a result:
   ///
@@ -2132,7 +2132,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         if (route._navigator != null)
           _poppedRoutes.add(route);
         _history.last.didPopNext(route);
-        for (NavigatorObserver observer in widget.observers)
+        for (final NavigatorObserver observer in widget.observers)
           observer.didPop(route, _history.last);
         RouteNotificationMessages.maybeNotifyRouteChange(_routePoppedMethod, route, _history.last);
       } else {
@@ -2157,7 +2157,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.popUntil}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -2190,7 +2190,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _history.removeAt(index);
     previousRoute?.didChangeNext(nextRoute);
     nextRoute?.didChangePrevious(previousRoute);
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didRemove(route, previousRoute);
     route.dispose();
     assert(() {
@@ -2201,7 +2201,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The
-  /// route to be replaced is the one below the given `anchorRoute`.
+  /// route to be removed is the one below the given `anchorRoute`.
   ///
   /// {@macro flutter.widgets.navigator.removeRouteBelow}
   void removeRouteBelow(Route<dynamic> anchorRoute) {
@@ -2281,7 +2281,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       // Don't operate the _history list since the gesture may be canceled.
       // In case of a back swipe, the gesture controller will call .pop() itself.
 
-      for (NavigatorObserver observer in widget.observers)
+      for (final NavigatorObserver observer in widget.observers)
         observer.didStartUserGesture(route, previousRoute);
     }
   }
@@ -2294,7 +2294,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(_userGesturesInProgress > 0);
     _userGesturesInProgress -= 1;
     if (_userGesturesInProgress == 0) {
-      for (NavigatorObserver observer in widget.observers)
+      for (final NavigatorObserver observer in widget.observers)
         observer.didStopUserGesture();
     }
   }
@@ -2315,7 +2315,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       // If we're between frames (SchedulerPhase.idle) then absorb any
       // subsequent pointers from this frame. The absorbing flag will be
       // reset in the next frame, see build().
-      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.findAncestorRenderObjectOfType<RenderAbsorbPointer>();
       setState(() {
         absorber?.absorbing = true;
         // We do this in setState so that we'll reset the absorbing value back

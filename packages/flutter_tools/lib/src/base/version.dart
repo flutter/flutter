@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,7 +52,7 @@ class Version implements Comparable<Version> {
   /// This is the highest-numbered stable version.
   static Version primary(List<Version> versions) {
     Version primary;
-    for (Version version in versions) {
+    for (final Version version in versions) {
       if (primary == null || (version > primary)) {
         primary = version;
       }
@@ -84,11 +84,11 @@ class Version implements Comparable<Version> {
   /// Two [Version]s are equal if their version numbers are. The version text
   /// is ignored.
   @override
-  bool operator ==(dynamic other) {
-    if (other is! Version) {
-      return false;
-    }
-    return major == other.major && minor == other.minor && patch == other.patch;
+  bool operator ==(Object other) {
+    return other is Version
+        && other.major == major
+        && other.minor == minor
+        && other.patch == patch;
   }
 
   @override

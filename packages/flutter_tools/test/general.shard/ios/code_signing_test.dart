@@ -1,6 +1,7 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -12,7 +13,7 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -315,7 +316,7 @@ void main() {
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
 
-      verify(config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
+      verify(globals.config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -455,7 +456,7 @@ void main() {
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
-      when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
+      when<String>(mockConfig.getValue('ios-signing-cert') as String).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
@@ -535,7 +536,7 @@ void main() {
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
-      when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Invalid Profile');
+      when<String>(mockConfig.getValue('ios-signing-cert') as String).thenReturn('iPhone Developer: Invalid Profile');
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
@@ -548,7 +549,7 @@ void main() {
         contains('Certificate choice "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
       expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
-      verify(config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
+      verify(globals.config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -653,6 +654,8 @@ class MockConfig extends Mock implements Config {}
 Stream<String> mockTerminalStdInStream;
 
 class TestTerminal extends AnsiTerminal {
+  TestTerminal() : super(stdio: globals.stdio, platform: globals.platform);
+
   @override
   String bolden(String message) => '<bold>$message</bold>';
 

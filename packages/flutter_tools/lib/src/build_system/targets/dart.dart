@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../convert.dart';
-import '../../globals.dart';
+import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -42,7 +42,7 @@ const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
 /// Alternative scheme for file URIs.
 ///
-/// May be used along with [kFileSystemRoots] to support a multiroot
+/// May be used along with [kFileSystemRoots] to support a multi-root
 /// filesystem.
 const String kFileSystemScheme = 'FileSystemScheme';
 
@@ -62,7 +62,7 @@ const String kDartDefines = 'DartDefines';
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
 
-/// Copies the prebuilt flutter bundle.
+/// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
 class CopyFlutterBundle extends Target {
   const CopyFlutterBundle();
@@ -75,7 +75,6 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
@@ -83,7 +82,11 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
-    Source.depfile('flutter_assets.d'),
+  ];
+
+  @override
+  List<String> get depfiles => <String>[
+    'flutter_assets.d'
   ];
 
   @override
@@ -96,13 +99,13 @@ class CopyFlutterBundle extends Target {
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+      final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+      final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
           .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
-      fs.file(vmSnapshotData)
+      globals.fs.file(vmSnapshotData)
           .copySync(environment.outputDir.childFile('vm_snapshot_data').path);
-      fs.file(isolateSnapshotData)
+      globals.fs.file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
     final Depfile assetDepfile = await copyAssets(environment, environment.outputDir);
@@ -115,7 +118,7 @@ class CopyFlutterBundle extends Target {
   ];
 }
 
-/// Copies the prebuilt flutter bundle for release mode.
+/// Copies the pre-built flutter bundle for release mode.
 class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   const ReleaseCopyFlutterBundle();
 
@@ -123,13 +126,14 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   String get name => 'release_flutter_bundle';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
-  ];
+  List<Source> get inputs => const <Source>[];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
   ];
 
   @override
@@ -151,12 +155,14 @@ class KernelSnapshot extends Target {
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
-    Source.depfile('kernel_snapshot.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('kernel_snapshot.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => <String>[
+    'kernel_snapshot.d',
   ];
 
   @override
@@ -174,9 +180,9 @@ class KernelSnapshot extends Target {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
+    final String targetFile = environment.defines[kTargetFile] ?? globals.fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
-    final String targetFileAbsolute = fs.file(targetFile).absolute.path;
+    final String targetFileAbsolute = globals.fs.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
@@ -193,9 +199,22 @@ class KernelSnapshot extends Target {
         targetPlatform == TargetPlatform.fuchsia_arm64) {
       targetModel = TargetModel.flutterRunner;
     }
+    // Force linking of the platform for desktop embedder targets since these
+    // do not correctly load the core snapshots in debug mode.
+    // See https://github.com/flutter/flutter/issues/44724
+    bool forceLinkPlatform;
+    switch (targetPlatform) {
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.linux_x64:
+        forceLinkPlatform = true;
+        break;
+      default:
+        forceLinkPlatform = false;
+    }
 
     final CompilerOutput output = await compiler.compile(
-      sdkRoot: artifacts.getArtifactPath(
+      sdkRoot: globals.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
         platform: targetPlatform,
         mode: buildMode,
@@ -206,7 +225,7 @@ class KernelSnapshot extends Target {
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
-      linkPlatformKernelIn: buildMode.isPrecompiled,
+      linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
       extraFrontEndOptions: extraFrontEndOptions,
@@ -234,6 +253,8 @@ abstract class AotElfBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
+    final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
+      ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final int snapshotExitCode = await snapshotter.build(
@@ -243,6 +264,7 @@ abstract class AotElfBase extends Target {
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
       bitcode: false,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -312,7 +334,7 @@ class AotElfRelease extends AotElfBase {
   ];
 }
 
-/// Copies the prebuilt flutter aot bundle.
+/// Copies the pre-built flutter aot bundle.
 // This is a one-off rule for implementing build aot in terms of assemble.
 abstract class CopyFlutterAotBundle extends Target {
   const CopyFlutterAotBundle();
@@ -337,32 +359,6 @@ abstract class CopyFlutterAotBundle extends Target {
   }
 }
 
-// This is a one-off rule for implementing build aot in terms of assemble.
-class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
-  const ProfileCopyFlutterAotBundle();
-
-  @override
-  String get name => 'profile_android_flutter_bundle';
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    AotElfProfile(),
-  ];
-}
-
-// This is a one-off rule for implementing build aot in terms of assemble.
-class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
-  const ReleaseCopyFlutterAotBundle();
-
-  @override
-  String get name => 'release_android_flutter_bundle';
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    AotElfRelease(),
-  ];
-}
-
 /// Dart defines are encoded inside [Environment] as a JSON array.
 List<String> parseDartDefines(Environment environment) {
   if (!environment.defines.containsKey(kDartDefines)) {
@@ -371,7 +367,7 @@ List<String> parseDartDefines(Environment environment) {
 
   final String dartDefinesJson = environment.defines[kDartDefines];
   try {
-    final List<Object> parsedDefines = jsonDecode(dartDefinesJson);
+    final List<Object> parsedDefines = jsonDecode(dartDefinesJson) as List<Object>;
     return parsedDefines.cast<String>();
   } on FormatException catch (_) {
     throw Exception(

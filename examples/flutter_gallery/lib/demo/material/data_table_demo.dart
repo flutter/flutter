@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -135,7 +135,7 @@ class DessertDataSource extends DataTableSource {
   int get selectedRowCount => _selectedCount;
 
   void _selectAll(bool checked) {
-    for (Dessert dessert in _desserts)
+    for (final Dessert dessert in _desserts)
       dessert.selected = checked;
     _selectedCount = checked ? _desserts.length : 0;
     notifyListeners();

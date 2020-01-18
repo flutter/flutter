@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -190,10 +190,21 @@ void main() {
           'navLargeTitleTextStyle',
           'navActionTextStyle',
           'pickerTextStyle',
-          'dateTimePickerTextStyle'
+          'dateTimePickerTextStyle',
         }
       ),
       isTrue,
+    );
+  });
+
+  testWidgets('CupertinoTheme.toStringDeep uses single-line style', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/47651.
+    expect(
+      const CupertinoTheme(
+        data: CupertinoThemeData(primaryColor: Color(0x00000000)),
+        child: SizedBox(),
+      ).toStringDeep().trimRight(),
+      isNot(contains('\n')),
     );
   });
 
@@ -209,7 +220,7 @@ void main() {
     }
   }
 
-  final Function dynamicColorsTestGroup = () {
+  final VoidCallback dynamicColorsTestGroup = () {
     testWidgets('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
       final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
       final CupertinoThemeData theme = await testTheme(tester, data);

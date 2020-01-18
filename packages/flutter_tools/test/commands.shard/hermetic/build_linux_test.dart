@@ -1,24 +1,24 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/linux/makefile.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -55,12 +55,17 @@ void main() {
     when(notLinuxPlatform.isWindows).thenReturn(false);
   });
 
+  // Creates the mock files necessary to look like a Flutter project.
+  void setUpMockCoreProjectFiles() {
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+  }
+
   // Creates the mock files necessary to run a build.
   void setUpMockProjectFilesForBuild() {
-    fs.file('linux/build.sh').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('linux', 'Makefile')).createSync(recursive: true);
+    setUpMockCoreProjectFiles();
   }
 
   // Sets up mock expectation for running 'make'.
@@ -78,9 +83,10 @@ void main() {
   testUsingContext('Linux build fails when there is no linux project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
+    setUpMockCoreProjectFiles();
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit(message: 'No Linux desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -112,7 +118,7 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux']
     );
-    expect(fs.file('linux/flutter/ephemeral/generated_config.mk').existsSync(), true);
+    expect(globals.fs.file('linux/flutter/ephemeral/generated_config.mk').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
@@ -142,7 +148,6 @@ void main() {
   });
 
   testUsingContext('Linux build does not spew stdout to status logger', () async {
-    final BufferLogger bufferLogger = logger;
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
@@ -151,8 +156,8 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--debug']
     );
-    expect(bufferLogger.statusText, isNot(contains('STDOUT STUFF')));
-    expect(bufferLogger.traceText, contains('STDOUT STUFF'));
+    expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.traceText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
@@ -193,15 +198,15 @@ void main() {
   });
 
   testUsingContext('linux can extract binary name from Makefile', () async {
-    fs.file('linux/Makefile')
+    globals.fs.file('linux/Makefile')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'''
 # Comment
 SOMETHING_ELSE=FOO
 BINARY_NAME=fizz_bar
 ''');
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(makefileExecutableName(flutterProject.linux), 'fizz_bar');
@@ -230,8 +235,7 @@ BINARY_NAME=fizz_bar
       const <String>['build', 'linux']
     );
 
-    final BufferLogger bufferLogger = logger;
-    expect(bufferLogger.statusText, contains('🚧'));
+    expect(testLogger.statusText, contains('🚧'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
@@ -240,7 +244,7 @@ BINARY_NAME=fizz_bar
   });
 
   testUsingContext('hidden when not enabled on Linux host', () {
-    when(platform.isLinux).thenReturn(true);
+    when(globals.platform.isLinux).thenReturn(true);
 
     expect(BuildLinuxCommand().hidden, true);
   }, overrides: <Type, Generator>{
@@ -249,7 +253,7 @@ BINARY_NAME=fizz_bar
   });
 
   testUsingContext('Not hidden when enabled and on Linux host', () {
-    when(platform.isLinux).thenReturn(true);
+    when(globals.platform.isLinux).thenReturn(true);
 
     expect(BuildLinuxCommand().hidden, false);
   }, overrides: <Type, Generator>{

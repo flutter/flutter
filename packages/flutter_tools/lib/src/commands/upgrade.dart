@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,14 +7,12 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -52,22 +50,15 @@ class UpgradeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    await _commandRunner.runCommand(
-      argResults['force'],
-      argResults['continue'],
+  Future<FlutterCommandResult> runCommand() {
+    return _commandRunner.runCommand(
+      boolArg('force'),
+      boolArg('continue'),
       GitTagVersion.determine(),
       FlutterVersion.instance,
     );
-    return null;
   }
 }
-
 
 @visibleForTesting
 class UpgradeCommandRunner {
@@ -82,7 +73,7 @@ class UpgradeCommandRunner {
     } else {
       await runCommandSecondHalf(flutterVersion);
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> runCommandFirstHalf(
@@ -122,21 +113,27 @@ class UpgradeCommandRunner {
     }
     await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
-    await attemptFastForward();
-    await flutterUpgradeContinue();
+    final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
+    if (alreadyUpToDate) {
+      // If the upgrade was a no op, then do not continue with the second half.
+      globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
+      globals.printStatus('$flutterVersion');
+    } else {
+      await flutterUpgradeContinue();
+    }
   }
 
   Future<void> flutterUpgradeContinue() async {
     final int code = await processUtils.stream(
       <String>[
-        fs.path.join('bin', 'flutter'),
+        globals.fs.path.join('bin', 'flutter'),
         'upgrade',
         '--continue',
         '--no-version-check',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
-      environment: Map<String, String>.of(platform.environment),
+      environment: Map<String, String>.of(globals.platform.environment),
     );
     if (code != 0) {
       throwToolExit(null, exitCode: code);
@@ -194,11 +191,12 @@ class UpgradeCommandRunner {
     }
   }
 
-  /// Attempts to reset to the last known tag or branch. This should restore the
-  /// history to something that is compatible with the regular upgrade
-  /// process.
+  /// Attempts to reset to the last non-hotfix tag.
+  ///
+  /// If the git history is on a hotfix, doing a fast forward will not pick up
+  /// major or minor version upgrades. By resetting to the point before the
+  /// hotfix, doing a git fast forward should succeed.
   Future<void> resetChanges(GitTagVersion gitTagVersion) async {
-    // We only got here by using --force.
     String tag;
     if (gitTagVersion == const GitTagVersion.unknown()) {
       tag = 'v0.0.0';
@@ -226,7 +224,7 @@ class UpgradeCommandRunner {
   /// If the user is on a deprecated channel, attempts to migrate them off of
   /// it.
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {
-    printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
+    globals.printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
     await ChannelCommand.upgradeChannel();
   }
 
@@ -234,7 +232,10 @@ class UpgradeCommandRunner {
   ///
   /// If there haven't been any hot fixes or local changes, this is equivalent
   /// to a fast-forward.
-  Future<void> attemptFastForward() async {
+  ///
+  /// If the fast forward lands us on the same channel and revision, then
+  /// returns true, otherwise returns false.
+  Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
     final int code = await processUtils.stream(
       <String>['git', 'pull', '--ff'],
       workingDirectory: Cache.flutterRoot,
@@ -243,6 +244,17 @@ class UpgradeCommandRunner {
     if (code != 0) {
       throwToolExit(null, exitCode: code);
     }
+
+    // Check if the upgrade did anything.
+    bool alreadyUpToDate = false;
+    try {
+      final FlutterVersion newFlutterVersion = FlutterVersion();
+      alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
+        newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
+    } catch (e) {
+      globals.printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
+    }
+    return alreadyUpToDate;
   }
 
   /// Update the engine repository and precache all artifacts.
@@ -251,15 +263,15 @@ class UpgradeCommandRunner {
   /// shell script re-entrantly here so that it will download the updated
   /// Dart and so forth if necessary.
   Future<void> precacheArtifacts() async {
-    printStatus('');
-    printStatus('Upgrading engine...');
+    globals.printStatus('');
+    globals.printStatus('Upgrading engine...');
     final int code = await processUtils.stream(
       <String>[
-        fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
+        globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
-      environment: Map<String, String>.of(platform.environment),
+      environment: Map<String, String>.of(globals.platform.environment),
     );
     if (code != 0) {
       throwToolExit(null, exitCode: code);
@@ -268,22 +280,22 @@ class UpgradeCommandRunner {
 
   /// Update the user's packages.
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
-    printStatus('');
-    printStatus(flutterVersion.toString());
+    globals.printStatus('');
+    globals.printStatus(flutterVersion.toString());
     final String projectRoot = findProjectRoot();
     if (projectRoot != null) {
-      printStatus('');
+      globals.printStatus('');
       await pub.get(context: PubContext.pubUpgrade, directory: projectRoot, upgrade: true, checkLastModified: false);
     }
   }
 
   /// Run flutter doctor in case requirements have changed.
   Future<void> runDoctor() async {
-    printStatus('');
-    printStatus('Running flutter doctor...');
+    globals.printStatus('');
+    globals.printStatus('Running flutter doctor...');
     await processUtils.stream(
       <String>[
-        fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
+        globals.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,

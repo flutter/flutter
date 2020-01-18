@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,7 +27,7 @@ class FadeInImageParts {
     StatefulElement animatedFadeOutFadeInElement;
     fadeInImageElement.visitChildren((Element child) {
       expect(animatedFadeOutFadeInElement, isNull);
-      animatedFadeOutFadeInElement = child;
+      animatedFadeOutFadeInElement = child as StatefulElement;
     });
     expect(animatedFadeOutFadeInElement, isNotNull);
     return animatedFadeOutFadeInElement.state;
@@ -49,8 +49,8 @@ class FadeInImageElements {
   final Element rawImageElement;
   final Element fadeTransitionElement;
 
-  RawImage get rawImage => rawImageElement.widget;
-  FadeTransition get fadeTransition => fadeTransitionElement?.widget;
+  RawImage get rawImage => rawImageElement.widget as RawImage;
+  FadeTransition get fadeTransition => fadeTransitionElement?.widget as FadeTransition;
   double get opacity => fadeTransition == null ? 1 : fadeTransition.opacity.value;
 }
 
@@ -78,14 +78,14 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
   final List<FadeInImageElements> elements = <FadeInImageElements>[];
   final Iterable<Element> rawImageElements = tester.elementList(find.byType(RawImage));
   ComponentElement fadeInImageElement;
-  for (Element rawImageElement in rawImageElements) {
+  for (final Element rawImageElement in rawImageElements) {
     Element fadeTransitionElement;
     rawImageElement.visitAncestorElements((Element ancestor) {
       if (ancestor.widget is FadeTransition) {
         fadeTransitionElement = ancestor;
       } else if (ancestor.widget is FadeInImage) {
         if (fadeInImageElement == null) {
-          fadeInImageElement = ancestor;
+          fadeInImageElement = ancestor as ComponentElement;
         } else {
           expect(fadeInImageElement, same(ancestor));
         }

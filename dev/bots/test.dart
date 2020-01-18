@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,6 +13,7 @@ import 'package:path/path.dart' as path;
 
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
+import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
 
@@ -36,6 +37,7 @@ final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
+
 final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
 
 /// The number of Cirrus jobs that run host-only devicelab tests in parallel.
@@ -66,7 +68,6 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
-  'test/widgets/shadow_test.dart',
   'test/widgets/raw_keyboard_listener_test.dart',
   'test/widgets/editable_text_test.dart',
   'test/widgets/widget_inspector_test.dart',
@@ -98,22 +99,28 @@ const List<String> kWebTestFileBlacklist = <String>[
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
 Future<void> main(List<String> args) async {
-  flutterTestArgs.addAll(args);
-  if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
-    print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
-  print('═' * 80);
-  await _runSmokeTests();
-  print('═' * 80);
-  await selectShard(const <String, ShardRunner>{
-    'add_to_app_tests': _runAddToAppTests,
-    'build_tests': _runBuildTests,
-    'framework_coverage': _runFrameworkCoverage,
-    'framework_tests': _runFrameworkTests,
-    'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
-    'tool_coverage': _runToolCoverage,
-    'tool_tests': _runToolTests,
-    'web_tests': _runWebTests,
-  });
+  print('$clock STARTING ANALYSIS');
+  try {
+    flutterTestArgs.addAll(args);
+    if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
+      print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
+    print('═' * 80);
+    await _runSmokeTests();
+    print('═' * 80);
+    await selectShard(const <String, ShardRunner>{
+      'add_to_app_tests': _runAddToAppTests,
+      'build_tests': _runBuildTests,
+      'framework_coverage': _runFrameworkCoverage,
+      'framework_tests': _runFrameworkTests,
+      'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
+      'tool_coverage': _runToolCoverage,
+      'tool_tests': _runToolTests,
+      'web_tests': _runWebTests,
+    });
+  } on ExitException catch (error) {
+    error.apply();
+  }
+  print('$clock ${bold}Test successful.$reset');
 }
 
 Future<void> _runSmokeTests() async {
@@ -195,12 +202,8 @@ Future<void> _runSmokeTests() async {
 
   // Verify that we correctly generated the version file.
   final String versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
-  if (versionError != null) {
-    print(redLine);
-    print(versionError);
-    print(redLine);
-    exit(1);
-  }
+  if (versionError != null)
+    exitWithError(<String>[versionError]);
 }
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
@@ -260,20 +263,30 @@ Future<void> _runToolTests() async {
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
+      // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
+      // on Windows.
+      final String suffix = Platform.isWindows && subshard == 'commands'
+        ? 'permeable'
+        : '';
       await _pubRunTest(
         toolsPath,
-        testPath: path.join(kTest, '$subshard$kDotShard'),
+        testPath: path.join(kTest, '$subshard$kDotShard', suffix),
         useBuildRunner: canUseBuildRunner,
         tableData: bigqueryApi?.tabledata,
-        // TODO(ianh): The integration tests fail to start on Windows if asserts are enabled.
-        // See https://github.com/flutter/flutter/issues/36476
-        enableFlutterToolAsserts: !(subshard == 'integration' && Platform.isWindows),
+        enableFlutterToolAsserts: true,
       );
     },
   );
 
   await selectSubshard(subshards);
 }
+
+// Example apps that should not be built by _runBuildTests`
+const List<String> _excludedExampleApplications = <String>[
+  // This application contains no platform code and cannot be built, except for
+  // as a part of a '--fast-start' Android application.
+  'splash',
+];
 
 /// Verifies that AOT, APK, and IPA (if on macOS) builds the examples apps
 /// without crashing. It does not actually launch the apps. That happens later
@@ -282,8 +295,11 @@ Future<void> _runToolTests() async {
 /// target app.
 Future<void> _runBuildTests() async {
   final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
-  await for (FileSystemEntity fileEntity in exampleDirectories) {
+  await for (final FileSystemEntity fileEntity in exampleDirectories) {
     if (fileEntity is! Directory) {
+      continue;
+    }
+    if (_excludedExampleApplications.any(fileEntity.path.endsWith)) {
       continue;
     }
     final String examplePath = fileEntity.path;
@@ -293,12 +309,20 @@ Future<void> _runBuildTests() async {
       await _flutterBuildIpa(examplePath);
     }
   }
-  // Web compilation tests.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
-  // Should not fail to compile with dart:io.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
-    path.join('lib', 'dart_io_import.dart'),
-  );
+
+  final String branch = Platform.environment['CIRRUS_BRANCH'];
+  if (branch != 'beta' && branch != 'stable') {
+    // Web compilation tests.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web'),
+      path.join('lib', 'main.dart'),
+    );
+    // Should not fail to compile with dart:io.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web_compile_tests'),
+      path.join('lib', 'dart_io_import.dart'),
+    );
+  }
 }
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
@@ -327,6 +351,9 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
     await runCommand('pod',
       <String>['install'],
       workingDirectory: podfile.parent.path,
+      environment: <String, String>{
+        'LANG': 'en_US.UTF-8',
+      },
     );
   }
   await runCommand(flutter,
@@ -407,6 +434,7 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
@@ -414,7 +442,8 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
@@ -508,6 +537,10 @@ Future<void> _runWebTests() async {
       path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
       <String>['test'],
     );
+    await _runFlutterWebTest(
+        path.join(flutterRoot, 'packages', 'flutter_driver'),
+        <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
+    );
   };
 
   await selectSubshard(subshards);
@@ -598,13 +631,17 @@ Future<void> _pubRunTest(String workingDirectory, {
   }
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-    final Stream<String> testOutput = runAndGetStdout(
-      pub,
-      args,
-      workingDirectory: workingDirectory,
-      environment: pubEnvironment,
-      beforeExit: formatter.finish,
-    );
+    Stream<String> testOutput;
+    try {
+      testOutput = runAndGetStdout(
+        pub,
+        args,
+        workingDirectory: workingDirectory,
+        environment: pubEnvironment,
+      );
+    } finally {
+      formatter.finish();
+    }
     await _processTestOutput(formatter, testOutput, tableData);
   } else {
     await runCommand(
@@ -681,26 +718,26 @@ Future<void> _runFlutterTest(String workingDirectory, {
 
     if (outputChecker != null) {
       final String message = outputChecker(output);
-      if (message != null) {
-        print('$redLine');
-        print(message);
-        print('$redLine');
-        exit(1);
-      }
+      if (message != null)
+        exitWithError(<String>[message]);
     }
     return;
   }
 
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-    final Stream<String> testOutput = runAndGetStdout(
-      flutter,
-      args,
-      workingDirectory: workingDirectory,
-      expectNonZeroExit: expectFailure,
-      beforeExit: formatter.finish,
-      environment: environment,
-    );
+    Stream<String> testOutput;
+    try {
+      testOutput = runAndGetStdout(
+        flutter,
+        args,
+        workingDirectory: workingDirectory,
+        expectNonZeroExit: expectFailure,
+        environment: environment,
+      );
+    } finally {
+      formatter.finish();
+    }
     await _processTestOutput(formatter, testOutput, tableData);
   } else {
     await runCommand(
@@ -746,6 +783,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     if (Platform.isMacOS) () => _runDevicelabTest('flutter_create_offline_test_mac'),
     if (Platform.isLinux) () => _runDevicelabTest('flutter_create_offline_test_linux'),
     if (Platform.isWindows) () => _runDevicelabTest('flutter_create_offline_test_windows'),
+    () => _runDevicelabTest('gradle_fast_start_test', environment: gradleEnvironment),
     // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
     if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
@@ -756,9 +794,9 @@ Future<void> _runHostOnlyDeviceLabTests() async {
 
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
 
-    // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
-    // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
+    if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
     if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
@@ -779,7 +817,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
       last = '_last';
     }
     subshards['$subshard$last'] = () async {
-      for (ShardRunner test in sublist)
+      for (final ShardRunner test in sublist)
         await test();
     };
   }
@@ -962,7 +1000,7 @@ Future<String> verifyVersion(File file) async {
 }
 
 /// If the CIRRUS_TASK_NAME environment variable exists, we use that to determine
-/// the shard and subshard (parsing it in the form shard-subshard-platform, ignoring
+/// the shard and sub-shard (parsing it in the form shard-subshard-platform, ignoring
 /// the platform).
 ///
 /// However, for local testing you can just set the SHARD and SUBSHARD
@@ -982,7 +1020,7 @@ Future<void> _runFromList(Map<String, ShardRunner> items, String key, String nam
     item = parts[positionInTaskName];
   }
   if (item == null) {
-    for (String currentItem in items.keys) {
+    for (final String currentItem in items.keys) {
       print('$bold$key=$currentItem$reset');
       await items[currentItem]();
       print('');

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,23 +10,25 @@ import 'package:pool/pool.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/dart.dart';
+import 'cache.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'project.dart';
 
-String get defaultMainPath => fs.path.join('lib', 'main.dart');
+String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
-String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
 String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
   return getKernelPathForTransformerOptions(
-    fs.path.join(getBuildDirectory(), 'app.dill'),
+    globals.fs.path.join(getBuildDirectory(), 'app.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
@@ -70,7 +72,7 @@ class BundleBuilder {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
+    packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
     final FlutterProject flutterProject = FlutterProject.current();
     await buildWithAssemble(
       buildMode: buildMode ?? BuildMode.debug,
@@ -84,7 +86,7 @@ class BundleBuilder {
     );
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
-      final File outputDill = fs.directory(assetDirPath).childFile('kernel_blob.bin');
+      final File outputDill = globals.fs.directory(assetDirPath).childFile('kernel_blob.bin');
       if (outputDill.existsSync()) {
         outputDill.copySync(applicationKernelFilePath);
       }
@@ -110,8 +112,10 @@ Future<void> buildWithAssemble({
   buildMode = precompiled ? buildMode : BuildMode.debug;
   final Environment environment = Environment(
     projectDir: flutterProject.directory,
-    outputDir: fs.directory(outputDir),
+    outputDir: globals.fs.directory(outputDir),
     buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
+    cacheDir: globals.cache.getRoot(),
+    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     defines: <String, String>{
       kTargetFile: mainPath,
       kBuildMode: getNameForBuildMode(buildMode),
@@ -125,15 +129,18 @@ Future<void> buildWithAssemble({
   final BuildResult result = await buildSystem.build(target, environment);
 
   if (!result.success) {
-    for (ExceptionMeasurement measurement in result.exceptions.values) {
-      printError(measurement.exception.toString());
-      printError(measurement.stackTrace.toString());
+    for (final ExceptionMeasurement measurement in result.exceptions.values) {
+        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
     }
     throwToolExit('Failed to build bundle.');
   }
   if (depfilePath != null) {
     final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-    final File outputDepfile = fs.file(depfilePath);
+    final File outputDepfile = globals.fs.file(depfilePath);
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
@@ -149,7 +156,7 @@ Future<AssetBundle> buildAssets({
   bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
+  packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -170,9 +177,18 @@ Future<AssetBundle> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
+  { Logger loggerOverride }
 ) async {
+  loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
-    bundleDir.deleteSync(recursive: true);
+    try {
+      bundleDir.deleteSync(recursive: true);
+    } on FileSystemException catch (err) {
+      loggerOverride.printError(
+        'Failed to clean up asset directory ${bundleDir.path}: $err\n'
+        'To clean build artifacts, use the command "flutter clean".'
+      );
+    }
   }
   bundleDir.createSync(recursive: true);
 
@@ -182,7 +198,12 @@ Future<void> writeBundle(
     assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = fs.file(bundleDir.uri.resolve(entry.key));
+        // This will result in strange looking files, for example files with `/`
+        // on Windows or files that end up getting URI encoded such as `#.ext`
+        // to `%23.ext`.  However, we have to keep it this way since the
+        // platform channels in the framework will URI encode these values,
+        // and the native APIs will look for files this way.
+        final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
         file.parent.createSync(recursive: true);
         await file.writeAsBytes(await entry.value.contentsAsBytes());
       } finally {

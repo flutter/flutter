@@ -1,10 +1,11 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/physics.dart';
@@ -22,7 +23,7 @@ import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_view.dart';
-import 'sliver.dart';
+import 'sliver_fill.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
@@ -61,7 +62,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// (those inside the [TabBarView], hooking them together so that they appear,
 /// to the user, as one coherent scroll view.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a [NestedScrollView] whose header is the combination of a
 /// [TabBar] in a [SliverAppBar] and whose body is a [TabBarView]. It uses a
@@ -91,7 +92,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///           // This is not necessary if the "headerSliverBuilder" only builds
 ///           // widgets that do not overlap the next sliver.
 ///           handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-///           child: SliverAppBar(
+///           sliver: SliverAppBar(
 ///             title: const Text('Books'), // This is the title in the app bar.
 ///             pinned: true,
 ///             expandedHeight: 150.0,
@@ -266,7 +267,7 @@ class NestedScrollView extends StatefulWidget {
   /// For sample code showing how to use this method, see the [NestedScrollView]
   /// documentation.
   static SliverOverlapAbsorberHandle sliverOverlapAbsorberHandleFor(BuildContext context) {
-    final _InheritedNestedScrollView target = context.inheritFromWidgetOfExactType(_InheritedNestedScrollView);
+    final _InheritedNestedScrollView target = context.dependOnInheritedWidgetOfExactType<_InheritedNestedScrollView>();
     assert(target != null, 'NestedScrollView.sliverOverlapAbsorberHandleFor must be called with a context that contains a NestedScrollView.');
     return target.state._absorberHandle;
   }
@@ -497,7 +498,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   bool get hasScrolledBody {
-    for (_NestedScrollPosition position in _innerPositions) {
+    for (final _NestedScrollPosition position in _innerPositions) {
       assert(position.minScrollExtent != null && position.pixels != null);
       if (position.pixels > position.minScrollExtent) {
         return true;
@@ -520,7 +521,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       return;
     _userScrollDirection = value;
     _outerPosition.didUpdateScrollDirection(value);
-    for (_NestedScrollPosition position in _innerPositions)
+    for (final _NestedScrollPosition position in _innerPositions)
       position.didUpdateScrollDirection(value);
   }
 
@@ -529,7 +530,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   void beginActivity(ScrollActivity newOuterActivity, _NestedScrollActivityGetter innerActivityGetter) {
     _outerPosition.beginActivity(newOuterActivity);
     bool scrolling = newOuterActivity.isScrolling;
-    for (_NestedScrollPosition position in _innerPositions) {
+    for (final _NestedScrollPosition position in _innerPositions) {
       final ScrollActivity newInnerActivity = innerActivityGetter(position);
       position.beginActivity(newInnerActivity);
       scrolling = scrolling && newInnerActivity.isScrolling;
@@ -574,7 +575,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     // are heading towards.
     _NestedScrollPosition innerPosition;
     if (velocity != 0.0) {
-      for (_NestedScrollPosition position in _innerPositions) {
+      for (final _NestedScrollPosition position in _innerPositions) {
         if (innerPosition != null) {
           if (velocity > 0.0) {
             if (innerPosition.pixels < position.pixels)
@@ -610,7 +611,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   ScrollActivity createInnerBallisticScrollActivity(_NestedScrollPosition position, double velocity) {
     return position.createBallisticScrollActivity(
       position.physics.createBallisticSimulation(
-        velocity == 0 ? position : _getMetrics(position, velocity),
+        velocity == 0 ? position as ScrollMetrics : _getMetrics(position, velocity),
         velocity,
       ),
       mode: _NestedBallisticScrollActivityMode.inner,
@@ -621,7 +622,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     assert(innerPosition != null);
     double pixels, minRange, maxRange, correctionOffset, extra;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
-      pixels = _outerPosition.pixels.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent); // TODO(ianh): gracefully handle out-of-range outer positions
+      pixels = _outerPosition.pixels.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent) as double; // TODO(ianh): gracefully handle out-of-range outer positions
       minRange = _outerPosition.minScrollExtent;
       maxRange = _outerPosition.maxScrollExtent;
       assert(minRange <= maxRange);
@@ -687,7 +688,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   double unnestOffset(double value, _NestedScrollPosition source) {
     if (source == _outerPosition)
-      return value.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent);
+      return value.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent) as double;
     if (value < source.minScrollExtent)
       return value - source.minScrollExtent + _outerPosition.minScrollExtent;
     return value - source.minScrollExtent + _outerPosition.maxScrollExtent;
@@ -695,7 +696,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   double nestOffset(double value, _NestedScrollPosition target) {
     if (target == _outerPosition)
-      return value.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent);
+      return value.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent) as double;
     if (value < _outerPosition.minScrollExtent)
       return value - _outerPosition.minScrollExtent + target.minScrollExtent;
     if (value > _outerPosition.maxScrollExtent)
@@ -707,7 +708,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     if (!_outerPosition.haveDimensions)
       return;
     double maxInnerExtent = 0.0;
-    for (_NestedScrollPosition position in _innerPositions) {
+    for (final _NestedScrollPosition position in _innerPositions) {
       if (!position.haveDimensions)
         return;
       maxInnerExtent = math.max(maxInnerExtent, position.maxScrollExtent - position.minScrollExtent);
@@ -744,7 +745,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   void jumpTo(double to) {
     goIdle();
     _outerPosition.localJumpTo(nestOffset(to, _outerPosition));
-    for (_NestedScrollPosition position in _innerPositions)
+    for (final _NestedScrollPosition position in _innerPositions)
       position.localJumpTo(nestOffset(to, position));
     goBallistic(0.0);
   }
@@ -799,7 +800,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       // different levels of overscroll.
       final double innerDelta = _outerPosition.applyClampedDragUpdate(delta);
       if (innerDelta != 0.0) {
-        for (_NestedScrollPosition position in _innerPositions)
+        for (final _NestedScrollPosition position in _innerPositions)
           position.applyFullDragUpdate(innerDelta);
       }
     } else {
@@ -808,7 +809,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       double outerDelta = 0.0; // it will go positive if it changes
       final List<double> overscrolls = <double>[];
       final List<_NestedScrollPosition> innerPositions = _innerPositions.toList();
-      for (_NestedScrollPosition position in innerPositions) {
+      for (final _NestedScrollPosition position in innerPositions) {
         final double overscroll = position.applyClampedDragUpdate(delta);
         outerDelta = math.max(outerDelta, overscroll);
         overscrolls.add(overscroll);
@@ -842,7 +843,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   @override
-  String toString() => '$runtimeType(outer=$_outerController; inner=$_innerController)';
+  String toString() => '${objectRuntimeType(this, '_NestedScrollCoordinator')}(outer=$_outerController; inner=$_innerController)';
 }
 
 class _NestedScrollController extends ScrollController {
@@ -987,7 +988,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     // The logic for max is equivalent but on the other side.
     final double max = delta > 0.0 ? double.infinity : math.max(maxScrollExtent, pixels);
     final double oldPixels = pixels;
-    final double newPixels = (pixels - delta).clamp(min, max);
+    final double newPixels = (pixels - delta).clamp(min, max) as double;
     final double clampedDelta = newPixels - pixels;
     if (clampedDelta == 0.0)
       return delta;
@@ -1152,7 +1153,7 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
   final _NestedScrollCoordinator coordinator;
 
   @override
-  _NestedScrollPosition get delegate => super.delegate;
+  _NestedScrollPosition get delegate => super.delegate as _NestedScrollPosition;
 
   @override
   void resetActivity() {
@@ -1185,7 +1186,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
   final _NestedScrollMetrics metrics;
 
   @override
-  _NestedScrollPosition get delegate => super.delegate;
+  _NestedScrollPosition get delegate => super.delegate as _NestedScrollPosition;
 
   @override
   void resetActivity() {
@@ -1215,7 +1216,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
         done = true;
       }
     } else {
-      value = value.clamp(metrics.minRange, metrics.maxRange);
+      value = value.clamp(metrics.minRange, metrics.maxRange) as double;
       done = true;
     }
     final bool result = super.applyMoveTo(value + metrics.correctionOffset);
@@ -1225,7 +1226,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 
   @override
   String toString() {
-    return '$runtimeType(${metrics.minRange} .. ${metrics.maxRange}; correcting by ${metrics.correctionOffset})';
+    return '${objectRuntimeType(this, '_NestedOuterBallisticScrollActivity')}(${metrics.minRange} .. ${metrics.maxRange}; correcting by ${metrics.correctionOffset})';
   }
 }
 
@@ -1310,14 +1311,14 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
         extra = ', $_writers WRITERS ASSIGNED';
         break;
     }
-    return '$runtimeType($layoutExtent$extra)';
+    return '${objectRuntimeType(this, 'SliverOverlapAbsorberHandle')}($layoutExtent$extra)';
   }
 }
 
 /// A sliver that wraps another, forcing its layout extent to be treated as
 /// overlap.
 ///
-/// The difference between the overlap requested by the [child] sliver and the
+/// The difference between the overlap requested by the child [sliver] and the
 /// overlap reported by this widget, called the _absorbed overlap_, is reported
 /// to the [SliverOverlapAbsorberHandle], which is typically passed to a
 /// [SliverOverlapInjector].
@@ -1331,14 +1332,20 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
   /// [SliverOverlapAbsorberHandle].
   ///
   /// The [handle] must not be null.
-  ///
-  /// The [child] must be a sliver.
   const SliverOverlapAbsorber({
     Key key,
     @required this.handle,
+    @Deprecated(
+      'Use sliver instead. '
+      'This feature was deprecated after v1.10.16.'
+    )
     Widget child,
+    Widget sliver,
   }) : assert(handle != null),
-       super(key: key, child: child);
+      // ignore: deprecated_member_use_from_same_package
+      assert(child == null || sliver == null),
+      // ignore: deprecated_member_use_from_same_package
+      super(key: key, child: sliver ?? child);
 
   /// The object in which the absorbed overlap is recorded.
   ///
@@ -1369,7 +1376,7 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
 /// A sliver that wraps another, forcing its layout extent to be treated as
 /// overlap.
 ///
-/// The difference between the overlap requested by the [child] sliver and the
+/// The difference between the overlap requested by the child [sliver] and the
 /// overlap reported by this widget, called the _absorbed overlap_, is reported
 /// to the [SliverOverlapAbsorberHandle], which is typically passed to a
 /// [RenderSliverOverlapInjector].
@@ -1379,13 +1386,20 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   ///
   /// The [handle] must not be null.
   ///
-  /// The [child] must be a [RenderSliver].
+  /// The [sliver] must be a [RenderSliver].
   RenderSliverOverlapAbsorber({
     @required SliverOverlapAbsorberHandle handle,
+    @Deprecated(
+      'Use sliver instead. '
+      'This feature was deprecated after v1.10.16.'
+    )
     RenderSliver child,
+    RenderSliver sliver,
   }) : assert(handle != null),
+       // ignore: deprecated_member_use_from_same_package
+       assert(child == null || sliver == null),
        _handle = handle {
-    this.child = child;
+    this.child = sliver ?? child;
   }
 
   /// The object in which the absorbed overlap is recorded.
@@ -1486,9 +1500,17 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
   const SliverOverlapInjector({
     Key key,
     @required this.handle,
+    @Deprecated(
+      'Use sliver instead. '
+      'This feature was deprecated after v1.10.16.'
+    )
     Widget child,
+    Widget sliver,
   }) : assert(handle != null),
-       super(key: key, child: child);
+       // ignore: deprecated_member_use_from_same_package
+       assert(child == null || sliver == null),
+       // ignore: deprecated_member_use_from_same_package
+       super(key: key, child: sliver ?? child);
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   ///

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,6 +11,7 @@ class GalleryOptions {
   GalleryOptions({
     this.themeMode,
     this.textScaleFactor,
+    this.visualDensity,
     this.textDirection = TextDirection.ltr,
     this.timeDilation = 1.0,
     this.platform,
@@ -21,6 +22,7 @@ class GalleryOptions {
 
   final ThemeMode themeMode;
   final GalleryTextScaleValue textScaleFactor;
+  final GalleryVisualDensityValue visualDensity;
   final TextDirection textDirection;
   final double timeDilation;
   final TargetPlatform platform;
@@ -31,6 +33,7 @@ class GalleryOptions {
   GalleryOptions copyWith({
     ThemeMode themeMode,
     GalleryTextScaleValue textScaleFactor,
+    GalleryVisualDensityValue visualDensity,
     TextDirection textDirection,
     double timeDilation,
     TargetPlatform platform,
@@ -41,6 +44,7 @@ class GalleryOptions {
     return GalleryOptions(
       themeMode: themeMode ?? this.themeMode,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      visualDensity: visualDensity ?? this.visualDensity,
       textDirection: textDirection ?? this.textDirection,
       timeDilation: timeDilation ?? this.timeDilation,
       platform: platform ?? this.platform,
@@ -51,23 +55,25 @@ class GalleryOptions {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final GalleryOptions typedOther = other;
-    return themeMode == typedOther.themeMode
-        && textScaleFactor == typedOther.textScaleFactor
-        && textDirection == typedOther.textDirection
-        && platform == typedOther.platform
-        && showPerformanceOverlay == typedOther.showPerformanceOverlay
-        && showRasterCacheImagesCheckerboard == typedOther.showRasterCacheImagesCheckerboard
-        && showOffscreenLayersCheckerboard == typedOther.showRasterCacheImagesCheckerboard;
+    return other is GalleryOptions
+        && other.themeMode == themeMode
+        && other.textScaleFactor == textScaleFactor
+        && other.visualDensity == visualDensity
+        && other.textDirection == textDirection
+        && other.platform == platform
+        && other.showPerformanceOverlay == showPerformanceOverlay
+        && other.showRasterCacheImagesCheckerboard == showRasterCacheImagesCheckerboard
+        && other.showOffscreenLayersCheckerboard == showRasterCacheImagesCheckerboard;
   }
 
   @override
   int get hashCode => hashValues(
     themeMode,
     textScaleFactor,
+    visualDensity,
     textDirection,
     timeDilation,
     platform,
@@ -188,9 +194,10 @@ class _Heading extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return _OptionsItem(
       child: DefaultTextStyle(
-        style: theme.textTheme.body1.copyWith(
+        style: theme.textTheme.title.copyWith(
           fontFamily: 'GoogleSans',
-          color: theme.accentColor,
+          color: theme.colorScheme.onPrimary,
+          fontWeight: FontWeight.w700,
         ),
         child: Semantics(
           child: Text(text),
@@ -300,6 +307,52 @@ class _TextScaleFactorItem extends StatelessWidget {
   }
 }
 
+class _VisualDensityItem extends StatelessWidget {
+  const _VisualDensityItem(this.options, this.onOptionsChanged);
+
+  final GalleryOptions options;
+  final ValueChanged<GalleryOptions> onOptionsChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _OptionsItem(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text('Visual density'),
+                Text(
+                  '${options.visualDensity.label}',
+                  style: Theme.of(context).primaryTextTheme.body1,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuButton<GalleryVisualDensityValue>(
+            padding: const EdgeInsetsDirectional.only(end: 16.0),
+            icon: const Icon(Icons.arrow_drop_down),
+            itemBuilder: (BuildContext context) {
+              return kAllGalleryVisualDensityValues.map<PopupMenuItem<GalleryVisualDensityValue>>((GalleryVisualDensityValue densityValue) {
+                return PopupMenuItem<GalleryVisualDensityValue>(
+                  value: densityValue,
+                  child: Text(densityValue.label),
+                );
+              }).toList();
+            },
+            onSelected: (GalleryVisualDensityValue densityValue) {
+              onOptionsChanged(
+                options.copyWith(visualDensity: densityValue),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TextDirectionItem extends StatelessWidget {
   const _TextDirectionItem(this.options, this.onOptionsChanged);
 
@@ -360,6 +413,8 @@ class _PlatformItem extends StatelessWidget {
         return 'Fuchsia';
       case TargetPlatform.iOS:
         return 'Cupertino';
+      case TargetPlatform.macOS:
+        return 'Material Desktop (macOS)';
     }
     assert(false);
     return null;
@@ -467,10 +522,11 @@ class GalleryOptionsPage extends StatelessWidget {
           const _Heading('Display'),
           _ThemeModeItem(options, onOptionsChanged),
           _TextScaleFactorItem(options, onOptionsChanged),
+          _VisualDensityItem(options, onOptionsChanged),
           _TextDirectionItem(options, onOptionsChanged),
           _TimeDilationItem(options, onOptionsChanged),
           const Divider(),
-          const _Heading('Platform mechanics'),
+          const ExcludeSemantics(child: _Heading('Platform mechanics')),
           _PlatformItem(options, onOptionsChanged),
           ..._enabledDiagnosticItems(),
           const Divider(),

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,22 +7,26 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/net.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
@@ -48,7 +52,7 @@ void main() {
 
   setUp(() {
     loggingProcessManager = LoggingProcessManager();
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+    tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     projectDir = tempDir.childDirectory('flutter_project');
     mockFlutterVersion = MockFlutterVersion();
   });
@@ -414,8 +418,6 @@ void main() {
       '.android/Flutter/build.gradle',
       '.android/Flutter/flutter.iml',
       '.android/Flutter/src/main/AndroidManifest.xml',
-      '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
-      '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
       '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
       '.android/gradle.properties',
       '.android/gradle/wrapper/gradle-wrapper.jar',
@@ -436,6 +438,8 @@ void main() {
     ], unexpectedPaths: <String>[
       'android/',
       'ios/',
+      '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
+      '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
     ]);
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
@@ -453,12 +457,12 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     void expectExists(String relPath) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
     }
 
     expectExists('android/gradle.properties');
 
-    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
   });
@@ -474,12 +478,12 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--no-androidx', projectDir.path]);
 
     void expectExists(String relPath) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
     }
 
     expectExists('android/gradle.properties');
 
-    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), false);
   });
@@ -529,12 +533,12 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     void expectExists(String relPath) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
     }
 
     expectExists('android/gradle.properties');
 
-    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
   });
@@ -550,12 +554,12 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', '--no-androidx', projectDir.path]);
 
     void expectExists(String relPath) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
     }
 
     expectExists('android/gradle.properties');
 
-    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), false);
   });
@@ -568,9 +572,11 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--macos', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('app does not include macOS by default', () async {
@@ -584,6 +590,8 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('plugin supports macOS if requested', () async {
@@ -594,9 +602,11 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--macos', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('plugin does not include macOS by default', () async {
@@ -610,6 +620,8 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('has correct content and formatting with module template', () async {
@@ -623,17 +635,17 @@ void main() {
     await runner.run(<String>['create', '--template=module', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
     void expectExists(String relPath, [bool expectation = true]) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), expectation);
+      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), expectation);
     }
 
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
 
-    final String actualContents = await fs.file(projectDir.path + '/test/widget_test.dart').readAsString();
+    final String actualContents = await globals.fs.file(projectDir.path + '/test/widget_test.dart').readAsString();
 
     expect(actualContents.contains('flutter_test.dart'), true);
 
-    for (FileSystemEntity file in projectDir.listSync(recursive: true)) {
+    for (final FileSystemEntity file in projectDir.listSync(recursive: true)) {
       if (file is File && file.path.endsWith('.dart')) {
         final String original = file.readAsStringSync();
 
@@ -648,55 +660,55 @@ void main() {
       }
     }
 
-    await _runFlutterTest(projectDir, target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
+    await _runFlutterTest(projectDir, target: globals.fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
 
     // Generated Xcode settings
-    final String xcodeConfigPath = fs.path.join('.ios', 'Flutter', 'Generated.xcconfig');
+    final String xcodeConfigPath = globals.fs.path.join('.ios', 'Flutter', 'Generated.xcconfig');
     expectExists(xcodeConfigPath);
-    final File xcodeConfigFile = fs.file(fs.path.join(projectDir.path, xcodeConfigPath));
+    final File xcodeConfigFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeConfigPath));
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
 
     // Generated export environment variables script
-    final String buildPhaseScriptPath = fs.path.join('.ios', 'Flutter', 'flutter_export_environment.sh');
+    final String buildPhaseScriptPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_export_environment.sh');
     expectExists(buildPhaseScriptPath);
-    final File buildPhaseScriptFile = fs.file(fs.path.join(projectDir.path, buildPhaseScriptPath));
+    final File buildPhaseScriptFile = globals.fs.file(globals.fs.path.join(projectDir.path, buildPhaseScriptPath));
     final String buildPhaseScript = buildPhaseScriptFile.readAsStringSync();
     expect(buildPhaseScript, contains('FLUTTER_ROOT='));
     expect(buildPhaseScript, contains('FLUTTER_APPLICATION_PATH='));
     expect(buildPhaseScript, contains('FLUTTER_TARGET='));
 
     // Generated podspec
-    final String podspecPath = fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
+    final String podspecPath = globals.fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
     expectExists(podspecPath);
-    final File podspecFile = fs.file(fs.path.join(projectDir.path, podspecPath));
+    final File podspecFile = globals.fs.file(globals.fs.path.join(projectDir.path, podspecPath));
     final String podspec = podspecFile.readAsStringSync();
     expect(podspec, contains('Flutter module - flutter_project'));
 
     // App identification
-    final String xcodeProjectPath = fs.path.join('.ios', 'Runner.xcodeproj', 'project.pbxproj');
+    final String xcodeProjectPath = globals.fs.path.join('.ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
-    final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
+    final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
     // Xcode build system
-    final String xcodeWorkspaceSettingsPath = fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata', 'WorkspaceSettings.xcsettings');
+    final String xcodeWorkspaceSettingsPath = globals.fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata', 'WorkspaceSettings.xcsettings');
     expectExists(xcodeWorkspaceSettingsPath, false);
 
-    final String versionPath = fs.path.join('.metadata');
+    final String versionPath = globals.fs.path.join('.metadata');
     expectExists(versionPath);
-    final String version = fs.file(fs.path.join(projectDir.path, versionPath)).readAsStringSync();
+    final String version = globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
     expect(version, contains('revision: 12345678'));
     expect(version, contains('channel: omega'));
 
     // IntelliJ metadata
-    final String intelliJSdkMetadataPath = fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
+    final String intelliJSdkMetadataPath = globals.fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
     expectExists(intelliJSdkMetadataPath);
-    final String sdkMetaContents = fs
-        .file(fs.path.join(
+    final String sdkMetaContents = globals.fs
+        .file(globals.fs.path.join(
           projectDir.path,
           intelliJSdkMetadataPath,
         ))
@@ -719,13 +731,13 @@ void main() {
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
     void expectExists(String relPath) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
     }
 
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
 
-    for (FileSystemEntity file in projectDir.listSync(recursive: true)) {
+    for (final FileSystemEntity file in projectDir.listSync(recursive: true)) {
       if (file is File && file.path.endsWith('.dart')) {
         final String original = file.readAsStringSync();
 
@@ -740,34 +752,34 @@ void main() {
       }
     }
 
-    await _runFlutterTest(projectDir, target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
+    await _runFlutterTest(projectDir, target: globals.fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
 
     // Generated Xcode settings
-    final String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
+    final String xcodeConfigPath = globals.fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
     expectExists(xcodeConfigPath);
-    final File xcodeConfigFile = fs.file(fs.path.join(projectDir.path, xcodeConfigPath));
+    final File xcodeConfigFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeConfigPath));
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     // App identification
-    final String xcodeProjectPath = fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
+    final String xcodeProjectPath = globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
-    final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
+    final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
 
-    final String versionPath = fs.path.join('.metadata');
+    final String versionPath = globals.fs.path.join('.metadata');
     expectExists(versionPath);
-    final String version = fs.file(fs.path.join(projectDir.path, versionPath)).readAsStringSync();
+    final String version = globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
     expect(version, contains('revision: 12345678'));
     expect(version, contains('channel: omega'));
 
     // IntelliJ metadata
-    final String intelliJSdkMetadataPath = fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
+    final String intelliJSdkMetadataPath = globals.fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
     expectExists(intelliJSdkMetadataPath);
-    final String sdkMetaContents = fs
-        .file(fs.path.join(
+    final String sdkMetaContents = globals.fs
+        .file(globals.fs.path.join(
           projectDir.path,
           intelliJSdkMetadataPath,
         ))
@@ -787,9 +799,9 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    String tmpProjectDir = fs.path.join(tempDir.path, 'hello_flutter');
+    String tmpProjectDir = globals.fs.path.join(tempDir.path, 'hello_flutter');
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.example', tmpProjectDir]);
-    FlutterProject project = FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(tmpProjectDir));
     expect(
         await project.ios.productBundleIdentifier,
         'com.example.helloFlutter',
@@ -799,9 +811,9 @@ void main() {
         'com.example.hello_flutter',
     );
 
-    tmpProjectDir = fs.path.join(tempDir.path, 'test_abc');
+    tmpProjectDir = globals.fs.path.join(tempDir.path, 'test_abc');
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'abc^*.1#@', tmpProjectDir]);
-    project = FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    project = FlutterProject.fromDirectory(globals.fs.directory(tmpProjectDir));
     expect(
         await project.ios.productBundleIdentifier,
         'abc.1.testAbc',
@@ -811,9 +823,9 @@ void main() {
         'abc.u1.test_abc',
     );
 
-    tmpProjectDir = fs.path.join(tempDir.path, 'flutter_project');
+    tmpProjectDir = globals.fs.path.join(tempDir.path, 'flutter_project');
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', '#+^%', tmpProjectDir]);
-    project = FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    project = FlutterProject.fromDirectory(globals.fs.directory(tmpProjectDir));
     expect(
         await project.ios.productBundleIdentifier,
         'flutterProject.untitled',
@@ -837,7 +849,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
   });
 
@@ -850,11 +862,11 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
 
     // Remove the .metadata to simulate an older instantiation that didn't generate those.
-    fs.file(fs.path.join(projectDir.path, '.metadata')).deleteSync();
+    globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).deleteSync();
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
   });
 
@@ -868,7 +880,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
   });
 
@@ -882,7 +894,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: module\n'));
   });
 
@@ -896,7 +908,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: plugin'));
   });
 
@@ -910,7 +922,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = globals.fs.file(globals.fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: package'));
   });
 
@@ -1028,7 +1040,7 @@ void main() {
       <String>['--no-pub', '--template=app', '--org', 'com.bar.foo'],
       <String>[],
     );
-    fs.directory(fs.path.join(projectDir.path, 'ios')).deleteSync(recursive: true);
+    globals.fs.directory(globals.fs.path.join(projectDir.path, 'ios')).deleteSync(recursive: true);
     await _createProject(
       projectDir,
       <String>['--no-pub', '--template=app', '--org', 'com.bar.baz'],
@@ -1057,7 +1069,7 @@ void main() {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    final File existingFile = fs.file(fs.path.join(projectDir.path, 'bad'));
+    final File existingFile = globals.fs.file(globals.fs.path.join(projectDir.path, 'bad'));
     if (!existingFile.existsSync()) {
       existingFile.createSync(recursive: true);
     }
@@ -1071,7 +1083,7 @@ void main() {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    final File existingFile = fs.file(fs.path.join(projectDir.path, 'bad'));
+    final File existingFile = globals.fs.file(globals.fs.path.join(projectDir.path, 'bad'));
     if (!existingFile.existsSync()) {
       existingFile.createSync(recursive: true);
     }
@@ -1083,14 +1095,14 @@ void main() {
 
   testUsingContext('overwrites existing directory when requested', () async {
     Cache.flutterRoot = '../..';
-    final Directory existingDirectory = fs.directory(fs.path.join(projectDir.path, 'bad'));
+    final Directory existingDirectory = globals.fs.directory(globals.fs.path.join(projectDir.path, 'bad'));
     if (!existingDirectory.existsSync()) {
       existingDirectory.createSync(recursive: true);
     }
-    final File existingFile = fs.file(fs.path.join(existingDirectory.path, 'lib', 'main.dart'));
+    final File existingFile = globals.fs.file(globals.fs.path.join(existingDirectory.path, 'lib', 'main.dart'));
     existingFile.createSync(recursive: true);
     await _createProject(
-      fs.directory(existingDirectory.path),
+      globals.fs.directory(existingDirectory.path),
       <String>['--overwrite', '-i', 'objc', '-a', 'java'],
       <String>[
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
@@ -1102,16 +1114,6 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
-  });
-
-  testUsingContext('fails when invalid package name', () async {
-    Cache.flutterRoot = '../..';
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    expect(
-      runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
-      throwsToolExit(message: '"invalidName" is not a valid Dart package name.'),
-    );
   });
 
   testUsingContext(
@@ -1169,7 +1171,7 @@ void main() {
   });
 
   testUsingContext('can write samples index to disk', () async {
-    final String outputFile = fs.path.join(tempDir.path, 'flutter_samples.json');
+    final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final List<String> args = <String>[
@@ -1179,7 +1181,7 @@ void main() {
     ];
 
     await runner.run(args);
-    final File expectedFile = fs.file(outputFile);
+    final File expectedFile = globals.fs.file(outputFile);
     expect(expectedFile.existsSync(), isTrue);
     expect(expectedFile.readAsStringSync(), equals(samplesIndexJson));
   }, overrides: <Type, Generator>{
@@ -1187,7 +1189,7 @@ void main() {
         () => MockHttpClient(200, result: samplesIndexJson),
   });
   testUsingContext('provides an error to the user if samples json download fails', () async {
-    final String outputFile = fs.path.join(tempDir.path, 'flutter_samples.json');
+    final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final List<String> args = <String>[
@@ -1197,7 +1199,7 @@ void main() {
     ];
 
     await expectLater(runner.run(args), throwsToolExit(exitCode: 2, message: 'Failed to write samples'));
-    expect(fs.file(outputFile).existsSync(), isFalse);
+    expect(globals.fs.file(outputFile).existsSync(), isFalse);
   }, overrides: <Type, Generator>{
     HttpClientFactory: () =>
         () => MockHttpClient(404, result: 'not found'),
@@ -1220,15 +1222,15 @@ Future<void> _createProject(
   ]);
 
   bool pathExists(String path) {
-    final String fullPath = fs.path.join(dir.path, path);
-    return fs.typeSync(fullPath) != FileSystemEntityType.notFound;
+    final String fullPath = globals.fs.path.join(dir.path, path);
+    return globals.fs.typeSync(fullPath) != FileSystemEntityType.notFound;
   }
 
   final List<String> failures = <String>[
-    for (String path in expectedPaths)
+    for (final String path in expectedPaths)
       if (!pathExists(path))
         'Path "$path" does not exist.',
-    for (String path in unexpectedPaths)
+    for (final String path in unexpectedPaths)
       if (pathExists(path))
         'Path "$path" exists when it shouldn\'t.',
   ];
@@ -1246,22 +1248,22 @@ Future<void> _createAndAnalyzeProject(
 }
 
 Future<void> _ensureFlutterToolsSnapshot() async {
-  final String flutterToolsPath = fs.path.absolute(fs.path.join(
+  final String flutterToolsPath = globals.fs.path.absolute(globals.fs.path.join(
     'bin',
     'flutter_tools.dart',
   ));
-  final String flutterToolsSnapshotPath = fs.path.absolute(fs.path.join(
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
     'bin',
     'cache',
     'flutter_tools.snapshot',
   ));
-  final String dotPackages = fs.path.absolute(fs.path.join(
+  final String dotPackages = globals.fs.path.absolute(globals.fs.path.join(
     '.packages',
   ));
 
-  final File snapshotFile = fs.file(flutterToolsSnapshotPath);
+  final File snapshotFile = globals.fs.file(flutterToolsSnapshotPath);
   if (snapshotFile.existsSync()) {
     snapshotFile.renameSync(flutterToolsSnapshotPath + '.bak');
   }
@@ -1284,7 +1286,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
 }
 
 Future<void> _restoreFlutterToolsSnapshot() async {
-  final String flutterToolsSnapshotPath = fs.path.absolute(fs.path.join(
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
     'bin',
@@ -1292,7 +1294,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
     'flutter_tools.snapshot',
   ));
 
-  final File snapshotBackup = fs.file(flutterToolsSnapshotPath + '.bak');
+  final File snapshotBackup = globals.fs.file(flutterToolsSnapshotPath + '.bak');
   if (!snapshotBackup.existsSync()) {
     // No backup to restore.
     return;
@@ -1302,7 +1304,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
 }
 
 Future<void> _analyzeProject(String workingDir) async {
-  final String flutterToolsSnapshotPath = fs.path.absolute(fs.path.join(
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
     'bin',
@@ -1329,7 +1331,7 @@ Future<void> _analyzeProject(String workingDir) async {
 }
 
 Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
-  final String flutterToolsSnapshotPath = fs.path.absolute(fs.path.join(
+  final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
     'bin',
@@ -1379,7 +1381,7 @@ class LoggingProcessManager extends LocalProcessManager {
 
   @override
   Future<Process> start(
-    List<dynamic> command, {
+    List<String> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,

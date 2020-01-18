@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 
 import 'base/build.dart';
 import 'base/common.dart';
-import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
@@ -16,7 +15,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/dart.dart';
 import 'dart/package_map.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'ios/bitcode.dart';
 import 'project.dart';
 
@@ -39,9 +38,13 @@ class AotBuilder {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
     }
+
+    // This code is currently dead, but will be updated as we move iOS to assemble.
+    // See also: https://github.com/flutter/flutter/issues/32925
     if (_canUseAssemble(platform)
         && extraGenSnapshotOptions?.isEmpty != false
         && extraFrontEndOptions?.isEmpty != false) {
+      assert(false);
       await _buildWithAssemble(
         targetFile: mainDartFile,
         outputDir: outputPath,
@@ -61,8 +64,8 @@ class AotBuilder {
 
     Status status;
     if (!quiet) {
-      final String typeName = artifacts.getEngineType(platform, buildMode);
-      status = logger.startProgress(
+      final String typeName = globals.artifacts.getEngineType(platform, buildMode);
+      status = globals.logger.startProgress(
         'Building AOT snapshot in ${getFriendlyModeName(buildMode)} mode ($typeName)...',
         timeout: timeoutConfiguration.slowOperation,
       );
@@ -90,8 +93,8 @@ class AotBuilder {
       if (platform == TargetPlatform.ios) {
         // Determine which iOS architectures to build for.
         final Map<DarwinArch, String> iosBuilds = <DarwinArch, String>{};
-        for (DarwinArch arch in iosBuildArchs) {
-          iosBuilds[arch] = fs.path.join(outputPath, getNameForDarwinArch(arch));
+        for (final DarwinArch arch in iosBuildArchs) {
+          iosBuilds[arch] = globals.fs.path.join(outputPath, getNameForDarwinArch(arch));
         }
 
         // Generate AOT snapshot and compile to arch-specific App.framework.
@@ -115,14 +118,14 @@ class AotBuilder {
         // Merge arch-specific App.frameworks into a multi-arch App.framework.
         if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
           final Iterable<String> dylibs = iosBuilds.values.map<String>(
-              (String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
-          fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
+              (String outputDir) => globals.fs.path.join(outputDir, 'App.framework', 'App'));
+          globals.fs.directory(globals.fs.path.join(outputPath, 'App.framework'))..createSync();
           await processUtils.run(
             <String>[
               'lipo',
               ...dylibs,
               '-create',
-              '-output', fs.path.join(outputPath, 'App.framework', 'App'),
+              '-output', globals.fs.path.join(outputPath, 'App.framework', 'App'),
             ],
             throwOnError: true,
           );
@@ -130,7 +133,7 @@ class AotBuilder {
           status?.cancel();
           exitCodes.forEach((DarwinArch iosArch, Future<int> exitCodeFuture) async {
             final int buildExitCode = await exitCodeFuture;
-            printError('Snapshotting ($iosArch) exited with non-zero exit code: $buildExitCode');
+            globals.printError('Snapshotting ($iosArch) exited with non-zero exit code: $buildExitCode');
           });
         }
       } else {
@@ -152,7 +155,7 @@ class AotBuilder {
     } on ProcessException catch (error) {
       // Catch the String exceptions thrown from the `runSync` methods below.
       status?.cancel();
-      printError(error.toString());
+      globals.printError(error.toString());
       return;
     }
     status?.stop();
@@ -161,11 +164,11 @@ class AotBuilder {
       throwToolExit(null);
     }
 
-    final String builtMessage = 'Built to $outputPath${fs.path.separator}.';
+    final String builtMessage = 'Built to $outputPath${globals.fs.path.separator}.';
     if (quiet) {
-      printTrace(builtMessage);
+      globals.printTrace(builtMessage);
     } else {
-      printStatus(builtMessage);
+      globals.printStatus(builtMessage);
     }
     return;
   }
@@ -176,7 +179,6 @@ class AotBuilder {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x86:
       case TargetPlatform.darwin_x64:
-        return true;
       case TargetPlatform.android_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_x64:
@@ -197,23 +199,23 @@ class AotBuilder {
     String outputDir,
     bool quiet
   }) async {
+    // This code is currently dead, but will be updated as we move iOS to assemble.
+    // See also: https://github.com/flutter/flutter/issues/32925
+    assert(false);
     Status status;
     if (!quiet) {
-      final String typeName = artifacts.getEngineType(targetPlatform, buildMode);
-      status = logger.startProgress(
+      final String typeName = globals.artifacts.getEngineType(targetPlatform, buildMode);
+      status = globals.logger.startProgress(
         'Building AOT snapshot in ${getFriendlyModeName(buildMode)} mode ($typeName)...',
         timeout: timeoutConfiguration.slowOperation,
       );
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    // Currently this only supports android, per the check above.
-    final Target target = buildMode == BuildMode.profile
-      ? const ProfileCopyFlutterAotBundle()
-      : const ReleaseCopyFlutterAotBundle();
+    const Target target = null;
 
-    final BuildResult result = await buildSystem.build(target, Environment(
-      projectDir: flutterProject.directory,
-      outputDir: fs.directory(outputDir),
+    final BuildResult result = await buildSystem.build(target, Environment.test(
+      flutterProject.directory,
+      outputDir: globals.fs.directory(outputDir),
       buildDir: flutterProject.directory
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build'),
@@ -225,17 +227,20 @@ class AotBuilder {
     ));
     status?.stop();
     if (!result.success) {
-      for (ExceptionMeasurement measurement in result.exceptions.values) {
-        printError(measurement.exception.toString());
-        printError(measurement.stackTrace.toString());
+      for (final ExceptionMeasurement measurement in result.exceptions.values) {
+        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
       }
       throwToolExit('Failed to build aot.');
     }
-    final String builtMessage = 'Built to $outputDir${fs.path.separator}.';
+    final String builtMessage = 'Built to $outputDir${globals.fs.path.separator}.';
     if (quiet) {
-      printTrace(builtMessage);
+      globals.printTrace(builtMessage);
     } else {
-      printStatus(builtMessage);
+      globals.printStatus(builtMessage);
     }
   }
 }

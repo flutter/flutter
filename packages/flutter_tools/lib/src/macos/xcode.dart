@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,10 +6,9 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
+import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 10;
@@ -17,8 +16,33 @@ const int kXcodeRequiredVersionMinor = 2;
 
 Xcode get xcode => context.get<Xcode>();
 
+enum SdkType {
+  iPhone,
+  iPhoneSimulator,
+  macOS,
+}
+
+/// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
+/// SUPPORTED_PLATFORMS values.
+///
+/// Usage: xcrun [options] <tool name> ... arguments ...
+/// ...
+/// --sdk <sdk name>            find the tool for the given SDK name
+String getNameForSdk(SdkType sdk) {
+  switch (sdk) {
+    case SdkType.iPhone:
+      return 'iphoneos';
+    case SdkType.iPhoneSimulator:
+      return 'iphonesimulator';
+    case SdkType.macOS:
+      return 'macosx';
+  }
+  assert(false);
+  return null;
+}
+
 class Xcode {
-  bool get isInstalledAndMeetsVersionCheck => platform.isMacOS && isInstalled && isVersionSatisfactory;
+  bool get isInstalledAndMeetsVersionCheck => globals.platform.isMacOS && isInstalled && isVersionSatisfactory;
 
   String _xcodeSelectPath;
   String get xcodeSelectPath {
@@ -117,9 +141,10 @@ class Xcode {
     );
   }
 
-  Future<String> iPhoneSdkLocation() async {
+  Future<String> sdkLocation(SdkType sdk) async {
+    assert(sdk != null);
     final RunResult runResult = await processUtils.run(
-      <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'],
+      <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
       throwOnError: true,
     );
     if (runResult.exitCode != 0) {
@@ -133,10 +158,10 @@ class Xcode {
       return null;
     }
     final List<String> searchPaths = <String>[
-      fs.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
+      globals.fs.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
     ];
     return searchPaths.where((String p) => p != null).firstWhere(
-      (String p) => fs.directory(p).existsSync(),
+      (String p) => globals.fs.directory(p).existsSync(),
       orElse: () => null,
     );
   }

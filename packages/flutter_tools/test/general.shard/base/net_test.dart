@@ -1,17 +1,18 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
@@ -34,7 +35,7 @@ void main() {
     });
 
     testUsingContext('fetchUrl(destFile) writes the data to a file', () async {
-      final File destFile = fs.file('dest_file')..createSync();
+      final File destFile = globals.fs.file('dest_file')..createSync();
       final List<int> data = await fetchUrl(
         Uri.parse('http://example.invalid/'),
         destFile: destFile,
@@ -365,25 +366,25 @@ class FakeHttpClientResponse implements io.HttpClientResponse {
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<Uint8List> listen(
-    void onData(Uint8List event), {
+  StreamSubscription<List<int>> listen(
+    void onData(List<int> event), {
     Function onError,
     void onDone(),
     bool cancelOnError,
   }) {
     if (data == null) {
-      return Stream<Uint8List>.fromFuture(Future<Uint8List>.error(
+      return Stream<List<int>>.fromFuture(Future<List<int>>.error(
         const io.SocketException('test'),
       )).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
     } else {
-      return Stream<Uint8List>.fromFuture(Future<Uint8List>.value(
-        utf8.encode(data) as Uint8List,
+      return Stream<List<int>>.fromFuture(Future<List<int>>.value(
+        utf8.encode(data),
       )).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
     }
   }
 
   @override
-  Future<dynamic> forEach(void Function(Uint8List element) action) async {
+  Future<dynamic> forEach(void Function(List<int> element) action) async {
     if (data == null) {
       return Future<void>.error(const io.SocketException('test'));
     } else {

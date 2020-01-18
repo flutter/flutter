@@ -1,12 +1,12 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -69,15 +69,13 @@ void main() {
       final MockFile mockFile = MockFile();
       when(mockFile.existsSync()).thenReturn(true);
 
-      final BufferLogger logger = context.get<Logger>();
       when(mockFile.deleteSync(recursive: true)).thenThrow(const FileSystemException('Deletion failed'));
       final CleanCommand command = CleanCommand();
       command.deleteFile(mockFile);
-      expect(logger.errorText, contains('A program may still be using a file'));
+      expect(testLogger.errorText, contains('A program may still be using a file'));
       verify(mockFile.deleteSync(recursive: true)).called(1);
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
-      Logger: () => BufferLogger(),
       Xcode: () => mockXcode,
     });
 
@@ -88,14 +86,12 @@ void main() {
       when(mockFile.existsSync()).thenThrow(const FileSystemException('OS error: Access Denied'));
       when(mockFile.path).thenReturn('foo.dart');
 
-      final BufferLogger logger = context.get<Logger>();
       final CleanCommand command = CleanCommand();
       command.deleteFile(mockFile);
-      expect(logger.errorText, contains('Cannot clean foo.dart'));
+      expect(testLogger.errorText, contains('Cannot clean foo.dart'));
       verifyNever(mockFile.deleteSync(recursive: true));
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
-      Logger: () => BufferLogger(),
       Xcode: () => mockXcode,
     });
   }

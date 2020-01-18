@@ -1,13 +1,13 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file
+// found in the LICENSE file.
 
 import 'package:xml/xml.dart' as xml;
 
 import '../base/file_system.dart';
 
 /// Writes a property sheet (.props) file to expose all of the key/value
-/// pairs in [variables] as enivornment variables.
+/// pairs in [variables] as environment variables.
 void writePropertySheet(File propertySheetFile, Map<String, String> variables) {
   final xml.XmlBuilder builder = xml.XmlBuilder();
   builder.processing('xml', 'version="1.0" encoding="utf-8"');

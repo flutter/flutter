@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -1194,9 +1194,15 @@ void main() {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({ this.textDirection, this.child });
+  const TestApp({
+    Key key,
+    this.textDirection,
+    this.child,
+  }) : super(key: key);
+
   final TextDirection textDirection;
   final Widget child;
+
   @override
   _TestAppState createState() => _TestAppState();
 }

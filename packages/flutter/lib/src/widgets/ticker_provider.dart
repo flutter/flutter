@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -49,7 +49,7 @@ class TickerMode extends InheritedWidget {
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
   static bool of(BuildContext context) {
-    final TickerMode widget = context.inheritFromWidgetOfExactType(TickerMode);
+    final TickerMode widget = context.dependOnInheritedWidgetOfExactType<TickerMode>();
     return widget?.enabled ?? true;
   }
 
@@ -180,7 +180,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   void dispose() {
     assert(() {
       if (_tickers != null) {
-        for (Ticker ticker in _tickers) {
+        for (final Ticker ticker in _tickers) {
           if (ticker.isActive) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('$this was disposed with an active Ticker.'),
@@ -208,7 +208,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   void didChangeDependencies() {
     final bool muted = !TickerMode.of(context);
     if (_tickers != null) {
-      for (Ticker ticker in _tickers) {
+      for (final Ticker ticker in _tickers) {
         ticker.muted = muted;
       }
     }

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,7 @@ import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'globals.dart' as globals;
 
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
@@ -31,8 +32,8 @@ class AndroidPlugin extends PluginPlatform {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
-      package: yaml['package'],
-      pluginClass: yaml['pluginClass'],
+      package: yaml['package'] as String,
+      pluginClass: yaml['pluginClass'] as String,
       pluginPath: pluginPath,
     );
   }
@@ -78,28 +79,28 @@ class AndroidPlugin extends PluginPlatform {
   Set<String> _getSupportedEmbeddings() {
     assert(pluginPath != null);
     final Set<String> supportedEmbeddings = <String>{};
-    final String baseMainPath = fs.path.join(
+    final String baseMainPath = globals.fs.path.join(
       pluginPath,
       'android',
       'src',
       'main',
     );
-    File mainPluginClass = fs.file(
-      fs.path.join(
+    File mainPluginClass = globals.fs.file(
+      globals.fs.path.join(
         baseMainPath,
         'java',
-        package.replaceAll('.', fs.path.separator),
+        package.replaceAll('.', globals.fs.path.separator),
         '$pluginClass.java',
       )
     );
     // Check if the plugin is implemented in Kotlin since the plugin's pubspec.yaml
     // doesn't include this information.
     if (!mainPluginClass.existsSync()) {
-      mainPluginClass = fs.file(
-        fs.path.join(
+      mainPluginClass = globals.fs.file(
+        globals.fs.path.join(
           baseMainPath,
           'kotlin',
-          package.replaceAll('.', fs.path.separator),
+          package.replaceAll('.', globals.fs.path.separator),
           '$pluginClass.kt',
         )
       );
@@ -144,7 +145,7 @@ class IOSPlugin extends PluginPlatform {
     return IOSPlugin(
       name: name,
       classPrefix: '',
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -188,7 +189,7 @@ class MacOSPlugin extends PluginPlatform {
     assert(validate(yaml));
     return MacOSPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -227,7 +228,7 @@ class WindowsPlugin extends PluginPlatform {
     assert(validate(yaml));
     return WindowsPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -267,7 +268,7 @@ class LinuxPlugin extends PluginPlatform {
     assert(validate(yaml));
     return LinuxPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -309,8 +310,8 @@ class WebPlugin extends PluginPlatform {
     assert(validate(yaml));
     return WebPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
-      fileName: yaml['fileName'],
+      pluginClass: yaml['pluginClass'] as String,
+      fileName: yaml['fileName'] as String,
     );
   }
 

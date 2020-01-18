@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,10 +6,9 @@ import 'dart:async';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
@@ -19,24 +18,13 @@ import 'build.dart';
 /// .ipas, see https://flutter.dev/docs/deployment/ios.
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
+    addBuildModeFlags(defaultToRelease: false);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
     argParser
-      ..addFlag('debug',
-        negatable: false,
-        help: 'Build a debug version of your app (default mode for iOS simulator builds).',
-      )
-      ..addFlag('profile',
-        negatable: false,
-        help: 'Build a version of your app specialized for performance profiling.',
-      )
-      ..addFlag('release',
-        negatable: false,
-        help: 'Build a release version of your app (default mode for device builds).',
-      )
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device.',
       )
@@ -54,29 +42,28 @@ class BuildIOSCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
     DevelopmentArtifact.iOS,
   };
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool forSimulator = argResults['simulator'];
+    final bool forSimulator = boolArg('simulator');
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
-    if (!platform.isMacOS) {
+    if (!globals.platform.isMacOS) {
       throwToolExit('Building for iOS is only supported on the Mac.');
     }
 
-    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(TargetPlatform.ios);
+    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(TargetPlatform.ios) as BuildableIOSApp;
 
     if (app == null) {
       throwToolExit('Application not configured for iOS');
     }
 
-    final bool shouldCodesign = argResults['codesign'];
+    final bool shouldCodesign = boolArg('codesign');
 
     if (!forSimulator && !shouldCodesign) {
-      printStatus('Warning: Building for device with codesigning disabled. You will '
+      globals.printStatus('Warning: Building for device with codesigning disabled. You will '
         'have to manually codesign before deploying to device.');
     }
     final BuildInfo buildInfo = getBuildInfo();
@@ -86,8 +73,8 @@ class BuildIOSCommand extends BuildSubCommand {
 
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
-    final String typeName = artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
-    printStatus('Building $app for $logTarget ($typeName)...');
+    final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    globals.printStatus('Building $app for $logTarget ($typeName)...');
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
@@ -102,9 +89,9 @@ class BuildIOSCommand extends BuildSubCommand {
     }
 
     if (result.output != null) {
-      printStatus('Built ${result.output}.');
+      globals.printStatus('Built ${result.output}.');
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

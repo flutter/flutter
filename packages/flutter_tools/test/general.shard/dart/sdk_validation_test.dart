@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,10 +24,10 @@ void main() {
 void testSampleProject(String lib, String member) {
   testUsingContext('contains dart:$lib', () async {
     Cache.disableLocking();
-    final Directory projectDirectory = fs.systemTempDirectory.createTempSync('flutter_sdk_validation_${lib}_test.').absolute;
+    final Directory projectDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_sdk_validation_${lib}_test.').absolute;
 
     try {
-      final File pubspecFile = fs.file(fs.path.join(projectDirectory.path, 'pubspec.yaml'));
+      final File pubspecFile = globals.fs.file(globals.fs.path.join(projectDirectory.path, 'pubspec.yaml'));
       pubspecFile.writeAsStringSync('''
 name: ${lib}_project
 dependencies:
@@ -34,7 +35,7 @@ dependencies:
     sdk: flutter
 ''');
 
-      final File dartFile = fs.file(fs.path.join(projectDirectory.path, 'lib', 'main.dart'));
+      final File dartFile = globals.fs.file(globals.fs.path.join(projectDirectory.path, 'lib', 'main.dart'));
       dartFile.parent.createSync();
       dartFile.writeAsStringSync('''
 import 'dart:$lib' as $lib;
@@ -63,7 +64,7 @@ Future<int> analyze(AnalysisServer server) async {
   int errorCount = 0;
   final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
   server.onErrors.listen((FileAnalysisErrors result) {
-    for (AnalysisError error in result.errors) {
+    for (final AnalysisError error in result.errors) {
       print(error.toString().trim());
     }
     errorCount += result.errors.length;

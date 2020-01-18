@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,7 +16,8 @@ import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
 import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
-import '../globals.dart';
+import '../cache.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -35,14 +36,20 @@ const List<Target> _kDefaultTargets = <Target>[
   ProfileMacOSBundleFlutterAssets(),
   ReleaseMacOSBundleFlutterAssets(),
   DebugBundleLinuxAssets(),
-  WebReleaseBundle(),
+  WebServiceWorker(),
   DebugAndroidApplication(),
+  FastStartAndroidApplication(),
   ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
-  // These are one-off rules for bundle and aot compat
-  ReleaseCopyFlutterAotBundle(),
-  ProfileCopyFlutterAotBundle(),
+  // This is a one-off rule for bundle and aot compat.
   CopyFlutterBundle(),
+  // Android ABI specific AOT rules.
+  androidArmProfileBundle,
+  androidArm64ProfileBundle,
+  androidx64ProfileBundle,
+  androidArmReleaseBundle,
+  androidArm64ReleaseBundle,
+  androidx64ReleaseBundle,
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -69,6 +76,7 @@ class AssembleCommand extends FlutterCommand {
         'files will be written. Must be either absolute or relative from the '
         'root of the current Flutter project.',
     );
+    argParser.addOption(kExtraGenSnapshotOptions);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -99,89 +107,110 @@ class AssembleCommand extends FlutterCommand {
     return const <CustomDimensions, String>{};
   }
 
-  /// The target we are building.
-  Target get target {
+  /// The target(s) we are building.
+  List<Target> get targets {
     if (argResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argResults.rest.first;
-    final Target result = _kDefaultTargets
-        .firstWhere((Target target) => target.name == name, orElse: () => null);
-    if (result == null) {
+    final Map<String, Target> targetMap = <String, Target>{
+      for (final Target target in _kDefaultTargets)
+        target.name: target
+    };
+    final List<Target> results = <Target>[
+      for (final String targetName in argResults.rest)
+        if (targetMap.containsKey(targetName))
+          targetMap[targetName]
+    ];
+    if (results.isEmpty) {
       throwToolExit('No target named "$name" defined.');
     }
-    return result;
+    return results;
   }
 
   /// The environmental configuration for a build invocation.
   Environment get environment {
     final FlutterProject flutterProject = FlutterProject.current();
-    String output = argResults['output'];
+    String output = stringArg('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
     // If path is relative, make it absolute from flutter project.
-    if (fs.path.isRelative(output)) {
-      output = fs.path.join(flutterProject.directory.path, output);
+    if (globals.fs.path.isRelative(output)) {
+      output = globals.fs.path.join(flutterProject.directory.path, output);
     }
     final Environment result = Environment(
-      outputDir: fs.directory(output),
+      outputDir: globals.fs.directory(output),
       buildDir: flutterProject.directory
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
-      defines: _parseDefines(argResults['define']),
+      defines: _parseDefines(stringsArg('define')),
+      cacheDir: globals.cache.getRoot(),
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     );
     return result;
   }
 
-  static Map<String, String> _parseDefines(List<String> values) {
+  Map<String, String> _parseDefines(List<String> values) {
     final Map<String, String> results = <String, String>{};
-    for (String chunk in values) {
-      final List<String> parts = chunk.split('=');
-      if (parts.length != 2) {
+    for (final String chunk in values) {
+      final int indexEquals = chunk.indexOf('=');
+      if (indexEquals == -1) {
         throwToolExit('Improperly formatted define flag: $chunk');
       }
-      final String key = parts[0];
-      final String value = parts[1];
+      final String key = chunk.substring(0, indexEquals);
+      final String value = chunk.substring(indexEquals + 1);
       results[key] = value;
+    }
+    // Workaround for extraGenSnapshot formatting.
+    if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
+      results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
     }
     return results;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final List<Target> targets = this.targets;
+    final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
     final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
-      resourcePoolSize: argResults['resource-pool-size'],
+      resourcePoolSize: argResults.wasParsed('resource-pool-size')
+        ? int.tryParse(stringArg('resource-pool-size'))
+        : null,
     ));
     if (!result.success) {
-      for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
-        printError('Target ${data.key} failed: ${data.value.exception}', stackTrace: data.value.stackTrace);
+      for (final ExceptionMeasurement measurement in result.exceptions.values) {
+        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
       }
       throwToolExit('build failed.');
     }
-    printTrace('build succeeded.');
+    globals.printTrace('build succeeded.');
     if (argResults.wasParsed('build-inputs')) {
-      writeListIfChanged(result.inputFiles, argResults['build-inputs']);
+      writeListIfChanged(result.inputFiles, stringArg('build-inputs'));
     }
     if (argResults.wasParsed('build-outputs')) {
-      writeListIfChanged(result.outputFiles, argResults['build-outputs']);
+      writeListIfChanged(result.outputFiles, stringArg('build-outputs'));
     }
     if (argResults.wasParsed('depfile')) {
-      final File depfileFile = fs.file(argResults['depfile']);
+      final File depfileFile = globals.fs.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-      depfile.writeToFile(fs.file(depfileFile));
+      depfile.writeToFile(globals.fs.file(depfileFile));
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 
 @visibleForTesting
 void writeListIfChanged(List<File> files, String path) {
-  final File file = fs.file(path);
+  final File file = globals.fs.file(path);
   final StringBuffer buffer = StringBuffer();
   // These files are already sorted.
-  for (File file in files) {
+  for (final File file in files) {
     buffer.writeln(file.path);
   }
   final String newContents = buffer.toString();
@@ -192,4 +221,23 @@ void writeListIfChanged(List<File> files, String path) {
   if (currentContents != newContents) {
     file.writeAsStringSync(newContents);
   }
+}
+
+class _CompositeTarget extends Target {
+  _CompositeTarget(this.dependencies);
+
+  @override
+  final List<Target> dependencies;
+
+  @override
+  String get name => '_composite';
+
+  @override
+  Future<void> build(Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
 }

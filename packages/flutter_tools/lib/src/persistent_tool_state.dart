@@ -1,10 +1,11 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'globals.dart' as globals;
 
 PersistentToolState get persistentToolState => PersistentToolState.instance;
 
@@ -24,7 +25,10 @@ abstract class PersistentToolState {
 
 class _DefaultPersistentToolState implements PersistentToolState {
   _DefaultPersistentToolState([File configFile]) :
-    _config = Config(configFile ?? fs.file(fs.path.join(userHomePath(), _kFileName)));
+    _config = Config(configFile ?? globals.fs.file(globals.fs.path.join(
+      fsUtils.userHomePath,
+      _kFileName,
+    )));
 
   static const String _kFileName = '.flutter_tool_state';
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
@@ -32,7 +36,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
   final Config _config;
 
   @override
-  bool get redisplayWelcomeMessage => _config.getValue(_kRedisplayWelcomeMessage);
+  bool get redisplayWelcomeMessage => _config.getValue(_kRedisplayWelcomeMessage) as bool;
 
   @override
   set redisplayWelcomeMessage(bool value) {

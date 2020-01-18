@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,7 @@ import 'dart:async';
 
 import '../cache.dart';
 import '../features.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -59,14 +59,14 @@ class PrecacheCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['all-platforms']) {
-      cache.includeAllPlatforms = true;
+    if (boolArg('all-platforms')) {
+      globals.cache.includeAllPlatforms = true;
     }
-    if (argResults['use-unsigned-mac-binaries']) {
-      cache.useUnsignedMacBinaries = true;
+    if (boolArg('use-unsigned-mac-binaries')) {
+      globals.cache.useUnsignedMacBinaries = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
-    for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
+    for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
       if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
@@ -74,20 +74,20 @@ class PrecacheCommand extends FlutterCommand {
       if (artifact.feature != null && !featureFlags.isEnabled(artifact.feature)) {
         continue;
       }
-      if (argResults[artifact.name]) {
+      if (boolArg(artifact.name)) {
         requiredArtifacts.add(artifact);
       }
       // The `android` flag expands to android_gen_snapshot, android_maven, android_internal_build.
-      if (artifact.name.startsWith('android_') && argResults['android']) {
+      if (artifact.name.startsWith('android_') && boolArg('android')) {
         requiredArtifacts.add(artifact);
       }
     }
-    final bool forceUpdate = argResults['force'];
-    if (forceUpdate || !cache.isUpToDate()) {
-      await cache.updateAll(requiredArtifacts);
+    final bool forceUpdate = boolArg('force');
+    if (forceUpdate || !globals.cache.isUpToDate()) {
+      await globals.cache.updateAll(requiredArtifacts);
     } else {
-      printStatus('Already up-to-date.');
+      globals.printStatus('Already up-to-date.');
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 }

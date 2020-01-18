@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,8 +25,10 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/github_template.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -38,10 +40,10 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
-BufferLogger get testLogger => context.get<Logger>();
+BufferLogger get testLogger => context.get<Logger>() as BufferLogger;
 
-FakeDeviceManager get testDeviceManager => context.get<DeviceManager>();
-FakeDoctor get testDoctor => context.get<Doctor>();
+FakeDeviceManager get testDeviceManager => context.get<DeviceManager>() as FakeDeviceManager;
+FakeDoctor get testDoctor => context.get<Doctor>() as FakeDoctor;
 
 typedef ContextInitializer = void Function(AppContext testContext);
 
@@ -72,16 +74,16 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir ??= fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    final File settingsFile = fs.file(
-      fs.path.join(configDir.path, '.flutter_settings')
+    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    final File settingsFile = globals.fs.file(
+      globals.fs.path.join(configDir.path, '.flutter_settings')
     );
     return Config(settingsFile);
   }
   PersistentToolState buildPersistentToolState(FileSystem fs) {
-    configDir ??= fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    final File toolStateFile = fs.file(
-      fs.path.join(configDir.path, '.flutter_tool_state'));
+    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    final File toolStateFile = globals.fs.file(
+      globals.fs.path.join(configDir.path, '.flutter_tool_state'));
     return PersistentToolState(toolStateFile);
   }
 
@@ -90,7 +92,8 @@ void testUsingContext(
       return context.run<dynamic>(
         name: 'mocks',
         overrides: <Type, Generator>{
-          Config: () => buildConfig(fs),
+          AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
+          Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(),
           FlutterVersion: () => MockFlutterVersion(),
@@ -101,9 +104,12 @@ void testUsingContext(
             return mock;
           },
           OutputPreferences: () => OutputPreferences.test(),
-          Logger: () => BufferLogger(),
+          Logger: () => BufferLogger(
+            terminal: globals.terminal,
+            outputPreferences: outputPreferences,
+          ),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-          PersistentToolState: () => buildPersistentToolState(fs),
+          PersistentToolState: () => buildPersistentToolState(globals.fs),
           SimControl: () => MockSimControl(),
           Usage: () => FakeUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
@@ -111,7 +117,8 @@ void testUsingContext(
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
-          Pub: () => ThrowingPub() // prevent accidentally using pub.
+          Pub: () => ThrowingPub(), // prevent accidentally using pub.
+          GitHubTemplateCreator: () => MockGitHubTemplateCreator(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -149,7 +156,7 @@ void testUsingContext(
 
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
-    final BufferLogger bufferLogger = testContext.get<Logger>();
+    final BufferLogger bufferLogger = testContext.get<Logger>() as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
       print(bufferLogger.errorText);
     }
@@ -393,6 +400,8 @@ class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
+class MockGitHubTemplateCreator extends Mock implements GitHubTemplateCreator {}
+
 class FakePlistParser implements PlistParser {
   @override
   Map<String, dynamic> parseFile(String plistFilePath) => const <String, dynamic>{};
@@ -406,10 +415,10 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 
   @override
   set currentDirectory(dynamic value) {
-    throw 'fs.currentDirectory should not be set on the local file system during '
+    throw 'globals.fs.currentDirectory should not be set on the local file system during '
           'tests as this can cause race conditions with concurrent tests. '
           'Consider using a MemoryFileSystem for testing if possible or refactor '
-          'code to not require setting fs.currentDirectory.';
+          'code to not require setting globals.fs.currentDirectory.';
   }
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,9 @@ import 'platform_channel.dart';
 
 /// Platform channels used by the Flutter system.
 class SystemChannels {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   SystemChannels._();
 
   /// A JSON [MethodChannel] for navigation.
@@ -22,25 +25,22 @@ class SystemChannels {
   ///  * `pushRoute`, which is called with a single string argument when the
   ///    operating system instructs the application to open a particular page.
   ///
-  /// See also:
-  ///
-  ///  * [WidgetsBindingObserver.didPopRoute] and
-  ///    [WidgetsBindingObserver.didPushRoute], which expose this channel's
-  ///    methods.
-  ///
   /// The following methods are used for the opposite direction data flow. The
   /// framework notifies the engine about the route changes.
   ///
   ///  * `routePushed`, which is called when a route is pushed. (e.g. A modal
-  ///  replaces the entire screen.)
+  ///    replaces the entire screen.)
   ///
   ///  * `routePopped`, which is called when a route is popped. (e.g. A dialog,
-  ///  such as time picker is closed.)
+  ///    such as time picker is closed.)
   ///
   ///  * `routeReplaced`, which is called when a route is replaced.
   ///
   /// See also:
   ///
+  ///  * [WidgetsBindingObserver.didPopRoute] and
+  ///    [WidgetsBindingObserver.didPushRoute], which expose this channel's
+  ///    methods.
   ///  * [Navigator] which manages transitions from one page to another.
   ///    [Navigator.push], [Navigator.pushReplacement], [Navigator.pop] and
   ///    [Navigator.replace], utilize this channel's methods to send route
@@ -251,7 +251,9 @@ class SystemChannels {
 
   /// A [MethodChannel] for controlling platform views.
   ///
-  /// See also: [PlatformViewsService] for the available operations on this channel.
+  /// See also:
+  ///
+  ///  * [PlatformViewsService] for the available operations on this channel.
   static const MethodChannel platform_views = MethodChannel(
     'flutter/platform_views',
     StandardMethodCodec(),

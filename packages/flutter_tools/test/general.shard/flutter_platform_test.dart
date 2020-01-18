@@ -1,17 +1,17 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:meta/meta.dart';
 
+import 'package:platform/platform.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test_core/backend.dart';
+import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -51,7 +51,7 @@ void main() {
         final VerificationResult toVerify = verify(mockProcessManager.start(any, environment: captureAnyNamed('environment')));
         expect(toVerify.captured, hasLength(1));
         expect(toVerify.captured.first, isInstanceOf<Map<String, String>>());
-        return toVerify.captured.first;
+        return toVerify.captured.first as Map<String, String>;
       }
 
       testUsingContext('as true when not originally set', () async {

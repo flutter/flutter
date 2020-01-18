@@ -1,8 +1,9 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,7 +30,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     FadeTransition widget2Opacity =
-        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(FadeTransition);
+        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
@@ -53,7 +54,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     widget2Opacity =
-        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(FadeTransition);
+        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.
@@ -94,7 +95,7 @@ void main() {
     Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final RenderDecoratedBox box = tester.element(find.byKey(page2Key))
-        .ancestorRenderObjectOfType(const TypeMatcher<RenderDecoratedBox>());
+        .findAncestorRenderObjectOfType<RenderDecoratedBox>();
 
     // Page 1 is moving to the left.
     expect(widget1TransientTopLeft.dx < widget1InitialTopLeft.dx, true);
@@ -784,5 +785,33 @@ void main() {
     await tester.tap(find.byKey(homeScaffoldKey));
     expect(homeTapCount, 2);
     expect(pageTapCount, 1);
+  });
+
+  testWidgets('On iOS, a MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/44864.
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title')),
+        ),
+      ),
+    );
+
+    final Offset titleInitialTopLeft = tester.getTopLeft(find.text('Title'));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push<void>(
+      CupertinoPageRoute<void>(builder: (BuildContext context) => const Placeholder()),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    final Offset titleTransientTopLeft = tester.getTopLeft(find.text('Title'));
+
+    // Title of the first route slides to the left.
+    expect(titleInitialTopLeft.dy, equals(titleTransientTopLeft.dy));
+    expect(titleInitialTopLeft.dx, greaterThan(titleTransientTopLeft.dx));
   });
 }

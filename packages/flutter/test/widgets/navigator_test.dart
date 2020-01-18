@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,6 +12,7 @@ import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
 class FirstWidget extends StatelessWidget {
+  const FirstWidget({ Key key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -27,6 +28,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatefulWidget {
+  const SecondWidget({ Key key }) : super(key: key);
   @override
   SecondWidgetState createState() => SecondWidgetState();
 }
@@ -47,7 +49,7 @@ class SecondWidgetState extends State<SecondWidget> {
 typedef ExceptionCallback = void Function(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
-  const ThirdWidget({ this.targetKey, this.onException });
+  const ThirdWidget({ Key key, this.targetKey, this.onException }) : super(key: key);
 
   final Key targetKey;
   final ExceptionCallback onException;
@@ -94,8 +96,8 @@ class OnTapPage extends StatelessWidget {
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(), // X
-      '/second': (BuildContext context) => SecondWidget(), // Y
+      '/': (BuildContext context) => const FirstWidget(), // X
+      '/second': (BuildContext context) => const SecondWidget(), // Y
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -255,42 +257,42 @@ void main() {
     expect(log, equals(<String>['left']));
   });
 
-  // This test doesn't work because the testing framework uses a fake version of
-  // the pointer event dispatch loop.
-  //
-  // TODO(abarth): Test more of the real code and enable this test.
-  // See https://github.com/flutter/flutter/issues/4771.
-  //
-  // testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
-  //   List<String> log = <String>[];
-  //   final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  //     '/': (BuildContext context) {
-  //       return new Row(
-  //         children: <Widget>[
-  //           new GestureDetector(
-  //             onTap: () {
-  //               log.add('left');
-  //               Navigator.pushNamed(context, '/second');
-  //             },
-  //             child: new Text('left')
-  //           ),
-  //           new GestureDetector(
-  //             onTap: () { log.add('right'); },
-  //             child: new Text('right')
-  //           ),
-  //         ]
-  //       );
-  //     },
-  //     '/second': (BuildContext context) => new Container(),
-  //   };
-  //   await tester.pumpWidget(new MaterialApp(routes: routes));
-  //   TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
-  //   expect(log, isEmpty);
-  //   await tester.tap(find.text('left'));
-  //   expect(log, equals(<String>['left']));
-  //   await gesture.up();
-  //   expect(log, equals(<String>['left']));
-  // });
+   testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
+     final List<String> log = <String>[];
+     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+       '/': (BuildContext context) {
+         return Row(
+           children: <Widget>[
+             GestureDetector(
+               onTap: () {
+                 log.add('left');
+                 Navigator.pushNamed(context, '/second');
+               },
+               child: const Text('left')
+             ),
+             GestureDetector(
+               onTap: () { log.add('right'); },
+               child: const Text('right'),
+             ),
+           ]
+         );
+       },
+       '/second': (BuildContext context) => Container(),
+     };
+     await tester.pumpWidget(MaterialApp(routes: routes));
+     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
+     expect(log, isEmpty);
+     await tester.tap(find.text('left'));
+     expect(log, equals(<String>['left']));
+     await gesture.up();
+     expect(log, equals(<String>['left']));
+
+     // This test doesn't work because it relies on part of the pointer event
+     // dispatching mechanism that is mocked out in testing. We should use the real
+     // mechanism even during testing and enable this test.
+     // TODO(abarth): Test more of the real code and enable this test.
+     // See https://github.com/flutter/flutter/issues/4771.
+   }, skip: true);
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -510,8 +512,8 @@ void main() {
 
     final TestObserver observer = TestObserver()
       ..onRemoved = (Route<dynamic> route, Route<dynamic> previous) {
-        removedRoute = route;
-        previousRoute = previous;
+        removedRoute = route as Route<String>;
+        previousRoute = previous as Route<String>;
       };
 
     await tester.pumpWidget(MaterialApp(
@@ -1044,7 +1046,7 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
       expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(
@@ -1071,7 +1073,7 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
       expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(
