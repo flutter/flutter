@@ -331,6 +331,40 @@ String _pathToSvgClipPath(ui.Path path,
   return sb.toString();
 }
 
+/// Converts color to a css compatible attribute value.
+String colorToCssString(ui.Color color) {
+  if (color == null) {
+    return null;
+  }
+  final int value = color.value;
+  if ((0xff000000 & value) == 0xff000000) {
+    return _colorToCssStringRgbOnly(color);
+  } else {
+    final double alpha = ((value >> 24) & 0xFF) / 255.0;
+    final StringBuffer sb = StringBuffer();
+    sb.write('rgba(');
+    sb.write(((value >> 16) & 0xFF).toString());
+    sb.write(',');
+    sb.write(((value >> 8) & 0xFF).toString());
+    sb.write(',');
+    sb.write((value & 0xFF).toString());
+    sb.write(',');
+    sb.write(alpha.toString());
+    sb.write(')');
+    return sb.toString();
+  }
+}
+
+/// Returns the CSS value of this color without the alpha component.
+///
+/// This is useful when painting shadows as on the Web shadow opacity combines
+/// with the paint opacity.
+String _colorToCssStringRgbOnly(ui.Color color) {
+  final int value = color.value;
+  final String paddedValue = '00000${value.toRadixString(16)}';
+  return '#${paddedValue.substring(paddedValue.length - 6)}';
+}
+
 /// Determines if the (dynamic) exception passed in is a NS_ERROR_FAILURE
 /// (from Firefox).
 ///

@@ -677,7 +677,7 @@ class PaintDrawColor extends PaintCommand {
 
   @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
-    serializedCommands.add(<dynamic>[11, color.toCssString(), blendMode.index]);
+    serializedCommands.add(<dynamic>[11, colorToCssString(color), blendMode.index]);
   }
 }
 
@@ -1086,7 +1086,7 @@ List<dynamic> _serializePaintToCssPaint(SurfacePaintData paint) {
     paint.strokeWidth,
     paint.strokeCap?.index,
     paint.isAntiAlias,
-    paint.color.toCssString(),
+    colorToCssString(paint.color),
     engineShader?.webOnlySerializeToCssPaint(),
     paint.maskFilter?.webOnlySerializeToCssPaint(),
     paint.filterQuality?.index,

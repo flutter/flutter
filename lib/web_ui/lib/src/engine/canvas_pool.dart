@@ -370,7 +370,7 @@ class _CanvasPool extends _SaveStackTracking {
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
     html.CanvasRenderingContext2D ctx = context;
     contextHandle.blendMode = blendMode;
-    contextHandle.fillStyle = color.toCssString();
+    contextHandle.fillStyle = colorToCssString(color);
     contextHandle.strokeStyle = '';
     ctx.beginPath();
     // Fill a virtually infinite rect with the color.
@@ -509,7 +509,7 @@ class _CanvasPool extends _SaveStackTracking {
           context.filter = _maskFilterToCss(
               ui.MaskFilter.blur(ui.BlurStyle.normal, shadow.blur));
           context.strokeStyle = '';
-          context.fillStyle = shadow.color.toCssString();
+          context.fillStyle = colorToCssString(shadow.color);
           _runPath(context, path);
           context.fill();
           context.restore();
@@ -525,9 +525,9 @@ class _CanvasPool extends _SaveStackTracking {
           context.save();
           context.filter = 'none';
           context.strokeStyle = '';
-          context.fillStyle = shadow.color.toCssString();
+          context.fillStyle = colorToCssString(shadow.color);
           context.shadowBlur = shadow.blur;
-          context.shadowColor = shadow.color.withAlpha(0xff).toCssString();
+          context.shadowColor = colorToCssString(shadow.color.withAlpha(0xff));
           context.shadowOffsetX = shadow.offsetX;
           context.shadowOffsetY = shadow.offsetY;
           _runPath(context, path);

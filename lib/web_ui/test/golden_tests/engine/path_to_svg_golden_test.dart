@@ -132,11 +132,11 @@ html.Element pathToSvgElement(Path path, Paint paint) {
       '<svg viewBox="0 0 ${bounds.right} ${bounds.bottom}" width="${bounds.right}" height="${bounds.bottom}">');
   sb.write('<path ');
   if (paint.style == PaintingStyle.stroke) {
-    sb.write('stroke="${paint.color.toCssString()}" ');
+    sb.write('stroke="${colorToCssString(paint.color)}" ');
     sb.write('stroke-width="${paint.strokeWidth}" ');
   }
   if (paint.style == PaintingStyle.fill) {
-    sb.write('fill="${paint.color.toCssString()}" ');
+    sb.write('fill="${colorToCssString(paint.color)}" ');
   }
   sb.write('d="');
   pathToSvg(path, sb); // This is what we're testing!
