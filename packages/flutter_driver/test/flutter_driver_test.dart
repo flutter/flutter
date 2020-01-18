@@ -693,7 +693,7 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      driver = WebFlutterDriver.connectedTo(mockConnection, Browser.chrome);
+      driver = WebFlutterDriver.connectedTo(mockConnection, true);
     });
 
     test('closes connection', () async {
@@ -1032,7 +1032,7 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      driver = WebFlutterDriver.connectedTo(mockConnection, Browser.edge);
+      driver = WebFlutterDriver.connectedTo(mockConnection, false);
     });
 
     test('tracing', () async {

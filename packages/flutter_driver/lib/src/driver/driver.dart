@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
@@ -91,13 +92,13 @@ abstract class FlutterDriver {
   @visibleForTesting
   factory FlutterDriver.connectedTo({
     FlutterWebConnection webConnection,
-    Browser browser,
+    bool supportTimelineAction,
     VMServiceClient serviceClient,
     rpc.Peer peer,
     VMIsolate appIsolate,
   }) {
-    if (webConnection != null && browser != null) {
-      return WebFlutterDriver.connectedTo(webConnection, browser);
+    if (webConnection != null && supportTimelineAction != null) {
+      return WebFlutterDriver.connectedTo(webConnection, supportTimelineAction);
     }
     return VMServiceFlutterDriver.connectedTo(serviceClient, peer, appIsolate);
   }
@@ -140,11 +141,9 @@ abstract class FlutterDriver {
     bool logCommunicationToFile = true,
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
-    bool browser = false,
     Duration timeout,
   }) async {
-
-    if (browser) {
+    if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
       return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
     }
     return VMServiceFlutterDriver.connect(
@@ -561,7 +560,9 @@ abstract class FlutterDriver {
   ///        In practice, sometimes the device gets really busy for a while and
   ///        even two seconds isn't enough, which means that this is still racy
   ///        and a source of flakes.
-  Future<List<int>> screenshot() => throw UnimplementedError();
+  Future<List<int>> screenshot() {
+    throw UnimplementedError();
+  }
 
   /// Returns the Flags set in the Dart VM as JSON.
   ///
@@ -584,8 +585,9 @@ abstract class FlutterDriver {
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
-  Future<List<Map<String, dynamic>>> getVmFlags() => throw UnimplementedError();
-
+  Future<List<Map<String, dynamic>>> getVmFlags() {
+    throw UnimplementedError();
+  }
   /// Starts recording performance traces.
   ///
   /// The `timeout` argument causes a warning to be displayed to the user if the
@@ -596,7 +598,9 @@ abstract class FlutterDriver {
   Future<void> startTracing({
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     Duration timeout = kUnusuallyLongTimeout,
-  }) => throw UnimplementedError();
+  }) {
+    throw UnimplementedError();
+  }
 
   /// Stops recording performance traces and downloads the timeline.
   ///
@@ -607,8 +611,9 @@ abstract class FlutterDriver {
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<Timeline> stopTracingAndDownloadTimeline({
     Duration timeout = kUnusuallyLongTimeout,
-  }) => throw UnimplementedError();
-
+  }) {
+    throw UnimplementedError();
+  }
   /// Runs [action] and outputs a performance trace for it.
   ///
   /// Waits for the `Future` returned by [action] to complete prior to stopping
@@ -632,7 +637,9 @@ abstract class FlutterDriver {
     Future<dynamic> action(), {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     bool retainPriorEvents = false,
-  }) => throw UnimplementedError();
+  }) {
+    throw UnimplementedError();
+  }
 
   /// Clears all timeline events recorded up until now.
   ///
@@ -643,8 +650,9 @@ abstract class FlutterDriver {
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<void> clearTimeline({
     Duration timeout = kUnusuallyLongTimeout,
-  }) => throw UnimplementedError();
-
+  }) {
+    throw UnimplementedError();
+  }
   /// [action] will be executed with the frame sync mechanism disabled.
   ///
   /// By default, Flutter Driver waits until there is no pending frame scheduled
@@ -675,12 +683,16 @@ abstract class FlutterDriver {
   /// Force a garbage collection run in the VM.
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
-  Future<void> forceGC() => throw UnimplementedError();
+  Future<void> forceGC() {
+    throw UnimplementedError();
+  }
 
   /// Closes the underlying connection to the VM service.
   ///
   /// Returns a [Future] that fires once the connection has been closed.
-  Future<void> close() => throw UnimplementedError();
+  Future<void> close() {
+    throw UnimplementedError();
+  }
 }
 
 /// Provides convenient accessors to frequently used finders.

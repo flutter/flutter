@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
@@ -17,9 +16,6 @@ import '../common/error.dart';
 import '../common/message.dart';
 import 'driver.dart';
 import 'timeline.dart';
-import 'web_driver_config.dart';
-
-export 'web_driver_config.dart';
 
 /// An implementation of the Flutter Driver using the WebDriver.
 ///
@@ -31,11 +27,11 @@ export 'web_driver_config.dart';
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_connection] and [_browserName].
-  WebFlutterDriver.connectedTo(this._connection, this._browser) :
+  WebFlutterDriver.connectedTo(this._connection, this._browserSupportsTimeline) :
         _startTime = DateTime.now();
 
   final FlutterWebConnection _connection;
-  final Browser _browser;
+  final bool _browserSupportsTimeline;
   DateTime _startTime;
 
   /// Start time for tracing
@@ -55,16 +51,16 @@ class WebFlutterDriver extends FlutterDriver {
   static Future<FlutterDriver> connectWeb(
       {String hostUrl, Duration timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
-    final Browser browser = browserNameToEnum(Platform.environment['BROWSER_NAME']);
+    final bool browserSupportsTimeline = Platform.environment['BROWSER_SUPPORTS_TIMELINE'] == 'true';
     final Map<String, dynamic> settings = <String, dynamic>{
-      'browser': browser,
-      'browser-dimension': Platform.environment['BROWSER_DIMENSION'],
-      'headless': Platform.environment['HEADLESS']?.toLowerCase() == 'true',
-      'selenium-port': Platform.environment['SELENIUM_PORT'],
+      'session-id': Platform.environment['DRIVER_SESSION_ID'],
+      'session-uri': Platform.environment['DRIVER_SESSION_URI'],
+      'session-spec': Platform.environment['DRIVER_SESSION_SPEC'],
+      'session-capabilities': Platform.environment['DRIVER_SESSION_CAPABILITIES'],
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
       (hostUrl, settings, timeout: timeout);
-    return WebFlutterDriver.connectedTo(connection, browser);
+    return WebFlutterDriver.connectedTo(connection, browserSupportsTimeline);
   }
 
   @override
@@ -160,8 +156,8 @@ class WebFlutterDriver extends FlutterDriver {
 
   /// Checks whether browser supports Timeline related operations
   void _checkBrowserSupportsTimeline() {
-    if (_browser != Browser.chrome) {
-      throw UnimplementedError();
+    if (_browserSupportsTimeline) {
+      throw UnsupportedError('Timeline action is not supported by current testing browser');
     }
   }
 }
@@ -181,10 +177,12 @@ class FlutterWebConnection {
       {Duration timeout}) async {
     // Use sync WebDriver because async version will create a 15 seconds
     // overhead when quitting.
-    final sync_io.WebDriver driver = createDriver(settings);
+    final sync_io.WebDriver driver = sync_io.fromExistingSession(
+        settings['session-id'].toString(),
+        uri: Uri.parse(settings['session-uri'].toString()),
+        spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()),
+        capabilities: <String, dynamic>{} ); //jsonDecode(settings['session-capabilities'].toString()) as Map<String, dynamic>
     driver.get(url);
-
-    setDriverLocationAndDimension(driver, settings);
 
     await waitUntilExtensionInstalled(driver, timeout);
     return FlutterWebConnection(driver);
@@ -224,24 +222,7 @@ class FlutterWebConnection {
 
   /// Closes the WebDriver.
   Future<void> close() async {
-    _driver.quit();
-  }
-}
-
-/// Configures the location and dimension of WebDriver.
-void setDriverLocationAndDimension(sync_io.WebDriver driver, Map<String, dynamic> settings) {
-  final List<String> dimensions = settings['browser-dimension'].split(',') as List<String>;
-  if (dimensions.length != 2) {
-    throw DriverError('Invalid browser window size.');
-  }
-  final int x = int.parse(dimensions[0]);
-  final int y = int.parse(dimensions[1]);
-  final sync_io.Window window = driver.window;
-  try {
-    window.setLocation(const math.Point<int>(0, 0));
-    window.setSize(math.Rectangle<int>(0, 0, x, y));
-  } catch (_) {
-    // Error might be thrown in some browsers.
+    _driver.quit(closeSession: false);
   }
 }
 
@@ -251,4 +232,15 @@ Future<void> waitUntilExtensionInstalled(sync_io.WebDriver driver, Duration time
       driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
       matcher: 'function',
       timeout: timeout ?? const Duration(days: 365));
+}
+
+sync_io.WebDriverSpec _convertToSpec(String specString) {
+  switch (specString.toLowerCase()) {
+    case 'webdriverspec.w3c':
+      return sync_io.WebDriverSpec.W3c;
+    case 'webdriverspec.jsonwire':
+      return sync_io.WebDriverSpec.JsonWire;
+    default:
+      return sync_io.WebDriverSpec.Auto;
+  }
 }

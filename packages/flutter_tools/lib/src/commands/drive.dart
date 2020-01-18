@@ -3,6 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:flutter_tools/src/convert.dart';
+import 'package:webdriver/sync_io.dart' as sync_io;
+import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -163,11 +168,41 @@ class DriveCommand extends RunCommandBase {
 
     final Map<String, String> environment = <String, String>{
       'VM_SERVICE_URL': observatoryUri,
-      'SELENIUM_PORT': argResults['driver-port'].toString(),
-      'BROWSER_NAME': argResults['browser-name'].toString(),
-      'BROWSER_DIMENSION': argResults['browser-dimension'].toString(),
-      'HEADLESS': argResults['headless'].toString(),
     };
+
+    sync_io.WebDriver driver;
+    if (device.isWebDevice) {
+      // start WebDriver
+      final _Browser browser = _browserNameToEnum(argResults['browser-name'].toString());
+      driver = _createDriver(
+        argResults['driver-port'].toString(),
+        browser,
+        argResults['headless'].toString() == 'true',
+      );
+
+      // set window size
+      final List<String> dimensions = argResults['browser-dimension'].split(',') as List<String>;
+      assert(dimensions.length == 2);
+      final int x = int.parse(dimensions[0]);
+      final int y = int.parse(dimensions[1]);
+      final sync_io.Window window = driver.window;
+      try {
+        window.setLocation(const math.Point<int>(0, 0));
+        window.setSize(math.Rectangle<int>(0, 0, x, y));
+      } catch (_) {
+       // Error might be thrown in some browsers.
+      }
+
+      // add driver info to environment variables
+      environment.addAll(<String, String> {
+        'DRIVER_SESSION_ID': driver.id,
+        'DRIVER_SESSION_URI': driver.uri.toString(),
+        'DRIVER_SESSION_SPEC': driver.spec.toString(),
+        'DRIVER_SESSION_CAPABILITIES': jsonEncode(driver.capabilities),
+        'BROWSER_SUPPORTS_TIMELINE': (browser == _Browser.chrome).toString(),
+        'FLUTTER_WEB_TEST': 'true',
+      });
+    }
 
     try {
       await testRunner(<String>[testFile], environment);
@@ -177,6 +212,7 @@ class DriveCommand extends RunCommandBase {
       }
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
+      driver?.quit();
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         globals.printStatus('Leaving the application running.');
       } else {
@@ -367,4 +403,118 @@ Future<bool> _stopApp(DriveCommand command) async {
   final bool stopped = await command.device.stopApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;
+}
+
+/// A list of supported browsers
+enum _Browser {
+  /// Chrome: https://www.google.com/chrome/
+  chrome,
+  /// Edge: https://www.microsoft.com/en-us/windows/microsoft-edge
+  edge,
+  /// Firefox: https://www.mozilla.org/en-US/firefox/
+  firefox,
+  /// Safari in iOS: https://www.apple.com/safari/
+  iosSafari,
+  /// Safari in macOS: https://www.apple.com/safari/
+  safari,
+}
+
+/// Converts [browserName] string to [_Browser]
+_Browser _browserNameToEnum(String browserName){
+  switch (browserName) {
+    case 'chrome': return _Browser.chrome;
+    case 'edge': return _Browser.edge;
+    case 'firefox': return _Browser.firefox;
+    case 'ios-safari': return _Browser.iosSafari;
+    case 'safari': return _Browser.safari;
+  }
+  throw UnsupportedError('Browser $browserName not supported');
+}
+
+sync_io.WebDriver _createDriver(String driverPort, _Browser browser, bool headless) {
+  return sync_io.createDriver(
+      uri: Uri.parse('http://localhost:$driverPort/wd/hub/'),
+      desired: getDesiredCapabilities(browser, headless),
+      spec: browser != _Browser.iosSafari ? sync_io.WebDriverSpec.JsonWire : sync_io.WebDriverSpec.W3c
+  );
+}
+
+/// Returns desired capabilities for given [browser] and [headless].
+@visibleForTesting
+Map<String, dynamic> getDesiredCapabilities(_Browser browser, bool headless) {
+  switch (browser) {
+    case _Browser.chrome:
+      return <String, dynamic>{
+        'acceptInsecureCerts': true,
+        'browserName': 'chrome',
+        'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
+        'chromeOptions': <String, dynamic>{
+          'w3c': false,
+          'args': <String>[
+            '--bwsi',
+            '--disable-background-timer-throttling',
+            '--disable-default-apps',
+            '--disable-extensions',
+            '--disable-popup-blocking',
+            '--disable-translate',
+            '--no-default-browser-check',
+            '--no-sandbox',
+            '--no-first-run',
+            if (headless) '--headless'
+          ],
+          'perfLoggingPrefs': <String, String>{
+            'traceCategories':
+            'devtools.timeline,'
+                'v8,blink.console,benchmark,blink,'
+                'blink.user_timing'
+          }
+        }
+      };
+      break;
+    case _Browser.firefox:
+      return <String, dynamic>{
+        'acceptInsecureCerts': true,
+        'browserName': 'firefox',
+        'moz:firefoxOptions' : <String, dynamic>{
+          'args': <String>[
+            if (headless) '-headless'
+          ],
+          'prefs': <String, dynamic>{
+            'dom.file.createInChild': true,
+            'dom.timeout.background_throttling_max_budget': -1,
+            'media.autoplay.default': 0,
+            'media.gmp-manager.url': '',
+            'media.gmp-provider.enabled': false,
+            'network.captive-portal-service.enabled': false,
+            'security.insecure_field_warning.contextual.enabled': false,
+            'test.currentTimeOffsetSeconds': 11491200
+          },
+          'log': <String, String>{'level': 'trace'}
+        }
+      };
+      break;
+    case _Browser.edge:
+      return <String, dynamic>{
+        'acceptInsecureCerts': true,
+        'browserName': 'edge',
+      };
+      break;
+    case _Browser.safari:
+      return <String, dynamic>{
+        'browserName': 'safari',
+        'safari.options': <String, dynamic>{
+          'skipExtensionInstallation': true,
+          'cleanSession': true
+        }
+      };
+      break;
+    case _Browser.iosSafari:
+      return <String, dynamic>{
+        'platformName': 'ios',
+        'browserName': 'safari',
+        'safari:useSimulator': true
+      };
+    default:
+      throw UnsupportedError('Browser $browser not supported.');
+  }
 }

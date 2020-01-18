@@ -32,6 +32,7 @@ dependencies:
   stream_channel: 2.0.0
   usage: 3.4.1
   vm_service_client: 0.2.6+2
+  webdriver: 2.1.1
   web_socket_channel: 1.1.0
   webkit_inspection_protocol: 0.5.0
   xml: 3.5.0

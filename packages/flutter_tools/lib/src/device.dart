@@ -423,6 +423,9 @@ abstract class Device {
   /// Whether the device supports the '--fast-start' development mode.
   bool get supportsFastStart => false;
 
+  /// Whether the device is a web-platform device.
+  bool get isWebDevice => false;
+
   /// Stop an app package on the current device.
   Future<bool> stopApp(covariant ApplicationPackage app);
 
