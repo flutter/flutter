@@ -21,7 +21,7 @@ void main() {
 
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    final List<Element> icons = find.byWidgetPredicate((widget) => widget is Icon).evaluate().toList();
+    final List<Element> icons = find.byWidgetPredicate((Widget widget) => widget is Icon).evaluate().toList();
 
     await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: icons)));
   });
@@ -34,7 +34,7 @@ void main() {
 
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    final List<Element> elements = find.byWidgetPredicate((widget) => widget is Icon).evaluate().toList();
+    final List<Element> elements = find.byWidgetPredicate((Widget widget) => widget is Icon).evaluate().toList();
 
     await expectLater(tester, meetsGuideline(CustomContrastGuideline(elements: elements)));
   });
