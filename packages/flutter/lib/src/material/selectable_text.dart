@@ -495,6 +495,9 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
     if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
       return false;
 
+    if (cause == SelectionChangedCause.drag)
+      return true;
+
     if (_controller.selection.isCollapsed)
       return false;
 
