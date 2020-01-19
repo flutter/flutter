@@ -874,8 +874,8 @@ void main() {
             builder: (BuildContext context) {
               return RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<dynamic>(
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
                           key: containerKey,
@@ -924,8 +924,8 @@ void main() {
             builder: (BuildContext context) {
               return RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    ModifiedReverseTransitionDurationRoute<dynamic>(
+                  Navigator.of(context).push<void>(
+                    ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
                           key: containerKey,
@@ -983,8 +983,8 @@ void main() {
             builder: (BuildContext context) {
               return RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    ModifiedReverseTransitionDurationRoute<dynamic>(
+                  Navigator.of(context).push<void>(
+                    ModifiedReverseTransitionDurationRoute<void>(
                       builder: (BuildContext innerContext) {
                         return Container(
                           key: containerKey,

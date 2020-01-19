@@ -1049,7 +1049,7 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
       if (_isPlatformBrightnessDependent && _isHighContrastDependent && _isInterfaceElevationDependent) toString('darkHighContrastElevatedColor', darkHighContrastElevatedColor),
     ];
 
-    return '${_debugLabel ?? runtimeType.toString()}(${xs.join(', ')}, resolved by: ${_debugResolveContext?.widget ?? "UNRESOLVED"})';
+    return '${_debugLabel ?? objectRuntimeType(this, 'CupertinoDynamicColor')}(${xs.join(', ')}, resolved by: ${_debugResolveContext?.widget ?? "UNRESOLVED"})';
   }
 
   @override
@@ -1086,7 +1086,7 @@ DiagnosticsProperty<Color> createCupertinoColorProperty(
   Color value, {
     bool showName = true,
     Object defaultValue = kNoDefaultValue,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.shallow,
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
     DiagnosticLevel level = DiagnosticLevel.info,
 }) {
   if (value is CupertinoDynamicColor) {

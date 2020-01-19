@@ -1195,7 +1195,7 @@ class TextStyle extends Diagnosticable {
   }
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => '${objectRuntimeType(this, 'TextStyle')}';
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override

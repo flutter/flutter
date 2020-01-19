@@ -88,7 +88,6 @@ class AnalyzeCommand extends FlutterCommand {
         runner.getRepoRoots(),
         runner.getRepoPackages(),
       ).analyze();
-      return null;
     } else {
       await AnalyzeOnce(
         argResults,
@@ -96,7 +95,7 @@ class AnalyzeCommand extends FlutterCommand {
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
       ).analyze();
-      return null;
     }
+    return FlutterCommandResult.success();
   }
 }

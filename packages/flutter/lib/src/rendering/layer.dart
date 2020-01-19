@@ -36,7 +36,7 @@ class AnnotationEntry<T> {
 
   @override
   String toString() {
-    return '$runtimeType(annotation: $annotation, localPostion: $localPosition)';
+    return '${objectRuntimeType(this, 'AnnotationEntry')}(annotation: $annotation, localPostion: $localPosition)';
   }
 }
 

@@ -51,6 +51,6 @@ class BuildMacosCommand extends BuildSubCommand {
       buildInfo: buildInfo,
       targetOverride: targetFile,
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

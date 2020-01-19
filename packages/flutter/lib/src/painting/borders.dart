@@ -267,7 +267,7 @@ class BorderSide {
   int get hashCode => hashValues(color, width, style);
 
   @override
-  String toString() => '$runtimeType($color, ${width.toStringAsFixed(1)}, $style)';
+  String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
 }
 
 /// Base class for shape outlines.
@@ -488,7 +488,7 @@ abstract class ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType()';
+    return '${objectRuntimeType(this, 'ShapeBorder')}()';
   }
 }
 
