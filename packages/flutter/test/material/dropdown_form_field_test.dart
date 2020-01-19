@@ -259,6 +259,14 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
     expect(tester.getTopLeft(find.text('label')).dy, 32.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 48.0);
+    expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dy,
+      tester.getTopLeft(find.text('label')).dy - 32.0
+    ); // Label is lower by 32 pixels than the InputDecorator, in the center of the TextField
+    expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dx,
+      tester.getTopLeft(find.text('label')).dx
+    ); // Label is aligned in x direction with the InputDecorator
 
     // [FormField] value is initially null.
     expect(stateKey.currentState.value, equals(null));
@@ -296,6 +304,14 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(tester.getTopLeft(find.text('three')).dy, 32.0);
     expect(tester.getBottomLeft(find.text('three')).dy, 48.0);
+    expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dy,
+      tester.getTopLeft(find.text('label')).dy - 12.0
+    ); // Label is lower by 12 pixels than the InputDecorator, above the TextField
+    expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dx,
+      tester.getTopLeft(find.text('label')).dx
+    ); // Label is aligned in x direction with the InputDecorator
   });
 
   testWidgets('DropdownButtonFormField InputDecorator label is aligned to center of TextField when alignLabelWithHint is false', (WidgetTester tester) async {
@@ -325,6 +341,14 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
     expect(tester.getTopLeft(find.text('label')).dy, 24.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 40.0);
+    expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dy,
+      tester.getTopLeft(find.text('label')).dy - 24.0
+    ); // Label is lower by 24 pixels than the InputDecorator, below the top border of the TextField
+    expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dx,
+      tester.getTopLeft(find.text('label')).dx
+    ); // Label is aligned in x direction with the InputDecorator
   });
 
   testWidgets('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
