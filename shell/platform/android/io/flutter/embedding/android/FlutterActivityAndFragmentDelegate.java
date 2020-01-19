@@ -175,7 +175,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
       // which means there shouldn't be any possibility for the Fragment Lifecycle to get out of
       // sync with the Activity. We use the Fragment's Lifecycle because it is possible that the
       // attached Activity is not a LifecycleOwner.
-      Log.d(TAG, "Attaching FlutterEngine to the Activity that owns this Fragment.");
+      Log.v(TAG, "Attaching FlutterEngine to the Activity that owns this Fragment.");
       flutterEngine.getActivityControlSurface().attachToActivity(
           host.getActivity(),
           host.getLifecycle()
@@ -200,7 +200,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
    */
   @VisibleForTesting
   /* package */ void setupFlutterEngine() {
-    Log.d(TAG, "Setting up FlutterEngine.");
+    Log.v(TAG, "Setting up FlutterEngine.");
 
     // First, check if the host wants to use a cached FlutterEngine.
     String cachedEngineId = host.getCachedEngineId();
@@ -222,7 +222,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 
     // Our host did not provide a custom FlutterEngine. Create a FlutterEngine to back our
     // FlutterView.
-    Log.d(TAG, "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
+    Log.v(TAG, "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
         + " this FlutterFragment.");
     flutterEngine = new FlutterEngine(host.getContext(), host.getFlutterShellArgs().toArray());
     isFlutterEngineFromHost = false;
@@ -319,7 +319,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
       return;
     }
 
-    Log.d(TAG, "Executing Dart entrypoint: " + host.getDartEntrypointFunctionName()
+    Log.v(TAG, "Executing Dart entrypoint: " + host.getDartEntrypointFunctionName()
         + ", and sending initial route: " + host.getInitialRoute());
 
     // The engine needs to receive the Flutter app's initial route before executing any
@@ -446,7 +446,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 
     if (host.shouldAttachEngineToActivity()) {
       // Notify plugins that they are no longer attached to an Activity.
-      Log.d(TAG, "Detaching FlutterEngine from the Activity that owns this Fragment.");
+      Log.v(TAG, "Detaching FlutterEngine from the Activity that owns this Fragment.");
       if (host.getActivity().isChangingConfigurations()) {
         flutterEngine.getActivityControlSurface().detachFromActivityForConfigChanges();
       } else {

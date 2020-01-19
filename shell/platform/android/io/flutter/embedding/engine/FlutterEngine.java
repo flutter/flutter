@@ -262,7 +262,7 @@ public class FlutterEngine {
    * This {@code FlutterEngine} instance should be discarded after invoking this method.
    */
   public void destroy() {
-    Log.d(TAG, "Destroying.");
+    Log.v(TAG, "Destroying.");
     // The order that these things are destroyed is important.
     pluginRegistry.destroy();
     dartExecutor.onDetachedFromJNI();

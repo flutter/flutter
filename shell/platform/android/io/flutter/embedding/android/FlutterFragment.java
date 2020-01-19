@@ -908,7 +908,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     FragmentActivity attachedActivity = getActivity();
     if (attachedActivity instanceof FlutterEngineProvider) {
       // Defer to the Activity that owns us to provide a FlutterEngine.
-      Log.d(TAG, "Deferring to attached Activity to provide a FlutterEngine.");
+      Log.v(TAG, "Deferring to attached Activity to provide a FlutterEngine.");
       FlutterEngineProvider flutterEngineProvider = (FlutterEngineProvider) attachedActivity;
       flutterEngine = flutterEngineProvider.provideFlutterEngine(getContext());
     }

@@ -582,16 +582,16 @@ public class FlutterView extends FrameLayout {
   public void attachToFlutterEngine(
       @NonNull FlutterEngine flutterEngine
   ) {
-    Log.d(TAG, "Attaching to a FlutterEngine: " + flutterEngine);
+    Log.v(TAG, "Attaching to a FlutterEngine: " + flutterEngine);
     if (isAttachedToFlutterEngine()) {
       if (flutterEngine == this.flutterEngine) {
         // We are already attached to this FlutterEngine
-        Log.d(TAG, "Already attached to this engine. Doing nothing.");
+        Log.v(TAG, "Already attached to this engine. Doing nothing.");
         return;
       }
 
       // Detach from a previous FlutterEngine so we can attach to this new one.
-      Log.d(TAG, "Currently attached to a different engine. Detaching and then attaching"
+      Log.v(TAG, "Currently attached to a different engine. Detaching and then attaching"
           + " to new engine.");
       detachFromFlutterEngine();
     }
@@ -669,9 +669,9 @@ public class FlutterView extends FrameLayout {
    * {@link FlutterEngine}.
    */
   public void detachFromFlutterEngine() {
-    Log.d(TAG, "Detaching from a FlutterEngine: " + flutterEngine);
+    Log.v(TAG, "Detaching from a FlutterEngine: " + flutterEngine);
     if (!isAttachedToFlutterEngine()) {
-      Log.d(TAG, "Not attached to an engine. Doing nothing.");
+      Log.v(TAG, "Not attached to an engine. Doing nothing.");
       return;
     }
 

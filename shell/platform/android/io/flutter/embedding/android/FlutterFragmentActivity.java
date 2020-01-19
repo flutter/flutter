@@ -297,7 +297,7 @@ public class FlutterFragmentActivity extends FragmentActivity
           setTheme(normalThemeRID);
         }
       } else {
-        Log.d(TAG, "Using the launch theme as normal theme.");
+        Log.v(TAG, "Using the launch theme as normal theme.");
       }
     } catch (PackageManager.NameNotFoundException exception) {
       Log.e(TAG, "Could not read meta-data for FlutterFragmentActivity. Using the launch theme as normal theme.");
@@ -417,7 +417,7 @@ public class FlutterFragmentActivity extends FragmentActivity
         : FlutterView.TransparencyMode.transparent;
 
     if (getCachedEngineId() != null) {
-      Log.d(TAG, "Creating FlutterFragment with cached engine:\n"
+      Log.v(TAG, "Creating FlutterFragment with cached engine:\n"
           + "Cached engine ID: " + getCachedEngineId() + "\n"
           + "Will destroy engine when Activity is destroyed: " + shouldDestroyEngineWithHost() + "\n"
           + "Background transparency mode: " + backgroundMode + "\n"
@@ -430,7 +430,7 @@ public class FlutterFragmentActivity extends FragmentActivity
           .destroyEngineWithFragment(shouldDestroyEngineWithHost())
           .build();
     } else {
-      Log.d(TAG, "Creating FlutterFragment with new engine:\n"
+      Log.v(TAG, "Creating FlutterFragment with new engine:\n"
           + "Background transparency mode: " + backgroundMode + "\n"
           + "Dart entrypoint: " + getDartEntrypointFunctionName() + "\n"
           + "Initial route: " + getInitialRoute() + "\n"
