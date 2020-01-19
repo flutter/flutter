@@ -277,7 +277,7 @@ class AssetImage extends AssetBundleImageProvider {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is AssetImage
@@ -289,5 +289,5 @@ class AssetImage extends AssetBundleImageProvider {
   int get hashCode => hashValues(keyName, bundle);
 
   @override
-  String toString() => '$runtimeType(bundle: $bundle, name: "$keyName")';
+  String toString() => '${objectRuntimeType(this, 'AssetImage')}(bundle: $bundle, name: "$keyName")';
 }

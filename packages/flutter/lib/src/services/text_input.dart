@@ -182,14 +182,14 @@ class TextInputType {
 
   @override
   String toString() {
-    return '$runtimeType('
+    return '${objectRuntimeType(this, 'TextInputType')}('
         'name: $_name, '
         'signed: $signed, '
         'decimal: $decimal)';
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is TextInputType
         && other.index == index
         && other.signed == signed
@@ -685,10 +685,10 @@ class TextEditingValue {
   }
 
   @override
-  String toString() => '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
+  String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     return other is TextEditingValue

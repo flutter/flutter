@@ -14,6 +14,12 @@ import '../reporting/reporting.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
+  if (!linuxProject.makeFile.existsSync()) {
+    throwToolExit('No Linux desktop project configured. See '
+      'https://github.com/flutter/flutter/wiki/Desktop-shells#create '
+      'to learn about adding Linux support to a project.');
+  }
+
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 export FLUTTER_ROOT=${Cache.flutterRoot}

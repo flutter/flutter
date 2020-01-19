@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui show lerpDouble;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -110,8 +112,8 @@ class StadiumBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is StadiumBorder
         && other.side == side;
@@ -122,7 +124,7 @@ class StadiumBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side)';
+    return '${objectRuntimeType(this, 'StadiumBorder')}($side)';
   }
 }
 
@@ -257,8 +259,8 @@ class _StadiumToCircleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is _StadiumToCircleBorder
         && other.side == side
@@ -399,8 +401,8 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is _StadiumToRoundedRectangleBorder
         && other.side == side

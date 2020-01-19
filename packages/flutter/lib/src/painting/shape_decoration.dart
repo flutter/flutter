@@ -24,7 +24,7 @@ import 'rounded_rectangle_border.dart';
 /// optionally filling it with a color or a gradient, optionally painting an
 /// image into it, and optionally casting a shadow.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw a white rectangle with a 24-pixel multicolor outline, with the text
@@ -246,10 +246,10 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is ShapeDecoration
         && other.color == color

@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
@@ -81,8 +83,8 @@ class CircleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is CircleBorder
         && other.side == side;
@@ -93,6 +95,6 @@ class CircleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side)';
+    return '${objectRuntimeType(this, 'CircleBorder')}($side)';
   }
 }

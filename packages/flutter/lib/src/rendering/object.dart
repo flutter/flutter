@@ -615,7 +615,7 @@ class PaintingContext extends ClipContext {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
+  String toString() => '${objectRuntimeType(this, 'PaintingContext')}#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
 }
 
 /// An abstract set of layout constraints.
@@ -2410,7 +2410,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// asynchronous computation) will at best have no useful effect and at worse
   /// will cause crashes as the data will be in an inconsistent state.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following snippet will describe the node as a button that responds to
   /// tap actions.

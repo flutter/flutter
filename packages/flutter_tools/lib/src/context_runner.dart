@@ -22,7 +22,6 @@ import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
-import 'base/utils.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -73,11 +72,18 @@ Future<T> runInContext<T>(
       AndroidValidator: () => AndroidValidator(),
       AndroidWorkflow: () => AndroidWorkflow(),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
-      Artifacts: () => CachedArtifacts(),
+      Artifacts: () => CachedArtifacts(
+        fileSystem: globals.fs,
+        cache: globals.cache,
+        platform: globals.platform,
+      ),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
-      BotDetector: () => const BotDetector(),
       BuildSystem: () => const BuildSystem(),
-      Cache: () => Cache(),
+      Cache: () => Cache(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
@@ -108,20 +114,26 @@ Future<T> runInContext<T>(
             stdio: globals.stdio,
             outputPreferences: outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
+            platform: globals.platform,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
+            platform: globals.platform,
           ),
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
       PersistentToolState: () => PersistentToolState(),
       ProcessInfo: () => ProcessInfo(),
-      ProcessUtils: () => ProcessUtils(),
+      ProcessUtils: () => ProcessUtils(
+        processManager: globals.processManager,
+        logger: globals.logger,
+      ),
       Pub: () => const Pub(),
+      ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),

@@ -1138,7 +1138,7 @@ abstract class CustomClipper<T> {
   bool shouldReclip(covariant CustomClipper<T> oldClipper);
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => '${objectRuntimeType(this, 'CustomClipper')}';
 }
 
 /// A [CustomClipper] that clips to the outer path of a [ShapeBorder].
@@ -2472,6 +2472,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
       return;
     _translation = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   @override
@@ -2907,7 +2908,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   /// will give you a 1:1 mapping between logical pixels and the output pixels
   /// in the image.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following is an example of how to go from a `GlobalKey` on a
   /// `RepaintBoundary` to a PNG:

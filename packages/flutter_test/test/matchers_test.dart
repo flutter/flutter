@@ -709,7 +709,7 @@ class _CustomColor extends Color {
   bool isEqual;
 
   @override
-  bool operator ==(dynamic other) => isEqual ?? super == other;
+  bool operator ==(Object other) => isEqual ?? super == other;
 
   @override
   int get hashCode => hashValues(super.hashCode, isEqual);

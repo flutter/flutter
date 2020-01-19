@@ -190,10 +190,21 @@ void main() {
           'navLargeTitleTextStyle',
           'navActionTextStyle',
           'pickerTextStyle',
-          'dateTimePickerTextStyle'
+          'dateTimePickerTextStyle',
         }
       ),
       isTrue,
+    );
+  });
+
+  testWidgets('CupertinoTheme.toStringDeep uses single-line style', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/47651.
+    expect(
+      const CupertinoTheme(
+        data: CupertinoThemeData(primaryColor: Color(0x00000000)),
+        child: SizedBox(),
+      ).toStringDeep().trimRight(),
+      isNot(contains('\n')),
     );
   });
 

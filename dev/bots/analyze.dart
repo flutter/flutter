@@ -44,6 +44,9 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  print('$clock runtimeType in toString...');
+  await verifyNoRuntimeTypeInToString(flutterRoot);
+
   print('$clock Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
 
@@ -435,6 +438,22 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
       );
     }
   }
+
+  for (final String key in dependencyMap.keys) {
+    for (final String dependency in dependencyMap[key]) {
+      if (dependencyMap[dependency] != null)
+        continue;
+      // Sanity check before performing _deepSearch, to ensure there's no rogue
+      // dependencies.
+      final String validFilenames = dependencyMap.keys.map((String name) => name + '.dart').join(', ');
+      errors.add(
+        '$key imported package:flutter/$dependency.dart '
+        'which is not one of the valid exports { $validFilenames }.\n'
+        'Consider changing $dependency.dart to one of them.'
+      );
+    }
+  }
+
   for (final String package in dependencyMap.keys) {
     final List<String> loop = _deepSearch<String>(dependencyMap, package);
     if (loop != null) {
@@ -523,6 +542,58 @@ Future<void> verifyInternationalizations() async {
       'Did you forget to run gen_localizations.dart after updating a .arb file?',
     ]);
   }
+}
+
+Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
+  final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
+  final Set<String> excludedFiles = <String>{
+    path.join(flutterLib, 'src', 'foundation', 'object.dart'), // Calls this from within an assert.
+  };
+  final List<File> files = _allFiles(flutterLib, 'dart', minimumMatches: 400)
+      .where((File file) => !excludedFiles.contains(file.path))
+      .toList();
+  final RegExp toStringRegExp = RegExp(r'^\s+String\s+to(.+?)?String(.+?)?\(\)\s+(\{|=>)');
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index++) {
+      if (toStringRegExp.hasMatch(lines[index])) {
+        final int sourceLine = index + 1;
+        bool _checkForRuntimeType(String line) {
+          if (line.contains(r'$runtimeType') || line.contains('runtimeType.toString()')) {
+            problems.add('${file.path}:$sourceLine}: toString calls runtimeType.toString');
+            return true;
+          }
+          return false;
+        }
+        if (_checkForRuntimeType(lines[index])) {
+          continue;
+        }
+        if (lines[index].contains('=>')) {
+          while (!lines[index].contains(';')) {
+            index++;
+            assert(index < lines.length, 'Source file $file has unterminated toString method.');
+            if (_checkForRuntimeType(lines[index])) {
+              break;
+            }
+          }
+        } else {
+          int openBraceCount = '{'.allMatches(lines[index]).length - '}'.allMatches(lines[index]).length;
+          while (!lines[index].contains('}') && openBraceCount > 0) {
+            index++;
+            assert(index < lines.length, 'Source file $file has unbalanced braces in a toString method.');
+            if (_checkForRuntimeType(lines[index])) {
+              break;
+            }
+            openBraceCount += '{'.allMatches(lines[index]).length;
+            openBraceCount -= '}'.allMatches(lines[index]).length;
+          }
+        }
+      }
+    }
+  }
+  if (problems.isNotEmpty)
+    exitWithError(problems);
 }
 
 Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatches = 4000 }) async {
@@ -745,6 +816,13 @@ final Set<Hash256> _grandfatheredBinaries = <Hash256>{
   // (also used by a few examples)
   Hash256(0xD29D4E0AF9256DC9, 0x2D0A8F8810608A5E, 0x64A132AD8B397CA2, 0xC4DDC0B1C26A68C3),
 
+  // packages/flutter_tools/templates/app/web/icons/Icon-192.png.copy.tmpl
+  // examples/flutter_gallery/web/icons/Icon-192.png
+  Hash256(0x3DCE99077602F704, 0x21C1C6B2A240BC9B, 0x83D64D86681D45F2, 0x154143310C980BE3),
+
+  // packages/flutter_tools/templates/app/web/icons/Icon-512.png.copy.tmpl
+  // examples/flutter_gallery/web/icons/Icon-512.png
+  Hash256(0xBACCB205AE45f0B4, 0x21BE1657259B4943, 0xAC40C95094AB877F, 0x3BCBE12CD544DCBE),
 
   // GALLERY ICONS
 
@@ -978,7 +1056,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> grandfathe
   assert(
     _grandfatheredBinaries
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
-      .reduce((int value, int element) => value ^ element) == 0x39A050CD69434936 // Please do not modify this line.
+      .reduce((int value, int element) => value ^ element) == 0xBFC18DE113B5AE8E // Please do not modify this line.
   );
   grandfatheredBinaries ??= _grandfatheredBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
@@ -1180,6 +1258,9 @@ Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool
 }
 
 List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
+  if (map[start] == null)
+    return null; // We catch these separately.
+
   for (final T key in map[start]) {
     if (key == start)
       continue; // we catch these separately

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -363,23 +364,37 @@ void main() {
 
     residentRunner.printHelp(details: true);
 
+    final CommandHelp commandHelp = residentRunner.commandHelp;
+
     // supports service protocol
     expect(residentRunner.supportsServiceProtocol, true);
-    expect(testLogger.statusText, contains('"w"'));
-    expect(testLogger.statusText, contains('"t"'));
-    expect(testLogger.statusText, contains('"P"'));
-    expect(testLogger.statusText, contains('"a"'));
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
-    expect(testLogger.statusText, contains('"L"'));
-    expect(testLogger.statusText, contains('"S"'));
-    expect(testLogger.statusText, contains('"U"'));
-    expect(testLogger.statusText, contains('"i"'));
-    expect(testLogger.statusText, contains('"p"'));
-    expect(testLogger.statusText, contains('"o"'));
-    expect(testLogger.statusText, contains('"z"'));
-    // screenshot
-    expect(testLogger.statusText, contains('"s"'));
+    // commands
+    expect(testLogger.statusText, equals(
+        <dynamic>[
+          'Flutter run key commands.',
+          commandHelp.r,
+          commandHelp.R,
+          commandHelp.h,
+          commandHelp.q,
+          commandHelp.s,
+          commandHelp.w,
+          commandHelp.t,
+          commandHelp.L,
+          commandHelp.S,
+          commandHelp.U,
+          commandHelp.i,
+          commandHelp.p,
+          commandHelp.o,
+          commandHelp.z,
+          commandHelp.P,
+          commandHelp.a,
+          commandHelp.s,
+          'An Observatory debugger and profiler on null is available at: null',
+          ''
+        ].join('\n')
+    ));
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {

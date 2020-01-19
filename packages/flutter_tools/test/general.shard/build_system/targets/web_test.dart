@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -31,6 +32,7 @@ void main() {
     when(mockPlatform.isWindows).thenReturn(false);
     when(mockPlatform.isMacOS).thenReturn(true);
     when(mockPlatform.isLinux).thenReturn(false);
+    when(mockPlatform.environment).thenReturn(const <String, String>{});
 
     when(mockWindowsPlatform.isWindows).thenReturn(true);
     when(mockWindowsPlatform.isMacOS).thenReturn(false);
@@ -41,11 +43,12 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('foo:lib/\n');
       PackageMap.globalPackagesPath = packagesFile.path;
+      globals.fs.currentDirectory.childDirectory('bar').createSync();
 
-      environment = Environment(
+      environment = Environment.test(
+        globals.fs.currentDirectory,
         projectDir: globals.fs.currentDirectory.childDirectory('foo'),
-        outputDir: globals.fs.currentDirectory,
-        buildDir: globals.fs.currentDirectory,
+        outputDir: globals.fs.currentDirectory.childDirectory('bar'),
         defines: <String, String>{
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
         }
@@ -75,6 +78,33 @@ void main() {
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
+  }));
+
+  test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('index.html')
+      ..createSync(recursive: true);
+    webResources.childFile('foo.txt')
+      ..writeAsStringSync('A');
+    environment.buildDir.childFile('main.dart.js').createSync();
+
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('foo.txt')
+      .readAsStringSync(), 'A');
+    expect(environment.outputDir.childFile('main.dart.js')
+      .existsSync(), true);
+    expect(environment.outputDir.childDirectory('assets')
+      .childFile('AssetManifest.json').existsSync(), true);
+
+    // Update to arbitary resource file triggers rebuild.
+    webResources.childFile('foo.txt').writeAsStringSync('B');
+
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('foo.txt')
+      .readAsStringSync(), 'B');
   }));
 
   test('WebEntrypointTarget generates an entrypoint for a file outside of main', () => testbed.run(() async {
@@ -354,6 +384,27 @@ void main() {
     verifyNever(globals.processManager.run(any));
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(),
+  }));
+
+  test('Generated service worker correctly inlines file hashes', () {
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'});
+
+    expect(result, contains('{\n  "/foo": "abcd"\n};'));
+  });
+
+  test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
+    environment.outputDir.childFile('a.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('A');
+    await const WebServiceWorker().build(environment);
+
+    expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
+    // Contains file hash.
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
+    expect(environment.buildDir.childFile('service_worker.d'), exists);
+    // Depends on resource file.
+    expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(), contains('a.txt'));
   }));
 }
 

@@ -65,7 +65,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -78,5 +78,5 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   int get hashCode => ui.hashValues(url, scale);
 
   @override
-  String toString() => '$runtimeType("$url", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
 }

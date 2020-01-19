@@ -618,10 +618,12 @@ class _ModifierSidePair extends Object {
   final KeyboardSide side;
 
   @override
-  bool operator ==(dynamic other) {
-    return runtimeType == other.runtimeType
-        && modifier == other.modifier
-        && side == other.side;
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _ModifierSidePair
+        && other.modifier == modifier
+        && other.side == side;
   }
 
   @override

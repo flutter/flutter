@@ -67,7 +67,7 @@ class SemanticsTag {
   final String name;
 
   @override
-  String toString() => '$runtimeType($name)';
+  String toString() => '${objectRuntimeType(this, 'SemanticsTag')}($name)';
 }
 
 /// An identifier of a custom semantics action.
@@ -126,7 +126,7 @@ class CustomSemanticsAction {
   int get hashCode => ui.hashValues(label, hint, action);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is CustomSemanticsAction
@@ -376,7 +376,7 @@ class SemanticsData extends Diagnosticable {
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => '${objectRuntimeType(this, 'SemanticsData')}';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -421,7 +421,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is SemanticsData
         && other.flags == flags
         && other.actions == actions
@@ -559,7 +559,7 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   int get hashCode => ui.hashValues(onTapHint, onLongPressHint);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is SemanticsHintOverrides
@@ -1150,7 +1150,7 @@ class SemanticsProperties extends DiagnosticableTree {
   }
 
   @override
-  String toStringShort() => '$runtimeType'; // the hashCode isn't important since we're immutable
+  String toStringShort() => '${objectRuntimeType(this, 'SemanticsProperties')}'; // the hashCode isn't important since we're immutable
 }
 
 /// In tests use this function to reset the counter used to generate
@@ -1665,7 +1665,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// describes how high the box is that this [SemanticsNode] occupies in three
   /// dimensional space. The two other dimensions are defined by [rect].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// The following code stacks three [PhysicalModel]s on top of each other
   /// separated by non-zero elevations.
   ///
@@ -2168,7 +2168,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   @override
-  String toStringShort() => '$runtimeType#$id';
+  String toStringShort() => '${objectRuntimeType(this, 'SemanticsNode')}#$id';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
