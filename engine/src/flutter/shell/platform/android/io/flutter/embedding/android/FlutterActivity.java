@@ -460,7 +460,7 @@ public class FlutterActivity extends Activity
           setTheme(normalThemeRID);
         }
       } else {
-        Log.d(TAG, "Using the launch theme as normal theme.");
+        Log.v(TAG, "Using the launch theme as normal theme.");
       }
     } catch (PackageManager.NameNotFoundException exception) {
       Log.e(TAG, "Could not read meta-data for FlutterActivity. Using the launch theme as normal theme.");
