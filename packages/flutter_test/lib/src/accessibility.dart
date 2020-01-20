@@ -345,6 +345,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   String get description => 'Text contrast should follow WCAG guidelines';
 }
 
+// TODO: Document.
 class CustomContrastGuideline extends AccessibilityGuideline {
   const CustomContrastGuideline({@required this.elements});
 
