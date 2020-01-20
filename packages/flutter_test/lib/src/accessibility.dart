@@ -350,8 +350,6 @@ class CustomContrastGuideline extends AccessibilityGuideline {
     // How to evaluate a single element.
 
     Evaluation evaluateElement(Element element) {
-      print('Evaluating element $element');
-
       final RenderBox renderObject = element.renderObject as RenderBox;
 
       final Rect originalPaintBounds = renderObject.paintBounds;
