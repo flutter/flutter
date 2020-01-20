@@ -347,15 +347,19 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
 // TODO: Document.
 class CustomContrastGuideline extends AccessibilityGuideline {
-  const CustomContrastGuideline({@required this.elements});
+  const CustomContrastGuideline({@required this.finder});
 
   static const double kMinimumRatio = 4.5;
   static const double kTolerance = -0.01;
 
-  final List<Element> elements;
+  final Finder finder;
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
+    // Compute elements to be evaluated.
+
+    final List<Element> elements = finder.evaluate().toList();
+
     // Obtain rendered image.
 
     final RenderView renderView = tester.binding.renderView;
@@ -371,6 +375,8 @@ class CustomContrastGuideline extends AccessibilityGuideline {
     // How to evaluate a single element.
 
     Evaluation evaluateElement(Element element) {
+      print('Evaluating element $element');
+
       final RenderBox renderObject = element.renderObject as RenderBox;
 
       final Rect originalPaintBounds = renderObject.paintBounds;
