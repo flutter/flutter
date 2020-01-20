@@ -7095,7 +7095,7 @@ void main() {
   );
 
   testWidgets(
-    'Mouse tap does not show handles nor toolbar',
+    'Mouse tap does not show toolbar, only handles',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
@@ -7123,7 +7123,7 @@ void main() {
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
     },
   );
 
@@ -7156,7 +7156,7 @@ void main() {
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
     },
   );
 
@@ -7192,8 +7192,8 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+      expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
     },
   );
 

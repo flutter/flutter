@@ -3696,7 +3696,7 @@ void main() {
   );
 
   testWidgets(
-    'Mouse double tap does not show handles nor toolbar',
+    'Mouse double tap does not toolbar, only handles',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -3723,7 +3723,7 @@ void main() {
       await tester.pump();
 
       final EditableTextState editableText = tester.state(find.byType(EditableText));
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
     },
   );

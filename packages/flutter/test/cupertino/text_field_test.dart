@@ -2578,7 +2578,7 @@ void main() {
   );
 
   testWidgets(
-    'Mouse double tap does not show handles nor toolbar',
+    'Mouse double tap does not show handles only toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
@@ -2609,7 +2609,7 @@ void main() {
       await gesture.up();
       await tester.pump();
 
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
 
       final Offset hPos = textOffsetToPosition(tester, 9); // Position of 'h'.
@@ -2624,8 +2624,8 @@ void main() {
       await gesture.up();
       await tester.pump();
 
-      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+      expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
     },
   );
 
