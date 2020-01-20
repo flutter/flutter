@@ -487,6 +487,7 @@ class ContrastReport {
   }
 }
 
+// TODO: Document.
 List<int> _subsetFromRect(ByteData data, Rect paintBounds, int width, int height) {
   final Rect truePaintBounds = paintBounds.intersect(
     Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
