@@ -320,12 +320,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 class CustomContrastGuideline extends AccessibilityGuideline {
   const CustomContrastGuideline({
     @required this.finder,
-    this.kMinimumRatio = 4.5,
-    this.kTolerance = -0.01,
+    this.minimumRatio = 4.5,
+    this.tolerance = -0.01,
   });
 
-  final double kMinimumRatio;
-  final double kTolerance;
+  final double minimumRatio;
+  final double tolerance;
 
   final Finder finder;
 
@@ -372,12 +372,12 @@ class CustomContrastGuideline extends AccessibilityGuideline {
       final ContrastReport report = ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
 
-      if (contrastRatio - kMinimumRatio >= kTolerance) {
+      if (contrastRatio - minimumRatio >= tolerance) {
         return const Evaluation.pass();
       } else {
         return Evaluation.fail(
             '$element:\nExpected contrast ratio of at least '
-                '$kMinimumRatio but found ${contrastRatio.toStringAsFixed(2)} \n'
+                '$minimumRatio but found ${contrastRatio.toStringAsFixed(2)} \n'
                 'The computed light color was: ${report.lightColor}, '
                 'The computed dark color was: ${report.darkColor}\n'
                 'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html\n'
