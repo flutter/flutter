@@ -318,10 +318,14 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
 // TODO: Document.
 class CustomContrastGuideline extends AccessibilityGuideline {
-  const CustomContrastGuideline({@required this.finder});
+  const CustomContrastGuideline({
+    @required this.finder,
+    this.kMinimumRatio = 4.5,
+    this.kTolerance = -0.01,
+  });
 
-  static const double kMinimumRatio = 4.5;
-  static const double kTolerance = -0.01;
+  final double kMinimumRatio;
+  final double kTolerance;
 
   final Finder finder;
 
