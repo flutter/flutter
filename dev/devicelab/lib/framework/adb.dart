@@ -223,9 +223,9 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
  FuchsiaDevice _workingDevice;
 
  String get _devFinder {
-    final String devFinder = path.join(getArtifactPath(), 'fuchsia', 'tools', 'dev_finder');
+    final String devFinder = path.join(getArtifactPath(), 'fuchsia', 'tools', 'device-finder');
     if (!File(devFinder).existsSync()) {
-      throw FileSystemException('Couldn\'t find dev_finder at location $devFinder');
+      throw FileSystemException('Couldn\'t find device-finder at location $devFinder');
     }
     return devFinder;
  }

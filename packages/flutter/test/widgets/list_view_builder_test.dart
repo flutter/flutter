@@ -304,6 +304,54 @@ void main() {
     expect(find.text('s5'), findsNothing);
     expect(find.text('i6'), findsNothing);
   });
+
+
+  testWidgets('ListView.separated uses correct semanticChildCount', (WidgetTester tester) async {
+    Widget buildFrame({int itemCount}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.separated(
+          itemCount: itemCount,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: 100.0,
+              child: Text('i$index'),
+            );
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: 10.0,
+              child: Text('s$index'),
+            );
+          },
+        ),
+      );
+    }
+
+    Scrollable scrollable() {
+      return tester.widget<Scrollable>(
+        find.descendant(
+          of: find.byType(ListView),
+          matching: find.byType(Scrollable),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(itemCount: 0));
+    expect(scrollable().semanticChildCount, 0);
+
+    await tester.pumpWidget(buildFrame(itemCount: 1));
+    expect(scrollable().semanticChildCount, 1);
+
+    await tester.pumpWidget(buildFrame(itemCount: 2));
+    expect(scrollable().semanticChildCount, 2);
+
+    await tester.pumpWidget(buildFrame(itemCount: 3));
+    expect(scrollable().semanticChildCount, 3);
+
+    await tester.pumpWidget(buildFrame(itemCount: 4));
+    expect(scrollable().semanticChildCount, 4);
+  });
 }
 
 void check({ List<int> visible = const <int>[], List<int> hidden = const <int>[] }) {

@@ -39,17 +39,15 @@ void main() {
     mockXcode = MockXcode();
     mockProcessManager = MockProcessManager();
     testbed = Testbed(setup: () {
-      androidEnvironment = Environment(
-        outputDir: globals.fs.currentDirectory,
-        projectDir: globals.fs.currentDirectory,
+      androidEnvironment = Environment.test(
+        globals.fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
         },
       );
-      iosEnvironment = Environment(
-        outputDir: globals.fs.currentDirectory,
-        projectDir: globals.fs.currentDirectory,
+      iosEnvironment = Environment.test(
+        globals.fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
@@ -264,9 +262,8 @@ flutter_tools:lib/''');
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(Environment(
-      outputDir: globals.fs.currentDirectory,
-      projectDir: globals.fs.currentDirectory,
+    await const KernelSnapshot().build(Environment.test(
+      globals.fs.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'debug',
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
@@ -405,14 +402,6 @@ flutter_tools:lib/''');
     expect(result.success, true);
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
-  }));
-
-  test('Profile/ReleaseCopyFlutterAotBundle copies .so to correct output directory', () => testbed.run(() async {
-    androidEnvironment.buildDir.createSync(recursive: true);
-    androidEnvironment.buildDir.childFile('app.so').createSync();
-    await const ProfileCopyFlutterAotBundle().build(androidEnvironment);
-
-    expect(androidEnvironment.outputDir.childFile('app.so').existsSync(), true);
   }));
 
   test('kExtraGenSnapshotOptions passes values to gen_snapshot', () => testbed.run(() async {

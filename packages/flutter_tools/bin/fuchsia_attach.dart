@@ -27,7 +27,7 @@ final ArgParser parser = ArgParser()
   ..addOption('target', help: 'The GN target to attach to')
   ..addOption('entrypoint', defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
   ..addOption('device', help: 'The device id to attach to')
-  ..addOption('dev-finder', help: 'The location of the dev_finder binary')
+  ..addOption('dev-finder', help: 'The location of the device-finder binary')
   ..addFlag('verbose', negatable: true);
 
 // Track the original working directory so that the tool can find the
@@ -57,7 +57,7 @@ Future<void> main(List<String> args) async {
   globals.fs.currentDirectory = path;
 
   if (!devFinder.existsSync()) {
-    print('Error: dev_finder not found at ${devFinder.path}.');
+    print('Error: device-finder not found at ${devFinder.path}.');
     return 1;
   }
   if (!frontendServer.existsSync()) {
@@ -108,7 +108,11 @@ Future<void> main(List<String> args) async {
       DeviceManager: () => _FuchsiaDeviceManager(),
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
       Artifacts: () => OverrideArtifacts(
-        parent: CachedArtifacts(),
+        parent: CachedArtifacts(
+          fileSystem: globals.fs,
+          cache: globals.cache,
+          platform: globals.platform,
+        ),
         frontendServer: frontendServer,
         engineDartBinary: dartSdk,
         platformKernelDill: platformKernelDill,
