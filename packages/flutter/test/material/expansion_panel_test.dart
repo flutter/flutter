@@ -649,7 +649,7 @@ void main() {
   });
 
   testWidgets(
-    'didUpdateWidget accounts for toggling between ExpansionPanelList'
+    'didUpdateWidget accounts for toggling between ExpansionPanelList '
     'and ExpansionPaneList.radio',
     (WidgetTester tester) async {
       bool isRadioList = false;

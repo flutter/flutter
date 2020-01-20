@@ -642,7 +642,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 ''');
   }
 
-  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar''');
+  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
 }
 
 String _hex(List<int> bytes) {

@@ -110,7 +110,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     List<String> dartDefines,
   }) async {
     if (fileSystemRoots != null || fileSystemScheme != null || depFilePath != null || targetModel != null || sdkRoot != null || packagesPath != null) {
-      globals.printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel,'
+      globals.printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel, '
         'sdkRoot, packagesPath are not supported when using the experimental '
         'build* pipeline');
     }

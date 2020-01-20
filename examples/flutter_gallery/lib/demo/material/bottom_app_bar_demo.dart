@@ -90,7 +90,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   static void _showSnackbar() {
     const String text =
       "When the Scaffold's floating action button location changes, "
-      'the floating action button animates to its new position.'
+      'the floating action button animates to its new position. '
       'The BottomAppBar adapts its shape appropriately.';
     _scaffoldKey.currentState.showSnackBar(
       const SnackBar(content: Text(text)),

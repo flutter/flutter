@@ -61,7 +61,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       )
       ..addFlag(
         'consumer-only',
-        help: 'Only prints the dependency graph that is the transitive closure'
+        help: 'Only prints the dependency graph that is the transitive closure '
               'that a consumer of the Flutter SDK will observe (When combined '
               'with transitive-closure)',
         defaultsTo: false,

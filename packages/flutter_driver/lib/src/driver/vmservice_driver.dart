@@ -220,7 +220,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
           rethrow;
         }
         _log(
-            'Check Health failed, try to wait for the service extensions to be'
+            'Check Health failed, try to wait for the service extensions to be '
                 'registered.'
         );
         await enableIsolateStreams();

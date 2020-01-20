@@ -236,8 +236,7 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     bool shouldBuildPluginAsAar,
   }) async {
     const String licenseNotAcceptedMatcher =
-      r'You have not accepted the license agreements of the following SDK components:'
-      r'\s*\[(.+)\]';
+      r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
     final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
     assert(licenseFailure != null);

@@ -491,7 +491,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAllAnnotations should still check children and return'
+  test('AnnotatedRegionLayer.findAllAnnotations should still check children and return '
     'children\'s opacity (false) during a failed hit', () {
     const Offset position = Offset(5, 5);
 
@@ -513,7 +513,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAllAnnotations should still check children and return'
+  test('AnnotatedRegionLayer.findAllAnnotations should still check children and return '
     'children\'s opacity (true) during a failed hit', () {
     const Offset position = Offset(5, 5);
 

@@ -171,7 +171,7 @@ final ArgParser _argParser = ArgParser()
     defaultsTo: true,
     help: 'Only run tests that match the host platform (e.g. do not run a\n'
           'test with a `required_agent_capabilities` value of "mac/android"\n'
-          'on a windows host). Each test publishes its'
+          'on a windows host). Each test publishes its '
           '`required_agent_capabilities`\nin the `manifest.yaml` file.',
   )
   ..addOption(

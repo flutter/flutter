@@ -858,7 +858,7 @@ String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite 
   // overwrite, on the theory that the user probably didn't expect it to exist.
   if (globals.fs.isFileSync(dirPath)) {
     return "Invalid project name: '$dirPath' - refers to an existing file."
-        '${overwrite ? ' Refusing to overwrite a file with a directory.' : ''}';
+        + (overwrite ? ' Refusing to overwrite a file with a directory.' : '');
   }
 
   if (overwrite) {

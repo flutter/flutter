@@ -52,7 +52,7 @@ class IdeConfigCommand extends FlutterCommand {
       'missing. If --overwrite is specified, will revert existing files to '
       'the template versions, reset the module list, and return configuration '
       'settings to the template versions.\n\n'
-      'This command is intended for Flutter developers to help them set up the'
+      'This command is intended for Flutter developers to help them set up the '
       "Flutter tree for development in an IDE. It doesn't affect other projects.\n\n"
       'Currently, IntelliJ is the default (and only) IDE that may be configured.';
 

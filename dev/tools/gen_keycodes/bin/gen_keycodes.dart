@@ -102,7 +102,7 @@ Future<void> main(List<String> rawArguments) async {
   argParser.addOption(
     'code',
     defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_key.dart'),
-    help: 'The path to where the output "keyboard_keys.dart" file should be'
+    help: 'The path to where the output "keyboard_keys.dart" file should be '
         'written. If --code is not specified, the output will be written to the '
         'correct directory in the flutter tree. If the output directory does not '
         'exist, it, and the path to it, will be created.',
@@ -110,7 +110,7 @@ Future<void> main(List<String> rawArguments) async {
   argParser.addOption(
     'maps',
     defaultsTo: path.join(flutterRoot.path, 'packages', 'flutter', 'lib', 'src', 'services', 'keyboard_maps.dart'),
-    help: 'The path to where the output "keyboard_maps.dart" file should be'
+    help: 'The path to where the output "keyboard_maps.dart" file should be '
       'written. If --maps is not specified, the output will be written to the '
       'correct directory in the flutter tree. If the output directory does not '
       'exist, it, and the path to it, will be created.',

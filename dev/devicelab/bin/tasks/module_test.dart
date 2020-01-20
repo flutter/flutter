@@ -220,7 +220,7 @@ Future<void> main() async {
           || !analyticsOutput.contains('cd25: true')
           || !analyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
-          'Building outer app produced the following analytics: "$analyticsOutput"'
+          'Building outer app produced the following analytics: "$analyticsOutput" '
           'but not the expected strings: "cd24: android", "cd25: true" and '
           '"viewName: assemble"'
         );
