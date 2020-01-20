@@ -316,18 +316,26 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   String get description => 'Text contrast should follow WCAG guidelines';
 }
 
-// TODO: Document.
+/// A guideline which verifies that all elements specified by a [Finder] [finder]
+/// meet minimum contrast levels.
+// TODO: Refine documentation.
 class CustomContrastGuideline extends AccessibilityGuideline {
   const CustomContrastGuideline({
     @required this.finder,
     this.minimumRatio = 4.5,
     this.tolerance = -0.01,
-  });
+    String description = 'Contrast should follow custom guidelines',
+  }) : _description = description;
 
   final double minimumRatio;
   final double tolerance;
 
   final Finder finder;
+
+  final String _description;
+
+  @override
+  String get description => _description;
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
@@ -378,7 +386,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
                 '$minimumRatio but found ${contrastRatio.toStringAsFixed(2)} \n'
                 'The computed light color was: ${report.lightColor}, '
                 'The computed dark color was: ${report.darkColor}\n'
-                'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html\n'
+                '$description'
         );
       }
     }
@@ -393,9 +401,6 @@ class CustomContrastGuideline extends AccessibilityGuideline {
 
     return result;
   }
-
-  @override
-  String get description => 'Contrast should follow WCAG guidelines';
 }
 
 /// A class that reports the contrast ratio of a part of the screen.
