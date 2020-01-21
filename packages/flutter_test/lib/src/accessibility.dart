@@ -268,7 +268,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       if (subset.isEmpty) {
         return result;
       }
-      final ContrastReport report = ContrastReport(subset);
+      final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
@@ -393,7 +393,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
         return const Evaluation.pass();
       }
 
-      final ContrastReport report = ContrastReport(subset);
+      final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
 
       if (contrastRatio >= minimumRatio - tolerance) {
@@ -425,7 +425,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
 ///
 /// Commonly used in accessibility testing to obtain the contrast ratio of
 /// text widgets and other types of widgets.
-class ContrastReport {
+class _ContrastReport {
   /// Generates a contrast report given a list of colors.
   ///
   /// Given a list of integers [colors], each representing the color of a pixel
@@ -436,14 +436,14 @@ class ContrastReport {
   /// The contrast ratio of the most frequent light color and the most
   /// frequent dark color is calculated. Colors are divided into light and
   /// dark colors based on their lightness as an [HSLColor].
-  factory ContrastReport(List<int> colors) {
+  factory _ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
     for (final int color in colors) {
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
     }
     if (colorHistogram.length == 1) {
       final Color hslColor = Color(colorHistogram.keys.first);
-      return ContrastReport._(hslColor, hslColor);
+      return _ContrastReport._(hslColor, hslColor);
     }
     // to determine the lighter and darker color, partition the colors
     // by lightness and then choose the mode from each group.
@@ -471,10 +471,10 @@ class ContrastReport {
       }
     }
     assert (lightColor != 0 && darkColor != 0);
-    return ContrastReport._(Color(lightColor), Color(darkColor));
+    return _ContrastReport._(Color(lightColor), Color(darkColor));
   }
 
-  const ContrastReport._(this.lightColor, this.darkColor);
+  const _ContrastReport._(this.lightColor, this.darkColor);
 
   /// The most frequently occurring light color.
   final Color lightColor;
