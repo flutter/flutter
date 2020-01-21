@@ -446,6 +446,45 @@ void main() {
       ]);
     });
   }, skip: !globals.platform.isLinux);
+
+
+  testUsingContext('FontSubset in univeral artifacts', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(artifacts.developmentArtifact, DevelopmentArtifact.universal);
+  });
+
+  testUsingContext('FontSubset artifacts on linux', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-x64', 'linux-x64/font-subset.zip']]);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'linux',
+  });
+
+  testUsingContext('FontSubset artifacts on windows', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(artifacts.getBinaryDirs(), <List<String>>[<String>['windows-x64', 'windows-x64/font-subset.zip']]);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'windows',
+  });
+
+  testUsingContext('FontSubset artifacts on macos', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(artifacts.getBinaryDirs(), <List<String>>[<String>['darwin-x64', 'darwin-x64/font-subset.zip']]);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'macos',
+  });
+
+  testUsingContext('FontSubset artifacts on fuchsia', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(() => artifacts.getBinaryDirs(), throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'fuchsia',
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {

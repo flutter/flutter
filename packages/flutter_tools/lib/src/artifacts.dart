@@ -62,17 +62,19 @@ enum Artifact {
   // Fuchsia artifacts from the engine prebuilts.
   fuchsiaKernelCompiler,
   fuchsiaFlutterRunner,
+
+  /// Tools related to subsetting or icon font files.
+  fontSubset,
+  constFinder,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
+  final String exe = platform == TargetPlatform.windows_x64 ? '.exe' : '';
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.flutterTester:
-      if (platform == TargetPlatform.windows_x64) {
-        return 'flutter_tester.exe';
-      }
-      return 'flutter_tester';
+      return 'flutter_tester$exe';
     case Artifact.snapshotDart:
       return 'snapshot.dart';
     case Artifact.flutterFramework:
@@ -98,10 +100,7 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
     case Artifact.engineDartBinary:
-      if (platform == TargetPlatform.windows_x64) {
-        return 'dart.exe';
-      }
-      return 'dart';
+      return 'dart$exe';
     case Artifact.dart2jsSnapshot:
       return 'dart2js.dart.snapshot';
     case Artifact.dartdevcSnapshot:
@@ -140,6 +139,10 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       final String jitOrAot = mode.isJit ? '_jit' : '_aot';
       final String productOrNo = mode.isRelease ? '_product' : '';
       return 'flutter$jitOrAot${productOrNo}_runner-0.far';
+    case Artifact.fontSubset:
+      return 'font-subset$exe';
+    case Artifact.constFinder:
+      return 'const_finder.dart.snapshot';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -366,6 +369,9 @@ class CachedArtifacts extends Artifacts {
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
+      case Artifact.fontSubset:
+      case Artifact.constFinder:
+        return _cache.getArtifactDirectory('font-subset').childFile(_artifactToFileName(artifact, platform, mode)).path;
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -538,6 +544,10 @@ class LocalEngineArtifacts extends Artifacts {
         final String jitOrAot = mode.isJit ? '_jit' : '_aot';
         final String productOrNo = mode.isRelease ? '_product' : '';
         return _fileSystem.path.join(engineOutPath, 'flutter$jitOrAot${productOrNo}_runner-0.far');
+      case Artifact.fontSubset:
+        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
+      case Artifact.constFinder:
+        return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
