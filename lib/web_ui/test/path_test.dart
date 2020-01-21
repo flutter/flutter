@@ -271,4 +271,31 @@ void main() {
     // TODO: Investigate failure on CI. Locally this passes.
     // [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"
   }, skip: browserEngine == BrowserEngine.firefox);
+
+  // Path contains should handle case where invalid RRect with large
+  // corner radius is used for hit test. Use case is a RenderPhysicalShape
+  // with a clipper that contains RRect of width/height 50 but corner radius
+  // of 100.
+  //
+  // Regression test for https://github.com/flutter/flutter/issues/48887
+  test('Should hit test correctly for malformed rrect', () {
+    // Correctly formed rrect.
+    final path1 = Path()
+      ..addRRect(RRect.fromLTRBR(50, 50, 100, 100, Radius.circular(20)));
+    expect(path1.contains(Offset(75, 75)), isTrue);
+    expect(path1.contains(Offset(52, 75)), isTrue);
+    expect(path1.contains(Offset(50, 50)), isFalse);
+    expect(path1.contains(Offset(100, 50)), isFalse);
+    expect(path1.contains(Offset(100, 100)), isFalse);
+    expect(path1.contains(Offset(50, 100)), isFalse);
+
+    final path2 = Path()
+      ..addRRect(RRect.fromLTRBR(50, 50, 100, 100, Radius.circular(100)));
+    expect(path2.contains(Offset(75, 75)), isTrue);
+    expect(path2.contains(Offset(52, 75)), isTrue);
+    expect(path2.contains(Offset(50, 50)), isFalse);
+    expect(path2.contains(Offset(100, 50)), isFalse);
+    expect(path2.contains(Offset(100, 100)), isFalse);
+    expect(path2.contains(Offset(50, 100)), isFalse);
+  });
 }

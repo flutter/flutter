@@ -867,46 +867,59 @@ class SurfacePath implements ui.Path {
           if (pointX < rRect.left || pointX > rRect.right) {
             return false;
           }
-          if (pointX < (rRect.left + rRect.tlRadiusX) &&
-              pointY < (rRect.top + rRect.tlRadiusY)) {
+          final double rRectWidth = rRect.width;
+          final double rRectHeight = rRect.height;
+          final double tlRadiusX = math.min(rRect.tlRadiusX, rRectWidth / 2.0);
+          final double tlRadiusY = math.min(rRect.tlRadiusY, rRectHeight / 2.0);
+          if (pointX < (rRect.left + tlRadiusX) &&
+              pointY < (rRect.top + tlRadiusY)) {
             // Top left corner
             return _ellipseContains(
                 pointX,
                 pointY,
-                rRect.left + rRect.tlRadiusX,
-                rRect.top + rRect.tlRadiusY,
-                rRect.tlRadiusX,
-                rRect.tlRadiusY);
-          } else if (pointX >= (rRect.right - rRect.trRadiusX) &&
-              pointY < (rRect.top + rRect.trRadiusY)) {
+                rRect.left + tlRadiusX,
+                rRect.top + tlRadiusY,
+                tlRadiusX,
+                tlRadiusY);
+          }
+          final double trRadiusX = math.min(rRect.trRadiusX, rRectWidth / 2.0);
+          final double trRadiusY = math.min(rRect.trRadiusY, rRectHeight / 2.0);
+          if (pointX >= (rRect.right - trRadiusX) &&
+              pointY < (rRect.top + trRadiusY)) {
             // Top right corner
             return _ellipseContains(
                 pointX,
                 pointY,
-                rRect.right - rRect.trRadiusX,
-                rRect.top + rRect.trRadiusY,
-                rRect.trRadiusX,
-                rRect.trRadiusY);
-          } else if (pointX >= (rRect.right - rRect.brRadiusX) &&
-              pointY >= (rRect.bottom - rRect.brRadiusY)) {
+                rRect.right - trRadiusX,
+                rRect.top + trRadiusY,
+                trRadiusX,
+                trRadiusY);
+          }
+          final double brRadiusX = math.min(rRect.brRadiusX, rRectWidth / 2.0);
+          final double brRadiusY = math.min(rRect.brRadiusY, rRectHeight / 2.0);
+          if (pointX >= (rRect.right - brRadiusX) &&
+              pointY >= (rRect.bottom - brRadiusY)) {
             // Bottom right corner
             return _ellipseContains(
                 pointX,
                 pointY,
-                rRect.right - rRect.brRadiusX,
-                rRect.bottom - rRect.brRadiusY,
-                rRect.trRadiusX,
-                rRect.trRadiusY);
-          } else if (pointX < (rRect.left + rRect.blRadiusX) &&
-              pointY >= (rRect.bottom - rRect.blRadiusY)) {
+                rRect.right - brRadiusX,
+                rRect.bottom - brRadiusY,
+                trRadiusX,
+                trRadiusY);
+          }
+          final double blRadiusX = math.min(rRect.blRadiusX, rRectWidth / 2.0);
+          final double blRadiusY = math.min(rRect.blRadiusY, rRectHeight / 2.0);
+          if (pointX < (rRect.left + blRadiusX) &&
+              pointY >= (rRect.bottom - blRadiusY)) {
             // Bottom left corner
             return _ellipseContains(
                 pointX,
                 pointY,
-                rRect.left + rRect.blRadiusX,
-                rRect.bottom - rRect.blRadiusY,
-                rRect.trRadiusX,
-                rRect.trRadiusY);
+                rRect.left + blRadiusX,
+                rRect.bottom - blRadiusY,
+                trRadiusX,
+                trRadiusY);
           }
           return true;
         }
