@@ -318,8 +318,6 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
 /// A guideline which verifies that all elements specified by a [Finder] [finder]
 /// meet minimum contrast levels.
-///
-// TODO: Refine documentation.
 class CustomContrastGuideline extends AccessibilityGuideline {
   /// Creates a custom guideline which verifies that all elements specified
   /// by [finder] meet minimum contrast levels.
@@ -514,7 +512,17 @@ class ContrastReport {
   }
 }
 
-// TODO: Document.
+/// Gives the colors of all pixels inside a given rectangle on the screen.
+///
+/// Given a [ByteData] object [data], which stores the color of each pixel
+/// in row-first order, where each pixel is given in 4 bytes in RGBA order,
+/// and [paintBounds], the rectangle,
+/// and [width] and [height], the dimensions of the [ByteData],
+/// returns a list of the colors of all pixels within the rectangle in
+/// row-first order.
+///
+/// In the returned list, each color is represented as a 32-bit integer
+/// in ARGB format, similar to the parameter for the [Color] constructor.
 List<int> _subsetFromRect(ByteData data, Rect paintBounds, int width, int height) {
   final Rect truePaintBounds = paintBounds.intersect(
     Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
