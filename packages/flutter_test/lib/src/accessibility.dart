@@ -318,8 +318,13 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
 /// A guideline which verifies that all elements specified by a [Finder] [finder]
 /// meet minimum contrast levels.
+///
 // TODO: Refine documentation.
 class CustomContrastGuideline extends AccessibilityGuideline {
+  /// Creates a custom guideline which verifies that all elements specified
+  /// by [finder] meet minimum contrast levels.
+  ///
+  /// An optional description string can be given using the [description] parameter.
   const CustomContrastGuideline({
     @required this.finder,
     this.minimumRatio = 4.5,
@@ -327,9 +332,24 @@ class CustomContrastGuideline extends AccessibilityGuideline {
     String description = 'Contrast should follow custom guidelines',
   }) : _description = description;
 
+  /// The minimum contrast ratio allowed.
+  ///
+  /// Defaults to 4.5, the minimum contrast
+  /// ratio for normal text, defined by WCAG.
+  /// See http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
   final double minimumRatio;
+
+  /// Tolerance for minimum contrast ratio.
+  ///
+  /// Any contrast ratio greater than [minimumRatio] or within [tolerance]
+  /// from [minimumRatio] passes the test.
+  // TODO: update to positive.
   final double tolerance;
 
+  /// The [Finder] used to find a subset of elements.
+  ///
+  /// [finder] determines which subset of elements will be tested for
+  /// contrast ratio.
   final Finder finder;
 
   final String _description;
