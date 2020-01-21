@@ -42,6 +42,21 @@ Future<void> main() async {
         );
       });
 
+      // First, build the module in Debug to copy the debug version of Flutter.framework.
+      // This proves "flutter build ios-framework" re-copies the relevant Flutter.framework,
+      // otherwise building plugins with bitcode will fail linking because the debug version
+      // of Flutter.framework does not contain bitcode.
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios',
+            '--debug',
+            '--no-codesign',
+          ],
+        );
+      });
+
       // This builds all build modes' frameworks by default
       section('Build frameworks');
 
