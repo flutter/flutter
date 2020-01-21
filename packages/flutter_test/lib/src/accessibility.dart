@@ -316,7 +316,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   String get description => 'Text contrast should follow WCAG guidelines';
 }
 
-/// A guideline which verifies that all elements specified by a [Finder] [finder]
+/// A guideline which verifies that all elements specified by [finder]
 /// meet minimum contrast levels.
 class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   /// Creates a custom guideline which verifies that all elements specified
