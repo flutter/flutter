@@ -214,7 +214,7 @@ class WebServerDevice extends Device {
 
   DeviceLogReader _logReader;
 
-  @override`
+  @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
