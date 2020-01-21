@@ -254,7 +254,8 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
   };
 
   {
-    TRACE_EVENT0("flutter", "vkAllocateMemory");
+    TRACE_EVENT1("flutter", "vkAllocateMemory", "allocationSize",
+                 alloc_info.allocationSize);
     VkDeviceMemory vk_memory = VK_NULL_HANDLE;
     if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().AllocateMemory(
             vulkan_provider_.vk_device(), &alloc_info, NULL, &vk_memory)) !=
