@@ -26,8 +26,7 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-         // Fast start is disabled due to https://github.com/flutter/flutter/issues/48971.
-        <String>['run', '--verbose', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/commands.dart', '--no-fast-start'],
+        <String>['run', '--verbose', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/commands.dart'],
       );
       final StreamController<String> stdout = StreamController<String>.broadcast();
       run.stdout
