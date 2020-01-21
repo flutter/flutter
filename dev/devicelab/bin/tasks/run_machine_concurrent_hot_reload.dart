@@ -48,6 +48,8 @@ void main() {
           'run',
           '--machine',
           '--verbose',
+          // Fast start is disabled due to https://github.com/flutter/flutter/issues/48971.
+          '--no-fast-start',
           '-d',
           device.deviceId,
           'lib/commands.dart',
