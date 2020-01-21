@@ -1892,6 +1892,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       }
     });
     newRoute.didChangeNext(null);
+    oldRoute.didChangeNext(newRoute);
     if (index > 0) {
       _history[index - 1].didChangeNext(newRoute);
       newRoute.didChangePrevious(_history[index - 1]);
@@ -1961,14 +1962,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
             observer.didRemove(removedRoute, newPrecedingRoute);
           removedRoute.dispose();
         }
-
-        if (newPrecedingRoute != null)
-          newPrecedingRoute.didChangeNext(newRoute);
       }
     });
 
     // Notify for newRoute
     newRoute.didChangeNext(null);
+    if (precedingRoute != null) {
+      newRoute.didChangePrevious(precedingRoute);
+      precedingRoute.didChangeNext(newRoute);
+    }
     for (final NavigatorObserver observer in widget.observers)
       observer.didPush(newRoute, precedingRoute);
 
