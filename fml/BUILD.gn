@@ -175,6 +175,7 @@ source_set("fml") {
         "$fuchsia_sdk_root/pkg:async-loop-cpp",
         "$fuchsia_sdk_root/pkg:async-loop-default",
         "$fuchsia_sdk_root/pkg:trace",
+        "$fuchsia_sdk_root/pkg:trace-engine",
         "$fuchsia_sdk_root/pkg:zx",
       ]
     } else {
@@ -183,6 +184,7 @@ source_set("fml") {
         "//zircon/public/lib/async-loop-cpp",
         "//zircon/public/lib/async-loop-default",
         "//zircon/public/lib/trace",
+        "//zircon/public/lib/trace-engine",
         "//zircon/public/lib/zx",
       ]
     }
