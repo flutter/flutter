@@ -53,8 +53,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   await result.future;
   Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
   resultPort.close();
-  errorPort.close(); 
-This is now with the shipping team.
+  errorPort.close();
   isolate.kill();
   Timeline.finishSync();
   return result.future;
