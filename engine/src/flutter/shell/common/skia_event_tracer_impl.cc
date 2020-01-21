@@ -13,7 +13,46 @@
 #include "third_party/skia/include/utils/SkEventTracer.h"
 #include "third_party/skia/include/utils/SkTraceEventPhase.h"
 
+#if defined(OS_FUCHSIA)
+
+#include <algorithm>
+#include <cstring>
+
+#include <lib/trace-engine/context.h>
+#include <lib/trace-engine/instrumentation.h>
+
+// Skia's copy of these flags are defined in a private header, so, as is
+// commonly done with "trace_event_common.h" values, copy them inline here (see
+// https://cs.chromium.org/chromium/src/base/trace_event/common/trace_event_common.h?l=1102-1110&rcl=239b85aeb3a6c07b33b5f162cd0ae8128eabf44d).
+//
+// Type values for identifying types in the TraceValue union.
+#define TRACE_VALUE_TYPE_BOOL (static_cast<unsigned char>(1))
+#define TRACE_VALUE_TYPE_UINT (static_cast<unsigned char>(2))
+#define TRACE_VALUE_TYPE_INT (static_cast<unsigned char>(3))
+#define TRACE_VALUE_TYPE_DOUBLE (static_cast<unsigned char>(4))
+#define TRACE_VALUE_TYPE_POINTER (static_cast<unsigned char>(5))
+#define TRACE_VALUE_TYPE_STRING (static_cast<unsigned char>(6))
+#define TRACE_VALUE_TYPE_COPY_STRING (static_cast<unsigned char>(7))
+#define TRACE_VALUE_TYPE_CONVERTABLE (static_cast<unsigned char>(8))
+
+#endif  // defined(OS_FUCHSIA)
+
 namespace flutter {
+
+namespace {
+
+#if defined(OS_FUCHSIA)
+template <class T, class U>
+inline T BitCast(const U& u) {
+  static_assert(sizeof(T) == sizeof(U));
+
+  T t;
+  memcpy(&t, &u, sizeof(t));
+  return t;
+}
+#endif
+
+}  // namespace
 
 class FlutterEventTracer : public SkEventTracer {
  public:
@@ -33,28 +72,116 @@ class FlutterEventTracer : public SkEventTracer {
                                       const uint64_t* p_arg_values,
                                       uint8_t flags) override {
 #if defined(OS_FUCHSIA)
-    // In a manner analogous to "fml/trace_event.h", use Fuchsia's system
-    // tracing macros when running on Fuchsia.
+    static trace_site_t trace_site;
+    trace_string_ref_t category_ref;
+    trace_context_t* trace_context = trace_acquire_context_for_category_cached(
+        kSkiaTag, &trace_site, &category_ref);
+
+    if (likely(!trace_context)) {
+      return 0;
+    }
+
+    trace_ticks_t ticks = zx_ticks_get();
+
+    trace_thread_ref_t thread_ref;
+    trace_context_register_current_thread(trace_context, &thread_ref);
+    trace_string_ref_t name_ref;
+    trace_context_register_string_literal(trace_context, name, &name_ref);
+
+    constexpr int kMaxArgs = 2;
+    trace_arg_t trace_args[kMaxArgs] = {};
+    FML_DCHECK(num_args >= 0);
+    int num_trace_args = std::min(kMaxArgs, num_args);
+
+    for (int i = 0; i < num_trace_args; i++) {
+      const char* arg_name = p_arg_names[i];
+      const uint8_t arg_type = p_arg_types[i];
+      const uint64_t arg_value = p_arg_values[i];
+
+      trace_string_ref_t arg_name_string_ref =
+          trace_context_make_registered_string_literal(trace_context, arg_name);
+
+      trace_arg_value_t trace_arg_value;
+      switch (arg_type) {
+        case TRACE_VALUE_TYPE_BOOL: {
+          trace_arg_value = trace_make_bool_arg_value(!!arg_value);
+          break;
+        }
+        case TRACE_VALUE_TYPE_UINT:
+          trace_arg_value = trace_make_uint64_arg_value(arg_value);
+          break;
+        case TRACE_VALUE_TYPE_INT:
+          trace_arg_value =
+              trace_make_int64_arg_value(BitCast<int64_t>(arg_value));
+          break;
+        case TRACE_VALUE_TYPE_DOUBLE:
+          trace_arg_value =
+              trace_make_double_arg_value(BitCast<double>(arg_value));
+          break;
+        case TRACE_VALUE_TYPE_POINTER:
+          trace_arg_value =
+              trace_make_pointer_arg_value(BitCast<uintptr_t>(arg_value));
+          break;
+        case TRACE_VALUE_TYPE_STRING: {
+          trace_string_ref_t arg_value_string_ref =
+              trace_context_make_registered_string_literal(
+                  trace_context, reinterpret_cast<const char*>(arg_value));
+          trace_arg_value = trace_make_string_arg_value(arg_value_string_ref);
+          break;
+        }
+        case TRACE_VALUE_TYPE_COPY_STRING: {
+          const char* arg_value_as_cstring =
+              reinterpret_cast<const char*>(arg_value);
+          trace_string_ref_t arg_value_string_ref =
+              trace_context_make_registered_string_copy(
+                  trace_context, arg_value_as_cstring,
+                  strlen(arg_value_as_cstring));
+          trace_arg_value = trace_make_string_arg_value(arg_value_string_ref);
+          break;
+        }
+        case TRACE_VALUE_TYPE_CONVERTABLE:
+          trace_arg_value = trace_make_null_arg_value();
+          break;
+        default:
+          trace_arg_value = trace_make_null_arg_value();
+      }
+
+      trace_args[i] = trace_make_arg(arg_name_string_ref, trace_arg_value);
+    }
+
     switch (phase) {
       case TRACE_EVENT_PHASE_BEGIN:
       case TRACE_EVENT_PHASE_COMPLETE:
-        TRACE_DURATION_BEGIN(kSkiaTag, name);
+        trace_context_write_duration_begin_event_record(
+            trace_context, ticks, &thread_ref, &category_ref, &name_ref,
+            trace_args, num_trace_args);
         break;
       case TRACE_EVENT_PHASE_END:
-        TRACE_DURATION_END(kSkiaTag, name);
+        trace_context_write_duration_end_event_record(
+            trace_context, ticks, &thread_ref, &category_ref, &name_ref,
+            trace_args, num_trace_args);
         break;
       case TRACE_EVENT_PHASE_INSTANT:
-        TRACE_INSTANT(kSkiaTag, name, TRACE_SCOPE_THREAD);
+        trace_context_write_instant_event_record(
+            trace_context, ticks, &thread_ref, &category_ref, &name_ref,
+            TRACE_SCOPE_THREAD, trace_args, num_trace_args);
         break;
       case TRACE_EVENT_PHASE_ASYNC_BEGIN:
-        TRACE_ASYNC_BEGIN(kSkiaTag, name, id);
+        trace_context_write_async_begin_event_record(
+            trace_context, ticks, &thread_ref, &category_ref, &name_ref, id,
+            trace_args, num_trace_args);
         break;
       case TRACE_EVENT_PHASE_ASYNC_END:
-        TRACE_ASYNC_END(kSkiaTag, name, id);
+        trace_context_write_async_end_event_record(
+            trace_context, ticks, &thread_ref, &category_ref, &name_ref, id,
+            trace_args, num_trace_args);
         break;
       default:
         break;
     }
+
+    trace_release_context(trace_context);
+
 #else   // defined(OS_FUCHSIA)
     switch (phase) {
       case TRACE_EVENT_PHASE_BEGIN:
