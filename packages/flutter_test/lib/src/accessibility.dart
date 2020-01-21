@@ -326,7 +326,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
   const CustomContrastGuideline({
     @required this.finder,
     this.minimumRatio = 4.5,
-    this.tolerance = -0.01,
+    this.tolerance = 0.01,
     String description = 'Contrast should follow custom guidelines',
   }) : _description = description;
 
@@ -339,9 +339,8 @@ class CustomContrastGuideline extends AccessibilityGuideline {
 
   /// Tolerance for minimum contrast ratio.
   ///
-  /// Any contrast ratio greater than [minimumRatio] or within [tolerance]
+  /// Any contrast ratio greater than [minimumRatio] or within a distance of [tolerance]
   /// from [minimumRatio] passes the test.
-  // TODO: update to positive.
   final double tolerance;
 
   /// The [Finder] used to find a subset of elements.
@@ -396,7 +395,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
       final ContrastReport report = ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
 
-      if (contrastRatio - minimumRatio >= tolerance) {
+      if (contrastRatio >= minimumRatio - tolerance) {
         return const Evaluation.pass();
       } else {
         return Evaluation.fail(
