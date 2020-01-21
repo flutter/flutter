@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -57,6 +58,31 @@ class PrecacheCommand extends FlutterCommand {
   @override
   bool get shouldUpdateCache => false;
 
+  /// Some flags are umbrella names that expand to include multiple artifacts.
+  static const Map<String, List<String>> _expandedArtifacts = <String, List<String>>{
+    'android': <String>[
+      'android_gen_snapshot',
+      'android_maven',
+      'android_internal_build',
+    ]
+  };
+
+  @override
+  Future<void> validateCommand() {
+    _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
+      if (!argResults.arguments.contains('--no-$umbrellaName')) {
+        return;
+      }
+      for (final String childArtifactName in childArtifactNames) {
+        if (argResults.arguments.contains('--$childArtifactName')) {
+          throwToolExit('--$childArtifactName requires --$umbrellaName');
+        }
+      }
+    });
+
+    return super.validateCommand();
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (boolArg('all-platforms')) {
@@ -74,11 +100,26 @@ class PrecacheCommand extends FlutterCommand {
       if (artifact.feature != null && !featureFlags.isEnabled(artifact.feature)) {
         continue;
       }
-      if (boolArg(artifact.name)) {
+
+      bool expandedArtifactProcessed = false;
+      _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
+        if (!childArtifactNames.contains(artifact.name)) {
+          return;
+        }
+        expandedArtifactProcessed = true;
+
+        // Expanded artifacts options are true by default.
+        // Explicitly ignore them if umbrella name is excluded.
+        // Example: --no-android [--android_gen_snapshot]
+        if (!boolArg(umbrellaName)) {
+          return;
+        }
+
+        // Example: --android [--android_gen_snapshot]
         requiredArtifacts.add(artifact);
-      }
-      // The `android` flag expands to android_gen_snapshot, android_maven, android_internal_build.
-      if (artifact.name.startsWith('android_') && boolArg('android')) {
+      });
+
+      if (!expandedArtifactProcessed && boolArg(artifact.name)) {
         requiredArtifacts.add(artifact);
       }
     }
