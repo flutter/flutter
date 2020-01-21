@@ -142,7 +142,7 @@ class DriveCommand extends RunCommandBase {
     }
 
     String observatoryUri;
-    bool isWebPlatform = await device.targetPlatform == TargetPlatform.web_javascript;
+    final bool isWebPlatform = await device.targetPlatform == TargetPlatform.web_javascript;
     if (argResults['use-existing-app'] == null) {
       globals.printStatus('Starting application: $targetFile');
 
