@@ -517,10 +517,12 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     // However, cocoapods will run before that script and requires something
     // to be in this location.
     final Directory framework = globals.fs.directory(
-      globals.artifacts.getArtifactPath(Artifact.flutterFramework,
-      platform: TargetPlatform.ios,
-      mode: mode,
-    ));
+      globals.artifacts.getArtifactPath(
+        Artifact.flutterFramework,
+        platform: TargetPlatform.ios,
+        mode: mode,
+      )
+    );
     if (framework.existsSync()) {
       final Directory engineDest = ephemeralDirectory
           .childDirectory('Flutter')
