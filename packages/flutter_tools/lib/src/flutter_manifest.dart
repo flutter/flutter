@@ -342,8 +342,9 @@ bool _validate(YamlMap manifest) {
         }
         if (kvp.value is! YamlMap) {
           errors.add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
+        } else {
+          _validateFlutter(kvp.value as YamlMap, errors);
         }
-        _validateFlutter(kvp.value as YamlMap, errors);
         break;
       default:
         // additionalProperties are allowed.

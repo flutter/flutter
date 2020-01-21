@@ -641,6 +641,21 @@ flutter:
       expect(assets[1].path, 'lib/gallery/abc%3Fxyz');
       expect(assets[2].path, 'lib/gallery/aaa%20bbb');
     });
+
+    testUsingContext('Returns proper error when flutter is a list instead of a map', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  - uses-material-design: true
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+
+      expect(flutterManifest, null);
+      expect(testLogger.errorText, contains('Expected "flutter" section to be an object or null, but got [{uses-material-design: true}].'));
+    });
   });
 
   group('FlutterManifest with MemoryFileSystem', () {
