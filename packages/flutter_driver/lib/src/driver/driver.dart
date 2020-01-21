@@ -87,18 +87,17 @@ abstract class FlutterDriver {
   FlutterDriver();
 
   /// Creates a driver that uses a connection provided by either the combination
-  /// of [webConnection] and [browser], or the combination of [serviceClient],
+  /// of [webConnection], or the combination of [serviceClient],
   /// [peer] and [appIsolate]
   @visibleForTesting
   factory FlutterDriver.connectedTo({
     FlutterWebConnection webConnection,
-    bool supportTimelineAction,
     VMServiceClient serviceClient,
     rpc.Peer peer,
     VMIsolate appIsolate,
   }) {
-    if (webConnection != null && supportTimelineAction != null) {
-      return WebFlutterDriver.connectedTo(webConnection, supportTimelineAction);
+    if (webConnection != null) {
+      return WebFlutterDriver.connectedTo(webConnection);
     }
     return VMServiceFlutterDriver.connectedTo(serviceClient, peer, appIsolate);
   }

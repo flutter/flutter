@@ -26,12 +26,11 @@ import 'timeline.dart';
 ///   4. Run test script: flutter drive --target=test_driver/scroll_perf_web.dart -v --use-existing-app=/application address/
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
-  /// [_connection] and [_browserName].
-  WebFlutterDriver.connectedTo(this._connection, this._browserSupportsTimeline) :
+  /// [_connection].
+  WebFlutterDriver.connectedTo(this._connection) :
         _startTime = DateTime.now();
 
   final FlutterWebConnection _connection;
-  final bool _browserSupportsTimeline;
   DateTime _startTime;
 
   /// Start time for tracing
@@ -52,8 +51,8 @@ class WebFlutterDriver extends FlutterDriver {
   static Future<FlutterDriver> connectWeb(
       {String hostUrl, Duration timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
-    final bool browserSupportsTimeline = Platform.environment['BROWSER_SUPPORTS_TIMELINE'] == 'true';
     final Map<String, dynamic> settings = <String, dynamic>{
+      'support-timeline-action': Platform.environment['SUPPORT_TIMELINE_ACTION'] == 'true',
       'session-id': Platform.environment['DRIVER_SESSION_ID'],
       'session-uri': Platform.environment['DRIVER_SESSION_URI'],
       'session-spec': Platform.environment['DRIVER_SESSION_SPEC'],
@@ -61,7 +60,7 @@ class WebFlutterDriver extends FlutterDriver {
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
       (hostUrl, settings, timeout: timeout);
-    return WebFlutterDriver.connectedTo(connection, browserSupportsTimeline);
+    return WebFlutterDriver.connectedTo(connection);
   }
 
   @override
@@ -157,7 +156,7 @@ class WebFlutterDriver extends FlutterDriver {
 
   /// Checks whether browser supports Timeline related operations
   void _checkBrowserSupportsTimeline() {
-    if (_browserSupportsTimeline) {
+    if (_connection.supportTimelineAction) {
       throw UnsupportedError('Timeline action is not supported by current testing browser');
     }
   }
@@ -166,9 +165,23 @@ class WebFlutterDriver extends FlutterDriver {
 /// Encapsulates connection information to an instance of a Flutter Web application.
 class FlutterWebConnection {
   /// Creates a FlutterWebConnection with WebDriver
-  FlutterWebConnection(this._driver);
+  /// and whether the WebDriver supports timeline action
+  FlutterWebConnection(this._driver, this._supportTimelineAction);
 
   final sync_io.WebDriver _driver;
+
+
+  bool _supportTimelineAction;
+  /// Whether the connected WebDriver supports timeline action for Flutter Web Driver
+  // ignore: unnecessary_getters_setters
+  bool get supportTimelineAction => _supportTimelineAction;
+
+  /// Setter for _supportTimelineAction
+  @visibleForTesting
+  // ignore: unnecessary_getters_setters
+  set supportTimelineAction(bool value) {
+    _supportTimelineAction = value;
+  }
 
   /// Starts WebDriver with the given [capabilities] and
   /// establishes the connection to Flutter Web application.
@@ -186,7 +199,7 @@ class FlutterWebConnection {
     driver.get(url);
 
     await waitUntilExtensionInstalled(driver, timeout);
-    return FlutterWebConnection(driver);
+    return FlutterWebConnection(driver, settings['support-timeline-action'] as bool);
   }
 
   /// Sends command via WebDriver to Flutter web application

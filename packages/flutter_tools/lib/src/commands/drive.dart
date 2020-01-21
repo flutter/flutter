@@ -204,7 +204,7 @@ class DriveCommand extends RunCommandBase {
         'DRIVER_SESSION_URI': driver.uri.toString(),
         'DRIVER_SESSION_SPEC': driver.spec.toString(),
         'DRIVER_SESSION_CAPABILITIES': jsonEncode(driver.capabilities),
-        'BROWSER_SUPPORTS_TIMELINE': (browser == Browser.chrome).toString(),
+        'SUPPORT_TIMELINE_ACTION': (browser == Browser.chrome).toString(),
         'FLUTTER_WEB_TEST': 'true',
       });
     }
