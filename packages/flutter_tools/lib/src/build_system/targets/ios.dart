@@ -89,6 +89,9 @@ class AotAssemblyRelease extends AotAssemblyBase {
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
+    // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
+    // it resolves to a file (ios/gen_snapshot) that never exists. This was
+    // split into gen_snapshot_arm64 and gen_snapshot_armv7.
     // Source.artifact(Artifact.genSnapshot,
     //   platform: TargetPlatform.ios,
     //   mode: BuildMode.release,
@@ -121,6 +124,9 @@ class AotAssemblyProfile extends AotAssemblyBase {
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
+    // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
+    // it resolves to a file (ios/gen_snapshot) that never exists. This was
+    // split into gen_snapshot_arm64 and gen_snapshot_armv7.
     // Source.artifact(Artifact.genSnapshot,
     //   platform: TargetPlatform.ios,
     //   mode: BuildMode.profile,
