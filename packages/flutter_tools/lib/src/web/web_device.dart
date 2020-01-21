@@ -55,9 +55,6 @@ class ChromeDevice extends Device {
   bool get supportsScreenshot => false;
 
   @override
-  bool get isWebDevice => true;
-
-  @override
   void clearLogs() { }
 
   DeviceLogReader _logReader;
@@ -213,14 +210,11 @@ class WebServerDevice extends Device {
   void clearLogs() { }
 
   @override
-  bool get isWebDevice => true;
-
-  @override
   Future<String> get emulatorId => null;
 
   DeviceLogReader _logReader;
 
-  @override
+  @override`
   DeviceLogReader getLogReader({ApplicationPackage app}) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }

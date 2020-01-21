@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter_tools/src/convert.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 import 'package:meta/meta.dart';
 
@@ -13,7 +12,9 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
+import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
@@ -141,10 +142,11 @@ class DriveCommand extends RunCommandBase {
     }
 
     String observatoryUri;
+    bool isWebPlatform = await device.targetPlatform == TargetPlatform.web_javascript;
     if (argResults['use-existing-app'] == null) {
       globals.printStatus('Starting application: $targetFile');
 
-      if (getBuildInfo().isRelease && !device.isWebDevice) {
+      if (getBuildInfo().isRelease && !isWebPlatform) {
         // This is because we need VM service to be able to drive the app.
         // For Flutter Web, testing in release mode is allowed.
         throwToolExit(
@@ -174,7 +176,7 @@ class DriveCommand extends RunCommandBase {
     sync_io.WebDriver driver;
     // For web device, WebDriver session will be launched beforehand
     // so that FlutterDriver can reuse it.
-    if (device.isWebDevice) {
+    if (isWebPlatform) {
       // start WebDriver
       final Browser browser = _browserNameToEnum(argResults['browser-name'].toString());
       driver = _createDriver(
