@@ -693,7 +693,7 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      mockConnection.supportTimelineAction = true;
+      mockConnection.supportsTimelineAction = true;
       driver = WebFlutterDriver.connectedTo(mockConnection);
     });
 
@@ -1033,7 +1033,7 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      mockConnection.supportTimelineAction = false;
+      mockConnection.supportsTimelineAction = false;
       driver = WebFlutterDriver.connectedTo(mockConnection);
     });
 
