@@ -74,14 +74,14 @@ class _IsolateConfiguration<Q, R> {
   final String debugLabel;
   final int flowId;
 
-  R apply() => callback(message);
+  FutureOr<R> apply() => callback(message);
 }
 
 Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
   R result;
   await Timeline.timeSync(
     '${configuration.debugLabel}',
-    () async { result = await configuration.apply(); },
+    () async { result = await await configuration.apply(); },
     flow: Flow.step(configuration.flowId),
   );
   Timeline.timeSync(
