@@ -176,7 +176,7 @@ class DriveCommand extends RunCommandBase {
     // so that FlutterDriver can reuse it.
     if (device.isWebDevice) {
       // start WebDriver
-      final _Browser browser = _browserNameToEnum(argResults['browser-name'].toString());
+      final Browser browser = _browserNameToEnum(argResults['browser-name'].toString());
       driver = _createDriver(
         argResults['driver-port'].toString(),
         browser,
@@ -202,7 +202,7 @@ class DriveCommand extends RunCommandBase {
         'DRIVER_SESSION_URI': driver.uri.toString(),
         'DRIVER_SESSION_SPEC': driver.spec.toString(),
         'DRIVER_SESSION_CAPABILITIES': jsonEncode(driver.capabilities),
-        'BROWSER_SUPPORTS_TIMELINE': (browser == _Browser.chrome).toString(),
+        'BROWSER_SUPPORTS_TIMELINE': (browser == Browser.chrome).toString(),
         'FLUTTER_WEB_TEST': 'true',
       });
     }
@@ -409,7 +409,8 @@ Future<bool> _stopApp(DriveCommand command) async {
 }
 
 /// A list of supported browsers
-enum _Browser {
+@visibleForTesting
+enum Browser {
   /// Chrome: https://www.google.com/chrome/
   chrome,
   /// Edge: https://www.microsoft.com/en-us/windows/microsoft-edge
@@ -422,31 +423,31 @@ enum _Browser {
   safari,
 }
 
-/// Converts [browserName] string to [_Browser]
-_Browser _browserNameToEnum(String browserName){
+/// Converts [browserName] string to [Browser]
+Browser _browserNameToEnum(String browserName){
   switch (browserName) {
-    case 'chrome': return _Browser.chrome;
-    case 'edge': return _Browser.edge;
-    case 'firefox': return _Browser.firefox;
-    case 'ios-safari': return _Browser.iosSafari;
-    case 'safari': return _Browser.safari;
+    case 'chrome': return Browser.chrome;
+    case 'edge': return Browser.edge;
+    case 'firefox': return Browser.firefox;
+    case 'ios-safari': return Browser.iosSafari;
+    case 'safari': return Browser.safari;
   }
   throw UnsupportedError('Browser $browserName not supported');
 }
 
-sync_io.WebDriver _createDriver(String driverPort, _Browser browser, bool headless) {
+sync_io.WebDriver _createDriver(String driverPort, Browser browser, bool headless) {
   return sync_io.createDriver(
       uri: Uri.parse('http://localhost:$driverPort/wd/hub/'),
       desired: getDesiredCapabilities(browser, headless),
-      spec: browser != _Browser.iosSafari ? sync_io.WebDriverSpec.JsonWire : sync_io.WebDriverSpec.W3c
+      spec: browser != Browser.iosSafari ? sync_io.WebDriverSpec.JsonWire : sync_io.WebDriverSpec.W3c
   );
 }
 
 /// Returns desired capabilities for given [browser] and [headless].
 @visibleForTesting
-Map<String, dynamic> getDesiredCapabilities(_Browser browser, bool headless) {
+Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
   switch (browser) {
-    case _Browser.chrome:
+    case Browser.chrome:
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
@@ -474,7 +475,7 @@ Map<String, dynamic> getDesiredCapabilities(_Browser browser, bool headless) {
         }
       };
       break;
-    case _Browser.firefox:
+    case Browser.firefox:
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'firefox',
@@ -496,13 +497,13 @@ Map<String, dynamic> getDesiredCapabilities(_Browser browser, bool headless) {
         }
       };
       break;
-    case _Browser.edge:
+    case Browser.edge:
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'edge',
       };
       break;
-    case _Browser.safari:
+    case Browser.safari:
       return <String, dynamic>{
         'browserName': 'safari',
         'safari.options': <String, dynamic>{
@@ -511,7 +512,7 @@ Map<String, dynamic> getDesiredCapabilities(_Browser browser, bool headless) {
         }
       };
       break;
-    case _Browser.iosSafari:
+    case Browser.iosSafari:
       return <String, dynamic>{
         'platformName': 'ios',
         'browserName': 'safari',
