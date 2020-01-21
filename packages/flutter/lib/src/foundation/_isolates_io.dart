@@ -53,7 +53,8 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   await result.future;
   Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
   resultPort.close();
-  errorPort.close();
+  errorPort.close(); 
+This is now with the shipping team.
   isolate.kill();
   Timeline.finishSync();
   return result.future;
@@ -81,7 +82,10 @@ Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) a
   R result;
   await Timeline.timeSync(
     '${configuration.debugLabel}',
-    () async { result = await await configuration.apply(); },
+    () async { 
+      FutureOr<R> applicationResult = await configuration.apply();
+      result = await applicationResult;
+    },
     flow: Flow.step(configuration.flowId),
   );
   Timeline.timeSync(
