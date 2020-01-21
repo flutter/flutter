@@ -341,6 +341,7 @@ class CustomContrastGuideline extends AccessibilityGuideline {
   ///
   /// Any contrast ratio greater than [minimumRatio] or within a distance of [tolerance]
   /// from [minimumRatio] passes the test.
+  /// Defaults to 0.01.
   final double tolerance;
 
   /// The [Finder] used to find a subset of elements.
