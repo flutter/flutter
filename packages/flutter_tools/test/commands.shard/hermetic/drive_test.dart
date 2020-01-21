@@ -585,6 +585,7 @@ void main() {
         'browserName': 'chrome',
         'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
         'chromeOptions': <String, dynamic>{
+          'w3c': false,
           'args': <String>[
             '--bwsi',
             '--disable-background-timer-throttling',
@@ -615,6 +616,7 @@ void main() {
         'browserName': 'chrome',
         'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
         'chromeOptions': <String, dynamic>{
+          'w3c': false,
           'args': <String>[
             '--bwsi',
             '--disable-background-timer-throttling',
