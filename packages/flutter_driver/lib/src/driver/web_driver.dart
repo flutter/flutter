@@ -23,7 +23,7 @@ import 'timeline.dart';
 ///   1. Have Selenium server (https://bit.ly/2TlkRyu) and WebDriver binary (https://chromedriver.chromium.org/downloads) downloaded and placed under the same folder
 ///   2. Launch WebDriver Server: java -jar selenium-server-standalone-3.141.59.jar
 ///   3. Launch Flutter Web application: flutter run -v -d chrome --target=test_driver/scroll_perf_web.dart
-///   4. Run test script: flutter drive --target=test_driver/scroll_perf.dart -v --use-existing-app=/application address/
+///   4. Run test script: flutter drive --target=test_driver/scroll_perf_web.dart -v --use-existing-app=/application address/
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_connection] and [_browserName].
@@ -46,8 +46,9 @@ class WebFlutterDriver extends FlutterDriver {
 
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
-  /// Driver also depends on environment variables BROWSER_NAME,
-  /// BROWSER_DIMENSION, HEADLESS and SELENIUM_PORT for configurations.
+  /// Driver also depends on environment variables DRIVER_SESSION_ID,
+  /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC
+  /// and DRIVER_SESSION_CAPABILITIES for configurations.
   static Future<FlutterDriver> connectWeb(
       {String hostUrl, Duration timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
