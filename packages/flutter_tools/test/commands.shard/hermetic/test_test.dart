@@ -48,6 +48,31 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     Cache: () => FakeCache(),
   });
+
+  testUsingContext('Pipes start-paused to package:test',
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--start-paused',
+      '--',
+      'test/fake_test.dart',
+    ]);
+    expect(
+      fakePackageTest.lastArgs,
+      contains('--pause-after-load'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => FakeCache(),
+  });
 }
 
 class FakePackageTest implements TestWrapper {
