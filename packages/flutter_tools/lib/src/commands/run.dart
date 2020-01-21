@@ -189,7 +189,8 @@ class RunCommand extends RunCommandBase {
       )
       ..addFlag('fast-start',
         negatable: true,
-        defaultsTo: true,
+        defaultsTo: false,
+        hide: true,
         help: 'Whether to quickly bootstrap applications with a minimal app. '
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
@@ -318,6 +319,10 @@ class RunCommand extends RunCommandBase {
       await super.validateCommand();
     }
 
+    if (boolArg('fast-start') && runningWithPrebuiltApplication) {
+      throwToolExit('--fast-start is not supported with --use-application-binary');
+    }
+
     devices = await findAllTargetDevices();
     if (devices == null) {
       throwToolExit(null);
@@ -360,9 +365,7 @@ class RunCommand extends RunCommandBase {
         vmserviceOutFile: stringArg('vmservice-out-file'),
         // Allow forcing fast-start to off to prevent doing more work on devices that
         // don't support it.
-        fastStart: boolArg('fast-start')
-          && !runningWithPrebuiltApplication
-          && devices.every((Device device) => device.supportsFastStart),
+        fastStart: boolArg('fast-start') && devices.every((Device device) => device.supportsFastStart),
       );
     }
   }
@@ -425,6 +428,12 @@ class RunCommand extends RunCommandBase {
     }
 
     for (final Device device in devices) {
+      if (!device.supportsFastStart && boolArg('fast-start')) {
+        globals.printStatus(
+          'Using --fast-start option with device ${device.name}, but this device '
+          'does not support it. Overriding the setting to false.'
+        );
+      }
       if (await device.isLocalEmulator) {
         if (await device.supportsHardwareRendering) {
           final bool enableSoftwareRendering = boolArg('enable-software-rendering') == true;
