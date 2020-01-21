@@ -144,10 +144,11 @@ class DriveCommand extends RunCommandBase {
     if (argResults['use-existing-app'] == null) {
       globals.printStatus('Starting application: $targetFile');
 
-      if (getBuildInfo().isRelease) {
+      if (getBuildInfo().isRelease && !device.isWebDevice) {
         // This is because we need VM service to be able to drive the app.
+        // For Flutter Web, testing in release mode is allowed.
         throwToolExit(
-          'Flutter Driver does not support running in release mode.\n'
+          'Flutter Driver (non-web) does not support running in release mode.\n'
           '\n'
           'Use --profile mode for testing application performance.\n'
           'Use --debug (default) mode for testing correctness (with assertions).'
@@ -171,6 +172,8 @@ class DriveCommand extends RunCommandBase {
     };
 
     sync_io.WebDriver driver;
+    // For web device, WebDriver session will be launched beforehand
+    // so that FlutterDriver can reuse it.
     if (device.isWebDevice) {
       // start WebDriver
       final _Browser browser = _browserNameToEnum(argResults['browser-name'].toString());

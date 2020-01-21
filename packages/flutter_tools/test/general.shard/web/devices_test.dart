@@ -44,6 +44,7 @@ void main() {
     expect(chromeDevice.getLogReader(app: mockWebApplicationPackage), isA<NoOpDeviceLogReader>());
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
+    expect(chromeDevice.isWebDevice, true);
   });
 
   test('Server defaults', () async {
@@ -60,6 +61,7 @@ void main() {
     expect(device.getLogReader(app: mockWebApplicationPackage), isA<NoOpDeviceLogReader>());
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(await device.portForwarder.forward(1), 1);
+    expect(device.isWebDevice, true);
   });
 
   testUsingContext('Chrome device is listed when Chrome is available', () async {

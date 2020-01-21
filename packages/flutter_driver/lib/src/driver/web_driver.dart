@@ -181,7 +181,7 @@ class FlutterWebConnection {
         settings['session-id'].toString(),
         uri: Uri.parse(settings['session-uri'].toString()),
         spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()),
-        capabilities: <String, dynamic>{} ); //jsonDecode(settings['session-capabilities'].toString()) as Map<String, dynamic>
+        capabilities: jsonDecode(settings['session-capabilities'].toString()) as Map<String, dynamic>);
     driver.get(url);
 
     await waitUntilExtensionInstalled(driver, timeout);
