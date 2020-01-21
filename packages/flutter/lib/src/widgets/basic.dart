@@ -2095,11 +2095,11 @@ class SizedBox extends SingleChildRenderObjectWidget {
   String toStringShort() {
     String type;
     if (width == double.infinity && height == double.infinity) {
-      type = '$runtimeType.expand';
+      type = '${objectRuntimeType(this, 'SizedBox')}.expand';
     } else if (width == 0.0 && height == 0.0) {
-      type = '$runtimeType.shrink';
+      type = '${objectRuntimeType(this, 'SizedBox')}.shrink';
     } else {
-      type = '$runtimeType';
+      type = '${objectRuntimeType(this, 'SizedBox')}';
     }
     return key == null ? '$type' : '$type-$key';
   }

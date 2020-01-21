@@ -194,9 +194,10 @@ class _Heading extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return _OptionsItem(
       child: DefaultTextStyle(
-        style: theme.textTheme.body1.copyWith(
+        style: theme.textTheme.title.copyWith(
           fontFamily: 'GoogleSans',
-          color: theme.accentColor,
+          color: theme.colorScheme.onPrimary,
+          fontWeight: FontWeight.w700,
         ),
         child: Semantics(
           child: Text(text),
@@ -525,7 +526,7 @@ class GalleryOptionsPage extends StatelessWidget {
           _TextDirectionItem(options, onOptionsChanged),
           _TimeDilationItem(options, onOptionsChanged),
           const Divider(),
-          const _Heading('Platform mechanics'),
+          const ExcludeSemantics(child: _Heading('Platform mechanics')),
           _PlatformItem(options, onOptionsChanged),
           ..._enabledDiagnosticItems(),
           const Divider(),

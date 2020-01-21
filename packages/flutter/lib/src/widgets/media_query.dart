@@ -574,7 +574,7 @@ class MediaQueryData {
 
   @override
   String toString() {
-    return '$runtimeType('
+    return '${objectRuntimeType(this, 'MediaQueryData')}('
              'size: $size, '
              'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
              'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '

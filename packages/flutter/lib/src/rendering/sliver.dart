@@ -715,7 +715,7 @@ class SliverGeometry extends Diagnosticable {
         if (check)
           return;
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('$runtimeType is not valid: $summary'),
+          ErrorSummary('${objectRuntimeType(this, 'SliverGeometry')} is not valid: $summary'),
           ...?details,
           if (informationCollector != null)
             ...informationCollector(),
@@ -758,7 +758,7 @@ class SliverGeometry extends Diagnosticable {
   }
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => '${objectRuntimeType(this, 'SliverGeometry')}';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1394,7 +1394,7 @@ abstract class RenderSliver extends RenderObject {
   @protected
   double childMainAxisPosition(covariant RenderObject child) {
     assert(() {
-      throw FlutterError('$runtimeType does not implement childPosition.');
+      throw FlutterError('${objectRuntimeType(this, 'RenderSliver')} does not implement childPosition.');
     }());
     return 0.0;
   }
@@ -1431,7 +1431,7 @@ abstract class RenderSliver extends RenderObject {
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(() {
-      throw FlutterError('$runtimeType does not implement applyPaintTransform.');
+      throw FlutterError('${objectRuntimeType(this, 'RenderSliver')} does not implement applyPaintTransform.');
     }());
   }
 

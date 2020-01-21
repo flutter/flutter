@@ -1138,7 +1138,7 @@ abstract class CustomClipper<T> {
   bool shouldReclip(covariant CustomClipper<T> oldClipper);
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => '${objectRuntimeType(this, 'CustomClipper')}';
 }
 
 /// A [CustomClipper] that clips to the outer path of a [ShapeBorder].
@@ -2472,6 +2472,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
       return;
     _translation = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   @override

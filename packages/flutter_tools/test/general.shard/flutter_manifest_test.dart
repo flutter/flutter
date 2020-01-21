@@ -619,6 +619,28 @@ flutter:
       expect(testLogger.errorText, contains('Asset manifest contains a null or empty uri.'));
       expect(assets.length, 1);
     });
+
+    testUsingContext('Special characters in asset URIs', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - lib/gallery/abc#xyz
+    - lib/gallery/abc?xyz
+    - lib/gallery/aaa bbb
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      final List<Uri> assets = flutterManifest.assets;
+
+      expect(assets.length, 3);
+      expect(assets[0].path, 'lib/gallery/abc%23xyz');
+      expect(assets[1].path, 'lib/gallery/abc%3Fxyz');
+      expect(assets[2].path, 'lib/gallery/aaa%20bbb');
+    });
   });
 
   group('FlutterManifest with MemoryFileSystem', () {

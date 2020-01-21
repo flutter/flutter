@@ -87,7 +87,7 @@ class ObjectKey extends LocalKey {
   String toString() {
     if (runtimeType == ObjectKey)
       return '[${describeIdentity(value)}]';
-    return '[$runtimeType ${describeIdentity(value)}]';
+    return '[${objectRuntimeType(this, 'ObjectKey')} ${describeIdentity(value)}]';
   }
 }
 
@@ -337,8 +337,8 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 
   @override
   String toString() {
-    String selfType = runtimeType.toString();
-    // const GlobalObjectKey().runtimeType.toString() returns 'GlobalObjectKey<State<StatefulWidget>>'
+    String selfType = objectRuntimeType(this, 'GlobalObjectKey');
+    // The runtimeType string of a GlobalObjectKey() returns 'GlobalObjectKey<State<StatefulWidget>>'
     // because GlobalObjectKey is instantiated to its bounds. To avoid cluttering the output
     // we remove the suffix.
     const String suffix = '<State<StatefulWidget>>';
@@ -442,7 +442,7 @@ abstract class Widget extends DiagnosticableTree {
   /// A short, textual description of this widget.
   @override
   String toStringShort() {
-    return key == null ? '$runtimeType' : '$runtimeType-$key';
+    return key == null ? '${objectRuntimeType(this, 'Widget')}' : '${objectRuntimeType(this, 'Widget')}-$key';
   }
 
   @override
@@ -3891,7 +3891,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// A short, textual description of this element.
   @override
   String toStringShort() {
-    return widget != null ? '${widget.toStringShort()}' : '[$runtimeType]';
+    return widget != null ? '${widget.toStringShort()}' : '[${objectRuntimeType(this, 'Element')}]';
   }
 
   @override

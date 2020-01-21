@@ -94,7 +94,7 @@ class TextSelection extends TextRange {
 
   @override
   String toString() {
-    return '$runtimeType(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
+    return '${objectRuntimeType(this, 'TextSelection')}(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
   }
 
   @override

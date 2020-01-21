@@ -108,7 +108,11 @@ Future<void> main(List<String> args) async {
       DeviceManager: () => _FuchsiaDeviceManager(),
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
       Artifacts: () => OverrideArtifacts(
-        parent: CachedArtifacts(),
+        parent: CachedArtifacts(
+          fileSystem: globals.fs,
+          cache: globals.cache,
+          platform: globals.platform,
+        ),
         frontendServer: frontendServer,
         engineDartBinary: dartSdk,
         platformKernelDill: platformKernelDill,

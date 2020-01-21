@@ -115,6 +115,23 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('Continues on failed stamp file update', () async {
+      final Directory artifactDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+      final Directory downloadDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
+      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
+      when(mockCache.setStampFor(any, any)).thenAnswer((_) {
+        throw const FileSystemException('stamp write failed');
+      });
+      final FakeSimpleArtifact artifact = FakeSimpleArtifact(mockCache);
+      await artifact.update();
+      expect(testLogger.errorText, contains('stamp write failed'));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
       final GradleWrapper gradleWrapper = GradleWrapper(mockCache);
       final Directory directory = globals.fs.directory('/Applications/flutter/bin/cache');
@@ -453,6 +470,19 @@ class FakeCachedArtifact extends EngineCachedArtifact {
 
   @override
   List<String> getPackageDirs() => packageDirs;
+}
+
+class FakeSimpleArtifact extends CachedArtifact {
+  FakeSimpleArtifact(Cache cache) : super(
+    'fake',
+    cache,
+    DevelopmentArtifact.universal,
+  );
+
+  @override
+  Future<void> updateInner() async {
+    // nop.
+  }
 }
 
 class FakeDownloadedArtifact extends CachedArtifact {

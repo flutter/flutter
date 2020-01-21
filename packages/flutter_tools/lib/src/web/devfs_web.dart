@@ -28,7 +28,7 @@ import 'bootstrap.dart';
 /// This is only used in development mode.
 class WebAssetServer {
   @visibleForTesting
-  WebAssetServer(this._httpServer, this._packages,
+  WebAssetServer(this._httpServer, this._packages, this.internetAddress,
       {@required void Function(dynamic, StackTrace) onError}) {
     _httpServer.listen((HttpRequest request) {
       _handleRequest(request).catchError(onError);
@@ -46,10 +46,11 @@ class WebAssetServer {
   /// trace.
   static Future<WebAssetServer> start(String hostname, int port) async {
     try {
-      final HttpServer httpServer = await HttpServer.bind(hostname, port);
+      final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
+      final HttpServer httpServer = await HttpServer.bind(address, port);
       final Packages packages =
           await loadPackagesFile(Uri.base.resolve('.packages'));
-      return WebAssetServer(httpServer, packages,
+      return WebAssetServer(httpServer, packages, address,
           onError: (dynamic error, StackTrace stackTrace) {
         httpServer.close(force: true);
         throwToolExit(
@@ -71,6 +72,7 @@ class WebAssetServer {
   final RegExp _drivePath = RegExp(r'\/[A-Z]:\/');
 
   final Packages _packages;
+  final InternetAddress internetAddress;
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   Future<void> _handleRequest(HttpRequest request) async {
@@ -274,7 +276,13 @@ class WebDevFS implements DevFS {
   @override
   Future<Uri> create() async {
     _webAssetServer = await WebAssetServer.start(hostname, port);
-    return Uri.base;
+    final InternetAddress internetAddress = _webAssetServer.internetAddress;
+    // Format ipv6 hosts according to RFC 5952.
+    return Uri.parse(
+      internetAddress.type == InternetAddressType.IPv4
+        ? '${internetAddress.address}:$port'
+        : '[${internetAddress.address}]:$port'
+    );
   }
 
   @override
