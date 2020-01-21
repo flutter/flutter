@@ -32,11 +32,9 @@ void main() {
   MockOperatingSystemUtils mockOperatingSystemUtils;
   MockProcessUtils mockProcessUtils;
   bool lastInitializePlatform;
-  dynamic lastAddress;
   int lastPort;
 
   setUp(() {
-    lastAddress = null;
     lastPort = null;
     lastInitializePlatform = null;
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
@@ -95,7 +93,6 @@ void main() {
         ChromeLauncher: () => mockChromeLauncher,
         ProcessUtils: () => mockProcessUtils,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
-          lastAddress = address;
           lastPort = port;
           return mockHttpMultiServer;
         },
@@ -178,15 +175,17 @@ void main() {
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
-      hostname: 'foo',
+      hostname: 'localhost',
       port: '1234',
       urlTunneller: null,
       dartDefines: const <String>[],
     );
 
-    expect(webFs.uri, contains('foo:1234'));
+    // Might be either ipv4 or ipv6 for localhost.
+    final bool hasExpectedUri = webFs.uri.toString().contains('[::1]:1234') ||
+                                webFs.uri.toString().contains('127.0.0.1:1234');
+    expect(hasExpectedUri, true);
     expect(lastPort, 1234);
-    expect(lastAddress, contains('foo'));
   }));
 
   test('Throws exception if build fails', () => testbed.run(() async {

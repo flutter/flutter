@@ -402,7 +402,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       hostPort,
       packagesFilePath,
     );
-    await device.devFS.create();
+    final Uri url = await device.devFS.create();
     await _updateDevFS(fullRestart: true);
     device.generator.accept();
     await device.device.startApp(
@@ -410,7 +410,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       mainPath: target,
       debuggingOptions: debuggingOptions,
       platformArgs: <String, Object>{
-        'uri': 'http://$effectiveHostname:$hostPort',
+        'uri': url.toString(),
       },
     );
     return attach(
