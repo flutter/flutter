@@ -318,12 +318,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
 /// A guideline which verifies that all elements specified by a [Finder] [finder]
 /// meet minimum contrast levels.
-class CustomContrastGuideline extends AccessibilityGuideline {
+class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   /// Creates a custom guideline which verifies that all elements specified
   /// by [finder] meet minimum contrast levels.
   ///
   /// An optional description string can be given using the [description] parameter.
-  const CustomContrastGuideline({
+  const CustomMinimumContrastGuideline({
     @required this.finder,
     this.minimumRatio = 4.5,
     this.tolerance = 0.01,

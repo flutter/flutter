@@ -16,7 +16,7 @@ void main() {
 
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    await expectLater(tester, meetsGuideline(CustomContrastGuideline(finder: find.byWidgetPredicate((Widget widget) => widget is Icon))));
+    await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: find.byWidgetPredicate((Widget widget) => widget is Icon))));
   });
 
   testWidgets('Menu icon satisfies accessibility contrast ratio guidelines, dark mode', (WidgetTester tester) async {
@@ -27,6 +27,6 @@ void main() {
 
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    await expectLater(tester, meetsGuideline(CustomContrastGuideline(finder: find.byWidgetPredicate((Widget widget) => widget is Icon))));
+    await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: find.byWidgetPredicate((Widget widget) => widget is Icon))));
   });
 }
