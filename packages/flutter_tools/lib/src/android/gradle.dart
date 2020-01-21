@@ -877,7 +877,7 @@ String _getLocalArtifactVersion(String pomPath) {
     );
   } on FileSystemException {
     throwToolExit(
-      'Error reading $pomPath. Please ensure that you have read permission to this'
+      'Error reading $pomPath. Please ensure that you have read permission to this '
       'file and try again.');
   }
   final Iterable<xml.XmlElement> project = document.findElements('project');

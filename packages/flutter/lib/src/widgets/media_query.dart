@@ -574,22 +574,23 @@ class MediaQueryData {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'MediaQueryData')}('
-             'size: $size, '
-             'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
-             'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
-             'platformBrightness: $platformBrightness, '
-             'padding: $padding, '
-             'viewPadding: $viewPadding, '
-             'viewInsets: $viewInsets, '
-             'physicalDepth: $physicalDepth, '
-             'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
-             'accessibleNavigation: $accessibleNavigation, '
-             'highContrast: $highContrast,'
-             'disableAnimations: $disableAnimations, '
-             'invertColors: $invertColors, '
-             'boldText: $boldText'
-           ')';
+    final List<String> properties = <String>[
+      'size: $size',
+      'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}',
+      'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}',
+      'platformBrightness: $platformBrightness',
+      'padding: $padding',
+      'viewPadding: $viewPadding',
+      'viewInsets: $viewInsets',
+      'physicalDepth: $physicalDepth',
+      'alwaysUse24HourFormat: $alwaysUse24HourFormat',
+      'accessibleNavigation: $accessibleNavigation',
+      'highContrast: $highContrast',
+      'disableAnimations: $disableAnimations',
+      'invertColors: $invertColors',
+      'boldText: $boldText',
+    ];
+    return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
 }
 
