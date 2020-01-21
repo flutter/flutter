@@ -710,7 +710,10 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = globals.fs.directory(globals.fs.path.join(location.path, cacheDir));
-      await _downloadZipArchive('Downloading $cacheDir ($urlPath) tools...', Uri.parse(url + urlPath), dir);
+
+      // Avoid printing things like 'Downloading linux-x64 tools...' multiple times.
+      final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
+      await _downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 

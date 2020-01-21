@@ -278,17 +278,19 @@ void main() {
     MemoryFileSystem memoryFileSystem;
     MockCache mockCache;
     MockOperatingSystemUtils mockOperatingSystemUtils;
+    MockHttpClient mockHttpClient;
 
     setUp(() {
       fakeHttpClient = FakeHttpClient();
+      mockHttpClient = MockHttpClient();
       fakePlatform = FakePlatform()..environment = const <String, String>{};
       memoryFileSystem = MemoryFileSystem();
       mockCache = MockCache();
       mockOperatingSystemUtils = MockOperatingSystemUtils();
-      when(mockOperatingSystemUtils.verifyZip(any)).thenReturn(true);
     });
 
     testUsingContext('makes binary dirs readable and executable by all', () async {
+      when(mockOperatingSystemUtils.verifyZip(any)).thenReturn(true);
       final Directory artifactDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
       final Directory downloadDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_download.');
       when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
@@ -313,6 +315,47 @@ void main() {
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       HttpClientFactory: () => () => fakeHttpClient,
+      OperatingSystemUtils: () => mockOperatingSystemUtils,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('prints a friendly name when downloading', () async {
+      when(mockOperatingSystemUtils.verifyZip(any)).thenReturn(false);
+      final MockHttpClientRequest httpClientRequest = MockHttpClientRequest();
+      final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
+      when(httpClientResponse.statusCode).thenReturn(200);
+
+      when(httpClientRequest.close()).thenAnswer((_) async => httpClientResponse);
+      when(mockHttpClient.getUrl(any)).thenAnswer((_) async => httpClientRequest);
+
+      final Directory artifactDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+      final Directory downloadDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
+      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
+      final FakeCachedArtifact artifact = FakeCachedArtifact(
+        cache: mockCache,
+        binaryDirs: <List<String>>[
+          <String>['bin_dir', 'darwin-x64/artifacts.zip'],
+          <String>['font-subset', 'darwin-x64/font-subset.zip'],
+        ],
+        requiredArtifacts: DevelopmentArtifact.universal,
+      );
+      await artifact.updateInner();
+      expect(testLogger.statusText, isNotNull);
+      expect(testLogger.statusText, isNotEmpty);
+      expect(
+        testLogger.statusText.split('\n'),
+        <String>[
+          'Downloading darwin-x64 tools...',
+          'Downloading darwin-x64/font-subset tools...',
+          '',
+        ],
+      );
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      HttpClientFactory: () => () => mockHttpClient,
       OperatingSystemUtils: () => mockOperatingSystemUtils,
       Platform: () => fakePlatform,
     });
@@ -552,3 +595,6 @@ class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockPlatform extends Mock implements Platform {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
+
+class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+class MockHttpClientResponse extends Mock implements HttpClientResponse {}
