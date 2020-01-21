@@ -702,7 +702,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Pump the build and rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
-  /// automatically by the engine when when it is time to lay out and paint a
+  /// automatically by the engine when it is time to lay out and paint a
   /// frame.
   ///
   /// Each frame consists of the following phases:
