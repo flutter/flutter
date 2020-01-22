@@ -60,6 +60,24 @@ void MockCanvas::didConcat(const SkMatrix& matrix) {
   draw_calls_.emplace_back(DrawCall{current_layer_, ConcatMatrixData{matrix}});
 }
 
+void MockCanvas::didConcat44(const SkScalar matrix[]) {
+  SkMatrix44 m44;
+  m44.setColMajor(matrix);
+  draw_calls_.emplace_back(DrawCall{current_layer_, ConcatMatrix44Data{m44}});
+}
+
+void MockCanvas::didScale(SkScalar x, SkScalar y) {
+  SkMatrix m;
+  m.setScale(x, y);
+  this->didConcat(m);
+}
+
+void MockCanvas::didTranslate(SkScalar x, SkScalar y) {
+  SkMatrix m;
+  m.setTranslate(x, y);
+  this->didConcat(m);
+}
+
 void MockCanvas::didSetMatrix(const SkMatrix& matrix) {
   draw_calls_.emplace_back(DrawCall{current_layer_, SetMatrixData{matrix}});
 }
@@ -343,6 +361,16 @@ bool operator==(const MockCanvas::ConcatMatrixData& a,
 
 std::ostream& operator<<(std::ostream& os,
                          const MockCanvas::ConcatMatrixData& data) {
+  return os << data.matrix;
+}
+
+bool operator==(const MockCanvas::ConcatMatrix44Data& a,
+                const MockCanvas::ConcatMatrix44Data& b) {
+  return a.matrix == b.matrix;
+}
+
+std::ostream& operator<<(std::ostream& os,
+                         const MockCanvas::ConcatMatrix44Data& data) {
   return os << data.matrix;
 }
 
