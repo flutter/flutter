@@ -204,13 +204,17 @@ class Plugin {
     bool isInvalid(String key, bool Function(YamlMap) validate) {
       final dynamic value = yaml[key];
       if (value is! YamlMap) {
-        return false;
+        return true;
       }
       final YamlMap yamlValue = value as YamlMap;
       if (yamlValue.containsKey('default_package')) {
         return false;
       }
       return !validate(yamlValue);
+    }
+
+    if (yaml == null) {
+      return <String>['Invalid "platforms" specification.'];
     }
     final List<String> errors = <String>[];
     if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {
