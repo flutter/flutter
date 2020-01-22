@@ -1,4 +1,4 @@
-Signature: 7a46a9ca65870e6282d94142adcc7c53
+Signature: 4fbb5b275048bb6275f64687474729ad
 
 UNUSED LICENSES:
 
@@ -8456,7 +8456,6 @@ FILE: ../../../third_party/dart/runtime/vm/timeline.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_analysis.cc
 FILE: ../../../third_party/dart/runtime/vm/timeline_analysis.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_test.cc
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/lib/js/dart2js/js_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/developer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/classes.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart
@@ -9082,9 +9081,7 @@ FILE: ../../../third_party/dart/runtime/vm/uri.cc
 FILE: ../../../third_party/dart/runtime/vm/uri.h
 FILE: ../../../third_party/dart/runtime/vm/uri_test.cc
 FILE: ../../../third_party/dart/runtime/vm/virtual_memory_fuchsia.cc
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/lib/js_util/dart2js/js_util_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/developer/service.dart
-FILE: ../../../third_party/dart/sdk/lib/js_util/dart2js/js_util_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/js_util/js_util.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/devfs.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/developer/service.dart
@@ -9410,7 +9407,6 @@ FILE: ../../../third_party/dart/sdk/lib/io/secure_socket.dart
 FILE: ../../../third_party/dart/sdk/lib/io/socket.dart
 FILE: ../../../third_party/dart/sdk/lib/io/stdio.dart
 FILE: ../../../third_party/dart/sdk/lib/io/string_transformer.dart
-FILE: ../../../third_party/dart/sdk/lib/js/dart2js/js_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/js/js.dart
 FILE: ../../../third_party/dart/sdk/lib/math/jenkins_smi_hash.dart
 FILE: ../../../third_party/dart/sdk/lib/math/point.dart
@@ -20461,6 +20457,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: node-source-map-support
+ORIGIN: ../../../third_party/dart/third_party/node-source-map-support/LICENSE.md
+TYPE: LicenseType.mit
+FILE: ../../../third_party/dart/third_party/node-source-map-support/browser-source-map-support.js
+FILE: ../../../third_party/dart/third_party/node-source-map-support/source-map-support.js
+----------------------------------------------------------------------------------------------------
+The MIT License (MIT)
+
+Copyright (c) 2014 Evan Wallace
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: observatory_pub_packages
 LIBRARY: pkg
 ORIGIN: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/comparators.dart + ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/LICENSE
@@ -23495,4 +23521,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 368
+Total license count: 369
