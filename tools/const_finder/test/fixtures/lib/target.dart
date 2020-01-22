@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 class Target {
-  const Target(this.stringValue, this.intValue);
+  const Target(this.stringValue, this.intValue, this.targetValue);
 
   final String stringValue;
   final int intValue;
+  final Target targetValue;
 
   void hit() {
     print('$stringValue $intValue');
