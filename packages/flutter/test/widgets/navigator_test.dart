@@ -12,6 +12,7 @@ import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
 class FirstWidget extends StatelessWidget {
+  const FirstWidget({ Key key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -27,6 +28,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatefulWidget {
+  const SecondWidget({ Key key }) : super(key: key);
   @override
   SecondWidgetState createState() => SecondWidgetState();
 }
@@ -47,7 +49,7 @@ class SecondWidgetState extends State<SecondWidget> {
 typedef ExceptionCallback = void Function(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
-  const ThirdWidget({ this.targetKey, this.onException });
+  const ThirdWidget({ Key key, this.targetKey, this.onException }) : super(key: key);
 
   final Key targetKey;
   final ExceptionCallback onException;
@@ -94,8 +96,8 @@ class OnTapPage extends StatelessWidget {
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(), // X
-      '/second': (BuildContext context) => SecondWidget(), // Y
+      '/': (BuildContext context) => const FirstWidget(), // X
+      '/second': (BuildContext context) => const SecondWidget(), // Y
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -510,8 +512,8 @@ void main() {
 
     final TestObserver observer = TestObserver()
       ..onRemoved = (Route<dynamic> route, Route<dynamic> previous) {
-        removedRoute = route;
-        previousRoute = previous;
+        removedRoute = route as Route<String>;
+        previousRoute = previous as Route<String>;
       };
 
     await tester.pumpWidget(MaterialApp(
@@ -1044,7 +1046,7 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
       expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(
@@ -1071,7 +1073,7 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
       expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(
@@ -1184,6 +1186,33 @@ void main() {
     expect(find.byKey(const ValueKey<String>('/A/B')), findsNothing); // popped
     expect(find.byKey(const ValueKey<String>('/C')), findsOneWidget);
   });
+
+  testWidgets('Pushing opaque Route does not rebuild routes below', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/45797.
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final Key bottomRoute = UniqueKey();
+    final Key topRoute = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        routes: <String, WidgetBuilder>{
+          '/' : (BuildContext context) => StatefulTestWidget(key: bottomRoute),
+          '/a': (BuildContext context) => StatefulTestWidget(key: topRoute),
+        },
+      ),
+    );
+    expect(tester.state<StatefulTestState>(find.byKey(bottomRoute)).rebuildCount, 1);
+
+    navigator.currentState.pushNamed('/a');
+    await tester.pumpAndSettle();
+
+    // Bottom route is offstage and did not rebuild.
+    expect(find.byKey(bottomRoute), findsNothing);
+    expect(tester.state<StatefulTestState>(find.byKey(bottomRoute, skipOffstage: false)).rebuildCount, 1);
+
+    expect(tester.state<StatefulTestState>(find.byKey(topRoute)).rebuildCount, 1);
+  });
 }
 
 class NoAnimationPageRoute extends PageRouteBuilder<void> {
@@ -1195,5 +1224,22 @@ class NoAnimationPageRoute extends PageRouteBuilder<void> {
   @override
   AnimationController createAnimationController() {
     return super.createAnimationController()..value = 1.0;
+  }
+}
+
+class StatefulTestWidget extends StatefulWidget {
+  const StatefulTestWidget({Key key}) : super(key: key);
+
+  @override
+  State<StatefulTestWidget> createState() => StatefulTestState();
+}
+
+class StatefulTestState extends State<StatefulTestWidget> {
+  int rebuildCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    rebuildCount += 1;
+    return Container();
   }
 }

@@ -1119,7 +1119,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       }
 
       debugPrint('Pending timers:');
-      for (String timerInfo in _currentFakeAsync.pendingTimersDebugInfo) {
+      for (final String timerInfo in _currentFakeAsync.pendingTimersDebugInfo) {
         final int firstLineEnd = timerInfo.indexOf('\n');
         assert(firstLineEnd != -1);
 
@@ -1657,7 +1657,7 @@ class _LiveTestRenderView extends RenderView {
         ..strokeWidth = radius / 10.0
         ..style = PaintingStyle.stroke;
       bool dirty = false;
-      for (int pointer in _pointers.keys) {
+      for (final int pointer in _pointers.keys) {
         final _LiveTestPointerRecord record = _pointers[pointer];
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position), paint);

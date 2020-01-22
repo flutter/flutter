@@ -106,7 +106,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// argument to the method (`child`), whose value is derived by applying the
   /// given [Tween] to the value of this [Animation].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Given an [AnimationController] `_controller`, the following code creates
   /// an `Animation<Alignment>` that swings from top left to top right as the
@@ -121,7 +121,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// );
   /// ```
   /// {@end-tool}
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The `_alignment.value` could then be used in a widget's build method, for
   /// instance, to position a child using an [Align] widget such that the
@@ -141,7 +141,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// Animation<Alignment> _alignment2 = _controller.drive(_tween);
   /// ```
   /// {@end-tool}
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following code is exactly equivalent, and is typically clearer when
   /// the tweens are created inline, as might be preferred when the tweens have

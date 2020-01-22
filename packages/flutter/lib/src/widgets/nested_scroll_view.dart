@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/physics.dart';
@@ -22,7 +23,7 @@ import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_view.dart';
-import 'sliver.dart';
+import 'sliver_fill.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
@@ -61,7 +62,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// (those inside the [TabBarView], hooking them together so that they appear,
 /// to the user, as one coherent scroll view.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a [NestedScrollView] whose header is the combination of a
 /// [TabBar] in a [SliverAppBar] and whose body is a [TabBarView]. It uses a
@@ -497,7 +498,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   bool get hasScrolledBody {
-    for (_NestedScrollPosition position in _innerPositions) {
+    for (final _NestedScrollPosition position in _innerPositions) {
       assert(position.minScrollExtent != null && position.pixels != null);
       if (position.pixels > position.minScrollExtent) {
         return true;
@@ -520,7 +521,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       return;
     _userScrollDirection = value;
     _outerPosition.didUpdateScrollDirection(value);
-    for (_NestedScrollPosition position in _innerPositions)
+    for (final _NestedScrollPosition position in _innerPositions)
       position.didUpdateScrollDirection(value);
   }
 
@@ -529,7 +530,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   void beginActivity(ScrollActivity newOuterActivity, _NestedScrollActivityGetter innerActivityGetter) {
     _outerPosition.beginActivity(newOuterActivity);
     bool scrolling = newOuterActivity.isScrolling;
-    for (_NestedScrollPosition position in _innerPositions) {
+    for (final _NestedScrollPosition position in _innerPositions) {
       final ScrollActivity newInnerActivity = innerActivityGetter(position);
       position.beginActivity(newInnerActivity);
       scrolling = scrolling && newInnerActivity.isScrolling;
@@ -574,7 +575,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     // are heading towards.
     _NestedScrollPosition innerPosition;
     if (velocity != 0.0) {
-      for (_NestedScrollPosition position in _innerPositions) {
+      for (final _NestedScrollPosition position in _innerPositions) {
         if (innerPosition != null) {
           if (velocity > 0.0) {
             if (innerPosition.pixels < position.pixels)
@@ -707,7 +708,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     if (!_outerPosition.haveDimensions)
       return;
     double maxInnerExtent = 0.0;
-    for (_NestedScrollPosition position in _innerPositions) {
+    for (final _NestedScrollPosition position in _innerPositions) {
       if (!position.haveDimensions)
         return;
       maxInnerExtent = math.max(maxInnerExtent, position.maxScrollExtent - position.minScrollExtent);
@@ -744,7 +745,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   void jumpTo(double to) {
     goIdle();
     _outerPosition.localJumpTo(nestOffset(to, _outerPosition));
-    for (_NestedScrollPosition position in _innerPositions)
+    for (final _NestedScrollPosition position in _innerPositions)
       position.localJumpTo(nestOffset(to, position));
     goBallistic(0.0);
   }
@@ -799,7 +800,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       // different levels of overscroll.
       final double innerDelta = _outerPosition.applyClampedDragUpdate(delta);
       if (innerDelta != 0.0) {
-        for (_NestedScrollPosition position in _innerPositions)
+        for (final _NestedScrollPosition position in _innerPositions)
           position.applyFullDragUpdate(innerDelta);
       }
     } else {
@@ -808,7 +809,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       double outerDelta = 0.0; // it will go positive if it changes
       final List<double> overscrolls = <double>[];
       final List<_NestedScrollPosition> innerPositions = _innerPositions.toList();
-      for (_NestedScrollPosition position in innerPositions) {
+      for (final _NestedScrollPosition position in innerPositions) {
         final double overscroll = position.applyClampedDragUpdate(delta);
         outerDelta = math.max(outerDelta, overscroll);
         overscrolls.add(overscroll);
@@ -842,7 +843,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   @override
-  String toString() => '$runtimeType(outer=$_outerController; inner=$_innerController)';
+  String toString() => '${objectRuntimeType(this, '_NestedScrollCoordinator')}(outer=$_outerController; inner=$_innerController)';
 }
 
 class _NestedScrollController extends ScrollController {
@@ -1225,7 +1226,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 
   @override
   String toString() {
-    return '$runtimeType(${metrics.minRange} .. ${metrics.maxRange}; correcting by ${metrics.correctionOffset})';
+    return '${objectRuntimeType(this, '_NestedOuterBallisticScrollActivity')}(${metrics.minRange} .. ${metrics.maxRange}; correcting by ${metrics.correctionOffset})';
   }
 }
 
@@ -1310,7 +1311,7 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
         extra = ', $_writers WRITERS ASSIGNED';
         break;
     }
-    return '$runtimeType($layoutExtent$extra)';
+    return '${objectRuntimeType(this, 'SliverOverlapAbsorberHandle')}($layoutExtent$extra)';
   }
 }
 

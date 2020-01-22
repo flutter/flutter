@@ -13,7 +13,8 @@ import 'media_query.dart';
 // Examples can assume:
 // String _name;
 
-/// The text style to apply to descendant [Text] widgets without explicit style.
+/// The text style to apply to descendant [Text] widgets which don't have an
+/// explicit style.
 ///
 /// See also:
 ///
@@ -57,13 +58,14 @@ class DefaultTextStyle extends InheritedTheme {
   ///
   /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
   /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextStyle.fallback()
+  const DefaultTextStyle.fallback({ Key key })
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
       maxLines = null,
       overflow = TextOverflow.clip,
-      textWidthBasis = TextWidthBasis.parent;
+      textWidthBasis = TextWidthBasis.parent,
+      super(key: key, child: null);
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -202,7 +204,7 @@ class DefaultTextStyle extends InheritedTheme {
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how to display text using the [Text] widget with the
 /// [overflow] set to [TextOverflow.ellipsis].
@@ -226,7 +228,7 @@ class DefaultTextStyle extends InheritedTheme {
 /// that follows displays "Hello beautiful world" with different styles
 /// for each word.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ![The word "Hello" is shown with the default text styles. The word "beautiful" is italicized. The word "world" is bold.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_rich.png)
 ///

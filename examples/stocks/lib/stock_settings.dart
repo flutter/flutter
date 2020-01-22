@@ -97,7 +97,7 @@ class StockSettingsState extends State<StockSettings> {
       widget.updater(value);
   }
 
-  Widget buildAppBar(BuildContext context) {
+  AppBar buildAppBar(BuildContext context) {
     return AppBar(
       title: const Text('Settings'),
     );

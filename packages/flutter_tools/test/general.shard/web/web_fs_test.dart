@@ -7,7 +7,6 @@ import 'package:build_daemon/data/build_status.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -32,11 +32,9 @@ void main() {
   MockOperatingSystemUtils mockOperatingSystemUtils;
   MockProcessUtils mockProcessUtils;
   bool lastInitializePlatform;
-  dynamic lastAddress;
   int lastPort;
 
   setUp(() {
-    lastAddress = null;
     lastPort = null;
     lastInitializePlatform = null;
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
@@ -61,7 +59,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenAnswer((Invocation invocation) async {
       final String workingDirectory = invocation.namedArguments[#workingDirectory] as String;
-      fs.file(fs.path.join(workingDirectory, '.packages')).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join(workingDirectory, '.packages')).createSync(recursive: true);
       return 0;
     });
     when(mockBuildDaemonClient.buildResults).thenAnswer((Invocation _) {
@@ -81,12 +79,12 @@ void main() {
     when(mockBuildDaemonCreator.assetServerPort(any)).thenReturn(4321);
     testbed = Testbed(
       setup: () {
-        fs.file(fs.path.join('packages', 'flutter_tools', 'pubspec.yaml'))
+        globals.fs.file(globals.fs.path.join('packages', 'flutter_tools', 'pubspec.yaml'))
           ..createSync(recursive: true)
           ..setLastModifiedSync(DateTime(1991, 08, 23));
         // Create an empty .packages file so we can read it when we check for
-        // plugins on WebFs.start()
-        fs.file('.packages').createSync();
+        // plugins on Webglobals.fs.start()
+        globals.fs.file('.packages').createSync();
       },
       overrides: <Type, Generator>{
         Pub: () => MockPub(),
@@ -95,7 +93,6 @@ void main() {
         ChromeLauncher: () => mockChromeLauncher,
         ProcessUtils: () => mockProcessUtils,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
-          lastAddress = address;
           lastPort = port;
           return mockHttpMultiServer;
         },
@@ -109,6 +106,7 @@ void main() {
           LogWriter logWriter,
           bool verbose,
           bool enableDebugExtension,
+          UrlEncoder urlEncoder,
         }) async {
           return mockDwds;
         },
@@ -120,12 +118,13 @@ void main() {
     final FlutterProject flutterProject = FlutterProject.current();
     await WebFs.start(
       skipDwds: false,
-      target: fs.path.join('lib', 'main.dart'),
+      target: globals.fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: true,
       hostname: null,
       port: null,
+      urlTunneller: null,
       dartDefines: const <String>[],
     );
     // Since the .packages file is missing in the memory filesystem, this should
@@ -150,12 +149,13 @@ void main() {
     final FlutterProject flutterProject = FlutterProject.current();
     await WebFs.start(
       skipDwds: false,
-      target: fs.path.join('lib', 'main.dart'),
+      target: globals.fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
       hostname: null,
       port: null,
+      urlTunneller: null,
       dartDefines: const <String>[],
     );
 
@@ -171,18 +171,21 @@ void main() {
     final FlutterProject flutterProject = FlutterProject.current();
     final WebFs webFs = await WebFs.start(
       skipDwds: false,
-      target: fs.path.join('lib', 'main.dart'),
+      target: globals.fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
-      hostname: 'foo',
+      hostname: 'localhost',
       port: '1234',
+      urlTunneller: null,
       dartDefines: const <String>[],
     );
 
-    expect(webFs.uri, contains('foo:1234'));
+    // Might be either ipv4 or ipv6 for localhost.
+    final bool hasExpectedUri = webFs.uri.toString().contains('[::1]:1234') ||
+                                webFs.uri.toString().contains('127.0.0.1:1234');
+    expect(hasExpectedUri, true);
     expect(lastPort, 1234);
-    expect(lastAddress, contains('foo'));
   }));
 
   test('Throws exception if build fails', () => testbed.run(() async {
@@ -204,12 +207,13 @@ void main() {
 
     expect(WebFs.start(
       skipDwds: false,
-      target: fs.path.join('lib', 'main.dart'),
+      target: globals.fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
       hostname: 'foo',
       port: '1234',
+      urlTunneller: null,
       dartDefines: const <String>[],
     ), throwsA(isInstanceOf<Exception>()));
   }));

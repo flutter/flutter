@@ -89,6 +89,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       dartDefines: dartDefines,
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

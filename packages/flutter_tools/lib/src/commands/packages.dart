@@ -131,7 +131,7 @@ class PackagesGetCommand extends FlutterCommand {
       await exampleProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 
@@ -162,7 +162,7 @@ class PackagesTestCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     await pub.batch(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 
@@ -203,7 +203,7 @@ class PackagesPublishCommand extends FlutterCommand {
     ];
     Cache.releaseLockEarly();
     await pub.interactively(<String>['publish', ...args]);
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 
@@ -234,7 +234,7 @@ class PackagesForwardCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     await pub.interactively(<String>[_commandName, ...argResults.rest]);
-    return null;
+    return FlutterCommandResult.success();
   }
 
 }
@@ -262,6 +262,6 @@ class PackagesPassthroughCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     await pub.interactively(argResults.rest);
-    return null;
+    return FlutterCommandResult.success();
   }
 }

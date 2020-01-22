@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding =
-    TestWidgetsFlutterBinding.ensureInitialized();
+    TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   const double _kOpenScale = 1.1;
 
   Widget _getChild() {

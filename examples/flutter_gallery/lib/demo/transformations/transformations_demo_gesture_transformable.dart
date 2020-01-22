@@ -183,7 +183,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   // Get the offset of the current widget from the global screen coordinates.
   // TODO(justinmc): Protect against calling this during first build.
   static Offset getOffset(BuildContext context) {
-    final RenderBox renderObject = context.findRenderObject();
+    final RenderBox renderObject = context.findRenderObject() as RenderBox;
     return renderObject.localToGlobal(Offset.zero);
   }
 
@@ -377,7 +377,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     final double clampedTotalScale = totalScale.clamp(
       widget.minScale,
       widget.maxScale,
-    );
+    ) as double;
     final double clampedScale = clampedTotalScale / currentScale;
     return matrix..scale(clampedScale);
   }

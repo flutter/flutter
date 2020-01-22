@@ -179,7 +179,7 @@ class TaskResult {
         message = 'success' {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
-      for (String key in benchmarkScoreKeys) {
+      for (final String key in benchmarkScoreKeys) {
         if (!data.containsKey(key)) {
           throw 'Invalid Golem score key "$key". It does not exist in task '
               'result data ${prettyJson.convert(data)}';
@@ -194,8 +194,10 @@ class TaskResult {
   /// Constructs a successful result using JSON data stored in a file.
   factory TaskResult.successFromFile(File file,
       {List<String> benchmarkScoreKeys}) {
-    return TaskResult.success(json.decode(file.readAsStringSync()),
-        benchmarkScoreKeys: benchmarkScoreKeys);
+    return TaskResult.success(
+      json.decode(file.readAsStringSync()) as Map<String, dynamic>,
+      benchmarkScoreKeys: benchmarkScoreKeys,
+    );
   }
 
   /// Constructs an unsuccessful result.

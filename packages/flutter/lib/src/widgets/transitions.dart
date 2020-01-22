@@ -23,7 +23,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
 /// use [AnimatedWidget], simply subclass it and implement the build function.
 ///
-///{@tool sample}
+///{@tool snippet}
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedWidget].
@@ -194,7 +194,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
 /// The following code implements the [SlideTransition] as seen in the video
 /// above:
 ///
@@ -520,6 +520,7 @@ class SizeTransition extends AnimatedWidget {
 ///
 /// Here's an illustration of the [FadeTransition] widget, with it's [opacity]
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
+///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
 ///
 /// See also:
@@ -567,6 +568,121 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
+    renderObject
+      ..opacity = opacity
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+  }
+}
+
+/// Animates the opacity of a sliver widget.
+///
+/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
+/// Creates a [CustomScrollView] with a [SliverFixedExtentList] that uses a
+/// [SliverFadeTransition] to fade the list in and out.
+///
+/// ```dart
+/// class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
+///   AnimationController controller;
+///   Animation<double> animation;
+///
+///   initState() {
+///     super.initState();
+///     controller = AnimationController(
+///         duration: const Duration(milliseconds: 1000), vsync: this);
+///     animation = CurvedAnimation(parent: controller, curve: Curves.easeIn);
+///
+///     animation.addStatusListener((status) {
+///       if (status == AnimationStatus.completed) {
+///         controller.reverse();
+///       } else if (status == AnimationStatus.dismissed) {
+///         controller.forward();
+///       }
+///     });
+///     controller.forward();
+///   }
+///
+///   Widget build(BuildContext context) {
+///     return CustomScrollView(
+///       slivers: <Widget>[
+///         SliverFadeTransition(
+///           opacity: animation,
+///           sliver: SliverFixedExtentList(
+///             itemExtent: 100.0,
+///             delegate: SliverChildBuilderDelegate(
+///               (BuildContext context, int index) {
+///                 return Container(
+///                   color: index % 2 == 0
+///                     ? Colors.indigo[200]
+///                     : Colors.orange[200],
+///                 );
+///               },
+///               childCount: 5,
+///             ),
+///           ),
+///         )
+///       ]
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// Here's an illustration of the [FadeTransition] widget, the [RenderBox]
+/// equivalent widget, with it's [opacity] animated by a [CurvedAnimation] set
+/// to [Curves.fastOutSlowIn]:
+///
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
+///
+/// See also:
+///
+///  * [SliverOpacity], which does not animate changes in opacity.
+class SliverFadeTransition extends SingleChildRenderObjectWidget {
+  /// Creates an opacity transition.
+  ///
+  /// The [opacity] argument must not be null.
+  const SliverFadeTransition({
+    Key key,
+    @required this.opacity,
+    this.alwaysIncludeSemantics = false,
+    Widget sliver,
+  }) : assert(opacity != null),
+      super(key: key, child: sliver);
+
+  /// The animation that controls the opacity of the sliver child.
+  ///
+  /// If the current value of the opacity animation is v, the child will be
+  /// painted with an opacity of v. For example, if v is 0.5, the child will be
+  /// blended 50% with its background. Similarly, if v is 0.0, the child will be
+  /// completely transparent.
+  final Animation<double> opacity;
+
+  /// Whether the semantic information of the sliver child is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the sliver child's semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
+  @override
+  RenderSliverAnimatedOpacity createRenderObject(BuildContext context) {
+    return RenderSliverAnimatedOpacity(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
@@ -691,7 +807,10 @@ class RelativePositionedTransition extends AnimatedWidget {
 
   /// The animation that controls the child's size and position.
   ///
-  /// See also [size].
+  /// See also:
+  ///
+  ///  * [size], which gets the size of the box that the [Positioned] widget's
+  ///    offsets are relative to.
   Animation<Rect> get rect => listenable as Animation<Rect>;
 
   /// The [Positioned] widget's offsets are relative to a box of this
@@ -916,7 +1035,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedBuilder] and makes use of the

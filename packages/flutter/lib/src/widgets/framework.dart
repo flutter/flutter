@@ -39,8 +39,15 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // KEYS
 
 /// A key that is only equal to itself.
+///
+/// This cannot be created with a const constructor because that implies that
+/// all instantiated keys would be the same instance and therefore not be unique.
 class UniqueKey extends LocalKey {
   /// Creates a key that is equal only to itself.
+  ///
+  /// The key cannot be created with a const constructor because that implies
+  /// that all instantiated keys would be the same instance and therefore not
+  /// be unique.
   // ignore: prefer_const_constructors_in_immutables , never use const for this class
   UniqueKey();
 
@@ -53,7 +60,11 @@ class UniqueKey extends LocalKey {
 /// Used to tie the identity of a widget to the identity of an object used to
 /// generate that widget.
 ///
-/// See also the discussions at [Key] and [Widget.key].
+/// See also:
+///
+///  * [Key], the base class for all keys.
+///  * The discussion at [Widget.key] for more information about how widgets use
+///    keys.
 class ObjectKey extends LocalKey {
   /// Creates a key that uses [identical] on [value] for its [operator==].
   const ObjectKey(this.value);
@@ -62,7 +73,7 @@ class ObjectKey extends LocalKey {
   final Object value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ObjectKey
@@ -76,7 +87,7 @@ class ObjectKey extends LocalKey {
   String toString() {
     if (runtimeType == ObjectKey)
       return '[${describeIdentity(value)}]';
-    return '[$runtimeType ${describeIdentity(value)}]';
+    return '[${objectRuntimeType(this, 'ObjectKey')} ${describeIdentity(value)}]';
   }
 }
 
@@ -99,7 +110,10 @@ class ObjectKey extends LocalKey {
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
 ///
-/// See also the discussion at [Widget.key].
+/// See also:
+///
+///  * The discussion at [Widget.key] for more information about how widgets use
+///    keys.
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for
@@ -192,7 +206,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   static void _debugVerifyIllFatedPopulation() {
     assert(() {
       Map<GlobalKey, Set<Element>> duplicates;
-      for (Element element in _debugIllFatedElements) {
+      for (final Element element in _debugIllFatedElements) {
         if (element._debugLifecycleState != _ElementLifecycle.defunct) {
           assert(element != null);
           assert(element.widget != null);
@@ -210,7 +224,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       if (duplicates != null) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[];
         information.add(ErrorSummary('Multiple widgets used the same GlobalKey.'));
-        for (GlobalKey key in duplicates.keys) {
+        for (final GlobalKey key in duplicates.keys) {
           final Set<Element> elements = duplicates[key];
           // TODO(jacobr): this will omit the '- ' before each widget name and
           // use the more standard whitespace style instead. Please let me know
@@ -311,7 +325,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   final Object value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is GlobalObjectKey<T>
@@ -323,8 +337,8 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 
   @override
   String toString() {
-    String selfType = runtimeType.toString();
-    // const GlobalObjectKey().runtimeType.toString() returns 'GlobalObjectKey<State<StatefulWidget>>'
+    String selfType = objectRuntimeType(this, 'GlobalObjectKey');
+    // The runtimeType string of a GlobalObjectKey() returns 'GlobalObjectKey<State<StatefulWidget>>'
     // because GlobalObjectKey is instantiated to its bounds. To avoid cluttering the output
     // we remove the suffix.
     const String suffix = '<State<StatefulWidget>>';
@@ -410,7 +424,9 @@ abstract class Widget extends DiagnosticableTree {
   /// Generally, a widget that is the only child of another widget does not need
   /// an explicit key.
   ///
-  /// See also the discussions at [Key] and [GlobalKey].
+  /// See also:
+  ///
+  ///  * The discussions at [Key] and [GlobalKey].
   final Key key;
 
   /// Inflates this configuration to a concrete instance.
@@ -426,7 +442,7 @@ abstract class Widget extends DiagnosticableTree {
   /// A short, textual description of this widget.
   @override
   String toStringShort() {
-    return key == null ? '$runtimeType' : '$runtimeType-$key';
+    return key == null ? '${objectRuntimeType(this, 'Widget')}' : '${objectRuntimeType(this, 'Widget')}-$key';
   }
 
   @override
@@ -435,6 +451,13 @@ abstract class Widget extends DiagnosticableTree {
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.dense;
   }
 
+  @override
+  @nonVirtual
+  bool operator ==(Object other) => super == other;
+
+  @override
+  @nonVirtual
+  int get hashCode => super.hashCode;
 
   /// Whether the `newWidget` can be used to update an [Element] that currently
   /// has the `oldWidget` as its configuration.
@@ -509,7 +532,7 @@ abstract class Widget extends DiagnosticableTree {
 ///    widget, so that only the inner-most widget needs to be rebuilt when the
 ///    theme changes.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following is a skeleton of a stateless widget subclass called `GreenFrog`.
 ///
@@ -528,7 +551,7 @@ abstract class Widget extends DiagnosticableTree {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This next example shows the more generic widget `Frog` which can be given
 /// a color and a child:
@@ -723,7 +746,7 @@ abstract class StatelessWidget extends Widget {
 ///    [KeyedSubtree] widget may be useful for this purpose if no other widget
 ///    can conveniently be assigned the key.)
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This is a skeleton of a stateful widget subclass called `YellowBird`.
 ///
@@ -747,7 +770,7 @@ abstract class StatelessWidget extends Widget {
 /// }
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows the more generic widget `Bird` which can be given a
 /// color and a child, and which has some internal state with a method that
@@ -1188,8 +1211,10 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// If you override this, make sure to end your method with a call to
   /// super.deactivate().
   ///
-  /// See also [dispose], which is called after [deactivate] if the widget is
-  /// removed from the tree permanently.
+  /// See also:
+  ///
+  ///  * [dispose], which is called after [deactivate] if the widget is removed
+  ///    from the tree permanently.
   @protected
   @mustCallSuper
   void deactivate() { }
@@ -1210,7 +1235,9 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
   ///
-  /// See also [deactivate], which is called prior to [dispose].
+  /// See also:
+  ///
+  ///  * [deactivate], which is called prior to [dispose].
   @protected
   @mustCallSuper
   void dispose() {
@@ -1392,17 +1419,16 @@ abstract class ProxyWidget extends Widget {
 /// [RenderObjectWidget]s with more than one child. For example, [Stack] uses
 /// the [Positioned] parent data widget to position each child.
 ///
-/// A [ParentDataWidget] is specific to a particular kind of [RenderObject], and
-/// thus also to a particular [RenderObjectWidget] class. That class is `T`, the
-/// [ParentDataWidget] type argument.
+/// A [ParentDataWidget] is specific to a particular kind of [ParentData]. That
+/// class is `T`, the [ParentData] type argument.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how you would build a [ParentDataWidget] to configure a
 /// `FrogJar` widget's children by specifying a [Size] for each one.
 ///
 /// ```dart
-/// class FrogSize extends ParentDataWidget<FrogJar> {
+/// class FrogSize extends ParentDataWidget<FrogJarParentData> {
 ///   FrogSize({
 ///     Key key,
 ///     @required this.size,
@@ -1422,6 +1448,9 @@ abstract class ProxyWidget extends Widget {
 ///       targetParent.markNeedsLayout();
 ///     }
 ///   }
+///
+///   @override
+///   Type get debugTypicalAncestorWidgetClass => FrogJar;
 /// }
 /// ```
 /// {@end-tool}
@@ -1431,12 +1460,12 @@ abstract class ProxyWidget extends Widget {
 ///  * [RenderObject], the superclass for layout algorithms.
 ///  * [RenderObject.parentData], the slot that this class configures.
 ///  * [ParentData], the superclass of the data that will be placed in
-///    [RenderObject.parentData] slots.
+///    [RenderObject.parentData] slots. The `T` type parameter for
+///    [ParentDataWidget] is a [ParentData].
 ///  * [RenderObjectWidget], the class for widgets that wrap [RenderObject]s.
-///    The `T` type parameter for [ParentDataWidget] is a [RenderObjectWidget].
 ///  * [StatefulWidget] and [State], for widgets that can build differently
 ///    several times over their lifetime.
-abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidget {
+abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const ParentDataWidget({ Key key, Widget child })
@@ -1445,45 +1474,61 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
   @override
   ParentDataElement<T> createElement() => ParentDataElement<T>(this);
 
-  /// Subclasses should override this method to return true if the given
-  /// ancestor is a RenderObjectWidget that wraps a RenderObject that can handle
-  /// the kind of ParentData widget that the ParentDataWidget subclass handles.
+  /// Checks if this widget can apply its parent data to the provided
+  /// `renderObject`.
   ///
-  /// The default implementation uses the type argument.
-  bool debugIsValidAncestor(RenderObjectWidget ancestor) {
+  /// The [RenderObject.parentData] of the provided `renderObject` is
+  /// typically set up by an ancestor [RenderObjectWidget] of the type returned
+  /// by [debugTypicalAncestorWidgetClass].
+  ///
+  /// This is called just before [applyParentData] is invoked with the same
+  /// [RenderObject] provided to that method.
+  bool debugIsValidRenderObject(RenderObject renderObject) {
     assert(T != dynamic);
-    assert(T != RenderObjectWidget);
-    return ancestor is T;
+    assert(T != ParentData);
+    return renderObject.parentData is T;
   }
 
-  /// Subclasses should override this to describe the requirements for using the
-  /// ParentDataWidget subclass. It is called when debugIsValidAncestor()
-  /// returned false for an ancestor, or when there are extraneous
-  /// [ParentDataWidget]s in the ancestor chain.
-  Iterable<DiagnosticsNode> debugDescribeInvalidAncestorChain({ String description, DiagnosticsNode ownershipChain, bool foundValidAncestor, Iterable<Widget> badAncestors }) sync* {
+  /// The [RenderObjectWidget] that is typically used to set up the [ParentData]
+  /// that [applyParentData] will write to.
+  ///
+  /// This is only used in error messages to tell users what widget typically
+  /// wraps this ParentDataWidget.
+  Type get debugTypicalAncestorWidgetClass;
+
+  Iterable<DiagnosticsNode> _debugDescribeIncorrectParentDataType({
+    @required ParentData parentData,
+    RenderObjectWidget parentDataCreator,
+    DiagnosticsNode ownershipChain,
+  }) sync* {
     assert(T != dynamic);
-    assert(T != RenderObjectWidget);
-    if (!foundValidAncestor) {
+    assert(T != ParentData);
+    assert(debugTypicalAncestorWidgetClass != null);
+
+    final String description = 'The ParentDataWidget $this wants to apply ParentData of type $T to a RenderObject';
+    if (parentData == null) {
       yield ErrorDescription(
-        '$runtimeType widgets must be placed inside $T widgets.\n'
-        '$description has no $T ancestor at all.'
+        '$description, which has not been set up to receive any ParentData.'
       );
     } else {
-      assert(badAncestors.isNotEmpty);
       yield ErrorDescription(
-        '$runtimeType widgets must be placed directly inside $T widgets.\n'
-        '$description has a $T ancestor, but there are other widgets between them:'
+        '$description, which has been set up to accept ParentData of incompatible type ${parentData.runtimeType}.'
       );
-      for (Widget ancestor in badAncestors) {
-        if (ancestor.runtimeType == runtimeType) {
-          yield ErrorDescription('- $ancestor (this is a different $runtimeType than the one with the problem)');
-        } else {
-          yield ErrorDescription('- $ancestor');
-        }
-      }
-      yield ErrorDescription('These widgets cannot come between a $runtimeType and its $T.');
     }
-    yield ErrorDescription('The ownership chain for the parent of the offending $runtimeType was:\n  $ownershipChain');
+    yield ErrorHint(
+      'Usually, this means that the $runtimeType widget has the wrong ancestor RenderObjectWidget. '
+      'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidgetClass widgets.'
+    );
+    if (parentDataCreator != null) {
+      yield ErrorHint(
+        'The offending $runtimeType is currently placed inside a ${parentDataCreator.runtimeType} widget.'
+      );
+    }
+    if (ownershipChain != null) {
+      yield ErrorDescription(
+        'The ownership chain for the RenderObject that received the incompatible parent data was:\n  $ownershipChain'
+      );
+    }
   }
 
   /// Write the data from this widget into the given render object's parent data.
@@ -1531,7 +1576,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Zbm3hjPjQMk}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following is a skeleton of an inherited widget called `FrogColor`:
 ///
@@ -1709,9 +1754,61 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
 
   /// The widgets below this widget in the tree.
   ///
-  /// If this list is going to be mutated, it is usually wise to put [Key]s on
-  /// the widgets, so that the framework can match old configurations to new
-  /// configurations and maintain the underlying render objects.
+  /// If this list is going to be mutated, it is usually wise to put a [Key] on
+  /// each of the child widgets, so that the framework can match old
+  /// configurations to new configurations and maintain the underlying render
+  /// objects.
+  ///
+  /// Also, a [Widget] in Flutter is immutable, so directly modifying the
+  /// [children] such as `someMultiChildRenderObjectWidget.children.add(...)` or
+  /// as the example code below will result in incorrect behaviors. Whenever the
+  /// children list is modified, a new list object should be provided.
+  ///
+  /// ```dart
+  /// class SomeWidgetState extends State<SomeWidget> {
+  ///   List<Widget> _children;
+  ///
+  ///   void initState() {
+  ///     _children = [];
+  ///   }
+  ///
+  ///   void someHandler() {
+  ///     setState(() {
+  ///         _children.add(...);
+  ///     });
+  ///   }
+  ///
+  ///   Widget build(...) {
+  ///     // Reusing `List<Widget> _children` here is problematic.
+  ///     return Row(children: _children);
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// The following code corrects the problem mentioned above.
+  ///
+  /// ```dart
+  /// class SomeWidgetState extends State<SomeWidget> {
+  ///   List<Widget> _children;
+  ///
+  ///   void initState() {
+  ///     _children = [];
+  ///   }
+  ///
+  ///   void someHandler() {
+  ///     setState(() {
+  ///       // The key here allows Flutter to reuse the underlying render
+  ///       // objects even if the children list is recreated.
+  ///       _children.add(ChildWidget(key: ...));
+  ///     });
+  ///   }
+  ///
+  ///   Widget build(...) {
+  ///     // Always create a new list of children as a Widget is immutable.
+  ///     return Row(children: List.from(_children));
+  ///   }
+  /// }
+  /// ```
   final List<Widget> children;
 
   @override
@@ -2103,7 +2200,7 @@ abstract class BuildContext {
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [findAncestorStateOfType] in [State.didChangeDependencies].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// ScrollableState scrollable = context.findAncestorStateOfType<ScrollableState>();
@@ -2472,7 +2569,7 @@ class BuildOwner {
         return true;
       }());
     } finally {
-      for (Element element in _dirtyElements) {
+      for (final Element element in _dirtyElements) {
         assert(element._inDirtyList);
         element._inDirtyList = false;
       }
@@ -2527,13 +2624,13 @@ class BuildOwner {
           if (_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans != null &&
               _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.isNotEmpty) {
             final Set<GlobalKey> keys = HashSet<GlobalKey>();
-            for (Element element in _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.keys) {
+            for (final Element element in _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.keys) {
               if (element._debugLifecycleState != _ElementLifecycle.defunct)
                 keys.addAll(_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans[element]);
             }
             if (keys.isNotEmpty) {
               final Map<String, int> keyStringCount = HashMap<String, int>();
-              for (String key in keys.map<String>((GlobalKey key) => key.toString())) {
+              for (final String key in keys.map<String>((GlobalKey key) => key.toString())) {
                 if (keyStringCount.containsKey(key)) {
                   keyStringCount[key] += 1;
                 } else {
@@ -2550,7 +2647,7 @@ class BuildOwner {
               });
               final Iterable<Element> elements = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.keys;
               final Map<String, int> elementStringCount = HashMap<String, int>();
-              for (String element in elements.map<String>((Element element) => element.toString())) {
+              for (final String element in elements.map<String>((Element element) => element.toString())) {
                 if (elementStringCount.containsKey(element)) {
                   elementStringCount[element] += 1;
                 } else {
@@ -2605,6 +2702,9 @@ class BuildOwner {
         return true;
       }());
     } catch (e, stack) {
+      // Catching the exception directly to avoid activating the ErrorWidget.
+      // Since the tree is in a broken state, adding the ErrorWidget would
+      // cause more exceptions.
       _debugReportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       Timeline.finishSync();
@@ -3249,7 +3349,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// The element will still have a valid parent when this is called. After this
   /// is called, [deactivateChild] is called to sever the link to this object.
   @protected
-  void forgetChild(Element child);
+  void forgetChild(Element child) {
+    // TODO(chunhtai): Creates empty body for subclass to call super. This will
+    // enable us to fix internal tests pro-actively for upcoming breaking
+    // change.
+    // https://github.com/flutter/flutter/issues/43780.
+  }
 
   void _activateWithParent(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
@@ -3323,7 +3428,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(depth != null);
     assert(_active);
     if (_dependencies != null && _dependencies.isNotEmpty) {
-      for (InheritedElement dependency in _dependencies)
+      for (final InheritedElement dependency in _dependencies)
         dependency._dependents.remove(this);
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
@@ -3791,7 +3896,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// A short, textual description of this element.
   @override
   String toStringShort() {
-    return widget != null ? '${widget.toStringShort()}' : '[$runtimeType]';
+    return widget != null ? '${widget.toStringShort()}' : '[${objectRuntimeType(this, 'Element')}]';
   }
 
   @override
@@ -4006,7 +4111,7 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails);
 ///
 /// It is possible to override this widget.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample --template=freeform}
 /// ```dart
 /// import 'package:flutter/material.dart';
 ///
@@ -4578,52 +4683,19 @@ abstract class ProxyElement extends ComponentElement {
 }
 
 /// An [Element] that uses a [ParentDataWidget] as its configuration.
-class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
+class ParentDataElement<T extends ParentData> extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   ParentDataElement(ParentDataWidget<T> widget) : super(widget);
 
   @override
   ParentDataWidget<T> get widget => super.widget as ParentDataWidget<T>;
 
-  @override
-  void mount(Element parent, dynamic newSlot) {
-    assert(() {
-      final List<Widget> badAncestors = <Widget>[];
-      Element ancestor = parent;
-      while (ancestor != null) {
-        if (ancestor is ParentDataElement<RenderObjectWidget>) {
-          badAncestors.add(ancestor.widget);
-        } else if (ancestor is RenderObjectElement) {
-          if (widget.debugIsValidAncestor(ancestor.widget))
-            break;
-          badAncestors.add(ancestor.widget);
-        }
-        ancestor = ancestor._parent;
-      }
-      if (ancestor != null && badAncestors.isEmpty)
-        return true;
-      // TODO(jacobr): switch to describing the invalid parent chain in terms
-      // of DiagnosticsNode objects when possible.
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Incorrect use of ParentDataWidget.'),
-        // TODO(jacobr): fix this constructor call to use FlutterErrorBuilder.
-        ...widget.debugDescribeInvalidAncestorChain(
-          description: '$this',
-          ownershipChain: ErrorDescription(parent.debugGetCreatorChain(10)),
-          foundValidAncestor: ancestor != null,
-          badAncestors: badAncestors,
-        ),
-      ]);
-    }());
-    super.mount(parent, newSlot);
-  }
-
   void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
       if (child is RenderObjectElement) {
         child._updateParentData(widget);
       } else {
-        assert(child is! ParentDataElement<RenderObjectWidget>);
+        assert(child is! ParentDataElement<ParentData>);
         child.visitChildren(applyParentDataToChild);
       }
     }
@@ -4835,7 +4907,7 @@ class InheritedElement extends ProxyElement {
   @override
   void notifyClients(InheritedWidget oldWidget) {
     assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
-    for (Element dependent in _dependents.keys) {
+    for (final Element dependent in _dependents.keys) {
       assert(() {
         // check that it really is our descendant
         Element ancestor = dependent._parent;
@@ -5037,14 +5109,48 @@ abstract class RenderObjectElement extends Element {
     return ancestor as RenderObjectElement;
   }
 
-  ParentDataElement<RenderObjectWidget> _findAncestorParentDataElement() {
+  ParentDataElement<ParentData> _findAncestorParentDataElement() {
     Element ancestor = _parent;
+    ParentDataElement<ParentData> result;
     while (ancestor != null && ancestor is! RenderObjectElement) {
-      if (ancestor is ParentDataElement<RenderObjectWidget>)
-        return ancestor;
+      if (ancestor is ParentDataElement<ParentData>) {
+        result = ancestor as ParentDataElement<ParentData>;
+        break;
+      }
       ancestor = ancestor._parent;
     }
-    return null;
+    assert(() {
+      if (result == null || ancestor == null) {
+        return true;
+      }
+      // Check that no other ParentDataWidgets want to provide parent data.
+      final List<ParentDataElement<ParentData>> badAncestors = <ParentDataElement<ParentData>>[];
+      ancestor = ancestor._parent;
+      while (ancestor != null && ancestor is! RenderObjectElement) {
+        if (ancestor is ParentDataElement<ParentData>) {
+          badAncestors.add(ancestor as ParentDataElement<ParentData>);
+        }
+        ancestor = ancestor._parent;
+      }
+      if (badAncestors.isNotEmpty) {
+        badAncestors.insert(0, result);
+        try {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Incorrect use of ParentDataWidget.'),
+            ErrorDescription('The following ParentDataWidgets are providing parent data to the same RenderObject:'),
+            for (final ParentDataElement<ParentData> ancestor in badAncestors)
+              ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${ancestor.widget.debugTypicalAncestorWidgetClass} widget)'),
+            ErrorDescription('However, a RenderObject can only receive parent data from at most one ParentDataWidget.'),
+            ErrorHint('Usually, this indicates that at least one of the offending ParentDataWidgets listed above is not placed directly inside a compatible ancestor widget.'),
+            ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
+          ]);
+        } on FlutterError catch (e) {
+          _debugReportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
+        }
+      }
+      return true;
+    }());
+    return result;
   }
 
   @override
@@ -5250,7 +5356,7 @@ abstract class RenderObjectElement extends Element {
 
     // Clean up any of the remaining middle nodes from the old list.
     if (haveOldChildren && oldKeyedChildren.isNotEmpty) {
-      for (Element oldChild in oldKeyedChildren.values) {
+      for (final Element oldChild in oldKeyedChildren.values) {
         if (forgottenChildren == null || !forgottenChildren.contains(oldChild))
           deactivateChild(oldChild);
       }
@@ -5276,8 +5382,31 @@ abstract class RenderObjectElement extends Element {
     widget.didUnmountRenderObject(renderObject);
   }
 
-  void _updateParentData(ParentDataWidget<RenderObjectWidget> parentData) {
-    parentData.applyParentData(renderObject);
+  void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
+    bool applyParentData = true;
+    assert(() {
+      try {
+        if (!parentDataWidget.debugIsValidRenderObject(renderObject)) {
+          applyParentData = false;
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Incorrect use of ParentDataWidget.'),
+            ...parentDataWidget._debugDescribeIncorrectParentDataType(
+              parentData: renderObject.parentData,
+              parentDataCreator: _ancestorRenderObjectElement.widget,
+              ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
+            ),
+          ]);
+        }
+      } on FlutterError catch (e) {
+        // Catching the exception directly to avoid activating the ErrorWidget.
+        // Since the tree is in a broken state, adding the ErrorWidget would
+        // cause more exceptions.
+        _debugReportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
+      }
+      return true;
+    }());
+    if (applyParentData)
+      parentDataWidget.applyParentData(renderObject);
   }
 
   @override
@@ -5294,7 +5423,7 @@ abstract class RenderObjectElement extends Element {
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
     _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, newSlot);
-    final ParentDataElement<RenderObjectWidget> parentDataElement = _findAncestorParentDataElement();
+    final ParentDataElement<ParentData> parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
       _updateParentData(parentDataElement.widget);
   }
@@ -5533,7 +5662,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    for (Element child in _children) {
+    for (final Element child in _children) {
       if (!_forgottenChildren.contains(child))
         visitor(child);
     }

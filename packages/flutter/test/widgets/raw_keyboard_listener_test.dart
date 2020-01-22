@@ -36,7 +36,7 @@ void main() {
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(RawKeyDownEvent));
     expect(events[0].data.runtimeType, equals(RawKeyEventDataFuchsia));
-    final RawKeyEventDataFuchsia typedData = events[0].data;
+    final RawKeyEventDataFuchsia typedData = events[0].data as RawKeyEventDataFuchsia;
     expect(typedData.hidUsage, 0x700e3);
     expect(typedData.codePoint, 0x0);
     expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);

@@ -205,12 +205,12 @@ class BackdropPanel extends StatelessWidget {
 class BackdropTitle extends AnimatedWidget {
   const BackdropTitle({
     Key key,
-    Listenable listenable,
+    Animation<double> listenable,
   }) : super(key: key, listenable: listenable);
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = listenable;
+    final Animation<double> animation = listenable as Animation<double>;
     return DefaultTextStyle(
       style: Theme.of(context).primaryTextTheme.title,
       softWrap: false,
@@ -283,7 +283,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   }
 
   double get _backdropHeight {
-    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject();
+    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 

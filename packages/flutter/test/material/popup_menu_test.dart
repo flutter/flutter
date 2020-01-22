@@ -791,7 +791,7 @@ void main() {
                   onPressed: () {
                     // Ensure showMenu throws an assertion without a position
                     expect(() {
-                      // ignore: missing_required_param_with_details
+                      // ignore: missing_required_param
                       showMenu<int>(
                         context: context,
                         items: <PopupMenuItem<int>>[
@@ -1194,9 +1194,15 @@ void main() {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({ this.textDirection, this.child });
+  const TestApp({
+    Key key,
+    this.textDirection,
+    this.child,
+  }) : super(key: key);
+
   final TextDirection textDirection;
   final Widget child;
+
   @override
   _TestAppState createState() => _TestAppState();
 }

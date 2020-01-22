@@ -26,5 +26,3 @@ $ANDROID_SDK_ROOT/tools/bin/sdkmanager  "platforms;android-28" \
     "build-tools;27.0.3" \
     "extras;google;m2repository" \
     "extras;android;m2repository"
-
-

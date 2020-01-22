@@ -1,7 +1,7 @@
 <<skip until matching line>>
 ══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
 The following assertion was thrown during layout:
-A RenderFlex overflowed by 2844 pixels on the right\.
+A RenderFlex overflowed by 2858 pixels on the right\.
 
 The relevant error-causing widget was:
   Row

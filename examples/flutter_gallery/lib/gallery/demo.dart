@@ -31,10 +31,10 @@ class ComponentDemoTabData {
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ComponentDemoTabData typedOther = other;
-    return typedOther.tabName == tabName
-        && typedOther.description == description
-        && typedOther.documentationUrl == documentationUrl;
+    return other is ComponentDemoTabData
+        && other.tabName == tabName
+        && other.description == description
+        && other.documentationUrl == documentationUrl;
   }
 
   @override

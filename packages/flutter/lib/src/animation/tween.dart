@@ -128,7 +128,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// which results in two separate [Animation] objects, each configured with a
 /// single [Tween].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Suppose `_controller` is an [AnimationController], and we want to create an
 /// [Animation<Offset>] that is controlled by that controller, and save it in
@@ -143,7 +143,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// );
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// _animation = Tween<Offset>(
@@ -261,7 +261,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   }
 
   @override
-  String toString() => '$runtimeType($begin \u2192 $end)';
+  String toString() => '${objectRuntimeType(this, 'Animatable')}($begin \u2192 $end)';
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
@@ -401,7 +401,7 @@ class ConstantTween<T> extends Tween<T> {
   T lerp(double t) => begin;
 
   @override
-  String toString() => '$runtimeType(value: $begin)';
+  String toString() => '${objectRuntimeType(this, 'ReverseTween')}(value: $begin)';
 }
 
 /// Transforms the value of the given animation by the given curve.
@@ -413,7 +413,7 @@ class ConstantTween<T> extends Tween<T> {
 /// curves when the animation is going forward vs when it is going backward,
 /// which can be useful in some scenarios.)
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following code snippet shows how you can apply a curve to a linear
 /// animation produced by an [AnimationController] `controller`:
@@ -450,5 +450,5 @@ class CurveTween extends Animatable<double> {
   }
 
   @override
-  String toString() => '$runtimeType(curve: $curve)';
+  String toString() => '${objectRuntimeType(this, 'CurveTween')}(curve: $curve)';
 }

@@ -13,13 +13,12 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 
@@ -27,12 +26,12 @@ final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(
+  return globals.fs.path.normalize(globals.fs.path.dirname(globals.artifacts.getArtifactPath(
       Artifact.flutterFramework, platform: TargetPlatform.ios, mode: mode)));
 }
 
 String flutterMacOSFrameworkDir(BuildMode mode) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(
+  return globals.fs.path.normalize(globals.fs.path.dirname(globals.artifacts.getArtifactPath(
       Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin_x64, mode: mode)));
 }
 
@@ -107,7 +106,7 @@ void _updateGeneratedEnvironmentVariablesScript({
 
   localsBuffer.writeln('#!/bin/sh');
   localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
-  for (String line in xcodeBuildSettings) {
+  for (final String line in xcodeBuildSettings) {
     localsBuffer.writeln('export "$line"');
   }
 
@@ -155,11 +154,11 @@ List<String> _xcodeBuildSettingsLines({
 }) {
   final List<String> xcodeBuildSettings = <String>[];
 
-  final String flutterRoot = fs.path.normalize(Cache.flutterRoot);
+  final String flutterRoot = globals.fs.path.normalize(Cache.flutterRoot);
   xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
-  xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${fs.path.normalize(project.directory.path)}');
+  xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${globals.fs.path.normalize(project.directory.path)}');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   if (targetOverride != null) {
@@ -191,11 +190,11 @@ List<String> _xcodeBuildSettingsLines({
   final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
-  if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
+  if (globals.artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
-    xcodeBuildSettings.add('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
-    xcodeBuildSettings.add('LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
+    xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
+    xcodeBuildSettings.add('LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -226,7 +225,7 @@ class XcodeProjectInterpreter {
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
-    if (!platform.isMacOS || !fs.file(_executable).existsSync()) {
+    if (!globals.platform.isMacOS || !globals.fs.file(_executable).existsSync()) {
       return;
     }
     try {
@@ -285,11 +284,15 @@ class XcodeProjectInterpreter {
   }) async {
     final Status status = Status.withSpinner(
       timeout: timeoutConfiguration.fastOperation,
+      timeoutConfiguration: timeoutConfiguration,
+      platform: globals.platform,
+      stopwatch: Stopwatch(),
+      supportsColor: globals.terminal.supportsColor,
     );
     final List<String> showBuildSettingsCommand = <String>[
       _executable,
       '-project',
-      fs.path.absolute(projectPath),
+      globals.fs.path.absolute(projectPath),
       '-target',
       target,
       '-showBuildSettings',
@@ -314,7 +317,7 @@ class XcodeProjectInterpreter {
           command: showBuildSettingsCommand.join(' '),
         ).send();
       }
-      printTrace('Unexpected failure to get the build settings: $error.');
+      globals.printTrace('Unexpected failure to get the build settings: $error.');
       return const <String, String>{};
     } finally {
       status.stop();
@@ -331,7 +334,7 @@ class XcodeProjectInterpreter {
       '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings()
-    ], workingDirectory: fs.currentDirectory.path);
+    ], workingDirectory: globals.fs.currentDirectory.path);
   }
 
   Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
@@ -362,7 +365,7 @@ class XcodeProjectInterpreter {
 /// environment without requiring settings changes in the Xcode project.
 List<String> environmentVariablesAsXcodeBuildSettings() {
   const String xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
-  return platform.environment.entries.where((MapEntry<String, String> mapEntry) {
+  return globals.platform.environment.entries.where((MapEntry<String, String> mapEntry) {
     return mapEntry.key.startsWith(xcodeBuildSettingPrefix);
   }).expand<String>((MapEntry<String, String> mapEntry) {
     // Remove FLUTTER_XCODE_ prefix from the environment variable to get the build setting.
@@ -373,7 +376,7 @@ List<String> environmentVariablesAsXcodeBuildSettings() {
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
   final Map<String, String> settings = <String, String>{};
-  for (Match match in showBuildSettingsOutput.split('\n').map<Match>(_settingExpr.firstMatch)) {
+  for (final Match match in showBuildSettingsOutput.split('\n').map<Match>(_settingExpr.firstMatch)) {
     if (match != null) {
       settings[match[1]] = match[2];
     }
@@ -403,7 +406,7 @@ class XcodeProjectInfo {
     final List<String> buildConfigurations = <String>[];
     final List<String> schemes = <String>[];
     List<String> collector;
-    for (String line in output.split('\n')) {
+    for (final String line in output.split('\n')) {
       if (line.isEmpty) {
         collector = null;
         continue;
@@ -455,7 +458,7 @@ class XcodeProjectInfo {
   /// regard to case.
   bool hasBuildConfiguratinForBuildMode(String buildMode) {
     buildMode = buildMode.toLowerCase();
-    for (String name in buildConfigurations) {
+    for (final String name in buildConfigurations) {
       if (name.toLowerCase() == buildMode) {
         return true;
       }

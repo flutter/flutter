@@ -128,7 +128,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       // Also send a kill signal in case the `q` above didn't work.
       process.kill(ProcessSignal.sigint);
       try {
-        completer.complete(Map<String, double>.from(json.decode(jsonOutput)));
+        completer.complete(Map<String, double>.from(json.decode(jsonOutput) as Map<String, dynamic>));
       } catch (ex) {
         completer.completeError('Decoding JSON failed ($ex). JSON string was: $jsonOutput');
       }

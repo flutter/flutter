@@ -268,20 +268,20 @@ class ColorScheme extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final ColorScheme otherScheme = other;
-    return otherScheme.primary == primary
-        && otherScheme.primaryVariant == primaryVariant
-        && otherScheme.secondary == secondary
-        && otherScheme.secondaryVariant == secondaryVariant
-        && otherScheme.surface == surface
-        && otherScheme.background == background
-        && otherScheme.error == error
-        && otherScheme.onPrimary == onPrimary
-        && otherScheme.onSecondary == onSecondary
-        && otherScheme.onSurface == onSurface
-        && otherScheme.onBackground == onBackground
-        && otherScheme.onError == onError
-        && otherScheme.brightness == brightness;
+    return other is ColorScheme
+        && other.primary == primary
+        && other.primaryVariant == primaryVariant
+        && other.secondary == secondary
+        && other.secondaryVariant == secondaryVariant
+        && other.surface == surface
+        && other.background == background
+        && other.error == error
+        && other.onPrimary == onPrimary
+        && other.onSecondary == onSecondary
+        && other.onSurface == onSurface
+        && other.onBackground == onBackground
+        && other.onError == onError
+        && other.brightness == brightness;
   }
 
   @override

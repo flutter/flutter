@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:flutter/widgets.dart' show Element;
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
@@ -153,7 +155,7 @@ class LocalComparisonOutput {
 
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
   File getFailureFile(String failure, Uri golden, Uri basedir) {
-    final String fileName = golden.pathSegments[0];
+    final String fileName = golden.pathSegments.last;
     final String testName = fileName.split(path.extension(fileName))[0]
       + '_'
       + failure
@@ -239,4 +241,17 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
     );
   }
   return ComparisonResult(passed: true);
+}
+
+/// An unsupported [WebGoldenComparator] that exists for API compatibility.
+class DefaultWebGoldenComparator extends WebGoldenComparator {
+  @override
+  Future<bool> compare(Element element, Size size, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<void> update(Uri golden, Element element, Size size) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
 }

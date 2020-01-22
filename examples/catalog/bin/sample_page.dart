@@ -146,7 +146,7 @@ void generate(String commit) {
   initialize();
 
   final List<SampleInfo> samples = <SampleInfo>[];
-  for (FileSystemEntity entity in sampleDirectory.listSync()) {
+  for (final FileSystemEntity entity in sampleDirectory.listSync()) {
     if (entity is File && entity.path.endsWith('.dart')) {
       final SampleInfo sample = SampleInfo(entity, commit);
       if (sample.initialize()) // skip files that lack the Sample Catalog comment
@@ -175,7 +175,7 @@ void generate(String commit) {
   );
 
   // Write the sample app files, like animated_list.md
-  for (SampleInfo sample in samples) {
+  for (final SampleInfo sample in samples) {
     writeExpandedTemplate(
       outputFile(sample.sourceName + '.md'),
       inputFile('bin', 'sample_page.md.template').readAsStringSync(),
@@ -188,13 +188,13 @@ void generate(String commit) {
   // that feature one class. For example AnimatedList_index.md would only
   // include samples that had AnimatedList in their "Classes:" list.
   final Map<String, List<SampleInfo>> classToSamples = <String, List<SampleInfo>>{};
-  for (SampleInfo sample in samples) {
-    for (String className in sample.highlightedClasses) {
+  for (final SampleInfo sample in samples) {
+    for (final String className in sample.highlightedClasses) {
       classToSamples[className] ??= <SampleInfo>[];
       classToSamples[className].add(sample);
     }
   }
-  for (String className in classToSamples.keys) {
+  for (final String className in classToSamples.keys) {
     final Iterable<String> entries = classToSamples[className].map<String>((SampleInfo sample) {
       return expandTemplate(entryTemplate, sample.commentValues);
     });
@@ -238,7 +238,7 @@ void generate(String commit) {
 
   // For now, the website's index.json file must be updated by hand.
   logMessage('The following entries must appear in _data/catalog/widgets.json');
-  for (String className in classToSamples.keys)
+  for (final String className in classToSamples.keys)
     logMessage('"sample": "${className}_index"');
 }
 

@@ -3,8 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class TestAction extends Action {
+  TestAction() : super(key);
+
+  static const LocalKey key = ValueKey<Type>(TestAction);
+
+  int calls = 0;
+
+  @override
+  void invoke(FocusNode node, Intent intent) {
+    calls += 1;
+  }
+}
 
 void main() {
   testWidgets('WidgetsApp with builder only', (WidgetTester tester) async {
@@ -19,6 +33,67 @@ void main() {
       ),
     );
     expect(find.byKey(key), findsOneWidget);
+  });
+
+  testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
+    bool checked = false;
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      WidgetsApp(
+        key: key,
+        builder: (BuildContext context, Widget child) {
+          return Material(
+            child: Checkbox(
+              value: checked,
+              autofocus: true,
+              onChanged: (bool value) {
+                checked = value;
+              },
+            ),
+          );
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    await tester.pump(); // Wait for focus to take effect.
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    // Default key mapping worked.
+    expect(checked, isTrue);
+    checked = false;
+
+    final TestAction action = TestAction();
+    await tester.pumpWidget(
+      WidgetsApp(
+        key: key,
+        actions: <LocalKey, ActionFactory>{
+          TestAction.key: () => action,
+        },
+        shortcuts: <LogicalKeySet, Intent> {
+          LogicalKeySet(LogicalKeyboardKey.space): const Intent(TestAction.key),
+        },
+        builder: (BuildContext context, Widget child) {
+          return Material(
+            child: Checkbox(
+              value: checked,
+              autofocus: true,
+              onChanged: (bool value) {
+                checked = value;
+              },
+            ),
+          );
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    // Default key mapping was not invoked.
+    expect(checked, isFalse);
+    // Overridden mapping was invoked.
+    expect(action.calls, equals(1));
   });
 
   group('error control test', () {

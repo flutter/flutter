@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
@@ -54,7 +55,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This is a sample widget which shows a [ListView] that has 25 [ListTile]s.
 /// It starts out as taking up half the body of the [Scaffold], and can be
@@ -475,7 +476,7 @@ class _DraggableScrollableSheetScrollPosition
     );
 
     final AnimationController ballisticController = AnimationController.unbounded(
-      debugLabel: '$runtimeType',
+      debugLabel: '${objectRuntimeType(this, '_DraggableScrollableSheetPosition')}',
       vsync: context.vsync,
     );
     double lastDelta = 0;

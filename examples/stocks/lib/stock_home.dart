@@ -188,7 +188,7 @@ class StockHomeState extends State<StockHome> {
     showAboutDialog(context: context);
   }
 
-  Widget buildAppBar() {
+  AppBar buildAppBar() {
     return AppBar(
       elevation: 0.0,
       title: Text(StockStrings.of(context).title),
@@ -283,7 +283,7 @@ class StockHomeState extends State<StockHome> {
 
   static const List<String> portfolioSymbols = <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
 
-  Widget buildSearchBar() {
+  AppBar buildSearchBar() {
     return AppBar(
       leading: BackButton(
         color: Theme.of(context).accentColor,

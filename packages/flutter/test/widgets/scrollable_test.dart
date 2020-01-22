@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -17,6 +16,7 @@ Future<void> pumpTest(
   bool scrollable = true,
   bool reverse = false,
   ScrollController controller,
+  Widget Function(Widget) wrapper,
 }) async {
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
@@ -34,30 +34,58 @@ Future<void> pumpTest(
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
 }
 
+// Pump a nested scrollable. The outer scrollable contains a sliver of a
+// 300-pixel-long scrollable followed by a 2000-pixel-long content.
+Future<void> pumpDoubleScrollableTest(
+  WidgetTester tester,
+  TargetPlatform platform,
+) async {
+  await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(
+      platform: platform,
+    ),
+    home: CustomScrollView(
+      slivers: <Widget>[
+        SliverToBoxAdapter(
+          child: Container(
+            height: 300,
+            child: const CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+              ],
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+      ],
+    ),
+  ));
+  await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+}
+
 const double dragOffset = 200.0;
 
-// TODO(gspencergoog): Change this to use TargetPlatform.macOS once that is available.
-// https://github.com/flutter/flutter/issues/31366
-// Can't be const, since Platform.macOS asserts if called in const context.
-// ignore: prefer_const_declarations
-final LogicalKeyboardKey modifierKey = (!kIsWeb && Platform.isMacOS)
+final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
     : LogicalKeyboardKey.controlLeft;
 
-double getScrollOffset(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+double getScrollOffset(WidgetTester tester, {bool last = true}) {
+  Finder viewportFinder = find.byType(Viewport);
+  if (last)
+    viewportFinder = viewportFinder.last;
+  final RenderViewport viewport = tester.renderObject(viewportFinder);
   return viewport.offset.pixels;
 }
 
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset;
+  final ScrollPosition position = viewport.offset as ScrollPosition;
   return position.activity.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset;
+  final ScrollPosition position = viewport.offset as ScrollPosition;
   position.jumpTo(0.0);
 }
 
@@ -255,6 +283,24 @@ void main() {
     // Pointer signals should not cause overscroll.
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
     expect(getScrollOffset(tester), 0.0);
+  });
+
+  testWidgets('Scroll pointer signals are handled when there is competion', (WidgetTester tester) async {
+    // This is a regression test. When there are multiple scrollables listening
+    // to the same event, for example when scrollables are nested, there used
+    // to be exceptions at scrolling events.
+
+    await pumpDoubleScrollableTest(tester, TargetPlatform.fuchsia);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport).last);
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    expect(getScrollOffset(tester, last: true), 20.0);
+    // Pointer signals should not cause overscroll.
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
+    expect(getScrollOffset(tester, last: true), 0.0);
   });
 
   testWidgets('Scroll pointer signals are ignored when scrolling is disabled', (WidgetTester tester) async {

@@ -77,9 +77,9 @@ enum Orientation {
 ///
 /// See also:
 ///
-/// * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
-/// [CupertinoPageScaffold], all of which are informed by [padding],
-/// [viewPadding], and [viewInsets].
+///  * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
+///    [CupertinoPageScaffold], all of which are informed by [padding],
+///    [viewPadding], and [viewInsets].
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
@@ -174,8 +174,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this property
-  ///   and how it relates to [padding] and [viewPadding].
+  ///  * [ui.window], which provides some additional detail about this property
+  ///    and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
   /// The parts of the display that are partially obscured by system UI,
@@ -213,8 +213,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this
-  ///   property and how it relates to [padding] and [viewInsets].
+  ///  * [ui.window], which provides some additional detail about this
+  ///    property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
   /// The areas along the edges of the display where the system consumes
@@ -234,7 +234,7 @@ class MediaQueryData {
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool sample --template=stateful_widget_material}
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]
@@ -574,22 +574,23 @@ class MediaQueryData {
 
   @override
   String toString() {
-    return '$runtimeType('
-             'size: $size, '
-             'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
-             'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
-             'platformBrightness: $platformBrightness, '
-             'padding: $padding, '
-             'viewPadding: $viewPadding, '
-             'viewInsets: $viewInsets, '
-             'physicalDepth: $physicalDepth, '
-             'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
-             'accessibleNavigation: $accessibleNavigation, '
-             'highContrast: $highContrast,'
-             'disableAnimations: $disableAnimations, '
-             'invertColors: $invertColors, '
-             'boldText: $boldText'
-           ')';
+    final List<String> properties = <String>[
+      'size: $size',
+      'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}',
+      'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}',
+      'platformBrightness: $platformBrightness',
+      'padding: $padding',
+      'viewPadding: $viewPadding',
+      'viewInsets: $viewInsets',
+      'physicalDepth: $physicalDepth',
+      'alwaysUse24HourFormat: $alwaysUse24HourFormat',
+      'accessibleNavigation: $accessibleNavigation',
+      'highContrast: $highContrast',
+      'disableAnimations: $disableAnimations',
+      'invertColors: $invertColors',
+      'boldText: $boldText',
+    ];
+    return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
 }
 
@@ -739,7 +740,7 @@ class MediaQuery extends InheritedWidget {
   /// See also:
   ///
   ///  * [MediaQueryData.viewPadding], the affected property of the
-  ///  [MediaQueryData].
+  ///    [MediaQueryData].
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
   factory MediaQuery.removeViewPadding({

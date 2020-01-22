@@ -70,8 +70,8 @@ class IconThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  /// * [CupertinoIconThemeData.resolve] an implementation that resolves
-  ///   [CupertinoIconThemeData.color] before returning.
+  ///  * [CupertinoIconThemeData.resolve] an implementation that resolves
+  ///    [CupertinoIconThemeData.color] before returning.
   IconThemeData resolve(BuildContext context) => this;
 
   /// Whether all the properties of this object are non-null.
@@ -100,7 +100,7 @@ class IconThemeData extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is IconThemeData

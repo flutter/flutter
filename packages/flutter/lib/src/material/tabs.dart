@@ -60,11 +60,14 @@ class Tab extends StatelessWidget {
   /// Creates a material design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]
-  /// and [child] arguments must not be used at the same time.
+  /// and [child] arguments must not be used at the same time. The
+  /// [iconMargin] is only useful when [icon] and either one of [text] or
+  /// [child] is non-null.
   const Tab({
     Key key,
     this.text,
     this.icon,
+    this.iconMargin = const EdgeInsets.only(bottom: 10.0),
     this.child,
   }) : assert(text != null || child != null || icon != null),
        assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/34180
@@ -84,6 +87,12 @@ class Tab extends StatelessWidget {
 
   /// An icon to display as the tab's label.
   final Widget icon;
+
+  /// The margin added around the tab's icon.
+  ///
+  /// Only useful when used in combination with [icon], and either one of
+  /// [text] or [child] is non-null.
+  final EdgeInsetsGeometry iconMargin;
 
   Widget _buildLabelText() {
     return child ?? Text(text, softWrap: false, overflow: TextOverflow.fade);
@@ -109,7 +118,7 @@ class Tab extends StatelessWidget {
         children: <Widget>[
           Container(
             child: icon,
-            margin: const EdgeInsets.only(bottom: 10.0),
+            margin: iconMargin,
           ),
           _buildLabelText(),
         ],
@@ -156,7 +165,7 @@ class _TabStyle extends AnimatedWidget {
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final Animation<double> animation = listenable;
+    final Animation<double> animation = listenable as Animation<double>;
 
     // To enable TextStyle.lerp(style1, style2, value), both styles must have
     // the same value of inherit. Force that to be inherit=true here.
@@ -232,7 +241,7 @@ class _TabLabelBarRenderer extends RenderFlex {
     RenderBox child = firstChild;
     final List<double> xOffsets = <double>[];
     while (child != null) {
-      final FlexParentData childParentData = child.parentData;
+      final FlexParentData childParentData = child.parentData as FlexParentData;
       xOffsets.add(childParentData.offset.dx);
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
@@ -298,7 +307,7 @@ double _indexChangeProgress(TabController controller) {
   // The controller's offset is changing because the user is dragging the
   // TabBarView's PageView to the left or right.
   if (!controller.indexIsChanging)
-    return (currentIndex - controllerValue).abs().clamp(0.0, 1.0);
+    return (currentIndex - controllerValue).abs().clamp(0.0, 1.0) as double;
 
   // The TabController animation's value is changing from previousIndex to currentIndex.
   return (controllerValue - currentIndex).abs() / (currentIndex - previousIndex).abs();
@@ -489,7 +498,7 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   @override
   double get value {
     assert(!controller.indexIsChanging);
-    return (controller.animation.value - index.toDouble()).abs().clamp(0.0, 1.0);
+    return (controller.animation.value - index.toDouble()).abs().clamp(0.0, 1.0) as double;
   }
 }
 
@@ -741,7 +750,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [AppBar] uses this size to compute its own preferred size.
   @override
   Size get preferredSize {
-    for (Widget item in tabs) {
+    for (final Widget item in tabs) {
       if (item is Tab) {
         final Tab tab = item;
         if (tab.text != null && tab.icon != null)
@@ -900,7 +909,7 @@ class _TabBarState extends State<TabBar> {
       case TextDirection.ltr:
         break;
     }
-    return (tabCenter - viewportWidth / 2.0).clamp(minExtent, maxExtent);
+    return (tabCenter - viewportWidth / 2.0).clamp(minExtent, maxExtent) as double;
   }
 
   double _tabCenteredScrollOffset(int index) {
@@ -1302,7 +1311,7 @@ class _TabBarViewState extends State<TabBarView> {
         _controller.index = _pageController.page.floor();
         _currentIndex =_controller.index;
       }
-      _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
+      _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0) as double;
     } else if (notification is ScrollEndNotification) {
       _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;

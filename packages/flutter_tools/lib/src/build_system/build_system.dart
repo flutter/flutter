@@ -12,11 +12,10 @@ import 'package:pool/pool.dart';
 
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'exceptions.dart';
 import 'file_hash_store.dart';
 import 'source.dart';
@@ -139,7 +138,7 @@ abstract class Target {
       inputsFiles.sources,
       outputFiles.sources,
       <Node>[
-        for (Target target in dependencies) target._toNode(environment),
+        for (final Target target in dependencies) target._toNode(environment),
       ],
       environment,
       inputsFiles.containsNewDepfile,
@@ -161,11 +160,11 @@ abstract class Target {
   ) {
     final File stamp = _findStampFile(environment);
     final List<String> inputPaths = <String>[];
-    for (File input in inputs) {
+    for (final File input in inputs) {
       inputPaths.add(input.path);
     }
     final List<String> outputPaths = <String>[];
-    for (File output in outputs) {
+    for (final File output in outputs) {
       outputPaths.add(output.path);
     }
     final Map<String, Object> result = <String, Object>{
@@ -208,13 +207,13 @@ abstract class Target {
     return <String, Object>{
       'name': name,
       'dependencies': <String>[
-        for (Target target in dependencies) target.name,
+        for (final Target target in dependencies) target.name,
       ],
       'inputs': <String>[
-        for (File file in resolveInputs(environment).sources) file.path,
+        for (final File file in resolveInputs(environment).sources) file.path,
       ],
       'outputs': <String>[
-        for (File file in resolveOutputs(environment).sources) file.path,
+        for (final File file in resolveOutputs(environment).sources) file.path,
       ],
       'stamp': _findStampFile(environment).absolute.path,
     };
@@ -230,7 +229,7 @@ abstract class Target {
     List<String> depfiles, Environment environment, { bool implicit = true, bool inputs = true,
   }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
-    for (Source source in config) {
+    for (final Source source in config) {
       source.accept(collector);
     }
     depfiles.forEach(collector.visitDepfile);
@@ -256,7 +255,7 @@ abstract class Target {
 /// Use a hard-coded path or directory relative to the current working
 /// directory to write an output file.
 ///
-///   fs.file('build/linux/out')
+///   globals.fs.file('build/linux/out')
 ///     ..createSync()
 ///     ..writeAsStringSync('output data');
 ///
@@ -278,12 +277,11 @@ abstract class Target {
 ///    }
 class Environment {
   /// Create a new [Environment] object.
-  ///
-  /// Only [projectDir] is required. The remaining environment locations have
-  /// defaults based on it.
   factory Environment({
     @required Directory projectDir,
     @required Directory outputDir,
+    @required Directory cacheDir,
+    @required Directory flutterRootDir,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
   }) {
@@ -293,7 +291,7 @@ class Environment {
     String buildPrefix;
     final List<String> keys = defines.keys.toList()..sort();
     final StringBuffer buffer = StringBuffer();
-    for (String key in keys) {
+    for (final String key in keys) {
       buffer.write(key);
       buffer.write(defines[key]);
     }
@@ -309,9 +307,30 @@ class Environment {
       projectDir: projectDir,
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
-      cacheDir: Cache.instance.getRoot(),
+      cacheDir: cacheDir,
       defines: defines,
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      flutterRootDir: flutterRootDir,
+    );
+  }
+
+  /// Create a new [Environment] object for unit testing.
+  ///
+  /// Any directories not provided will fallback to a [testDirectory]
+  factory Environment.test(Directory testDirectory, {
+    Directory projectDir,
+    Directory outputDir,
+    Directory cacheDir,
+    Directory flutterRootDir,
+    Directory buildDir,
+    Map<String, String> defines = const <String, String>{},
+  }) {
+    return Environment(
+      projectDir: projectDir ?? testDirectory,
+      outputDir: outputDir ?? testDirectory,
+      cacheDir: cacheDir ?? testDirectory,
+      flutterRootDir: flutterRootDir ?? testDirectory,
+      buildDir: buildDir,
+      defines: defines,
     );
   }
 
@@ -411,8 +430,11 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment, fs)
-      ..initialize();
+    final FileHashStore fileCache = FileHashStore(
+      environment: environment,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    )..initialize();
 
     // Perform sanity checks on build.
     checkCycles(target);
@@ -461,7 +483,7 @@ class BuildSystem {
 /// An active instance of a build.
 class _BuildInstance {
   _BuildInstance(this.environment, this.fileCache, this.buildSystemConfig)
-    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
+    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? globals.platform?.numberOfProcessors ?? 1);
 
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
@@ -503,10 +525,10 @@ class _BuildInstance {
     // these files are included as both inputs and outputs then it isn't
     // possible to construct a DAG describing the build.
     void updateGraph() {
-      for (File output in node.outputs) {
+      for (final File output in node.outputs) {
         outputFiles[output.path] = output;
       }
-      for (File input in node.inputs) {
+      for (final File input in node.inputs) {
         final String resolvedPath = input.absolute.path;
         if (outputFiles.containsKey(resolvedPath)) {
           continue;
@@ -523,13 +545,13 @@ class _BuildInstance {
 
       if (canSkip) {
         skipped = true;
-        printTrace('Skipping target: ${node.target.name}');
+        globals.printTrace('Skipping target: ${node.target.name}');
         updateGraph();
         return passed;
       }
-      printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+      globals.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
       await node.target.build(environment);
-      printTrace('${node.target.name}: Complete');
+      globals.printTrace('${node.target.name}: Complete');
 
       node.inputs
         ..clear()
@@ -551,11 +573,11 @@ class _BuildInstance {
 
       // Delete outputs from previous stages that are no longer a part of the
       // build.
-      for (String previousOutput in node.previousOutputs) {
+      for (final String previousOutput in node.previousOutputs) {
         if (outputFiles.containsKey(previousOutput)) {
           continue;
         }
-        final File previousFile = fs.file(previousOutput);
+        final File previousFile = globals.fs.file(previousOutput);
         if (previousFile.existsSync()) {
           previousFile.deleteSync();
         }
@@ -615,7 +637,7 @@ void checkCycles(Target initial) {
     }
     visited.add(target);
     stack.add(target);
-    for (Target dependency in target.dependencies) {
+    for (final Target dependency in target.dependencies) {
       checkInternal(dependency, visited, stack);
     }
     stack.remove(target);
@@ -628,7 +650,7 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
   final List<File> missingOutputs = <File>[];
-  for (File sourceFile in outputs) {
+  for (final File sourceFile in outputs) {
     if (!sourceFile.existsSync()) {
       missingOutputs.add(sourceFile);
       continue;
@@ -734,13 +756,13 @@ class Node {
     FileHashStore fileHashStore,
   ) async {
     final Set<String> currentOutputPaths = <String>{
-      for (File file in outputs) file.path,
+      for (final File file in outputs) file.path,
     };
     // For each input, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.
     final List<File> sourcesToHash = <File>[];
     final List<File> missingInputs = <File>[];
-    for (File file in inputs) {
+    for (final File file in inputs) {
       if (!file.existsSync()) {
         missingInputs.add(file);
         continue;
@@ -761,7 +783,7 @@ class Node {
 
     // For each output, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.
-    for (String previousOutput in previousOutputs) {
+    for (final String previousOutput in previousOutputs) {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
@@ -769,7 +791,7 @@ class Node {
         // if this isn't a current output file there is no reason to compute the hash.
         continue;
       }
-      final File file = fs.file(previousOutput);
+      final File file = globals.fs.file(previousOutput);
       if (!file.existsSync()) {
         invalidatedReasons.add(InvalidatedReason.outputMissing);
         _dirty = true;
@@ -794,7 +816,7 @@ class Node {
     if (missingInputs.isNotEmpty) {
       _dirty = true;
       final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
-      printTrace('invalidated build due to missing files: $missingMessage');
+      globals.printTrace('invalidated build due to missing files: $missingMessage');
       invalidatedReasons.add(InvalidatedReason.inputMissing);
     }
 

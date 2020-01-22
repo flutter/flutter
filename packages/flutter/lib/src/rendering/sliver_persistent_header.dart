@@ -22,7 +22,7 @@ import 'viewport_offset.dart';
 /// See also:
 ///
 ///  * [SliverAppBar], which creates a header that can be stretched into an
-///  overscroll area and trigger a callback function.
+///    overscroll area and trigger a callback function.
 class OverScrollHeaderStretchConfiguration {
   /// Creates an object that specifies how a stretched header may activate an
   /// [AsyncCallback].
@@ -111,7 +111,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// See also:
   ///
   ///  * [SliverAppBar], which creates a header that can stretched into an
-  ///  overscroll area and trigger a callback function.
+  ///    overscroll area and trigger a callback function.
   OverScrollHeaderStretchConfiguration stretchConfiguration;
 
   /// Update the child render object if necessary.
@@ -373,14 +373,15 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     final bool overlapsContent = constraints.overlap > 0.0;
     excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
     layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
-    final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent) as double;
+    final double effectiveRemainingPaintExtent = math.max(0, constraints.remainingPaintExtent - constraints.overlap);
+    final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, effectiveRemainingPaintExtent) as double;
     final double stretchOffset = stretchConfiguration != null ?
       constraints.overlap.abs() :
       0.0;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
-      paintExtent: math.min(childExtent, constraints.remainingPaintExtent),
+      paintExtent: math.min(childExtent, effectiveRemainingPaintExtent),
       layoutExtent: layoutExtent,
       maxPaintExtent: maxExtent + stretchOffset,
       maxScrollObstructionExtent: minExtent,

@@ -7,15 +7,13 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'android_sdk.dart';
 
 const int kAndroidSdkMinVersion = 28;
@@ -74,20 +72,20 @@ class AndroidValidator extends DoctorValidator {
   Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
-      if (!processManager.canRun(javaBinary)) {
+      if (!globals.processManager.canRun(javaBinary)) {
         messages.add(ValidationMessage.error(userMessages.androidCantRunJavaBinary(javaBinary)));
         return false;
       }
       String javaVersionText;
       try {
-        printTrace('java -version');
-        final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
+        globals.printTrace('java -version');
+        final ProcessResult result = await globals.processManager.run(<String>[javaBinary, '-version']);
         if (result.exitCode == 0) {
           final List<String> versionLines = (result.stderr as String).split('\n');
           javaVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         }
       } catch (error) {
-        printTrace(error.toString());
+        globals.printTrace(error.toString());
       }
       if (javaVersionText == null || javaVersionText.isEmpty) {
         // Could not determine the java version.
@@ -112,8 +110,8 @@ class AndroidValidator extends DoctorValidator {
 
     if (androidSdk == null) {
       // No Android SDK found.
-      if (platform.environment.containsKey(kAndroidHome)) {
-        final String androidHomeDir = platform.environment[kAndroidHome];
+      if (globals.platform.environment.containsKey(kAndroidHome)) {
+        final String androidHomeDir = globals.platform.environment[kAndroidHome];
         messages.add(ValidationMessage.error(userMessages.androidBadSdkDir(kAndroidHome, androidHomeDir)));
       } else {
         messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
@@ -149,12 +147,12 @@ class AndroidValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
     }
 
-    if (platform.environment.containsKey(kAndroidHome)) {
-      final String androidHomeDir = platform.environment[kAndroidHome];
+    if (globals.platform.environment.containsKey(kAndroidHome)) {
+      final String androidHomeDir = globals.platform.environment[kAndroidHome];
       messages.add(ValidationMessage('$kAndroidHome = $androidHomeDir'));
     }
-    if (platform.environment.containsKey(kAndroidSdkRoot)) {
-      final String androidSdkRoot = platform.environment[kAndroidSdkRoot];
+    if (globals.platform.environment.containsKey(kAndroidSdkRoot)) {
+      final String androidSdkRoot = globals.platform.environment[kAndroidSdkRoot];
       messages.add(ValidationMessage('$kAndroidSdkRoot = $androidSdkRoot'));
     }
 
@@ -229,18 +227,18 @@ class AndroidLicenseValidator extends DoctorValidator {
     if (javaBinary == null) {
       return false;
     }
-    if (!processManager.canRun(javaBinary)) {
+    if (!globals.processManager.canRun(javaBinary)) {
       return false;
     }
     String javaVersion;
     try {
-      final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
+      final ProcessResult result = await globals.processManager.run(<String>[javaBinary, '-version']);
       if (result.exitCode == 0) {
         final List<String> versionLines = (result.stderr as String).split('\n');
         javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
     } catch (error) {
-      printTrace(error.toString());
+      globals.printTrace(error.toString());
     }
     if (javaVersion == null) {
       // Could not determine the java version.
@@ -295,7 +293,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;
     } on ProcessException catch (e) {
-      printTrace('Failed to run Android sdk manager: $e');
+      globals.printTrace('Failed to run Android sdk manager: $e');
       return LicensesAccepted.unknown;
     }
   }
@@ -303,7 +301,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   /// Run the Android SDK manager tool in order to accept SDK licenses.
   static Future<bool> runLicenseManager() async {
     if (androidSdk == null) {
-      printStatus(userMessages.androidSdkShort);
+      globals.printStatus(userMessages.androidSdkShort);
       return false;
     }
 
@@ -345,6 +343,6 @@ class AndroidLicenseValidator extends DoctorValidator {
   static bool _canRunSdkManager() {
     assert(androidSdk != null);
     final String sdkManagerPath = androidSdk.sdkManagerPath;
-    return processManager.canRun(sdkManagerPath);
+    return globals.processManager.canRun(sdkManagerPath);
   }
 }

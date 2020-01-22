@@ -139,7 +139,7 @@ void main() {
       find.byKey(painterKey),
       matchesGoldenFile('card_theme.custom_shape.png'),
     );
-  },  skip: isBrowser);
+  });
 }
 
 CardTheme _cardTheme() {

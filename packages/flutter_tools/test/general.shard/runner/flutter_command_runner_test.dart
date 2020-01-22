@@ -35,6 +35,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
+      Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     });
 
     setUp(() {
@@ -165,7 +166,11 @@ void main() {
     });
 
     group('getRepoPackages', () {
+      String oldFlutterRoot;
+
       setUp(() {
+        oldFlutterRoot = Cache.flutterRoot;
+        Cache.flutterRoot = _kFlutterRoot;
         fs.directory(fs.path.join(_kFlutterRoot, 'examples'))
             .createSync(recursive: true);
         fs.directory(fs.path.join(_kFlutterRoot, 'packages'))
@@ -177,6 +182,10 @@ void main() {
             .createSync();
         fs.file(fs.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
             .createSync();
+      });
+
+      tearDown(() {
+        Cache.flutterRoot = oldFlutterRoot;
       });
 
       testUsingContext('', () {

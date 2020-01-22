@@ -75,6 +75,6 @@ class BottomNavigationBarItem {
   /// See also:
   ///
   ///  * [Icon.color] and [ImageIcon.color] to control the foreground color of
-  ///     the icons themselves.
+  ///    the icons themselves.
   final Color backgroundColor;
 }

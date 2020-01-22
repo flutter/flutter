@@ -177,6 +177,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       onTapHint: widget.onPressed == null ? null : onTapHint,
       child: IconButton(
         padding: widget.padding,
+        iconSize: widget.size,
         color: _iconColor,
         disabledColor: widget.disabledColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,

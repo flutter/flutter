@@ -19,7 +19,7 @@ const String _kSecondIsolateName = 'second isolate name';
 
 void main() {
   task(() async {
-    final AndroidDevice device = await devices.workingDevice;
+    final AndroidDevice device = await devices.workingDevice as AndroidDevice;
     await device.unlock();
 
     section('Compile and run the tester app');

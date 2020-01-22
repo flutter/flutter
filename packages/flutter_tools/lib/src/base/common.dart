@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'file_system.dart';
-import 'platform.dart';
+import '../globals.dart' as globals;
 
 /// Whether the tool started from the daemon, as opposed to the command line.
 // TODO(jonahwilliams): remove once IDE updates have rolled.
@@ -11,11 +10,11 @@ bool isRunningFromDaemon = false;
 
 /// Return the absolute path of the user's home directory
 String get homeDirPath {
-  String path = platform.isWindows
-      ? platform.environment['USERPROFILE']
-      : platform.environment['HOME'];
+  String path = globals.platform.isWindows
+      ? globals.platform.environment['USERPROFILE']
+      : globals.platform.environment['HOME'];
   if (path != null) {
-    path = fs.path.absolute(path);
+    path = globals.fs.path.absolute(path);
   }
   return path;
 }
