@@ -178,6 +178,10 @@ void main() {
     });
   });
 
+  group('custom minimum contrast guideline', () {
+    // TODO: tests here.
+  });
+
   group('tap target size guideline', () {
     testWidgets('Tappable box at 48 by 48', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
