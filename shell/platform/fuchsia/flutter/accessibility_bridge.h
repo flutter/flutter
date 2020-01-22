@@ -85,7 +85,24 @@ class AccessibilityBridge
   // Notifies the bridge of a 'hover move' touch exploration event.
   zx_status_t OnHoverMove(double x, double y);
 
+  // |fuchsia::accessibility::semantics::SemanticListener|
+  void HitTest(
+      fuchsia::math::PointF local_point,
+      fuchsia::accessibility::semantics::SemanticListener::HitTestCallback
+          callback) override;
+
  private:
+  // Holds only the fields we need for hit testing.
+  // In particular, it adds a screen_rect field to flutter::SemanticsNode.
+  struct SemanticsNode {
+    int32_t id;
+    int32_t flags;
+    SkRect rect;
+    SkRect screen_rect;
+    SkMatrix44 transform;
+    std::vector<int32_t> children_in_hit_test_order;
+  };
+
   AccessibilityBridge::Delegate& delegate_;
 
   static constexpr int32_t kRootNodeId = 0;
@@ -95,8 +112,8 @@ class AccessibilityBridge
   fuchsia::accessibility::semantics::SemanticTreePtr tree_ptr_;
   bool semantics_enabled_;
   // This is the cache of all nodes we've sent to Fuchsia's SemanticsManager.
-  // Assists with pruning unreachable nodes.
-  std::unordered_map<int32_t, std::vector<int32_t>> nodes_;
+  // Assists with pruning unreachable nodes and hit testing.
+  std::unordered_map<int32_t, SemanticsNode> nodes_;
 
   // Derives the BoundingBox of a Flutter semantics node from its
   // rect and elevation.
@@ -127,18 +144,32 @@ class AccessibilityBridge
   // May result in a call to FuchsiaAccessibility::Commit().
   void PruneUnreachableNodes();
 
+  // Updates the on-screen positions of accessibility elements,
+  // starting from the root element with an identity matrix.
+  //
+  // This should be called from Update.
+  void UpdateScreenRects();
+
+  // Updates the on-screen positions of accessibility elements, starting
+  // from node_id and using the specified transform.
+  //
+  // Update calls this via UpdateScreenRects().
+  void UpdateScreenRects(int32_t node_id,
+                         SkMatrix44 parent_transform,
+                         std::unordered_set<int32_t>* visited_nodes);
+
+  // Traverses the semantics tree to find the node_id hit by the given x,y
+  // point.
+  //
+  // Assumes that SemanticsNode::screen_rect is up to date.
+  std::optional<int32_t> GetHitNode(int32_t node_id, float x, float y);
+
   // |fuchsia::accessibility::semantics::SemanticListener|
   void OnAccessibilityActionRequested(
       uint32_t node_id,
       fuchsia::accessibility::semantics::Action action,
       fuchsia::accessibility::semantics::SemanticListener::
           OnAccessibilityActionRequestedCallback callback) override;
-
-  // |fuchsia::accessibility::semantics::SemanticListener|
-  void HitTest(
-      fuchsia::math::PointF local_point,
-      fuchsia::accessibility::semantics::SemanticListener::HitTestCallback
-          callback) override;
 
   // |fuchsia::accessibility::semantics::SemanticListener|
   void OnSemanticsModeChanged(bool enabled,
