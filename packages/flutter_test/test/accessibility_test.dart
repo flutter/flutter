@@ -202,7 +202,7 @@ void main() {
     final Finder _findIconsAndTexts = find.byWidgetPredicate((Widget widget) => widget is Icon || widget is Text);
 
     testWidgets('Black icons on white background', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.black, background: Colors.white),
         _icon (color: Colors.black, background: Colors.white),
       ]));
@@ -211,7 +211,7 @@ void main() {
     });
 
     testWidgets('Black icons on black background', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.black, background: Colors.black),
         _icon (color: Colors.black, background: Colors.black),
       ]));
@@ -220,7 +220,7 @@ void main() {
     });
 
     testWidgets('White icons on black background ("dark mode")', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.white, background: Colors.black),
         _icon (color: Colors.white, background: Colors.black),
       ]));
@@ -229,7 +229,7 @@ void main() {
     });
 
     testWidgets('Using different icons', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.black, background: Colors.white, icon: Icons.more_horiz),
         _icon (color: Colors.black, background: Colors.white, icon: Icons.description),
         _icon (color: Colors.black, background: Colors.white, icon: Icons.image),
@@ -240,7 +240,7 @@ void main() {
     });
 
     testWidgets('One invalid instance fails entire test', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.black, background: Colors.white),
         _icon (color: Colors.black, background: Colors.black),
       ]));
@@ -249,7 +249,7 @@ void main() {
     });
 
     testWidgets('White on different colors, passing', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.white, background: Colors.red[800], icon: Icons.more_horiz),
         _icon (color: Colors.white, background: Colors.green[800], icon: Icons.description),
         _icon (color: Colors.white, background: Colors.blue[800], icon: Icons.image),
@@ -260,7 +260,7 @@ void main() {
     });
 
     testWidgets('White on different colors, failing', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.white, background: Colors.red[200], icon: Icons.more_horiz),
         _icon (color: Colors.white, background: Colors.green[400], icon: Icons.description),
         _icon (color: Colors.white, background: Colors.blue[600], icon: Icons.image),
@@ -271,13 +271,13 @@ void main() {
     });
 
     testWidgets('Absence of icons, passing', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([]));
+      await tester.pumpWidget(_row(<Widget>[]));
 
       await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
     });
 
     testWidgets('Absence of icons, passing - 2nd test', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _text (color: Colors.black, background: Colors.white),
         _text (color: Colors.black, background: Colors.black),
       ]));
@@ -286,7 +286,7 @@ void main() {
     });
 
     testWidgets('Guideline ignores widgets of other types', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.black, background: Colors.white),
         _icon (color: Colors.black, background: Colors.white),
         _text (color: Colors.black, background: Colors.white),
@@ -299,7 +299,7 @@ void main() {
     });
 
     testWidgets('Custom minimum ratio - Icons', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.blue, background: Colors.white),
         _icon (color: Colors.black, background: Colors.white),
       ]));
@@ -309,7 +309,7 @@ void main() {
     });
 
     testWidgets('Custom minimum ratio - Texts', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _text (color: Colors.blue, background: Colors.white),
         _text (color: Colors.black, background: Colors.white),
       ]));
@@ -319,7 +319,7 @@ void main() {
     });
 
     testWidgets('Custom minimum ratio - Different standards for icons and texts', (WidgetTester tester) async {
-      await tester.pumpWidget(_row([
+      await tester.pumpWidget(_row(<Widget>[
         _icon (color: Colors.blue, background: Colors.white),
         _icon (color: Colors.black, background: Colors.white),
         _text (color: Colors.blue, background: Colors.white),
