@@ -7432,4 +7432,45 @@ void main() {
 
     expect(textFieldSize1, equals(textFieldSize2));
   });
+
+  testWidgets(
+    'The selection menu displays in an Overlay without error',
+    (WidgetTester tester) async {
+      // This is a regression test for
+      // https://github.com/flutter/flutter/issues/43787
+      final TextEditingController controller = TextEditingController(
+        text: 'This is a test that shows some odd behavior with Text Selection!',
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Container(
+            color: Colors.grey,
+            child: Center(
+              child: Container(
+                color: Colors.red,
+                width: 300,
+                height: 600,
+                child: Overlay(
+                  initialEntries: <OverlayEntry>[
+                    OverlayEntry(
+                      builder: (BuildContext context) => Center(
+                        child: TextField(
+                          controller: controller,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await _showSelectionMenuAt(tester, controller, controller.text.indexOf('test'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
