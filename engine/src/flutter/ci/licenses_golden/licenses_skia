@@ -1,4 +1,4 @@
-Signature: 4e85c369de795951b56f624921748c56
+Signature: 9e46b0ff096183bbe63eda3c41b2cb3a
 
 UNUSED LICENSES:
 
@@ -3002,18 +3002,18 @@ FILE: ../../../third_party/skia/src/gpu/GrTransferFromRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrUtil.h
 FILE: ../../../third_party/skia/src/gpu/GrWaitRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWaitRenderTask.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrClampFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrColorMatrixFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrHSLToRGBFilterEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRGBToHSLFilterEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrSaturateProcessor.fp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrClampFragmentProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrClampFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHSLToRGBFilterEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrHSLToRGBFilterEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRGBToHSLFilterEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRGBToHSLFilterEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrSaturateProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrSaturateProcessor.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadUtils.h
@@ -5090,10 +5090,10 @@ FILE: ../../../third_party/skia/src/gpu/tessellate/GrCoverShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrCoverShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrGpuTessellationPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrGpuTessellationPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatePathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatePathOp.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellateWedgeShader.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellateWedgeShader.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.cpp
