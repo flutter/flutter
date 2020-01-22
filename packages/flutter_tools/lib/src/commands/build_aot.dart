@@ -69,7 +69,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     final String targetPlatform = stringArg('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     final String outputPath = stringArg('output-dir') ?? getAotBuildDirectory();
-    final BuildMode buildMode = getBuildMode();
+    final BuildInfo buildInfo = getBuildInfo();
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
     }
@@ -79,7 +79,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     await aotBuilder.build(
       platform: platform,
       outputPath: outputPath,
-      buildMode: buildMode,
+      buildMode: buildInfo.mode,
       mainDartFile: findMainDartFile(targetFile),
       bitcode: boolArg('bitcode'),
       quiet: boolArg('quiet'),
@@ -88,6 +88,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
       extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       dartDefines: dartDefines,
+      optimizations: buildInfo.optimizations,
     );
     return FlutterCommandResult.success();
   }

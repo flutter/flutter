@@ -32,9 +32,13 @@ abstract class AotAssemblyBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_assembly');
     }
+    if (environment.defines[kOptimizationLevel] == null) {
+      throw MissingDefineException(kOptimizationLevel, 'aot_assembly');
+    }
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+    final Optimizations optimizations = getOptimizationsFromString(environment.defines[kOptimizationLevel]);
     final List<DarwinArch> iosArchs = environment.defines[kIosArchs]?.split(',')?.map(getIOSArchForName)?.toList()
         ?? <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
@@ -51,6 +55,7 @@ abstract class AotAssemblyBase extends Target {
         outputPath: environment.outputDir.path,
         darwinArch: iosArchs.single,
         bitcode: bitcode,
+        optimizations: optimizations,
       );
       if (snapshotExitCode != 0) {
         throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -68,6 +73,7 @@ abstract class AotAssemblyBase extends Target {
           outputPath: globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
           darwinArch: iosArch,
           bitcode: bitcode,
+          optimizations: optimizations,
         ));
       }
       final List<int> results = await Future.wait(pending);

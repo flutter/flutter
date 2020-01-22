@@ -40,6 +40,9 @@ const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 /// This is expected to be a comma separated list of strings.
 const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
+/// The optimizations applied to the compiled dart code.
+const String kOptimizationLevel = 'OptimizationLevel';
+
 /// Alternative scheme for file URIs.
 ///
 /// May be used along with [kFileSystemRoots] to support a multi-root
@@ -253,10 +256,14 @@ abstract class AotElfBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
+    if (environment.defines[kOptimizationLevel] == null) {
+      throw MissingDefineException(kOptimizationLevel, 'aot_elf');
+    }
     final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
       ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+    final Optimizations optimizations = getOptimizationsFromString(environment.defines[kOptimizationLevel]);
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
@@ -265,6 +272,7 @@ abstract class AotElfBase extends Target {
       outputPath: outputPath,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
+      optimizations: optimizations,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

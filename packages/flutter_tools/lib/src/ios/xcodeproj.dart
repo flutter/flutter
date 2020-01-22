@@ -214,6 +214,15 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('TRACK_WIDGET_CREATION=true');
   }
 
+  switch (buildInfo.optimizations) {
+    case Optimizations.None:
+      xcodeBuildSettings.add('OPTIMIZATION_LEVEL=0');
+      break;
+    case Optimizations.All:
+      xcodeBuildSettings.add('OPTIMIZATION_LEVEL=1');
+      break;
+  }
+
   return xcodeBuildSettings;
 }
 

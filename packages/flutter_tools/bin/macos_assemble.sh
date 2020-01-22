@@ -33,6 +33,12 @@ if [[ -n "$FLUTTER_TARGET" ]]; then
     target_path="${FLUTTER_TARGET}"
 fi
 
+# Set the optimiation level flag.
+local optimization_level="0"
+if [[ -n "$OPTIMIZATION_LEVEL" ]]; then
+  optimization_level="${OPTIMIZATION_LEVEL}"
+fi
+
 if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
 fi
@@ -70,6 +76,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
     -dBuildMode="${build_mode}"                                             \
+    -dOptimizationLevel="${optimization_level}"                             \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \

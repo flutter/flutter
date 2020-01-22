@@ -91,6 +91,7 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
+    @required Optimizations optimizations,
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
@@ -154,6 +155,16 @@ class AOTSnapshotter {
 
       // Not supported by the Pixel in 32-bit mode.
       genSnapshotArgs.add('--no-use-integer-division');
+    }
+    switch (optimizations) {
+      case Optimizations.None:
+        break;
+      case Optimizations.All:
+        genSnapshotArgs.addAll(const <String>[
+          '--no-causal-async-stacks',
+          '--lazy-async-stacks',
+        ]);
+        break;
     }
 
     genSnapshotArgs.add(mainPath);

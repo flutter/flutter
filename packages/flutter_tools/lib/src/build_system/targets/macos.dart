@@ -196,10 +196,14 @@ class CompileMacOSFramework extends Target {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
+    if (environment.defines[kOptimizationLevel] == null) {
+      throw MissingDefineException(kOptimizationLevel, 'compile_macos_framework');
+    }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
+    final Optimizations optimizations = getOptimizationsFromString(environment.defines[kOptimizationLevel]);
     final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
       buildMode: buildMode,
@@ -208,6 +212,7 @@ class CompileMacOSFramework extends Target {
       platform: TargetPlatform.darwin_x64,
       darwinArch: DarwinArch.x86_64,
       packagesPath: environment.projectDir.childFile('.packages').path,
+      optimizations: optimizations,
     );
     if (result != 0) {
       throw Exception('gen shapshot failed.');

@@ -595,6 +595,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
+        String optimizationLevelValue = null
+        if (project.hasProperty('optimization-level')) {
+            optimizationLevelValue = project.property('optimization-level')
+        }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
             extraFrontEndOptionsValue = project.property('extra-front-end-options')
@@ -637,6 +641,7 @@ class FlutterPlugin implements Plugin<Project> {
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
+                optimizationLevel optimizationLevelValue
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -767,6 +772,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String extraFrontEndOptions
     @Optional @Input
     String extraGenSnapshotOptions
+    @Input
+    String optimizationLevel
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -820,6 +827,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             args "-dTargetPlatform=android"
             args "-dBuildMode=${buildMode}"
+            args "-dOptimizationLevel=${optimizationLevel}"
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }

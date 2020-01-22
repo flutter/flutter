@@ -73,7 +73,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         abbr: 'o',
         valueHelp: 'path/to/directory/',
         help: 'Location to write the frameworks.',
-      );
+      )
+      ..addOption('optimization-level');
   }
 
   AotBuilder aotBuilder;
@@ -141,6 +142,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
     final String outputArgument = stringArg('output')
         ?? globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
+    final Optimizations optimizations = getOptimizationsFromString(stringArg('optimization-level'));
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -179,7 +181,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       }
 
       // Build aot, create module.framework and copy.
-      await _produceAppFramework(mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
+      await _produceAppFramework(mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory, optimizations);
 
       // Build and copy plugins.
       await processPodsIfNeeded(_project.ios, getIosBuildDirectory(), mode);
@@ -323,7 +325,7 @@ end
     _produceXCFramework(mode, fatFlutterFrameworkCopy);
   }
 
-  Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
+  Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory, Optimizations optimizations) async {
     const String appFrameworkName = 'App.framework';
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
     destinationAppFrameworkDirectory.createSync(recursive: true);
@@ -336,7 +338,7 @@ end
         status.stop();
       }
     } else {
-      await _produceAotAppFrameworkIfNeeded(mode, iPhoneBuildOutput, destinationAppFrameworkDirectory);
+      await _produceAotAppFrameworkIfNeeded(mode, iPhoneBuildOutput, destinationAppFrameworkDirectory, optimizations);
     }
 
     final File sourceInfoPlist = _project.ios.hostAppRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
@@ -400,6 +402,7 @@ end
     BuildMode mode,
     Directory iPhoneBuildOutput,
     Directory destinationAppFrameworkDirectory,
+    Optimizations optimizations,
   ) async {
     if (mode == BuildMode.debug) {
       return;
@@ -420,6 +423,7 @@ end
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
         dartDefines: dartDefines,
+        optimizations: optimizations,
       );
 
       const String appFrameworkName = 'App.framework';

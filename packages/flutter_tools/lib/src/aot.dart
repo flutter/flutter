@@ -27,6 +27,7 @@ class AotBuilder {
     @required String outputPath,
     @required BuildMode buildMode,
     @required String mainDartFile,
+    @required Optimizations optimizations,
     bool bitcode = kBitcodeEnabledDefault,
     bool quiet = true,
     bool reportTimings = false,
@@ -51,6 +52,7 @@ class AotBuilder {
         targetPlatform: platform,
         buildMode: buildMode,
         quiet: quiet,
+        optimizations: optimizations,
       );
       return;
     }
@@ -110,6 +112,7 @@ class AotBuilder {
             extraGenSnapshotOptions: extraGenSnapshotOptions,
             bitcode: bitcode,
             quiet: quiet,
+            optimizations: optimizations,
           ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
@@ -146,6 +149,7 @@ class AotBuilder {
           outputPath: outputPath,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           bitcode: false,
+          optimizations: optimizations,
         );
         if (snapshotExitCode != 0) {
           status?.cancel();
@@ -197,7 +201,8 @@ class AotBuilder {
     BuildMode buildMode,
     String targetFile,
     String outputDir,
-    bool quiet
+    bool quiet,
+    Optimizations optimizations,
   }) async {
     // This code is currently dead, but will be updated as we move iOS to assemble.
     // See also: https://github.com/flutter/flutter/issues/32925
@@ -223,6 +228,7 @@ class AotBuilder {
         kBuildMode: getNameForBuildMode(buildMode),
         kTargetPlatform: getNameForTargetPlatform(targetPlatform),
         kTargetFile: targetFile,
+        kOptimizationLevel: getNameForOptimizations(optimizations),
       }
     ));
     status?.stop();

@@ -205,12 +205,16 @@ class AndroidAot extends AotElfBase {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');
     }
+    if (environment.defines[kOptimizationLevel] == null) {
+      throw MissingDefineException(kOptimizationLevel, 'aot_elf');
+    }
     if (!output.existsSync()) {
       output.createSync(recursive: true);
     }
     final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
       ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final Optimizations optimizations = getOptimizationsFromString(environment.defines[kOptimizationLevel]);
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
@@ -219,6 +223,7 @@ class AndroidAot extends AotElfBase {
       outputPath: output.path,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
+      optimizations: optimizations,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

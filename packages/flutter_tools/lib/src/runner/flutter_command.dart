@@ -362,6 +362,14 @@ abstract class FlutterCommand extends Command<void> {
       negatable: false,
       hide: !verboseHelp,
       help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    argParser.addOption(
+      'optimization-level',
+      abbr: 'O',
+      valueHelp: '0',
+      defaultsTo: '0',
+      allowed: const <String>['0', '1'],
+      help: 'The optimization level applied in profile and release modes.'
+    );
   }
 
   void addShrinkingFlag() {
@@ -489,6 +497,9 @@ abstract class FlutterCommand extends Command<void> {
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
           : null,
+      optimizations: argParser.options.containsKey('optimization-level')
+         ? getOptimizationsFromString(stringArg('optimization-level'))
+         : Optimizations.None,
     );
   }
 

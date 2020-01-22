@@ -6,6 +6,33 @@ import 'base/context.dart';
 import 'base/utils.dart';
 import 'globals.dart' as globals;
 
+/// The optimization level applied to profile and release builds.
+enum Optimizations {
+  /// Apply no additional optimizations.
+  None,
+  /// Apply all available optimizations.
+  ///
+  /// This currently includes no-causal-async-stacks and lazy-async-stacks.
+  All,
+}
+
+/// Return the [Optimizations] for a string representation.
+Optimizations getOptimizationsFromString(String value) {
+  switch (value) {
+    case '1':
+      return Optimizations.All;
+    default:
+      return Optimizations.None;
+  }
+}
+
+/// Return the String representation for a given [Optimizations].
+String getNameForOptimizations(Optimizations optimizations) {
+  return const <String>[
+    '0', '1'
+  ][optimizations.index];
+}
+
 /// Information about a build to be performed or used.
 class BuildInfo {
   const BuildInfo(
@@ -18,9 +45,12 @@ class BuildInfo {
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
+    this.optimizations = Optimizations.None,
   });
 
   final BuildMode mode;
+
+  final Optimizations optimizations;
 
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.

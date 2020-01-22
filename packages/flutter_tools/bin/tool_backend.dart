@@ -17,6 +17,7 @@ Future<void> main(List<String> arguments) async {
   final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
   final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final String optimizationLevel = Platform.environment['OPTIMIZATION_LEVEL'] ?? '0';
   Directory.current = projectDirectory;
 
   if (localEngine != null && !localEngine.contains(buildMode)) {
@@ -49,6 +50,7 @@ or
           '-dTargetPlatform=$targetPlatform',
           '-dBuildMode=debug',
           '-dTargetFile=$flutterTarget',
+          '-dOptimizationLevel=$optimizationLevel',
           '--output=build',
           'debug_bundle_linux_assets',
         ]);

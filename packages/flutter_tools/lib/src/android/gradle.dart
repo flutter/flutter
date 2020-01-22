@@ -304,6 +304,9 @@ Future<void> buildGradleApp({
   assert(buildInfo.trackWidgetCreation != null);
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
 
+  assert(buildInfo.optimizations != null);
+  command.add('-Poptimization-level=${getNameForOptimizations(buildInfo.optimizations)}');
+
   if (buildInfo.extraFrontEndOptions != null) {
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
   }

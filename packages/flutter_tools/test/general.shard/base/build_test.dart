@@ -269,6 +269,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        optimizations: Optimizations.None,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -281,6 +282,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        optimizations: Optimizations.None,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -293,6 +295,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        optimizations: Optimizations.None,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -319,6 +322,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: true,
+        optimizations: Optimizations.None,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -376,6 +380,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: true,
+        optimizations: Optimizations.None,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -436,6 +441,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
+        optimizations: Optimizations.None,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -483,6 +489,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         bitcode: false,
+        optimizations: Optimizations.None,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -519,6 +526,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
+        optimizations: Optimizations.None,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -557,6 +565,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         bitcode: false,
+        optimizations: Optimizations.None,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -584,6 +593,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        optimizations: Optimizations.None,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -614,6 +624,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        optimizations: Optimizations.None,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -650,6 +661,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        optimizations: Optimizations.None,
       );
 
       expect(genSnapshotExitCode, 0);

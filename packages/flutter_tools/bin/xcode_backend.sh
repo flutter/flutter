@@ -157,6 +157,11 @@ BuildApp() {
     verbose_flag="--verbose"
   fi
 
+  local optimization_level="0"
+  if [[ -n "$OPTIMIZATION_LEVEL" ]]; then
+    optimization_level="${OPTIMIZATION_LEVEL}"
+  fi
+
   local build_dir="${FLUTTER_BUILD_DIR:-build}"
 
   local track_widget_creation_flag=""
@@ -187,6 +192,7 @@ BuildApp() {
       --target="${target_path}"                                             \
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
+      --optimization-level="${optimization_level}"                          \
       ${flutter_engine_flag}                                                \
       ${local_engine_flag}                                                  \
       ${bitcode_flag}
