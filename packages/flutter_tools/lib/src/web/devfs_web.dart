@@ -280,8 +280,8 @@ class WebDevFS implements DevFS {
     // Format ipv6 hosts according to RFC 5952.
     return Uri.parse(
       internetAddress.type == InternetAddressType.IPv4
-        ? '${internetAddress.address}:$port'
-        : '[${internetAddress.address}]:$port'
+        ? 'http://${internetAddress.address}:$port'
+        : 'http://[${internetAddress.address}]:$port'
     );
   }
 
