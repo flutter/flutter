@@ -7470,7 +7470,7 @@ void main() {
 
       await _showSelectionMenuAt(tester, controller, controller.text.indexOf('test'));
       await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull); 
+      expect(tester.takeException(), isNull);
     },
   );
 }
