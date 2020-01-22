@@ -181,8 +181,8 @@ void main() {
   group('custom minimum contrast guideline', () {
     Widget _icon ({Color icon, Color background}) {
       return Container(
-        width: 60.0,
-        height: 60.0,
+        width: 100.0,
+        height: 100.0,
         color: background,
         child: Icon(Icons.search, color: icon),
       );
@@ -190,8 +190,8 @@ void main() {
 
     Widget _text ({Color text, Color background}) {
       return Container(
-        width: 60.0,
-        height: 60.0,
+        width: 100.0,
+        height: 100.0,
         color: background,
         child: Text('Text', style: TextStyle(color: text)),
       );
