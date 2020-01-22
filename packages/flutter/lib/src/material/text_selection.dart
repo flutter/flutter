@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'debug.dart';
 import 'flat_button.dart';
@@ -24,7 +25,7 @@ const double _kToolbarContentDistanceBelow = 16.0;
 const double _kToolbarContentDistance = 8.0;
 
 /// Manages a copy/paste text selection toolbar.
-class _TextSelectionToolbar extends StatelessWidget {
+class _TextSelectionToolbar extends StatefulWidget {
   const _TextSelectionToolbar({
     Key key,
     this.handleCut,
@@ -39,25 +40,126 @@ class _TextSelectionToolbar extends StatelessWidget {
   final VoidCallback handleSelectAll;
 
   @override
+  _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
+}
+
+class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
+  final GlobalKey _containerKey = GlobalKey();
+  final List<GlobalKey> _itemKeys = <GlobalKey>[];
+
+  // The number of items that fit in the main selection menu. Any others go in
+  // the overflow menu. Must be less than or equal to items.length.
+  int _itemsInFirstMenu;
+
+  @override initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _measureItems();
+  }
+
+  // Measure how many items fit inside the container in order to decide which
+  // to put in the overflow menu.
+  void _measureItems() {
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      assert(_containerKey.currentContext != null);
+      final RenderBox renderBoxContainer = _containerKey.currentContext.findRenderObject() as RenderBox;
+      double containerWidth = renderBoxContainer.paintBounds.width;
+
+      final int indexWhereOverflows = _itemKeys.indexWhere((GlobalKey key) {
+        assert(key.currentContext != null);
+        final RenderBox renderBox = key.currentContext.findRenderObject() as RenderBox;
+
+        if (renderBox.paintBounds.width > containerWidth) {
+          return true;
+        }
+
+        containerWidth -= renderBox.paintBounds.width;
+        return false;
+      });
+
+      setState(() {
+        _itemsInFirstMenu = indexWhereOverflows == -1 ? _itemKeys.length : indexWhereOverflows;
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> items = <Widget>[
-      if (handleCut != null) FlatButton(child: Text(localizations.cutButtonLabel), onPressed: handleCut),
-      if (handleCopy != null) FlatButton(child: Text(localizations.copyButtonLabel), onPressed: handleCopy),
-      if (handlePaste != null) FlatButton(child: Text(localizations.pasteButtonLabel), onPressed: handlePaste),
-      if (handleSelectAll != null) FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll),
-    ];
+
+    final List<Widget> items = <Widget>[];
+    _itemKeys.removeRange(0, _itemKeys.length);
+    if (widget.handleCut != null) {
+      _itemKeys.add(GlobalKey());
+      items.add(FlatButton(
+        key: _itemKeys[_itemKeys.length - 1],
+        child: Text(localizations.cutButtonLabel),
+        onPressed: widget.handleCut,
+      ));
+    }
+    if (widget.handleCopy != null) {
+      _itemKeys.add(GlobalKey());
+      items.add(FlatButton(
+        key: _itemKeys[_itemKeys.length - 1],
+        child: Text(localizations.copyButtonLabel),
+        onPressed: widget.handleCopy,
+      ));
+    }
+    if (widget.handlePaste != null) {
+      _itemKeys.add(GlobalKey());
+      items.add(FlatButton(
+        key: _itemKeys[_itemKeys.length - 1],
+        child: Text(localizations.pasteButtonLabel),
+        onPressed: widget.handlePaste,
+      ));
+    }
+    if (widget.handleSelectAll != null) {
+      _itemKeys.add(GlobalKey());
+      items.add(FlatButton(
+        key: _itemKeys[_itemKeys.length - 1],
+        child: Text(/*'Select evvvvverything'*/localizations.selectAllButtonLabel),
+        onPressed: widget.handleSelectAll,
+      ));
+    }
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
       return Container(width: 0.0, height: 0.0);
     }
 
+    // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
+    // frame of measurement.
+    if (_itemsInFirstMenu == null) {
+      // TODO(justinmc): Clean up this duplication and overall division of
+      // widgets.
+      return Offstage(
+        child: Material(
+          elevation: 1.0,
+          child: Container(
+            key: _containerKey,
+            height: _kToolbarHeight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: items,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Material(
       elevation: 1.0,
       child: Container(
+        key: _containerKey,
         height: _kToolbarHeight,
-        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: items.sublist(0, _itemsInFirstMenu),
+        ),
+        // TODO(justinmc): Add overflow menu.
       ),
     );
   }
