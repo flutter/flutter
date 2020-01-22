@@ -782,7 +782,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('Cheap Box 52')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
 
     expect(expensiveWidgets, 17);
     expect(cheapWidgets, 0);
@@ -796,7 +796,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
-    expect(find.byKey(const ValueKey<String>('Cheap Box 52')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
 
     expect(expensiveWidgets, 18);
     expect(cheapWidgets, 40);
