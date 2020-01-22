@@ -255,7 +255,6 @@ void AccessibilityBridge::UpdateScreenRects(
   const auto& current_transform = parent_transform * node.transform;
 
   const auto& rect = node.rect;
-  FML_LOG(ERROR) << "nodeid: " << node_id;
   SkScalar quad[] = {
       rect.left(),  rect.top(),     //
       rect.right(), rect.top(),     //
