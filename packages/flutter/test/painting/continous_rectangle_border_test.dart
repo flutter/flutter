@@ -123,7 +123,7 @@ void main() {
   testWidgets('Golden test topRight radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
-        color: Colors.green[300],
+        color: Colors.green[100],
         shape: const ContinuousRectangleBorder(
           borderRadius: BorderRadius.only(
             topRight: Radius.circular(350.0),

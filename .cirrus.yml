@@ -302,6 +302,19 @@ task:
       script:
         - ./dev/bots/firebase_testlab.sh
 
+    - name: flutter_gold # linux-only
+      only_if: false # Temp - should be if cirrus permissions are correct
+      depends_on:
+        - analyze-linux
+        - framework_tests-widgets-linux
+        - framework_tests-libraries-linux
+        - framework_tests-widgets-macos
+        - framework_tests-libraries-macos
+        - framework_tests-widgets-windows
+        - framework_tests-libraries-windows
+      script:
+        - dart dev\bots\flutter_gold_status.dart
+
     - name: deploy_gallery-linux # linux- and macos- only
       depends_on:
         - analyze-linux
