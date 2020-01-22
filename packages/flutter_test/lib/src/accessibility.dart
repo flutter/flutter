@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart' as FlutterMaterial;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
@@ -269,6 +270,10 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       }
       final _ContrastReport report = _ContrastReport(subset);
+      // If rectangle is empty, pass the test.
+      if (report.isEmptyRect) {
+        return result;
+      }
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
@@ -396,7 +401,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
       final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
 
-      if (contrastRatio >= minimumRatio - tolerance) {
+      if (report.isEmptyRect || contrastRatio >= minimumRatio - tolerance) {
         return const Evaluation.pass();
       } else {
         return Evaluation.fail(
@@ -470,17 +475,48 @@ class _ContrastReport {
         lightCount = count;
       }
     }
-    assert (lightColor != 0 && darkColor != 0);
-    return _ContrastReport._(Color(lightColor), Color(darkColor));
+    // Depending on the number of colors present, return the correct contrast
+    // report.
+    if (lightCount > 0 && darkCount > 0) {
+      return _ContrastReport._(Color(lightColor), Color(darkColor));
+    } else if (lightCount > 0) {
+      return _ContrastReport.singleColor(Color(lightColor));
+    } else if (darkCount > 0) {
+      return _ContrastReport.singleColor(Color(darkColor));
+    } else {
+      return _ContrastReport.emptyRect();
+    }
   }
 
-  const _ContrastReport._(this.lightColor, this.darkColor);
+  const _ContrastReport._(this.lightColor, this.darkColor)
+      : isSingleColor = false,
+        isEmptyRect = false;
 
-  /// The most frequently occurring light color.
+  const _ContrastReport.singleColor(Color color)
+      : lightColor = color,
+        darkColor = color,
+        isSingleColor = true,
+        isEmptyRect = false;
+
+  const _ContrastReport.emptyRect()
+      : lightColor = FlutterMaterial.Colors.transparent,
+        darkColor = FlutterMaterial.Colors.transparent,
+        isSingleColor = false,
+        isEmptyRect = true;
+
+  /// The most frequently occurring light color. Uses [Colors.transparent] if
+  /// the rectangle is empty.
   final Color lightColor;
 
-  /// The most frequently occurring dark color.
+  /// The most frequently occurring dark color. Uses [Colors.transparent] if
+  /// the rectangle is empty.
   final Color darkColor;
+
+  /// Whether the rectangle contains only one color.
+  final bool isSingleColor;
+
+  /// Whether the rectangle contains 0 pixels.
+  final bool isEmptyRect;
 
   /// Computes the contrast ratio as defined by the WCAG.
   ///
