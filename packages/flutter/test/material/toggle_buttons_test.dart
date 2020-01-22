@@ -228,7 +228,7 @@ void main() {
             ),
           ),
         );
-        fail('Should not be possible to create a toggle button with mismatching'
+        fail('Should not be possible to create a toggle button with mismatching '
             'children.length and isSelected.length.');
       } on AssertionError catch (e) {
         expect(e.toString(), contains('children.length'));
