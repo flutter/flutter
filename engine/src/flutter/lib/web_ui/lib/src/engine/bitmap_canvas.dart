@@ -571,6 +571,25 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   @override
+  void drawPoints(ui.PointMode pointMode, Float32List points,
+      double strokeWidth, ui.Color color) {
+    ContextStateHandle contextHandle = _canvasPool.contextHandle;
+    contextHandle
+      ..lineWidth = strokeWidth
+      ..blendMode = ui.BlendMode.srcOver
+      ..strokeCap = ui.StrokeCap.round
+      ..strokeJoin = ui.StrokeJoin.round
+      ..filter = '';
+    final String cssColor = colorToCssString(color);
+    if (pointMode == ui.PointMode.points) {
+      contextHandle.fillStyle = cssColor;
+    } else {
+      contextHandle.strokeStyle = cssColor;
+    }
+    _canvasPool.drawPoints(pointMode, points, strokeWidth / 2.0);
+  }
+
+  @override
   void endOfPaint() {
     assert(_saveCount == 0);
     _canvasPool.endOfPaint();

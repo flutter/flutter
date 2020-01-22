@@ -69,6 +69,9 @@ abstract class EngineCanvas {
   void drawVertices(
       ui.Vertices vertices, ui.BlendMode blendMode, SurfacePaintData paint);
 
+  void drawPoints(ui.PointMode pointMode, Float32List points,
+      double strokeWidth, ui.Color color);
+
   /// Extension of Canvas API to mark the end of a stream of painting commands
   /// to enable re-use/dispose optimizations.
   void endOfPaint();
