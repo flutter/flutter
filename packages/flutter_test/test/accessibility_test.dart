@@ -179,7 +179,44 @@ void main() {
   });
 
   group('custom minimum contrast guideline', () {
-    // TODO: tests here.
+    Widget _icon ({Color icon, Color background}) {
+      return Container(
+        width: 60.0,
+        height: 60.0,
+        color: background,
+        child: Icon(Icons.search, color: icon),
+      );
+    }
+
+    Widget _text ({Color text, Color background}) {
+      return Container(
+        width: 60.0,
+        height: 60.0,
+        color: background,
+        child: Text('Text', style: TextStyle(color: text)),
+      );
+    }
+
+    final Finder _findIcons = find.byWidgetPredicate((Widget widget) => widget is Icon);
+    final Finder _findTexts = find.byWidgetPredicate((Widget widget) => widget is Text);
+    final Finder _findIconsAndTexts = find.byWidgetPredicate((Widget widget) => widget is Icon || widget is Text);
+
+    testWidgets('Black icons on White background', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        _icon(icon: Colors.black, background: Colors.white),
+      ));
+
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
+    testWidgets('Black icons on Black background', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        _icon(icon: Colors.black, background: Colors.black),
+      ));
+
+      await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
   });
 
   group('tap target size guideline', () {
