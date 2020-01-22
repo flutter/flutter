@@ -242,8 +242,18 @@ class Overlay extends StatefulWidget {
   /// ```dart
   /// OverlayState overlay = Overlay.of(context);
   /// ```
-  static OverlayState of(BuildContext context, { Widget debugRequiredFor }) {
-    final OverlayState result = context.findAncestorStateOfType<OverlayState>();
+  ///
+  /// If `rootOverlay` is set to true, the state from the furthest instance of
+  /// this class is given instead. Useful for installing overlay entries
+  /// above all subsequent instances of [Overlay].
+  static OverlayState of(
+    BuildContext context, {
+    bool rootOverlay = false,
+    Widget debugRequiredFor,
+  }) {
+    final OverlayState result = rootOverlay
+        ? context.findRootAncestorStateOfType<OverlayState>()
+        : context.findAncestorStateOfType<OverlayState>();
     assert(() {
       if (debugRequiredFor != null && result == null) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
