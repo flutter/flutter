@@ -658,6 +658,60 @@ void main() {
     test.includeChild = false;
   });
 
+  testWidgets('Element diagnostics with multiple dependencies', (WidgetTester tester) async {
+    GlobalKey key0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DefaultFocusTraversal(
+          child: Container(
+            key: key0 = GlobalKey(),
+          ),
+        ),
+      ),
+    );
+    final StatelessElement element1 = key0.currentContext as StatelessElement;
+    element1.dependOnInheritedWidgetOfExactType<Directionality>();
+    element1.dependOnInheritedWidgetOfExactType<DefaultFocusTraversal>();
+
+    expect(element1, hasAGoodToStringDeep);
+    expect(
+      element1.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'Container-[GlobalKey#00000](dependencies: [DefaultFocusTraversal, Directionality])\n'
+        '└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000)\n'
+        ' └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000)\n'
+        ''
+      ),
+    );
+
+    // Do again with reversed order
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DefaultFocusTraversal(
+          child: Container(
+            key: key0 = GlobalKey(),
+          ),
+        ),
+      ),
+    );
+    final StatelessElement element2 = key0.currentContext as StatelessElement;
+    element2.dependOnInheritedWidgetOfExactType<DefaultFocusTraversal>();
+    element2.dependOnInheritedWidgetOfExactType<Directionality>();
+
+    expect(element2, hasAGoodToStringDeep);
+    expect(
+      element2.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'Container-[GlobalKey#00000](dependencies: [DefaultFocusTraversal, Directionality])\n'
+        '└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000)\n'
+        ' └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000)\n'
+        ''
+      ),
+    );
+  });
+
   testWidgets('scheduleBuild while debugBuildingDirtyElements is true', (WidgetTester tester) async {
     /// ignore here is required for testing purpose because changing the flag properly is hard
     // ignore: invalid_use_of_protected_member
