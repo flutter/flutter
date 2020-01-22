@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class Foo extends StatefulWidget {
+  const Foo({ Key key }) : super(key: key);
   @override
   FooState createState() => FooState();
 }
@@ -80,7 +81,7 @@ class FooScrollBehavior extends ScrollBehavior {
 void main() {
   testWidgets('Can animate scroll after setState', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Foo(),
       ),

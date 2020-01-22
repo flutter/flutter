@@ -42,7 +42,7 @@ void verifyToStringOutput(String name, String route, String testString) {
   final List<String> lines = testString.split('\n');
   if (!testString.endsWith('\n'))
     reportToStringError(name, route, lines.length, lines, 'does not end with a line feed');
-  for (String line in lines) {
+  for (final String line in lines) {
     lineNumber += 1;
     if (line == '' && lineNumber != lines.length) {
       reportToStringError(name, route, lineNumber, lines, 'found empty line');
@@ -157,11 +157,11 @@ Future<void> smokeGallery(WidgetTester tester) async {
 
   expect(find.text(kGalleryTitle), findsOneWidget);
 
-  for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
+  for (final GalleryDemoCategory category in kAllGalleryDemoCategories) {
     await Scrollable.ensureVisible(tester.element(find.text(category.name)), alignment: 0.5);
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
-    for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
+    for (final GalleryDemo demo in kGalleryCategoryToDemos[category]) {
       await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
       await smokeDemo(tester, demo);
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');

@@ -86,7 +86,7 @@ class CupertinoScrollbar extends StatefulWidget {
   /// Here is an example of using the `controller` parameter to enable
   /// scrollbar dragging for multiple independent ListViews:
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// final ScrollController _controllerOne = ScrollController();

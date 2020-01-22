@@ -254,7 +254,7 @@ class ArchiveUnpublisher {
       return bDate.compareTo(aDate);
     });
     jsonData['releases'] = releases;
-    for (Channel channel in channels) {
+    for (final Channel channel in channels) {
       if (!revisionsBeingRemoved.contains(jsonData['current_release'][getChannelName(channel)])) {
         // Don't replace the current release if it's not one of the revisions we're removing.
         continue;
@@ -276,7 +276,7 @@ class ArchiveUnpublisher {
   Future<Map<Channel, Map<String, String>>> _getArchivePaths(List<Map<String, String>> releases) async {
     final Set<String> hashes = <String>{};
     final Map<Channel, Map<String, String>> paths = <Channel, Map<String, String>>{};
-    for (Map<String, String> revision in releases) {
+    for (final Map<String, String> revision in releases) {
       final String hash = revision['hash'];
       final Channel channel = fromChannelName(revision['channel']);
       hashes.add(hash);
@@ -350,9 +350,9 @@ class ArchiveUnpublisher {
   Future<void> _cloudRemoveArchive(Map<Channel, Map<String, String>> paths) async {
     final List<String> files = <String>[];
     print('${confirmed ? 'Removing' : 'Would remove'} the following release archives:');
-    for (Channel channel in paths.keys) {
+    for (final Channel channel in paths.keys) {
       final Map<String, String> hashes = paths[channel];
-      for (String hash in hashes.keys) {
+      for (final String hash in hashes.keys) {
         final String file = '$gsReleaseFolder/${hashes[hash]}';
         files.add(file);
         print('  $file');
@@ -464,7 +464,7 @@ Future<void> main(List<String> rawArguments) async {
   if (revisions.isEmpty) {
     errorExit('Invalid argument: at least one --revision must be specified.');
   }
-  for (String revision in revisions) {
+  for (final String revision in revisions) {
     if (revision.length != 40) {
       errorExit('Invalid argument: --revision "$revision" must be the entire hash, not just a prefix.');
     }
@@ -500,7 +500,7 @@ Future<void> main(List<String> rawArguments) async {
   String message;
   String stack;
   try {
-    for (PublishedPlatform platform in platforms) {
+    for (final PublishedPlatform platform in platforms) {
       final ArchiveUnpublisher publisher = ArchiveUnpublisher(
         tempDir,
         revisions.toSet(),

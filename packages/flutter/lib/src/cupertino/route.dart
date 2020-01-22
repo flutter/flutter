@@ -734,8 +734,8 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is _CupertinoEdgeShadowDecoration
         && other.edgeGradient == edgeGradient;

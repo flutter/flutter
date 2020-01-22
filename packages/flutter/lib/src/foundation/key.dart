@@ -70,7 +70,7 @@ class ValueKey<T> extends LocalKey {
   final T value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ValueKey<T>

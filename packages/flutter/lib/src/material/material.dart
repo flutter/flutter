@@ -524,7 +524,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Offset.zero & size);
-      for (InkFeature inkFeature in _inkFeatures)
+      for (final InkFeature inkFeature in _inkFeatures)
         inkFeature._paint(canvas);
       canvas.restore();
     }

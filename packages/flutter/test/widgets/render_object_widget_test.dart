@@ -11,7 +11,10 @@ final BoxDecoration kBoxDecorationB = BoxDecoration(border: nonconst(null));
 final BoxDecoration kBoxDecorationC = BoxDecoration(border: nonconst(null));
 
 class TestWidget extends StatelessWidget {
-  const TestWidget({ this.child });
+  const TestWidget({
+    Key key,
+    this.child,
+  }) : super(key: key);
 
   final Widget child;
 

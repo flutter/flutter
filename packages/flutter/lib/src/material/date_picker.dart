@@ -1094,7 +1094,7 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 ///
 /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_date_picker.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Show a date picker with the dark theme.
 ///
 /// ```dart

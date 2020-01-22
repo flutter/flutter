@@ -5,14 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class NotifyMaterial extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    LayoutChangedNotification().dispatch(context);
-    return Container();
-  }
-}
-
 void main() {
   testWidgets('SizeChangedLayoutNotification test', (WidgetTester tester) async {
     bool notified = false;

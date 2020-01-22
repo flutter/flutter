@@ -6,11 +6,10 @@ import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 
 /// This is a simple wrapper around the custom kernel compiler from the Fuchsia
@@ -31,22 +30,22 @@ class FuchsiaKernelCompiler {
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
     final String fsRoot = fuchsiaProject.project.directory.path;
-    final String relativePackagesFile = fs.path.relative(packagesFile, from: fsRoot);
-    final String manifestPath = fs.path.join(outDir, '$appName.dilpmanifest');
-    final String kernelCompiler = artifacts.getArtifactPath(
+    final String relativePackagesFile = globals.fs.path.relative(packagesFile, from: fsRoot);
+    final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
+    final String kernelCompiler = globals.artifacts.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
       platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
-    if (!fs.isFileSync(kernelCompiler)) {
+    if (!globals.fs.isFileSync(kernelCompiler)) {
       throwToolExit('Fuchisa kernel compiler not found at "$kernelCompiler"');
     }
-    final String platformDill = artifacts.getArtifactPath(
+    final String platformDill = globals.artifacts.getArtifactPath(
       Artifact.platformKernelDill,
       platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
-    if (!fs.isFileSync(platformDill)) {
+    if (!globals.fs.isFileSync(platformDill)) {
       throwToolExit('Fuchisa platform file not found at "$platformDill"');
     }
     List<String> flags = <String>[
@@ -55,7 +54,7 @@ class FuchsiaKernelCompiler {
       '--filesystem-scheme', 'main-root',
       '--filesystem-root', fsRoot,
       '--packages', '$multiRootScheme:///$relativePackagesFile',
-      '--output', fs.path.join(outDir, '$appName.dil'),
+      '--output', globals.fs.path.join(outDir, '$appName.dil'),
       '--component-name', appName,
 
       // AOT/JIT:
@@ -85,11 +84,11 @@ class FuchsiaKernelCompiler {
     ];
 
     final List<String> command = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       kernelCompiler,
       ...flags,
     ];
-    final Status status = logger.startProgress(
+    final Status status = globals.logger.startProgress(
       'Building Fuchsia application...',
       timeout: null,
     );

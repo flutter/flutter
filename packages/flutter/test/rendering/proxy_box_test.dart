@@ -9,7 +9,6 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/scheduler/ticker.dart';
 import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
@@ -277,7 +276,7 @@ void main() {
 
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 0.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -292,7 +291,7 @@ void main() {
 
   test('RenderAnimatedOpacity does not composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 1.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -307,7 +306,7 @@ void main() {
 
   test('RenderAnimatedOpacity reuses its layer', () {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
@@ -455,6 +454,18 @@ void main() {
     // transform -> clip
     _testFittedBoxWithClipRectLayer();
   });
+
+  test('RenderFractionalTranslation updates its semantics after its translation value is set', () {
+    final _TestSemanticsUpdateRenderFractionalTranslation box = _TestSemanticsUpdateRenderFractionalTranslation(
+      translation: const Offset(0.5, 0.5),
+    );
+    layout(box, constraints: BoxConstraints.tight(const Size(200.0, 200.0)));
+    expect(box.markNeedsSemanticsUpdateCallCount, 1);
+    box.translation = const Offset(0.4, 0.4);
+    expect(box.markNeedsSemanticsUpdateCallCount, 2);
+    box.translation = const Offset(0.3, 0.3);
+    expect(box.markNeedsSemanticsUpdateCallCount, 3);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -481,61 +492,6 @@ class _TestRRectClipper extends CustomClipper<RRect> {
 
   @override
   bool shouldReclip(_TestRRectClipper oldClipper) => true;
-}
-
-class _FakeTickerProvider implements TickerProvider {
-  @override
-  Ticker createTicker(TickerCallback onTick, [ bool disableAnimations = false ]) {
-    return _FakeTicker();
-  }
-}
-
-class _FakeTicker implements Ticker {
-  @override
-  bool muted;
-
-  @override
-  void absorbTicker(Ticker originalTicker) { }
-
-  @override
-  String get debugLabel => null;
-
-  @override
-  bool get isActive => null;
-
-  @override
-  bool get isTicking => null;
-
-  @override
-  bool get scheduled => null;
-
-  @override
-  bool get shouldScheduleTick => null;
-
-  @override
-  void dispose() { }
-
-  @override
-  void scheduleTick({ bool rescheduling = false }) { }
-
-  @override
-  TickerFuture start() {
-    return null;
-  }
-
-  @override
-  void stop({ bool canceled = false }) { }
-
-  @override
-  void unscheduleTick() { }
-
-  @override
-  String toString({ bool debugIncludeStack = false }) => super.toString();
-
-  @override
-  DiagnosticsNode describeForError(String name) {
-    return DiagnosticsProperty<Ticker>(name, this, style: DiagnosticsTreeStyle.errorProperty);
-  }
 }
 
 // Forces two frames and checks that:
@@ -565,4 +521,19 @@ class _TestPathClipper extends CustomClipper<Path> {
   }
   @override
   bool shouldReclip(_TestPathClipper oldClipper) => false;
+}
+
+class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
+  _TestSemanticsUpdateRenderFractionalTranslation({
+    @required Offset translation,
+    RenderBox child,
+  }) : super(translation: translation, child: child);
+
+  int markNeedsSemanticsUpdateCallCount = 0;
+
+  @override
+  void markNeedsSemanticsUpdate() {
+    markNeedsSemanticsUpdateCallCount++;
+    super.markNeedsSemanticsUpdate();
+  }
 }

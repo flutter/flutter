@@ -6,10 +6,9 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
+import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 10;
@@ -43,7 +42,7 @@ String getNameForSdk(SdkType sdk) {
 }
 
 class Xcode {
-  bool get isInstalledAndMeetsVersionCheck => platform.isMacOS && isInstalled && isVersionSatisfactory;
+  bool get isInstalledAndMeetsVersionCheck => globals.platform.isMacOS && isInstalled && isVersionSatisfactory;
 
   String _xcodeSelectPath;
   String get xcodeSelectPath {
@@ -159,10 +158,10 @@ class Xcode {
       return null;
     }
     final List<String> searchPaths = <String>[
-      fs.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
+      globals.fs.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
     ];
     return searchPaths.where((String p) => p != null).firstWhere(
-      (String p) => fs.directory(p).existsSync(),
+      (String p) => globals.fs.directory(p).existsSync(),
       orElse: () => null,
     );
   }

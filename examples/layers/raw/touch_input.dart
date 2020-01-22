@@ -79,7 +79,7 @@ void beginFrame(Duration timeStamp) {
 void handlePointerDataPacket(ui.PointerDataPacket packet) {
   // The pointer packet contains a number of pointer movements, which we iterate
   // through and process.
-  for (ui.PointerData datum in packet.data) {
+  for (final ui.PointerData datum in packet.data) {
     if (datum.change == ui.PointerChange.down) {
       // If the pointer went down, we change the color of the circle to blue.
       color = const ui.Color(0xFF0000FF);

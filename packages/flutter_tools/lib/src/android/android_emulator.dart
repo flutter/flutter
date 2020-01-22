@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
+import '../globals.dart' as globals;
 import 'android_sdk.dart';
 
 class AndroidEmulators extends EmulatorDiscovery {
@@ -84,7 +85,7 @@ List<AndroidEmulator> getEmulatorAvds() {
 /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
 /// of emulators by reading information from the relevant ini files.
 void extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
-  for (String id in text.trim().split('\n').where((String l) => l != '')) {
+  for (final String id in text.trim().split('\n').where((String l) => l != '')) {
     emulators.add(_loadEmulatorInfo(id));
   }
 }
@@ -93,12 +94,12 @@ AndroidEmulator _loadEmulatorInfo(String id) {
   id = id.trim();
   final String avdPath = getAvdPath();
   if (avdPath != null) {
-    final File iniFile = fs.file(fs.path.join(avdPath, '$id.ini'));
+    final File iniFile = globals.fs.file(globals.fs.path.join(avdPath, '$id.ini'));
     if (iniFile.existsSync()) {
       final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
       if (ini['path'] != null) {
         final File configFile =
-            fs.file(fs.path.join(ini['path'], 'config.ini'));
+            globals.fs.file(globals.fs.path.join(ini['path'], 'config.ini'));
         if (configFile.existsSync()) {
           final Map<String, String> properties =
               parseIniLines(configFile.readAsLinesSync());
@@ -124,7 +125,7 @@ Map<String, String> parseIniLines(List<String> contents) {
       // Split into name/value
       .map<List<String>>((String l) => l.split('='));
 
-  for (List<String> property in properties) {
+  for (final List<String> property in properties) {
     results[property[0].trim()] = property[1].trim();
   }
 

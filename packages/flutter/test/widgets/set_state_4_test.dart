@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class Changer extends StatefulWidget {
+  const Changer({ Key key }) : super(key: key);
   @override
   ChangerState createState() => ChangerState();
 }
@@ -21,7 +22,7 @@ class ChangerState extends State<Changer> {
 
 void main() {
   testWidgets('setState() catches being used with an async callback', (WidgetTester tester) async {
-    await tester.pumpWidget(Changer());
+    await tester.pumpWidget(const Changer());
     final ChangerState s = tester.state(find.byType(Changer));
     expect(s.test0, isNot(throwsFlutterError));
     expect(s.test1, isNot(throwsFlutterError));

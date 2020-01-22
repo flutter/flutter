@@ -419,7 +419,7 @@ class ClipCachePainter extends CustomPainter {
 }
 
 class ShapeListener extends StatefulWidget {
-  const ShapeListener(this.child);
+  const ShapeListener(this.child, { Key key }) : super(key: key);
 
   final Widget child;
 
@@ -466,4 +466,3 @@ class RectangularNotch extends NotchedShape {
       ..close();
   }
 }
-

@@ -33,7 +33,7 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
     stdout.add(line);
     if (line.contains('Waiting') && onListening != null)
       listening.complete(onListening());
-    if (line.contains('To detach, press "d"; to quit, press "q".'))
+    if (line.contains('Quit (terminate the application on the device)'))
       ready.complete();
     if (line.contains('Reloaded '))
       reloaded.complete();

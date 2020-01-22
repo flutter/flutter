@@ -282,7 +282,7 @@ void main() {
       find.byKey(painterKey),
       matchesGoldenFile('radio.ink_ripple.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Radio is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');

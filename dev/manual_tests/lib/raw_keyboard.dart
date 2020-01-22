@@ -127,8 +127,8 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           if (_event.character != null) {
             dataText.add(Text('character: ${_event.character}'));
           }
-          for (ModifierKey modifier in data.modifiersPressed.keys) {
-            for (KeyboardSide side in KeyboardSide.values) {
+          for (final ModifierKey modifier in data.modifiersPressed.keys) {
+            for (final KeyboardSide side in KeyboardSide.values) {
               if (data.isModifierPressed(modifier, side: side)) {
                 dataText.add(
                   Text('${_getEnumName(side)} ${_getEnumName(modifier).replaceAll('Modifier', '')} pressed'),

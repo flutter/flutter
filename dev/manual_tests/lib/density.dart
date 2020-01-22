@@ -158,8 +158,6 @@ class Options extends StatefulWidget {
 }
 
 class _OptionsState extends State<Options> {
-  static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
   @override
   void initState() {
     super.initState();

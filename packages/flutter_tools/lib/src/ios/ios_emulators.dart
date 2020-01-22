@@ -4,18 +4,17 @@
 
 import 'dart:async';
 
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import 'ios_workflow.dart';
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
   @override
-  bool get supportsPlatform => platform.isMacOS;
+  bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
   bool get canListAnything => iosWorkflow.canListEmulators;
@@ -51,7 +50,7 @@ class IOSEmulator extends Emulator {
 
       final RunResult launchResult = await processUtils.run(args);
       if (launchResult.exitCode != 0) {
-        printError('$launchResult');
+        globals.printError('$launchResult');
         return false;
       }
       return true;

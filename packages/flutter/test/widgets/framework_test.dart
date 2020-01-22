@@ -644,7 +644,7 @@ void main() {
   });
 
   testWidgets('Element diagnostics with null child', (WidgetTester tester) async {
-    await tester.pumpWidget(NullChildTest());
+    await tester.pumpWidget(const NullChildTest());
     final NullChildElement test = tester.element<NullChildElement>(find.byType(NullChildTest));
     test.includeChild = true;
     expect(
@@ -713,6 +713,7 @@ void main() {
 }
 
 class NullChildTest extends Widget {
+  const NullChildTest({ Key key }) : super(key: key);
   @override
   Element createElement() => NullChildElement(this);
 }

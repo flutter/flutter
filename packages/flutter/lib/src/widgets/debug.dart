@@ -108,7 +108,7 @@ bool debugHighlightDeprecatedWidgets = false;
 
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
-  for (Widget widget in widgets) {
+  for (final Widget widget in widgets) {
     assert(widget != null);
     if (widget.key == null)
       continue;

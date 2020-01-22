@@ -143,7 +143,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// SelectableText(
@@ -159,7 +159,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// that follows displays "Hello beautiful world" with different styles
 /// for each word.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// const SelectableText.rich(

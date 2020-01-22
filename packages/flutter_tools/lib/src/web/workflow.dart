@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/platform.dart';
 import '../doctor.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 
 /// The  web workflow instance.
 WebWorkflow get webWorkflow => context.get<WebWorkflow>();
@@ -14,7 +14,7 @@ class WebWorkflow extends Workflow {
   const WebWorkflow();
 
   @override
-  bool get appliesToHostPlatform => featureFlags.isWebEnabled && (platform.isWindows || platform.isMacOS || platform.isLinux);
+  bool get appliesToHostPlatform => featureFlags.isWebEnabled && (globals.platform.isWindows || globals.platform.isMacOS || globals.platform.isLinux);
 
   @override
   bool get canLaunchDevices => featureFlags.isWebEnabled;

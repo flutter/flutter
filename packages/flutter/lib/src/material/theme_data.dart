@@ -96,7 +96,7 @@ enum MaterialTapTargetSize {
 ///
 /// To obtain the current theme, use [Theme.of].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample creates a [Theme] widget that stores the `ThemeData`. The
 /// `ThemeData` can be accessed by descendant Widgets that use the correct
@@ -128,7 +128,7 @@ enum MaterialTapTargetSize {
 /// [MaterialApp]. The `ThemeData` will be used throughout the app to style
 /// material design widgets.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample creates a [MaterialApp] widget that stores `ThemeData` and
 /// passes the `ThemeData` to descendant widgets. The [AppBar] widget uses the
@@ -588,7 +588,7 @@ class ThemeData extends Diagnosticable {
   /// forward we will be converting all the widget implementations to only use
   /// colors or colors derived from those in [ColorScheme].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example will set up an application to use the baseline Material
   /// Design light and dark themes.
   ///
@@ -1815,8 +1815,18 @@ class VisualDensity extends Diagnosticable {
     );
   }
 
+  /// Return a copy of [constraints] whose minimum width and height have been
+  /// updated with the [baseSizeAdjustment].
+  BoxConstraints effectiveConstraints(BoxConstraints constraints){
+    assert(constraints != null && constraints.debugAssertIsValid());
+    return constraints.copyWith(
+      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, double.infinity).toDouble(),
+      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, double.infinity).toDouble(),
+    );
+  }
+
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

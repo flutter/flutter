@@ -27,7 +27,7 @@ void main() {
     ]);
     expect(stdoutLines, <String>[
       'Found 7 sample code sections.',
-       'Starting analysis of samples.',
+       'Starting analysis of code samples.',
       '',
     ]);
   }, skip: Platform.isWindows);

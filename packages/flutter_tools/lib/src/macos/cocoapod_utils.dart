@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../build_info.dart';
+import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -24,7 +24,7 @@ Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDir
   // If the Xcode project, Podfile, or generated xcconfig have changed since
   // last run, pods should be updated.
   final Fingerprinter fingerprinter = Fingerprinter(
-    fingerprintPath: fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
+    fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,

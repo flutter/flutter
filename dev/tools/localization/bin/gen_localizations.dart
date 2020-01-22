@@ -87,7 +87,7 @@ String generateArbBasedLocalizationSubclasses({
   // Used to calculate if there are any corresponding countries for a given language and script.
   final Map<LocaleInfo, Set<String>> languageAndScriptToCountryCodes = <LocaleInfo, Set<String>>{};
   final Set<String> allResourceIdentifiers = <String>{};
-  for (LocaleInfo locale in localeToResources.keys.toList()..sort()) {
+  for (final LocaleInfo locale in localeToResources.keys.toList()..sort()) {
     if (locale.scriptCode != null) {
       languageToScriptCodes[locale.languageCode] ??= <String>{};
       languageToScriptCodes[locale.languageCode].add(locale.scriptCode);
@@ -129,13 +129,13 @@ String generateArbBasedLocalizationSubclasses({
   final List<String> allKeys = allResourceIdentifiers.toList()..sort();
   final List<String> languageCodes = languageToLocales.keys.toList()..sort();
   final LocaleInfo canonicalLocale = LocaleInfo.fromString('en');
-  for (String languageName in languageCodes) {
+  for (final String languageName in languageCodes) {
     final LocaleInfo languageLocale = LocaleInfo.fromString(languageName);
     output.writeln(generateClassDeclaration(languageLocale, generatedClassPrefix, baseClass));
     output.writeln(generateConstructor(languageLocale));
 
     final Map<String, String> languageResources = localeToResources[languageLocale];
-    for (String key in allKeys) {
+    for (final String key in allKeys) {
       final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key] as Map<String, dynamic>;
       output.writeln(generateGetter(key, languageResources[key], attributes, languageLocale));
     }
@@ -146,7 +146,7 @@ String generateArbBasedLocalizationSubclasses({
       scriptCodeCount = languageToScriptCodes[languageName].length;
       // Language has scriptCodes, so we need to properly fallback countries to corresponding
       // script default values before language default values.
-      for (String scriptCode in languageToScriptCodes[languageName]) {
+      for (final String scriptCode in languageToScriptCodes[languageName]) {
         final LocaleInfo scriptBaseLocale = LocaleInfo.fromString(languageName + '_' + scriptCode);
         output.writeln(generateClassDeclaration(
           scriptBaseLocale,
@@ -155,7 +155,7 @@ String generateArbBasedLocalizationSubclasses({
         ));
         output.writeln(generateConstructor(scriptBaseLocale));
         final Map<String, String> scriptResources = localeToResources[scriptBaseLocale];
-        for (String key in scriptResources.keys.toList()..sort()) {
+        for (final String key in scriptResources.keys.toList()..sort()) {
           if (languageResources[key] == scriptResources[key])
             continue;
           final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key] as Map<String, dynamic>;
@@ -164,7 +164,7 @@ String generateArbBasedLocalizationSubclasses({
         output.writeln('}');
 
         final List<LocaleInfo> localeCodes = languageToLocales[languageName]..sort();
-        for (LocaleInfo locale in localeCodes) {
+        for (final LocaleInfo locale in localeCodes) {
           if (locale.originalString == languageName)
             continue;
           if (locale.originalString == languageName + '_' + scriptCode)
@@ -179,7 +179,7 @@ String generateArbBasedLocalizationSubclasses({
           ));
           output.writeln(generateConstructor(locale));
           final Map<String, String> localeResources = localeToResources[locale];
-          for (String key in localeResources.keys) {
+          for (final String key in localeResources.keys) {
             // When script fallback contains the key, we compare to it instead of language fallback.
             if (scriptResources.containsKey(key) ? scriptResources[key] == localeResources[key] : languageResources[key] == localeResources[key])
               continue;
@@ -193,7 +193,7 @@ String generateArbBasedLocalizationSubclasses({
       // No scriptCode. Here, we do not compare against script default (because it
       // doesn't exist).
       final List<LocaleInfo> localeCodes = languageToLocales[languageName]..sort();
-      for (LocaleInfo locale in localeCodes) {
+      for (final LocaleInfo locale in localeCodes) {
         if (locale.originalString == languageName)
           continue;
         countryCodeCount += 1;
@@ -204,7 +204,7 @@ String generateArbBasedLocalizationSubclasses({
           '$generatedClassPrefix${camelCase(languageLocale)}',
         ));
         output.writeln(generateConstructor(locale));
-        for (String key in localeResources.keys) {
+        for (final String key in localeResources.keys) {
           if (languageResources[key] == localeResources[key])
             continue;
           final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key] as Map<String, dynamic>;
@@ -262,7 +262,7 @@ $supportedLocales/// {@endtemplate}
 /// [$baseClass.delegate].
 $factoryDeclaration
   switch (locale.languageCode) {''');
-  for (String language in languageToLocales.keys) {
+  for (final String language in languageToLocales.keys) {
     // Only one instance of the language.
     if (languageToLocales[language].length == 1) {
       output.writeln('''
@@ -272,7 +272,7 @@ $factoryDeclaration
       output.writeln('''
     case '$language': {
       switch (locale.countryCode) {''');
-      for (LocaleInfo locale in languageToLocales[language]) {
+      for (final LocaleInfo locale in languageToLocales[language]) {
         if (locale.originalString == language)
           continue;
         assert(locale.length > 1);
@@ -290,14 +290,14 @@ $factoryDeclaration
       output.writeln('''
     case '$language': {
       switch (locale.scriptCode) {''');
-      for (String scriptCode in languageToScriptCodes[language]) {
+      for (final String scriptCode in languageToScriptCodes[language]) {
         final LocaleInfo scriptLocale = LocaleInfo.fromString(language + '_' + scriptCode);
         output.writeln('''
         case '$scriptCode': {''');
         if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
           output.writeln('''
           switch (locale.countryCode) {''');
-          for (LocaleInfo locale in languageToLocales[language]) {
+          for (final LocaleInfo locale in languageToLocales[language]) {
             if (locale.countryCode == null)
               continue;
             else
@@ -326,7 +326,7 @@ $factoryDeclaration
         } else {
           // Not Explicitly defined, fallback to first locale with the same language and
           // script:
-          for (LocaleInfo locale in languageToLocales[language]) {
+          for (final LocaleInfo locale in languageToLocales[language]) {
             if (locale.scriptCode != scriptCode)
               continue;
             if (languageAndScriptToCountryCodes.containsKey(scriptLocale)) {
@@ -345,7 +345,7 @@ $factoryDeclaration
       if (hasCountryCode) {
       output.writeln('''
       switch (locale.countryCode) {''');
-        for (LocaleInfo locale in languageToLocales[language]) {
+        for (final LocaleInfo locale in languageToLocales[language]) {
           if (locale.originalString == language)
             continue;
           assert(locale.length > 1);

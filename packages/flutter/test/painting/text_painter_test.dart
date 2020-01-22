@@ -749,7 +749,7 @@ void main() {
     // be removed when it is no longer useful.
     if (lines[1].hardBreak == true) {
       print('LineMetrics called: ${lines.length}');
-      for (ui.LineMetrics line in lines) {
+      for (final ui.LineMetrics line in lines) {
         print('${line.lineNumber}: ${line.hardBreak}');
       }
     }

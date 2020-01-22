@@ -371,7 +371,7 @@ class Actions extends InheritedWidget {
 /// widget, and the new control should be enabled for keyboard traversal and
 /// activation.
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool sample --template=stateful_widget_material}
 /// This example shows how keyboard interaction can be added to a custom control
 /// that changes color when hovered and focused, and can toggle a light when
 /// activated, either by touch or by hitting the `X` key on the keyboard.

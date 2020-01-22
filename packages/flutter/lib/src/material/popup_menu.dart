@@ -178,7 +178,7 @@ class _RenderMenuItem extends RenderShiftedBox {
 /// [PopupMenuItem] is kMinInteractiveDimension pixels high. If you use a widget
 /// with a different height, it must be specified in the [height] property.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here, a [Text] widget is used with a popup menu item. The `WhyFarther` type
 /// is an enum, not shown here.
@@ -339,7 +339,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 /// layout uses [ListTile]; the checkmark is an [Icons.done] icon, shown in the
 /// [ListTile.leading] position.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Suppose a `Commands` enum exists that lists the possible commands from a
 /// particular popup menu, including `Commands.heroAndScholar` and
@@ -885,7 +885,7 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a menu with four items, selecting between an enum's
 /// values and setting a `_selection` field based on the selection.

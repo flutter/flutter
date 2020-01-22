@@ -4,9 +4,8 @@
 
 import 'package:meta/meta.dart';
 
-import 'base/config.dart';
 import 'base/context.dart';
-import 'base/platform.dart';
+import 'globals.dart' as globals;
 import 'version.dart';
 
 /// The current [FeatureFlags] implementation.
@@ -53,13 +52,13 @@ class FeatureFlags {
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = Config.instance.getValue(feature.configSetting) as bool;
+      final bool configOverride = globals.config.getValue(feature.configSetting) as bool;
       if (configOverride != null) {
         isEnabled = configOverride;
       }
     }
     if (feature.environmentOverride != null) {
-      if (platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
+      if (globals.platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
         isEnabled = true;
       }
     }

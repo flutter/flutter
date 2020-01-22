@@ -155,7 +155,7 @@ void loadMatchingArbsIntoBundleMaps({
   /// overwrite the existing assumed data.
   final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
 
-  for (FileSystemEntity entity in directory.listSync().toList()..sort(sortFilesByPath)) {
+  for (final FileSystemEntity entity in directory.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
       final String localeString = filenamePattern.firstMatch(entityPath)[1];
@@ -166,7 +166,7 @@ void loadMatchingArbsIntoBundleMaps({
         final Map<String, String> resources = localeToResources[locale];
         final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
         final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
-        for (String key in bundle.keys) {
+        for (final String key in bundle.keys) {
           // The ARB file resource "attributes" for foo are called @foo.
           if (key.startsWith('@'))
             attributes[key.substring(1)] = bundle[key];
@@ -270,7 +270,7 @@ const String registry = 'https://www.iana.org/assignments/language-subtag-regist
 Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
   List<String> lastHeading;
-  for (String line in section.split('\n')) {
+  for (final String line in section.split('\n')) {
     if (line == '')
       continue;
     if (line.startsWith('  ')) {
@@ -304,7 +304,7 @@ Future<void> precacheLanguageAndRegionTags() async {
   final String body = (await response.cast<List<int>>().transform<String>(utf8.decoder).toList()).join('');
   client.close(force: true);
   final List<Map<String, List<String>>> sections = body.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
-  for (Map<String, List<String>> section in sections) {
+  for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type'].single;
     if (type == 'language' || type == 'region' || type == 'script') {

@@ -494,7 +494,7 @@ void main() {
       find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('text field toolbar options correctly changes options (iOS)',
       (WidgetTester tester) async {
@@ -544,7 +544,7 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Select All'), findsNothing);
-  });
+  }, skip: isBrowser);
 
   testWidgets('text field toolbar options correctly changes options (Android)',
       (WidgetTester tester) async {
@@ -577,7 +577,7 @@ void main() {
     expect(find.text('COPY'), findsOneWidget);
     expect(find.text('CUT'), findsNothing);
     expect(find.text('SELECT ALL'), findsNothing);
-  });
+  }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
@@ -2853,7 +2853,7 @@ void main() {
     // and the left edge of the input and label.
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2961,7 +2961,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.testTextInput.editingState['text'], isEmpty);
+    expect(tester.testTextInput.editingState, isNull);
 
     // Initial state with null controller.
     await tester.tap(find.byType(TextField));
@@ -6565,7 +6565,7 @@ void main() {
 
     expect(description, <String>[
       'enabled: false',
-      'decoration: InputDecoration(labelText: "foo")',
+      'decoration: InputDecoration(labelText: "foo", floatingLabelBehavior: FloatingLabelBehavior.auto)',
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'autocorrect: false',
@@ -7432,4 +7432,45 @@ void main() {
 
     expect(textFieldSize1, equals(textFieldSize2));
   });
+
+  testWidgets(
+    'The selection menu displays in an Overlay without error',
+    (WidgetTester tester) async {
+      // This is a regression test for
+      // https://github.com/flutter/flutter/issues/43787
+      final TextEditingController controller = TextEditingController(
+        text: 'This is a test that shows some odd behavior with Text Selection!',
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Container(
+            color: Colors.grey,
+            child: Center(
+              child: Container(
+                color: Colors.red,
+                width: 300,
+                height: 600,
+                child: Overlay(
+                  initialEntries: <OverlayEntry>[
+                    OverlayEntry(
+                      builder: (BuildContext context) => Center(
+                        child: TextField(
+                          controller: controller,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await _showSelectionMenuAt(tester, controller, controller.text.indexOf('test'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
