@@ -533,13 +533,13 @@ void main() {
       equalsIgnoringHashCodes(
         '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
         'The following assertion was thrown building Stepper(dirty,\n'
-        'dependencies: [TickerMode,\n'
-        '_LocalizationsScope-[GlobalKey#6b31b]], state:\n'
-        '_StepperState#1bf00):\n'
+        'dependencies: [_LocalizationsScope-[GlobalKey#6b31b],\n'
+        'TickerMode], state: _StepperState#1bf00):\n'
         'Steppers must not be nested.\n'
         'The material specification advises that one should avoid\n'
         'embedding steppers within steppers.\n'
-        'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
+        'https://material.io/archive/guidelines/components/steppers.html#steppers-usage\n'
+        ''
       ),
     );
   });
