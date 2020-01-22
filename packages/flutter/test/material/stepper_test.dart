@@ -529,7 +529,7 @@ void main() {
     // which will change depending on where the test is run.
     expect(lines.length, greaterThan(7));
     expect(
-      lines.take(9).join('\n'),
+      lines.take(8).join('\n'),
       equalsIgnoringHashCodes(
         '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
         'The following assertion was thrown building Stepper(dirty,\n'
@@ -538,8 +538,7 @@ void main() {
         'Steppers must not be nested.\n'
         'The material specification advises that one should avoid\n'
         'embedding steppers within steppers.\n'
-        'https://material.io/archive/guidelines/components/steppers.html#steppers-usage\n'
-        ''
+        'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
       ),
     );
   });
