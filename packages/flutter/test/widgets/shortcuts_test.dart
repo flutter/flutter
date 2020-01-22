@@ -177,7 +177,6 @@ void main() {
             TestAction.key: () => TestAction(
               onInvoke: (FocusNode node, Intent intent) {
                 invoked = true;
-                return true;
               },
             ),
           },
@@ -215,7 +214,6 @@ void main() {
               TestAction.key: () => TestAction(
                 onInvoke: (FocusNode node, Intent intent) {
                   invoked = true;
-                  return true;
                 },
               ),
             },
@@ -254,7 +252,6 @@ void main() {
                 TestAction.key: () => TestAction(
                   onInvoke: (FocusNode node, Intent intent) {
                     invoked = true;
-                    return true;
                   },
                 ),
               },

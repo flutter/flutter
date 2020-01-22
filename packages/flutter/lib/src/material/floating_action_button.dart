@@ -444,7 +444,6 @@ class FloatingActionButton extends StatelessWidget {
 
     final Color foregroundColor = this.foregroundColor
       ?? floatingActionButtonTheme.foregroundColor
-      ?? theme.accentIconTheme.color
       ?? theme.colorScheme.onSecondary;
     final Color backgroundColor = this.backgroundColor
       ?? floatingActionButtonTheme.backgroundColor
@@ -475,7 +474,7 @@ class FloatingActionButton extends StatelessWidget {
       ?? _defaultHighlightElevation;
     final MaterialTapTargetSize materialTapTargetSize = this.materialTapTargetSize
       ?? theme.materialTapTargetSize;
-    final TextStyle textStyle = theme.accentTextTheme.button.copyWith(
+    final TextStyle textStyle = theme.textTheme.button.copyWith(
       color: foregroundColor,
       letterSpacing: 1.2,
     );

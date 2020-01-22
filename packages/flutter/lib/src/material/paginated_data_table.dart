@@ -426,75 +426,82 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     ]);
 
     // CARD
-    return Card(
-      semanticContainer: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Semantics(
-            container: true,
-            child: DefaultTextStyle(
-              // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
-              // list and then tweak them appropriately.
-              // See https://material.io/design/components/data-tables.html#tables-within-cards
-              style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
-                                           : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
-              child: IconTheme.merge(
-                data: const IconThemeData(
-                  opacity: 0.54
-                ),
-                child: Ink(
-                  height: 64.0,
-                  color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: headerWidgets,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Card(
+          semanticContainer: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Semantics(
+                container: true,
+                child: DefaultTextStyle(
+                  // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
+                  // list and then tweak them appropriately.
+                  // See https://material.io/design/components/data-tables.html#tables-within-cards
+                  style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
+                                               : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
+                  child: IconTheme.merge(
+                    data: const IconThemeData(
+                      opacity: 0.54
+                    ),
+                    child: Ink(
+                      height: 64.0,
+                      color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: headerWidgets,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            dragStartBehavior: widget.dragStartBehavior,
-            child: DataTable(
-              key: _tableKey,
-              columns: widget.columns,
-              sortColumnIndex: widget.sortColumnIndex,
-              sortAscending: widget.sortAscending,
-              onSelectAll: widget.onSelectAll,
-              dataRowHeight: widget.dataRowHeight,
-              headingRowHeight: widget.headingRowHeight,
-              horizontalMargin: widget.horizontalMargin,
-              columnSpacing: widget.columnSpacing,
-              showCheckboxColumn: widget.showCheckboxColumn,
-              rows: _getRows(_firstRowIndex, widget.rowsPerPage),
-            ),
-          ),
-          DefaultTextStyle(
-            style: footerTextStyle,
-            child: IconTheme.merge(
-              data: const IconThemeData(
-                opacity: 0.54
-              ),
-              child: Container(
-                height: 56.0,
-                child: SingleChildScrollView(
-                  dragStartBehavior: widget.dragStartBehavior,
-                  scrollDirection: Axis.horizontal,
-                  reverse: true,
-                  child: Row(
-                    children: footerWidgets,
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                dragStartBehavior: widget.dragStartBehavior,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: constraints.minWidth),
+                  child: DataTable(
+                    key: _tableKey,
+                    columns: widget.columns,
+                    sortColumnIndex: widget.sortColumnIndex,
+                    sortAscending: widget.sortAscending,
+                    onSelectAll: widget.onSelectAll,
+                    dataRowHeight: widget.dataRowHeight,
+                    headingRowHeight: widget.headingRowHeight,
+                    horizontalMargin: widget.horizontalMargin,
+                    columnSpacing: widget.columnSpacing,
+                    rows: _getRows(_firstRowIndex, widget.rowsPerPage),
                   ),
                 ),
               ),
-            ),
+              DefaultTextStyle(
+                style: footerTextStyle,
+                child: IconTheme.merge(
+                  data: const IconThemeData(
+                    opacity: 0.54
+                  ),
+                  child: Container(
+                    // TODO(bkonyi): this won't handle text zoom correctly, https://github.com/flutter/flutter/issues/48522
+                    height: 56.0,
+                    child: SingleChildScrollView(
+                      dragStartBehavior: widget.dragStartBehavior,
+                      scrollDirection: Axis.horizontal,
+                      reverse: true,
+                      child: Row(
+                        children: footerWidgets,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

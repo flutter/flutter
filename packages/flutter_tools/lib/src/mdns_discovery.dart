@@ -195,7 +195,7 @@ class MDnsObservatoryDiscovery {
           'The mDNS query for an attached iOS device failed. It may '
           'be necessary to disable the "Personal Hotspot" on the device, and '
           'to ensure that the "Disable unless needed" setting is unchecked '
-          'under System Preferences > Network > iPhone USB.'
+          'under System Preferences > Network > iPhone USB. '
           'See https://github.com/flutter/flutter/issues/46698 for details.'
         );
         break;

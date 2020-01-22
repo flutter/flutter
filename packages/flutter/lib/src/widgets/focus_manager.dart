@@ -367,6 +367,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates a focus node.
   ///
   /// The [debugLabel] is ignored on release builds.
+  ///
+  /// The [skipTraversal] and [canRequestFocus] arguments must not be null.
   FocusNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
@@ -776,6 +778,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
       DefaultFocusTraversal.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
     }
+    if (child._requestFocusWhenReparented) {
+      child._doRequestFocus();
+      child._requestFocusWhenReparented = false;
+    }
   }
 
   /// Called by the _host_ [StatefulWidget] to attach a [FocusNode] to the
@@ -818,7 +824,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Requests the primary focus for this node, or for a supplied [node], which
   /// will also give focus to its [ancestors].
   ///
-  /// If called without a node, request focus for this node.
+  /// If called without a node, request focus for this node. If the node hasn't
+  /// been added to the focus tree yet, then defer the focus request until it
+  /// is, allowing newly created widgets to request focus as soon as they are
+  /// added.
   ///
   /// If the given [node] is not yet a part of the focus tree, then this method
   /// will add the [node] as a child of this node before requesting focus.
@@ -849,6 +858,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       assert(_focusDebug('Node NOT requesting focus because canRequestFocus is false: $this'));
       return;
     }
+    // If the node isn't part of the tree, then we just defer the focus request
+    // until the next time it is reparented, so that it's possible to focus
+    // newly added widgets.
+    if (_parent == null) {
+      _requestFocusWhenReparented = true;
+      return;
+    }
     _setAsFocusedChild();
     if (hasPrimaryFocus) {
       return;
@@ -857,6 +873,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(_focusDebug('Node requesting focus: $this'));
     _markAsDirty(newFocus: this);
   }
+
+  // If set to true, the node will request focus on this node the next time
+  // this node is reparented in the focus tree.
+  //
+  // Once requestFocus has been called at the next reparenting, this value
+  // will be reset to false.
+  //
+  // This will only force a call to requestFocus for the node once the next time
+  // the node is reparented. After that, _requestFocusWhenReparented would need
+  // to be set to true again to have it be focused again on the next
+  // reparenting.
+  //
+  // This is used when requestFocus is called and there is no parent yet.
+  bool _requestFocusWhenReparented = false;
 
   /// Sets this node as the [FocusScopeNode.focusedChild] of the enclosing
   /// scope.

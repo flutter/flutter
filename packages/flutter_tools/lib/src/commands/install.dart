@@ -45,7 +45,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
       throwToolExit('Install failed');
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 

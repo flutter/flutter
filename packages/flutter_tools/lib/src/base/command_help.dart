@@ -4,34 +4,125 @@
 
 import 'dart:math' as math;
 
-import '../globals.dart' as globals;
+import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+
+import 'logger.dart';
 import 'terminal.dart';
+
+// ignore_for_file: non_constant_identifier_names
 
 const String fire = '🔥';
 const int maxLineWidth = 84;
 
-/// Encapsulates the help text construction and printing
+/// Encapsulates the help text construction and printing.
 class CommandHelp {
+  CommandHelp({
+    @required Logger logger,
+    @required AnsiTerminal terminal,
+    @required Platform platform,
+    @required OutputPreferences outputPreferences,
+  }) : _logger = logger,
+       _terminal = terminal,
+       _platform = platform,
+       _outputPreferences = outputPreferences;
 
-  const CommandHelp._(this.key, this.description, [this.inParenthesis = '']);
+  final Logger _logger;
 
-  static const CommandHelp L = CommandHelp._('L', 'Dump layer tree to the console.', 'debugDumpLayerTree');
-  static const CommandHelp P = CommandHelp._('P', 'Toggle performance overlay.', 'WidgetsApp.showPerformanceOverlay');
-  static const CommandHelp R = CommandHelp._('R', 'Hot restart.');
-  static const CommandHelp S = CommandHelp._('S', 'Dump accessibility tree in traversal order.', 'debugDumpSemantics');
-  static const CommandHelp U = CommandHelp._('U', 'Dump accessibility tree in inverse hit test order.', 'debugDumpSemantics');
-  static const CommandHelp a = CommandHelp._('a', 'Toggle timeline events for all widget build methods.', 'debugProfileWidgetBuilds');
-  static const CommandHelp d = CommandHelp._('d', 'Detach (terminate "flutter run" but leave application running).');
-  static const CommandHelp h = CommandHelp._('h', 'Repeat this help message.');
-  static const CommandHelp i = CommandHelp._('i', 'Toggle widget inspector.', 'WidgetsApp.showWidgetInspectorOverride');
-  static const CommandHelp o = CommandHelp._('o', 'Simulate different operating systems.', 'defaultTargetPlatform');
-  static const CommandHelp p = CommandHelp._('p', 'Toggle the display of construction lines.', 'debugPaintSizeEnabled');
-  static const CommandHelp q = CommandHelp._('q', 'Quit (terminate the application on the device).');
-  static const CommandHelp r = CommandHelp._('r', 'Hot reload. $fire$fire$fire');
-  static const CommandHelp s = CommandHelp._('s', 'Save a screenshot to flutter.png.');
-  static const CommandHelp t = CommandHelp._('t', 'Dump rendering tree to the console.', 'debugDumpRenderTree');
-  static const CommandHelp w = CommandHelp._('w', 'Dump widget hierarchy to the console.', 'debugDumpApp');
-  static const CommandHelp z = CommandHelp._('z', 'Toggle elevation checker.');
+  final AnsiTerminal _terminal;
+
+  final Platform _platform;
+
+  final OutputPreferences _outputPreferences;
+
+  CommandHelpOption _L;
+  CommandHelpOption get L => _L ??= _makeOption('L', 'Dump layer tree to the console.', 'debugDumpLayerTree');
+
+  CommandHelpOption _P;
+  CommandHelpOption get P => _P ??= _makeOption('P', 'Toggle performance overlay.', 'WidgetsApp.showPerformanceOverlay');
+
+  CommandHelpOption _R;
+  CommandHelpOption get R => _R ??= _makeOption('R', 'Hot restart.');
+
+  CommandHelpOption _S;
+  CommandHelpOption get S => _S ??= _makeOption('S', 'Dump accessibility tree in traversal order.', 'debugDumpSemantics');
+
+  CommandHelpOption _U;
+  CommandHelpOption get U => _U ??= _makeOption('U', 'Dump accessibility tree in inverse hit test order.', 'debugDumpSemantics');
+
+  CommandHelpOption _a;
+  CommandHelpOption get a => _a ??= _makeOption('a', 'Toggle timeline events for all widget build methods.', 'debugProfileWidgetBuilds');
+
+  CommandHelpOption _d;
+  CommandHelpOption get d => _d ??= _makeOption('d', 'Detach (terminate "flutter run" but leave application running).');
+
+  CommandHelpOption _h;
+  CommandHelpOption get h => _h ??= _makeOption('h', 'Repeat this help message.');
+
+  CommandHelpOption _i;
+  CommandHelpOption get i => _i ??= _makeOption('i', 'Toggle widget inspector.', 'WidgetsApp.showWidgetInspectorOverride');
+
+  CommandHelpOption _o;
+  CommandHelpOption get o => _o ??= _makeOption('o', 'Simulate different operating systems.', 'defaultTargetPlatform');
+
+  CommandHelpOption _p;
+  CommandHelpOption get p => _p ??= _makeOption('p', 'Toggle the display of construction lines.', 'debugPaintSizeEnabled');
+
+  CommandHelpOption _q;
+  CommandHelpOption get q => _q ??= _makeOption('q', 'Quit (terminate the application on the device).');
+
+  CommandHelpOption _r;
+  CommandHelpOption get r => _r ??= _makeOption('r', 'Hot reload. $fire$fire$fire');
+
+  CommandHelpOption _s;
+  CommandHelpOption get s => _s ??= _makeOption('s', 'Save a screenshot to flutter.png.');
+
+  CommandHelpOption _t;
+  CommandHelpOption get t => _t ??= _makeOption('t', 'Dump rendering tree to the console.', 'debugDumpRenderTree');
+
+  CommandHelpOption _w;
+  CommandHelpOption get w => _w ??= _makeOption('w', 'Dump widget hierarchy to the console.', 'debugDumpApp');
+
+  CommandHelpOption _z;
+  CommandHelpOption get z => _z ??= _makeOption('z', 'Toggle elevation checker.');
+
+  CommandHelpOption _makeOption(String key, String description, [
+    String inParenthesis = '',
+  ]) {
+    return CommandHelpOption(
+      key,
+      description,
+      inParenthesis: inParenthesis,
+      logger: _logger,
+      terminal: _terminal,
+      platform: _platform,
+      outputPreferences: _outputPreferences,
+    );
+  }
+}
+
+/// Encapsulates printing help text for a single option.
+class CommandHelpOption {
+  CommandHelpOption(
+    this.key,
+    this.description, {
+    this.inParenthesis = '',
+    @required Logger logger,
+    @required AnsiTerminal terminal,
+    @required Platform platform,
+    @required OutputPreferences outputPreferences,
+  }) : _logger = logger,
+       _terminal = terminal,
+       _platform = platform,
+       _outputPreferences = outputPreferences;
+
+  final Logger _logger;
+
+  final AnsiTerminal _terminal;
+
+  final Platform _platform;
+
+  final OutputPreferences _outputPreferences;
 
   /// The key associated with this command
   final String key;
@@ -47,12 +138,12 @@ class CommandHelp {
   @override
   String toString() {
     final StringBuffer message = StringBuffer();
-    message.writeAll(<String>[globals.terminal.bolden(key), description], ' ');
+    message.writeAll(<String>[_terminal.bolden(key), description], ' ');
 
     if (_hasTextInParenthesis) {
       bool wrap = false;
-      final int maxWidth = math.max(outputPreferences.wrapColumn ?? 0,  maxLineWidth);
-      int width = maxWidth - (globals.platform.stdoutSupportsAnsi ? _rawMessageLength + 1 : message.length);
+      final int maxWidth = math.max(_outputPreferences.wrapColumn ?? 0,  maxLineWidth);
+      int width = maxWidth - (_platform.stdoutSupportsAnsi ? _rawMessageLength + 1 : message.length);
       final String parentheticalText = '($inParenthesis)';
       if (width < parentheticalText.length) {
         width = maxWidth;
@@ -65,12 +156,12 @@ class CommandHelp {
       // pad according to the raw text
       message.write(''.padLeft(width - parentheticalText.length));
 
-      message.write(globals.terminal.color(parentheticalText, TerminalColor.grey));
+      message.write(_terminal.color(parentheticalText, TerminalColor.grey));
     }
     return message.toString();
   }
 
   void print() {
-    globals.printStatus(toString());
+    _logger.printStatus(toString());
   }
 }

@@ -139,6 +139,6 @@ class BuildBundleCommand extends BuildSubCommand {
       fileSystemScheme: stringArg('filesystem-scheme'),
       fileSystemRoots: stringsArg('filesystem-root'),
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

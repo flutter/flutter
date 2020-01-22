@@ -297,7 +297,7 @@ class CreateCommand extends FlutterCommand {
       Cache.releaseLockEarly();
 
       await _writeSamplesJson(stringArg('list-samples'));
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (argResults.rest.isEmpty) {
@@ -482,8 +482,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         globals.printStatus('Your $application code is in $relativeAppMain');
       }
     }
-
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
@@ -651,7 +650,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   int _injectGradleWrapper(FlutterProject project) {
     int filesCreated = 0;
-    copyDirectorySync(
+    fsUtils.copyDirectorySync(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
       onFileCopied: (File sourceFile, File destinationFile) {
@@ -858,8 +857,10 @@ String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite 
   // If the destination directory is actually a file, then we refuse to
   // overwrite, on the theory that the user probably didn't expect it to exist.
   if (globals.fs.isFileSync(dirPath)) {
-    return "Invalid project name: '$dirPath' - refers to an existing file."
-        '${overwrite ? ' Refusing to overwrite a file with a directory.' : ''}';
+    final String message = "Invalid project name: '$dirPath' - refers to an existing file.";
+    return overwrite
+      ? '$message Refusing to overwrite a file with a directory.'
+      : message;
   }
 
   if (overwrite) {

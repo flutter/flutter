@@ -47,7 +47,7 @@ class BuildAarCommand extends BuildSubCommand {
       )
       ..addOption(
         'output-dir',
-        help: 'The absolute path to the directory where the repository is generated.'
+        help: 'The absolute path to the directory where the repository is generated. '
               'By default, this is \'<current-directory>android/build\'. ',
       );
   }
@@ -119,7 +119,7 @@ class BuildAarCommand extends BuildSubCommand {
       outputDirectoryPath: stringArg('output-dir'),
       buildNumber: buildNumber,
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 
   /// Returns the [FlutterProject] which is determined from the remaining command-line

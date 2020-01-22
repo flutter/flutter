@@ -294,7 +294,7 @@ abstract class MultiChildLayoutDelegate {
   ///
   /// By default, returns the [runtimeType] of the class.
   @override
-  String toString() => '$runtimeType';
+  String toString() => '${objectRuntimeType(this, 'MultiChildLayoutDelegate')}';
 }
 
 /// Defers the layout of multiple children to a delegate.

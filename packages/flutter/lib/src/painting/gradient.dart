@@ -511,7 +511,7 @@ class LinearGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($begin, $end, $colors, $stops, $tileMode)';
+    return '${objectRuntimeType(this, 'LinearGradient')}($begin, $end, $colors, $stops, $tileMode)';
   }
 }
 
@@ -773,7 +773,7 @@ class RadialGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
+    return '${objectRuntimeType(this, 'RadialGradient')}($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
   }
 }
 
@@ -1018,6 +1018,6 @@ class SweepGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
+    return '${objectRuntimeType(this, 'SweepGradient')}($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
   }
 }

@@ -733,10 +733,10 @@ abstract class BoxScrollView extends ScrollView {
 ///    widget subtree with other widgets.
 ///
 ///  * Using [AutomaticKeepAlive] widgets (inserted by default when
-///    [addAutomaticKeepAlives] is true). Instead of unconditionally caching the
-///    child element subtree when scrolling off-screen like [KeepAlive],
-///    [AutomaticKeepAlive] can let whether to cache the subtree be determined
-///    by descendant logic in the subtree.
+///    [addAutomaticKeepAlives] is true). [AutomaticKeepAlive] allows descendant
+///    widgets to control whether the subtree is actually kept alive or not.
+///    This behavior is in contrast with [KeepAlive], which will unconditionally keep
+///    the subtree alive.
 ///
 ///    As an example, the [EditableText] widget signals its list child element
 ///    subtree to stay alive while its text field has input focus. If it doesn't
@@ -1051,7 +1051,7 @@ class ListView extends BoxScrollView {
            }
            return widget;
          },
-         childCount: _computeSemanticChildCount(itemCount),
+         childCount: _computeActualChildCount(itemCount),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
@@ -1069,7 +1069,7 @@ class ListView extends BoxScrollView {
          shrinkWrap: shrinkWrap,
          padding: padding,
          cacheExtent: cacheExtent,
-         semanticChildCount: _computeSemanticChildCount(itemCount),
+         semanticChildCount: itemCount,
        );
 
   /// Creates a scrollable, linear array of widgets with a custom child model.
@@ -1215,8 +1215,8 @@ class ListView extends BoxScrollView {
     properties.add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
   }
 
-  // Helper method to compute the semantic child count for the separated constructor.
-  static int _computeSemanticChildCount(int itemCount) {
+  // Helper method to compute the actual child count for the separated constructor.
+  static int _computeActualChildCount(int itemCount) {
     return math.max(0, itemCount * 2 - 1);
   }
 }

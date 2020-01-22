@@ -929,7 +929,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
 
     return Semantics(
-      onTap: () {
+      enabled: enabled,
+      onTap: !enabled ? null : () {
         if (!controller.selection.isValid) {
           controller.selection = TextSelection.collapsed(offset: controller.text.length);
         }

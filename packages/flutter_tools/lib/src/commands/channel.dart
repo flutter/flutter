@@ -42,10 +42,10 @@ class ChannelCommand extends FlutterCommand {
           showAll: boolArg('all'),
           verbose: globalResults['verbose'] as bool,
         );
-        return null;
+        return FlutterCommandResult.success();
       case 1:
         await _switchChannel(argResults.rest[0]);
-        return null;
+        return FlutterCommandResult.success();
       default:
         throw ToolExit('Too many arguments.\n$usage');
     }

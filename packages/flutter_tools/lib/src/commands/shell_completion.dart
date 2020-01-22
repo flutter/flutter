@@ -50,7 +50,7 @@ class ShellCompletionCommand extends FlutterCommand {
 
     if (argResults.rest.isEmpty || argResults.rest.first == '-') {
       stdout.write(generateCompletionScript(<String>['flutter']));
-      return null;
+      return FlutterCommandResult.warning();
     }
 
     final File outputFile = globals.fs.file(argResults.rest.first);
@@ -67,6 +67,6 @@ class ShellCompletionCommand extends FlutterCommand {
       throwToolExit('Unable to write shell completion setup script.\n$error', exitCode: 1);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

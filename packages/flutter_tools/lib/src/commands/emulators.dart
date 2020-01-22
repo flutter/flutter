@@ -54,7 +54,7 @@ class EmulatorsCommand extends FlutterCommand {
       await _listEmulators(searchText);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> _launchEmulator(String id) async {

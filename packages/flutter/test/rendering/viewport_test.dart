@@ -1047,7 +1047,7 @@ void main() {
           'FlutterError\n'
           '   Horizontal viewport was given unbounded width.\n'
           '   Viewports expand in the scrolling direction to fill their\n'
-          '   container.In this case, a horizontal viewport was given an\n'
+          '   container. In this case, a horizontal viewport was given an\n'
           '   unlimited amount of horizontal space in which to expand. This\n'
           '   situation typically happens when a scrollable widget is nested\n'
           '   inside another scrollable widget.\n'

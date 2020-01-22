@@ -22,6 +22,6 @@ class TrainingCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     // This command does not do anything yet :).
-    return null;
+    return FlutterCommandResult.success();
   }
 }
