@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  /* group('text contrast guideline', () {
+  group('text contrast guideline', () {
     testWidgets('black text on white background - Text Widget - direct style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
@@ -176,7 +176,7 @@ void main() {
       expect(result.passed, true);
       handle.dispose();
     });
-  }); */
+  });
 
   group('custom minimum contrast guideline', () {
     Widget _icon ({IconData icon = Icons.search, Color color, Color background}) {
@@ -332,7 +332,7 @@ void main() {
 
   });
 
-  /* group('tap target size guideline', () {
+  group('tap target size guideline', () {
     testWidgets('Tappable box at 48 by 48', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
@@ -593,7 +593,7 @@ void main() {
     ));
     await expectLater(tester, meetsGuideline(textContrastGuideline));
     handle.dispose();
-  }); */
+  });
 }
 
 Widget _boilerplate(Widget child) {
