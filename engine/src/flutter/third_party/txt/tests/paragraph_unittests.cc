@@ -175,6 +175,37 @@ TEST_F(ParagraphTest, GetGlyphPositionAtCoordinateSegfault) {
   ASSERT_TRUE(Snapshot());
 }
 
+// Check that GetGlyphPositionAtCoordinate computes correct text positions for
+// a paragraph containing multiple styled runs.
+TEST_F(ParagraphTest, GetGlyphPositionAtCoordinateMultiRun) {
+  txt::ParagraphStyle paragraph_style;
+  txt::ParagraphBuilderTxt builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families = std::vector<std::string>(1, "Ahem");
+  text_style.color = SK_ColorBLACK;
+  text_style.font_size = 10;
+  builder.PushStyle(text_style);
+  builder.AddText(u"A");
+  text_style.font_size = 20;
+  builder.PushStyle(text_style);
+  builder.AddText(u"B");
+  text_style.font_size = 30;
+  builder.PushStyle(text_style);
+  builder.AddText(u"C");
+
+  auto paragraph = BuildParagraph(builder);
+  paragraph->Layout(GetTestCanvasWidth());
+
+  paragraph->Paint(GetCanvas(), 10.0, 15.0);
+
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2.0, 5.0).position, 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(12.0, 5.0).position, 1ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(32.0, 5.0).position, 2ull);
+
+  ASSERT_TRUE(Snapshot());
+}
+
 TEST_F(ParagraphTest, LineMetricsParagraph1) {
   const char* text = "Hello! What is going on?\nSecond line \nthirdline";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
