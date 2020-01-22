@@ -40,7 +40,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
   ///
   /// This callback is triggered when the pointer has started to be contained
   /// by the annotationed region for any reason, which means it always matches a
-  /// later [onEnter].
+  /// later [onExit].
   ///
   /// See also:
   ///
@@ -70,13 +70,13 @@ class MouseTrackerAnnotation extends Diagnosticable {
   /// This callback is triggered when the pointer has stopped to be contained
   /// by the region for any reason, which means it always matches an earlier
   /// [onEnter]. This is different from [MouseRegion.onExit], which is not
-  /// triggered in certain cases and does not always match `onEnter`.
+  /// triggered in certain cases and does not always match [MouseRegion.onEnter].
   ///
   /// See also:
   ///
   ///  * [onEnter], which is triggered when a mouse pointer enters the region.
   ///  * [MouseRegion.onExit], which uses this callback, but is not triggered in
-  ///    certain cases and does not always match its earier `onEnter`.
+  ///    certain cases and does not always match its earier [MouseRegion.onEnter].
   final PointerExitEventListener onExit;
 
   @override
@@ -154,7 +154,7 @@ class _MouseState {
 ///
 /// ### Details
 ///
-/// The state of [MouseTracker] consists of 2 parts:
+/// The state of [MouseTracker] consists of two parts:
 ///
 ///  * The mouse devices that are connected.
 ///  * In which annotations each device is contained.
