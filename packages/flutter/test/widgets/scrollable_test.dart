@@ -744,7 +744,7 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('Box 111')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('Box 52')), findsNothing);
 
     expect(expensiveWidgets, 17);
     expect(cheapWidgets, 0);
@@ -752,13 +752,68 @@ void main() {
     // Getting the tester to simulate a life-like fling is difficult.
     // Instead, just manually drive the activity with a ballistic simulation as
     // if the user has flung the list.
-    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity.delegate.goBallistic(6800);
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity.delegate.goBallistic(4000);
 
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
-    expect(find.byKey(const ValueKey<String>('Box 111')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('Box 52')), findsOneWidget);
 
-    expect(expensiveWidgets, 44);
-    expect(cheapWidgets, 74);
+    expect(expensiveWidgets, 38);
+    expect(cheapWidgets, 20);
   });
+
+  testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
+    int cheapWidgets = 0;
+    int expensiveWidgets = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        physics: const SuperPessimisticScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            cheapWidgets += 1;
+            return SizedBox(key: ValueKey<String>('Cheap box $index'), height: 50.0);
+          }
+          expensiveWidgets += 1;
+          return SizedBox(key: ValueKey<String>('Box $index'), height: 50.0);
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('Cheap Box 52')), findsNothing);
+
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 0);
+
+    // Getting the tester to simulate a life-like fling is difficult.
+    // Instead, just manually drive the activity with a ballistic simulation as
+    // if the user has flung the list.
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity.delegate.goBallistic(4000);
+
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('Cheap Box 52')), findsOneWidget);
+
+    expect(expensiveWidgets, 18);
+    expect(cheapWidgets, 40);
+  });
+}
+
+class SuperPessimisticScrollPhysics extends ScrollPhysics {
+  const SuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+
+
+  @override
+  bool recommendDeferredLoading(double velocity) {
+    return velocity > 1;
+  }
+
+  @override
+  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return SuperPessimisticScrollPhysics(parent: buildParent(ancestor));
+  }
 }
