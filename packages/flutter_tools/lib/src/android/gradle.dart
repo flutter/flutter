@@ -546,6 +546,19 @@ Future<void> buildGradleAar({
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
     command.add('-Plocal-engine-build-mode=${androidBuildInfo.buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+
+    // Copy the local engine repo in the output directory.
+    try {
+      fsUtils.copyDirectorySync(
+        localEngineRepo,
+        getRepoDirectory(outputDirectory),
+      );
+    } on FileSystemException catch(_) {
+      throwToolExit(
+        'Failed to copy the local engine ${localEngineRepo.path} repo '
+        'in ${outputDirectory.path}'
+      );
+    }
   }
 
   command.add(aarTask);
