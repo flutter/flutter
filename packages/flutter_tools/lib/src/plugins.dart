@@ -202,6 +202,9 @@ class Plugin {
 
   static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
     bool isInvalid(String key, bool Function(YamlMap) validate) {
+      if (!yaml.containsKey(key)) {
+        return false;
+      }
       final dynamic value = yaml[key];
       if (value is! YamlMap) {
         return true;
