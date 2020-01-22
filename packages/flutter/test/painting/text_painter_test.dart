@@ -741,6 +741,9 @@ void main() {
 
     painter.layout(maxWidth: 300);
 
+    expect(painter.text, const TextSpan(text: text));
+    expect(painter.preferredLineHeight, 14);
+
     final List<ui.LineMetrics> lines = painter.computeLineMetrics();
 
     expect(lines.length, 4);
