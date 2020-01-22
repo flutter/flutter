@@ -28,7 +28,6 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
-import io.flutter.view.FlutterMain;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 

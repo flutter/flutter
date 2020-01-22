@@ -37,7 +37,6 @@ import io.flutter.embedding.engine.plugins.lifecycle.HiddenLifecycleReference;
 import io.flutter.embedding.engine.plugins.service.ServiceAware;
 import io.flutter.embedding.engine.plugins.service.ServiceControlSurface;
 import io.flutter.embedding.engine.plugins.service.ServicePluginBinding;
-import io.flutter.plugin.platform.PlatformViewsController;
 
 class FlutterEnginePluginRegistry implements PluginRegistry,
     ActivityControlSurface,
