@@ -3349,7 +3349,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// The element will still have a valid parent when this is called. After this
   /// is called, [deactivateChild] is called to sever the link to this object.
   @protected
-  void forgetChild(Element child);
+  void forgetChild(Element child) {
+    // TODO(chunhtai): Creates empty body for subclass to call super. This will
+    // enable us to fix internal tests pro-actively for upcoming breaking
+    // change.
+    // https://github.com/flutter/flutter/issues/43780.
+  }
 
   void _activateWithParent(Element parent, dynamic newSlot) {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
