@@ -470,8 +470,17 @@ class _ContrastReport {
         lightCount = count;
       }
     }
-    assert (lightColor != 0 && darkColor != 0);
-    return _ContrastReport._(Color(lightColor), Color(darkColor));
+    // Depending on the number of colors present, return the correct contrast
+    // report.
+    if (lightCount > 0 && darkCount > 0) {
+      return _ContrastReport._(Color(lightColor), Color(darkColor));
+    } else if (lightCount > 0) {
+      return _ContrastReport.singleColor(Color(lightColor));
+    } else if (darkCount > 0) {
+      return _ContrastReport.singleColor(Color(darkColor));
+    } else {
+      return _ContrastReport.emptyRect();
+    }
   }
 
   const _ContrastReport._(this.lightColor, this.darkColor)
