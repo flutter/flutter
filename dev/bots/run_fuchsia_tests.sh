@@ -37,3 +37,12 @@ reboot() {
 trap reboot EXIT
 
 ./fuchsia_ctl -d $device_name pave  -i $1
+
+
+# run the driver tests
+FLUTTER_DIR=$PWD/flutter
+FLUTTER_TOOL=./$FLUTTER_DIR/bin/flutter
+
+$FLUTTER_TOOL precache --fuchsia
+$FLUTTER_TOOL precache --flutter_runner
+$FLUTTER_TOOL doctor
