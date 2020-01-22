@@ -33,7 +33,7 @@ void configureProject(Project project, String outputDir) {
     project.android.libraryVariants.all { variant ->
         addAarTask(project, variant)
     }
-    
+
     project.uploadArchives {
         repositories {
             mavenDeployer {
