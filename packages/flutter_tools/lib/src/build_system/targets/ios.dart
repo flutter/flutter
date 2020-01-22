@@ -53,6 +53,7 @@ abstract class AotAssemblyBase extends Target {
         outputPath: globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
         darwinArch: iosArch,
         bitcode: bitcode,
+        quiet: true,
       ));
     }
     final List<int> results = await Future.wait(pending);
