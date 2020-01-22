@@ -474,13 +474,35 @@ class _ContrastReport {
     return _ContrastReport._(Color(lightColor), Color(darkColor));
   }
 
-  const _ContrastReport._(this.lightColor, this.darkColor);
+  const _ContrastReport._(this.lightColor, this.darkColor)
+      : isSingleColor = false,
+        isEmptyRect = false;
 
-  /// The most frequently occurring light color.
+  const _ContrastReport.singleColor(Color color)
+      : lightColor = color,
+        darkColor = color,
+        isSingleColor = true,
+        isEmptyRect = false;
+
+  const _ContrastReport.emptyRect()
+      : lightColor = Colors.transparent,
+        darkColor = Colors.transparent,
+        isSingleColor = false,
+        isEmptyRect = true;
+
+  /// The most frequently occurring light color. Uses [Colors.transparent] if
+  /// the rectangle is empty.
   final Color lightColor;
 
-  /// The most frequently occurring dark color.
+  /// The most frequently occurring dark color. Uses [Colors.transparent] if
+  /// the rectangle is empty.
   final Color darkColor;
+
+  /// Whether the rectangle contains only one color.
+  final bool isSingleColor;
+
+  /// Whether the rectangle contains 0 pixels.
+  final bool isEmptyRect;
 
   /// Computes the contrast ratio as defined by the WCAG.
   ///
