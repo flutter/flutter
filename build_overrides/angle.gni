@@ -7,6 +7,8 @@
 
 angle_root = "//third_party/angle"
 
+angle_has_build = true
+
 angle_googletest_dir = "//third_party/googletest/src"
 angle_libpng_dir = "//third_party/libpng"
 # Note: This path doesn't actually exist; see
