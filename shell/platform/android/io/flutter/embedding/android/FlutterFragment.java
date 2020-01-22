@@ -742,13 +742,6 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     delegate.onLowMemory();
   }
 
-  @NonNull
-  private Context getContextCompat() {
-    return Build.VERSION.SDK_INT >= 23
-      ? getContext()
-      : getActivity();
-  }
-
   /**
    * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by
    * {@link FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when
