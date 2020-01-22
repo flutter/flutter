@@ -159,7 +159,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     cache ??= globals.cache;
 
     for (final BuildMode mode in buildModes) {
-      globals.printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
+      globals.printStatus('Building frameworks for $iosProject in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
@@ -175,7 +175,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         produceFlutterPodspec(mode, modeDirectory);
       } else {
         // Copy Flutter.framework.
-        await _produceFlutterFramework(outputDirectory, mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
+        await _produceFlutterFramework(mode, modeDirectory);
       }
 
       // Build aot, create module.framework and copy.
@@ -266,10 +266,7 @@ end
   }
 
   Future<void> _produceFlutterFramework(
-    Directory outputDirectory,
     BuildMode mode,
-    Directory iPhoneBuildOutput,
-    Directory simulatorBuildOutput,
     Directory modeDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
@@ -446,6 +443,15 @@ end
     final Status status = globals.logger.startProgress(
       ' ├─Building plugins...', timeout: timeoutConfiguration.slowOperation);
     try {
+      // Regardless of the last "flutter build" build mode,
+      // copy the corresponding engine.
+      // A plugin framework built with bitcode must link against the bitcode version
+      // of Flutter.framework (Release).
+      _project.ios.copyEngineArtifactToProject(mode);
+
+      final String bitcodeGenerationMode = mode == BuildMode.release ?
+          'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.
+
       List<String> pluginsBuildCommand = <String>[
         'xcrun',
         'xcodebuild',
@@ -455,6 +461,7 @@ end
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
+        'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
         'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
       ];
 
@@ -592,7 +599,7 @@ end
 
       final Status status = globals.logger.startProgress(
         ' ├─Creating $frameworkBinaryName.xcframework...',
-        timeout: timeoutConfiguration.fastOperation,
+        timeout: timeoutConfiguration.slowOperation,
       );
       try {
         if (mode == BuildMode.debug) {
