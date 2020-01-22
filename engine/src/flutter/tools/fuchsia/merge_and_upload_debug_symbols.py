@@ -64,7 +64,7 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
   # instances. Normally verification takes slightly more than 1 minute when
   # it succeeds.
   num_tries = 3
-  while tries in range(num_tries):
+  for tries in range(num_tries):
     try:
       subprocess.check_call(command, cwd=_packaging_dir)
       break
