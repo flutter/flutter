@@ -420,12 +420,6 @@ end
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
         dartDefines: dartDefines,
       );
-
-//      const String appFrameworkName = 'App.framework';
-//      fsUtils.copyDirectorySync(
-//        iPhoneBuildOutput.childDirectory(appFrameworkName),
-//        destinationAppFrameworkDirectory,
-//      );
     } finally {
       status.stop();
     }
