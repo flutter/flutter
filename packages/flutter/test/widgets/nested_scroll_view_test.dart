@@ -677,12 +677,10 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-
-  testWidgets('NestedScrollView and SliverOverlapAbsorber for PR #48947', (WidgetTester tester) async {
-    await tester.pumpWidget(_TestLayoutExtentIsNegative(1));
-    await tester.pumpWidget(_TestLayoutExtentIsNegative(10));
+  testWidgets('NestedScrollView with SliverOverlapAbsorber in or out of the first screen', (WidgetTester tester) async {
+    await tester.pumpWidget(const _TestLayoutExtentIsNegative(1));
+    await tester.pumpWidget(const _TestLayoutExtentIsNegative(10));
   });
-
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {
@@ -701,9 +699,10 @@ class TestHeader extends SliverPersistentHeaderDelegate {
 }
 
 class _TestLayoutExtentIsNegative extends StatelessWidget {
-  final int widgetCountBeforeSliverOverlapAbsorber;
 
-  _TestLayoutExtentIsNegative(this.widgetCountBeforeSliverOverlapAbsorber);
+  const _TestLayoutExtentIsNegative(this.widgetCountBeforeSliverOverlapAbsorber);
+
+  final int widgetCountBeforeSliverOverlapAbsorber;
 
   @override
   Widget build(BuildContext context) {
