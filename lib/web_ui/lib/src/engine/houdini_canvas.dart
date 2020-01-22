@@ -235,6 +235,12 @@ class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
   }
 
   @override
+  void drawPoints(ui.PointMode pointMode, Float32List points,
+      double strokeWidth, ui.Color color) {
+    // TODO(flutter_web): implement.
+  }
+
+  @override
   void endOfPaint() {}
 }
 
