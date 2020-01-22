@@ -398,7 +398,7 @@ end
 
   Future<void> _produceAotAppFrameworkIfNeeded(
     BuildMode mode,
-    Directory destinationAppFrameworkDirectory,
+    Directory destinationDirectory,
   ) async {
     if (mode == BuildMode.debug) {
       return;
@@ -410,7 +410,7 @@ end
     try {
       await aotBuilder.build(
         platform: TargetPlatform.ios,
-        outputPath: destinationAppFrameworkDirectory.path,
+        outputPath: destinationDirectory.path,
         buildMode: mode,
         // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
         mainDartFile: globals.fs.path.absolute(targetFile),
