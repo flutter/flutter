@@ -66,11 +66,18 @@ class FlutterWebPlatform extends PlatformPlugin {
           globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
           serveFilesOutsidePath: true,
         ))
-        .add(createStaticHandler(_config.suiteDefaults.precompiledPath,
-            serveFilesOutsidePath: true))
+        .add(createStaticHandler(
+          _config.suiteDefaults.precompiledPath,
+          serveFilesOutsidePath: true,
+        ))
         .add(_handleStaticArtifact)
         .add(_goldenFileHandler)
-        .add(_wrapperHandler);
+        .add(_wrapperHandler)
+        .add(createStaticHandler(
+          globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter', 'test'),
+          serveFilesOutsidePath: true,
+        ))
+        .add(_flutterFilesHandler);
     _server.mount(cascade.handler);
 
     _testGoldenComparator = TestGoldenComparator(
@@ -191,6 +198,38 @@ class FlutterWebPlatform extends PlatformPlugin {
     } else {
       return shelf.Response.notFound('Not Found');
     }
+  }
+
+  final shelf.Handler _flutterFilesStaticHandler = createStaticHandler(
+        globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter', 'lib', 'src'),
+        serveFilesOutsidePath: true,
+      );
+
+  FutureOr<shelf.Response> _flutterFilesHandler(shelf.Request request) {
+    // For some reason, the paths we are getting are missing the `lib/` segment.
+    // So we remove the "packages/flutter/src/" prefix and serve it as a relative
+    // path from inside the flutter src directory.
+    if (request.requestedUri.path.startsWith('/packages/flutter/src')) {
+      final shelf.Request modifiedRequest = shelf.Request(
+        request.method,
+        request.requestedUri.replace(path: _getRelativePathToFlutterSrc(request.requestedUri.path)),
+        protocolVersion: request.protocolVersion,
+        headers: request.headers,
+        handlerPath: _getRelativePathToFlutterSrc(request.handlerPath),
+        url: request.url.replace(path: _getRelativePathToFlutterSrc(request.url.path)),
+        encoding: request.encoding,
+        context: request.context,
+      );
+      return _flutterFilesStaticHandler(modifiedRequest);
+    }
+    return shelf.Response.notFound('Not Found');
+  }
+
+  String _getRelativePathToFlutterSrc(String path) {
+    if (path.startsWith(RegExp(r'^/?packages/flutter/src/'))) {
+      return path.replaceFirst('packages/flutter/src/', '');
+    }
+    return path;
   }
 
   final bool updateGoldens;
