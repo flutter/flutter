@@ -201,7 +201,7 @@ void main() {
     final Finder _findTexts = find.byWidgetPredicate((Widget widget) => widget is Text);
     final Finder _findIconsAndTexts = find.byWidgetPredicate((Widget widget) => widget is Icon || widget is Text);
 
-    testWidgets('Black icons on White background', (WidgetTester tester) async {
+    testWidgets('Black icons on white background', (WidgetTester tester) async {
       await tester.pumpWidget(_row([
         _icon (color: Colors.black, background: Colors.white),
         _icon (color: Colors.black, background: Colors.white),
@@ -210,13 +210,124 @@ void main() {
       await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
     });
 
-    testWidgets('Black icons on Black background', (WidgetTester tester) async {
+    testWidgets('Black icons on black background', (WidgetTester tester) async {
       await tester.pumpWidget(_row([
         _icon (color: Colors.black, background: Colors.black),
         _icon (color: Colors.black, background: Colors.black),
       ]));
 
       await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
+    testWidgets('White icons on black background ("dark mode")', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.white, background: Colors.black),
+        _icon (color: Colors.white, background: Colors.black),
+      ]));
+
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
+    testWidgets('Using different icons', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.black, background: Colors.white, icon: Icons.more_horiz),
+        _icon (color: Colors.black, background: Colors.white, icon: Icons.description),
+        _icon (color: Colors.black, background: Colors.white, icon: Icons.image),
+        _icon (color: Colors.black, background: Colors.white, icon: Icons.beach_access),
+      ]));
+
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
+    testWidgets('One invalid instance fails entire test', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.black, background: Colors.white),
+        _icon (color: Colors.black, background: Colors.black),
+      ]));
+
+      await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
+    testWidgets('White on different colors, passing', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.white, background: Colors.red[800], icon: Icons.more_horiz),
+        _icon (color: Colors.white, background: Colors.green[800], icon: Icons.description),
+        _icon (color: Colors.white, background: Colors.blue[800], icon: Icons.image),
+        _icon (color: Colors.white, background: Colors.purple[800], icon: Icons.beach_access),
+      ]));
+
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
+    testWidgets('White on different colors, failing', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.white, background: Colors.red[200], icon: Icons.more_horiz),
+        _icon (color: Colors.white, background: Colors.green[400], icon: Icons.description),
+        _icon (color: Colors.white, background: Colors.blue[600], icon: Icons.image),
+        _icon (color: Colors.white, background: Colors.purple[800], icon: Icons.beach_access),
+      ]));
+
+      await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
+    testWidgets('Absence of icons, passing', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([]));
+
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
+    testWidgets('Absence of icons, passing - 2nd test', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _text (color: Colors.black, background: Colors.white),
+        _text (color: Colors.black, background: Colors.black),
+      ]));
+
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+    });
+
+    testWidgets('Guideline ignores widgets of other types', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.black, background: Colors.white),
+        _icon (color: Colors.black, background: Colors.white),
+        _text (color: Colors.black, background: Colors.white),
+        _text (color: Colors.black, background: Colors.black),
+      ]));
+
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+      await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findTexts)));
+      await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findIconsAndTexts)));
+    });
+
+    testWidgets('Custom minimum ratio - Icons', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.blue, background: Colors.white),
+        _icon (color: Colors.black, background: Colors.white),
+      ]));
+
+      await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons, minimumRatio: 3.0)));
+    });
+
+    testWidgets('Custom minimum ratio - Texts', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _text (color: Colors.blue, background: Colors.white),
+        _text (color: Colors.black, background: Colors.white),
+      ]));
+
+      await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findTexts)));
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findTexts, minimumRatio: 3.0)));
+    });
+
+    testWidgets('Custom minimum ratio - Different standards for icons and texts', (WidgetTester tester) async {
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.blue, background: Colors.white),
+        _icon (color: Colors.black, background: Colors.white),
+        _text (color: Colors.blue, background: Colors.white),
+        _text (color: Colors.black, background: Colors.white),
+      ]));
+
+      await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
+      await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findTexts, minimumRatio: 3.0)));
     });
 
   });
