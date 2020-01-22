@@ -421,7 +421,7 @@ Information about project "Runner":
       platform = fakePlatform('ignored');
     });
 
-    testUsingContext('environment variables as Xcode build settings', () {
+    testWithoutContext('environment variables as Xcode build settings', () {
       platform.environment = Map<String, String>.unmodifiable(<String, String>{
         'Ignored': 'Bogus',
         'FLUTTER_NOT_XCODE': 'Bogus',
@@ -430,8 +430,6 @@ Information about project "Runner":
       });
       final List<String> environmentVariablesAsBuildSettings = environmentVariablesAsXcodeBuildSettings(platform);
       expect(environmentVariablesAsBuildSettings, <String>['CODE_SIGN_STYLE=Manual', 'ARCHS=arm64']);
-    }, overrides: <Type, Generator>{
-      Platform: () => platform
     });
   });
 
