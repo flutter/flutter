@@ -124,6 +124,7 @@ class Cache {
       for (final String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
+      _artifacts.add(FontSubsetArtifacts(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -709,7 +710,10 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = globals.fs.directory(globals.fs.path.join(location.path, cacheDir));
-      await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
+
+      // Avoid printing things like 'Downloading linux-x64 tools...' multiple times.
+      final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
+      await _downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 
@@ -1174,6 +1178,33 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
     }
     return _doUpdate();
   }
+}
+
+/// Cached artifacts for font subsetting.
+class FontSubsetArtifacts extends EngineCachedArtifact {
+  FontSubsetArtifacts(Cache cache) : super(artifactName, cache, DevelopmentArtifact.universal);
+
+  static const String artifactName = 'font-subset';
+
+  @override
+  List<List<String>> getBinaryDirs() {
+    const Map<String, List<String>> artifacts = <String, List<String>> {
+      'macos': <String>['darwin-x64', 'darwin-x64/$artifactName.zip'],
+      'linux': <String>['linux-x64', 'linux-x64/$artifactName.zip'],
+      'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
+    };
+    final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
+    if (binaryDirs == null) {
+      throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+    }
+    return <List<String>>[binaryDirs];
+  }
+
+  @override
+  List<String> getLicenseDirs() => const <String>[];
+
+  @override
+  List<String> getPackageDirs() => const <String>[];
 }
 
 /// Cached iOS/USB binary artifacts.
