@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart' as FlutterMaterial;
+import 'package:flutter/material.dart' as flutter_material;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
@@ -499,8 +499,8 @@ class _ContrastReport {
         isEmptyRect = false;
 
   const _ContrastReport.emptyRect()
-      : lightColor = FlutterMaterial.Colors.transparent,
-        darkColor = FlutterMaterial.Colors.transparent,
+      : lightColor = flutter_material.Colors.transparent,
+        darkColor = flutter_material.Colors.transparent,
         isSingleColor = false,
         isEmptyRect = true;
 
