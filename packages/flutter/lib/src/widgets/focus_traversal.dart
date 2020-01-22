@@ -857,58 +857,27 @@ class _OrderedFocusInfo {
 /// left (the "Six" button).
 ///
 /// ```dart preamble
-/// class DemoButton extends StatefulWidget {
-///   const DemoButton({this.name, this.canRequestFocus = true, this.autofocus = false, this.order});
+/// class DemoButton extends StatelessWidget {
+///   const DemoButton({this.name, this.autofocus = false, this.order});
 ///
 ///   final String name;
-///   final bool canRequestFocus;
 ///   final bool autofocus;
 ///   final double order;
 ///
-///   @override
-///   _DemoButtonState createState() => _DemoButtonState();
-/// }
-///
-/// class _DemoButtonState extends State<DemoButton> {
-///   FocusNode focusNode;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     focusNode = FocusNode(
-///       debugLabel: widget.name,
-///       canRequestFocus: widget.canRequestFocus,
-///     );
-///   }
-///
-///   @override
-///   void dispose() {
-///     focusNode?.dispose();
-///     super.dispose();
-///   }
-///
-///   @override
-///   void didUpdateWidget(DemoButton oldWidget) {
-///     super.didUpdateWidget(oldWidget);
-///     focusNode.canRequestFocus = widget.canRequestFocus;
-///   }
-///
 ///   void _handleOnPressed() {
-///     focusNode.requestFocus();
-///     print('Button ${widget.name} pressed.');
+///     print('Button $name pressed.');
 ///     debugDumpFocusTree();
 ///   }
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return FocusTraversalOrder(
-///       order: NumericFocusOrder(widget.order),
+///       order: NumericFocusOrder(order),
 ///       child: FlatButton(
-///         focusNode: focusNode,
-///         autofocus: widget.autofocus,
+///         autofocus: autofocus,
 ///         focusColor: Colors.red,
 ///         onPressed: () => _handleOnPressed(),
-///         child: Text(widget.name),
+///         child: Text(name),
 ///       ),
 ///     );
 ///   }
@@ -925,21 +894,14 @@ class _OrderedFocusInfo {
 ///         Row(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: const <Widget>[
-///             DemoButton(
-///               name: 'Six',
-///               order: 6,
-///             ),
+///             DemoButton(name: 'Six', order: 6),
 ///           ],
 ///         ),
 ///         Row(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: const <Widget>[
 ///             DemoButton(name: 'Five', order: 5),
-///             DemoButton(
-///               name: 'Four',
-///               canRequestFocus: false,
-///               order: 4,
-///             ),
+///             DemoButton(name: 'Four', order: 4),
 ///           ],
 ///         ),
 ///         Row(
@@ -959,8 +921,11 @@ class _OrderedFocusInfo {
 /// See also:
 ///
 ///  * [NumericFocusOrder], a focus order that assigns a numeric traversal order
-///    to widgets using a [FocusTraversalOrder] widget.
-///  * [FocusOrder], an abstract base class for all types of orderings.
+///    to a [FocusTraversalOrder] widget.
+///  * [LexicalFocusOrder], a focus order that assigns a string-based lexical
+///    traversal order to a [FocusTraversalOrder] widget.
+///  * [FocusOrder], an abstract base class for all types of focus traversal
+///    orderings.
 class OrderedFocusTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
   /// Constructs a traversal policy that orders widgets for keyboard traversal
   /// based on an explicit order.
@@ -1045,7 +1010,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// A widget that describes the inherited focus policy for focus traversal for
 /// its descendants.
 ///
-/// By default, traverses in widget order using
+/// By default, traverses in reading order using
 /// [ReadingOrderFocusTraversalPolicy].
 ///
 /// See also:
