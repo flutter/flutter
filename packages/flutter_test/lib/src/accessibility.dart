@@ -270,6 +270,10 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       }
       final _ContrastReport report = _ContrastReport(subset);
+      // If rectangle is empty, pass the test.
+      if (report.isEmptyRect) {
+        return result;
+      }
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
@@ -397,7 +401,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
       final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
 
-      if (contrastRatio >= minimumRatio - tolerance) {
+      if (report.isEmptyRect || contrastRatio >= minimumRatio - tolerance) {
         return const Evaluation.pass();
       } else {
         return Evaluation.fail(
