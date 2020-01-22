@@ -694,7 +694,8 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      driver = WebFlutterDriver.connectedTo(mockConnection, Browser.chrome);
+      mockConnection.supportsTimelineAction = true;
+      driver = WebFlutterDriver.connectedTo(mockConnection);
     });
 
     test('closes connection', () async {
@@ -1033,7 +1034,8 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      driver = WebFlutterDriver.connectedTo(mockConnection, Browser.edge);
+      mockConnection.supportsTimelineAction = false;
+      driver = WebFlutterDriver.connectedTo(mockConnection);
     });
 
     test('tracing', () async {
