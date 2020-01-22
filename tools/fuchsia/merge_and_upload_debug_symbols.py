@@ -60,8 +60,18 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
                      'fuchsia-debug-symbols-%s.cipd' % target_arch)
     ]
 
-  subprocess.check_call(command, cwd=_packaging_dir)
-
+  # Retry up to three times.  We've seen CIPD fail on verification in some
+  # instances. Normally verification takes slightly more than 1 minute when
+  # it succeeds.
+  num_tries = 3
+  while tries in range(num_tries):
+    try:
+      subprocess.check_call(command, cwd=_packaging_dir)
+      break
+    except subprocess.CalledProcessError:
+      print('Failed %s times' % tries + 1)
+      if tries == num_tries - 1:
+        raise
 
 def CreateTarFile(folder_path, base_dir):
   archive_name = os.path.basename(folder_path)
