@@ -16,6 +16,7 @@
 #include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
+#include "third_party/skia/include/core/SkMatrix44.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkRect.h"
@@ -53,6 +54,10 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
 
   struct ConcatMatrixData {
     SkMatrix matrix;
+  };
+
+  struct ConcatMatrix44Data {
+    SkMatrix44 matrix;
   };
 
   struct SetMatrixData {
@@ -109,6 +114,7 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
                                     SaveLayerData,
                                     RestoreData,
                                     ConcatMatrixData,
+                                    ConcatMatrix44Data,
                                     SetMatrixData,
                                     DrawRectData,
                                     DrawPathData,
@@ -139,6 +145,9 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
   void willRestore() override;
   void didRestore() override {}
   void didConcat(const SkMatrix& matrix) override;
+  void didConcat44(const SkScalar matrix[]) override;
+  void didScale(SkScalar x, SkScalar y) override;
+  void didTranslate(SkScalar x, SkScalar y) override;
   void didSetMatrix(const SkMatrix& matrix) override;
 
   // Draw and clip operations that we track.
@@ -269,6 +278,10 @@ extern bool operator==(const MockCanvas::ConcatMatrixData& a,
                        const MockCanvas::ConcatMatrixData& b);
 extern std::ostream& operator<<(std::ostream& os,
                                 const MockCanvas::ConcatMatrixData& data);
+extern bool operator==(const MockCanvas::ConcatMatrix44Data& a,
+                       const MockCanvas::ConcatMatrix44Data& b);
+extern std::ostream& operator<<(std::ostream& os,
+                                const MockCanvas::ConcatMatrix44Data& data);
 extern bool operator==(const MockCanvas::SetMatrixData& a,
                        const MockCanvas::SetMatrixData& b);
 extern std::ostream& operator<<(std::ostream& os,

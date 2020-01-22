@@ -53,6 +53,12 @@ void DidDrawCanvas::willRestore() {}
 
 void DidDrawCanvas::didConcat(const SkMatrix& matrix) {}
 
+void DidDrawCanvas::didConcat44(const SkScalar[]) {}
+
+void DidDrawCanvas::didScale(SkScalar, SkScalar) {}
+
+void DidDrawCanvas::didTranslate(SkScalar, SkScalar) {}
+
 void DidDrawCanvas::didSetMatrix(const SkMatrix& matrix) {}
 
 void DidDrawCanvas::onClipRect(const SkRect& rect,
