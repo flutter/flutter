@@ -359,32 +359,6 @@ abstract class CopyFlutterAotBundle extends Target {
   }
 }
 
-// This is a one-off rule for implementing build aot in terms of assemble.
-class ProfileCopyFlutterAotBundle extends CopyFlutterAotBundle {
-  const ProfileCopyFlutterAotBundle();
-
-  @override
-  String get name => 'profile_android_flutter_bundle';
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    AotElfProfile(),
-  ];
-}
-
-// This is a one-off rule for implementing build aot in terms of assemble.
-class ReleaseCopyFlutterAotBundle extends CopyFlutterAotBundle {
-  const ReleaseCopyFlutterAotBundle();
-
-  @override
-  String get name => 'release_android_flutter_bundle';
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    AotElfRelease(),
-  ];
-}
-
 /// Dart defines are encoded inside [Environment] as a JSON array.
 List<String> parseDartDefines(Environment environment) {
   if (!environment.defines.containsKey(kDartDefines)) {

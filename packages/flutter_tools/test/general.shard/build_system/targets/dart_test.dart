@@ -404,14 +404,6 @@ flutter_tools:lib/''');
     ProcessManager: () => mockProcessManager,
   }));
 
-  test('Profile/ReleaseCopyFlutterAotBundle copies .so to correct output directory', () => testbed.run(() async {
-    androidEnvironment.buildDir.createSync(recursive: true);
-    androidEnvironment.buildDir.childFile('app.so').createSync();
-    await const ProfileCopyFlutterAotBundle().build(androidEnvironment);
-
-    expect(androidEnvironment.outputDir.childFile('app.so').existsSync(), true);
-  }));
-
   test('kExtraGenSnapshotOptions passes values to gen_snapshot', () => testbed.run(() async {
     androidEnvironment.defines[kExtraGenSnapshotOptions] = 'foo,bar,baz=2';
 

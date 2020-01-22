@@ -503,19 +503,20 @@ class SliverConstraints extends Constraints {
 
   @override
   String toString() {
-    return 'SliverConstraints('
-             '$axisDirection, '
-             '$growthDirection, '
-             '$userScrollDirection, '
-             'scrollOffset: ${scrollOffset.toStringAsFixed(1)}, '
-             'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}, ' +
-             (overlap != 0.0 ? 'overlap: ${overlap.toStringAsFixed(1)}, ' : '') +
-             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, '
-             'crossAxisDirection: $crossAxisDirection, '
-             'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}, '
-             'remainingCacheExtent: ${remainingCacheExtent.toStringAsFixed(1)} '
-             'cacheOrigin: ${cacheOrigin.toStringAsFixed(1)} '
-           ')';
+    final List<String> properties = <String>[
+      '$axisDirection',
+      '$growthDirection',
+      '$userScrollDirection',
+      'scrollOffset: ${scrollOffset.toStringAsFixed(1)}',
+      'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}',
+      if (overlap != 0.0) 'overlap: ${overlap.toStringAsFixed(1)}',
+      'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}',
+      'crossAxisDirection: $crossAxisDirection',
+      'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}',
+      'remainingCacheExtent: ${remainingCacheExtent.toStringAsFixed(1)}',
+      'cacheOrigin: ${cacheOrigin.toStringAsFixed(1)}',
+    ];
+    return 'SliverConstraints(${properties.join(', ')})';
   }
 }
 

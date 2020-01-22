@@ -611,7 +611,7 @@ void main() {
         generator.classMethods.first,
         '''  String get title {
     return Intl.message(
-      r'Title',
+      'Title',
       locale: _localeName,
       name: 'title',
       desc: r'Title for the application'
@@ -656,7 +656,7 @@ void main() {
         generator.classMethods.first,
         '''  String itemNumber(Object value) {
     return Intl.message(
-      r\'Item \$value\',
+      \'Item \$value\',
       locale: _localeName,
       name: 'itemNumber',
       desc: r\'Item placement in list.\',
@@ -707,7 +707,7 @@ void main() {
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
     return Intl.message(
-      r'Spring begins on \$springStartDateString',
+      'Spring begins on \$springStartDateString',
       locale: _localeName,
       name: 'springBegins',
       desc: r'The first day of spring',
@@ -831,7 +831,7 @@ void main() {
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
     return Intl.message(
-      r\'Since it\' "\'" r\'s \$springStartDateString, it\' "\'" r\'s finally spring! \$helloWorld!\',
+      \'Since it\' "\'" r\'s \$springStartDateString, it\' "\'" r\'s finally spring! \$helloWorld!\',
       locale: _localeName,
       name: 'springGreetings',
       desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
@@ -888,7 +888,7 @@ void main() {
     final String springEndDateString = springEndDateDateFormat.format(springEndDate);
 
     return Intl.message(
-      r\'Spring begins on \$springStartDateString and ends on \$springEndDateString\',
+      \'Spring begins on \$springStartDateString and ends on \$springEndDateString\',
       locale: _localeName,
       name: 'springRange',
       desc: r\'The range of dates for spring in the year\',
@@ -996,7 +996,7 @@ void main() {
     final String progressString = progressNumberFormat.format(progress);
 
     return Intl.message(
-      r'You have completed \$progressString of the course.',
+      'You have completed \$progressString of the course.',
       locale: _localeName,
       name: 'courseCompletion',
       desc: r'The amount of progress the student has made in their class.',
@@ -1063,7 +1063,7 @@ void main() {
     final String progressString = progressNumberFormat.format(progress);
 
     return Intl.message(
-      r'You have completed \$progressString of the course.',
+      'You have completed \$progressString of the course.',
       locale: _localeName,
       name: 'courseCompletion',
       desc: r'The amount of progress the student has made in their class.',
@@ -1121,7 +1121,7 @@ void main() {
     final String progressString = progressNumberFormat.format(progress);
 
     return Intl.message(
-      r'You have completed \$progressString of the course.',
+      'You have completed \$progressString of the course.',
       locale: _localeName,
       name: 'courseCompletion',
       desc: r'The amount of progress the student has made in their class.',

@@ -75,6 +75,69 @@ void main() {
     expect(iconButton.size, const Size(70.0, 70.0));
   });
 
+  testWidgets('Small icons with non-null constraints can be <48dp', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: IconButton(
+          iconSize: 10.0,
+          onPressed: mockOnPressedFunction,
+          icon: const Icon(Icons.link),
+          constraints: const BoxConstraints(),
+        ),
+      ),
+    );
+
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+
+    // By default IconButton has a padding of 8.0 on all sides, so both
+    // width and height are 10.0 + 2 * 8.0 = 26.0
+    expect(iconButton.size, const Size(26.0, 26.0));
+  });
+
+  testWidgets('Small icons with non-null constraints and custom padding can be <48dp', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: IconButton(
+          iconSize: 10.0,
+          padding: const EdgeInsets.all(3.0),
+          onPressed: mockOnPressedFunction,
+          icon: const Icon(Icons.link),
+          constraints: const BoxConstraints(),
+        ),
+      ),
+    );
+
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+
+    // This IconButton has a padding of 3.0 on all sides, so both
+    // width and height are 10.0 + 2 * 3.0 = 16.0
+    expect(iconButton.size, const Size(16.0, 16.0));
+  });
+
+  testWidgets('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: Theme(
+          data: ThemeData(visualDensity: const VisualDensity(horizontal: 1, vertical: -1)),
+          child: IconButton(
+            iconSize: 10.0,
+            onPressed: mockOnPressedFunction,
+            icon: const Icon(Icons.link),
+            constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+
+    // VisualDensity(horizontal: 1, vertical: -1) increases the icon's
+    // width by 4 pixels and decreases its height by 4 pixels, giving
+    // final width 32.0 + 4.0 = 36.0 and
+    // final height 32.0 - 4.0 = 28.0
+    expect(iconButton.size, const Size(36.0, 28.0));
+  });
+
   testWidgets('test default icon buttons are constrained', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
