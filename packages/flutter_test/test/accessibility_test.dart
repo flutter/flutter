@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('text contrast guideline', () {
+  /* group('text contrast guideline', () {
     testWidgets('black text on white background - Text Widget - direct style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
@@ -176,50 +176,52 @@ void main() {
       expect(result.passed, true);
       handle.dispose();
     });
-  });
+  }); */
 
   group('custom minimum contrast guideline', () {
-    Widget _icon ({Color icon, Color background}) {
+    Widget _icon ({IconData icon = Icons.search, Color color, Color background}) {
       return Container(
-        width: 100.0,
-        height: 100.0,
+        padding: const EdgeInsets.all(8.0),
         color: background,
-        child: Icon(Icons.search, color: icon),
+        child: Icon(icon, color: color),
       );
     }
 
-    Widget _text ({Color text, Color background}) {
+    Widget _text ({String text = 'Text', Color color, Color background}) {
       return Container(
-        width: 100.0,
-        height: 100.0,
+        padding: const EdgeInsets.all(8.0),
         color: background,
-        child: Text('Text', style: TextStyle(color: text)),
+        child: Text(text, style: TextStyle(color: color)),
       );
     }
+
+    Widget _row (List<Widget> widgets) => _boilerplate(Row(children: widgets));
 
     final Finder _findIcons = find.byWidgetPredicate((Widget widget) => widget is Icon);
     final Finder _findTexts = find.byWidgetPredicate((Widget widget) => widget is Text);
     final Finder _findIconsAndTexts = find.byWidgetPredicate((Widget widget) => widget is Icon || widget is Text);
 
     testWidgets('Black icons on White background', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(
-        _icon(icon: Colors.black, background: Colors.white),
-      ));
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.black, background: Colors.white),
+        _icon (color: Colors.black, background: Colors.white),
+      ]));
 
       await expectLater(tester, meetsGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
     });
 
     testWidgets('Black icons on Black background', (WidgetTester tester) async {
-      await tester.pumpWidget(_boilerplate(
-        _icon(icon: Colors.black, background: Colors.black),
-      ));
+      await tester.pumpWidget(_row([
+        _icon (color: Colors.black, background: Colors.black),
+        _icon (color: Colors.black, background: Colors.black),
+      ]));
 
       await expectLater(tester, doesNotMeetGuideline(CustomMinimumContrastGuideline(finder: _findIcons)));
     });
 
   });
 
-  group('tap target size guideline', () {
+  /* group('tap target size guideline', () {
     testWidgets('Tappable box at 48 by 48', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
@@ -480,7 +482,7 @@ void main() {
     ));
     await expectLater(tester, meetsGuideline(textContrastGuideline));
     handle.dispose();
-  });
+  }); */
 }
 
 Widget _boilerplate(Widget child) {
