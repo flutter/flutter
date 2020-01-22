@@ -43,10 +43,6 @@ void main(List<String> args) {
         valueHelp: 'path/to/main.dill',
         help: 'The path to a kernel file to parse, which was created from the '
             'main-package-uri library.')
-    ..addOption('main-library-uri',
-        help: 'The package: URI to treat as the main entrypoint library '
-            '(the same package used to create the kernel-file).',
-        valueHelp: 'package:hello_world/main.dart')
     ..addOption('class-library-uri',
         help: 'The package: URI of the class to find.',
         valueHelp: 'package:flutter/src/widgets/icon_data.dart')
@@ -73,7 +69,6 @@ void main(List<String> args) {
 
   final ConstFinder finder = ConstFinder(
     kernelFilePath: getArg<String>('kernel-file'),
-    targetLibraryUri: getArg<String>('main-library-uri'),
     classLibraryUri: getArg<String>('class-library-uri'),
     className: getArg<String>('class-name'),
   );

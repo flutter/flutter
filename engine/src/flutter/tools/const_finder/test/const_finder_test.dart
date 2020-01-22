@@ -34,7 +34,6 @@ void _checkConsts() {
   print('Checking for expected constants.');
   final ConstFinder finder = ConstFinder(
     kernelFilePath: constsDill,
-    targetLibraryUri: 'package:const_finder_fixtures/consts.dart',
     classLibraryUri: 'package:const_finder_fixtures/target.dart',
     className: 'Target',
   );
@@ -43,8 +42,15 @@ void _checkConsts() {
     jsonEncode(finder.findInstances()),
     jsonEncode(<String, dynamic>{
       'constantInstances': <Map<String, dynamic>>[
-        <String, dynamic>{'stringValue': '1', 'intValue': 1},
-        <String, dynamic>{'stringValue': '2', 'intValue': 2}
+        <String, dynamic>{'stringValue': '1', 'intValue': 1, 'targetValue': null},
+        <String, dynamic>{'stringValue': '4', 'intValue': 4, 'targetValue': null},
+        <String, dynamic>{'stringValue': '2', 'intValue': 2},
+        <String, dynamic>{'stringValue': '6', 'intValue': 6, 'targetValue': null},
+        <String, dynamic>{'stringValue': '8', 'intValue': 8, 'targetValue': null},
+        <String, dynamic>{'stringValue': '10', 'intValue': 10, 'targetValue': null},
+        <String, dynamic>{'stringValue': '9', 'intValue': 9},
+        <String, dynamic>{'stringValue': '7', 'intValue': 7, 'targetValue': null},
+        <String, dynamic>{'stringValue': 'package', 'intValue':-1, 'targetValue': null},
       ],
       'nonConstantLocations': <dynamic>[],
     }),
@@ -55,7 +61,6 @@ void _checkNonConsts() {
   print('Checking for non-constant instances.');
   final ConstFinder finder = ConstFinder(
     kernelFilePath: constsAndNonDill,
-    targetLibraryUri: 'package:const_finder_fixtures/consts_and_non.dart',
     classLibraryUri: 'package:const_finder_fixtures/target.dart',
     className: 'Target',
   );
@@ -64,19 +69,34 @@ void _checkNonConsts() {
     jsonEncode(finder.findInstances()),
     jsonEncode(<String, dynamic>{
       'constantInstances': <dynamic>[
-        <String, dynamic>{'stringValue': '1', 'intValue': 1}
+        <String, dynamic>{'stringValue': '1', 'intValue': 1, 'targetValue': null},
+        <String, dynamic>{'stringValue': '6', 'intValue': 6, 'targetValue': null},
+        <String, dynamic>{'stringValue': '8', 'intValue': 8, 'targetValue': null},
+        <String, dynamic>{'stringValue': '10', 'intValue': 10, 'targetValue': null},
+        <String, dynamic>{'stringValue': '9', 'intValue': 9},
+        <String, dynamic>{'stringValue': '7', 'intValue': 7, 'targetValue': null},
       ],
       'nonConstantLocations': <dynamic>[
         <String, dynamic>{
           'file': 'file://$fixtures/lib/consts_and_non.dart',
-          'line': 12,
-          'column': 26
+          'line': 14,
+          'column': 26,
         },
         <String, dynamic>{
           'file': 'file://$fixtures/lib/consts_and_non.dart',
-          'line': 14,
-          'column': 26
+          'line': 17,
+          'column': 26,
         },
+        <String, dynamic>{
+          'file': 'file://$fixtures/lib/consts_and_non.dart',
+          'line': 19,
+          'column': 26,
+        },
+        <String, dynamic>{
+          'file': 'file://$fixtures/pkg/package.dart',
+          'line': 10,
+          'column': 25,
+        }
       ]
     }),
   );
