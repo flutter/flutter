@@ -484,7 +484,7 @@ class _ContrastReport {
     } else if (darkCount > 0) {
       return _ContrastReport.singleColor(Color(darkColor));
     } else {
-      return _ContrastReport.emptyRect();
+      return const _ContrastReport.emptyRect();
     }
   }
 
