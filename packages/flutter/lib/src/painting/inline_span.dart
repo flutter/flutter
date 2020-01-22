@@ -96,7 +96,7 @@ class InlineSpanSemanticsInformation {
   int get hashCode => hashValues(text, semanticsLabel, recognizer, isPlaceholder);
 
   @override
-  String toString() => '$runtimeType{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
+  String toString() => '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
 }
 
 /// An immutable span of inline content which forms part of a paragraph.

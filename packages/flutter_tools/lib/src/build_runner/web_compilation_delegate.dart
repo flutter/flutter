@@ -82,14 +82,23 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         .listSync()
         .whereType<Directory>();
       for (final Directory childDirectory in childDirectories) {
-        final String path = globals.fs.path.join(testOutputDir, 'packages',
-            globals.fs.path.basename(childDirectory.path));
-        copyDirectorySync(childDirectory.childDirectory('lib'), globals.fs.directory(path));
+        final String path = globals.fs.path.join(
+          testOutputDir,
+          'packages',
+          globals.fs.path.basename(childDirectory.path),
+        );
+        fsUtils.copyDirectorySync(
+          childDirectory.childDirectory('lib'),
+          globals.fs.directory(path),
+        );
       }
       final Directory outputDirectory = rootDirectory
-          .childDirectory(projectName)
-          .childDirectory('test');
-      copyDirectorySync(outputDirectory, globals.fs.directory(globals.fs.path.join(testOutputDir)));
+        .childDirectory(projectName)
+        .childDirectory('test');
+      fsUtils.copyDirectorySync(
+        outputDirectory,
+        globals.fs.directory(globals.fs.path.join(testOutputDir)),
+      );
     }
     return success;
   }

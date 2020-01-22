@@ -1031,6 +1031,44 @@ void main() {
       await tester.pump();
       expect(focusNode.hasPrimaryFocus, isTrue);
     });
+    testWidgets("Won't autofocus a node if one is already focused.", (WidgetTester tester) async {
+      final FocusNode focusNodeA = FocusNode(debugLabel: 'Test Node A');
+      final FocusNode focusNodeB = FocusNode(debugLabel: 'Test Node B');
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[
+            Focus(
+              focusNode: focusNodeA,
+              autofocus: true,
+              child: Container(),
+            ),
+          ],
+        ),
+      );
+
+      await tester.pump();
+      expect(focusNodeA.hasPrimaryFocus, isTrue);
+
+      await tester.pumpWidget(
+        Column(
+          children: <Widget>[
+            Focus(
+              focusNode: focusNodeA,
+              child: Container(),
+            ),
+            Focus(
+              focusNode: focusNodeB,
+              autofocus: true,
+              child: Container(),
+            ),
+          ],
+        ),
+      );
+
+      await tester.pump();
+      expect(focusNodeB.hasPrimaryFocus, isFalse);
+      expect(focusNodeA.hasPrimaryFocus, isTrue);
+    });
   });
   group(Focus, () {
     testWidgets('Focus.of stops at the nearest Focus widget.', (WidgetTester tester) async {

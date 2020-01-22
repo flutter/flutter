@@ -90,7 +90,10 @@ class BoxConstraints extends Constraints {
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
     this.maxHeight = double.infinity,
-  });
+  }) : assert (minWidth != null),
+       assert (maxWidth != null),
+       assert (minHeight != null),
+       assert (maxHeight != null);
 
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)

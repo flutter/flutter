@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
@@ -475,7 +476,7 @@ class _DraggableScrollableSheetScrollPosition
     );
 
     final AnimationController ballisticController = AnimationController.unbounded(
-      debugLabel: '$runtimeType',
+      debugLabel: '${objectRuntimeType(this, '_DraggableScrollableSheetPosition')}',
       vsync: context.vsync,
     );
     double lastDelta = 0;

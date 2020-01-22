@@ -1720,8 +1720,8 @@ void main() {
           expect(error, isNotNull);
           expect(error.toStringDeep(), equalsIgnoringHashCodes(
             'FlutterError\n'
-            '   Scaffold.bottomSheet cannot be specified while a bottom\n'
-            '   sheetdisplayed with showBottomSheet() is still visible.\n'
+            '   Scaffold.bottomSheet cannot be specified while a bottom sheet\n'
+            '   displayed with showBottomSheet() is still visible.\n'
             '   Rebuild the Scaffold with a null bottomSheet before calling\n'
             '   showBottomSheet().\n',
           ));

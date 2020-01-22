@@ -222,6 +222,7 @@ class AlertDialog extends StatelessWidget {
     this.contentTextStyle,
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
+    this.actionsOverflowDirection,
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
@@ -315,7 +316,31 @@ class AlertDialog extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry actionsPadding;
+
+  /// The vertical direction of [actions] if the children overflow
+  /// horizontally.
+  ///
+  /// If the dialog's [actions] do not fit into a single row, then they
+  /// are arranged in a column. The first action is at the top of the
+  /// column if this property is set to [VerticalDirection.down], since it
+  /// "starts" at the top and "ends" at the bottom. On the other hand,
+  /// the first action will be at the bottom of the column if this
+  /// property is set to [VerticalDirection.up], since it "starts" at the
+  /// bottom and "ends" at the top.
+  ///
+  /// If null then it will use the surrounding
+  /// [ButtonBarTheme.overflowDirection]. If that is null, it will
+  /// default to [VerticalDirection.down].
+  ///
+  /// See also:
+  ///
+  /// * [ButtonBar], which [actions] configures to lay itself out.
+  final VerticalDirection actionsOverflowDirection;
 
   /// The padding that surrounds each button in [actions].
   ///
@@ -325,6 +350,10 @@ class AlertDialog extends StatelessWidget {
   /// If this property is null, then it will use the surrounding
   /// [ButtonBarTheme.buttonPadding]. If that is null, it will default to
   /// 8.0 logical pixels on the left and right.
+  ///
+  /// See also:
+  ///
+  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry buttonPadding;
 
   /// {@macro flutter.material.dialog.backgroundColor}
@@ -415,6 +444,7 @@ class AlertDialog extends StatelessWidget {
         padding: actionsPadding,
         child: ButtonBar(
           buttonPadding: buttonPadding,
+          overflowDirection: actionsOverflowDirection,
           children: actions,
         ),
       );

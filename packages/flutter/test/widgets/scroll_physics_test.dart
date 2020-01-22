@@ -4,16 +4,23 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics({ this.name, ScrollPhysics parent }) : super(parent: parent);
+  const TestScrollPhysics({
+    this.name,
+    ScrollPhysics parent
+  }) : super(parent: parent);
   final String name;
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return TestScrollPhysics(name: name, parent: parent?.applyTo(ancestor) ?? ancestor);
+    return TestScrollPhysics(
+      name: name,
+      parent: parent?.applyTo(ancestor) ?? ancestor,
+    );
   }
 
   TestScrollPhysics get namedParent => parent as TestScrollPhysics;
@@ -62,20 +69,30 @@ void main() {
 
     String types(ScrollPhysics s) => s.parent == null ? '${s.runtimeType}' : '${s.runtimeType} ${types(s.parent)}';
 
-    expect(types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
-      'BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics PageScrollPhysics');
+    expect(
+      types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
+      'BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics PageScrollPhysics',
+    );
 
-    expect(types(clamp.applyTo(never.applyTo(always.applyTo(page.applyTo(bounce))))),
-      'ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics PageScrollPhysics BouncingScrollPhysics');
+    expect(
+      types(clamp.applyTo(never.applyTo(always.applyTo(page.applyTo(bounce))))),
+      'ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics PageScrollPhysics BouncingScrollPhysics',
+    );
 
-    expect(types(never.applyTo(always.applyTo(page.applyTo(bounce.applyTo(clamp))))),
-      'NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics');
+    expect(
+      types(never.applyTo(always.applyTo(page.applyTo(bounce.applyTo(clamp))))),
+      'NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics',
+    );
 
-    expect(types(always.applyTo(page.applyTo(bounce.applyTo(clamp.applyTo(never))))),
-      'AlwaysScrollableScrollPhysics PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics');
+    expect(
+      types(always.applyTo(page.applyTo(bounce.applyTo(clamp.applyTo(never))))),
+      'AlwaysScrollableScrollPhysics PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics',
+    );
 
-    expect(types(page.applyTo(bounce.applyTo(clamp.applyTo(never.applyTo(always))))),
-      'PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics');
+    expect(
+      types(page.applyTo(bounce.applyTo(clamp.applyTo(never.applyTo(always))))),
+      'PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics',
+    );
   });
 
   group('BouncingScrollPhysics test', () {
@@ -115,7 +132,10 @@ void main() {
       expect(moreOverscrollApplied, lessThan(20.0));
 
       // Scrolling from a more overscrolled position meets more resistance.
-      expect(lessOverscrollApplied.abs(), greaterThan(moreOverscrollApplied.abs()));
+      expect(
+        lessOverscrollApplied.abs(),
+        greaterThan(moreOverscrollApplied.abs()),
+      );
     });
 
     test('easing an overscroll still has resistance', () {
@@ -143,8 +163,14 @@ void main() {
         axisDirection: AxisDirection.down,
       );
 
-      expect(physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, 10.0), 10.0);
-      expect(physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, -10.0), -10.0);
+      expect(
+        physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, 10.0),
+        10.0,
+      );
+      expect(
+        physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, -10.0),
+        -10.0,
+      );
     });
 
     test('easing an overscroll meets less resistance than tensioning', () {
@@ -222,7 +248,9 @@ void main() {
       // RegExp matcher is required here due to flutter web and flutter mobile generating
       // slightly different floating point numbers
       // in Flutter web 0.0 sometimes just appears as 0. or 0
-      expect(error.toStringDeep(), matches(RegExp(
+      expect(
+        error.toStringDeep(),
+        matches(RegExp(
         r'''FlutterError
    ClampingScrollPhysics\.applyBoundaryConditions\(\) was called
    redundantly\.
@@ -236,8 +264,33 @@ void main() {
    The position object in question was\:
      FixedScrollMetrics\(500(\.\d*)?..\[0(\.\d*)?\]..500(\.\d*)?\)
 ''',
-        multiLine: true,
-      )));
+          multiLine: true,
+        ))
+      );
     }
+  });
+
+  testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
+    // Regression test for: https://github.com/flutter/flutter/issues/47850
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: NestedScrollView(
+          physics: const PageScrollPhysics(),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
+            ];
+          },
+          body: ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Index $index');
+            },
+            itemCount: 100,
+          ),
+        ),
+      )
+    ));
+    await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
 }

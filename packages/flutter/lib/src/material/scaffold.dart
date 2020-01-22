@@ -178,7 +178,7 @@ class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
 
   @override
   String toString() {
-    return '$runtimeType(begin: $begin, end: $end, progress: $progress)';
+    return '${objectRuntimeType(this, '_TransitionSnapshotFabLocation')}(begin: $begin, end: $end, progress: $progress)';
   }
 }
 
@@ -261,7 +261,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
       if (renderObject == null || !renderObject.owner.debugDoingPaint)
         throw FlutterError(
             'Scaffold.geometryOf() must only be accessed during the paint phase.\n'
-            'The ScaffoldGeometry is only available during the paint phase, because\n'
+            'The ScaffoldGeometry is only available during the paint phase, because '
             'its value is computed during the animation and layout phases prior to painting.'
         );
       return true;
@@ -1755,7 +1755,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
         throw FlutterError(
-          'Scaffold.bottomSheet cannot be specified while a bottom sheet'
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet '
           'displayed with showBottomSheet() is still visible.\n'
           'Rebuild the Scaffold with a null bottomSheet before calling showBottomSheet().'
         );
@@ -1935,7 +1935,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(() {
       if (widget.bottomSheet != null) {
         throw FlutterError(
-          'Scaffold.bottomSheet cannot be specified while a bottom sheet'
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet '
           'displayed with showBottomSheet() is still visible.\n'
           'Rebuild the Scaffold with a null bottomSheet before calling showBottomSheet().'
         );

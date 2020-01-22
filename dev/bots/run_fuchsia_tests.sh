@@ -13,7 +13,7 @@
 # The first and only parameter should be the path to the Fuchsia system image
 # tarball, e.g. `./run_fuchsia_tests.sh generic-x64.tgz`.
 #
-# This script expects `pm`, `dev_finder`, and `fuchsia_ctl` to all be in the
+# This script expects `pm`, `device-finder`, and `fuchsia_ctl` to all be in the
 # same directory as the script.
 
 set -Ee

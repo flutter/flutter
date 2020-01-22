@@ -11,7 +11,10 @@ import 'utils.dart';
 class Config {
   Config([File configFile, Logger localLogger]) {
     final Logger loggerInstance = localLogger ?? globals.logger;
-    _configFile = configFile ?? globals.fs.file(globals.fs.path.join(userHomePath(), '.flutter_settings'));
+    _configFile = configFile ?? globals.fs.file(globals.fs.path.join(
+      fsUtils.userHomePath,
+      '.flutter_settings',
+    ));
     if (_configFile.existsSync()) {
       try {
         _values = castStringKeyedMap(json.decode(_configFile.readAsStringSync()));

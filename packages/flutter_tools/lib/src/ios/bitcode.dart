@@ -38,7 +38,7 @@ Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform)
     throwToolExit(
       'The Flutter.framework at $flutterFrameworkPath was built '
       'with "${engineClangVersion ?? 'unknown'}", but the current version '
-      'of clang is "$clangVersion". This will result in failures when trying to'
+      'of clang is "$clangVersion". This will result in failures when trying to '
       'archive an IPA. To resolve this issue, update your version of Xcode to '
       'at least $engineClangSemVer.',
     );

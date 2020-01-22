@@ -67,7 +67,7 @@ class SemanticsTag {
   final String name;
 
   @override
-  String toString() => '$runtimeType($name)';
+  String toString() => '${objectRuntimeType(this, 'SemanticsTag')}($name)';
 }
 
 /// An identifier of a custom semantics action.
@@ -376,7 +376,7 @@ class SemanticsData extends Diagnosticable {
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => '${objectRuntimeType(this, 'SemanticsData')}';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1150,7 +1150,7 @@ class SemanticsProperties extends DiagnosticableTree {
   }
 
   @override
-  String toStringShort() => '$runtimeType'; // the hashCode isn't important since we're immutable
+  String toStringShort() => '${objectRuntimeType(this, 'SemanticsProperties')}'; // the hashCode isn't important since we're immutable
 }
 
 /// In tests use this function to reset the counter used to generate
@@ -2168,7 +2168,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   @override
-  String toStringShort() => '$runtimeType#$id';
+  String toStringShort() => '${objectRuntimeType(this, 'SemanticsNode')}#$id';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

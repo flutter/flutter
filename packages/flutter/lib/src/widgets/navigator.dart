@@ -344,7 +344,7 @@ class RouteSettings {
   final Object arguments;
 
   @override
-  String toString() => '$runtimeType("$name", $arguments)';
+  String toString() => '${objectRuntimeType(this, 'RouteSettings')}("$name", $arguments)';
 }
 
 /// An interface for observing the behavior of a [Navigator].

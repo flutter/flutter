@@ -33,6 +33,7 @@ import 'dart:io' as io
     InternetAddressType,
     IOSink,
     NetworkInterface,
+    pid,
     Process,
     ProcessInfo,
     ProcessSignal,
@@ -251,6 +252,14 @@ io.Stdout get stdout => globals.stdio.stdout;
 Stream<List<int>> get stdin => globals.stdio.stdin;
 io.IOSink get stderr => globals.stdio.stderr;
 bool get stdinHasTerminal => globals.stdio.stdinHasTerminal;
+
+// TODO(zra): Move pid and writePidFile into `ProcessInfo`.
+void writePidFile(String pidFile) {
+  if (pidFile != null) {
+    // Write our pid to the file.
+    globals.fs.file(pidFile).writeAsStringSync(io.pid.toString());
+  }
+}
 
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {

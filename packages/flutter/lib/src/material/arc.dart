@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 // How close the begin and end points must be to an axis to be considered
@@ -169,7 +170,7 @@ class MaterialPointArcTween extends Tween<Offset> {
 
   @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end; center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
+    return '${objectRuntimeType(this, 'MaterialPointArcTween')}($begin \u2192 $end; center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
   }
 }
 
@@ -324,7 +325,7 @@ class MaterialRectArcTween extends RectTween {
 
   @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
+    return '${objectRuntimeType(this, 'MaterialRectArcTween')}($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
   }
 }
 
@@ -410,6 +411,6 @@ class MaterialRectCenterArcTween extends RectTween {
 
   @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end; centerArc=$centerArc)';
+    return '${objectRuntimeType(this, 'MaterialRectCenterArcTween')}($begin \u2192 $end; centerArc=$centerArc)';
   }
 }
