@@ -45,18 +45,18 @@ void main() {
   });
 
   group('_IOSSimulatorDevicePortForwarder', () {
-    testUsingContext('dispose() does not throw an exception', () {
+    testUsingContext('dispose() does not throw an exception', () async {
       final IOSSimulator simulator = IOSSimulator('123');
-      final DevicePortForwarder portFowarder = simulator.portForwarder;
-      portFowarder.forward(123);
-      portFowarder.forward(124);
-      expect(portFowarder.forwardedPorts.length, 2);
+      final DevicePortForwarder portForwarder = simulator.portForwarder;
+      await portForwarder.forward(123);
+      await portForwarder.forward(124);
+      expect(portForwarder.forwardedPorts.length, 2);
       try {
-        portFowarder.dispose();
+        await portForwarder.dispose();
       } catch (e) {
         fail('Encountered exception: $e');
       }
-      expect(portFowarder.forwardedPorts.length, 0);
+      expect(portForwarder.forwardedPorts.length, 0);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     }, testOn: 'posix');
