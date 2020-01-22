@@ -229,7 +229,7 @@ abstract class FlutterCommand extends Command<void> {
   /// Adds options for connecting to the Dart VM observatory port.
   void usesPortOptions() {
     argParser.addOption(observatoryPortOption,
-        help: '(deprecated use host-vmservice-port instead)'
+        help: '(deprecated use host-vmservice-port instead) '
               'Listen to the given port for an observatory debugger connection.\n'
               'Specifying port 0 (the default) will find a random free port.',
     );
@@ -368,11 +368,11 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('shrink',
       negatable: true,
       defaultsTo: true,
-      help: 'Whether to enable code shrinking on release mode.'
+      help: 'Whether to enable code shrinking on release mode. '
             'When enabling shrinking, you also benefit from obfuscation, '
             'which shortens the names of your app’s classes and members, '
             'and optimization, which applies more aggressive strategies to '
-            'further reduce the size of your app.'
+            'further reduce the size of your app. '
             'To learn more, see: https://developer.android.com/studio/build/shrink-code',
       );
   }

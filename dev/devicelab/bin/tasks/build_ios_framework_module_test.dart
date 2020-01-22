@@ -42,6 +42,21 @@ Future<void> main() async {
         );
       });
 
+      // First, build the module in Debug to copy the debug version of Flutter.framework.
+      // This proves "flutter build ios-framework" re-copies the relevant Flutter.framework,
+      // otherwise building plugins with bitcode will fail linking because the debug version
+      // of Flutter.framework does not contain bitcode.
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios',
+            '--debug',
+            '--no-codesign',
+          ],
+        );
+      });
+
       // This builds all build modes' frameworks by default
       section('Build frameworks');
 
@@ -123,6 +138,7 @@ Future<void> main() async {
         );
 
         await _checkFrameworkArchs(appFrameworkPath, mode);
+        await _checkBitcode(appFrameworkPath, mode);
 
         final String aotSymbols = await dylibSymbols(appFrameworkPath);
 
@@ -168,6 +184,7 @@ Future<void> main() async {
         );
 
         await _checkFrameworkArchs(engineFrameworkPath, mode);
+        await _checkBitcode(engineFrameworkPath, mode);
 
         checkFileExists(path.join(
           outputPath,
@@ -211,6 +228,7 @@ Future<void> main() async {
           'device_info',
         );
         await _checkFrameworkArchs(pluginFrameworkPath, mode);
+        await _checkBitcode(pluginFrameworkPath, mode);
 
         checkFileExists(path.join(
           outputPath,
@@ -235,7 +253,7 @@ Future<void> main() async {
         }
       }
 
-      section("Check all modes' have generated plugin registrant");
+      section('Check all modes have generated plugin registrant');
 
       for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         final String registrantFrameworkPath = path.join(
@@ -246,6 +264,7 @@ Future<void> main() async {
         );
 
         await _checkFrameworkArchs(registrantFrameworkPath, mode);
+        await _checkBitcode(registrantFrameworkPath, mode);
 
         checkFileExists(path.join(
           outputPath,
@@ -308,5 +327,14 @@ Future<void> _checkFrameworkArchs(String frameworkPath, String mode) async {
   // Release and Profile should not.
   if (containsSimulator != isDebug) {
     throw TaskResult.failure('$mode $frameworkPath x86_64 architecture ${isDebug ? 'missing' : 'present'}');
+  }
+}
+
+Future<void> _checkBitcode(String frameworkPath, String mode) async {
+  checkFileExists(frameworkPath);
+
+  // Bitcode only needed in Release mode for archiving.
+  if (mode == 'Release' && !await containsBitcode(frameworkPath)) {
+    throw TaskResult.failure('$frameworkPath does not contain bitcode');
   }
 }

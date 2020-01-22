@@ -620,7 +620,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 
   for (final String buildMode in buildModes) {
     globals.printStatus('''
-      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber''');
+      ${buildMode}Implementation \'$androidPackage:flutter_$buildMode:$buildNumber\'''');
   }
 
   globals.printStatus('''
@@ -642,7 +642,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 ''');
   }
 
-  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar''');
+  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
 }
 
 String _hex(List<int> bytes) {
@@ -877,7 +877,7 @@ String _getLocalArtifactVersion(String pomPath) {
     );
   } on FileSystemException {
     throwToolExit(
-      'Error reading $pomPath. Please ensure that you have read permission to this'
+      'Error reading $pomPath. Please ensure that you have read permission to this '
       'file and try again.');
   }
   final Iterable<xml.XmlElement> project = document.findElements('project');
