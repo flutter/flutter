@@ -687,7 +687,7 @@ void main() {
           ),
         ),
       );
-debugDumpFocusTree();
+
       // The orders are assigned to be backwards from normal, so should go backwards.
       for (int i = nodeCount - 1; i >= 0; --i) {
         nodes.first.nextFocus();

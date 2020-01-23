@@ -15,7 +15,6 @@ import 'framework.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
 
-// Just a convenience for this file, since we do it a lot.
 void _focusAndEnsureVisible(FocusNode node, {ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit}) {
   node.requestFocus();
   Scrollable.ensureVisible(node.context, alignment: 1.0, alignmentPolicy: alignmentPolicy);
@@ -82,10 +81,6 @@ abstract class FocusTraversalPolicy {
   /// It is also used by the [FocusManager] to know which node to focus
   /// initially if no nodes are focused.
   ///
-  /// If the [direction] is null, then it should find the appropriate first node
-  /// for next/previous, and if direction is non-null, should find the
-  /// appropriate first node in that direction.
-  ///
   /// The `currentNode` argument must not be null.
   ///
   /// The default implementation returns the [FocusScopeNode.focusedChild] if
@@ -148,7 +143,7 @@ abstract class FocusTraversalPolicy {
   /// Returns true if it successfully found a node and requested focus.
   ///
   /// The [currentNode] argument must not be null.
-  bool next(FocusNode currentNode) => moveFocus(currentNode, forward: true);
+  bool next(FocusNode currentNode) => _moveFocus(currentNode, forward: true);
 
   /// Focuses the previous widget in the focus scope that contains the given
   /// [currentNode].
@@ -160,7 +155,7 @@ abstract class FocusTraversalPolicy {
   /// Returns true if it successfully found a node and requested focus.
   ///
   /// The [currentNode] argument must not be null.
-  bool previous(FocusNode currentNode) => moveFocus(currentNode, forward: false);
+  bool previous(FocusNode currentNode) => _moveFocus(currentNode, forward: false);
 
   /// Focuses the next widget in the given [direction] in the focus scope that
   /// contains the given [currentNode].
@@ -194,21 +189,23 @@ abstract class FocusTraversalPolicy {
   @protected
   Iterable<FocusNode> sortDescendants(FocusScopeNode scope) => scope.traversalDescendants;
 
-  /// Subclasses should override to change the default behavior when moving from
-  /// one node to the next.
-  ///
-  /// This function is called by the default implementation of [next] and
-  /// [previous] to move to the next or previous node, respectively.
-  ///
-  /// The default behavior uses [findFirstFocus] to find the first node if there
-  /// is no [FocusScopeNode.focusedChild] set. If there is a focused child for
-  /// the scope, then it calls [sortDescendants] to get a sorted list of
-  /// descendants, and then finds the node after the current first focus of the
-  /// scope if `forward` is true, and the node before it if `forward` is false.
-  ///
-  /// Returns true if a node requested focus.
+  // Moves the focus to the next node in the FocusScopeNode provided by the
+  // nearest scope to the currentNode argument, either in a forward or
+  // reverse direction, depending on the value of the forward argument.
+  //
+  // This function is called by the next and previous members to move to the
+  // next or previous node, respectively.
+  //
+  // Uses findFirstFocus to find the first node if there is no
+  // FocusScopeNode.focusedChild set. If there is a focused child for the
+  // scope, then it calls sortDescendants to get a sorted list of descendants,
+  // and then finds the node after the current first focus of the scope if
+  // forward is true, and the node before it if forward is false.
+  //
+  // Returns true if a node requested focus.
   @protected
-  bool moveFocus(FocusNode currentNode, {@required bool forward}) {
+  bool _moveFocus(FocusNode currentNode, {@required bool forward}) {
+    assert(forward != null);
     if (currentNode == null) {
       return false;
     }
@@ -669,8 +666,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
 ///    focus traversal in a direction.
 class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {}
 
+// This class exists mainly for efficiency reasons: rect is copied out of the
+// node, because it will be accessed many times in the reading order algorithm,
+// and the FocusNode.rect accessor does coordinate transformation.
 class _ReadingOrderSortData {
-  _ReadingOrderSortData(this.node) : rect = node.rect;
+  _ReadingOrderSortData(this.node) : assert(node != null), rect = node.rect;
 
   final Rect rect;
   final FocusNode node;
@@ -770,25 +770,29 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 ///
 /// See also:
 ///
+///  * [FocusTraversalOrder], a widget that assigns an order to a widget subtree
+///    for the [OrderedFocusTraversalPolicy] to use.
 ///  * [NumericFocusOrder], for a focus order that describes its order with a
 ///    `double`.
+///  * [LexicalFocusOrder], a focus order that assigns a string-based lexical
+///    traversal order to a [FocusTraversalOrder] widget.
 abstract class FocusOrder extends Diagnosticable implements Comparable<FocusOrder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const FocusOrder();
 
   @override
+  @nonVirtual
   int compareTo(FocusOrder other) {
     assert(runtimeType == other.runtimeType,
-      "The sorting algorithm must not compare incomparable keys, since they don't know "
-      'how to order themselves relative to each other.');
+      "The sorting algorithm must not compare incomparable keys, since they don't "
+      'know how to order themselves relative to each other.');
     return doCompare(other);
   }
 
-  /// The implementation of [compareTo].
+  /// The subclass implementation called by [compareTo].
   ///
-  /// The argument is guaranteed to be of the same type as this object and have
-  /// the same [name].
+  /// The argument is guaranteed to be of the same [runtimeType] as this object.
   ///
   /// The method should return a negative number if this object comes earlier in
   /// the sort order than the argument; and a positive number if it comes later
@@ -798,9 +802,17 @@ abstract class FocusOrder extends Diagnosticable implements Comparable<FocusOrde
   int doCompare(covariant FocusOrder other);
 }
 
-/// Assigns a numerical order to a widget subtree that is using a
-/// [OrderedFocusTraversalPolicy] to set the order in which widgets should be
-///// traversed with the keyboard.
+/// Can be given to a [FocusTraversalOrder] widget to assign a numerical order
+/// to a widget subtree that is using a [OrderedFocusTraversalPolicy] to define the
+/// order in which widgets should be traversed with the keyboard.
+///
+/// Focus order types cannot be mixed when they might be compared to each other,
+/// so don't use different types of [FocusOrder] within the same focus scope.
+///
+/// See also:
+///
+///  * [FocusTraversalOrder], a widget that assigns an order to a widget subtree
+///    for the [OrderedFocusTraversalPolicy] to use.
 class NumericFocusOrder extends FocusOrder {
   /// Const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -819,9 +831,18 @@ class NumericFocusOrder extends FocusOrder {
   int doCompare(NumericFocusOrder other) => order.compareTo(other.order);
 }
 
-/// Uses a String to assign lexical order to a widget subtree that is using a
-/// [OrderedFocusTraversalPolicy] to set the order in which widgets should be
+/// Can be given to a [FocusTraversalOrder] widget to use a String to assign a
+/// lexical order to a widget subtree that is using a
+/// [OrderedFocusTraversalPolicy] to define the order in which widgets should be
 /// traversed with the keyboard.
+///
+/// Focus order types cannot be mixed when they might be compared to each other,
+/// so don't use different types of [FocusOrder] within the same focus scope.
+///
+/// See also:
+///
+///  * [FocusTraversalOrder], a widget that assigns an order to a widget subtree
+///    for the [OrderedFocusTraversalPolicy] to use.
 class LexicalFocusOrder extends FocusOrder {
   /// Const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -842,7 +863,9 @@ class LexicalFocusOrder extends FocusOrder {
 
 // Used to help sort the focus nodes in an OrderedFocusTraversalPolicy.
 class _OrderedFocusInfo {
-  const _OrderedFocusInfo({this.node, this.order});
+  const _OrderedFocusInfo({@required this.node, @required this.order})
+      : assert(node != null),
+        assert(order != null);
 
   final FocusNode node;
   final FocusOrder order;
@@ -850,6 +873,8 @@ class _OrderedFocusInfo {
 
 /// A [FocusTraversalPolicy] that orders nodes by an explicit order that resides
 /// in the nearest [FocusTraversalOrder] widget ancestor.
+///
+/// The sort order can
 ///
 /// {@tool sample --template=stateless_widget_scaffold_center}
 /// This sample shows how to assign a traversal order to a widget. In the
@@ -946,10 +971,10 @@ class OrderedFocusTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 
   @override
   Iterable<FocusNode> sortDescendants(FocusScopeNode scope) {
-    final Iterable<FocusNode> geometryOrdered = secondary.sortDescendants(scope);
+    final Iterable<FocusNode> sortedDescendants = secondary.sortDescendants(scope);
     final List<FocusNode> unordered = <FocusNode>[];
     final List<_OrderedFocusInfo> ordered = <_OrderedFocusInfo>[];
-    for (final FocusNode node in geometryOrdered) {
+    for (final FocusNode node in sortedDescendants) {
       final FocusOrder order = FocusTraversalOrder.of(node.context, nullOk: true);
       if (order != null) {
         ordered.add(_OrderedFocusInfo(node: node, order: order));
