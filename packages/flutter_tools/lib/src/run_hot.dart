@@ -388,8 +388,6 @@ class HotRunner extends ResidentRunner {
 
     // Picking up first device's compiler as a source of truth - compilers
     // for all devices should be in sync.
-    printStatus('DEBUGGING: ${ flutterDevices[0].devFS.lastCompiled}');
-    printStatus('DEBUGGING: ${flutterDevices[0].devFS.sources}');
     final List<Uri> invalidatedFiles = await projectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevices[0].devFS.lastCompiled,
       urisToMonitor: flutterDevices[0].devFS.sources,
