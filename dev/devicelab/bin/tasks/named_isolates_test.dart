@@ -51,7 +51,7 @@ void main() {
     print('Extracted observatory port: $observatoryUri');
     final Process attachProcess =
       await _run(device: device, command: <String>['attach', '--debug-uri',
-          observatoryUri, '--isolate-filter', '$_kSecondIsolateName'], stdoutListener: (String line) {
+          observatoryUri, '--isolate-filter', _kSecondIsolateName], stdoutListener: (String line) {
         if (line.contains(_kFirstIsolateName)) {
           firstNameFound.complete();
         } else if (line.contains(_kSecondIsolateName)) {

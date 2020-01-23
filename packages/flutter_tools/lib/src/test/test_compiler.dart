@@ -186,6 +186,6 @@ class TestCompiler {
       _suppressOutput = true;
       return;
     }
-    globals.printError('$message');
+    globals.printError(message);
   }
 }
