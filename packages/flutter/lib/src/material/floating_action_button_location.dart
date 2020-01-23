@@ -56,6 +56,8 @@ abstract class FloatingActionButtonLocation {
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
   static const FloatingActionButtonLocation centerFloat = _CenterFloatFloatingActionButtonLocation();
 
+  static const FloatingActionButtonLocation startFloat = _StartFloatFloatingActionButtonLocation();
+
   /// End-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
   /// action button lines up with the top of the bottom navigation bar.
@@ -79,6 +81,10 @@ abstract class FloatingActionButtonLocation {
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
   static const FloatingActionButtonLocation centerDocked = _CenterDockedFloatingActionButtonLocation();
+
+  static const FloatingActionButtonLocation startDocked = _StartDockedFloatingActionButtonLocation();
+
+  static const FloatingActionButtonLocation centerTop = _CenterTopFloatingActionButtonLocation();
 
   /// Start-aligned [FloatingActionButton], floating over the transition between
   /// the [Scaffold.appBar] and the [Scaffold.body].
@@ -110,8 +116,6 @@ abstract class FloatingActionButtonLocation {
   /// This is unlikely to be a useful location for apps that lack a top [AppBar]
   /// or that use a [SliverAppBar] in the scaffold body itself.
   static const FloatingActionButtonLocation endTop = _EndTopFloatingActionButtonLocation();
-
-  static const FloatingActionButtonLocation startDocked = _StartDockedFloatingActionButtonLocation();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   ///
@@ -251,6 +255,21 @@ class _EndDockedFloatingActionButtonLocation extends FloatingActionButtonLocatio
   String toString() => 'FloatingActionButtonLocation.endDocked';
 }
 
+class _StartFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _StartFloatFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    return Offset(
+      _startOffsetX(scaffoldGeometry),
+      _floatingOffsetY(scaffoldGeometry),
+    );
+  }
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.centerFloat';
+}
+
 class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
   const _CenterFloatFloatingActionButtonLocation();
 
@@ -288,6 +307,21 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
       _startOffsetX(scaffoldGeometry),
+      _topOffsetY(scaffoldGeometry),
+    );
+  }
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.startTop';
+}
+
+class _CenterTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _CenterTopFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    return Offset(
+      _centerOffsetX(scaffoldGeometry),
       _topOffsetY(scaffoldGeometry),
     );
   }
