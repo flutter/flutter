@@ -37,26 +37,28 @@ Future<void> _queryTryjobStatus() async {
   String rawResponse;
   bool needsTriage = true;
 
-  print('${green}Requesting:$reset\n$requestForTryjobStatus');
+  print('$clock ${green}Requesting:$reset\n$requestForTryjobStatus');
 
-  // Continue checking until there are no untriaged digests
+  // Continue checking until there are no untriaged digests.
+  // TODO(Piinks): This should also have the opportunity to fail when new images
+  //  have been marked negative. This may be possible after
+  //  https://bugs.chromium.org/p/skia/issues/detail?id=9783 is done.
   while (needsTriage) {
     try {
       final io.HttpClient httpClient = io.HttpClient();
-      final io.HttpClientRequest request = await httpClient.getUrl(
-        requestForTryjobStatus);
+      final io.HttpClientRequest request = await httpClient.getUrl(requestForTryjobStatus);
       final io.HttpClientResponse response = await request.close();
+
       rawResponse = await utf8.decodeStream(response);
-      print(rawResponse);
-      final List<String> digests = json.decode(rawResponse)['digests'] as List<String>;
-      print(digests);
-      if (digests == null)
+      final Map<String, dynamic> decodedResponse = json.decode(rawResponse) as Map<String, dynamic>;
+
+      if (decodedResponse['digests'] == null) {
         needsTriage = false;
-      else {
+      } else {
         print('${red}Tryjob generated new images.$reset\n'
           'Visit https://flutter-gold.skia.org/changelists to view and triage '
           '(e.g. because this is an intentional change).\n'
-          '$clock ${bold}Next triage status check scheduled in 3 minutes.$reset');
+          '$clock ${bold}Next triage status check scheduled in 3 minutes.$reset\n');
 
         await Future<void>.delayed(const Duration(minutes: 3));
       }
@@ -66,7 +68,10 @@ Future<void> _queryTryjobStatus() async {
         'rawResponse: $rawResponse',
       ]);
     } catch (e) {
-      exit(1);
+      exitWithError(<String>[
+        '${red}Error detected requesting tryjob status from Flutter Gold.\n$reset',
+        'error: $e',
+      ]);
     }
   }
 }
