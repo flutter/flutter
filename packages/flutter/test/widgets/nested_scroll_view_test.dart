@@ -677,6 +677,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/39963.
   testWidgets('NestedScrollView with SliverOverlapAbsorber in or out of the first screen', (WidgetTester tester) async {
     await tester.pumpWidget(const _TestLayoutExtentIsNegative(1));
     await tester.pumpWidget(const _TestLayoutExtentIsNegative(10));
@@ -699,11 +700,8 @@ class TestHeader extends SliverPersistentHeaderDelegate {
 }
 
 class _TestLayoutExtentIsNegative extends StatelessWidget {
-
   const _TestLayoutExtentIsNegative(this.widgetCountBeforeSliverOverlapAbsorber);
-
   final int widgetCountBeforeSliverOverlapAbsorber;
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -714,14 +712,15 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
         body: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
-              ...List<Widget>.generate(widgetCountBeforeSliverOverlapAbsorber, (_) => SliverToBoxAdapter(
-                child: Container(
-                  color: Colors.red,
-                  height: 200,
-                  margin:const EdgeInsets.all(20),
-                ),
-              ),
-              ),
+              ...List<Widget>.generate(widgetCountBeforeSliverOverlapAbsorber, (_) {
+                return SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.red,
+                    height: 200,
+                    margin:const EdgeInsets.all(20),
+                  ),
+                );
+              },),
               SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 sliver: SliverAppBar(
@@ -742,11 +741,13 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
             height: 2000,
             margin: const EdgeInsets.only(top: 50),
             child: ListView(
-              children: List<Widget>.generate(3, (_) => Container(
-                color: Colors.green[200],
-                height: 200,
-                margin: const EdgeInsets.all(20),
-              ),),
+              children: List<Widget>.generate(3, (_) {
+                return Container(
+                  color: Colors.green[200],
+                  height: 200,
+                  margin: const EdgeInsets.all(20),
+                );
+              },),
             ),
           ),
         ),
