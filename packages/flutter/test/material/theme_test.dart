@@ -418,14 +418,12 @@ void main() {
     int buildCount;
     CupertinoThemeData actualTheme;
     IconThemeData actualIconTheme;
-    BuildContext context;
 
     final Widget singletonThemeSubtree = Builder(
-      builder: (BuildContext localContext) {
+      builder: (BuildContext context) {
         buildCount++;
-        actualTheme = CupertinoTheme.of(localContext);
-        actualIconTheme = IconTheme.of(localContext);
-        context = localContext;
+        actualTheme = CupertinoTheme.of(context);
+        actualIconTheme = IconTheme.of(context);
         return const Placeholder();
       },
     );
@@ -439,7 +437,6 @@ void main() {
       buildCount = 0;
       actualTheme = null;
       actualIconTheme = null;
-      context = null;
     });
 
     testWidgets('Default theme has defaults', (WidgetTester tester) async {
@@ -462,27 +459,6 @@ void main() {
       expect(theme.scaffoldBackgroundColor, Colors.grey[850]);
       expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
       expect(theme.textTheme.textStyle.fontSize, 17.0);
-    });
-
-    testWidgets('MaterialTheme overrides the brightness', (WidgetTester tester) async {
-      await testTheme(tester, ThemeData.dark());
-      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
-
-      await testTheme(tester, ThemeData.light());
-      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
-
-      // Overridable by cupertinoOverrideTheme.
-      await testTheme(tester, ThemeData(
-        brightness: Brightness.light,
-        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.dark),
-      ));
-      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
-
-      await testTheme(tester, ThemeData(
-        brightness: Brightness.dark,
-        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.light),
-      ));
-      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
     });
 
     testWidgets('Can override material theme', (WidgetTester tester) async {

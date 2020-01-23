@@ -56,8 +56,6 @@ Future<int> runTests(
   final List<String> testArgs = <String>[
     if (!globals.terminal.supportsColor)
       '--no-color',
-    if (startPaused)
-      '--pause-after-load',
     if (machine)
       ...<String>['-r', 'json']
     else
@@ -98,7 +96,6 @@ Future<int> runTests(
           updateGoldens: updateGoldens,
           shellPath: shellPath,
           flutterProject: flutterProject,
-          pauseAfterLoad: startPaused,
         );
       },
     );
