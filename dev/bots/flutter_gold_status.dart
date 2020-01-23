@@ -30,14 +30,14 @@ Future<void> main() async {
 }
 
 Future<void> _queryTryjobStatus() async {
-  print('${green}Running query...$reset');
-
   final String currentCommit = await _getCurrentCommit();
   final Uri requestForTryjobStatus = Uri.parse(
     'http://flutter-gold.skia.org/json/changelist/github/$cirrusPR/$currentCommit/untriaged'
   );
   String rawResponse;
   bool needsTriage = true;
+
+  print('${green}Requesting $requestForTryjobStatus ...$reset');
 
   // Continue checking until there are no untriaged digests
   while (needsTriage) {
@@ -47,8 +47,9 @@ Future<void> _queryTryjobStatus() async {
         requestForTryjobStatus);
       final io.HttpClientResponse response = await request.close();
       rawResponse = await utf8.decodeStream(response);
-      final List<String> digests = json.decode(rawResponse)['digests'] as List<
-        String>;
+      print(rawResponse);
+      final List<String> digests = json.decode(rawResponse)['digests'] as List<String>;
+      print(digests);
       if (digests == null)
         needsTriage = false;
       else {
