@@ -3,41 +3,82 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
-import 'dart:math' as math;
+import 'dart:convert';
+import 'dart:io' as io;
 
-import 'package:googleapis/bigquery/v2.dart' as bq;
-import 'package:googleapis_auth/auth_io.dart' as auth;
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
-import 'flutter_compact_formatter.dart';
-import 'run_command.dart';
 import 'utils.dart';
 
-/// Used to cehck for any tryjob results from Flutter Gold
+final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(io.Platform.script))));
+final String cirrusPR = io.Platform.environment['CIRRUS_PR'];
+
+/// Used to check for any tryjob results from Flutter Gold associated with a PR.
 Future<void> main() async {
   // Allow time for the results to have finished processing on Gold's end
   print('$clock WAITING TO START STATUS CHECK');
+  await Future<void>.delayed(const Duration(seconds: 30));
   try {
-    flutterTestArgs.addAll(args);
-    if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
-      print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
+    print('Running task: Flutter Gold Tryjob Status Check');
     print('═' * 80);
-    await _runSmokeTests();
-    print('═' * 80);
-    await selectShard(const <String, ShardRunner>{
-      'add_to_app_tests': _runAddToAppTests,
-      'build_tests': _runBuildTests,
-      'framework_coverage': _runFrameworkCoverage,
-      'framework_tests': _runFrameworkTests,
-      'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
-      'tool_coverage': _runToolCoverage,
-      'tool_tests': _runToolTests,
-      'web_tests': _runWebTests,
-    });
+    await _queryTryjobStatus();
   } on ExitException catch (error) {
     error.apply();
   }
-  print('$clock ${bold}Test successful.$reset');
+  print('$clock ${bold}Tryjob status check complete, no untriaged results.$reset');
+}
+
+Future<void> _queryTryjobStatus() async {
+  print('${green}Running query...$reset');
+
+  final String currentCommit = await _getCurrentCommit();
+  final Uri requestForTryjobStatus = Uri.parse(
+    'http://flutter-gold.skia.org/json/changelist/github/$cirrusPR/$currentCommit/untriaged'
+  );
+  String rawResponse;
+  bool needsTriage = true;
+
+  // Continue checking until there are no untriaged digests
+  while (needsTriage) {
+    try {
+      final io.HttpClient httpClient = io.HttpClient();
+      final io.HttpClientRequest request = await httpClient.getUrl(
+        requestForTryjobStatus);
+      final io.HttpClientResponse response = await request.close();
+      rawResponse = await utf8.decodeStream(response);
+      final List<String> digests = json.decode(rawResponse)['digests'] as List<
+        String>;
+      if (digests == null)
+        needsTriage = false;
+      else {
+        print('${red}Tryjob generated new images.$reset\n'
+          'Visit https://flutter-gold.skia.org/changelists to view and triage '
+          '(e.g. because this is an intentional change).\n'
+          '$clock ${bold}Next status check scheduled in 3 minutes.$reset');
+
+        await Future<void>.delayed(const Duration(minutes: 3));
+      }
+    } on FormatException catch (_) {
+      exitWithError(<String>[
+        '${red}Formatting error detected requesting tryjob status from Flutter Gold.\n$reset',
+        'rawResponse: $rawResponse',
+      ]);
+    } catch (e) {
+      exit(1);
+    }
+  }
+}
+
+/// Returns the current commit hash of the Flutter repository.
+///
+/// Gold uses the current commit for a given pull request to identify tryjob
+/// patch sets.
+Future<String> _getCurrentCommit() async {
+  const LocalProcessManager process = LocalProcessManager();
+  final io.ProcessResult revParse = await process.run(
+    <String>['git', 'rev-parse', 'HEAD'],
+    workingDirectory: flutterRoot,
+  );
+  return revParse.exitCode == 0 ? (revParse.stdout as String).trim() : null;
 }
