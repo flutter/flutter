@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io; // ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -50,5 +49,5 @@ void main() {
     expect(logs, contains('STATELESS'));
     expect(logs, contains('STATEFUL'));
     await subscription.cancel();
-  }, skip: io.Platform.isWindows);
+  });
 }
