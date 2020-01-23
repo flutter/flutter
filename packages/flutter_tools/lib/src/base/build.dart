@@ -156,6 +156,13 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--no-use-integer-division');
     }
 
+    // Optimization arguments.
+    genSnapshotArgs.addAll(<String>[
+      // Faster async/await
+      '--no-causal-async-stacks',
+      '--lazy-async-stacks',
+    ]);
+
     genSnapshotArgs.add(mainPath);
 
     // TODO(jonahwilliams): fully remove input checks once all callers are
