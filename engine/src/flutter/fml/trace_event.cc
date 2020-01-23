@@ -11,8 +11,16 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 
+#if (FLUTTER_RELEASE && !defined(OS_FUCHSIA))
+#define TIMELINE_ENABLED 0
+#else
+#define TIMELINE_ENABLED 1
+#endif
+
 namespace fml {
 namespace tracing {
+
+#if TIMELINE_ENABLED
 
 size_t TraceNonce() {
   static std::atomic_size_t gLastItem;
@@ -236,6 +244,75 @@ void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
                      nullptr                        // argument_values
   );
 }
+
+#else  // TIMELINE_ENABLED
+
+size_t TraceNonce() {
+  return 0;
+}
+
+void TraceTimelineEvent(TraceArg category_group,
+                        TraceArg name,
+                        TraceIDArg identifier,
+                        Dart_Timeline_Event_Type type,
+                        const std::vector<const char*>& c_names,
+                        const std::vector<std::string>& values) {}
+
+void TraceEvent0(TraceArg category_group, TraceArg name) {}
+
+void TraceEvent1(TraceArg category_group,
+                 TraceArg name,
+                 TraceArg arg1_name,
+                 TraceArg arg1_val) {}
+
+void TraceEvent2(TraceArg category_group,
+                 TraceArg name,
+                 TraceArg arg1_name,
+                 TraceArg arg1_val,
+                 TraceArg arg2_name,
+                 TraceArg arg2_val) {}
+
+void TraceEventEnd(TraceArg name) {}
+
+void TraceEventAsyncComplete(TraceArg category_group,
+                             TraceArg name,
+                             TimePoint begin,
+                             TimePoint end) {}
+
+void TraceEventAsyncBegin0(TraceArg category_group,
+                           TraceArg name,
+                           TraceIDArg id) {}
+
+void TraceEventAsyncEnd0(TraceArg category_group,
+                         TraceArg name,
+                         TraceIDArg id) {}
+
+void TraceEventAsyncBegin1(TraceArg category_group,
+                           TraceArg name,
+                           TraceIDArg id,
+                           TraceArg arg1_name,
+                           TraceArg arg1_val) {}
+
+void TraceEventAsyncEnd1(TraceArg category_group,
+                         TraceArg name,
+                         TraceIDArg id,
+                         TraceArg arg1_name,
+                         TraceArg arg1_val) {}
+
+void TraceEventInstant0(TraceArg category_group, TraceArg name) {}
+
+void TraceEventFlowBegin0(TraceArg category_group,
+                          TraceArg name,
+                          TraceIDArg id) {}
+
+void TraceEventFlowStep0(TraceArg category_group,
+                         TraceArg name,
+                         TraceIDArg id) {}
+
+void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
+}
+
+#endif  // TIMELINE_ENABLED
 
 }  // namespace tracing
 }  // namespace fml
