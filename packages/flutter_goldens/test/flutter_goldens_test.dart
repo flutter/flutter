@@ -63,7 +63,7 @@ void main() {
     ));
 
     await tester.pumpAndSettle();
-    matchesGoldenFile('continuous_rectangle_border.golden_test_varying_radii.png');
+    matchesGoldenFile('inconsequential_golde_file.png');
     // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
   }, skip: isBrowser);
 
