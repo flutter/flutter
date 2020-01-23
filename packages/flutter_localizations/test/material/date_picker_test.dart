@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -51,12 +51,12 @@ void main() {
       },
     };
 
-    for (Locale locale in testLocales.keys) {
+    for (final Locale locale in testLocales.keys) {
       testWidgets('shows dates for $locale', (WidgetTester tester) async {
-        final List<String> expectedDaysOfWeek = testLocales[locale]['expectedDaysOfWeek'];
-        final List<String> expectedDaysOfMonth = testLocales[locale]['expectedDaysOfMonth'];
-        final String expectedMonthYearHeader = testLocales[locale]['expectedMonthYearHeader'];
-        final TextDirection textDirection = testLocales[locale]['textDirection'];
+        final List<String> expectedDaysOfWeek = testLocales[locale]['expectedDaysOfWeek'] as List<String>;
+        final List<String> expectedDaysOfMonth = testLocales[locale]['expectedDaysOfMonth'] as List<String>;
+        final String expectedMonthYearHeader = testLocales[locale]['expectedMonthYearHeader'] as String;
+        final TextDirection textDirection = testLocales[locale]['textDirection'] as TextDirection;
         final DateTime baseDate = DateTime(2017, 9, 27);
 
         await _pumpBoilerplate(tester, DayPicker(
@@ -70,12 +70,12 @@ void main() {
 
         expect(find.text(expectedMonthYearHeader), findsOneWidget);
 
-        for (String dayOfWeek in expectedDaysOfWeek) {
+        for (final String dayOfWeek in expectedDaysOfWeek) {
           expect(find.text(dayOfWeek), findsWidgets);
         }
 
         Offset previousCellOffset;
-        for (String dayOfMonth in expectedDaysOfMonth) {
+        for (final String dayOfMonth in expectedDaysOfMonth) {
           final Finder dayCell = find.descendant(of: find.byType(GridView), matching: find.text(dayOfMonth));
           expect(dayCell, findsOneWidget);
 

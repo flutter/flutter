@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -269,12 +268,10 @@ void main() {
 
   group('hot attach', () {
     MockResidentCompiler residentCompiler = MockResidentCompiler();
-    BufferLogger mockLogger;
     MockLocalEngineArtifacts mockArtifacts;
 
     setUp(() {
       residentCompiler = MockResidentCompiler();
-      mockLogger = BufferLogger();
       mockArtifacts = MockLocalEngineArtifacts();
     });
 
@@ -298,13 +295,12 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ).attach();
       expect(exitCode, 2);
-      expect(mockLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
+      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
           'consider using an emulator running API level 29 or lower.'));
-      expect(mockLogger.statusText, contains('Learn more about the status of this issue on '
+      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
           'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      Logger: () => mockLogger,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
@@ -327,13 +323,12 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ).attach();
       expect(exitCode, 2);
-      expect(mockLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
+      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
           'consider using an emulator running API level 29 or lower.'));
-      expect(mockLogger.statusText, contains('Learn more about the status of this issue on '
+      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
           'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      Logger: () => mockLogger,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
   });
@@ -397,6 +392,7 @@ class TestFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
   }) async {
     throw exception;
   }

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -148,7 +148,7 @@ void main() {
     await tester.tap(find.byKey(dropdownMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    for (Element item in tester.elementList(find.text('menuItem')))
+    for (final Element item in tester.elementList(find.text('menuItem')))
       expect(Theme.of(item).brightness, equals(Brightness.light));
   });
 
@@ -390,8 +390,8 @@ void main() {
       ];
     }
 
-    for (TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
-      for (TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
+    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
+      for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
@@ -418,12 +418,14 @@ void main() {
     int buildCount;
     CupertinoThemeData actualTheme;
     IconThemeData actualIconTheme;
+    BuildContext context;
 
     final Widget singletonThemeSubtree = Builder(
-      builder: (BuildContext context) {
+      builder: (BuildContext localContext) {
         buildCount++;
-        actualTheme = CupertinoTheme.of(context);
-        actualIconTheme = IconTheme.of(context);
+        actualTheme = CupertinoTheme.of(localContext);
+        actualIconTheme = IconTheme.of(localContext);
+        context = localContext;
         return const Placeholder();
       },
     );
@@ -437,6 +439,7 @@ void main() {
       buildCount = 0;
       actualTheme = null;
       actualIconTheme = null;
+      context = null;
     });
 
     testWidgets('Default theme has defaults', (WidgetTester tester) async {
@@ -459,6 +462,27 @@ void main() {
       expect(theme.scaffoldBackgroundColor, Colors.grey[850]);
       expect(theme.textTheme.textStyle.fontFamily, '.SF Pro Text');
       expect(theme.textTheme.textStyle.fontSize, 17.0);
+    });
+
+    testWidgets('MaterialTheme overrides the brightness', (WidgetTester tester) async {
+      await testTheme(tester, ThemeData.dark());
+      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
+
+      await testTheme(tester, ThemeData.light());
+      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
+
+      // Overridable by cupertinoOverrideTheme.
+      await testTheme(tester, ThemeData(
+        brightness: Brightness.light,
+        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.dark),
+      ));
+      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
+
+      await testTheme(tester, ThemeData(
+        brightness: Brightness.dark,
+        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.light),
+      ));
+      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
     });
 
     testWidgets('Can override material theme', (WidgetTester tester) async {
@@ -650,7 +674,7 @@ void main() {
 
 int testBuildCalled;
 class Test extends StatefulWidget {
-  const Test();
+  const Test({ Key key }) : super(key: key);
 
   @override
   _TestState createState() => _TestState();

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -262,10 +262,10 @@ void main() {
           onError: anyNamed('onError'),
           cancelOnError: anyNamed('cancelOnError'),
         )).thenAnswer((Invocation invocation) {
-          final void Function(List<int>) onData = invocation.positionalArguments[0];
-          final void Function(Object) onError = invocation.namedArguments[#onError];
-          final void Function() onDone = invocation.namedArguments[#onDone];
-          final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+          final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
+          final void Function(Object) onError = invocation.namedArguments[#onError] as void Function(Object);
+          final VoidCallback onDone = invocation.namedArguments[#onDone] as VoidCallback;
+          final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
 
           return Stream<Uint8List>.fromIterable(chunks).listen(
             onData,

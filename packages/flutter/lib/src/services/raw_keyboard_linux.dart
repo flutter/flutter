@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -127,7 +127,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 
   @override
   String toString() {
-    return '$runtimeType(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
+    return '${objectRuntimeType(this, 'RawKeyEventDataLinux')}(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
         ' unicodeScalarValues: $unicodeScalarValues, modifiers: $modifiers, '
         'modifiers down: $modifiersPressed)';
   }

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -226,7 +226,7 @@ class TableBorder {
               ..strokeWidth = verticalInside.width
               ..style = PaintingStyle.stroke;
             path.reset();
-            for (double x in columns) {
+            for (final double x in columns) {
               path.moveTo(rect.left + x, rect.top);
               path.lineTo(rect.left + x, rect.bottom);
             }
@@ -245,7 +245,7 @@ class TableBorder {
               ..strokeWidth = horizontalInside.width
               ..style = PaintingStyle.stroke;
             path.reset();
-            for (double y in rows) {
+            for (final double y in rows) {
               path.moveTo(rect.left, rect.top + y);
               path.lineTo(rect.right, rect.top + y);
             }
@@ -260,18 +260,18 @@ class TableBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final TableBorder typedOther = other;
-    return top == typedOther.top
-        && right == typedOther.right
-        && bottom == typedOther.bottom
-        && left == typedOther.left
-        && horizontalInside == typedOther.horizontalInside
-        && verticalInside == typedOther.verticalInside;
+    return other is TableBorder
+        && other.top == top
+        && other.right == right
+        && other.bottom == bottom
+        && other.left == left
+        && other.horizontalInside == horizontalInside
+        && other.verticalInside == verticalInside;
   }
 
   @override

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 // How close the begin and end points must be to an axis to be considered
@@ -169,7 +170,7 @@ class MaterialPointArcTween extends Tween<Offset> {
 
   @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end; center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
+    return '${objectRuntimeType(this, 'MaterialPointArcTween')}($begin \u2192 $end; center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
   }
 }
 
@@ -193,14 +194,14 @@ const List<_Diagonal> _allDiagonals = <_Diagonal>[
   _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
 ];
 
-typedef _KeyFunc<T> = dynamic Function(T input);
+typedef _KeyFunc<T> = double Function(T input);
 
 // Select the element for which the key function returns the maximum value.
 T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
   T maxValue;
-  dynamic maxKey;
-  for (T value in input) {
-    final dynamic key = keyFunc(value);
+  double maxKey;
+  for (final T value in input) {
+    final double key = keyFunc(value);
     if (maxKey == null || key > maxKey) {
       maxValue = value;
       maxKey = key;
@@ -324,7 +325,7 @@ class MaterialRectArcTween extends RectTween {
 
   @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
+    return '${objectRuntimeType(this, 'MaterialRectArcTween')}($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
   }
 }
 
@@ -410,6 +411,6 @@ class MaterialRectCenterArcTween extends RectTween {
 
   @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end; centerArc=$centerArc)';
+    return '${objectRuntimeType(this, 'MaterialRectCenterArcTween')}($begin \u2192 $end; centerArc=$centerArc)';
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,7 +43,7 @@ class Upload {
     if (retryCount == 0)
       return const Duration(milliseconds: 1000);
     random ??= math.Random();
-    return Duration(milliseconds: random.nextInt(1000) + math.pow(2, retryCount) * 1000);
+    return Duration(milliseconds: random.nextInt(1000) + (math.pow(2, retryCount) as int) * 1000);
   }
 
   Future<bool> save(HttpClient client, String name, List<int> content) async {
@@ -120,14 +120,14 @@ Future<void> saveCatalogScreenshots({
     String prefix, // Prefix for all file names.
   }) async {
   final List<String> screenshots = <String>[
-    for (FileSystemEntity entity in directory.listSync())
+    for (final FileSystemEntity entity in directory.listSync())
       if (entity is File && entity.path.endsWith('.png'))
         entity.path,
   ];
 
   final List<String> largeNames = <String>[]; // Cloud storage names for the full res screenshots.
   final List<String> smallNames = <String>[]; // Likewise for the scaled down screenshots.
-  for (String path in screenshots) {
+  for (final String path in screenshots) {
     final String name = screenshotName(path);
     largeNames.add('$commit/$prefix$name.png');
     smallNames.add('$commit/$prefix${name}_small.png');

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,7 +21,7 @@ void main() {
   });
 
   test('Defaults to the default typography for the platform', () {
-    for (TargetPlatform platform in TargetPlatform.values) {
+    for (final TargetPlatform platform in TargetPlatform.values) {
       final ThemeData theme = ThemeData(platform: platform);
       final Typography typography = Typography(platform: platform);
       expect(theme.textTheme, typography.black.apply(decoration: TextDecoration.none),
@@ -201,6 +201,7 @@ void main() {
 
     final ThemeData theme = ThemeData.raw(
       brightness: Brightness.dark,
+      visualDensity: const VisualDensity(),
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
@@ -279,6 +280,7 @@ void main() {
 
     final ThemeData otherTheme = ThemeData.raw(
       brightness: Brightness.light,
+      visualDensity: const VisualDensity(),
       primaryColor: Colors.white,
       primaryColorBrightness: Brightness.light,
       primaryColorLight: Colors.white,

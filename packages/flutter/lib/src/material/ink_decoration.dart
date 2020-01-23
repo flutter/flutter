@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -44,7 +44,7 @@ import 'material.dart';
 /// generally speaking will match the order they are given in the widget tree,
 /// but this order may appear to be somewhat random in more dynamic situations.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how a [Material] widget can have a yellow rectangle drawn
 /// on it using [Ink], while still having ink effects over the yellow rectangle:
@@ -68,7 +68,7 @@ import 'material.dart';
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following example shows how an image can be printed on a [Material]
 /// widget with an [InkWell] above it:
@@ -252,7 +252,7 @@ class _InkState extends State<Ink> {
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
         controller: Material.of(context),
-        referenceBox: context.findRenderObject(),
+        referenceBox: context.findRenderObject() as RenderBox,
         onRemoved: _handleRemoved,
       );
     } else {

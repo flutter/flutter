@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -162,6 +162,25 @@ void main() {
       expect(child1.hasPrimaryFocus, isFalse);
       expect(child2.hasFocus, isTrue);
       expect(child2.hasPrimaryFocus, isTrue);
+    });
+    testWidgets('Requesting focus before adding to tree results in a request after adding', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode();
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode child = FocusNode();
+      child.requestFocus();
+      expect(child.hasPrimaryFocus, isFalse); // not attached yet.
+
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      await tester.pump();
+      expect(scope.focusedChild, isNull);
+      expect(child.hasPrimaryFocus, isFalse); // not attached yet.
+
+      final FocusAttachment childAttachment = child.attach(context);
+      expect(child.hasPrimaryFocus, isFalse); // not parented yet.
+      childAttachment.reparent(parent: scope);
+      await tester.pump();
+      expect(child.hasPrimaryFocus, isTrue); // now attached and parented, so focus finally happened.
     });
     testWidgets('Autofocus works.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
@@ -664,12 +683,12 @@ void main() {
         description,
         equalsIgnoringHashCodes(
           'FocusManager#00000\n'
-          ' │ primaryFocus: FocusNode#00000(Child 4)\n'
+          ' │ primaryFocus: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← [root]\n'
           ' │\n'
-          ' └─rootScope: FocusScopeNode#00000(Root Focus Scope)\n'
+          ' └─rootScope: FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
           '   │ IN FOCUS PATH\n'
-          '   │ focusedChildren: FocusScopeNode#00000\n'
+          '   │ focusedChildren: FocusScopeNode#00000([IN FOCUS PATH])\n'
           '   │\n'
           '   ├─Child 1: FocusScopeNode#00000(Scope 1)\n'
           '   │ │ context: Container-[GlobalKey#00000]\n'
@@ -683,19 +702,19 @@ void main() {
           '   │   └─Child 2: FocusNode#00000\n'
           '   │       context: Container-[GlobalKey#00000]\n'
           '   │\n'
-          '   └─Child 2: FocusScopeNode#00000\n'
+          '   └─Child 2: FocusScopeNode#00000([IN FOCUS PATH])\n'
           '     │ context: Container-[GlobalKey#00000]\n'
           '     │ IN FOCUS PATH\n'
-          '     │ focusedChildren: FocusNode#00000(Child 4)\n'
+          '     │ focusedChildren: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           '     │\n'
-          '     └─Child 1: FocusNode#00000(Parent 2)\n'
+          '     └─Child 1: FocusNode#00000(Parent 2 [IN FOCUS PATH])\n'
           '       │ context: Container-[GlobalKey#00000]\n'
           '       │ IN FOCUS PATH\n'
           '       │\n'
           '       ├─Child 1: FocusNode#00000(Child 3)\n'
           '       │   context: Container-[GlobalKey#00000]\n'
           '       │\n'
-          '       └─Child 2: FocusNode#00000(Child 4)\n'
+          '       └─Child 2: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           '           context: Container-[GlobalKey#00000]\n'
           '           PRIMARY FOCUS\n'
         ));

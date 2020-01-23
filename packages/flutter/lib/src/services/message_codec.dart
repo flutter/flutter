@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -48,7 +48,7 @@ class MethodCall {
   final dynamic arguments;
 
   @override
-  String toString() => '$runtimeType($method, $arguments)';
+  String toString() => '${objectRuntimeType(this, 'MethodCall')}($method, $arguments)';
 }
 
 /// A codec for method calls and enveloped results.

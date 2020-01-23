@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,7 +34,8 @@ void main() {
     List<RadioListTile<int>> findTiles() => find
       .byType(radioListTileType)
       .evaluate()
-      .map<RadioListTile<int>>((Element element) => element.widget)
+      .map<Widget>((Element element) => element.widget)
+      .cast<RadioListTile<int>>()
       .toList();
 
     Widget buildFrame() {

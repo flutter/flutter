@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,6 +45,9 @@ Future<void> main() async {
             objcPodspecPath,
             '--allow-warnings',
           ],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
         );
       });
 
@@ -60,6 +63,9 @@ Future<void> main() async {
             '--allow-warnings',
             '--use-libraries',
           ],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
         );
       });
 

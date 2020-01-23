@@ -1,13 +1,13 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -189,6 +189,12 @@ void main() {
       expect(xcode.eulaSigned, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('SDK name', () {
+      expect(getNameForSdk(SdkType.iPhone), 'iphoneos');
+      expect(getNameForSdk(SdkType.iPhoneSimulator), 'iphonesimulator');
+      expect(getNameForSdk(SdkType.macOS), 'macosx');
     });
   });
 }

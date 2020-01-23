@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,7 @@ import 'text_theme.dart';
 /// its localized [TextStyle] geometry for [ThemeData.textTheme].
 ///
 /// The script category defines the overall geometry of a [TextTheme] for
-/// the static [MaterialTextGeometry.localizedFor] method in terms of the
+/// the [Typography.geometryThemeFor] method in terms of the
 /// three language categories defined in <https://material.io/go/design-typography>.
 ///
 /// Generally speaking, font sizes for [ScriptCategory.tall] and
@@ -88,10 +88,11 @@ enum ScriptCategory {
 class Typography extends Diagnosticable {
   /// Creates a typography instance.
   ///
-  /// If [platform] is [TargetPlatform.iOS], the default values for [black] and
-  /// [white] are [blackCupertino] and [whiteCupertino] respectively. Otherwise
-  /// they are [blackMountainView] and [whiteMoutainView]. If [platform] is
-  /// null then both [black] and [white] must be specified.
+  /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
+  /// default values for [black] and [white] are [blackCupertino] and
+  /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
+  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2014], [dense2014], and [tall2014].
@@ -106,6 +107,7 @@ class Typography extends Diagnosticable {
     assert(platform != null || (black != null && white != null));
     switch (platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         black ??= blackCupertino;
         white ??= whiteCupertino;
         break;
@@ -232,12 +234,12 @@ class Typography extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final Typography otherTypography = other;
-    return otherTypography.black == black
-        && otherTypography.white == white
-        && otherTypography.englishLike == englishLike
-        && otherTypography.dense == dense
-        && otherTypography.tall == tall;
+    return other is Typography
+        && other.black == black
+        && other.white == white
+        && other.englishLike == englishLike
+        && other.dense == dense
+        && other.tall == tall;
   }
 
   @override

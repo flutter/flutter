@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -40,7 +40,8 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 /// For [PlaceholderSpan]s, [InlineSpanSemanticsInformation.placeholder] is used by default.
 ///
 /// See also:
-///   * [InlineSpan.getSemanticsInformation]
+///
+///  * [InlineSpan.getSemanticsInformation]
 @immutable
 class InlineSpanSemanticsInformation {
   /// Constructs an object that holds the text and semantics label values of an
@@ -83,18 +84,19 @@ class InlineSpanSemanticsInformation {
   final bool requiresOwnNode;
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! InlineSpanSemanticsInformation) {
-      return false;
-    }
-    return other.text == text && other.semanticsLabel == semanticsLabel && other.recognizer == recognizer && other.isPlaceholder == isPlaceholder;
+  bool operator ==(Object other) {
+    return other is InlineSpanSemanticsInformation
+        && other.text == text
+        && other.semanticsLabel == semanticsLabel
+        && other.recognizer == recognizer
+        && other.isPlaceholder == isPlaceholder;
   }
 
   @override
   int get hashCode => hashValues(text, semanticsLabel, recognizer, isPlaceholder);
 
   @override
-  String toString() => '$runtimeType{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
+  String toString() => '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
 }
 
 /// An immutable span of inline content which forms part of a paragraph.
@@ -107,7 +109,7 @@ class InlineSpanSemanticsInformation {
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a tree of [InlineSpan]s that make a query asking for a
 /// name with a [TextField] embedded inline.
@@ -353,13 +355,13 @@ abstract class InlineSpan extends DiagnosticableTree {
   RenderComparison compareTo(InlineSpan other);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final InlineSpan typedOther = other;
-    return typedOther.style == style;
+    return other is InlineSpan
+        && other.style == style;
   }
 
   @override

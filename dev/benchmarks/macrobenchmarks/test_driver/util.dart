@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,6 +13,7 @@ void macroPerfTest(
     { Duration pageDelay,
       Duration duration = const Duration(seconds: 3),
       Future<void> driverOps(FlutterDriver driver),
+      Future<void> setupOps(FlutterDriver driver),
     }) {
   test(testName, () async {
     final FlutterDriver driver = await FlutterDriver.connect();
@@ -32,6 +33,10 @@ void macroPerfTest(
     if (pageDelay != null) {
       // Wait for the page to load
       await Future<void>.delayed(pageDelay);
+    }
+
+    if (setupOps != null) {
+      await setupOps(driver);
     }
 
     final Timeline timeline = await driver.traceAction(() async {

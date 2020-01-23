@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,9 +53,10 @@ void main() {
 
   group('SkiaGoldClient', () {
     SkiaGoldClient skiaClient;
+    Directory workDirectory;
 
     setUp(() {
-      final Directory workDirectory = fs.directory('/workDirectory')
+      workDirectory = fs.directory('/workDirectory')
         ..createSync(recursive: true);
       skiaClient = SkiaGoldClient(
         workDirectory,
@@ -66,20 +67,91 @@ void main() {
       );
     });
 
-    group('auth', () {
-      test('performs minimal work if already authorized', () async {
-        fs.file('/workDirectory/temp/auth_opt.json')
-          ..createSync(recursive: true);
-        when(process.run(any))
-          .thenAnswer((_) => Future<ProcessResult>
-            .value(ProcessResult(123, 0, '', '')));
-        await skiaClient.auth();
+    test('auth performs minimal work if already authorized', () async {
+      fs.file('/workDirectory/temp/auth_opt.json')
+        ..createSync(recursive: true);
+      when(process.run(any))
+        .thenAnswer((_) => Future<ProcessResult>
+        .value(ProcessResult(123, 0, '', '')));
+      await skiaClient.auth();
 
-        verifyNever(process.run(
-            captureAny,
-            workingDirectory: captureAnyNamed('workingDirectory'),
-        ));
-      });
+      verifyNever(process.run(
+        captureAny,
+        workingDirectory: captureAnyNamed('workingDirectory'),
+      ));
+    });
+
+    test('throws for error state from auth', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLD_SERVICE_ACCOUNT' : 'Service Account',
+          'GOLDCTL' : 'goldctl',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: mockHttpClient,
+      );
+
+      when(process.run(any))
+        .thenAnswer((_) => Future<ProcessResult>
+        .value(ProcessResult(123, 1, 'fail', 'fail')));
+      final Future<void> test = skiaClient.auth();
+
+      expect(
+        test,
+        throwsException,
+      );
+    });
+
+    test(' throws for error state from init', () {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: mockHttpClient,
+      );
+
+      when(process.run(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: '/flutter',
+      )).thenAnswer((_) => Future<ProcessResult>
+        .value(ProcessResult(12345678, 0, '12345678', '')));
+
+      when(process.run(
+        <String>[
+          'goldctl',
+          'imgtest', 'init',
+          '--instance', 'flutter',
+          '--work-dir', '/workDirectory/temp',
+          '--commit', '12345678',
+          '--keys-file', '/workDirectory/keys.json',
+          '--failure-file', '/workDirectory/failures.json',
+          '--passfail',
+        ],
+      )).thenAnswer((_) => Future<ProcessResult>
+        .value(ProcessResult(123, 1, 'fail', 'fail')));
+      final Future<void> test =  skiaClient.imgtestInit();
+
+      expect(
+        test,
+        throwsException,
+      );
     });
 
     group('Request Handling', () {
@@ -221,13 +293,13 @@ void main() {
           url = Uri.parse('https://flutter-gold.skia.org/json/ignores');
           mockHttpRequest = MockHttpClientRequest();
           mockHttpResponse = MockHttpClientResponse(utf8.encode(
-              ignoreResponseTemplate(
-                pullRequestNumber: pullRequestNumber,
-                expires: DateTime.now()
-                  .add(const Duration(days: 1))
-                  .toString(),
-                otherTestName: 'unrelatedTest.1'
-              )
+            ignoreResponseTemplate(
+              pullRequestNumber: pullRequestNumber,
+              expires: DateTime.now()
+                .add(const Duration(days: 1))
+                .toString(),
+              otherTestName: 'unrelatedTest.1'
+            )
           ));
           when(mockHttpClient.getUrl(url))
             .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
@@ -256,7 +328,7 @@ void main() {
         });
 
         test('returns false for not ignored test and ignored pull request number', () async {
-         expect(
+          expect(
             await skiaClient.testIsIgnoredForPullRequest(
               pullRequestNumber,
               'failure.png',
@@ -507,39 +579,9 @@ void main() {
     });
 
     group('Pre-Submit', () {
-      FlutterPreSubmitFileComparator comparator;
+      FlutterGoldenFileComparator comparator;
       final MockSkiaGoldClient mockSkiaClient = MockSkiaGoldClient();
 
-      setUp(() {
-        final Directory basedir = fs.directory('flutter/test/library/')
-          ..createSync(recursive: true);
-        comparator = FlutterPreSubmitFileComparator(
-          basedir.uri,
-          mockSkiaClient,
-          fs: fs,
-          platform: FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'CIRRUS_CI' : 'true',
-              'CIRRUS_PR' : '1234',
-              'GOLD_SERVICE_ACCOUNT' : 'service account...'
-            },
-            operatingSystem: 'macos'
-          ),
-        );
-
-        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.expectations)
-          .thenReturn(expectationsTemplate());
-        when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
-          .thenReturn('flutter.golden_test.1');
-        when(mockSkiaClient.isValidDigestForExpectation(
-          '55109a4bed52acc780530f7a9aeff6c0',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => Future<bool>.value(false));
-      });
       group('correctly determines testing environment', () {
         test('returns true', () {
           platform = FakePlatform(
@@ -602,48 +644,110 @@ void main() {
         });
       });
 
-      test('comparison passes test that is ignored for this PR', () async {
-        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.testIsIgnoredForPullRequest(
-          '1234',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => Future<bool>.value(true));
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.golden_test.1.png'),
-          ),
-          isTrue,
-        );
+      group('_Authorized', () {
+        setUp(() async {
+          final Directory basedir = fs.directory('flutter/test/library/')
+            ..createSync(recursive: true);
+          comparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(
+            FakePlatform(
+              environment: <String, String>{
+                'FLUTTER_ROOT': _kFlutterRoot,
+                'CIRRUS_CI' : 'true',
+                'CIRRUS_PR' : '1234',
+                'GOLD_SERVICE_ACCOUNT' : 'service account...',
+                'CIRRUS_USER_PERMISSION' : 'admin',
+              },
+              operatingSystem: 'macos'
+            ),
+            goldens: mockSkiaClient,
+            testBasedir: basedir,
+          );
+        });
+
+        test('fromDefaultComparator chooses correct comparator', () async {
+          expect(
+            comparator.runtimeType.toString(),
+            '_AuthorizedFlutterPreSubmitComparator',
+          );
+        });
       });
 
-      test('fails test that is not ignored', () async {
-        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.testIsIgnoredForPullRequest(
-          '1234',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => Future<bool>.value(false));
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.golden_test.1.png'),
-          ),
-          isFalse,
-        );
-      });
+      group('_UnAuthorized', () {
+        setUp(() async {
+          final Directory basedir = fs.directory('flutter/test/library/')
+            ..createSync(recursive: true);
+          comparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(
+            FakePlatform(
+              environment: <String, String>{
+                'FLUTTER_ROOT': _kFlutterRoot,
+                'CIRRUS_CI' : 'true',
+                'CIRRUS_PR' : '1234',
+                'GOLD_SERVICE_ACCOUNT' : 'ENCRYPTED[...]',
+                'CIRRUS_USER_PERMISSION' : 'none',
+              },
+              operatingSystem: 'macos'
+            ),
+            goldens: mockSkiaClient,
+            testBasedir: basedir,
+          );
+          when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
+            .thenReturn('flutter.golden_test.1');
+          when(mockSkiaClient.expectations)
+            .thenReturn(expectationsTemplate());
+        });
 
-      test('passes non-existent baseline for new test', () async {
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.1.png'),
-          ),
-          isTrue,
-        );
+        test('fromDefaultComparator chooses correct comparator', () async {
+          expect(
+            comparator.runtimeType.toString(),
+            '_UnauthorizedFlutterPreSubmitComparator',
+          );
+        });
+
+        test('comparison passes test that is ignored for this PR', () async {
+          when(mockSkiaClient.imgtestCheck(any, any))
+            .thenAnswer((_) => Future<bool>.value(false));
+          when(mockSkiaClient.testIsIgnoredForPullRequest(
+            '1234',
+            'library.flutter.golden_test.1.png',
+          ))
+            .thenAnswer((_) => Future<bool>.value(true));
+          expect(
+            await comparator.compare(
+              Uint8List.fromList(_kFailPngBytes),
+              Uri.parse('flutter.golden_test.1.png'),
+            ),
+            isTrue,
+          );
+        });
+
+        test('fails test that is not ignored', () async {
+          when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
+            .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
+          when(mockSkiaClient.testIsIgnoredForPullRequest(
+            '1234',
+            'library.flutter.golden_test.1.png',
+          ))
+            .thenAnswer((_) => Future<bool>.value(false));
+          expect(
+            await comparator.compare(
+              Uint8List.fromList(_kFailPngBytes),
+              Uri.parse('flutter.golden_test.1.png'),
+            ),
+            isFalse,
+          );
+        });
+
+        test('passes non-existent baseline for new test', () async {
+          when(mockSkiaClient.cleanTestName('library.flutter.new_golden_test.1.png'))
+            .thenReturn('flutter.new_golden_test.1');
+          expect(
+            await comparator.compare(
+              Uint8List.fromList(_kFailPngBytes),
+              Uri.parse('flutter.new_golden_test.1.png'),
+            ),
+            isTrue,
+          );
+        });
       });
     });
 
@@ -676,7 +780,7 @@ void main() {
             isTrue,
           );
         });
-        test('returns false', () {
+        test('returns false - no CI', () {
           platform = FakePlatform(
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
@@ -767,9 +871,19 @@ void main() {
         final MockDirectory mockDirectory = MockDirectory();
         when(mockDirectory.existsSync()).thenReturn(true);
         when(mockDirectory.uri).thenReturn(Uri.parse('/flutter'));
+
         when(mockSkiaClient.getExpectations())
-          .thenAnswer((_) => throw const OSError());
-        final FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          .thenAnswer((_) => throw const OSError('Can\'t reach Gold'));
+        FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          platform,
+          goldens: mockSkiaClient,
+          baseDirectory: mockDirectory,
+        );
+        expect(comparator.runtimeType, FlutterSkippingGoldenFileComparator);
+
+        when(mockSkiaClient.getExpectations())
+          .thenAnswer((_) => throw const SocketException('Can\'t reach Gold'));
+        comparator = await FlutterLocalFileComparator.fromDefaultComparator(
           platform,
           goldens: mockSkiaClient,
           baseDirectory: mockDirectory,

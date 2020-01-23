@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -90,7 +90,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   static void _showSnackbar() {
     const String text =
       "When the Scaffold's floating action button location changes, "
-      'the floating action button animates to its new position.'
+      'the floating action button animates to its new position. '
       'The BottomAppBar adapts its shape appropriately.';
     _scaffoldKey.currentState.showSnackBar(
       const SnackBar(content: Text(text)),

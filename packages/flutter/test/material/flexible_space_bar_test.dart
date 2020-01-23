@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,7 +65,7 @@ void main() {
           collapseMode: CollapseMode.pin,
         ),
       ),
-    );
+    ) as FlexibleSpaceBarSettings;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -101,7 +101,7 @@ void main() {
     expect(clipRect.size.height, maxExtent);
 
     final Element actionTextBox = tester.element(find.text('title'));
-    final Text textWidget = actionTextBox.widget;
+    final Text textWidget = actionTextBox.widget as Text;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
 
     TextStyle effectiveStyle = textWidget.style;

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -81,7 +81,7 @@ class TextSelection extends TextRange {
   /// The position at which the selection originates.
   ///
   /// Might be larger than, smaller than, or equal to extent.
-  TextPosition get base => TextPosition(offset: baseOffset, affinity: affinity ?? TextAffinity.downstream);
+  TextPosition get base => TextPosition(offset: baseOffset, affinity: affinity);
 
   /// The position at which the selection terminates.
   ///
@@ -90,24 +90,22 @@ class TextSelection extends TextRange {
   /// side of the selection, this is the location at which to paint the caret.
   ///
   /// Might be larger than, smaller than, or equal to base.
-  TextPosition get extent => TextPosition(offset: extentOffset, affinity: affinity ?? TextAffinity.downstream);
+  TextPosition get extent => TextPosition(offset: extentOffset, affinity: affinity);
 
   @override
   String toString() {
-    return '$runtimeType(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
+    return '${objectRuntimeType(this, 'TextSelection')}(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (other is! TextSelection)
-      return false;
-    final TextSelection typedOther = other;
-    return typedOther.baseOffset == baseOffset
-        && typedOther.extentOffset == extentOffset
-        && typedOther.affinity == affinity
-        && typedOther.isDirectional == isDirectional;
+    return other is TextSelection
+        && other.baseOffset == baseOffset
+        && other.extentOffset == extentOffset
+        && other.affinity == affinity
+        && other.isDirectional == isDirectional;
   }
 
   @override

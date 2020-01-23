@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -127,7 +127,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
     results.add(model);
 
     assert(model.widget is T);
-    final T modelWidget = model.widget;
+    final T modelWidget = model.widget as T;
     if (modelWidget.isSupportedAspect(aspect))
       return;
 
@@ -170,8 +170,8 @@ abstract class InheritedModel<T> extends InheritedWidget {
     }
 
     final InheritedElement lastModel = models.last;
-    for (InheritedElement model in models) {
-      final T value = context.dependOnInheritedElement(model, aspect: aspect);
+    for (final InheritedElement model in models) {
+      final T value = context.dependOnInheritedElement(model, aspect: aspect) as T;
       if (model == lastModel)
         return value;
     }
@@ -187,11 +187,11 @@ class InheritedModelElement<T> extends InheritedElement {
   InheritedModelElement(InheritedModel<T> widget) : super(widget);
 
   @override
-  InheritedModel<T> get widget => super.widget;
+  InheritedModel<T> get widget => super.widget as InheritedModel<T>;
 
   @override
   void updateDependencies(Element dependent, Object aspect) {
-    final Set<T> dependencies = getDependencies(dependent);
+    final Set<T> dependencies = getDependencies(dependent) as Set<T>;
     if (dependencies != null && dependencies.isEmpty)
       return;
 
@@ -199,13 +199,13 @@ class InheritedModelElement<T> extends InheritedElement {
       setDependencies(dependent, HashSet<T>());
     } else {
       assert(aspect is T);
-      setDependencies(dependent, (dependencies ?? HashSet<T>())..add(aspect));
+      setDependencies(dependent, (dependencies ?? HashSet<T>())..add(aspect as T));
     }
   }
 
   @override
   void notifyDependent(InheritedModel<T> oldWidget, Element dependent) {
-    final Set<T> dependencies = getDependencies(dependent);
+    final Set<T> dependencies = getDependencies(dependent) as Set<T>;
     if (dependencies == null)
       return;
     if (dependencies.isEmpty || widget.updateShouldNotifyDependent(oldWidget, dependencies))

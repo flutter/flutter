@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -200,7 +200,7 @@ class ChangeNotifier implements Listenable {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
       final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
-      for (VoidCallback listener in localListeners) {
+      for (final VoidCallback listener in localListeners) {
         try {
           if (_listeners.contains(listener))
             listener();

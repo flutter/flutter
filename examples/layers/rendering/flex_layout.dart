@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -48,7 +48,7 @@ void main() {
     subrow.add(RenderSolidColorBox(const Color(0x7FCCFFFF), desiredSize: const Size(30.0, 40.0)));
     row.add(subrow);
     table.add(row);
-    final FlexParentData rowParentData = row.parentData;
+    final FlexParentData rowParentData = row.parentData as FlexParentData;
     rowParentData.flex = 1;
   }
 
@@ -71,7 +71,7 @@ void main() {
     row.add(RenderSolidColorBox(const Color(0xFFCCCCFF), desiredSize: const Size(160.0, 60.0)));
     row.mainAxisAlignment = justify;
     table.add(row);
-    final FlexParentData rowParentData = row.parentData;
+    final FlexParentData rowParentData = row.parentData as FlexParentData;
     rowParentData.flex = 1;
   }
 

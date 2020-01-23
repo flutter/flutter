@@ -1,8 +1,10 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show lerpDouble;
+
+import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
@@ -53,7 +55,7 @@ class StadiumBorder extends ShapeBorder {
     if (a is RoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: a.borderRadius,
+        borderRadius: a.borderRadius as BorderRadius,
         rectness: 1.0 - t,
       );
     }
@@ -74,7 +76,7 @@ class StadiumBorder extends ShapeBorder {
     if (b is RoundedRectangleBorder) {
       return _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: b.borderRadius,
+        borderRadius: b.borderRadius as BorderRadius,
         rectness: t,
       );
     }
@@ -110,11 +112,11 @@ class StadiumBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final StadiumBorder typedOther = other;
-    return side == typedOther.side;
+    return other is StadiumBorder
+        && other.side == side;
   }
 
   @override
@@ -122,7 +124,7 @@ class StadiumBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side)';
+    return '${objectRuntimeType(this, 'StadiumBorder')}($side)';
   }
 }
 
@@ -257,12 +259,12 @@ class _StadiumToCircleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final _StadiumToCircleBorder typedOther = other;
-    return side == typedOther.side
-        && circleness == typedOther.circleness;
+    return other is _StadiumToCircleBorder
+        && other.side == side
+        && other.circleness == circleness;
   }
 
   @override
@@ -399,13 +401,13 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final _StadiumToRoundedRectangleBorder typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius
-        && rectness == typedOther.rectness;
+    return other is _StadiumToRoundedRectangleBorder
+        && other.side == side
+        && other.borderRadius == borderRadius
+        && other.rectness == rectness;
   }
 
   @override

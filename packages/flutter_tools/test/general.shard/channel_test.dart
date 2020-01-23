@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/commands/channel.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
@@ -180,7 +181,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
 
-      final File versionCheckFile = Cache.instance.getStampFileFor(
+      final File versionCheckFile = globals.cache.getStampFileFor(
         VersionCheckStamp.flutterVersionCheckStampFile,
       );
 

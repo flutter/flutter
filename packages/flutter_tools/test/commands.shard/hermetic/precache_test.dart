@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -44,8 +44,6 @@ void main() {
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.web,
-      DevelopmentArtifact.androidGenSnapshot,
-      DevelopmentArtifact.androidMaven,
     }));
   }, overrides: <Type, Generator>{
     Cache: () => cache,
@@ -59,9 +57,20 @@ void main() {
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
-      DevelopmentArtifact.androidGenSnapshot,
-      DevelopmentArtifact.androidMaven,
     }));
+  }, overrides: <Type, Generator>{
+    Cache: () => cache,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+  });
+
+  testUsingContext('precache exits if requesting mismatched artifacts.', () async {
+    final PrecacheCommand command = PrecacheCommand();
+    applyMocksToCommand(command);
+
+    expect(createTestCommandRunner(command).run(const <String>['precache',
+      '--no-android',
+      '--android_gen_snapshot',
+    ]), throwsToolExit(message: '--android_gen_snapshot requires --android'));
   }, overrides: <Type, Generator>{
     Cache: () => cache,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
@@ -174,6 +183,7 @@ void main() {
     FlutterVersion: () => flutterVersion,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
   });
+
   testUsingContext('precache downloads artifacts when --force is provided', () async {
     when(cache.isUpToDate()).thenReturn(true);
     final PrecacheCommand command = PrecacheCommand();

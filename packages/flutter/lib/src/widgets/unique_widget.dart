@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,7 +34,7 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   ///
   /// Might be null if the widget is not currently in the tree.
   T get currentState {
-    final GlobalKey<T> globalKey = key;
+    final GlobalKey<T> globalKey = key as GlobalKey<T>;
     return globalKey.currentState;
   }
 }

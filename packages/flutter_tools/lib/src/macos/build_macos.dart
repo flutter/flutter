@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -20,7 +20,13 @@ Future<void> buildMacOS({
   BuildInfo buildInfo,
   String targetOverride,
 }) async {
-  final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
+  if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
+    throwToolExit('No macOS desktop project configured. '
+      'See https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-project '
+      'to learn about adding macOS support to a project.');
+  }
+
+  final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
@@ -62,7 +68,7 @@ Future<void> buildMacOS({
 
   // Run the Xcode build.
   final Stopwatch sw = Stopwatch()..start();
-  final Status status = logger.startProgress(
+  final Status status = globals.logger.startProgress(
     'Building macOS application...',
     timeout: null,
   );
@@ -76,8 +82,8 @@ Future<void> buildMacOS({
       '-configuration', '$configuration',
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,
-      'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-      'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+      'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+      'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       'COMPILER_INDEX_STORE_ENABLE=NO',
       ...environmentVariablesAsXcodeBuildSettings()
     ], trace: true);

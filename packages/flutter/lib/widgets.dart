@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -48,6 +48,7 @@ export 'src/widgets/icon_data.dart';
 export 'src/widgets/icon_theme.dart';
 export 'src/widgets/icon_theme_data.dart';
 export 'src/widgets/image.dart';
+export 'src/widgets/image_filter.dart';
 export 'src/widgets/image_icon.dart';
 export 'src/widgets/implicit_animations.dart';
 export 'src/widgets/inherited_model.dart';
@@ -94,6 +95,7 @@ export 'src/widgets/shortcuts.dart';
 export 'src/widgets/single_child_scroll_view.dart';
 export 'src/widgets/size_changed_layout_notifier.dart';
 export 'src/widgets/sliver.dart';
+export 'src/widgets/sliver_fill.dart';
 export 'src/widgets/sliver_layout_builder.dart';
 export 'src/widgets/sliver_persistent_header.dart';
 export 'src/widgets/sliver_prototype_extent_list.dart';

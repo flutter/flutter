@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -228,7 +228,7 @@ void main() {
             ),
           ),
         );
-        fail('Should not be possible to create a toggle button with mismatching'
+        fail('Should not be possible to create a toggle button with mismatching '
             'children.length and isSelected.length.');
       } on AssertionError catch (e) {
         expect(e.toString(), contains('children.length'));

@@ -1,10 +1,10 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/platform.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
@@ -13,7 +13,7 @@ class IOSWorkflow implements Workflow {
   const IOSWorkflow();
 
   @override
-  bool get appliesToHostPlatform => platform.isMacOS;
+  bool get appliesToHostPlatform => globals.platform.isMacOS;
 
   // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override

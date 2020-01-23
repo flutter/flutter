@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -176,7 +176,7 @@ class TextTheme extends Diagnosticable {
   /// the typography styles in the material design specification, as a starting
   /// point.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -260,7 +260,7 @@ class TextTheme extends Diagnosticable {
   /// [TextTheme] has only some fields defined, and you want to define the rest
   /// by merging it with a default theme.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// /// A Widget that sets the ambient theme's title text color for its
@@ -476,25 +476,25 @@ class TextTheme extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final TextTheme typedOther = other;
-    return display4 == typedOther.display4
-        && display3 == typedOther.display3
-        && display2 == typedOther.display2
-        && display1 == typedOther.display1
-        && headline == typedOther.headline
-        && title == typedOther.title
-        && subhead == typedOther.subhead
-        && body2 == typedOther.body2
-        && body1 == typedOther.body1
-        && caption == typedOther.caption
-        && button == typedOther.button
-        && subtitle == typedOther.subtitle
-        && overline == typedOther.overline;
+    return other is TextTheme
+        && other.display4 == display4
+        && other.display3 == display3
+        && other.display2 == display2
+        && other.display1 == display1
+        && other.headline == headline
+        && other.title == title
+        && other.subhead == subhead
+        && other.body2 == body2
+        && other.body1 == body1
+        && other.caption == caption
+        && other.button == button
+        && other.subtitle == subtitle
+        && other.overline == overline;
   }
 
   @override

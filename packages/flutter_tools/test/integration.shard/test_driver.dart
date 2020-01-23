@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
@@ -83,7 +84,7 @@ abstract class FlutterTestDriver {
     bool withDebugger = false,
     File pidFile,
   }) async {
-    final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger) {
       arguments.add('--start-paused');
     }
@@ -164,6 +165,12 @@ abstract class FlutterTestDriver {
     if (_processPid == null) {
       return -1;
     }
+    // If we try to kill the process while it's paused, we'll end up terminating
+    // it forcefully and it won't terminate child processes, so we need to ensure
+    // it's running before terminating.
+    await resume().timeout(defaultTimeout)
+        .catchError((Object e) => _debugPrint('Ignoring failure to resume during shutdown'));
+
     _debugPrint('Sending SIGTERM to $_processPid..');
     ProcessSignal.SIGTERM.send(_processPid);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
@@ -312,7 +319,7 @@ abstract class FlutterTestDriver {
   }
 
   SourcePosition _lookupTokenPos(List<List<int>> table, int tokenPos) {
-    for (List<int> row in table) {
+    for (final List<int> row in table) {
       final int lineNumber = row[0];
       int index = 1;
 
@@ -345,7 +352,7 @@ abstract class FlutterTestDriver {
         return;
       }
       if ((event != null && json['event'] == event) ||
-          (id    != null && json['id']    == id)) {
+          (id != null && json['id'] == id)) {
         await subscription.cancel();
         _debugPrint('OK ($interestingOccurrence)');
         response.complete(json);
@@ -380,10 +387,8 @@ abstract class FlutterTestDriver {
 
     if (_printDebugOutputToStdOut) {
       _debugPrint('$task...');
-      return callback()..timeout(timeout, onTimeout: () {
-        _debugPrint('$task is taking longer than usual...');
-        return null;
-      });
+      final Timer longWarning = Timer(timeout, () => _debugPrint('$task is taking longer than usual...'));
+      return callback().whenComplete(longWarning.cancel);
     }
 
     // We're not showing all output to the screen, so let's capture the output
@@ -399,14 +404,12 @@ abstract class FlutterTestDriver {
     }
     final StreamSubscription<String> subscription = _allMessages.stream.listen(logMessage);
 
-    final Future<T> future = callback();
-
-    future.timeout(timeout ?? defaultTimeout, onTimeout: () {
+    final Timer longWarning = Timer(timeout, () {
       _debugPrint(messages.toString());
       timeoutExpired = true;
       _debugPrint('$task is taking longer than usual...');
-      return null;
     });
+    final Future<T> future = callback().whenComplete(longWarning.cancel);
 
     return future.catchError((dynamic error) {
       if (!timeoutExpired) {
@@ -495,7 +498,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // fast.
     unawaited(_process.exitCode.then((_) {
       if (!prematureExitGuard.isCompleted) {
-        prematureExitGuard.completeError('Process existed prematurely: ${args.join(' ')}');
+        prematureExitGuard.completeError('Process existed prematurely: ${args.join(' ')}: $_errorBuffer');
       }
     }));
 
@@ -525,7 +528,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         // have already completed.
         _currentRunningAppId = (await started)['params']['appId'] as String;
         prematureExitGuard.complete();
-      } catch(error, stackTrace) {
+      } catch (error, stackTrace) {
         prematureExitGuard.completeError(error, stackTrace);
       }
     }());
@@ -535,6 +538,29 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
   Future<void> hotRestart({ bool pause = false }) => _restart(fullRestart: true, pause: pause);
   Future<void> hotReload() => _restart(fullRestart: false);
+
+  Future<void> scheduleFrame() async {
+    if (_currentRunningAppId == null) {
+      throw Exception('App has not started yet');
+    }
+    await _sendRequest(
+      'app.callServiceExtension',
+      <String, dynamic>{'appId': _currentRunningAppId, 'methodName': 'ext.ui.window.scheduleFrame'},
+    );
+  }
+
+  Future<void> reloadMethod({ String libraryId, String classId }) async {
+    if (_currentRunningAppId == null) {
+      throw Exception('App has not started yet');
+    }
+    final dynamic reloadMethodResponse = await _sendRequest(
+      'app.reloadMethod',
+      <String, dynamic>{'appId': _currentRunningAppId, 'class': classId, 'library': libraryId},
+    );
+    if (reloadMethodResponse == null || reloadMethodResponse['code'] != 0) {
+      _throwErrorResponse('reloadMethodResponse request failed');
+    }
+  }
 
   Future<void> _restart({ bool fullRestart = false, bool pause = false }) async {
     if (_currentRunningAppId == null) {
@@ -546,7 +572,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       'app.restart',
       <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
     );
-    _debugPrint('${ fullRestart ? "Hot restart" : "Hot reload" } complete.');
+    _debugPrint('${fullRestart ? "Hot restart" : "Hot reload"} complete.');
 
     if (hotReloadResponse == null || hotReloadResponse['code'] != 0) {
       _throwErrorResponse('Hot ${fullRestart ? 'restart' : 'reload'} request failed');

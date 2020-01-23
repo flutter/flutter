@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -57,7 +57,7 @@ class KeyEventSimulator {
         map = kLinuxToPhysicalKey;
         break;
     }
-    for (int code in map.keys) {
+    for (final int code in map.keys) {
       if (key.debugName == map[code].debugName) {
         scanCode = code;
         break;
@@ -84,7 +84,7 @@ class KeyEventSimulator {
         map = kGlfwToLogicalKey;
         break;
     }
-    for (int code in map.keys) {
+    for (final int code in map.keys) {
       if (key.debugName == map[code].debugName) {
         keyCode = code;
         break;

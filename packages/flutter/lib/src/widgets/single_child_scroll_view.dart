@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -80,13 +80,15 @@ import 'scrollable.dart';
 /// with some remaining space to allocate as specified by its
 /// [Column.mainAxisAlignment] argument.
 ///
-/// {@tool snippet --template=stateless_widget}
+/// {@tool sample --template=stateless_widget}
 /// In this example, the children are spaced out equally, unless there's no more
 /// room, in which case they stack vertically and scroll.
 ///
 /// When using this technique, [Expanded] and [Flexible] are not useful, because
 /// in both cases the "available space" is infinite (since this is in a viewport).
 /// The next section describes a technique for providing a maximum height constraint.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/single_child_scroll_view_fixed.png)
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -147,9 +149,11 @@ import 'scrollable.dart';
 /// so that the intrinsic sizing algorithm can short-circuit the computation when it
 /// reaches those parts of the subtree.
 ///
-/// {@tool snippet --template=stateless_widget}
+/// {@tool sample --template=stateless_widget}
 /// In this example, the column becomes either as big as viewport, or as big as
 /// the contents, whichever is biggest.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/single_child_scroll_view_expanded.png)
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -575,7 +579,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     if (target is! RenderBox)
       return RevealedOffset(offset: offset.pixels, rect: rect);
 
-    final RenderBox targetBox = target;
+    final RenderBox targetBox = target as RenderBox;
     final Matrix4 transform = targetBox.getTransformTo(child);
     final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Size contentSize = child.size;

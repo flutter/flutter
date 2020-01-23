@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,9 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class BadWidget extends StatefulWidget {
+  const BadWidget({ Key key }) : super(key: key);
   @override
   State<StatefulWidget> createState() => BadWidgetState();
-
 }
 
 class BadWidgetState extends State<BadWidget> {
@@ -28,7 +28,7 @@ class BadWidgetState extends State<BadWidget> {
 
 void main() {
   testWidgets('setState() catches being used inside a constructor', (WidgetTester tester) async {
-    await tester.pumpWidget(BadWidget());
+    await tester.pumpWidget(const BadWidget());
     expect(tester.takeException(), isInstanceOf<FlutterError>());
   });
 }

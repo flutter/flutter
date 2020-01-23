@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ class CupertinoIconThemeData extends IconThemeData with DiagnosticableMixin {
     double size
   }) : super(color: color, opacity: opacity, size: size);
 
-  /// Called by [IconThemeData.of] to resolve [color] against the given [BuildContext].
+  /// Called by [IconTheme.of] to resolve [color] against the given [BuildContext].
   @override
   IconThemeData resolve(BuildContext context) {
     final Color resolvedColor = CupertinoDynamicColor.resolve(color, context);

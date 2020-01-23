@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -68,11 +68,11 @@ void main() {
       const Locale('zh', 'ZH'): const <String>['period', 'hour', 'string :', 'minute'], //'ah:mm'
     };
 
-    for (Locale locale in locales.keys) {
+    for (final Locale locale in locales.keys) {
       final Offset center = await startPicker(tester, (TimeOfDay time) { }, locale: locale);
       final List<String> actual = <String>[];
       tester.element(find.byType(CustomMultiChildLayout)).visitChildren((Element child) {
-        final LayoutId layout = child.widget;
+        final LayoutId layout = child.widget as LayoutId;
         final String fragmentType = '${layout.child.runtimeType}';
         final dynamic widget = layout.child;
         if (fragmentType == '_MinuteControl') {
@@ -114,7 +114,7 @@ void main() {
       Locale('en', 'GB'), // HH
       Locale('es', 'ES'), // H
     ];
-    for (Locale locale in locales) {
+    for (final Locale locale in locales) {
       // Tap along the segment stretching from the center to the edge at
       // 12:00 AM position. There are two rings. At ~70% mark, the ring
       // switches between inner ring and outer ring.
@@ -174,12 +174,18 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels as List<dynamic>;
+    expect(
+      primaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      labels12To11,
+    );
     expect(dialPainter.primaryInnerLabels, null);
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels as List<dynamic>;
+    expect(
+      secondaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      labels12To11,
+    );
     expect(dialPainter.secondaryInnerLabels, null);
   });
 
@@ -188,14 +194,26 @@ void main() {
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
-    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels;
-    expect(primaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels as List<dynamic>;
+    expect(
+      primaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      labels00To23,
+    );
+    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels as List<dynamic>;
+    expect(
+      primaryInnerLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      labels12To11TwoDigit,
+    );
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
-    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
-    expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels as List<dynamic>;
+    expect(
+      secondaryOuterLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      labels00To23,
+    );
+    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels as List<dynamic>;
+    expect(
+      secondaryInnerLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text as TextSpan).text),
+      labels12To11TwoDigit,
+    );
   });
 }

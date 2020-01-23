@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(const ListTile());
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception;
+    final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 5);
     expect(error.diagnostics[2].level, DiagnosticLevel.hint);
     expect(
@@ -49,7 +49,7 @@ void main() {
     await tester.pumpWidget(const BackButton());
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception;
+    final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 6);
     expect(error.diagnostics[3].level, DiagnosticLevel.hint);
     expect(
@@ -68,7 +68,7 @@ void main() {
       '   BackButton widgets require MaterialLocalizations to be provided\n'
       '   by a Localizations widget ancestor.\n'
       '   Localizations are used to generate many different messages,\n'
-      '   labels,and abbreviations which are used by the material library.\n'
+      '   labels, and abbreviations which are used by the material library.\n'
       '   To introduce a MaterialLocalizations, either use a MaterialApp at\n'
       '   the root of your application to include them automatically, or\n'
       '   add a Localization widget with a MaterialLocalizations delegate.\n'
@@ -95,7 +95,7 @@ void main() {
     );
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception;
+    final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 5);
     expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[3], isInstanceOf<DiagnosticsBlock>());

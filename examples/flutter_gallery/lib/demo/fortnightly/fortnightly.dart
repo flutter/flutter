@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -131,7 +131,7 @@ class FruitPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'How these crazy fruits sweetened our hearts, relationships,'
+                      'How these crazy fruits sweetened our hearts, relationships, '
                           'and puffed pastries',
                       style: textTheme.body1,
                     ),

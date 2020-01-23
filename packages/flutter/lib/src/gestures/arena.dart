@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -256,7 +256,7 @@ class GestureArenaManager {
     assert(state.eagerWinner == null || state.eagerWinner == member);
     assert(!state.isOpen);
     _arenas.remove(pointer);
-    for (GestureArenaMember rejectedMember in state.members) {
+    for (final GestureArenaMember rejectedMember in state.members) {
       if (rejectedMember != member)
         rejectedMember.rejectGesture(pointer);
     }

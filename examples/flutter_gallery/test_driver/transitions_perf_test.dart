@@ -1,9 +1,9 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JsonEncoder, JsonDecoder;
+import 'dart:convert' show JsonEncoder, json;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -66,18 +66,28 @@ List<String> _allDemos = <String>[];
 Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
   final Map<String, List<int>> durations = <String, List<int>>{};
   Map<String, dynamic> startEvent;
+  int frameStart;
 
   // Save the duration of the first frame after each 'Start Transition' event.
-  for (Map<String, dynamic> event in events) {
-    final String eventName = event['name'];
+  for (final Map<String, dynamic> event in events) {
+    final String eventName = event['name'] as String;
     if (eventName == 'Start Transition') {
       assert(startEvent == null);
       startEvent = event;
     } else if (startEvent != null && eventName == 'Frame') {
-      final String routeName = startEvent['args']['to'];
-      durations[routeName] ??= <int>[];
-      durations[routeName].add(event['dur']);
-      startEvent = null;
+      final String phase = event['ph'] as String;
+      final int timestamp = event['ts'] as int;
+      if (phase == 'B') {
+        assert(frameStart == null);
+        frameStart = timestamp;
+      } else {
+        assert(phase == 'E');
+        final String routeName = startEvent['args']['to'] as String;
+        durations[routeName] ??= <int>[];
+        durations[routeName].add(timestamp - frameStart);
+        startEvent = null;
+        frameStart = null;
+      }
     }
   }
 
@@ -101,13 +111,13 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     String lastEventName = '';
     String lastRouteName = '';
     while (eventIter.moveNext()) {
-      final String eventName = eventIter.current['name'];
+      final String eventName = eventIter.current['name'] as String;
 
       if (!<String>['Start Transition', 'Frame'].contains(eventName))
         continue;
 
       final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to']
+        ? eventIter.current['args']['to'] as String
         : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {
@@ -133,7 +143,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
   String currentDemoCategory;
 
-  for (String demo in demos) {
+  for (final String demo in demos) {
     if (kSkippedDemos.contains(demo))
       continue;
 
@@ -192,7 +202,7 @@ void main([List<String> args = const <String>[]]) {
       }
 
       // See _handleMessages() in transitions_perf.dart.
-      _allDemos = List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
+      _allDemos = List<String>.from(json.decode(await driver.requestData('demoNames')) as List<dynamic>);
       if (_allDemos.isEmpty)
         throw 'no demo names found';
     });
@@ -221,7 +231,7 @@ void main([List<String> args = const <String>[]]) {
       await summary.writeSummaryToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(
-          List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
+          List<Map<String, dynamic>>.from(timeline.json['traceEvents'] as List<dynamic>),
           histogramPath);
 
       // Execute the remaining tests.

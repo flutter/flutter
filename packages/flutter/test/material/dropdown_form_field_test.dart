@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,6 +13,10 @@ import '../rendering/mock_canvas.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 final ValueChanged<String> onChanged = (_) { };
+final Type dropdownButtonType = DropdownButton<String>(
+  onChanged: (_) { },
+  items: const <DropdownMenuItem<String>>[],
+).runtimeType;
 
 Finder _iconRichText(Key iconKey) {
   return find.descendant(
@@ -31,7 +35,7 @@ Widget buildFormFrame({
   Color iconDisabledColor,
   Color iconEnabledColor,
   double iconSize = 24.0,
-  bool isDense = false,
+  bool isDense = true,
   bool isExpanded = false,
   Widget hint,
   Widget disabledHint,
@@ -103,10 +107,17 @@ class _TestAppState extends State<TestApp> {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({ this.textDirection, this.child, this.mediaSize });
+  const TestApp({
+    Key key,
+    this.textDirection,
+    this.child,
+    this.mediaSize,
+  }) : super(key: key);
+
   final TextDirection textDirection;
   final Widget child;
   final Size mediaSize;
+
   @override
   _TestAppState createState() => _TestAppState();
 }
@@ -227,7 +238,6 @@ void main() {
       buildFormFrame(
         buttonKey: buttonKey,
         value: value,
-        isDense: true,
         onChanged: onChanged,
       ),
     );
@@ -254,12 +264,41 @@ void main() {
     final double menuItemHeight = itemBoxesHeight.reduce(math.max);
     expect(menuItemHeight, greaterThanOrEqualTo(buttonBox.size.height));
 
-    for (RenderBox itemBox in itemBoxes) {
+    for (final RenderBox itemBox in itemBoxes) {
       expect(itemBox.attached, isTrue);
       final Offset buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
       final Offset itemBoxCenter = itemBox.size.center(itemBox.localToGlobal(Offset.zero));
       expect(buttonBoxCenter.dy, equals(itemBoxCenter.dy));
     }
+  });
+
+  testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/46844
+    final Key buttonKey = UniqueKey();
+    const String value = 'two';
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<String>(
+            key: buttonKey,
+            value: value,
+            onChanged: onChanged,
+            items: menuItems.map<DropdownMenuItem<String>>((String item) {
+              return DropdownMenuItem<String>(
+                key: ValueKey<String>(item),
+                value: item,
+                child: Text(item, key: ValueKey<String>(item + 'Text')),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    expect(box.size.height, 24.0);
   });
 
   testWidgets('DropdownButtonFormField - custom text style', (WidgetTester tester) async {
