@@ -171,8 +171,6 @@ void main() {
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     String filteredStack;
     FlutterError.onError = (FlutterErrorDetails details) {
-      expect(filteredStack, null);
-      expect(details.exception, isAssertionError);
       filteredStack = details.toString();
     };
     await tester.pumpWidget(Directionality(
