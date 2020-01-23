@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, HeightBehavior;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -75,7 +75,7 @@ class RenderParagraph extends RenderBox
     Locale locale,
     StrutStyle strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.HeightBehavior heightBehavior,
+    ui.TextHeightBehavior textHeightBehavior,
     List<RenderBox> children,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
@@ -98,7 +98,7 @@ class RenderParagraph extends RenderBox
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
-         heightBehavior: heightBehavior
+         textHeightBehavior: textHeightBehavior
        ) {
     addAll(children);
     _extractPlaceholderSpans(text);
@@ -277,12 +277,12 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  /// {@macro flutter.dart:ui.heightBehavior}
-  ui.HeightBehavior get heightBehavior => _textPainter.heightBehavior;
-  set heightBehavior(ui.HeightBehavior value) {
-    if (_textPainter.heightBehavior == value)
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  ui.TextHeightBehavior get textHeightBehavior => _textPainter.textHeightBehavior;
+  set textHeightBehavior(ui.TextHeightBehavior value) {
+    if (_textPainter.textHeightBehavior == value)
       return;
-    _textPainter.heightBehavior = value;
+    _textPainter.textHeightBehavior = value;
     _overflowShader = null;
     markNeedsLayout();
   }

@@ -1317,7 +1317,7 @@ void main() {
     );
   });
 
-  testWidgets('Text HeightBehavior', (WidgetTester tester) async {
+  testWidgets('Text TextHeightBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -1336,7 +1336,7 @@ void main() {
                 const Text('Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5,),
-                  heightBehavior: HeightBehavior(
+                  textHeightBehavior: TextHeightBehavior(
                     applyHeightToFirstAscent: false,
                     applyHeightToLastDescent: false,
                   ),
@@ -1344,7 +1344,7 @@ void main() {
                 const Text('Hello',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5,),
-                  heightBehavior: HeightBehavior(
+                  textHeightBehavior: TextHeightBehavior(
                     applyHeightToFirstAscent: false,
                   ),
                 ),
@@ -1356,7 +1356,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.HeightBehavior.1.png'),
+      matchesGoldenFile('text_golden.TextHeightBehavior.1.png'),
     );
   });
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Image, ImageFilter, HeightBehavior;
+import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -5063,7 +5063,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.locale,
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
-    this.heightBehavior,
+    this.textHeightBehavior,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5145,8 +5145,8 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.heightBehavior}
-  final ui.HeightBehavior heightBehavior;
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final ui.TextHeightBehavior textHeightBehavior;
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
@@ -5160,7 +5160,7 @@ class RichText extends MultiChildRenderObjectWidget {
       maxLines: maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
-      heightBehavior: heightBehavior,
+      textHeightBehavior: textHeightBehavior,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -5178,7 +5178,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..maxLines = maxLines
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
-      ..heightBehavior = heightBehavior
+      ..textHeightBehavior = textHeightBehavior
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, HeightBehavior;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 
@@ -1067,7 +1067,7 @@ class TextStyle extends Diagnosticable {
     double textScaleFactor = 1.0,
     String ellipsis,
     int maxLines,
-    ui.HeightBehavior heightBehavior,
+    ui.TextHeightBehavior textHeightBehavior,
     Locale locale,
     String fontFamily,
     double fontSize,
@@ -1088,7 +1088,7 @@ class TextStyle extends Diagnosticable {
       fontFamily: fontFamily ?? this.fontFamily,
       fontSize: (fontSize ?? this.fontSize ?? _defaultFontSize) * textScaleFactor,
       height: height ?? this.height,
-      heightBehavior: heightBehavior,
+      textHeightBehavior: textHeightBehavior,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,

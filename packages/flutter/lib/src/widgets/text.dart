@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show HeightBehavior;
+import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -45,7 +45,7 @@ class DefaultTextStyle extends InheritedTheme {
     this.overflow = TextOverflow.clip,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
-    this.heightBehavior,
+    this.textHeightBehavior,
     @required Widget child,
   }) : assert(style != null),
        assert(softWrap != null),
@@ -68,7 +68,7 @@ class DefaultTextStyle extends InheritedTheme {
       maxLines = null,
       overflow = TextOverflow.clip,
       textWidthBasis = TextWidthBasis.parent,
-      heightBehavior = null,
+      textHeightBehavior = null,
       super(key: key, child: null);
 
   /// Creates a default text style that overrides the text styles in scope at
@@ -145,8 +145,8 @@ class DefaultTextStyle extends InheritedTheme {
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.heightBehavior}
-  final ui.HeightBehavior heightBehavior;
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final ui.TextHeightBehavior textHeightBehavior;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -170,7 +170,7 @@ class DefaultTextStyle extends InheritedTheme {
         overflow != oldWidget.overflow ||
         maxLines != oldWidget.maxLines ||
         textWidthBasis != oldWidget.textWidthBasis ||
-        heightBehavior != oldWidget.heightBehavior;
+        textHeightBehavior != oldWidget.textHeightBehavior;
   }
 
   @override
@@ -183,7 +183,7 @@ class DefaultTextStyle extends InheritedTheme {
       overflow: overflow,
       maxLines: maxLines,
       textWidthBasis: textWidthBasis,
-      heightBehavior: heightBehavior,
+      textHeightBehavior: textHeightBehavior,
       child: child,
     );
   }
@@ -197,7 +197,7 @@ class DefaultTextStyle extends InheritedTheme {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
-    properties.add(DiagnosticsProperty<ui.HeightBehavior>('heightBehavior', heightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -293,7 +293,7 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
-    this.heightBehavior,
+    this.textHeightBehavior,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -325,7 +325,7 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
-    this.heightBehavior,
+    this.textHeightBehavior,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -428,8 +428,8 @@ class Text extends StatelessWidget {
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.heightBehavior}
-  final ui.HeightBehavior heightBehavior;
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final ui.TextHeightBehavior textHeightBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -449,7 +449,7 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      heightBehavior: heightBehavior ?? defaultTextStyle.heightBehavior,
+      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
@@ -484,7 +484,7 @@ class Text extends StatelessWidget {
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null));
-    properties.add(DiagnosticsProperty<ui.HeightBehavior>('heightBehavior', heightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }
