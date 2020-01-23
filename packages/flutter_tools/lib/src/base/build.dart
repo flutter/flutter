@@ -49,7 +49,6 @@ class GenSnapshot {
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
-      '--causal_async_stacks',
       ...additionalArgs,
     ];
 
