@@ -311,29 +311,28 @@ class NestedScrollView extends StatefulWidget {
 /// using `globalKey.currentState.innerController`.
 ///
 /// ```dart preamble
-///   final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+/// final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
 /// ```
 /// ```dart
-///   @override
-///   Widget build(BuildContext context) {
-///     return NestedScrollView(
-///       key: globalKey,
-///       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-///         const <Widget>[
-///           SliverAppBar(
-///             title: const Text('NestedScrollViewState Demo!'),
-///           ),
-///         ],
-///       }
-///       body: const CustomScrollView(
-///         // Body slivers go here!
-///       ),
-///     );
-///   }
+/// @override
+/// Widget build(BuildContext context) {
+///   return NestedScrollView(
+///     key: globalKey,
+///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+///       return <Widget>[
+///         SliverAppBar(
+///           title: Text('NestedScrollViewState Demo!'),
+///         ),
+///       ];
+///     },
+///     body: CustomScrollView(
+///       // Body slivers go here!
+///     ),
+///   );
+/// }
 ///
-///   ScrollController get innerController {
-///     return globalKey.currentState.innerController;
-///   }
+/// ScrollController get innerController {
+///   return globalKey.currentState.innerController;
 /// }
 /// ```
 /// {@end-tool}
