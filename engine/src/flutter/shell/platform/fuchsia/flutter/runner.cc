@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define FML_USED_ON_EMBEDDER
-
 #include "runner.h"
 
 #include <fuchsia/mem/cpp/fidl.h>
@@ -130,6 +128,11 @@ static void SetProcessName() {
   zx::process::self()->set_property(ZX_PROP_NAME, name.c_str(), name.size());
 }
 
+static void SetThreadName(const std::string& thread_name) {
+  zx::thread::self()->set_property(ZX_PROP_NAME, thread_name.c_str(),
+                                   thread_name.size());
+}
+
 #if !defined(DART_PRODUCT)
 // Register native symbol information for the Dart VM's profiler.
 static void RegisterProfilerSymbols(const char* symbols_path,
@@ -143,8 +146,8 @@ static void RegisterProfilerSymbols(const char* symbols_path,
 }
 #endif  // !defined(DART_PRODUCT)
 
-Runner::Runner(fml::MessageLoop& message_loop)
-    : message_loop_(message_loop), context_(sys::ComponentContext::Create()) {
+Runner::Runner(async::Loop* loop)
+    : loop_(loop), context_(sys::ComponentContext::Create()) {
 #if !defined(DART_PRODUCT)
   // The VM service isolate uses the process-wide namespace. It writes the
   // vm service protocol port under /tmp. The VMServiceObject exposes that
@@ -162,7 +165,7 @@ Runner::Runner(fml::MessageLoop& message_loop)
 
   SetProcessName();
 
-  fml::Thread::SetCurrentThreadName("io.flutter.runner.main");
+  SetThreadName("io.flutter.runner.main");
 
   context_->outgoing()->AddPublicService<fuchsia::sys::Runner>(
       std::bind(&Runner::RegisterApplication, this, std::placeholders::_1));
@@ -211,13 +214,12 @@ void Runner::StartComponent(
   // there being multiple application runner instance in the process at the same
   // time. So it is safe to use the raw pointer.
   Application::TerminationCallback termination_callback =
-      [task_runner = message_loop_.GetTaskRunner(),  //
-       application_runner = this                     //
+      [task_runner = loop_->dispatcher(),  //
+       application_runner = this           //
   ](const Application* application) {
-        fml::TaskRunner::RunNowOrPostTask(
-            task_runner, [application_runner, application]() {
-              application_runner->OnApplicationTerminate(application);
-            });
+        async::PostTask(task_runner, [application_runner, application]() {
+          application_runner->OnApplicationTerminate(application);
+        });
       };
 
   auto active_application = Application::Create(
@@ -252,11 +254,13 @@ void Runner::OnApplicationTerminate(const Application* application) {
   active_applications_.erase(application);
 
   // Post the task to destroy the application and quit its message loop.
-  fml::TaskRunner::RunNowOrPostTask(
-      application_thread->GetTaskRunner(),
-      fml::MakeCopyable(
-          [instance = std::move(application_to_destroy),
-           thread = application_thread.get()]() mutable { instance.reset(); }));
+  async::PostTask(
+      application_thread->dispatcher(),
+      fml::MakeCopyable([instance = std::move(application_to_destroy),
+                         thread = application_thread.get()]() mutable {
+        instance.reset();
+        thread->Quit();
+      }));
 
   // This works because just posted the quit task on the hosted thread.
   application_thread->Join();
@@ -283,8 +287,7 @@ bool Runner::SetupTZDataInternal() {
 #if !defined(DART_PRODUCT)
 void Runner::SetupTraceObserver() {
   trace_observer_ = std::make_unique<trace::TraceObserver>();
-  FML_DCHECK(message_loop_.GetTaskRunner()->RunsTasksOnCurrentThread());
-  trace_observer_->Start(async_get_default_dispatcher(), [runner = this]() {
+  trace_observer_->Start(loop_->dispatcher(), [runner = this]() {
     if (!trace_is_category_enabled("dart:profiler")) {
       return;
     }
@@ -294,11 +297,10 @@ void Runner::SetupTraceObserver() {
     } else if (trace_state() == TRACE_STOPPING) {
       for (auto& it : runner->active_applications_) {
         fml::AutoResetWaitableEvent latch;
-        fml::TaskRunner::RunNowOrPostTask(
-            it.second.thread->GetTaskRunner(), [&]() {
-              it.second.application->WriteProfileToTrace();
-              latch.Signal();
-            });
+        async::PostTask(it.second.thread->dispatcher(), [&]() {
+          it.second.application->WriteProfileToTrace();
+          latch.Signal();
+        });
         latch.Wait();
       }
       Dart_StopProfiling();
