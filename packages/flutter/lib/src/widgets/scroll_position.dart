@@ -741,6 +741,18 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     UserScrollNotification(metrics: copyWith(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
   }
 
+  /// Provides a heuristic to determine if expensive frame-bound tasks should be
+  /// deferred.
+  ///
+  /// The actual work of this is delegated to the [physics] via
+  /// [ScrollPhysics.recommendDeferredScrolling] called with the current
+  /// [activity]'s [ScrollActivity.velocity].
+  bool recommendDeferredLoading() {
+    assert(activity != null);
+    assert(activity.velocity != null);
+    return physics.recommendDeferredLoading(activity.velocity);
+  }
+
   @override
   void dispose() {
     activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition

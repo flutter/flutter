@@ -676,4 +676,144 @@ void main() {
     // of Platform.isMacOS, don't skip this on web anymore.
     // https://github.com/flutter/flutter/issues/31366
   }, skip: kIsWeb);
+
+  testWidgets('Can recommendDeferredLoadingForContext - animation', (WidgetTester tester) async {
+    int cheapWidgets = 0;
+    int expensiveWidgets = 0;
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        controller: controller,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            cheapWidgets += 1;
+            return const SizedBox(height: 50.0);
+          }
+          expensiveWidgets += 1;
+          return SizedBox(key: ValueKey<String>('Box $index'), height: 50.0);
+        },
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('Box 111')), findsNothing);
+
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 0);
+
+    // The position value here is different from the maximum velocity we will
+    // reach, which is controlled by a combination of curve, duration, and
+    // position.
+    // This is just meant to be a pretty good simulation. A linear curve
+    // with these same parameters will never back off on the velocity enough
+    // to reset here.
+    controller.animateTo(
+      5000,
+      duration: const Duration(seconds: 2),
+      curve: Curves.fastLinearToSlowEaseIn,
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('Box 111')), findsOneWidget);
+
+    expect(expensiveWidgets, 69);
+    expect(cheapWidgets, 48);
+  });
+
+  testWidgets('Can recommendDeferredLoadingForContext - ballistics', (WidgetTester tester) async {
+    int cheapWidgets = 0;
+    int expensiveWidgets = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            cheapWidgets += 1;
+            return const SizedBox(height: 50.0);
+          }
+          expensiveWidgets += 1;
+          return SizedBox(key: ValueKey<String>('Box $index'), height: 50.0);
+        },
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('Box 52')), findsNothing);
+
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 0);
+
+    // Getting the tester to simulate a life-like fling is difficult.
+    // Instead, just manually drive the activity with a ballistic simulation as
+    // if the user has flung the list.
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity.delegate.goBallistic(4000);
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('Box 52')), findsOneWidget);
+
+    expect(expensiveWidgets, 38);
+    expect(cheapWidgets, 20);
+  });
+
+  testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
+    int cheapWidgets = 0;
+    int expensiveWidgets = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        physics: const SuperPessimisticScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            cheapWidgets += 1;
+            return SizedBox(key: ValueKey<String>('Cheap box $index'), height: 50.0);
+          }
+          expensiveWidgets += 1;
+          return SizedBox(key: ValueKey<String>('Box $index'), height: 50.0);
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
+
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 0);
+
+    // Getting the tester to simulate a life-like fling is difficult.
+    // Instead, just manually drive the activity with a ballistic simulation as
+    // if the user has flung the list.
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity.delegate.goBallistic(4000);
+
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
+
+    expect(expensiveWidgets, 18);
+    expect(cheapWidgets, 40);
+  });
+}
+
+class SuperPessimisticScrollPhysics extends ScrollPhysics {
+  const SuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+
+
+  @override
+  bool recommendDeferredLoading(double velocity) {
+    return velocity > 1;
+  }
+
+  @override
+  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return SuperPessimisticScrollPhysics(parent: buildParent(ancestor));
+  }
 }
