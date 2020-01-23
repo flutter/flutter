@@ -17,7 +17,7 @@ final String cirrusPR = io.Platform.environment['CIRRUS_PR'];
 /// Used to check for any tryjob results from Flutter Gold associated with a PR.
 Future<void> main() async {
   // Allow time for the results to have finished processing on Gold's end
-  print('$clock WAITING TO START STATUS CHECK');
+  print('$clock Waiting 30 seconds to start status check...');
   await Future<void>.delayed(const Duration(seconds: 30));
   try {
     print('Running task: Flutter Gold Tryjob Status Check');
@@ -37,7 +37,7 @@ Future<void> _queryTryjobStatus() async {
   String rawResponse;
   bool needsTriage = true;
 
-  print('${green}Requesting $requestForTryjobStatus ...$reset');
+  print('${green}Requesting:$reset\n$requestForTryjobStatus');
 
   // Continue checking until there are no untriaged digests
   while (needsTriage) {
@@ -56,7 +56,7 @@ Future<void> _queryTryjobStatus() async {
         print('${red}Tryjob generated new images.$reset\n'
           'Visit https://flutter-gold.skia.org/changelists to view and triage '
           '(e.g. because this is an intentional change).\n'
-          '$clock ${bold}Next status check scheduled in 3 minutes.$reset');
+          '$clock ${bold}Next triage status check scheduled in 3 minutes.$reset');
 
         await Future<void>.delayed(const Duration(minutes: 3));
       }
