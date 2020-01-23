@@ -1,4 +1,4 @@
-Signature: 9e46b0ff096183bbe63eda3c41b2cb3a
+Signature: 411fc64fe581574d81cebe1cdf535e30
 
 UNUSED LICENSES:
 
@@ -3360,7 +3360,6 @@ FILE: ../../../third_party/skia/include/utils/SkTextUtils.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
 FILE: ../../../third_party/skia/modules/skottie/gm/3dgm.cpp
 FILE: ../../../third_party/skia/modules/skottie/include/SkottieProperty.h
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
@@ -3369,8 +3368,8 @@ FILE: ../../../third_party/skia/modules/skottie/src/SkottieProperty.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTest.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTool.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/PrecompLayer.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/ShapeLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/TextLayer.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/ShapeLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.cpp
 FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
@@ -3945,6 +3944,45 @@ FILE: ../../../third_party/skia/src/utils/SkThreadUtils_pthread.cpp
 FILE: ../../../third_party/skia/src/utils/SkThreadUtils_win.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2017 Google Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
+ORIGIN: ../../../third_party/skia/bench/GrQuadBench.cpp + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/bench/GrQuadBench.cpp
+FILE: ../../../third_party/skia/gm/crbug_224618.cpp
+FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
+----------------------------------------------------------------------------------------------------
+Copyright 2020 Google LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -5567,12 +5605,22 @@ FILE: ../../../third_party/skia/gm/bicubic.cpp
 FILE: ../../../third_party/skia/gm/compressed_textures.cpp
 FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
 FILE: ../../../third_party/skia/include/private/SkM44.h
+FILE: ../../../third_party/skia/modules/skottie/src/Adapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/Animator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Animator.h
 FILE: ../../../third_party/skia/modules/skottie/src/Camera.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Camera.h
 FILE: ../../../third_party/skia/modules/skottie/src/Transform.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Transform.h
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/MergePaths.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Polystar.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Rectangle.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Repeater.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/RoundCorners.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/ShapeLayer.h
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/TrimPaths.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/src/core/SkCanvasMatrix.h
 FILE: ../../../third_party/skia/src/core/SkM44.cpp
@@ -6713,43 +6761,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/core/SkTraceEvent.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2014 Google Inc.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the
-    distribution.
-
-  * Neither the name of the copyright holder nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
-ORIGIN: ../../../third_party/skia/src/core/SkVM_fwd.h + ../../../third_party/skia/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
-----------------------------------------------------------------------------------------------------
-Copyright 2020 Google LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
