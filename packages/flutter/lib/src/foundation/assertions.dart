@@ -37,10 +37,18 @@ class PartialStackFrame {
        assert(method != null),
        assert(packagePath != null);
 
+  /// An `<asynchronous suspension>` line in a stack trace.
+  static const PartialStackFrame asynchronousSuspension = PartialStackFrame(
+    className: '',
+    packagePath: '',
+    method: 'asynchronous suspension',
+  );
+
   /// The class name for the method.
   ///
-  /// On web, this is ignored, since class names are not available. Top level
-  /// methods should use the empty string.
+  /// On web, this is ignored, since class names are not available.
+  ///
+  /// On all platforms, top level methods should use the empty string.
   final String className;
 
   /// The method name for this frame line.
@@ -51,15 +59,18 @@ class PartialStackFrame {
   /// The relative path to the file for this method and class.
   ///
   /// This is required for disambiguation.
-  final String packagePath;
+  final Pattern packagePath;
 
-  @override
-  String toString() {
+  /// Tests whether the [StackFrame] matches the information in this
+  /// [PartialStackFrame].
+  bool matches(StackFrame stackFrame) {
     if (kIsWeb) {
-      final String webMethod = method.startsWith('_') ? '[$method]' : method;
-      return '$packagePath: $webMethod';
+      return packagePath.allMatches(stackFrame.packagePath).isNotEmpty
+          && stackFrame.method == (method.startsWith('_') ? '[$method]' : method);
     }
-    return '$packagePath: $className.$method';
+    return packagePath.allMatches(stackFrame.packagePath).isNotEmpty
+        && stackFrame.method == method
+        && stackFrame.className == className;
   }
 }
 
@@ -103,10 +114,13 @@ class SubStackFilter {
     if (stackFrames.length != numFrames) {
       return false;
     }
-    final String Function(StackFrame) mappingFunction = kIsWeb
-      ? (StackFrame frame) => '${frame.packagePath}: ${frame.method.startsWith('_') ? '[' + frame.method + ']' : frame.method}'
-      : (StackFrame frame) => '${frame.packagePath}: ${frame.className}.${frame.method}';
-    return stackFrames.map<String>(mappingFunction).join('\n') == frames.join('\n');
+
+    for (int index = 0; index < stackFrames.length; index++) {
+      if (!frames[index].matches(stackFrames[index])) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
