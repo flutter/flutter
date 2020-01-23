@@ -19,7 +19,7 @@ import 'framework.dart';
 ///  * [CupertinoTabBar]
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/bars/tab-bars>
 class BottomNavigationBarItem {
-  /// Creates an item that is used with [BottomNavigationBar.items].
+  /// Creates an item that is used with [BottomNavigationBar.destinations].
   ///
   /// The argument [icon] should not be null and the argument [title] should not be null when used in a Material Design's [BottomNavigationBar].
   const BottomNavigationBarItem({
