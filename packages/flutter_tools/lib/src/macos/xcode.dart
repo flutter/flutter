@@ -4,11 +4,16 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
+
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
-import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 10;
@@ -41,14 +46,31 @@ String getNameForSdk(SdkType sdk) {
   return null;
 }
 
+/// A utility class for interacting with Xcode command line tools.
 class Xcode {
-  bool get isInstalledAndMeetsVersionCheck => globals.platform.isMacOS && isInstalled && isVersionSatisfactory;
+  Xcode({
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @required XcodeProjectInterpreter xcodeProjectInterpreter,
+  }) : _platform = platform,
+       _fileSystem = fileSystem,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+
+  final Platform _platform;
+  final ProcessUtils _processUtils;
+  final FileSystem _fileSystem;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
+
+  bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isVersionSatisfactory;
 
   String _xcodeSelectPath;
   String get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath = processUtils.runSync(
+        _xcodeSelectPath = _processUtils.runSync(
           <String>['/usr/bin/xcode-select', '--print-path'],
         ).stdout.trim();
       } on ProcessException {
@@ -64,21 +86,21 @@ class Xcode {
     if (xcodeSelectPath == null || xcodeSelectPath.isEmpty) {
       return false;
     }
-    return xcodeProjectInterpreter.isInstalled;
+    return _xcodeProjectInterpreter.isInstalled;
   }
 
-  int get majorVersion => xcodeProjectInterpreter.majorVersion;
+  int get majorVersion => _xcodeProjectInterpreter.majorVersion;
 
-  int get minorVersion => xcodeProjectInterpreter.minorVersion;
+  int get minorVersion => _xcodeProjectInterpreter.minorVersion;
 
-  String get versionText => xcodeProjectInterpreter.versionText;
+  String get versionText => _xcodeProjectInterpreter.versionText;
 
   bool _eulaSigned;
   /// Has the EULA been signed?
   bool get eulaSigned {
     if (_eulaSigned == null) {
       try {
-        final RunResult result = processUtils.runSync(
+        final RunResult result = _processUtils.runSync(
           <String>['/usr/bin/xcrun', 'clang'],
         );
         if (result.stdout != null && result.stdout.contains('license')) {
@@ -103,7 +125,7 @@ class Xcode {
       try {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
-        final RunResult result = processUtils.runSync(
+        final RunResult result = _processUtils.runSync(
           <String>['/usr/bin/xcrun', 'simctl', 'list'],
         );
         _isSimctlInstalled = result.stderr == null || result.stderr == '';
@@ -115,7 +137,7 @@ class Xcode {
   }
 
   bool get isVersionSatisfactory {
-    if (!xcodeProjectInterpreter.isInstalled) {
+    if (!_xcodeProjectInterpreter.isInstalled) {
       return false;
     }
     if (majorVersion > kXcodeRequiredVersionMajor) {
@@ -128,14 +150,14 @@ class Xcode {
   }
 
   Future<RunResult> cc(List<String> args) {
-    return processUtils.run(
+    return _processUtils.run(
       <String>['xcrun', 'cc', ...args],
       throwOnError: true,
     );
   }
 
   Future<RunResult> clang(List<String> args) {
-    return processUtils.run(
+    return _processUtils.run(
       <String>['xcrun', 'clang', ...args],
       throwOnError: true,
     );
@@ -143,7 +165,7 @@ class Xcode {
 
   Future<String> sdkLocation(SdkType sdk) async {
     assert(sdk != null);
-    final RunResult runResult = await processUtils.run(
+    final RunResult runResult = await _processUtils.run(
       <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
       throwOnError: true,
     );
@@ -158,10 +180,10 @@ class Xcode {
       return null;
     }
     final List<String> searchPaths = <String>[
-      globals.fs.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
+      _fileSystem.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
     ];
     return searchPaths.where((String p) => p != null).firstWhere(
-      (String p) => globals.fs.directory(p).existsSync(),
+      (String p) => _fileSystem.directory(p).existsSync(),
       orElse: () => null,
     );
   }
