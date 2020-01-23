@@ -13,6 +13,9 @@ import 'flat_button.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'icon_button.dart';
+import 'icons.dart';
+import 'colors.dart';
 
 const double _kHandleSize = 22.0;
 
@@ -43,13 +46,26 @@ class _TextSelectionToolbar extends StatefulWidget {
   _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
 
-class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
+class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
   final GlobalKey _containerKey = GlobalKey();
+  final GlobalKey _moreButtonKey = GlobalKey();
   final List<GlobalKey> _itemKeys = <GlobalKey>[];
+  double _menuContentWidth;
 
   // The number of items that fit in the main selection menu. Any others go in
   // the overflow menu. Must be less than or equal to items.length.
   int _itemsInFirstMenu;
+
+  // Whether or not the overflow menu is open.
+  bool _overflowOpen = false;
+
+  // Whether the overflow menu exists.
+  bool get _shouldShowMoreButton {
+    if (_itemKeys.isEmpty || _itemsInFirstMenu == null) {
+      return false;
+    }
+    return _itemsInFirstMenu < _itemKeys.length;
+  }
 
   @override initState() {
     super.initState();
@@ -66,22 +82,29 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       assert(_containerKey.currentContext != null);
       final RenderBox renderBoxContainer = _containerKey.currentContext.findRenderObject() as RenderBox;
-      double containerWidth = renderBoxContainer.paintBounds.width;
+      double remainingContainerWidth = renderBoxContainer.size.width;
 
       final int indexWhereOverflows = _itemKeys.indexWhere((GlobalKey key) {
         assert(key.currentContext != null);
         final RenderBox renderBox = key.currentContext.findRenderObject() as RenderBox;
 
-        if (renderBox.paintBounds.width > containerWidth) {
+        if (renderBox.size.width > remainingContainerWidth) {
           return true;
         }
 
-        containerWidth -= renderBox.paintBounds.width;
+        remainingContainerWidth -= renderBox.size.width;
         return false;
       });
 
+      final RenderBox renderBoxMoreButton = _moreButtonKey.currentContext.findRenderObject() as RenderBox;
+      final double moreButtonWidth = renderBoxMoreButton.size.width;
+      final double itemsWidth = renderBoxContainer.size.width - remainingContainerWidth;
+
       setState(() {
         _itemsInFirstMenu = indexWhereOverflows == -1 ? _itemKeys.length : indexWhereOverflows;
+        _menuContentWidth = _shouldShowMoreButton
+          ? itemsWidth + moreButtonWidth
+          : itemsWidth;
       });
     });
   }
@@ -120,7 +143,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       _itemKeys.add(GlobalKey());
       items.add(FlatButton(
         key: _itemKeys[_itemKeys.length - 1],
-        child: Text(/*'Select evvvvverything'*/localizations.selectAllButtonLabel),
+        child: Text('Select evvvvverything'/*localizations.selectAllButtonLabel*/),
         onPressed: widget.handleSelectAll,
       ));
     }
@@ -129,6 +152,17 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
     if (items.isEmpty) {
       return Container(width: 0.0, height: 0.0);
     }
+
+    final moreButton = IconButton(
+      key: _moreButtonKey,
+      icon: Icon(Icons.more_vert),
+      tooltip: 'More',
+      onPressed: () {
+        setState(() {
+          _overflowOpen = true;
+        });
+      },
+    );
 
     // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
     // frame of measurement.
@@ -143,23 +177,61 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
             height: _kToolbarHeight,
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: items,
+              children: <Widget>[
+                ...items,
+                moreButton,
+              ],
             ),
           ),
         ),
       );
     }
 
-    return Material(
-      elevation: 1.0,
-      child: Container(
-        key: _containerKey,
+    Widget menuContent;
+    if (_overflowOpen) {
+      menuContent = Container(
+        // TODO(justinmc): Height should be dynamic.
+        height: _kToolbarHeight * 3,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            ...items.sublist(_itemsInFirstMenu, items.length),
+            IconButton(
+              icon: Icon(Icons.arrow_back),
+              tooltip: 'Back',
+              onPressed: () {
+                setState(() {
+                  _overflowOpen = false;
+                });
+              },
+            ),
+          ],
+        ),
+      );
+    } else {
+      menuContent = Container(
         height: _kToolbarHeight,
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: items.sublist(0, _itemsInFirstMenu),
+          children: <Widget>[
+            ...items.sublist(0, _itemsInFirstMenu),
+            if (_itemsInFirstMenu < items.length) moreButton,
+          ],
         ),
-        // TODO(justinmc): Add overflow menu.
+      );
+    }
+
+    return Container(
+      key: _containerKey,
+      width: _menuContentWidth,
+      child: Material(
+        elevation: 1.0,
+        child: AnimatedSize(
+          vsync: this,
+          duration: const Duration(milliseconds: 200),
+          child: menuContent,
+        ),
       ),
     );
   }
