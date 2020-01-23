@@ -50,14 +50,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     String shellPath,
     this.updateGoldens,
   }) {
-    // Look up the location of the testing resources.
-    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.join(
-      Cache.flutterRoot,
-      'packages',
-      'flutter_tools',
-      '.packages',
-    )).map;
-    testUri = packageMap['test'];
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(packagesDirHandler())
@@ -74,10 +66,10 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_goldenFileHandler)
         .add(_wrapperHandler)
         .add(createStaticHandler(
-          globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter', 'test'),
+          p.join(p.current, 'test'),
           serveFilesOutsidePath: true,
         ))
-        .add(_flutterFilesHandler);
+        .add(_packageFilesHandler);
     _server.mount(cascade.handler);
 
     _testGoldenComparator = TestGoldenComparator(
@@ -104,7 +96,19 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  Uri testUri;
+  /// Parsed package map from `.packages` of the current working directory.
+  final PackageMap _packageMap = PackageMap(p.join(p.current, '.packages'));
+
+  /// Parsed package map from `.packages` of the `flutter_tools` package.
+  final PackageMap _flutterToolsPackageMap = PackageMap(p.join(
+    Cache.flutterRoot,
+    'packages',
+    'flutter_tools',
+    '.packages',
+  ));
+
+  /// Uri of the test package.
+  Uri get testUri => _flutterToolsPackageMap.map['test'];
 
   /// The test runner configuration.
   final Configuration _config;
@@ -200,36 +204,32 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
   }
 
-  final shelf.Handler _flutterFilesStaticHandler = createStaticHandler(
-        globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter', 'lib', 'src'),
-        serveFilesOutsidePath: true,
-      );
-
-  FutureOr<shelf.Response> _flutterFilesHandler(shelf.Request request) {
-    // For some reason, the paths we are getting are missing the `lib/` segment.
-    // So we remove the "packages/flutter/src/" prefix and serve it as a relative
-    // path from inside the flutter src directory.
-    if (request.requestedUri.path.startsWith('/packages/flutter/src')) {
-      final shelf.Request modifiedRequest = shelf.Request(
-        request.method,
-        request.requestedUri.replace(path: _getRelativePathToFlutterSrc(request.requestedUri.path)),
-        protocolVersion: request.protocolVersion,
-        headers: request.headers,
-        handlerPath: _getRelativePathToFlutterSrc(request.handlerPath),
-        url: request.url.replace(path: _getRelativePathToFlutterSrc(request.url.path)),
-        encoding: request.encoding,
-        context: request.context,
-      );
-      return _flutterFilesStaticHandler(modifiedRequest);
+  FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) {
+    if (request.requestedUri.path.startsWith('/packages/')) {
+      final RegExp pkgRegExp = RegExp(r'/packages/([^/]+)/(.+)');
+      final Match match = pkgRegExp.matchAsPrefix(request.requestedUri.path);
+      final String packageName = match.group(1);
+      final String restFilePath = match.group(2);
+      final Uri packageUri = _packageMap.map[packageName];
+      if (packageUri != null) {
+        final shelf.Handler handler = createStaticHandler(
+          packageUri.toFilePath(),
+          serveFilesOutsidePath: true,
+        );
+        final shelf.Request modifiedRequest = shelf.Request(
+          request.method,
+          request.requestedUri.replace(path: restFilePath),
+          protocolVersion: request.protocolVersion,
+          headers: request.headers,
+          handlerPath: request.handlerPath,
+          url: request.url.replace(path: restFilePath),
+          encoding: request.encoding,
+          context: request.context,
+        );
+        return handler(modifiedRequest);
+      }
     }
     return shelf.Response.notFound('Not Found');
-  }
-
-  String _getRelativePathToFlutterSrc(String path) {
-    if (path.startsWith(RegExp(r'^/?packages/flutter/src/'))) {
-      return path.replaceFirst('packages/flutter/src/', '');
-    }
-    return path;
   }
 
   final bool updateGoldens;
