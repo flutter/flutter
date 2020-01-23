@@ -166,7 +166,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
 
     // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
     // frame of measurement.
-    if (_itemsInFirstMenu == null) {
+    if (_itemsInFirstMenu == null || _itemsInFirstMenu > items.length) {
       // TODO(justinmc): Clean up this duplication and overall division of
       // widgets.
       return Offstage(
