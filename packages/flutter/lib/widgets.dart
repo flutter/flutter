@@ -78,6 +78,7 @@ export 'src/widgets/raw_keyboard_listener.dart';
 export 'src/widgets/routes.dart';
 export 'src/widgets/safe_area.dart';
 export 'src/widgets/scroll_activity.dart';
+export 'src/widgets/scroll_aware_image_provider.dart';
 export 'src/widgets/scroll_configuration.dart';
 export 'src/widgets/scroll_context.dart';
 export 'src/widgets/scroll_controller.dart';

@@ -212,5 +212,35 @@ void main() {
             },
           ));
     });
+
+    test('containsKey - pending', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      }) as TestImageStreamCompleter;
+
+      expect(resultingCompleter1, completer1);
+      expect(imageCache.containsKey(testImage), true);
+    });
+
+    test('containsKey - completed', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      }) as TestImageStreamCompleter;
+
+      // Mark as complete
+      completer1.testSetImage(testImage);
+
+      expect(resultingCompleter1, completer1);
+      expect(imageCache.containsKey(testImage), true);
+
+    });
   });
 }

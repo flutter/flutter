@@ -340,6 +340,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// is false after calling `super.removeListener()`, and if so, stopping that
   /// same work.
   @protected
+  @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
 
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]

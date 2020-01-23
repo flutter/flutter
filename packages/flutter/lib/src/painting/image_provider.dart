@@ -270,10 +270,19 @@ abstract class ImageProvider<T> {
   /// This is the public entry-point of the [ImageProvider] class hierarchy.
   ///
   /// Subclasses should implement [obtainKey] and [load], which are used by this
-  /// method.
+  /// method. If they need to manage the actual resolution of the image, they
+  /// should override [resolveForStream] instead of this method.
+  @nonVirtual
   ImageStream resolve(ImageConfiguration configuration) {
     assert(configuration != null);
     final ImageStream stream = ImageStream();
+    _safeObtainKey(configuration, stream);
+    return stream;
+  }
+
+  void _safeObtainKey(ImageConfiguration configuration, ImageStream stream) {
+    assert(configuration != null);
+    assert(stream != null);
     T obtainedKey;
     bool didError = false;
     Future<void> handleError(dynamic exception, StackTrace stack) async {
@@ -322,17 +331,36 @@ abstract class ImageProvider<T> {
       }
       key.then<void>((T key) {
         obtainedKey = key;
-        final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
-          key,
-          () => load(key, PaintingBinding.instance.instantiateImageCodec),
-          onError: handleError,
-        );
-        if (completer != null) {
-          stream.setCompleter(completer);
+        try {
+          useKey(configuration, stream, key, handleError);
+        } catch (error, stackTrace) {
+          handleError(error, stackTrace);
         }
       }).catchError(handleError);
     });
-    return stream;
+  }
+
+  /// Called when [resolve] has finished calling [obtainKey].
+  ///
+  /// Subclasses should avoid calling [obtainKey] directly and instead override
+  /// this method, which makes sure appropriate error handling is in place to
+  /// notify callers and the framework.
+  ///
+  /// It is safe to call [handleError] multiple times if multiple errors occur.
+  ///
+  /// The default implementation uses the key to interact with the [ImageCache],
+  /// calling [ImageCache.putIfAbsent] and notifying listeners of the [stream].
+  /// Implementers that do not call super should
+  @protected
+  void useKey(ImageConfiguration configuration, ImageStream stream, T key, ImageErrorListener handleError) {
+    final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
+      key,
+      () => load(key, PaintingBinding.instance.instantiateImageCodec),
+      onError: handleError,
+    );
+    if (completer != null) {
+      stream.setCompleter(completer);
+    }
   }
 
   /// Evicts an entry from the image cache.
