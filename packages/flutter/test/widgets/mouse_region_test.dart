@@ -240,8 +240,7 @@ void main() {
       ),
     ));
     await tester.pump();
-    expect(move, isNotNull);
-    expect(move.position, equals(const Offset(400.0, 300.0)));
+    expect(move, isNull);
     expect(enter, isNotNull);
     expect(enter.position, equals(const Offset(400.0, 300.0)));
     expect(exit, isNull);
@@ -268,13 +267,9 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(400.0, 300.0));
     await tester.pump();
-    expect(move, isNotNull);
-    expect(move.position, equals(const Offset(400.0, 300.0)));
-    expect(enter, isNotNull);
-    expect(enter.position, equals(const Offset(400.0, 300.0)));
-    expect(exit, isNull);
     move = null;
     enter = null;
+    exit = null;
     await tester.pumpWidget(Center(
       child: Container(
         width: 100.0,
@@ -875,8 +870,8 @@ void main() {
     TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
     addTearDown(() => gesture?.removePointer());
-    await gesture.moveTo(tester.getCenter(find.byType(Container)));
     await tester.pumpAndSettle();
+    await gesture.moveTo(tester.getCenter(find.byType(Container)));
 
     expect(enter.length, 1);
     expect(enter.single.position, const Offset(400.0, 300.0));
