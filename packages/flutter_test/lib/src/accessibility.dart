@@ -264,7 +264,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
         return result;
       }
-      final List<int> subset = _subsetFromRect(byteData, paintBounds, image.width, image.height);
+      final List<int> subset = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
       if (subset.isEmpty) {
         return result;
@@ -392,7 +392,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
         renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
       );
 
-      final List<int> subset = _subsetFromRect(byteData, paintBounds, image.width, image.height);
+      final List<int> subset = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
 
       if (subset.isEmpty) {
         return const Evaluation.pass();
@@ -559,7 +559,7 @@ class _ContrastReport {
 ///
 /// In the returned list, each color is represented as a 32-bit integer
 /// in ARGB format, similar to the parameter for the [Color] constructor.
-List<int> _subsetFromRect(ByteData data, Rect paintBounds, int width, int height) {
+List<int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, int height) {
   final Rect truePaintBounds = paintBounds.intersect(
     Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
   );
