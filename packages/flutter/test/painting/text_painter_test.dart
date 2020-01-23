@@ -806,5 +806,5 @@ void main() {
   // does not have a clear cause. This may or may not be a dart compiler
   // issue or similar. See https://github.com/flutter/flutter/issues/43763
   // for more info.
-  }, skip: true); 
+  }, skip: true);
 }
