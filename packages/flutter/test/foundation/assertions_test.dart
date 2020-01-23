@@ -379,7 +379,7 @@ void main() {
 
     expect(builder.properties.length, 4);
     expect(builder.properties[0].toString(), 'The following assertion was thrown:');
-    expect(builder.properties[1].toString(), 'Assertion failed');
+    expect(builder.properties[1].toString(), contains('Assertion failed'));
     expect(builder.properties[2] is ErrorSpacer, true);
     final DiagnosticsStackTrace trace = builder.properties[3] as DiagnosticsStackTrace;
     expect(trace, isNotNull);
@@ -413,7 +413,7 @@ void main() {
     details.debugFillProperties(builder);
     expect(builder.properties.length, 6);
     expect(builder.properties[0].toString(), 'The following assertion was thrown:');
-    expect(builder.properties[1].toString(), 'Assertion failed');
+    expect(builder.properties[1].toString(), contains('Assertion failed'));
     expect(builder.properties[2] is ErrorSpacer, true);
     expect(
       builder.properties[3].toString(),

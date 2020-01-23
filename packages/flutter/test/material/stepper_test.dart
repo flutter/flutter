@@ -533,8 +533,8 @@ void main() {
       equalsIgnoringHashCodes(
         '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
         'The following assertion was thrown building Stepper(dirty,\n'
-        'dependencies: [_LocalizationsScope-[GlobalKey#6b31b],\n'
-        'TickerMode], state: _StepperState#1bf00):\n'
+        'dependencies: [_LocalizationsScope-[GlobalKey#00000]], state:\n'
+        '_StepperState#00000):\n'
         'Steppers must not be nested.\n'
         'The material specification advises that one should avoid\n'
         'embedding steppers within steppers.\n'
