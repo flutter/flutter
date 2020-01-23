@@ -92,7 +92,7 @@ abstract class FocusTraversalPolicy {
     final FocusScopeNode scope = currentNode.nearestScope;
     FocusNode candidate = scope.focusedChild;
     if (candidate == null && scope.traversalChildren.isNotEmpty) {
-      final Iterable<FocusNode> sorted = sortDescendants(scope);
+      final Iterable<FocusNode> sorted = sortDescendants(scope.traversalDescendants);
       candidate = sorted.isNotEmpty ? sorted.first : null;
     }
 
@@ -183,11 +183,9 @@ abstract class FocusTraversalPolicy {
   /// This is not used for directional focus ([inDirection]), only for
   /// determining the focus order for [next] and [previous].
   ///
-  /// The default implementation provides the nodes in depth-first widget
-  /// traversal order (See [FocusScopeNode.traversalDescendants]), in the same
-  /// way that [WidgetOrderFocusTraversalPolicy] does.
+  /// The default implementation provides the nodes in the order given.
   @protected
-  Iterable<FocusNode> sortDescendants(FocusScopeNode scope) => scope.traversalDescendants;
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants) => descendants;
 
   // Moves the focus to the next node in the FocusScopeNode provided by the
   // nearest scope to the currentNode argument, either in a forward or
@@ -224,7 +222,7 @@ abstract class FocusTraversalPolicy {
         return true;
       }
     }
-    final List<FocusNode> sortedNodes = sortDescendants(nearestScope).toList();
+    final List<FocusNode> sortedNodes = sortDescendants(nearestScope.traversalDescendants).toList();
     if (forward && focusedChild == sortedNodes.last) {
       _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
       return true;
@@ -704,10 +702,9 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   // Sorts the list of nodes based on their geometry into the desired reading
   // order based on the directionality of the context for each node.
   @override
-  Iterable<FocusNode> sortDescendants(FocusScopeNode scope) {
-    final Iterable<FocusNode> nodes = scope.traversalDescendants;
-    if (nodes.length <= 1) {
-      return nodes;
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants) {
+    if (descendants.length <= 1) {
+      return descendants;
     }
 
     Iterable<_ReadingOrderSortData> inBand(_ReadingOrderSortData current, Iterable<_ReadingOrderSortData> candidates) {
@@ -717,7 +714,8 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       });
     }
 
-    final TextDirection textDirection = scope.context == null ? TextDirection.ltr : Directionality.of(scope.context);
+    final BuildContext context = descendants.first.enclosingScope.context;
+    final TextDirection textDirection = context == null ? TextDirection.ltr : Directionality.of(context);
     _ReadingOrderSortData pickFirst(List<_ReadingOrderSortData> candidates) {
       int compareBeginningSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
         return textDirection == TextDirection.ltr ? a.rect.left.compareTo(b.rect.left) : -a.rect.right.compareTo(b.rect.right);
@@ -741,7 +739,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     }
 
     final List<_ReadingOrderSortData> data = <_ReadingOrderSortData>[
-      for (final FocusNode node in nodes) _ReadingOrderSortData(node),
+      for (final FocusNode node in descendants) _ReadingOrderSortData(node),
     ];
 
     // Pick the initial widget as the one that is leftmost in the band of the
@@ -970,8 +968,8 @@ class OrderedFocusTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   FocusTraversalPolicy secondary;
 
   @override
-  Iterable<FocusNode> sortDescendants(FocusScopeNode scope) {
-    final Iterable<FocusNode> sortedDescendants = secondary.sortDescendants(scope);
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants) {
+    final Iterable<FocusNode> sortedDescendants = secondary.sortDescendants(descendants);
     final List<FocusNode> unordered = <FocusNode>[];
     final List<_OrderedFocusInfo> ordered = <_OrderedFocusInfo>[];
     for (final FocusNode node in sortedDescendants) {
