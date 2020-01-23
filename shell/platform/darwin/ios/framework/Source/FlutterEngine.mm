@@ -122,6 +122,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 }
 
 - (void)dealloc {
+  [_labelPrefix release];
   [_pluginPublications release];
   _binaryMessenger.parent = nil;
   [_binaryMessenger release];
