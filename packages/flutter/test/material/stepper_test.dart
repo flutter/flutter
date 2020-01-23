@@ -529,21 +529,21 @@ void main() {
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
     final String errorMessage = lines.takeWhile(
-      (String line) => line != 'When the exception was thrown, this was the stack:',
+      (String line) => line != '',
     ).join('\n');
     expect(errorMessage.length, lessThan(fullErrorMessage.length));
     expect(errorMessage, startsWith(
       '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
       'The following assertion was thrown building Stepper('
     ));
-    // The description string of the stepper looks slightly different dependent
+    // The description string of the stepper looks slightly different depending
     // on the platform and is omitted here.
     expect(errorMessage, endsWith(
       '):\n'
       'Steppers must not be nested.\n'
       'The material specification advises that one should avoid\n'
       'embedding steppers within steppers.\n'
-      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage\n'
+      'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
     ));
   });
 
