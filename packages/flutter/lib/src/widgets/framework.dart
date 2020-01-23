@@ -3489,6 +3489,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     Key key;
     assert(() {
       key = _widget.key; // Use the private property to avoid a CastError during hot reload.
+      return true;
     }());
     if (!kDebugMode) {
       key = widget.key;
