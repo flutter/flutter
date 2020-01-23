@@ -227,6 +227,7 @@ executable("fml_unittests") {
     "memory/weak_ptr_unittest.cc",
     "message_loop_task_queues_merge_unmerge_unittests.cc",
     "message_loop_task_queues_unittests.cc",
+    "message_loop_unittests.cc",
     "message_unittests.cc",
     "paths_unittests.cc",
     "platform/darwin/string_range_sanitization_unittests.mm",
@@ -243,10 +244,7 @@ executable("fml_unittests") {
 
   # TODO(gw280): Figure out why these tests don't work currently on Fuchsia
   if (!is_fuchsia) {
-    sources += [
-      "file_unittest.cc",
-      "message_loop_unittests.cc",
-    ]
+    sources += [ "file_unittest.cc" ]
   }
 
   deps = [

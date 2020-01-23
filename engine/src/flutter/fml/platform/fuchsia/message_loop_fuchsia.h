@@ -6,6 +6,7 @@
 #define FLUTTER_FML_PLATFORM_FUCHSIA_MESSAGE_LOOP_FUCHSIA_H_
 
 #include <lib/async-loop/cpp/loop.h>
+#include <lib/async/cpp/task.h>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop_impl.h"
@@ -25,6 +26,8 @@ class MessageLoopFuchsia : public MessageLoopImpl {
   void WakeUp(fml::TimePoint time_point) override;
 
   async::Loop loop_;
+  std::mutex task_mutex_;
+  async::Task task_;
 
   FML_FRIEND_MAKE_REF_COUNTED(MessageLoopFuchsia);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopFuchsia);
