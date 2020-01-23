@@ -133,6 +133,12 @@ void main() {
     tester.binding.scheduleWarmUpFrame(); // this actually tests flutter_test's implementation
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(frameCount, 1);
+
+    // Get the tester back to a resumed state for subsequent tests.
+    message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
   });
 
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
@@ -171,6 +177,8 @@ void main() {
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     String filteredStack;
     FlutterError.onError = (FlutterErrorDetails details) {
+      expect(details.exception, isAssertionError);
+      expect(filteredStack, isNull);
       filteredStack = details.toString();
     };
     await tester.pumpWidget(Directionality(
@@ -189,8 +197,8 @@ void main() {
       ),
     ));
     // We don't elide the root or the last element.
+    FlutterError.onError = oldHandler;
     expect(tester.allElements.length, 10);
     expect(filteredStack, contains('...     Normal element mounting (x8 - 42 frames)'));
-    FlutterError.onError = oldHandler;
   });
 }
