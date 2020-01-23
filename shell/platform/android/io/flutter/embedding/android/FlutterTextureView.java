@@ -38,6 +38,8 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
   private boolean isAttachedToFlutterRenderer = false;
   @Nullable
   private FlutterRenderer flutterRenderer;
+  @Nullable
+  private Surface renderSurface;
 
   // Connects the {@code SurfaceTexture} beneath this {@code TextureView} with Flutter's native code.
   // Callbacks are received by this Object and then those messages are forwarded to our
@@ -172,7 +174,8 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
       throw new IllegalStateException("connectSurfaceToRenderer() should only be called when flutterRenderer and getSurfaceTexture() are non-null.");
     }
 
-    flutterRenderer.startRenderingToSurface(new Surface(getSurfaceTexture()));
+    renderSurface = new Surface(getSurfaceTexture());
+    flutterRenderer.startRenderingToSurface(renderSurface);
   }
 
   // FlutterRenderer must be non-null.
@@ -192,5 +195,7 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
     }
 
     flutterRenderer.stopRenderingToSurface();
+    renderSurface.release();
+    renderSurface = null;
   }
 }
