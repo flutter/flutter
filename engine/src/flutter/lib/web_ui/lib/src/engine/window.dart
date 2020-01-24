@@ -170,7 +170,7 @@ class EngineWindow extends ui.Window {
             // There are no default system sounds on web.
             return;
           case 'Clipboard.setData':
-            ClipboardMessageHandler().setDataMethodCall(decoded);
+            ClipboardMessageHandler().setDataMethodCall(decoded, callback);
             return;
           case 'Clipboard.getData':
             ClipboardMessageHandler().getDataMethodCall(callback);
