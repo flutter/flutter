@@ -522,38 +522,6 @@ void main() {
     ]));
   });
 
-  test('should correctly handle when annotation is attached or detached while not containing the pointer', () {
-    final List<PointerEvent> events = <PointerEvent>[];
-    _setUpMouseAnnotationFinder((Offset position) sync* {
-    });
-
-    // Connect a mouse when there is no annotation.
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
-    ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-    ]));
-    expect(_mouseTracker.mouseIsConnected, isTrue);
-    events.clear();
-
-    _binding.scheduleMouseTrackerPostFrameCheck();
-    expect(_binding.postFrameCallbacks, hasLength(1));
-
-    _binding.flushPostFrameCallbacks(Duration.zero);
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-    ]));
-    events.clear();
-
-    _binding.scheduleMouseTrackerPostFrameCheck();
-    expect(_binding.postFrameCallbacks, hasLength(1));
-
-    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
-    ]));
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-    ]));
-  });
-
   test('should not schedule postframe callbacks when no mouse is connected', () {
     _setUpMouseAnnotationFinder((Offset position) sync* {
     });
