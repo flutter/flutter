@@ -161,7 +161,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     //--------------------------------------------------------------------------
     /// @brief      When the Flutter application has a message to send to the
     ///             underlying platform, the message needs to be forwarded to
-    ///             the platform on the the appropriate thread (via the platform
+    ///             the platform on the appropriate thread (via the platform
     ///             task runner). The engine delegates this task to the shell
     ///             via this method.
     ///
@@ -231,7 +231,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   //----------------------------------------------------------------------------
   /// @brief      Creates an instance of the engine. This is done by the Shell
-  ///             on the the UI task runner.
+  ///             on the UI task runner.
   ///
   /// @param      delegate           The object used by the engine to perform
   ///                                tasks that require access to components
@@ -370,7 +370,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///             Flutter application. This happens implicitly in the call to
   ///             `Engine::Run` and `Engine::Restart` as the asset manager is
   ///             referenced from the run configuration provided to those calls.
-  ///             In addition to the the `Engine::Run` and `Engine::Restart`
+  ///             In addition to the `Engine::Run` and `Engine::Restart`
   ///             calls, the tooling may need to update the assets available to
   ///             the application as the user adds them to their project. For
   ///             example, these assets may be referenced by code that is newly

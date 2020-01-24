@@ -191,7 +191,7 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
   if (!RenderPictureToRenderTarget(
           root_picture_recorder_->finishRecordingAsPicture(),
           root_render_target_.get())) {
-    FML_LOG(ERROR) << "Could not render into the the root render target.";
+    FML_LOG(ERROR) << "Could not render into the root render target.";
     return false;
   }
   // The root picture recorder will be reset when a new frame begins.

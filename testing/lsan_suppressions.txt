@@ -31,7 +31,7 @@ leak:wrap_dispatch_source_set_event_handler
 leak:flutter::PlatformViewEmbedder::HandlePlatformMessage
 
 # Service ID platform message is leaked in case the isolate dies before the
-# message is received by the the same.
+# message is received by the same.
 # https://github.com/flutter/flutter/issues/42178
 leak:flutter::Engine::Run(flutter::RunConfiguration)
 

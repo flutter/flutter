@@ -125,7 +125,7 @@ class Scrollable extends RoleManager {
   /// have zero offset relative to Flutter's notion of scroll position is
   /// referred to as "neutral scroll position".
   ///
-  /// We always set the the scroll position to a non-zero value in order to
+  /// We always set the scroll position to a non-zero value in order to
   /// be able to scroll in the negative direction. When scrollTop/scrollLeft is
   /// zero the browser will refuse to scroll back even when there is more
   /// content available.

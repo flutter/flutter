@@ -1125,7 +1125,7 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 /// @brief      Initialize and run a Flutter engine instance and return a handle
-///             to it. This is a convenience method for the the pair of calls to
+///             to it. This is a convenience method for the pair of calls to
 ///             `FlutterEngineInitialize` and `FlutterEngineRunInitialized`.
 ///
 /// @note       This method of running a Flutter engine works well except in

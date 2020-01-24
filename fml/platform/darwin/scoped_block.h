@@ -19,7 +19,7 @@ enum class OwnershipPolicy {
   // ownership claim.
   Assume,
 
-  // The scoped object will retain the the object and any initial ownership is
+  // The scoped object will retain the object and any initial ownership is
   // not changed.
   Retain,
 };
