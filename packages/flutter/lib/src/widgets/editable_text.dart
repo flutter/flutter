@@ -1204,7 +1204,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // TextInputClient implementation:
 
+  // _lastKnownRemoteTextEditingValue tracks the value of the input method,
+  // and is updated to the formatted version when the local value is sent
+  // to the input method.
   TextEditingValue _lastKnownRemoteTextEditingValue;
+  // _receivedRemoteTextEditingValue is the direct value last passed in
+  // updateEditingValue. This value does not get updated with the formatted
+  // version.
   TextEditingValue _receivedRemoteTextEditingValue;
 
   @override
@@ -1217,6 +1223,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.readOnly) {
       return;
     }
+    _receivedRemoteTextEditingValue = value;
     if (value.text != _value.text) {
       hideToolbar();
       _showCaretOnScreen();
@@ -1225,10 +1232,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _obscureLatestCharIndex = _value.selection.baseOffset;
       }
     }
-    print('Updating-remoteValue: ${value.text}');
-    _receivedRemoteTextEditingValue = value;
+
     _formatAndSetValue(value);
-    _lastKnownRemoteTextEditingValue = value;
+
     // To keep the cursor from blinking while typing, we want to restart the
     // cursor timer every time a new character is typed.
     _stopCursorTimer(resetCharTicks: false);
@@ -1355,7 +1361,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextEditingValue localValue = _value;
     if (localValue == _receivedRemoteTextEditingValue)
       return;
-    print('Setting IMM: ${localValue.text}');
     _lastKnownRemoteTextEditingValue = localValue;
     _textInputConnection.setEditingState(localValue);
   }
@@ -1458,6 +1463,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection.close();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
+      _receivedRemoteTextEditingValue = null;
     }
   }
 
@@ -1476,6 +1482,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection.connectionClosedReceived();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
+      _receivedRemoteTextEditingValue = null;
       _finalizeEditing(true);
     }
   }
@@ -1624,13 +1631,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       for (final TextInputFormatter formatter in widget.inputFormatters)
         value = formatter.formatEditUpdate(_value, value);
       _value = value;
-      _updateRemoteEditingValueIfNeeded();
+      // _updateRemoteEditingValueIfNeeded();
+      _updateRemoteEditingValueIfNeeded()
     } else {
       _value = value;
     }
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
-    print('Finish Format: ${_value.text}');
+    _lastKnownRemoteTextEditingValue = _receivedRemoteTextEditingValue;
   }
 
   void _onCursorColorTick() {
