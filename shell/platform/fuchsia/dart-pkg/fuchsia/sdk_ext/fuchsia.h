@@ -11,7 +11,8 @@ namespace fuchsia {
 namespace dart {
 
 void Initialize(fidl::InterfaceHandle<fuchsia::sys::Environment> environment,
-                zx::channel directory_request);
+                zx::channel directory_request,
+                std::optional<zx::eventpair> view_ref);
 
 }  // namespace dart
 }  // namespace fuchsia

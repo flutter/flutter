@@ -102,7 +102,8 @@ void SetReturnCode(Dart_NativeArguments arguments) {
 }  // namespace
 
 void Initialize(fidl::InterfaceHandle<fuchsia::sys::Environment> environment,
-                zx::channel directory_request) {
+                zx::channel directory_request,
+                std::optional<zx::eventpair> view_ref) {
   zircon::dart::Initialize();
 
   Dart_Handle library = Dart_LookupLibrary(ToDart("dart:fuchsia"));
@@ -126,6 +127,13 @@ void Initialize(fidl::InterfaceHandle<fuchsia::sys::Environment> environment,
     result = Dart_SetField(
         library, ToDart("_outgoingServices"),
         ToDart(zircon::dart::Handle::Create(std::move(directory_request))));
+    FML_CHECK(!tonic::LogIfError(result));
+  }
+
+  if (view_ref) {
+    result = Dart_SetField(
+        library, ToDart("_viewRef"),
+        ToDart(zircon::dart::Handle::Create((*view_ref).release())));
     FML_CHECK(!tonic::LogIfError(result));
   }
 }

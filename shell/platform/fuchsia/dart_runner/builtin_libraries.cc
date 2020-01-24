@@ -6,6 +6,7 @@
 
 #include <lib/fdio/namespace.h>
 #include <lib/zx/channel.h>
+#include <optional>
 
 #include "dart-pkg/fuchsia/sdk_ext/fuchsia.h"
 #include "flutter/fml/logging.h"
@@ -103,9 +104,10 @@ void InitBuiltinLibrariesForIsolate(
     zx::channel directory_request,
     bool service_isolate) {
   // dart:fuchsia --------------------------------------------------------------
+  // dart runner doesn't care about scenic view ref.
   if (!service_isolate) {
     fuchsia::dart::Initialize(std::move(environment),
-                              std::move(directory_request));
+                              std::move(directory_request), std::nullopt);
   }
 
   // dart:fuchsia.builtin ------------------------------------------------------
