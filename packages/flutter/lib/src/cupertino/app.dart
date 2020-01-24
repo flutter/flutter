@@ -195,7 +195,7 @@ class CupertinoApp extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   /// {@macro flutter.widgets.widgetsApp.shortcuts}
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single shortcut for
   /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
   /// add your own [Shortcuts] widget.
@@ -223,7 +223,7 @@ class CupertinoApp extends StatefulWidget {
   final Map<LogicalKeySet, Intent> shortcuts;
 
   /// {@macro flutter.widgets.widgetsApp.actions}
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single action handling an
   /// [ActivateAction] to the default actions without needing to
   /// add your own [Actions] widget.

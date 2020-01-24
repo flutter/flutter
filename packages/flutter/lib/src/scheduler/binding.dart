@@ -209,7 +209,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (!kReleaseMode) {
       int frameNumber = 0;
       addTimingsCallback((List<FrameTiming> timings) {
-        for (FrameTiming frameTiming in timings) {
+        for (final FrameTiming frameTiming in timings) {
           frameNumber += 1;
           _profileFramePostEvent(frameNumber, frameTiming);
         }
@@ -249,7 +249,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void _executeTimingsCallbacks(List<FrameTiming> timings) {
     final List<TimingsCallback> clonedCallbacks =
         List<TimingsCallback>.from(_timingsCallbacks);
-    for (TimingsCallback callback in clonedCallbacks) {
+    for (final TimingsCallback callback in clonedCallbacks) {
       try {
         if (_timingsCallbacks.contains(callback)) {
           callback(timings);
@@ -582,7 +582,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
                 'The stack traces for when they were registered are as follows:'
               );
             }
-            for (int id in callbacks.keys) {
+            for (final int id in callbacks.keys) {
               final _FrameCallbackEntry entry = callbacks[id];
               yield DiagnosticsStackTrace('── callback $id ──', entry.debugStack, showSeparator: false);
             }
@@ -1043,7 +1043,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     try {
       // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
-      for (FrameCallback callback in _persistentCallbacks)
+      for (final FrameCallback callback in _persistentCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
 
       // POST-FRAME CALLBACKS
@@ -1051,7 +1051,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       final List<FrameCallback> localPostFrameCallbacks =
           List<FrameCallback>.from(_postFrameCallbacks);
       _postFrameCallbacks.clear();
-      for (FrameCallback callback in localPostFrameCallbacks)
+      for (final FrameCallback callback in localPostFrameCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
     } finally {
       _schedulerPhase = SchedulerPhase.idle;

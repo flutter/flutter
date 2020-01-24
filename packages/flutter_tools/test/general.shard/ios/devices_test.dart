@@ -24,6 +24,8 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -78,7 +80,7 @@ void main() {
       Platform: () => macPlatform,
     });
 
-    for (Platform platform in unsupportedPlatforms) {
+    for (final Platform platform in unsupportedPlatforms) {
       testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
           () { IOSDevice('device-123'); },
@@ -193,7 +195,7 @@ void main() {
         mockIosDeploy = MockIOSDeploy();
         mockUsage = MockUsage();
 
-        tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
         projectDir = tempDir.childDirectory('flutter_project');
 
         when(
@@ -410,7 +412,7 @@ void main() {
         Usage: () => mockUsage,
       });
 
-      testUsingContext(' succeeds in release mode', () async {
+      testUsingContext('succeeds in release mode', () async {
         final IOSDevice device = IOSDevice('123');
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
@@ -428,7 +430,7 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
-      testUsingContext(' succeeds with --cache-sksl', () async {
+      testUsingContext('succeeds with --cache-sksl', () async {
         final IOSDevice device = IOSDevice('123');
         device.setLogReader(mockApp, mockLogReader);
         final Uri uri = Uri(
@@ -472,6 +474,50 @@ void main() {
         IOSDeploy: () => mockIosDeploy,
       });
 
+      testUsingContext('succeeds with --device-vmservice-port', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.setLogReader(mockApp, mockLogReader);
+        final Uri uri = Uri(
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: 1234,
+          path: 'observatory',
+        );
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
+            .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
+
+        List<String> args;
+        when(mockIosDeploy.runApp(
+          deviceId: anyNamed('deviceId'),
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation inv) {
+          args = inv.namedArguments[const Symbol('launchArguments')] as List<String>;
+          return Future<int>.value(0);
+        });
+
+        final LaunchResult launchResult = await device.startApp(mockApp,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(
+            const BuildInfo(BuildMode.debug, null),
+            deviceVmServicePort: 8181,
+          ),
+          platformArgs: <String, dynamic>{},
+        );
+        expect(launchResult.started, isTrue);
+        expect(args, contains('--observatory-port=8181'));
+        expect(await device.stopApp(mockApp), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
+        FileSystem: () => mockFileSystem,
+        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
+        IOSDeploy: () => mockIosDeploy,
+      });
+
       void testNonPrebuilt(
         String name, {
         @required bool showBuildSettingsFlakes,
@@ -483,7 +529,7 @@ void main() {
               projectDir.childDirectory('build/ios/iphoneos/Debug-arm64');
 
           // The -showBuildSettings calls have a timeout and so go through
-          // processManager.start().
+          // globals.processManager.start().
           mockProcessManager.processFactory = flakyProcessFactory(
             flakes: showBuildSettingsFlakes ? 1 : 0,
             delay: const Duration(seconds: 62),
@@ -735,7 +781,7 @@ void main() {
     });
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
-    for (Platform platform in unsupportedPlatforms) {
+    for (final Platform platform in unsupportedPlatforms) {
       testUsingContext('throws Unsupported Operation exception on ${platform.operatingSystem}', () async {
         when(iMobileDevice.isInstalled).thenReturn(false);
         when(iMobileDevice.getAvailableDeviceIDs())
@@ -875,7 +921,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
   });
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
-    fs.file('pubspec.yaml')
+    globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
 name: example
@@ -883,7 +929,7 @@ name: example
 flutter:
   module: {}
 ''');
-    fs.file('.packages').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
@@ -893,9 +939,9 @@ flutter:
     Platform: () => macPlatform,
   });
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.directory('ios').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.directory('ios').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
@@ -906,8 +952,8 @@ flutter:
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSDevice('test').isSupportedForProject(flutterProject), false);
@@ -929,7 +975,7 @@ class AbsoluteBuildableIOSApp extends BuildableIOSApp {
 
   @override
   String get deviceBundlePath =>
-      fs.path.join(project.parent.directory.path, 'build', 'ios', 'iphoneos', name);
+      globals.fs.path.join(project.parent.directory.path, 'build', 'ios', 'iphoneos', name);
 
 }
 

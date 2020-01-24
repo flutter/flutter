@@ -716,16 +716,16 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
 
   @override
   _CupertinoEdgeShadowDecoration lerpFrom(Decoration a, double t) {
-    if (a is! _CupertinoEdgeShadowDecoration)
-      return _CupertinoEdgeShadowDecoration.lerp(null, this, t);
-    return _CupertinoEdgeShadowDecoration.lerp(a, this, t);
+    if (a is _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(a, this, t);
+    return _CupertinoEdgeShadowDecoration.lerp(null, this, t);
   }
 
   @override
   _CupertinoEdgeShadowDecoration lerpTo(Decoration b, double t) {
-    if (b is! _CupertinoEdgeShadowDecoration)
-      return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
-    return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
+    if (b is _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
+    return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
   }
 
   @override
@@ -734,11 +734,11 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final _CupertinoEdgeShadowDecoration typedOther = other;
-    return edgeGradient == typedOther.edgeGradient;
+    return other is _CupertinoEdgeShadowDecoration
+        && other.edgeGradient == edgeGradient;
   }
 
   @override

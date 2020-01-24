@@ -20,7 +20,7 @@ class FastScrollLargeImagesMemoryTest extends MemoryTest {
         );
 
   @override
-  AndroidDevice get device => super.device;
+  AndroidDevice get device => super.device as AndroidDevice;
 
   @override
   int get iterationCount => 5;

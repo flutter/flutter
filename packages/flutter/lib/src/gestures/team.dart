@@ -34,7 +34,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(_winner != null || _members.isNotEmpty);
     _close();
     _winner ??= _owner.captain ?? _members[0];
-    for (GestureArenaMember member in _members) {
+    for (final GestureArenaMember member in _members) {
       if (member != _winner)
         member.rejectGesture(pointer);
     }
@@ -45,7 +45,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   void rejectGesture(int pointer) {
     assert(_pointer == pointer);
     _close();
-    for (GestureArenaMember member in _members)
+    for (final GestureArenaMember member in _members)
       member.rejectGesture(pointer);
   }
 

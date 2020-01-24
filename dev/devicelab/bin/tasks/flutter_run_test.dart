@@ -63,4 +63,3 @@ Future<TaskResult> createFlutterRunTask() async {
     ? TaskResult.success(<String, dynamic>{})
     : TaskResult.failure('Test did not execute as expected.');
 }
-

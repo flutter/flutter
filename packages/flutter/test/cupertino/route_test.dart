@@ -109,8 +109,8 @@ void main() {
     final List<Element> titles = tester.elementList(find.text('An iPod'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject;
-          final RenderParagraph bParagraph = b.renderObject;
+          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
           return aParagraph.text.style.fontSize.compareTo(
             bParagraph.text.style.fontSize
           );

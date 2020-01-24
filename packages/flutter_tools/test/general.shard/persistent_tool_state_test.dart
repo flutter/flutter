@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -16,7 +17,7 @@ void main() {
   });
 
   test('state can be set and persists', () => testbed.run(() {
-    final File stateFile = fs.file('.flutter_tool_state');
+    final File stateFile = globals.fs.file('.flutter_tool_state');
     final PersistentToolState state1 = PersistentToolState(stateFile);
     expect(state1.redisplayWelcomeMessage, null);
     state1.redisplayWelcomeMessage = true;

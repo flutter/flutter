@@ -120,14 +120,14 @@ Future<void> saveCatalogScreenshots({
     String prefix, // Prefix for all file names.
   }) async {
   final List<String> screenshots = <String>[
-    for (FileSystemEntity entity in directory.listSync())
+    for (final FileSystemEntity entity in directory.listSync())
       if (entity is File && entity.path.endsWith('.png'))
         entity.path,
   ];
 
   final List<String> largeNames = <String>[]; // Cloud storage names for the full res screenshots.
   final List<String> smallNames = <String>[]; // Likewise for the scaled down screenshots.
-  for (String path in screenshots) {
+  for (final String path in screenshots) {
     final String name = screenshotName(path);
     largeNames.add('$commit/$prefix$name.png');
     smallNames.add('$commit/$prefix${name}_small.png');

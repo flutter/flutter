@@ -63,6 +63,15 @@ TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/post_backdrop_filter_perf.dart',
+    'post_backdrop_filter_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
 TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -145,6 +154,14 @@ TaskFunction createBasicMaterialCompileTest() {
 
     return CompileTest(sampleDir.path).run();
   };
+}
+
+TaskFunction createTextfieldPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/textfield_perf.dart',
+    'textfield_perf',
+  ).run;
 }
 
 
@@ -363,13 +380,15 @@ class CompileTest {
       case DeviceOperatingSystem.android:
         options.add('android-arm');
         break;
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
     }
     final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
 
     final RegExp metricExpression = RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
     final Map<String, dynamic> metrics = <String, dynamic>{};
-    for (Match m in metricExpression.allMatches(compileLog)) {
+    for (final Match m in metricExpression.allMatches(compileLog)) {
       metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
     }
     if (metrics.length != _kSdkNameToMetricNameMapping.length) {
@@ -417,6 +436,8 @@ class CompileTest {
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));
         break;
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
     }
 
     metrics.addAll(<String, dynamic>{
@@ -439,6 +460,8 @@ class CompileTest {
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
         break;
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
     }
     watch.start();
     await flutter('build', options: options);

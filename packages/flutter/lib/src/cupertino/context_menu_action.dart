@@ -135,7 +135,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
                   if (widget.trailingIcon != null)
                     Icon(
                       widget.trailingIcon,
-                      color: CupertinoColors.destructiveRed,
+                      color: _textStyle.color,
                     ),
                 ],
               ),

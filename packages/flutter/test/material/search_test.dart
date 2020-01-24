@@ -644,11 +644,12 @@ void main() {
 
 class TestHomePage extends StatelessWidget {
   const TestHomePage({
+    Key key,
     this.results,
     this.delegate,
     this.passInInitialQuery = false,
     this.initialQuery,
-  });
+  }) : super(key: key);
 
   final List<String> results;
   final SearchDelegate<String> delegate;

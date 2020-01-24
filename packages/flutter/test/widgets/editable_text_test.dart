@@ -358,6 +358,101 @@ void main() {
     expect(tester.testTextInput.setClientArgs['enableSuggestions'], enableSuggestions);
   });
 
+  group('smartDashesType and smartQuotesType', () {
+    testWidgets('sent to the engine properly', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      const SmartDashesType smartDashesType = SmartDashesType.disabled;
+      const SmartQuotesType smartQuotesType = SmartQuotesType.disabled;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                smartDashesType: smartDashesType,
+                smartQuotesType: smartQuotesType,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], smartDashesType.index.toString());
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], smartQuotesType.index.toString());
+    });
+
+    testWidgets('default to true when obscureText is false', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                obscureText: false,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], '1');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], '1');
+    });
+
+    testWidgets('default to false when obscureText is true', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                obscureText: true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], '0');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], '0');
+    });
+  });
+
   testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
         const TextEditingValue(
@@ -416,6 +511,89 @@ void main() {
     // First handle should have the same dx but bigger dy.
     expect(handles[0].localToGlobal(Offset.zero), const Offset(-35.0, 17.0));
     expect(handles[1].localToGlobal(Offset.zero), const Offset(197.0, 17.0));
+  });
+
+  testWidgets('can update style of previous activated EditableText', (WidgetTester tester) async {
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: Column(
+              children: <Widget>[
+                EditableText(
+                  key: key1,
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 9),
+                  cursorColor: cursorColor,
+                ),
+                EditableText(
+                  key: key2,
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 9),
+                  cursorColor: cursorColor,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key1));
+    await tester.showKeyboard(find.byKey(key1));
+    controller.text = 'test';
+    await tester.idle();
+    RenderBox renderEditable = tester.renderObject(find.byKey(key1));
+    expect(renderEditable.size.height, 9.0);
+    // Taps the other EditableText to deactivate the first one.
+    await tester.tap(find.byKey(key2));
+    await tester.showKeyboard(find.byKey(key2));
+    // Updates the style.
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: Column(
+              children: <Widget>[
+                EditableText(
+                  key: key1,
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 20),
+                  cursorColor: cursorColor,
+                ),
+                EditableText(
+                  key: key2,
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 9),
+                  cursorColor: cursorColor,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    renderEditable = tester.renderObject(find.byKey(key1));
+    expect(renderEditable.size.height, 20.0);
+    expect(tester.takeException(), null);
   });
 
   testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
@@ -2731,7 +2909,7 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
     expect(renderEditable.text.children.length, 3);
-    final TextSpan textSpan = renderEditable.text.children[1];
+    final TextSpan textSpan = renderEditable.text.children[1] as TextSpan;
     expect(textSpan.text, 'composing');
     expect(textSpan.style.decoration, TextDecoration.underline);
 
@@ -3002,7 +3180,7 @@ void main() {
           platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
           platform: platform);
     }
-    for (LogicalKeyboardKey key in keys) {
+    for (final LogicalKeyboardKey key in keys) {
       await tester.sendKeyEvent(key, platform: platform);
       await tester.pump();
     }
@@ -3833,10 +4011,6 @@ void main() {
   });
 
   testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
-    });
     const String testText = 'flutter is the best!';
     final TextEditingController controller = TextEditingController(text: testText);
     final EditableText et = EditableText(
@@ -3861,14 +4035,107 @@ void main() {
     ));
 
     await tester.showKeyboard(find.byType(EditableText));
-    expect(log.length, 7);
     // TextInput.show should be before TextInput.setEditingState
     final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
+    expect(tester.testTextInput.log.length, 7);
     int index = 0;
-    for (MethodCall m in log) {
+    for (final MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
       index++;
     }
+  });
+
+  testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
+    // We shouldn't get a message here because this change is owned by the platform side.
+    const String testText = 'flutter is the best!';
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText et = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: et,
+        ),
+      ),
+    ));
+
+    await tester.enterText(find.byType(EditableText), '...');
+
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.show',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.setEditingState',
+      'TextInput.show',
+    ];
+    expect(tester.testTextInput.log.length, logOrder.length);
+    int index = 0;
+    for (final MethodCall m in tester.testTextInput.log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
+    expect(tester.testTextInput.editingState['text'], 'flutter is the best!');
+  });
+
+  testWidgets('setEditingState is called when text changes on controller', (WidgetTester tester) async {
+    // We should get a message here because this change is owned by the framework side.
+    const String testText = 'flutter is the best!';
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText et = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: et,
+        ),
+      ),
+    ));
+
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text += '...';
+    await tester.idle();
+
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.show',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.setEditingState',
+      'TextInput.show',
+      'TextInput.setEditingState',
+    ];
+    expect(tester.testTextInput.log.length, logOrder.length);
+    int index = 0;
+    for (final MethodCall m in tester.testTextInput.log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
+    expect(tester.testTextInput.editingState['text'], 'flutter is the best!...');
   });
 }
 
@@ -3886,11 +4153,13 @@ class MockTextSelectionControls extends Mock implements TextSelectionControls {
 
 class CustomStyleEditableText extends EditableText {
   CustomStyleEditableText({
+    Key key,
     TextEditingController controller,
     Color cursorColor,
     FocusNode focusNode,
     TextStyle style,
   }) : super(
+          key: key,
           controller: controller,
           cursorColor: cursorColor,
           backgroundCursorColor: Colors.grey,
@@ -3913,7 +4182,11 @@ class CustomStyleEditableTextState extends EditableTextState {
 }
 
 class TransformedEditableText extends StatefulWidget {
-  const TransformedEditableText({ this.offset, this.transformButtonKey });
+  const TransformedEditableText({
+    Key key,
+    this.offset,
+    this.transformButtonKey,
+  }) : super(key: key);
 
   final Offset offset;
   final Key transformButtonKey;

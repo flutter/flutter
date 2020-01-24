@@ -16,7 +16,7 @@ class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBi
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
   @override
-  void postEvent(String eventKind, Map<dynamic, dynamic> eventData) {
+  void postEvent(String eventKind, Map<String, dynamic> eventData) {
     getEventsDispatched(eventKind).add(eventData);
   }
 

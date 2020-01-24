@@ -17,7 +17,7 @@ import 'theme_data.dart';
 /// such an image, the user's initials. A given user's initials should
 /// always be paired with the same background color, for consistency.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// If the avatar is to have an image, the image should be specified in the
 /// [backgroundImage] property:
@@ -31,7 +31,7 @@ import 'theme_data.dart';
 ///
 /// The image will be cropped to have a circle shape.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// If the avatar is to just have the user's initials, they are typically
 /// provided using a [Text] widget as the [child] and a [backgroundColor]:

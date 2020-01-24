@@ -20,7 +20,7 @@ void main() {
         child: child = RenderSizedBox(const Size(100.0, 100.0)),
       ),
     );
-    final BoxParentData childParentData = child.parentData;
+    final BoxParentData childParentData = child.parentData as BoxParentData;
 
     layout(root, phase: EnginePhase.layout);
     expect(childParentData.offset.dx, equals(0.0));

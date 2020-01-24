@@ -6,6 +6,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/format.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -16,7 +17,7 @@ void main() {
 
     setUp(() {
       Cache.disableLocking();
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_format_test.');
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_format_test.');
     });
 
     tearDown(() {
@@ -26,7 +27,7 @@ void main() {
     testUsingContext('a file', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
+      final File srcFile = globals.fs.file(globals.fs.path.join(projectPath, 'lib', 'main.dart'));
       final String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 
@@ -41,8 +42,8 @@ void main() {
     testUsingContext('dry-run', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile = fs.file(
-          fs.path.join(projectPath, 'lib', 'main.dart'));
+      final File srcFile = globals.fs.file(
+          globals.fs.path.join(projectPath, 'lib', 'main.dart'));
       final String nonFormatted = srcFile.readAsStringSync().replaceFirst(
           'main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
@@ -58,8 +59,8 @@ void main() {
     testUsingContext('dry-run with set-exit-if-changed', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile = fs.file(
-          fs.path.join(projectPath, 'lib', 'main.dart'));
+      final File srcFile = globals.fs.file(
+          globals.fs.path.join(projectPath, 'lib', 'main.dart'));
       final String nonFormatted = srcFile.readAsStringSync().replaceFirst(
           'main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
@@ -80,8 +81,8 @@ void main() {
       const int lineLengthLong = 120;
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile = fs.file(
-          fs.path.join(projectPath, 'lib', 'main.dart'));
+      final File srcFile = globals.fs.file(
+          globals.fs.path.join(projectPath, 'lib', 'main.dart'));
       final String nonFormatted = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(
           nonFormatted.replaceFirst('main()',

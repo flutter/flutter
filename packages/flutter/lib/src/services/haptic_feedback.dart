@@ -11,6 +11,9 @@ import 'system_channels.dart';
 /// This API is intentionally terse since it calls default platform behavior. It
 /// is not suitable for precise control of the system's haptic feedback module.
 class HapticFeedback {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   HapticFeedback._();
 
   /// Provides vibration haptic feedback to the user for a short duration.

@@ -104,17 +104,17 @@ class DialogTheme extends Diagnosticable {
   int get hashCode => shape.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final DialogTheme typedOther = other;
-    return typedOther.backgroundColor == backgroundColor
-        && typedOther.elevation == elevation
-        && typedOther.shape == shape
-        && typedOther.titleTextStyle == titleTextStyle
-        && typedOther.contentTextStyle == contentTextStyle;
+    return other is DialogTheme
+        && other.backgroundColor == backgroundColor
+        && other.elevation == elevation
+        && other.shape == shape
+        && other.titleTextStyle == titleTextStyle
+        && other.contentTextStyle == contentTextStyle;
   }
 
   @override

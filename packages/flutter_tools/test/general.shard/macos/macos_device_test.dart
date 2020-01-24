@@ -7,14 +7,15 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -48,9 +49,9 @@ void main() {
     });
 
     testUsingContext('isSupportedForProject is true with editable host app', () async {
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages').createSync();
-      fs.directory('macos').createSync();
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
+      globals.fs.directory('macos').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(MacOSDevice().isSupportedForProject(flutterProject), true);
@@ -60,8 +61,8 @@ void main() {
     });
 
     testUsingContext('isSupportedForProject is false with no host app', () async {
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages').createSync();
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(MacOSDevice().isSupportedForProject(flutterProject), false);

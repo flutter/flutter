@@ -87,15 +87,15 @@ class BottomAppBarTheme extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final BottomAppBarTheme typedOther = other;
-    return typedOther.color == color
-        && typedOther.elevation == elevation
-        && typedOther.shape == shape;
+    return other is BottomAppBarTheme
+        && other.color == color
+        && other.elevation == elevation
+        && other.shape == shape;
   }
 
   @override

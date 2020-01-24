@@ -314,7 +314,7 @@ class MouseTracker extends ChangeNotifier {
     final int device = state.device;
     return (_mouseStates.containsKey(device) && _trackedAnnotations.isNotEmpty)
       ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(globalPosition))
-      : <MouseTrackerAnnotation>{};
+      : <MouseTrackerAnnotation>{} as LinkedHashSet<MouseTrackerAnnotation>;
   }
 
   static bool get _duringBuildPhase {
@@ -410,7 +410,7 @@ class MouseTracker extends ChangeNotifier {
     // We can safely use `_mouseStates` here without worrying about the removed
     // state, because `targetEvent` should be null when `_mouseStates` is used.
     final Iterable<_MouseState> dirtyStates = targetEvent == null ? _mouseStates.values : <_MouseState>[targetState];
-    for (_MouseState dirtyState in dirtyStates) {
+    for (final _MouseState dirtyState in dirtyStates) {
       final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(dirtyState);
       final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = dirtyState.replaceAnnotations(nextAnnotations);
       handleUpdatedDevice(dirtyState, lastAnnotations);

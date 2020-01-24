@@ -11,10 +11,10 @@ import 'package:path/path.dart' as path;
 enum SnippetType {
   /// Produces a snippet that includes the code interpolated into an application
   /// template.
-  application,
+  sample,
 
   /// Produces a nicely formatted sample code, but no application.
-  sample,
+  snippet,
 }
 
 /// Return the name of an enum item.
@@ -69,7 +69,7 @@ class Configuration {
 
   /// Gets the skeleton file to use for the given [SnippetType] and DartPad preference.
   File getHtmlSkeletonFile(SnippetType type, {bool showDartPad = false}) {
-    assert(!showDartPad || type == SnippetType.application,
+    assert(!showDartPad || type == SnippetType.sample,
         'Only application snippets work with dartpad.');
     final String filename =
         '${showDartPad ? 'dartpad-' : ''}${getEnumName(type)}.html';

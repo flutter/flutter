@@ -7,7 +7,6 @@ import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_file_system.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -70,7 +70,7 @@ void main() {
     testUsingContext('uses the error handling file system', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
-          expect(fs, isA<ErrorHandlingFileSystem>());
+          expect(globals.fs, isA<ErrorHandlingFileSystem>());
           return const FlutterCommandResult(ExitStatus.success);
         }
       );
@@ -217,6 +217,14 @@ void main() {
       }
     });
 
+    test('FlutterCommandResult.success()', () async {
+      expect(FlutterCommandResult.success().exitStatus, ExitStatus.success);
+    });
+
+    test('FlutterCommandResult.warning()', () async {
+      expect(FlutterCommandResult.warning().exitStatus, ExitStatus.warning);
+    });
+
     group('signals tests', () {
       MockIoProcessSignal mockSignal;
       ProcessSignal signalUnderTest;
@@ -297,7 +305,7 @@ void main() {
           'flutter',
           'dummy',
           const Duration(milliseconds: 1000),
-          null,
+          'fail',
         ],
       );
     });
@@ -388,7 +396,7 @@ class FakeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 

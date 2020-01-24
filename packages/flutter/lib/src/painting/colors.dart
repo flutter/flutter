@@ -214,7 +214,7 @@ class HSVColor {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     return other is HSVColor
@@ -228,7 +228,7 @@ class HSVColor {
   int get hashCode => hashValues(alpha, hue, saturation, value);
 
   @override
-  String toString() => '$runtimeType($alpha, $hue, $saturation, $value)';
+  String toString() => '${objectRuntimeType(this, 'HSVColor')}($alpha, $hue, $saturation, $value)';
 }
 
 /// A color represented using [alpha], [hue], [saturation], and [lightness].
@@ -398,7 +398,7 @@ class HSLColor {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     return other is HSLColor
@@ -412,7 +412,7 @@ class HSLColor {
   int get hashCode => hashValues(alpha, hue, saturation, lightness);
 
   @override
-  String toString() => '$runtimeType($alpha, $hue, $saturation, $lightness)';
+  String toString() => '${objectRuntimeType(this, 'HSLColor')}($alpha, $hue, $saturation, $lightness)';
 }
 
 /// A color that has a small table of related colors called a "swatch".
@@ -441,7 +441,7 @@ class ColorSwatch<T> extends Color {
   Color operator [](T index) => _swatch[index];
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
@@ -455,7 +455,7 @@ class ColorSwatch<T> extends Color {
   int get hashCode => hashValues(runtimeType, value, _swatch);
 
   @override
-  String toString() => '$runtimeType(primary value: ${super.toString()})';
+  String toString() => '${objectRuntimeType(this, 'ColorSwatch')}(primary value: ${super.toString()})';
 }
 
 /// [DiagnosticsProperty] that has an [Color] as value.

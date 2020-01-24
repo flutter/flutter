@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Typography is defined for all target platforms', () {
-    for (TargetPlatform platform in TargetPlatform.values) {
+    for (final TargetPlatform platform in TargetPlatform.values) {
       final Typography typography = Typography(platform: platform);
       expect(typography, isNotNull, reason: 'null typography for $platform');
       expect(typography.black, isNotNull, reason: 'null black typography for $platform');
@@ -32,7 +32,7 @@ void main() {
     }, 'Uses SF Text font');
 
     final Typography typography = Typography(platform: TargetPlatform.iOS);
-    for (TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
+    for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.display4, isDisplayFont);
       expect(textTheme.display3, isDisplayFont);
       expect(textTheme.display2, isDisplayFont);

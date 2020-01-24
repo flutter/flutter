@@ -55,7 +55,7 @@ void main() {
     layout(table, constraints: const BoxConstraints.tightFor(width: 100.0));
 
     const double expectedWidth = 100.0 / 6;
-    for (RenderBox child in children) {
+    for (final RenderBox child in children) {
       expect(child.size.width, moreOrLessEquals(expectedWidth));
     }
   });

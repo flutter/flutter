@@ -4,8 +4,9 @@
 
 import 'package:flutter_tools/src/features.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/linux/linux_workflow.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';

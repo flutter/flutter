@@ -57,7 +57,11 @@ class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
 }
 
 class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
-  const RekeyableDummyStatefulWidgetWrapper({ this.child, this.initialKey });
+  const RekeyableDummyStatefulWidgetWrapper({
+    Key key,
+    this.child,
+    this.initialKey,
+  }) : super(key: key);
   final Widget child;
   final GlobalKey initialKey;
   @override
@@ -156,9 +160,9 @@ void main() {
 
     keyRoot.currentState.switchChildren();
     final List<State> states = tester.stateList(find.byType(RekeyableDummyStatefulWidgetWrapper)).toList();
-    final RekeyableDummyStatefulWidgetWrapperState a = states[0];
+    final RekeyableDummyStatefulWidgetWrapperState a = states[0] as RekeyableDummyStatefulWidgetWrapperState;
     a._setChild(null);
-    final RekeyableDummyStatefulWidgetWrapperState b = states[1];
+    final RekeyableDummyStatefulWidgetWrapperState b = states[1] as RekeyableDummyStatefulWidgetWrapperState;
     b._setChild(keyC);
     await tester.pump();
 

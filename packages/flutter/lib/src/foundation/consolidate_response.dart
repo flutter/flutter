@@ -115,7 +115,7 @@ class _OutputBuffer extends ByteConversionSinkBase {
     }
     _bytes = Uint8List(_contentLength);
     int offset = 0;
-    for (List<int> chunk in _chunks) {
+    for (final List<int> chunk in _chunks) {
       _bytes.setRange(offset, offset + chunk.length, chunk);
       offset += chunk.length;
     }

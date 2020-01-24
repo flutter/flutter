@@ -7,6 +7,7 @@ import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'globals.dart' as globals;
 
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
@@ -78,28 +79,28 @@ class AndroidPlugin extends PluginPlatform {
   Set<String> _getSupportedEmbeddings() {
     assert(pluginPath != null);
     final Set<String> supportedEmbeddings = <String>{};
-    final String baseMainPath = fs.path.join(
+    final String baseMainPath = globals.fs.path.join(
       pluginPath,
       'android',
       'src',
       'main',
     );
-    File mainPluginClass = fs.file(
-      fs.path.join(
+    File mainPluginClass = globals.fs.file(
+      globals.fs.path.join(
         baseMainPath,
         'java',
-        package.replaceAll('.', fs.path.separator),
+        package.replaceAll('.', globals.fs.path.separator),
         '$pluginClass.java',
       )
     );
     // Check if the plugin is implemented in Kotlin since the plugin's pubspec.yaml
     // doesn't include this information.
     if (!mainPluginClass.existsSync()) {
-      mainPluginClass = fs.file(
-        fs.path.join(
+      mainPluginClass = globals.fs.file(
+        globals.fs.path.join(
           baseMainPath,
           'kotlin',
-          package.replaceAll('.', fs.path.separator),
+          package.replaceAll('.', globals.fs.path.separator),
           '$pluginClass.kt',
         )
       );

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_linux.dart';
@@ -56,7 +56,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices() : super('linux devices');
 
   @override
-  bool get supportsPlatform => platform.isLinux;
+  bool get supportsPlatform => globals.platform.isLinux;
 
   @override
   bool get canListAnything => linuxWorkflow.canListDevices;

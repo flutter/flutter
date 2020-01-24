@@ -238,4 +238,3 @@ class Factory<T> {
     return 'Factory(type: $type)';
   }
 }
-

@@ -21,7 +21,7 @@ import 'theme.dart';
 ///
 /// Typically used with a [Scaffold] and a [FloatingActionButton].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// ```dart
 /// Scaffold(
 ///   bottomNavigationBar: BottomAppBar(

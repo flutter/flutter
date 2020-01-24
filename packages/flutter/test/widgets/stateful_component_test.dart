@@ -17,7 +17,7 @@ void main() {
       );
       expect(element, isNotNull);
       expect(element.renderObject is RenderDecoratedBox, isTrue);
-      final RenderDecoratedBox renderObject = element.renderObject;
+      final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(expectedDecoration));
     }
 
@@ -57,10 +57,10 @@ void main() {
 
   testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) async {
     await tester.pumpWidget(
-      FlipWidget(
-        key: const Key('rebuild test'),
+      const FlipWidget(
+        key: Key('rebuild test'),
         left: TestBuildCounter(),
-        right: const DecoratedBox(decoration: kBoxDecorationB),
+        right: DecoratedBox(decoration: kBoxDecorationB),
       ),
     );
 

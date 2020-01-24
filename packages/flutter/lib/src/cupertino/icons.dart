@@ -26,6 +26,9 @@ import 'package:flutter/widgets.dart';
 ///  * [Icon], used to show these icons.
 ///  * <https://github.com/flutter/cupertino_icons/blob/master/map.png>, a map of the icons in this icons font.
 class CupertinoIcons {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   CupertinoIcons._();
 
   /// The icon font used for Cupertino icons.

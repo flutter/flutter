@@ -68,7 +68,7 @@ class PathBoundsMatcher extends Matcher {
   @override
   Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
-    final Map<Matcher, dynamic> map = matchState['failedMatcher'];
+    final Map<Matcher, dynamic> map = matchState['failedMatcher'] as Map<Matcher, dynamic>;
     final Iterable<String> descriptions = map.entries
       .map<String>(
         (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString()
@@ -105,8 +105,8 @@ class PathPointsMatcher extends Matcher {
 
   @override
   Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    final Offset notIncluded = matchState['notIncluded'];
-    final Offset notExcluded = matchState['notExcluded'];
+    final Offset notIncluded = matchState['notIncluded'] as Offset;
+    final Offset notExcluded = matchState['notExcluded'] as Offset;
     final Description desc = super.describeMismatch(item, mismatchDescription, matchState, verbose);
 
     if ((notExcluded ?? notIncluded) != null) {
@@ -332,7 +332,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-      ).decoration;
+      ).decoration as BoxDecoration;
 
       expect(
         decoration.borderRadius,
@@ -358,7 +358,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-      ).decoration;
+      ).decoration as BoxDecoration;
 
       expect(
         decoration.borderRadius,
@@ -2732,7 +2732,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-      ).decoration;
+      ).decoration as BoxDecoration;
 
       expect(
         decoration.border.bottom.color.value,
@@ -2972,8 +2972,8 @@ void main() {
     final List<Widget> transitions =
       find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
     expect(transitions.length, 2);
-    final FadeTransition left = transitions[0];
-    final FadeTransition right = transitions[1];
+    final FadeTransition left = transitions[0] as FadeTransition;
+    final FadeTransition right = transitions[1] as FadeTransition;
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
@@ -3943,5 +3943,62 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(200, 200)),
+            child: const CupertinoTextField(),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(Semantics),
+        ).first,
+      ),
+      matchesSemantics(
+        isTextField: true,
+        isEnabled: true,
+        hasEnabledState: true,
+        hasTapAction: true,
+      ),
+    );
+  });
+
+  testWidgets('Disabled Cupertino text field semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(200, 200)),
+            child: const CupertinoTextField(
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(Semantics),
+        ).first,
+      ),
+      matchesSemantics(
+        isEnabled: false,
+        hasEnabledState: true,
+        hasTapAction: false,
+      ),
+    );
   });
 }

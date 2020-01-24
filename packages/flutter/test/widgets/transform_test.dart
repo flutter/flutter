@@ -251,7 +251,7 @@ void main() {
       ..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
-    final TransformLayer layer = layers[1];
+    final TransformLayer layer = layers[1] as TransformLayer;
     final Matrix4 transform = layer.transform;
     expect(transform.getTranslation(), equals(Vector3(100.0, 75.0, 0.0)));
   });
@@ -268,7 +268,7 @@ void main() {
       ..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
-    final TransformLayer layer = layers[1];
+    final TransformLayer layer = layers[1] as TransformLayer;
     final Matrix4 transform = layer.transform;
     expect(transform.storage, <dynamic>[
       moreOrLessEquals(0.0), 1.0, 0.0, 0.0,
@@ -323,7 +323,7 @@ void main() {
       ..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
-    final TransformLayer layer = layers[1];
+    final TransformLayer layer = layers[1] as TransformLayer;
     final Matrix4 transform = layer.transform;
     expect(transform.storage, <dynamic>[
       // These are column-major, not row-major.
