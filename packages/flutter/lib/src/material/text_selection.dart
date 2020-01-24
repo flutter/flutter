@@ -51,6 +51,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   final GlobalKey _moreButtonKey = GlobalKey();
   final List<GlobalKey> _itemKeys = <GlobalKey>[];
   double _menuContentWidth;
+  double _overflowContentHeight;
 
   // The number of items that fit in the main selection menu. Any others go in
   // the overflow menu. Must be less than or equal to items.length.
@@ -65,10 +66,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return false;
     }
     return _itemsInFirstMenu < _itemKeys.length;
-  }
-
-  @override initState() {
-    super.initState();
   }
 
   @override
@@ -120,7 +117,12 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       items.add(FlatButton(
         key: _itemKeys[_itemKeys.length - 1],
         child: Text(localizations.cutButtonLabel),
-        onPressed: widget.handleCut,
+        onPressed: () {
+          setState(() {
+            _overflowOpen = false;
+          });
+          widget.handleCut();
+        },
       ));
     }
     if (widget.handleCopy != null) {
@@ -128,7 +130,12 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       items.add(FlatButton(
         key: _itemKeys[_itemKeys.length - 1],
         child: Text(localizations.copyButtonLabel),
-        onPressed: widget.handleCopy,
+        onPressed: () {
+          setState(() {
+            _overflowOpen = false;
+          });
+          widget.handleCopy();
+        },
       ));
     }
     if (widget.handlePaste != null) {
@@ -136,7 +143,12 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       items.add(FlatButton(
         key: _itemKeys[_itemKeys.length - 1],
         child: Text(localizations.pasteButtonLabel),
-        onPressed: widget.handlePaste,
+        onPressed: () {
+          setState(() {
+            _overflowOpen = false;
+          });
+          widget.handlePaste();
+        },
       ));
     }
     if (widget.handleSelectAll != null) {
@@ -144,7 +156,12 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       items.add(FlatButton(
         key: _itemKeys[_itemKeys.length - 1],
         child: Text('Select evvvvverything'/*localizations.selectAllButtonLabel*/),
-        onPressed: widget.handleSelectAll,
+        onPressed: () {
+          setState(() {
+            _overflowOpen = false;
+          });
+          widget.handleSelectAll();
+        },
       ));
     }
 
@@ -190,8 +207,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     Widget menuContent;
     if (_overflowOpen) {
       menuContent = Container(
-        // TODO(justinmc): Height should be dynamic.
-        height: _kToolbarHeight * 3,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,12 +240,19 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     return Container(
       key: _containerKey,
       width: _menuContentWidth,
-      child: Material(
-        elevation: 1.0,
-        child: AnimatedSize(
-          vsync: this,
-          duration: const Duration(milliseconds: 200),
-          child: menuContent,
+      child: Align(
+        alignment: Alignment.topRight,
+        heightFactor: 1.0,
+        widthFactor: 1.0,
+        child: Material(
+          elevation: 1.0,
+          child: AnimatedSize(
+            vsync: this,
+            // This duration was eyeballed on an emulator for Pixel 2 running
+            // Android API 28.
+            duration: const Duration(milliseconds: 140),
+            child: menuContent,
+          ),
         ),
       ),
     );
