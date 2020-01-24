@@ -117,6 +117,12 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
   @Override
   public void add(@NonNull FlutterPlugin plugin) {
+    if (has(plugin.getClass())) {
+      Log.w(TAG, "Attempted to register plugin (" + plugin +") but it was "
+          + "already registered with this FlutterEngine (" + flutterEngine + ").");
+      return;
+    }
+
     Log.v(TAG, "Adding plugin: " + plugin);
     // Add the plugin to our generic set of plugins and notify the plugin
     // that is has been attached to an engine.
