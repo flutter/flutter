@@ -92,12 +92,12 @@ void main() {
         }
       },
     );
+    await _flutter.resume(); // we start paused so we can set up our TICK 1 listener before the app starts
     unawaited(sawTick1.future.timeout(
       const Duration(seconds: 5),
       onTimeout: () { print('The test app is taking longer than expected to print its synchronization line...'); },
     ));
     await sawTick1.future; // after this, app is in steady state
-    await _flutter.resume(); // we start paused so we can set up our TICK 1 listener before the app starts
     await _flutter.addBreakpoint(
       _project.scheduledBreakpointUri,
       _project.scheduledBreakpointLine,
