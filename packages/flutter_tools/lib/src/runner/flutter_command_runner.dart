@@ -309,7 +309,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.printError('Please ensure you have permissions in the artifact cache directory.');
           throwToolExit('Failed to write the version file');
         }
-        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool) {
+        final bool machineFlag = topLevelResults['machine'] as bool;
+        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
           await FlutterVersion.instance.checkFlutterVersionFreshness();
         }
 
@@ -323,7 +324,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         if (topLevelResults['version'] as bool) {
           flutterUsage.sendCommand('version');
           String status;
-          if (topLevelResults['machine'] as bool) {
+          if (machineFlag) {
             status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
           } else {
             status = FlutterVersion.instance.toString();
@@ -332,7 +333,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           return;
         }
 
-        if (topLevelResults['machine'] as bool) {
+        if (machineFlag) {
           throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);

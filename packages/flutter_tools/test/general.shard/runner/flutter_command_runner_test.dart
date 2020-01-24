@@ -72,6 +72,22 @@ void main() {
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
+      testUsingContext('does not check that Flutter installation is up-to-date with --machine flag', () async {
+        final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
+        bool versionChecked = false;
+        when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
+          versionChecked = true;
+        });
+
+        await runner.run(<String>['dummy', '--machine', '--version']);
+
+        expect(versionChecked, isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+      }, initializeFlutterRoot: false);
+
       testUsingContext('throw tool exit if the version file cannot be written', () async {
         final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
         when(version.ensureVersionFile()).thenThrow(const FileSystemException());
