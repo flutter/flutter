@@ -30,7 +30,7 @@ void main() {
         'version',
         '--no-pub',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n' ''));
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });

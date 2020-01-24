@@ -352,12 +352,12 @@ class WebDevFS implements DevFS {
           generateBootstrapScript(
             requireUrl: _filePathToUriFragment(requireJS.path),
             mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
-            entrypoint: '${_filePathToUriFragment(mainPath)}.js',
+            entrypoint: '${_filePathToUriFragment(mainPath)}.lib.js',
           ));
       _webAssetServer.writeFile(
           '/main_module.js',
           generateMainModule(
-            entrypoint: '${_filePathToUriFragment(mainPath)}.js',
+            entrypoint: '${_filePathToUriFragment(mainPath)}.lib.js',
           ));
       _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
       _webAssetServer.writeFile(

@@ -688,7 +688,7 @@ class ThemeData extends Diagnosticable {
   /// is -4), to [VisualDensity.maximumDensity] (which is 4), inclusive, where
   /// negative values indicate a denser, more compact, UI, and positive values
   /// indicate a less dense, more expanded, UI. If a component doesn't support
-  /// the value given, it will clamp to the the nearest supported value.
+  /// the value given, it will clamp to the nearest supported value.
   ///
   /// The default for visual densities is zero for both vertical and horizontal
   /// densities, which corresponds to the default visual density of components

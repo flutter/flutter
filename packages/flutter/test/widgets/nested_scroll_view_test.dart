@@ -676,6 +676,12 @@ void main() {
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/39963.
+  testWidgets('NestedScrollView with SliverOverlapAbsorber in or out of the first screen', (WidgetTester tester) async {
+    await tester.pumpWidget(const _TestLayoutExtentIsNegative(1));
+    await tester.pumpWidget(const _TestLayoutExtentIsNegative(10));
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {
@@ -691,4 +697,61 @@ class TestHeader extends SliverPersistentHeaderDelegate {
   }
   @override
   bool shouldRebuild(TestHeader oldDelegate) => false;
+}
+
+class _TestLayoutExtentIsNegative extends StatelessWidget {
+  const _TestLayoutExtentIsNegative(this.widgetCountBeforeSliverOverlapAbsorber);
+  final int widgetCountBeforeSliverOverlapAbsorber;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Test'),
+        ),
+        body: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              ...List<Widget>.generate(widgetCountBeforeSliverOverlapAbsorber, (_) {
+                return SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.red,
+                    height: 200,
+                    margin:const EdgeInsets.all(20),
+                  ),
+                );
+              },),
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverAppBar(
+                  pinned: true,
+                  forceElevated: innerBoxIsScrolled,
+                  backgroundColor: Colors.blue[300],
+                  title: Container(
+                    height: 50,
+                    child: const Center(
+                      child: Text('Sticky Header'),
+                    ),
+                  ),
+                ),
+              )
+            ];
+          },
+          body: Container(
+            height: 2000,
+            margin: const EdgeInsets.only(top: 50),
+            child: ListView(
+              children: List<Widget>.generate(3, (_) {
+                return Container(
+                  color: Colors.green[200],
+                  height: 200,
+                  margin: const EdgeInsets.all(20),
+                );
+              },),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
