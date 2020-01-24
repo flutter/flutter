@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../painting/image_test_utils.dart';
-import '../painting/mocks_for_image_cache.dart' show TestImage, TestImageStreamCompleter;
+import '../painting/mocks_for_image_cache.dart' show TestImage;
 
 void main() {
   tearDown(() {
@@ -102,7 +101,7 @@ void main() {
     testImageProvider.complete();
 
     expect(imageCache.currentSize, 1);
-    expect(_findPhysics(tester).velocities, isEmpty);
+    expect(_findPhysics(tester).velocities, <double>[0]);
   });
 
   testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (WidgetTester tester) async {
