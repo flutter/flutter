@@ -81,7 +81,7 @@ Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) a
   R result;
   await Timeline.timeSync(
     '${configuration.debugLabel}',
-    () async { 
+    () async {
       FutureOr<R> applicationResult = await configuration.apply();
       result = await applicationResult;
     },
