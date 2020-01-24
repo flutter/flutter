@@ -326,17 +326,17 @@ end
   Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
     const String appFrameworkName = 'App.framework';
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
-    destinationAppFrameworkDirectory.createSync(recursive: true);
 
     if (mode == BuildMode.debug) {
       final Status status = globals.logger.startProgress(' ├─Adding placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
       try {
+        destinationAppFrameworkDirectory.createSync(recursive: true);
         await _produceStubAppFrameworkIfNeeded(mode, iPhoneBuildOutput, simulatorBuildOutput, destinationAppFrameworkDirectory);
       } finally {
         status.stop();
       }
     } else {
-      await _produceAotAppFrameworkIfNeeded(mode, iPhoneBuildOutput, destinationAppFrameworkDirectory);
+      await _produceAotAppFrameworkIfNeeded(mode, modeDirectory);
     }
 
     final File sourceInfoPlist = _project.ios.hostAppRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
@@ -398,8 +398,7 @@ end
 
   Future<void> _produceAotAppFrameworkIfNeeded(
     BuildMode mode,
-    Directory iPhoneBuildOutput,
-    Directory destinationAppFrameworkDirectory,
+    Directory destinationDirectory,
   ) async {
     if (mode == BuildMode.debug) {
       return;
@@ -411,7 +410,7 @@ end
     try {
       await aotBuilder.build(
         platform: TargetPlatform.ios,
-        outputPath: iPhoneBuildOutput.path,
+        outputPath: destinationDirectory.path,
         buildMode: mode,
         // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
         mainDartFile: globals.fs.path.absolute(targetFile),
@@ -420,12 +419,6 @@ end
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
         dartDefines: dartDefines,
-      );
-
-      const String appFrameworkName = 'App.framework';
-      fsUtils.copyDirectorySync(
-        iPhoneBuildOutput.childDirectory(appFrameworkName),
-        destinationAppFrameworkDirectory,
       );
     } finally {
       status.stop();
