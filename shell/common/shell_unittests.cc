@@ -22,6 +22,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_test.h"
+#include "flutter/shell/common/shell_test_platform_view.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiter_fallback.h"
@@ -129,7 +130,7 @@ TEST_F(ShellTest,
         // This is unused in the platform view as we are not using the simulated
         // vsync mechanism. We should have better DI in the tests.
         const auto vsync_clock = std::make_shared<ShellTestVsyncClock>();
-        return std::make_unique<ShellTestPlatformView>(
+        return ShellTestPlatformView::Create(
             shell, shell.GetTaskRunners(), vsync_clock,
             [task_runners = shell.GetTaskRunners()]() {
               return static_cast<std::unique_ptr<VsyncWaiter>>(

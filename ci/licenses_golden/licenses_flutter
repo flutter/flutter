@@ -570,6 +570,10 @@ FILE: ../../../flutter/shell/common/shell_io_manager.cc
 FILE: ../../../flutter/shell/common/shell_io_manager.h
 FILE: ../../../flutter/shell/common/shell_test.cc
 FILE: ../../../flutter/shell/common/shell_test.h
+FILE: ../../../flutter/shell/common/shell_test_platform_view.cc
+FILE: ../../../flutter/shell/common/shell_test_platform_view.h
+FILE: ../../../flutter/shell/common/shell_test_platform_view_gl.cc
+FILE: ../../../flutter/shell/common/shell_test_platform_view_gl.h
 FILE: ../../../flutter/shell/common/shell_unittests.cc
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.h
