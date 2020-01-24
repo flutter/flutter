@@ -254,7 +254,7 @@ void main() {
       )
     );
 
-    // The label should be aligned with the input text when the menu is closed and both `isEmpty` 
+    // The label should be aligned with the input text when the menu is closed and both `isEmpty`
     // and`alignLabelWithHint` are true.
     await tester.pumpAndSettle();
     expect(
