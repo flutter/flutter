@@ -81,6 +81,13 @@ class ScrollPhysics {
   /// heuristic depending on whether the transform was increasing or decreasing
   /// the overall scale between the global screen and local scrollable
   /// coordinate systems.
+  ///
+  /// The default implementation is stateless, and simply provides a point-in-
+  /// time decision about how fast the scrollable is scrolling. It would not
+  /// handle, for example, a scrollable that is animating back and forth at
+  /// high velocity in a loop. It is assumed that callers will handle such
+  /// a case, or that a custom stateful implementation would be written that
+  /// tracks the sign of the velocity on successive calls.
   bool recommendDeferredLoading(double velocity) {
     assert(velocity != null);
     if (parent == null) {
