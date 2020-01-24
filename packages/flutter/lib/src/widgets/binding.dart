@@ -272,14 +272,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   void _debugAddStackFilters() {
-    const PartialStackFrame elementInflateWidget = PartialStackFrame(className: 'Element', method: 'inflateWidget', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame elementUpdateChild = PartialStackFrame(className: 'Element', method: 'updateChild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame elementRebuild = PartialStackFrame(className: 'Element', method: 'rebuild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame componentElementPerformRebuild = PartialStackFrame(className: 'ComponentElement', method: 'performRebuild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame componentElementFristBuild = PartialStackFrame(className: 'ComponentElement', method: '_firstBuild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame componentElementMount = PartialStackFrame(className: 'ComponentElement', method: 'mount', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame statefulElementFristBuild = PartialStackFrame(className: 'StatefulElement', method: '_firstBuild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame singleChildMount = PartialStackFrame(className: 'SingleChildRenderObjectElement', method: 'mount', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame elementInflateWidget = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'Element', method: 'inflateWidget', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame elementUpdateChild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'Element', method: 'updateChild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame elementRebuild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'Element', method: 'rebuild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame componentElementPerformRebuild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'ComponentElement', method: 'performRebuild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame componentElementFristBuild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'ComponentElement', method: '_firstBuild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame componentElementMount = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'ComponentElement', method: 'mount', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame statefulElementFristBuild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'StatefulElement', method: '_firstBuild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame singleChildMount = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'SingleChildRenderObjectElement', method: 'mount', packagePath: 'src/widgets/framework.dart');
 
     const String replacementString = '...     Normal element mounting';
 

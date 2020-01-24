@@ -30,6 +30,8 @@ class PartialStackFrame {
   /// Creates a new [PartialStackFrame] instance. All arguments are required and
   /// must not be null.
   const PartialStackFrame({
+    @required this.packageScheme,
+    @required this.package,
     @required this.className,
     @required this.method,
     @required this.packagePath,
@@ -39,10 +41,20 @@ class PartialStackFrame {
 
   /// An `<asynchronous suspension>` line in a stack trace.
   static const PartialStackFrame asynchronousSuspension = PartialStackFrame(
+    packageScheme: '',
+    package: '',
     className: '',
     packagePath: '',
     method: 'asynchronous suspension',
   );
+
+  /// The scheme of the package, e.g. `package` for `package:flutter` or `dart`
+  /// for `dart:ui`.
+  final String packageScheme;
+
+  /// The name of the package, e.g. `flutter` for `package:flutter`, or `ui` for
+  /// `dart:ui`.
+  final String package;
 
   /// The class name for the method.
   ///
@@ -65,10 +77,14 @@ class PartialStackFrame {
   /// [PartialStackFrame].
   bool matches(StackFrame stackFrame) {
     if (kIsWeb) {
-      return packagePath.allMatches(stackFrame.packagePath).isNotEmpty
+      return stackFrame.packageScheme == packageScheme
+          && stackFrame.package == package
+          && packagePath.allMatches(stackFrame.packagePath).isNotEmpty
           && stackFrame.method == (method.startsWith('_') ? '[$method]' : method);
     }
-    return packagePath.allMatches(stackFrame.packagePath).isNotEmpty
+    return stackFrame.packageScheme == packageScheme
+        && stackFrame.package == package
+        && packagePath.allMatches(stackFrame.packagePath).isNotEmpty
         && stackFrame.method == method
         && stackFrame.className == className;
   }
