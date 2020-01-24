@@ -254,7 +254,8 @@ void main() {
       )
     );
 
-    // isEmpty: true causes the label to be aligned with the input text if alignLabelWithHint is set to true
+    // The label should be aligned with the input text when the menu is closed and both `isEmpty` 
+    // and`alignLabelWithHint` are true.
     await tester.pumpAndSettle();
     expect(
       tester.getTopLeft(find.byType(InputDecorator)).dy,
