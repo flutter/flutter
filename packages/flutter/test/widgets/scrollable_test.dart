@@ -808,7 +808,7 @@ class SuperPessimisticScrollPhysics extends ScrollPhysics {
 
 
   @override
-  bool recommendDeferredLoading(double velocity) {
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
     return velocity > 1;
   }
 
