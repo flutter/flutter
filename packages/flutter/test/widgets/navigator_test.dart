@@ -1036,6 +1036,54 @@ void main() {
     expect(find.byKey(keyAB), findsNothing);
   });
 
+  testWidgets("Popping immediately after pushing doesn't crash", (WidgetTester tester) async {
+    // Added this test to protect against regression of https://github.com/flutter/flutter/issues/45539
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () {
+        Navigator.pushNamed(context, '/A');
+        Navigator.of(context).pop();
+      }),
+      '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
+    };
+    bool isPushed = false;
+    bool isPopped = false;
+    final TestObserver observer = TestObserver()
+      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        // Pushes the initial route.
+        expect(route is PageRoute && route.settings.name == '/', isTrue);
+        expect(previousRoute, isNull);
+        isPushed = true;
+      }
+      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        isPopped = true;
+      };
+
+    await tester.pumpWidget(MaterialApp(
+      routes: routes,
+      navigatorObservers: <NavigatorObserver>[observer],
+    ));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(isPushed, isTrue);
+    expect(isPopped, isFalse);
+
+    isPushed = false;
+    isPopped = false;
+    observer.onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      expect(route is PageRoute && route.settings.name == '/A', isTrue);
+      expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+      isPushed = true;
+    };
+
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(isPushed, isTrue);
+    expect(isPopped, isTrue);
+  });
+
   group('error control test', () {
     testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -1186,33 +1234,6 @@ void main() {
     expect(find.byKey(const ValueKey<String>('/A/B')), findsNothing); // popped
     expect(find.byKey(const ValueKey<String>('/C')), findsOneWidget);
   });
-
-  testWidgets('Pushing opaque Route does not rebuild routes below', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/45797.
-
-    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
-    final Key bottomRoute = UniqueKey();
-    final Key topRoute = UniqueKey();
-    await tester.pumpWidget(
-      MaterialApp(
-        navigatorKey: navigator,
-        routes: <String, WidgetBuilder>{
-          '/' : (BuildContext context) => StatefulTestWidget(key: bottomRoute),
-          '/a': (BuildContext context) => StatefulTestWidget(key: topRoute),
-        },
-      ),
-    );
-    expect(tester.state<StatefulTestState>(find.byKey(bottomRoute)).rebuildCount, 1);
-
-    navigator.currentState.pushNamed('/a');
-    await tester.pumpAndSettle();
-
-    // Bottom route is offstage and did not rebuild.
-    expect(find.byKey(bottomRoute), findsNothing);
-    expect(tester.state<StatefulTestState>(find.byKey(bottomRoute, skipOffstage: false)).rebuildCount, 1);
-
-    expect(tester.state<StatefulTestState>(find.byKey(topRoute)).rebuildCount, 1);
-  });
 }
 
 class NoAnimationPageRoute extends PageRouteBuilder<void> {
@@ -1224,22 +1245,5 @@ class NoAnimationPageRoute extends PageRouteBuilder<void> {
   @override
   AnimationController createAnimationController() {
     return super.createAnimationController()..value = 1.0;
-  }
-}
-
-class StatefulTestWidget extends StatefulWidget {
-  const StatefulTestWidget({Key key}) : super(key: key);
-
-  @override
-  State<StatefulTestWidget> createState() => StatefulTestState();
-}
-
-class StatefulTestState extends State<StatefulTestWidget> {
-  int rebuildCount = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    rebuildCount += 1;
-    return Container();
   }
 }

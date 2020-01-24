@@ -68,7 +68,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
     final String presetPluginsPath = pathsSelectorValue == null
         ? null
-        : globals.fs.path.join(homeDirPath, 'Library', 'Application Support', '$pathsSelectorValue');
+        : globals.fs.path.join(homeDirPath, 'Library', 'Application Support', pathsSelectorValue);
     return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
   }
 
