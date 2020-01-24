@@ -726,7 +726,7 @@ void main() {
 
 /// A [ContainerLayer] that contains a stack of layers: `layer` in the front,
 /// and another layer annotated with `value` in the back.
-/// 
+///
 /// It is a utility function that helps checking the opacity returned by
 /// [Layer.findAnnotations].
 Layer _withBackgroundAnnotation(int value, Layer layer) {
