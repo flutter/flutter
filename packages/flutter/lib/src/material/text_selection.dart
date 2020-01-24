@@ -10,12 +10,11 @@ import 'package:flutter/scheduler.dart';
 
 import 'debug.dart';
 import 'flat_button.dart';
+import 'icon_button.dart';
+import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
-import 'icon_button.dart';
-import 'icons.dart';
-import 'colors.dart';
 
 const double _kHandleSize = 22.0;
 
@@ -51,7 +50,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   final GlobalKey _moreButtonKey = GlobalKey();
   final List<GlobalKey> _itemKeys = <GlobalKey>[];
   double _menuContentWidth;
-  double _overflowContentHeight;
 
   // The number of items that fit in the main selection menu. Any others go in
   // the overflow menu. Must be less than or equal to items.length.
@@ -71,6 +69,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   @override
   void didChangeDependencies() {
     _measureItems();
+    super.didChangeDependencies();
   }
 
   // Measure how many items fit inside the container in order to decide which
@@ -160,7 +159,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       _itemKeys.add(GlobalKey());
       items.add(FlatButton(
         key: _itemKeys[_itemKeys.length - 1],
-        child: Text('Select evvvvverything'/*localizations.selectAllButtonLabel*/),
+        child: Text(localizations.selectAllButtonLabel),
         onPressed: () {
           setState(() {
             _overflowOpen = false;
