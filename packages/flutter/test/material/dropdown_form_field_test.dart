@@ -256,16 +256,13 @@ void main() {
 
     // isEmpty: true causes the label to be aligned with the input text if alignLabelWithHint is set to true
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
-    expect(tester.getTopLeft(find.text('label')).dy, 32.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 48.0);
     expect(
       tester.getTopLeft(find.byType(InputDecorator)).dy,
-      tester.getTopLeft(find.text('label')).dy - 32.0
-    ); // Label is lower by 32 pixels than the InputDecorator, in the center of the TextField
+      tester.getTopLeft(find.text('label')).dy - 32.0,
+    ); // Label is lower by 32 pixels than the InputDecorator, within the TextField
     expect(
       tester.getTopLeft(find.byType(InputDecorator)).dx,
-      tester.getTopLeft(find.text('label')).dx
+      tester.getTopLeft(find.text('label')).dx,
     ); // Label is aligned in x direction with the InputDecorator
 
     // [FormField] value is initially null.
@@ -277,12 +274,19 @@ void main() {
     await tester.tap(find.text('label'));
     await tester.pumpAndSettle();
 
+    expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dy,
+      tester.getTopLeft(find.text('label')).dy - 32.0,
+    ); // Label is lower by 32 pixels than the InputDecorator (has not shifted)
+
     // Tap outside the [DropdownButton] to close dropdown menu without selecting an option.
     await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.text('label')).dy, 32.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 48.0);
+    expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dy,
+      tester.getTopLeft(find.text('label')).dy - 32.0,
+    ); // Label is lower by 32 pixels than the InputDecorator, within the TextField
 
     // [FormField] value is still null.
     expect(stateKey.currentState.value, equals(null));
@@ -300,18 +304,19 @@ void main() {
     expect(stateKey.currentState.value, equals('three'));
     // [InputDecorator] isEmpty property is now false.
     expect((tester.widget(find.byType(InputDecorator)) as InputDecorator).isEmpty, equals(false));
-    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
-    expect(tester.getTopLeft(find.text('three')).dy, 32.0);
-    expect(tester.getBottomLeft(find.text('three')).dy, 48.0);
+
     expect(
       tester.getTopLeft(find.byType(InputDecorator)).dy,
-      tester.getTopLeft(find.text('label')).dy - 12.0
+      tester.getTopLeft(find.text('label')).dy - 12.0,
     ); // Label is lower by 12 pixels than the InputDecorator, above the TextField
     expect(
       tester.getTopLeft(find.byType(InputDecorator)).dx,
-      tester.getTopLeft(find.text('label')).dx
+      tester.getTopLeft(find.text('label')).dx,
     ); // Label is aligned in x direction with the InputDecorator
+    expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dy,
+      tester.getTopLeft(find.text('three')).dy - 32.0,
+    ); // Text of selected option is lower by 32 pixels than the InputDecorator
   });
 
   testWidgets('DropdownButtonFormField InputDecorator label is aligned to center of TextField when alignLabelWithHint is false', (WidgetTester tester) async {
@@ -338,16 +343,17 @@ void main() {
 
     // isEmpty: true causes the label to be aligned with the center of the TextField if alignLabelWithHint is set to false
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
-    expect(tester.getTopLeft(find.text('label')).dy, 24.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 40.0);
     expect(
       tester.getTopLeft(find.byType(InputDecorator)).dy,
-      tester.getTopLeft(find.text('label')).dy - 24.0
+      tester.getTopLeft(find.text('label')).dy - 24.0,
     ); // Label is lower by 24 pixels than the InputDecorator, below the top border of the TextField
     expect(
+      tester.getTopLeft(find.byType(InputDecorator)).dy,
+      tester.getBottomLeft(find.text('label')).dy - 40.0,
+    ); // Bottom of the label is lower by 40 pixels than the InputDecorator
+    expect(
       tester.getTopLeft(find.byType(InputDecorator)).dx,
-      tester.getTopLeft(find.text('label')).dx
+      tester.getTopLeft(find.text('label')).dx,
     ); // Label is aligned in x direction with the InputDecorator
   });
 
