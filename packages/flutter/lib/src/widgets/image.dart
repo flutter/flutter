@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/src/widgets/disposable_build_context.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -947,13 +948,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   bool _invertColors;
   int _frameNumber;
   bool _wasSynchronouslyLoaded;
-  ScrollAwareContextProvider<State<Image>> _scrollAwareContext;
+  DisposableBuildContext<State<Image>> _scrollAwareContext;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _scrollAwareContext = ScrollAwareContextProvider<State<Image>>(this);
+    _scrollAwareContext = DisposableBuildContext<State<Image>>(this);
   }
 
   @override

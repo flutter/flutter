@@ -25,9 +25,9 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  void useKey(ImageConfiguration config, ImageStream stream, TestImageProvider key, ImageErrorListener handleError) {
+  void resolveStreamForKey(ImageConfiguration config, ImageStream stream, TestImageProvider key, ImageErrorListener handleError) {
     configuration = config;
-    super.useKey(config, stream, key, handleError);
+    super.resolveStreamForKey(config, stream, key, handleError);
   }
 
   @override

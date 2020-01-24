@@ -182,6 +182,42 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheW
 ///
 /// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
+/// ## Image resolving
+///
+/// The [ImageProvider] goes through the following lifecycle to resolve an
+/// image, once the [resolve] method is called:
+///
+///   1. Create an [ImageStream] using [createStream] to return to the caller.
+///      This stream will be used to communicate back to the caller when the
+///      image is decoded and ready to display, or when an error occurs.
+///   2. Obtain the key for the image using [obtainKey].
+///      Since this method is asynchronous, but also can return synchronously,
+///      it sets up error handlers that would catch both synchronous and
+///      asynchronous errors, and ensures that errors thrown both into the
+///      [Zone] and the current stack are caught and handled once. The error
+///      handler is passed on to [resolveStreamForKey] and the [ImageCache].
+///   3. If the key is successfully obtained, schedule resolution of the image
+///      using that key. This is handled by [resolveStreamForKey]. That method
+///      may fizzle if it determines the image is no longer necessary, use the
+///      provided [ImageErrorListener] to report an error, set the completer
+///      from the cache if possible, or call [load] to fetch the encoded image
+///      bytes and schedule decoding.
+///   4. The [load] method is responsible for both fetching the encoded bytes
+///      and decoding them using the provided [DecoderCallback]. It is called
+///      in a context that uses the [ImageErrorListener] to report errors back.
+///
+/// Subclasses normally only have to implement the [load] and [obtainKey]
+/// methods. A subclass that needs finer grained control over the [ImageStream]
+/// type must override [createStream]. A subclass that needs finer grained
+/// control over the resolution, such as delaying calling [load], must override
+/// [resolveStreamForKey].
+///
+/// The [resolve] method is marked as [nonVirtual] so that [ImageProvider]s can
+/// be properly composed, and so that the base class can properly set up error
+/// handling for subsequent methods.
+///
+/// ## Using an [ImageProvider]
+///
 /// {@tool snippet}
 ///
 /// The following shows the code required to write a widget that fully conforms
@@ -270,17 +306,29 @@ abstract class ImageProvider<T> {
   /// This is the public entry-point of the [ImageProvider] class hierarchy.
   ///
   /// Subclasses should implement [obtainKey] and [load], which are used by this
-  /// method. If they need to manage the actual resolution of the image, they
-  /// should override [resolveForStream] instead of this method.
+  /// method. If they need to change the implementation of [ImageStream] used,
+  /// they should override [createStream]. If they need to manage the actual
+  /// resolution of the image, they should override [resolveStreamForKey].
   @nonVirtual
   ImageStream resolve(ImageConfiguration configuration) {
     assert(configuration != null);
-    final ImageStream stream = ImageStream();
-    _safeObtainKey(configuration, stream);
+    final ImageStream stream = createStream(configuration);
+    // Load the key (potentially asynchronously), set up an error handling zone,
+    // and call resolveStreamForKey.
+    _createErrorHandlerAndKey(configuration, stream);
     return stream;
   }
 
-  void _safeObtainKey(ImageConfiguration configuration, ImageStream stream) {
+  /// Called by [resolve] to create the [ImageStream] it returns.
+  ///
+  /// Subclasses should override this instead of [resolve] if they need to
+  /// return some subclass of [ImageStream].
+  @protected
+  ImageStream createStream(ImageConfiguration configuration) {
+    return ImageStream();
+  }
+
+  void _createErrorHandlerAndKey(ImageConfiguration configuration, ImageStream stream) {
     assert(configuration != null);
     assert(stream != null);
     T obtainedKey;
@@ -332,7 +380,7 @@ abstract class ImageProvider<T> {
       key.then<void>((T key) {
         obtainedKey = key;
         try {
-          useKey(configuration, stream, key, handleError);
+          resolveStreamForKey(configuration, stream, key, handleError);
         } catch (error, stackTrace) {
           handleError(error, stackTrace);
         }
@@ -342,17 +390,23 @@ abstract class ImageProvider<T> {
 
   /// Called when [resolve] has finished calling [obtainKey].
   ///
-  /// Subclasses should avoid calling [obtainKey] directly and instead override
-  /// this method, which makes sure appropriate error handling is in place to
-  /// notify callers and the framework.
+  /// Subclasses should override this method rather than calling [obtainKey] if
+  /// they need to use a key directly. The [resolve] method installs appropriate
+  /// error handling guards so that errors will bubble up to the right places in
+  /// the framework, and passes those guards along to this method via the
+  /// [handleError] parameter.
   ///
-  /// It is safe to call [handleError] multiple times if multiple errors occur.
+  /// It is safe for the implementation of this method to call [handleError]
+  /// multiple times if multiple errors occur, or if an error is thrown both
+  /// synchronously into the current part of the stack and thrown into the
+  /// enclosing [Zone].
   ///
   /// The default implementation uses the key to interact with the [ImageCache],
   /// calling [ImageCache.putIfAbsent] and notifying listeners of the [stream].
-  /// Implementers that do not call super should
+  /// Implementers that do not call super are expected to correctly use the
+  /// [ImageCache].
   @protected
-  void useKey(ImageConfiguration configuration, ImageStream stream, T key, ImageErrorListener handleError) {
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, T key, ImageErrorListener handleError) {
     final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
       key,
       () => load(key, PaintingBinding.instance.instantiateImageCodec),

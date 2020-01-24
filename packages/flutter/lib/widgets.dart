@@ -31,6 +31,7 @@ export 'src/widgets/color_filter.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/dismissible.dart';
+export 'src/widgets/disposable_build_context.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/draggable_scrollable_sheet.dart';
 export 'src/widgets/editable_text.dart';

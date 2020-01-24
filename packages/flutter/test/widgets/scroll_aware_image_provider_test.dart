@@ -17,14 +17,14 @@ void main() {
     return Scrollable.of(find.byType(TestWidget).evaluate().first).position.physics as RecordingPhysics;
   }
 
-  testWidgets('ScrollAwareContextProvider asserts on disposed state', (WidgetTester tester) async {
+  testWidgets('DisposableBuildContext asserts on disposed state', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
     final TestWidgetState state = key.currentState;
     expect(state.mounted, true);
 
-    final ScrollAwareContextProvider context = ScrollAwareContextProvider(state);
+    final DisposableBuildContext context = DisposableBuildContext(state);
     expect(context.debugValidate(), true);
 
     await tester.pumpWidget(const TestWidget(null));
@@ -36,14 +36,14 @@ void main() {
     context.dispose();
     expect(context.debugValidate(), true);
 
-    expect(() => ScrollAwareContextProvider(state), throwsAssertionError);
+    expect(() => DisposableBuildContext(state), throwsAssertionError);
   });
 
   testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
-    final ScrollAwareContextProvider context = ScrollAwareContextProvider(key.currentState);
+    final DisposableBuildContext context = DisposableBuildContext(key.currentState);
     const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
@@ -79,7 +79,7 @@ void main() {
       ),
     ));
 
-    final ScrollAwareContextProvider context = ScrollAwareContextProvider(key.currentState);
+    final DisposableBuildContext context = DisposableBuildContext(key.currentState);
     const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
@@ -120,7 +120,7 @@ void main() {
       ),
     ));
 
-    final ScrollAwareContextProvider context = ScrollAwareContextProvider(keys.last.currentState);
+    final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState);
     const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
@@ -171,7 +171,7 @@ void main() {
       ),
     ));
 
-    final ScrollAwareContextProvider context = ScrollAwareContextProvider(keys.last.currentState);
+    final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState);
     const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
@@ -232,7 +232,7 @@ void main() {
       ),
     ));
 
-    final ScrollAwareContextProvider context = ScrollAwareContextProvider(keys.last.currentState);
+    final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState);
     const TestImage testImage = TestImage(width: 10, height: 10);
     final TestImageProvider testImageProvider = TestImageProvider(testImage);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
