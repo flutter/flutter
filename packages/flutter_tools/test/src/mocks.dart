@@ -310,21 +310,28 @@ class FakeProcess implements Process {
 /// A process that prompts the user to proceed, then asynchronously writes
 /// some lines to stdout before it exits.
 class PromptingProcess implements Process {
+  PromptingProcess({
+    bool stdinError = false,
+  }) : _stdin = CompleterIOSink(throwOnAdd: stdinError);
+
   Future<void> showPrompt(String prompt, List<String> outputLines) async {
-    _stdoutController.add(utf8.encode(prompt));
-    final List<int> bytesOnStdin = await _stdin.future;
-    // Echo stdin to stdout.
-    _stdoutController.add(bytesOnStdin);
-    if (bytesOnStdin[0] == utf8.encode('y')[0]) {
-      for (final String line in outputLines) {
-        _stdoutController.add(utf8.encode('$line\n'));
+    try {
+      _stdoutController.add(utf8.encode(prompt));
+      final List<int> bytesOnStdin = await _stdin.future;
+      // Echo stdin to stdout.
+      _stdoutController.add(bytesOnStdin);
+      if (bytesOnStdin.isNotEmpty && bytesOnStdin[0] == utf8.encode('y')[0]) {
+        for (final String line in outputLines) {
+          _stdoutController.add(utf8.encode('$line\n'));
+        }
       }
+    } finally {
+      await _stdoutController.close();
     }
-    await _stdoutController.close();
   }
 
   final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
-  final CompleterIOSink _stdin = CompleterIOSink();
+  final CompleterIOSink _stdin;
 
   @override
   Stream<List<int>> get stdout => _stdoutController.stream;
@@ -347,6 +354,12 @@ class PromptingProcess implements Process {
 
 /// An IOSink that completes a future with the first line written to it.
 class CompleterIOSink extends MemoryIOSink {
+  CompleterIOSink({
+    this.throwOnAdd = false,
+  });
+
+  final bool throwOnAdd;
+
   final Completer<List<int>> _completer = Completer<List<int>>();
 
   Future<List<int>> get future => _completer.future;
@@ -354,7 +367,12 @@ class CompleterIOSink extends MemoryIOSink {
   @override
   void add(List<int> data) {
     if (!_completer.isCompleted) {
-      _completer.complete(data);
+      // When throwOnAdd is true, complete with empty so any expected output
+      // doesn't appear.
+      _completer.complete(throwOnAdd ? <int>[] : data);
+    }
+    if (throwOnAdd) {
+      throw 'CompleterIOSink Error';
     }
     super.add(data);
   }
@@ -375,9 +393,20 @@ class MemoryIOSink implements IOSink {
   @override
   Future<void> addStream(Stream<List<int>> stream) {
     final Completer<void> completer = Completer<void>();
-    stream.listen((List<int> data) {
-      add(data);
-    }).onDone(() => completer.complete());
+    StreamSubscription<List<int>> sub;
+    sub = stream.listen(
+      (List<int> data) {
+        try {
+          add(data);
+        } catch (err, stack) {
+          sub.cancel();
+          completer.completeError(err, stack);
+        }
+      },
+      onError: completer.completeError,
+      onDone: completer.complete,
+      cancelOnError: true,
+    );
     return completer.future;
   }
 

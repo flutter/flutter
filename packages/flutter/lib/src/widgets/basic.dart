@@ -2099,9 +2099,9 @@ class SizedBox extends SingleChildRenderObjectWidget {
     } else if (width == 0.0 && height == 0.0) {
       type = '${objectRuntimeType(this, 'SizedBox')}.shrink';
     } else {
-      type = '${objectRuntimeType(this, 'SizedBox')}';
+      type = objectRuntimeType(this, 'SizedBox');
     }
-    return key == null ? '$type' : '$type-$key';
+    return key == null ? type : '$type-$key';
   }
 
   @override
@@ -4367,7 +4367,7 @@ class Column extends Flex {
 /// See also:
 ///
 ///  * [Expanded], which forces the child to expand to fill the available space.
-///  * [Spacer], a widget that takes up space proportional to it's flex value.
+///  * [Spacer], a widget that takes up space proportional to its flex value.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flexible extends ParentDataWidget<FlexParentData> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]

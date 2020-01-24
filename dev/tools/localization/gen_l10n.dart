@@ -456,18 +456,20 @@ String genSimpleMethod(Map<String, dynamic> arbBundle, String resourceId) {
     );
 
   if (attributesMap.containsKey('placeholders')) {
+    final String rawMessageString = genSimpleMethodMessage(arbBundle, resourceId); // "r'...'"
     return simpleMethodTemplate
       .replaceAll('@methodName', resourceId)
       .replaceAll('@methodParameters', genMethodParameters(arbBundle, resourceId, 'Object').join(', '))
       .replaceAll('@dateFormatting', generateDateFormattingLogic(arbBundle, resourceId))
       .replaceAll('@numberFormatting', generateNumberFormattingLogic(arbBundle, resourceId))
-      .replaceAll('@message', '${genSimpleMethodMessage(arbBundle, resourceId)}')
+      .replaceAll('@message', '${rawMessageString.substring(1)}')
       .replaceAll('@intlMethodArgs', genIntlMethodArgs(arbBundle, resourceId).join(',\n      '));
   }
 
+  final String rawMessageString = generateString(arbBundle[resourceId] as String); // "r'...'"
   return getterMethodTemplate
     .replaceAll('@methodName', resourceId)
-    .replaceAll('@message', '${generateString(arbBundle[resourceId] as String)}')
+    .replaceAll('@message', '${rawMessageString.substring(1)}')
     .replaceAll('@intlMethodArgs', genIntlMethodArgs(arbBundle, resourceId).join(',\n      '));
 }
 
@@ -542,7 +544,7 @@ String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
 }
 
 String genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
-  const String prefix = 'static const List<Locale> supportedLocales = <Locale>[\n    Locale(''';
+  const String prefix = 'static const List<Locale> supportedLocales = <Locale>[\n    Locale(';
   const String suffix = '),\n  ];';
 
   String resultingProperty = prefix;

@@ -278,7 +278,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) {
         const String r8StdoutWarning =
-            'Execution failed for task \':app:transformClassesAndResourcesWithR8ForStageInternal\'.'
+            "Execution failed for task ':app:transformClassesAndResourcesWithR8ForStageInternal'.\n"
             '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
         return Future<Process>.value(
           createMockProcess(

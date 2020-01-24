@@ -360,7 +360,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     super.initState();
     _controller = AnimationController(
       duration: widget.duration,
-      debugLabel: kDebugMode ? '${widget.toStringShort()}' : null,
+      debugLabel: kDebugMode ? widget.toStringShort() : null,
       vsync: this,
     );
     _controller.addStatusListener((AnimationStatus status) {
@@ -649,7 +649,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
        assert(constraints == null || constraints.debugAssertIsValid()),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".'
        ),
        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        constraints =

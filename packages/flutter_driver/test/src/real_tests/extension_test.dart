@@ -543,6 +543,75 @@ void main() {
     expect(await getOffset(OffsetType.center), const Offset(40 + (100 / 2), 30 + (120 / 2)));
   });
 
+  testWidgets('getText', (WidgetTester tester) async {
+    await silenceDriverLogger(() async {
+      final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+      Future<String> getTextInternal(SerializableFinder search) async {
+        final Map<String, String> arguments = GetText(search, timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> result = await extension.call(arguments);
+        if (result['isError'] as bool) {
+          return null;
+        }
+        return GetTextResult.fromJson(result['response'] as Map<String, dynamic>).text;
+      }
+
+      await tester.pumpWidget(
+          MaterialApp(
+              home: Scaffold(body:Column(
+                key: const ValueKey<String>('column'),
+                children: <Widget>[
+                  const Text('Hello1', key: ValueKey<String>('text1')),
+                  Container(
+                      height: 25.0,
+                      child: RichText(
+                          key: const ValueKey<String>('text2'),
+                          text: const TextSpan(text: 'Hello2')
+                      )
+                  ),
+                  Container(
+                      height: 25.0,
+                      child: EditableText(
+                          key: const ValueKey<String>('text3'),
+                          controller: TextEditingController(text: 'Hello3'),
+                          focusNode: FocusNode(),
+                          style: const TextStyle(),
+                          cursorColor: Colors.red,
+                          backgroundCursorColor: Colors.black)
+                  ),
+                  Container(
+                      height: 25.0,
+                      child: TextField(
+                          key: const ValueKey<String>('text4'),
+                          controller: TextEditingController(text: 'Hello4')
+                      )
+                  ),
+                  Container(
+                      height: 25.0,
+                      child: TextFormField(
+                          key: const ValueKey<String>('text5'),
+                          controller: TextEditingController(text: 'Hello5')
+                      )
+                  ),
+                ],
+              ))
+          )
+      );
+
+      expect(await getTextInternal(ByValueKey('text1')), 'Hello1');
+      expect(await getTextInternal(ByValueKey('text2')), 'Hello2');
+      expect(await getTextInternal(ByValueKey('text3')), 'Hello3');
+      expect(await getTextInternal(ByValueKey('text4')), 'Hello4');
+      expect(await getTextInternal(ByValueKey('text5')), 'Hello5');
+
+      // Check if error thrown for other types
+      final Map<String, String> arguments = GetText(ByValueKey('column'), timeout: const Duration(seconds: 1)).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      expect(response['isError'], true);
+      expect(response['response'], contains('is currently not supported by getText'));
+    });
+  });
+
   testWidgets('descendant finder', (WidgetTester tester) async {
     await silenceDriverLogger(() async {
       final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);

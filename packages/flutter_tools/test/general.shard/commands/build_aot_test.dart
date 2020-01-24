@@ -150,7 +150,7 @@ void main() {
       validateBitcode(BuildMode.release, TargetPlatform.ios),
       equals('The Flutter.framework at ios_profile/Flutter.framework was built with "Apple LLVM version 10.0.1 '
              '(clang-1234.1.12.1)", but the current version of clang is "Apple LLVM version 10.0.0 (clang-4567.1.1.1)". '
-             'This will result in failures when trying toarchive an IPA. To resolve this issue, update your version '
+             'This will result in failures when trying to archive an IPA. To resolve this issue, update your version '
              'of Xcode to at least 10.0.1.'),
     );
   }, overrides: <Type, Generator>{
