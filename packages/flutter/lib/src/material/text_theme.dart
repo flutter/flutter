@@ -741,8 +741,8 @@ class TextTheme extends Diagnosticable {
       headline6,
       subtitle1,
       subtitle2,
-      body1,
-      body2,
+      bodyText1,
+      bodyText2,
       caption,
       button,
       overline,
@@ -761,8 +761,8 @@ class TextTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('headline6', headline6, defaultValue: defaultTheme.headline6));
     properties.add(DiagnosticsProperty<TextStyle>('subtitle1', subtitle1, defaultValue: defaultTheme.subtitle1));
     properties.add(DiagnosticsProperty<TextStyle>('subtitle2', subtitle2, defaultValue: defaultTheme.subtitle2));
-    properties.add(DiagnosticsProperty<TextStyle>('body1', body1, defaultValue: defaultTheme.body1));
-    properties.add(DiagnosticsProperty<TextStyle>('body2', body2, defaultValue: defaultTheme.body2));
+    properties.add(DiagnosticsProperty<TextStyle>('bodyText1', bodyText1, defaultValue: defaultTheme.bodyText1));
+    properties.add(DiagnosticsProperty<TextStyle>('bodyText2', bodyText2, defaultValue: defaultTheme.bodyText2));
     properties.add(DiagnosticsProperty<TextStyle>('caption', caption, defaultValue: defaultTheme.caption));
     properties.add(DiagnosticsProperty<TextStyle>('button', button, defaultValue: defaultTheme.button));
     properties.add(DiagnosticsProperty<TextStyle>('overline', overline, defaultValue: defaultTheme.overline));
