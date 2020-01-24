@@ -4,13 +4,13 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
 
@@ -115,7 +115,7 @@ class OverlayEntry {
   }
 
   OverlayState _overlay;
-  final GlobalKey<_OverlayEntryWidgetState> _key = GlobalKey<_OverlayEntryWidgetState>();
+  final GlobalKey<_OverlayEntryState> _key = GlobalKey<_OverlayEntryState>();
 
   /// Remove this entry from the overlay.
   ///
@@ -152,30 +152,21 @@ class OverlayEntry {
   String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
 }
 
-class _OverlayEntryWidget extends StatefulWidget {
-  const _OverlayEntryWidget({
-    @required Key key,
-    @required this.entry,
-    this.tickerEnabled = true,
-  }) : assert(key != null),
-       assert(entry != null),
-       assert(tickerEnabled != null),
-       super(key: key);
+class _OverlayEntry extends StatefulWidget {
+  _OverlayEntry(this.entry)
+    : assert(entry != null),
+      super(key: entry._key);
 
   final OverlayEntry entry;
-  final bool tickerEnabled;
 
   @override
-  _OverlayEntryWidgetState createState() => _OverlayEntryWidgetState();
+  _OverlayEntryState createState() => _OverlayEntryState();
 }
 
-class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
+class _OverlayEntryState extends State<_OverlayEntry> {
   @override
   Widget build(BuildContext context) {
-    return TickerMode(
-      enabled: widget.tickerEnabled,
-      child: widget.entry.builder(context),
-    );
+    return widget.entry.builder(context);
   }
 
   void _markNeedsBuild() {
@@ -461,32 +452,28 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // This list is filled backwards and then reversed below before
-    // it is added to the tree.
-    final List<Widget> children = <Widget>[];
+    // These lists are filled backwards. For the offstage children that
+    // does not matter since they aren't rendered, but for the onstage
+    // children we reverse the list below before adding it to the tree.
+    final List<Widget> onstageChildren = <Widget>[];
+    final List<Widget> offstageChildren = <Widget>[];
     bool onstage = true;
-    int onstageCount = 0;
     for (int i = _entries.length - 1; i >= 0; i -= 1) {
       final OverlayEntry entry = _entries[i];
       if (onstage) {
-        onstageCount += 1;
-        children.add(_OverlayEntryWidget(
-          key: entry._key,
-          entry: entry,
-        ));
+        onstageChildren.add(_OverlayEntry(entry));
         if (entry.opaque)
           onstage = false;
       } else if (entry.maintainState) {
-        children.add(_OverlayEntryWidget(
-          key: entry._key,
-          entry: entry,
-          tickerEnabled: false,
-        ));
+        offstageChildren.add(TickerMode(enabled: false, child: _OverlayEntry(entry)));
       }
     }
     return _Theatre(
-      skipCount: children.length - onstageCount,
-      children: children.reversed.toList(growable: false),
+      onstage: Stack(
+        fit: StackFit.expand,
+        children: onstageChildren.reversed.toList(growable: false),
+      ),
+      offstage: offstageChildren,
     );
   }
 
@@ -499,50 +486,36 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   }
 }
 
-/// Special version of a [Stack], that doesn't layout and render the first
-/// [skipCount] children.
+/// A widget that has one [onstage] child which is visible, and one or more
+/// [offstage] widgets which are kept alive, and are built, but are not laid out
+/// or painted.
 ///
-/// The first [skipCount] children are considered "offstage".
-class _Theatre extends MultiChildRenderObjectWidget {
+/// The onstage widget must be a [Stack].
+///
+/// For convenience, it is legal to use [Positioned] widgets around the offstage
+/// widgets.
+class _Theatre extends RenderObjectWidget {
   _Theatre({
-    Key key,
-    this.skipCount = 0,
-    List<Widget> children = const <Widget>[],
-  }) : assert(skipCount != null),
-       assert(skipCount >= 0),
-       assert(children != null),
-       assert(children.length >= skipCount),
-       super(key: key, children: children);
+    this.onstage,
+    @required this.offstage,
+  }) : assert(offstage != null),
+       assert(!offstage.any((Widget child) => child == null));
 
-  final int skipCount;
+  final Stack onstage;
+
+  final List<Widget> offstage;
 
   @override
   _TheatreElement createElement() => _TheatreElement(this);
 
   @override
-  _RenderTheatre createRenderObject(BuildContext context) {
-    return _RenderTheatre(
-      skipCount: skipCount,
-      textDirection: Directionality.of(context),
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderTheatre renderObject) {
-    renderObject
-      ..skipCount = skipCount
-      ..textDirection = Directionality.of(context);
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(IntProperty('skipCount', skipCount));
-  }
+  _RenderTheatre createRenderObject(BuildContext context) => _RenderTheatre();
 }
 
-class _TheatreElement extends MultiChildRenderObjectElement {
-  _TheatreElement(_Theatre widget) : super(widget);
+class _TheatreElement extends RenderObjectElement {
+  _TheatreElement(_Theatre widget)
+    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.offstage)),
+      super(widget);
 
   @override
   _Theatre get widget => super.widget as _Theatre;
@@ -550,268 +523,186 @@ class _TheatreElement extends MultiChildRenderObjectElement {
   @override
   _RenderTheatre get renderObject => super.renderObject as _RenderTheatre;
 
+  Element _onstage;
+  static final Object _onstageSlot = Object();
+
+  List<Element> _offstage;
+  final Set<Element> _forgottenOffstageChildren = HashSet<Element>();
+
+  @override
+  void insertChildRenderObject(RenderBox child, dynamic slot) {
+    assert(renderObject.debugValidateChild(child));
+    if (slot == _onstageSlot) {
+      assert(child is RenderStack);
+      renderObject.child = child as RenderStack;
+    } else {
+      assert(slot == null || slot is Element);
+      renderObject.insert(child, after: slot?.renderObject as RenderBox);
+    }
+  }
+
+  @override
+  void moveChildRenderObject(RenderBox child, dynamic slot) {
+    if (slot == _onstageSlot) {
+      renderObject.remove(child);
+      assert(child is RenderStack);
+      renderObject.child = child as RenderStack;
+    } else {
+      assert(slot == null || slot is Element);
+      if (renderObject.child == child) {
+        renderObject.child = null;
+        renderObject.insert(child, after: slot?.renderObject as RenderBox);
+      } else {
+        renderObject.move(child, after: slot?.renderObject as RenderBox);
+      }
+    }
+  }
+
+  @override
+  void removeChildRenderObject(RenderBox child) {
+    if (renderObject.child == child) {
+      renderObject.child = null;
+    } else {
+      renderObject.remove(child);
+    }
+  }
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    if (_onstage != null)
+      visitor(_onstage);
+    for (final Element child in _offstage) {
+      if (!_forgottenOffstageChildren.contains(child))
+        visitor(child);
+    }
+  }
+
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    assert(children.length >= widget.skipCount);
-    children.skip(widget.skipCount).forEach(visitor);
+    if (_onstage != null)
+      visitor(_onstage);
+  }
+
+  @override
+  bool forgetChild(Element child) {
+    if (child == _onstage) {
+      _onstage = null;
+    } else {
+      assert(_offstage.contains(child));
+      assert(!_forgottenOffstageChildren.contains(child));
+      _forgottenOffstageChildren.add(child);
+    }
+    return true;
+  }
+
+  @override
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot);
+    _onstage = updateChild(_onstage, widget.onstage, _onstageSlot);
+    _offstage = List<Element>(widget.offstage.length);
+    Element previousChild;
+    for (int i = 0; i < _offstage.length; i += 1) {
+      final Element newChild = inflateWidget(widget.offstage[i], previousChild);
+      _offstage[i] = newChild;
+      previousChild = newChild;
+    }
+  }
+
+  @override
+  void update(_Theatre newWidget) {
+    super.update(newWidget);
+    assert(widget == newWidget);
+    _onstage = updateChild(_onstage, widget.onstage, _onstageSlot);
+    _offstage = updateChildren(_offstage, widget.offstage, forgottenChildren: _forgottenOffstageChildren);
+    _forgottenOffstageChildren.clear();
   }
 }
 
-class _RenderTheatre extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData> {
-  _RenderTheatre({
-    List<RenderBox> children,
-    @required TextDirection textDirection,
-    int skipCount = 0,
-  }) : assert(skipCount != null),
-       assert(skipCount >= 0),
-       assert(textDirection != null),
-       _textDirection = textDirection,
-       _skipCount = skipCount {
-    addAll(children);
-  }
-
-  bool _hasVisualOverflow = false;
+// A render object which lays out and paints one subtree while keeping a list
+// of other subtrees alive but not laid out or painted (the "zombie" children).
+//
+// The subtree that is laid out and painted must be a [RenderStack].
+//
+// This class uses [StackParentData] objects for its parent data so that the
+// children of its primary subtree's stack can be moved to this object's list
+// of zombie children without changing their parent data objects.
+class _RenderTheatre extends RenderBox
+  with RenderObjectWithChildMixin<RenderStack>, RenderProxyBoxMixin<RenderStack>,
+       ContainerRenderObjectMixin<RenderBox, StackParentData> {
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(RenderObject child) {
     if (child.parentData is! StackParentData)
       child.parentData = StackParentData();
   }
 
-  Alignment _resolvedAlignment;
-
-  void _resolve() {
-    if (_resolvedAlignment != null)
-      return;
-    _resolvedAlignment = AlignmentDirectional.topStart.resolve(textDirection);
-  }
-
-  void _markNeedResolution() {
-    _resolvedAlignment = null;
-    markNeedsLayout();
-  }
-
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    if (_textDirection == value)
-      return;
-    _textDirection = value;
-    _markNeedResolution();
-  }
-
-  int get skipCount => _skipCount;
-  int _skipCount;
-  set skipCount(int value) {
-    assert(value != null);
-    if (_skipCount != value) {
-      _skipCount = value;
-      markNeedsLayout();
-    }
-  }
-
-  RenderBox get _firstOnstageChild {
-    if (skipCount == super.childCount) {
-      return null;
-    }
-    RenderBox child = super.firstChild;
-    for (int toSkip = skipCount; toSkip > 0; toSkip--) {
-      final StackParentData childParentData = child.parentData as StackParentData;
-      child = childParentData.nextSibling;
-      assert(child != null);
-    }
-    return child;
-  }
-
-  RenderBox get _lastOnstageChild => skipCount == super.childCount ? null : lastChild;
-
-  int get _onstageChildCount => childCount - skipCount;
+  // Because both RenderObjectWithChildMixin and ContainerRenderObjectMixin
+  // define redepthChildren, visitChildren and debugDescribeChildren and don't
+  // call super, we have to define them again here to make sure the work of both
+  // is done.
+  //
+  // We chose to put ContainerRenderObjectMixin last in the inheritance chain so
+  // that we can call super to hit its more complex definitions of
+  // redepthChildren and visitChildren, and then duplicate the more trivial
+  // definition from RenderObjectWithChildMixin inline in our version here.
+  //
+  // This code duplication is suboptimal.
+  // TODO(ianh): Replace this with a better solution once https://github.com/dart-lang/sdk/issues/27100 is fixed
+  //
+  // For debugDescribeChildren we just roll our own because otherwise the line
+  // drawings won't really work as well.
 
   @override
-  double computeMinIntrinsicWidth(double height) {
-    return RenderStack.getIntrinsicDimension(_firstOnstageChild, (RenderBox child) => child.getMinIntrinsicWidth(height));
+  void redepthChildren() {
+    if (child != null)
+      redepthChild(child);
+    super.redepthChildren();
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
-    return RenderStack.getIntrinsicDimension(_firstOnstageChild, (RenderBox child) => child.getMaxIntrinsicWidth(height));
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    return RenderStack.getIntrinsicDimension(_firstOnstageChild, (RenderBox child) => child.getMinIntrinsicHeight(width));
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    return RenderStack.getIntrinsicDimension(_firstOnstageChild, (RenderBox child) => child.getMaxIntrinsicHeight(width));
-  }
-
-  @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout);
-    double result;
-    RenderBox child = _firstOnstageChild;
-    while (child != null) {
-      assert(!child.debugNeedsLayout);
-      final StackParentData childParentData = child.parentData as StackParentData;
-      double candidate = child.getDistanceToActualBaseline(baseline);
-      if (candidate != null) {
-        candidate += childParentData.offset.dy;
-        if (result != null) {
-          result = math.min(result, candidate);
-        } else {
-          result = candidate;
-        }
-      }
-      child = childParentData.nextSibling;
-    }
-    return result;
-  }
-
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  void performResize() {
-    size = constraints.biggest;
-    assert(size.isFinite);
-  }
-
-  @override
-  void performLayout() {
-    _hasVisualOverflow = false;
-
-    if (_onstageChildCount == 0) {
-      return;
-    }
-
-    _resolve();
-    assert(_resolvedAlignment != null);
-
-    // Same BoxConstraints as used by RenderStack for StackFit.expand.
-    final BoxConstraints nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
-
-    RenderBox child = _firstOnstageChild;
-    while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
-
-      if (!childParentData.isPositioned) {
-        child.layout(nonPositionedConstraints, parentUsesSize: true);
-        childParentData.offset = _resolvedAlignment.alongOffset(size - child.size as Offset);
-      } else {
-        _hasVisualOverflow = RenderStack.layoutPositionedChild(child, childParentData, size, _resolvedAlignment) || _hasVisualOverflow;
-      }
-
-      assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
-    }
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    RenderBox child = _lastOnstageChild;
-    for (int i = 0; i < _onstageChildCount; i++) {
-      assert(child != null);
-      final StackParentData childParentData = child.parentData as StackParentData;
-      final bool isHit = result.addWithPaintOffset(
-        offset: childParentData.offset,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - childParentData.offset);
-          return child.hitTest(result, position: transformed);
-        },
-      );
-      if (isHit)
-        return true;
-      child = childParentData.previousSibling;
-    }
-    return false;
-  }
-
-  @protected
-  void paintStack(PaintingContext context, Offset offset) {
-    RenderBox child = _firstOnstageChild;
-    while (child != null) {
-      final StackParentData childParentData = child.parentData as StackParentData;
-      context.paintChild(child, childParentData.offset + offset);
-      child = childParentData.nextSibling;
-    }
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack);
-    } else {
-      paintStack(context, offset);
-    }
-  }
-
-  @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    RenderBox child = _firstOnstageChild;
-    while (child != null) {
+  void visitChildren(RenderObjectVisitor visitor) {
+    if (child != null)
       visitor(child);
-      final StackParentData childParentData = child.parentData as StackParentData;
-      child = childParentData.nextSibling;
-    }
-  }
-
-  @override
-  Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(IntProperty('skipCount', skipCount));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
+    super.visitChildren(visitor);
   }
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> offstageChildren = <DiagnosticsNode>[];
-    final List<DiagnosticsNode> onstageChildren = <DiagnosticsNode>[];
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[
+      if (child != null) child.toDiagnosticsNode(name: 'onstage'),
+    ];
 
-    int count = 1;
-    bool onstage = false;
-    RenderBox child = firstChild;
-    final RenderBox firstOnstageChild = _firstOnstageChild;
-    while (child != null) {
-      if (child == firstOnstageChild) {
-        onstage = true;
-        count = 1;
-      }
+    if (firstChild != null) {
+      RenderBox child = firstChild;
 
-      if (onstage) {
-        onstageChildren.add(
-          child.toDiagnosticsNode(
-            name: 'onstage $count',
-          ),
-        );
-      } else {
-        offstageChildren.add(
+      int count = 1;
+      while (true) {
+        children.add(
           child.toDiagnosticsNode(
             name: 'offstage $count',
             style: DiagnosticsTreeStyle.offstage,
           ),
         );
+        if (child == lastChild)
+          break;
+        final StackParentData childParentData = child.parentData as StackParentData;
+        child = childParentData.nextSibling;
+        count += 1;
       }
-
-      final StackParentData childParentData = child.parentData as StackParentData;
-      child = childParentData.nextSibling;
-      count += 1;
-    }
-
-    return <DiagnosticsNode>[
-      ...onstageChildren,
-      if (offstageChildren.isNotEmpty)
-        ...offstageChildren
-      else
+    } else {
+      children.add(
         DiagnosticsNode.message(
           'no offstage children',
           style: DiagnosticsTreeStyle.offstage,
         ),
-    ];
+      );
+    }
+    return children;
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null)
+      visitor(child);
   }
 }

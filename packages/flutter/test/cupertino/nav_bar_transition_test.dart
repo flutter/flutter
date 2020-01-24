@@ -72,9 +72,12 @@ CupertinoPageScaffold scaffoldForNavBar(Widget navBar) {
 }
 
 Finder flying(WidgetTester tester, Finder finder) {
-  final ContainerRenderObjectMixin<RenderBox, StackParentData> theater = tester.renderObject(find.byType(Overlay));
+  final RenderObjectWithChildMixin<RenderStack> theater =
+      tester.renderObject(find.byType(Overlay));
+  final RenderStack theaterStack = theater.child;
   final Finder lastOverlayFinder = find.byElementPredicate((Element element) {
-    return element is RenderObjectElement && element.renderObject == theater.lastChild;
+    return element is RenderObjectElement &&
+        element.renderObject == theaterStack.lastChild;
   });
 
   assert(
