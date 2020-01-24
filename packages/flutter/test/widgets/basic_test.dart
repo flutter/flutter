@@ -290,7 +290,10 @@ void main() {
     ));
 
     await tester.pumpAndSettle();
-    matchesGoldenFile('inconsequential_golden_file.png');
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('inconsequential_golden_file.png'),
+    );
     // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
   }, skip: isBrowser);
 }
