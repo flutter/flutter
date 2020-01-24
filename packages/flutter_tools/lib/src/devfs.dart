@@ -488,6 +488,9 @@ class DevFS {
     if (fullRestart) {
       generator.reset();
     }
+    // On a full restart, or on an initial compile for the attach based workflow,
+    // this will produce a full dill. Subsequent invocations will produce incremental
+    // dill files that depend on the invalidated files.
     globals.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
