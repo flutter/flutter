@@ -145,8 +145,20 @@ Future<T> runInContext<T>(
       VisualStudioValidator: () => const VisualStudioValidator(),
       WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
-      Xcode: () => Xcode(),
-      XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
+      Xcode: () => Xcode(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
+      ),
+      XcodeProjectInterpreter: () => XcodeProjectInterpreter(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+        terminal: globals.terminal,
+      ),
       XcodeValidator: () => const XcodeValidator(),
     },
   );

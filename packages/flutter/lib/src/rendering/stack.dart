@@ -425,8 +425,7 @@ class RenderStack extends RenderBox
     }
   }
 
-  /// Helper function for calculating the intrinsics metrics of a Stack.
-  static double getIntrinsicDimension(RenderBox firstChild, double mainChildSizeGetter(RenderBox child)) {
+  double _getIntrinsicDimension(double mainChildSizeGetter(RenderBox child)) {
     double extent = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
@@ -441,78 +440,27 @@ class RenderStack extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return getIntrinsicDimension(firstChild, (RenderBox child) => child.getMinIntrinsicWidth(height));
+    return _getIntrinsicDimension((RenderBox child) => child.getMinIntrinsicWidth(height));
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return getIntrinsicDimension(firstChild, (RenderBox child) => child.getMaxIntrinsicWidth(height));
+    return _getIntrinsicDimension((RenderBox child) => child.getMaxIntrinsicWidth(height));
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return getIntrinsicDimension(firstChild, (RenderBox child) => child.getMinIntrinsicHeight(width));
+    return _getIntrinsicDimension((RenderBox child) => child.getMinIntrinsicHeight(width));
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return getIntrinsicDimension(firstChild, (RenderBox child) => child.getMaxIntrinsicHeight(width));
+    return _getIntrinsicDimension((RenderBox child) => child.getMaxIntrinsicHeight(width));
   }
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     return defaultComputeDistanceToHighestActualBaseline(baseline);
-  }
-
-  /// Lays out the positioned `child` according to `alignment` within a Stack of `size`.
-  ///
-  /// Returns true when the child has visual overflow.
-  static bool layoutPositionedChild(RenderBox child, StackParentData childParentData, Size size, Alignment alignment) {
-    assert(childParentData.isPositioned);
-    assert(child.parentData == childParentData);
-
-    bool hasVisualOverflow = false;
-    BoxConstraints childConstraints = const BoxConstraints();
-
-    if (childParentData.left != null && childParentData.right != null)
-      childConstraints = childConstraints.tighten(width: size.width - childParentData.right - childParentData.left);
-    else if (childParentData.width != null)
-      childConstraints = childConstraints.tighten(width: childParentData.width);
-
-    if (childParentData.top != null && childParentData.bottom != null)
-      childConstraints = childConstraints.tighten(height: size.height - childParentData.bottom - childParentData.top);
-    else if (childParentData.height != null)
-      childConstraints = childConstraints.tighten(height: childParentData.height);
-
-    child.layout(childConstraints, parentUsesSize: true);
-
-    double x;
-    if (childParentData.left != null) {
-      x = childParentData.left;
-    } else if (childParentData.right != null) {
-      x = size.width - childParentData.right - child.size.width;
-    } else {
-      x = alignment.alongOffset(size - child.size as Offset).dx;
-    }
-
-    if (x < 0.0 || x + child.size.width > size.width)
-      hasVisualOverflow = true;
-
-    double y;
-    if (childParentData.top != null) {
-      y = childParentData.top;
-    } else if (childParentData.bottom != null) {
-      y = size.height - childParentData.bottom - child.size.height;
-    } else {
-      y = alignment.alongOffset(size - child.size as Offset).dy;
-    }
-
-    if (y < 0.0 || y + child.size.height > size.height)
-      hasVisualOverflow = true;
-
-    childParentData.offset = Offset(x, y);
-
-    return hasVisualOverflow;
   }
 
   @override
@@ -579,7 +527,45 @@ class RenderStack extends RenderBox
       if (!childParentData.isPositioned) {
         childParentData.offset = _resolvedAlignment.alongOffset(size - child.size as Offset);
       } else {
-        _hasVisualOverflow = layoutPositionedChild(child, childParentData, size, _resolvedAlignment) || _hasVisualOverflow;
+        BoxConstraints childConstraints = const BoxConstraints();
+
+        if (childParentData.left != null && childParentData.right != null)
+          childConstraints = childConstraints.tighten(width: size.width - childParentData.right - childParentData.left);
+        else if (childParentData.width != null)
+          childConstraints = childConstraints.tighten(width: childParentData.width);
+
+        if (childParentData.top != null && childParentData.bottom != null)
+          childConstraints = childConstraints.tighten(height: size.height - childParentData.bottom - childParentData.top);
+        else if (childParentData.height != null)
+          childConstraints = childConstraints.tighten(height: childParentData.height);
+
+        child.layout(childConstraints, parentUsesSize: true);
+
+        double x;
+        if (childParentData.left != null) {
+          x = childParentData.left;
+        } else if (childParentData.right != null) {
+          x = size.width - childParentData.right - child.size.width;
+        } else {
+          x = _resolvedAlignment.alongOffset(size - child.size as Offset).dx;
+        }
+
+        if (x < 0.0 || x + child.size.width > size.width)
+          _hasVisualOverflow = true;
+
+        double y;
+        if (childParentData.top != null) {
+          y = childParentData.top;
+        } else if (childParentData.bottom != null) {
+          y = size.height - childParentData.bottom - child.size.height;
+        } else {
+          y = _resolvedAlignment.alongOffset(size - child.size as Offset).dy;
+        }
+
+        if (y < 0.0 || y + child.size.height > size.height)
+          _hasVisualOverflow = true;
+
+        childParentData.offset = Offset(x, y);
       }
 
       assert(child.parentData == childParentData);
