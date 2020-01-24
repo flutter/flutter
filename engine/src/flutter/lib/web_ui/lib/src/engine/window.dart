@@ -47,11 +47,24 @@ class EngineWindow extends ui.Window {
 
   @override
   ui.Size get physicalSize {
+    if (_physicalSize?.value == null) {
+      _computePhysicalSize();
+    }
+    assert(_physicalSize != null);
+    assert(_physicalSize.value != null);
+    return _physicalSize.value;
+  }
+
+  /// Computes the physical size of the screen from [html.window].
+  ///
+  /// This function is expensive. It triggers browser layout if there are
+  /// pending DOM writes.
+  void _computePhysicalSize() {
     bool override = false;
 
     assert(() {
       if (webOnlyDebugPhysicalSizeOverride != null) {
-        _physicalSize = webOnlyDebugPhysicalSizeOverride;
+        _physicalSize = FrameReference<ui.Size>(webOnlyDebugPhysicalSizeOverride);
         override = true;
       }
       return true;
@@ -68,23 +81,15 @@ class EngineWindow extends ui.Window {
         windowInnerWidth = html.window.innerWidth * devicePixelRatio;
         windowInnerHeight = html.window.innerHeight * devicePixelRatio;
       }
-      if (windowInnerWidth != _lastKnownWindowInnerWidth ||
-          windowInnerHeight != _lastKnownWindowInnerHeight) {
-        _lastKnownWindowInnerWidth = windowInnerWidth;
-        _lastKnownWindowInnerHeight = windowInnerHeight;
-        _physicalSize = ui.Size(
-          windowInnerWidth,
-          windowInnerHeight,
-        );
-      }
+      _physicalSize = FrameReference<ui.Size>(ui.Size(
+        windowInnerWidth,
+        windowInnerHeight,
+      ));
     }
-
-    return _physicalSize;
   }
 
-  ui.Size _physicalSize = ui.Size.zero;
-  double _lastKnownWindowInnerWidth = -1;
-  double _lastKnownWindowInnerHeight = -1;
+  /// Lazily populated and cleared at the end of the frame.
+  FrameReference<ui.Size> _physicalSize;
 
   /// Overrides the value of [physicalSize] in tests.
   ui.Size webOnlyDebugPhysicalSizeOverride;
