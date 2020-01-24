@@ -20,7 +20,10 @@ class HotReloadProject extends Project {
   ''';
 
   @override
-  final String main = r'''
+  final String main = getCode(false);
+
+  static String getCode(bool stateful) {
+    return '''
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';
@@ -44,7 +47,7 @@ class HotReloadProject extends Project {
   }
 
 
-  class Child extends StatelessWidget {
+  class ${stateful ? 'Other' : 'Child'} extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
       print('STATELESS');
@@ -52,11 +55,11 @@ class HotReloadProject extends Project {
     }
   }
 
-  class Other extends StatefulWidget {
+  class ${stateful ? 'Child' : 'Other'}  extends StatefulWidget {
     State createState() => _State();
   }
 
-  class _State extends State<Other>{
+  class _State extends State<${stateful ? 'Child' : 'Other'}>{
     @override
     Widget build(BuildContext context) {
       print('STATEFUL');
@@ -64,13 +67,13 @@ class HotReloadProject extends Project {
     }
   }
   ''';
+  }
+
+  /// Whether the template is currently stateful.
+  bool stateful = false;
 
   void toggleState() {
-    final String main = globals.fs.file(globals.fs.path.join(dir.path, 'lib', 'main.dart')).readAsStringSync();
-    String newMainContents = main.replaceAll('Child', 'Temp');
-    newMainContents = newMainContents.replaceAll('Other', 'Child');
-    newMainContents = newMainContents.replaceAll('Temp', 'Other');
-    newMainContents = newMainContents.replaceAll('Other()', 'Child()');
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    stateful = !stateful;
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), getCode(stateful));
   }
 }
