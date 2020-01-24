@@ -1,4 +1,4 @@
-Signature: 292b8d0f6520fb36b08b451fbf56ad22
+Signature: 4e5701fa95bcc743babb16f45821a137
 
 UNUSED LICENSES:
 
@@ -528,6 +528,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
@@ -778,7 +779,8 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/syscalls/timer.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/syscalls/vcpu.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/syscalls/vmar.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/syscalls/vmo.fidl
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/syscalls/zx.fidl
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/syscalls/zx_common.fidl
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/syscalls/zx_syscall.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/ftp.h
@@ -1033,7 +1035,8 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/syscalls/timer.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/syscalls/vcpu.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/syscalls/vmar.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/syscalls/vmo.fidl
-FILE: ../../../fuchsia/sdk/linux/arch/x64/syscalls/zx.fidl
+FILE: ../../../fuchsia/sdk/linux/arch/x64/syscalls/zx_common.fidl
+FILE: ../../../fuchsia/sdk/linux/arch/x64/syscalls/zx_syscall.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/ftp.h
@@ -1510,6 +1513,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/url_request_rewrite_rules.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/zx/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/zx/zx_common.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/executor.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/executor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/irq.h
@@ -2222,6 +2227,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
