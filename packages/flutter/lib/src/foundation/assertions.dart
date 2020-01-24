@@ -76,6 +76,8 @@ class PartialStackFrame {
   /// Tests whether the [StackFrame] matches the information in this
   /// [PartialStackFrame].
   bool matches(StackFrame stackFrame) {
+    // Ideally this wouldn't be necessary.
+    // TODO(dnfield): https://github.com/dart-lang/sdk/issues/40117
     if (kIsWeb) {
       return stackFrame.packageScheme == packageScheme
           && stackFrame.package == package
