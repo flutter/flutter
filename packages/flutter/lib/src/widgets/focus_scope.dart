@@ -459,13 +459,30 @@ class _FocusState extends State<Focus> {
   @override
   Widget build(BuildContext context) {
     _focusAttachment.reparent();
-    return _FocusMarker(
-      node: focusNode,
-      child: Semantics(
+
+    // Only add a semantics widget if we have the focus or are focusable.
+    // Otherwise, when this focus widget is the parent of another focus widget,
+    // and this one is not focusable, it can eclipse the information for the
+    // child.
+    Widget semantics = widget.child;
+    // If _canRequestFocus is false, then _hasPrimaryFocus must also be false.
+    // If _hasPrimaryFocus is true, then _canRequestFocus must also be true.
+    if (_hasPrimaryFocus) {
+      semantics = Semantics(
         focusable: _canRequestFocus,
         focused: _hasPrimaryFocus,
         child: widget.child,
-      ),
+      );
+    } else if (_canRequestFocus) {
+      semantics = Semantics(
+        focusable: _canRequestFocus,
+        child: widget.child,
+      );
+    }
+
+    return _FocusMarker(
+      node: focusNode,
+      child: semantics,
     );
   }
 }

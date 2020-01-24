@@ -19,7 +19,7 @@ void main() {
       final GlobalKey key3 = GlobalKey(debugLabel: '3');
       final GlobalKey key4 = GlobalKey(debugLabel: '4');
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
-      await tester.pumpWidget(DefaultFocusTraversal(
+      await tester.pumpWidget(FocusTraversalGroup(
         policy: WidgetOrderFocusTraversalPolicy(),
         child: FocusScope(
           key: key1,
@@ -64,7 +64,7 @@ void main() {
       bool focus3;
       bool focus5;
       await tester.pumpWidget(
-        DefaultFocusTraversal(
+        FocusTraversalGroup(
           policy: WidgetOrderFocusTraversalPolicy(),
           child: FocusScope(
             debugLabel: 'key1',
@@ -177,7 +177,7 @@ void main() {
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
       final GlobalKey key6 = GlobalKey(debugLabel: '6');
       await tester.pumpWidget(
-        DefaultFocusTraversal(
+        FocusTraversalGroup(
           policy: WidgetOrderFocusTraversalPolicy(),
           child: FocusScope(
             key: key1,
@@ -250,7 +250,7 @@ void main() {
       final FocusNode testNode2 = FocusNode(debugLabel: 'Second Focus Node');
       await tester.pumpWidget(
         MaterialApp(
-          home: DefaultFocusTraversal(
+          home: FocusTraversalGroup(
             policy: WidgetOrderFocusTraversalPolicy(),
             child: Center(
               child: Builder(builder: (BuildContext context) {
@@ -317,7 +317,7 @@ void main() {
       final GlobalKey key3 = GlobalKey(debugLabel: '3');
       final GlobalKey key4 = GlobalKey(debugLabel: '4');
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
-      await tester.pumpWidget(DefaultFocusTraversal(
+      await tester.pumpWidget(FocusTraversalGroup(
         policy: ReadingOrderTraversalPolicy(),
         child: FocusScope(
           key: key1,
@@ -364,7 +364,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
+          child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'key1',
@@ -473,7 +473,7 @@ void main() {
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
       final GlobalKey key6 = GlobalKey(debugLabel: '6');
       await tester.pumpWidget(
-        DefaultFocusTraversal(
+        FocusTraversalGroup(
           policy: ReadingOrderTraversalPolicy(),
           child: FocusScope(
             key: key1,
@@ -544,7 +544,7 @@ void main() {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
-      await tester.pumpWidget(DefaultFocusTraversal(
+      await tester.pumpWidget(FocusTraversalGroup(
         policy: OrderedTraversalPolicy(secondary: ReadingOrderTraversalPolicy()),
         child: FocusScope(
           child: Column(
@@ -586,7 +586,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
-          child: DefaultFocusTraversal(
+          child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
             child: FocusScope(
               child: Row(
@@ -625,7 +625,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
+          child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
             child: FocusScope(
               child: Row(
@@ -669,7 +669,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
+          child: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
             child: FocusScope(
               child: Row(
@@ -711,7 +711,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
+          child: FocusTraversalGroup(
             policy: WidgetOrderFocusTraversalPolicy(),
             child: FocusScope(
               node: scopeNode,
@@ -838,7 +838,7 @@ void main() {
       final FocusNode testNode2 = FocusNode(debugLabel: 'Second Focus Node');
       await tester.pumpWidget(
         MaterialApp(
-          home: DefaultFocusTraversal(
+          home: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
             child: Center(
               child: Builder(builder: (BuildContext context) {
@@ -917,7 +917,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
+          child: FocusTraversalGroup(
             policy: WidgetOrderFocusTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'Scope',
@@ -1070,7 +1070,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
+          child: FocusTraversalGroup(
             policy: WidgetOrderFocusTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'Scope',
@@ -1191,7 +1191,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
+          child: FocusTraversalGroup(
             policy: WidgetOrderFocusTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'scope',
@@ -1235,7 +1235,7 @@ void main() {
 
       await tester.pump();
 
-      final FocusTraversalPolicy policy = DefaultFocusTraversal.of(upperLeftKey.currentContext);
+      final FocusTraversalPolicy policy = FocusTraversalGroup.of(upperLeftKey.currentContext).policy;
 
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.up), equals(lowerLeftNode));
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.down), equals(upperLeftNode));
@@ -1249,7 +1249,7 @@ void main() {
       final FocusNode focusBottom = FocusNode(debugLabel: 'bottom');
 
       final FocusTraversalPolicy policy = ReadingOrderTraversalPolicy();
-      await tester.pumpWidget(DefaultFocusTraversal(
+      await tester.pumpWidget(FocusTraversalGroup(
         policy: policy,
         child: FocusScope(
           debugLabel: 'Scope',
@@ -1273,7 +1273,7 @@ void main() {
       expect(focusBottom.hasFocus, isTrue);
 
       // Remove center focus node.
-      await tester.pumpWidget(DefaultFocusTraversal(
+      await tester.pumpWidget(FocusTraversalGroup(
         policy: policy,
         child: FocusScope(
           debugLabel: 'Scope',

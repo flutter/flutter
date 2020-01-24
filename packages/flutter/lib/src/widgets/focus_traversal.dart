@@ -63,7 +63,7 @@ enum TraversalDirection {
 }
 
 /// An object used to specify a focus traversal policy used for configuring a
-/// [DefaultFocusTraversal] widget or a [FocusTraversalGroup] widget.
+/// [FocusTraversalGroup] widget.
 ///
 /// The focus traversal policy is what determines which widget is "next",
 /// "previous", or in a direction from the currently focused [FocusNode].
@@ -76,8 +76,6 @@ enum TraversalDirection {
 ///  * [FocusNode], for a description of the focus system.
 ///  * [FocusTraversalGroup], a widget that groups together and imposes a
 ///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
-///  * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
-///    [Focus] nodes below it in the widget hierarchy without grouping.
 ///  * [FocusNode], which is affected by the traversal policy.
 ///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
@@ -213,7 +211,7 @@ abstract class FocusTraversalPolicy {
   // that they are each in, and filtering out non-traversable/focusable nodes.
   List<FocusNode> _sortAllDescendants(FocusScopeNode scope) {
     final FocusTraversalGroup scopeGroup = scope.context == null ? null : FocusTraversalGroup.of(scope.context, nullOk: true);
-    final FocusTraversalPolicy defaultPolicy = scopeGroup?.policy ?? DefaultFocusTraversal.of(scope.context, nullOk: true) ?? ReadingOrderTraversalPolicy();
+    final FocusTraversalPolicy defaultPolicy = scopeGroup?.policy ?? ReadingOrderTraversalPolicy();
     // Build the sorting data structure, separating descendants into groups.
     final Map<FocusNode, _FocusPolicyGroupInfo> groups = <FocusNode, _FocusPolicyGroupInfo>{};
     for (final FocusNode node in scope.descendants) {
@@ -364,8 +362,8 @@ class _DirectionalPolicyData {
 /// See also:
 ///
 ///  * [FocusNode], for a description of the focus system.
-///  * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
-///    [Focus] nodes below it in the widget hierarchy.
+///  * [FocusTraversalGroup], a widget that groups together and imposes a
+///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 ///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
 ///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
@@ -735,8 +733,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
 /// See also:
 ///
 ///  * [FocusNode], for a description of the focus system.
-///  * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
-///    [Focus] nodes below it in the widget hierarchy.
+///  * [FocusTraversalGroup], a widget that groups together and imposes a
+///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 ///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
 ///    natural "reading order" for the current [Directionality].
 ///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
@@ -776,8 +774,8 @@ class _ReadingOrderSortData {
 /// See also:
 ///
 ///  * [FocusNode], for a description of the focus system.
-///  * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
-///    [Focus] nodes below it in the widget hierarchy.
+///  * [FocusTraversalGroup], a widget that groups together and imposes a
+///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 ///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
 ///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
@@ -999,8 +997,8 @@ class _OrderedFocusInfo {
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return DefaultFocusTraversal(
-///     policy: OrderedFocusTraversalPolicy(),
+///   return FocusTraversalGroup(
+///     policy: OrderedTraversalPolicy(),
 ///     child: Column(
 ///       mainAxisAlignment: MainAxisAlignment.center,
 ///       children: <Widget>[
@@ -1133,8 +1131,6 @@ class FocusTraversalOrder extends InheritedWidget {
 ///
 /// See also:
 ///
-///  * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
-///    [Focus] nodes below it in the widget hierarchy without grouping.
 ///  * [FocusNode], for a description of the focus system.
 ///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
@@ -1143,12 +1139,12 @@ class FocusTraversalOrder extends InheritedWidget {
 ///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
 ///    focus traversal in a direction.
 class FocusTraversalGroup extends StatelessWidget {
-  /// Creates a [DefaultFocusTraversal] object.
+  /// Creates a [FocusTraversalGroup] object.
   ///
   /// The [child] argument must not be null.
   FocusTraversalGroup({
     Key key,
-    this.policy,
+    FocusTraversalPolicy policy,
     @required this.child,
     String debugLabel,
   })  : _focusNode = FocusNode(
@@ -1156,8 +1152,11 @@ class FocusTraversalGroup extends StatelessWidget {
           skipTraversal: true,
           debugLabel: debugLabel ?? 'FocusTraversalPolicyGroup',
         ),
+        policy = policy ?? ReadingOrderTraversalPolicy(),
         super(key: key);
 
+  /// The child widget of this [FocusTraversalGroup].
+  ///
   /// {@macro flutter.widgets.child}
   final Widget child;
 
@@ -1231,22 +1230,15 @@ class FocusTraversalGroup extends StatelessWidget {
   }
 }
 
-/// A widget that describes the inherited focus policy for focus traversal for
-/// its descendants.
+/// A deprecated widget that describes the inherited focus policy for focus
+/// traversal for its descendants.
 ///
-/// By default, traverses in reading order using [ReadingOrderTraversalPolicy].
-///
-/// See also:
-///
-///  * [FocusTraversalGroup], a widget that groups together and imposes a
-///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
-///  * [FocusNode], for a description of the focus system.
-///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
-///    creation order to describe the order of traversal.
-///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
-///    natural "reading order" for the current [Directionality].
-///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
-///    focus traversal in a direction.
+/// _This widget has been deprecated: use [FocusTraversalGroup] instead._
+@Deprecated(
+  'Use FocusTraversalGroup as a replacement for DefaultFocusTraversal. '
+  'Be aware that FocusTraversalGroup does add an (unfocusable) Focus widget to the hierarchy that DefaultFocusTraversal does not. '
+  'This feature was deprecated after v1.14.3.'
+)
 class DefaultFocusTraversal extends InheritedWidget {
   /// Creates a [DefaultFocusTraversal] object.
   ///
@@ -1282,6 +1274,10 @@ class DefaultFocusTraversal extends InheritedWidget {
   /// result of an order change.
   ///
   /// The [context] argument must not be null.
+  @Deprecated(
+      'Use FocusTraversalGroup.of(context).policy as a replacement for DefaultFocusTraversal.of(context) '
+      'This feature was deprecated after v1.14.3.'
+  )
   static FocusTraversalPolicy of(BuildContext context, {bool nullOk = false}) {
     final DefaultFocusTraversal inherited = context?.findAncestorWidgetOfExactType<DefaultFocusTraversal>();
     assert(() {
