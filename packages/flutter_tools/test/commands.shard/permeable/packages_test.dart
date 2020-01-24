@@ -424,6 +424,27 @@ void main() {
       Pub: () => const Pub(),
     });
 
+    testUsingContext('pub publish input fails', () async {
+      final PromptingProcess process = PromptingProcess(stdinError: true);
+      mockProcessManager.processFactory = (List<String> commands) => process;
+      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
+      final Future<void> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
+      final Future<void> simulateUserInput = Future<void>(() {
+        mockStdio.simulateStdin('y');
+      });
+      await Future.wait<void>(<Future<void>>[runPackages, runPrompt, simulateUserInput]);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(2));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'publish');
+      // We get a trace message about the write to stdin failing.
+      expect(testLogger.traceText, contains('Echoing stdin to the pub subprocess failed'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      Pub: () => const Pub(),
+    });
+
     testUsingContext('publish', () async {
       await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
       final List<String> commands = mockProcessManager.commands;
