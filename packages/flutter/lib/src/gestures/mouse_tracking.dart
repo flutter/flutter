@@ -289,7 +289,6 @@ class MouseTracker extends ChangeNotifier {
       return;
 
     final PointerEvent previousEvent = existingState?.latestEvent;
-    final Offset lastHoverPosition = previousEvent is! PointerHoverEvent ? null : previousEvent.position;
     _updateDevices(
       targetEvent: event,
       handleUpdatedDevice: (_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations) {
@@ -297,7 +296,7 @@ class MouseTracker extends ChangeNotifier {
         _dispatchDeviceCallbacks(
           lastAnnotations: previousAnnotations,
           nextAnnotations: mouseState.annotations,
-          lastHoverPosition: lastHoverPosition,
+          previousEvent: previousEvent,
           unhandledEvent: event,
           trackedAnnotations: _trackedAnnotations,
         );
@@ -328,13 +327,11 @@ class MouseTracker extends ChangeNotifier {
   void _updateAllDevices() {
     _updateDevices(
       handleUpdatedDevice: (_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations) {
-        final PointerEvent latestEvent = mouseState.latestEvent;
-        final Offset lastHoverPosition = latestEvent is PointerHoverEvent ? latestEvent.position : null;
         _dispatchDeviceCallbacks(
           lastAnnotations: previousAnnotations,
           nextAnnotations: mouseState.annotations,
-          lastHoverPosition: lastHoverPosition,
-          unhandledEvent: mouseState.latestEvent,
+          previousEvent: mouseState.latestEvent,
+          unhandledEvent: null,
           trackedAnnotations: _trackedAnnotations,
         );
       }
@@ -427,20 +424,22 @@ class MouseTracker extends ChangeNotifier {
   // Dispatch callbacks related to a device after all necessary information
   // has been collected.
   //
-  // The `lastHoverPosition` can be null, which means the last event is not a
-  // hover. Other arguments must not be null.
+  // The `previousEvent` is the latest event before `unhandledEvent`. It might be
+  // null, which means the update is triggered by a new event.
+  // The `unhandledEvent` can be null, which means the update is not triggered
+  // by an event.
   static void _dispatchDeviceCallbacks({
     @required LinkedHashSet<MouseTrackerAnnotation> lastAnnotations,
     @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
-    @required Offset lastHoverPosition,
+    @required PointerEvent previousEvent,
     @required PointerEvent unhandledEvent,
     @required Set<MouseTrackerAnnotation> trackedAnnotations,
   }) {
     assert(lastAnnotations != null);
     assert(nextAnnotations != null);
-    // lastHoverPosition can be null
-    assert(unhandledEvent != null);
     assert(trackedAnnotations != null);
+    final PointerEvent latestEvent = unhandledEvent ?? previousEvent;
+    assert(latestEvent != null);
     // Order is important for mouse event callbacks. The `findAnnotations`
     // returns annotations in the visual order from front to back. We call
     // it the "visual order", and the opposite one "reverse visual order".
@@ -456,7 +455,7 @@ class MouseTracker extends ChangeNotifier {
       // trigger may cause exceptions and has safer alternatives. See
       // [MouseRegion.onExit] for details.
       if (annotation.onExit != null && attached) {
-        annotation.onExit(PointerExitEvent.fromMouseEvent(unhandledEvent));
+        annotation.onExit(PointerExitEvent.fromMouseEvent(latestEvent));
       }
     }
 
@@ -466,7 +465,7 @@ class MouseTracker extends ChangeNotifier {
     for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
       assert(trackedAnnotations.contains(annotation));
       if (annotation.onEnter != null) {
-        annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent));
+        annotation.onEnter(PointerEnterEvent.fromMouseEvent(latestEvent));
       }
     }
 
@@ -476,6 +475,7 @@ class MouseTracker extends ChangeNotifier {
     if (unhandledEvent is PointerHoverEvent) {
       final Iterable<MouseTrackerAnnotation> hoveringAnnotations =
         nextAnnotations.toList().reversed;
+      final Offset lastHoverPosition = previousEvent is PointerHoverEvent ? previousEvent.position : null;
       for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
         // Deduplicate: Trigger hover if it's a newly hovered annotation
         // or the position has changed
