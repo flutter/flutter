@@ -426,6 +426,7 @@ void main() {
   });
 
   testWidgets('SliverPadding includes preceding padding in the precedingScrollExtent provided to child', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/49195
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
