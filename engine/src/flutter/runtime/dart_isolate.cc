@@ -294,9 +294,11 @@ bool DartIsolate::PrepareForRunningFromPrecompiledCode() {
     return false;
   }
 
-  GetIsolateGroupData().SetChildIsolatePreparer([](DartIsolate* isolate) {
-    return isolate->PrepareForRunningFromPrecompiledCode();
-  });
+  if (GetIsolateGroupData().GetChildIsolatePreparer() == nullptr) {
+    GetIsolateGroupData().SetChildIsolatePreparer([](DartIsolate* isolate) {
+      return isolate->PrepareForRunningFromPrecompiledCode();
+    });
+  }
 
   const fml::closure& isolate_create_callback =
       GetIsolateGroupData().GetIsolateCreateCallback();
