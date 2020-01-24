@@ -42,4 +42,88 @@ void main() {
     expect(rrect.contains(const Offset(1.7, 1.97)), isTrue);
     expect(rrect.contains(const Offset(1.0, 1.99)), isTrue);
   });
+
+  test('RRect.webOnlyUniformRadii returns true when all corner radii are equal',
+      () {
+    final RRect rect1 = RRect.fromRectAndCorners(
+        const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0),
+        topLeft: const Radius.elliptical(5, 5),
+        topRight: const Radius.elliptical(5, 5),
+        bottomLeft: const Radius.elliptical(5, 5),
+        bottomRight: const Radius.elliptical(5, 5),
+    );
+    expect(rect1.webOnlyUniformRadii, isTrue);
+
+    final RRect rect2 = RRect.fromRectAndCorners(
+      const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0),
+      topLeft: const Radius.elliptical(1000, 5),
+      topRight: const Radius.elliptical(5, 5),
+      bottomLeft: const Radius.elliptical(5, 5),
+      bottomRight: const Radius.elliptical(5, 5),
+    );
+    expect(rect2.webOnlyUniformRadii, isFalse);
+
+    final RRect rect3 = RRect.fromRectAndCorners(
+      const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0),
+      topLeft: const Radius.elliptical(5, 1000),
+      topRight: const Radius.elliptical(5, 5),
+      bottomLeft: const Radius.elliptical(5, 5),
+      bottomRight: const Radius.elliptical(5, 5),
+    );
+    expect(rect3.webOnlyUniformRadii, isFalse);
+
+    final RRect rect4 = RRect.fromRectAndCorners(
+      const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0),
+      topLeft: const Radius.elliptical(5, 5),
+      topRight: const Radius.elliptical(1000, 5),
+      bottomLeft: const Radius.elliptical(5, 5),
+      bottomRight: const Radius.elliptical(5, 5),
+    );
+    expect(rect4.webOnlyUniformRadii, isFalse);
+
+    final RRect rect5 = RRect.fromRectAndCorners(
+      const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0),
+      topLeft: const Radius.elliptical(5, 5),
+      topRight: const Radius.elliptical(5, 1000),
+      bottomLeft: const Radius.elliptical(5, 5),
+      bottomRight: const Radius.elliptical(5, 5),
+    );
+    expect(rect5.webOnlyUniformRadii, isFalse);
+
+    final RRect rect6 = RRect.fromRectAndCorners(
+      const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0),
+      topLeft: const Radius.elliptical(5, 5),
+      topRight: const Radius.elliptical(5, 5),
+      bottomLeft: const Radius.elliptical(1000, 5),
+      bottomRight: const Radius.elliptical(5, 5),
+    );
+    expect(rect6.webOnlyUniformRadii, isFalse);
+
+    final RRect rect7 = RRect.fromRectAndCorners(
+      const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0),
+      topLeft: const Radius.elliptical(5, 5),
+      topRight: const Radius.elliptical(5, 5),
+      bottomLeft: const Radius.elliptical(5, 1000),
+      bottomRight: const Radius.elliptical(5, 5),
+    );
+    expect(rect7.webOnlyUniformRadii, isFalse);
+
+    final RRect rect8 = RRect.fromRectAndCorners(
+      const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0),
+      topLeft: const Radius.elliptical(5, 5),
+      topRight: const Radius.elliptical(5, 5),
+      bottomLeft: const Radius.elliptical(5, 5),
+      bottomRight: const Radius.elliptical(1000, 5),
+    );
+    expect(rect8.webOnlyUniformRadii, isFalse);
+
+    final RRect rect9 = RRect.fromRectAndCorners(
+      const Rect.fromLTWH(1.0, 2.0, 3.0, 4.0),
+      topLeft: const Radius.elliptical(5, 5),
+      topRight: const Radius.elliptical(5, 5),
+      bottomLeft: const Radius.elliptical(5, 5),
+      bottomRight: const Radius.elliptical(5, 1000),
+    );
+    expect(rect9.webOnlyUniformRadii, isFalse);
+  });
 }
