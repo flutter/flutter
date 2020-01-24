@@ -142,6 +142,12 @@ class ScrollPhysics {
   /// The velocity parameter must not be null, but may be positive, negative, or
   /// zero.
   ///
+  /// The metrics parameter must not be null.
+  ///
+  /// The context parameter must not be null. It normally refers to the
+  /// [BuildContext] of the widget making the call, such as an [Image] widget
+  /// in a [ListView].
+  ///
   /// This can be used to determine whether decoding or fetching complex data
   /// for the currently visible part of the viewport should be delayed
   /// to avoid doing work that will not have a chance to appear before a new
@@ -164,7 +170,7 @@ class ScrollPhysics {
   /// The default implementation is stateless, and simply provides a point-in-
   /// time decision about how fast the scrollable is scrolling. It would always
   /// return true for a scrollable that is animating back and forth at high
-  ///  velocity in a loop. It is assumed that callers will handle such
+  /// velocity in a loop. It is assumed that callers will handle such
   /// a case, or that a custom stateful implementation would be written that
   /// tracks the sign of the velocity on successive calls.
   ///
