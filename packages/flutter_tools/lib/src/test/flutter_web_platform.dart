@@ -9,6 +9,9 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
+import 'package:meta/meta.dart';
+import 'package:package_config/discovery.dart';
+import 'package:package_config/packages.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:pool/pool.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -96,10 +99,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  /// Parsed package map from `.packages` of the current working directory.
-  final PackageMap _packageMap = PackageMap(p.join(p.current, '.packages'));
+  final Future<Packages> _packagesFuture = loadPackagesFile(Uri.base.resolve('.packages'));
 
-  /// Parsed package map from `.packages` of the `flutter_tools` package.
   final PackageMap _flutterToolsPackageMap = PackageMap(p.join(
     Cache.flutterRoot,
     'packages',
@@ -113,8 +114,14 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// The test runner configuration.
   final Configuration _config;
 
+  @visibleForTesting
+  Configuration get config => _config;
+
   /// The underlying server.
   final shelf.Server _server;
+
+  @visibleForTesting
+  shelf.Server get server => _server;
 
   /// The URL for this server.
   Uri get url => _server.url;
@@ -204,30 +211,27 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
   }
 
-  FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) {
-    if (request.requestedUri.path.startsWith('/packages/')) {
-      final RegExp pkgRegExp = RegExp(r'/packages/([^/]+)/(.+)');
-      final Match match = pkgRegExp.matchAsPrefix(request.requestedUri.path);
-      final String packageName = match.group(1);
-      final String restFilePath = match.group(2);
-      final Uri packageUri = _packageMap.map[packageName];
-      if (packageUri != null) {
-        final shelf.Handler handler = createStaticHandler(
-          packageUri.toFilePath(),
-          serveFilesOutsidePath: true,
-        );
-        final shelf.Request modifiedRequest = shelf.Request(
-          request.method,
-          request.requestedUri.replace(path: restFilePath),
-          protocolVersion: request.protocolVersion,
-          headers: request.headers,
-          handlerPath: request.handlerPath,
-          url: request.url.replace(path: restFilePath),
-          encoding: request.encoding,
-          context: request.context,
-        );
-        return handler(modifiedRequest);
-      }
+  FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) async {
+    if (request.requestedUri.pathSegments.first == 'packages') {
+      final Packages packages = await _packagesFuture;
+      final Uri fileUri = packages.resolve(Uri(
+        scheme: 'package',
+        pathSegments: request.requestedUri.pathSegments.skip(1),
+      ));
+      final String dirname = p.dirname(fileUri.toFilePath());
+      final String basename = p.basename(fileUri.toFilePath());
+      final shelf.Handler handler = createStaticHandler(dirname);
+      final shelf.Request modifiedRequest = shelf.Request(
+        request.method,
+        request.requestedUri.replace(path: basename),
+        protocolVersion: request.protocolVersion,
+        headers: request.headers,
+        handlerPath: request.handlerPath,
+        url: request.url.replace(path: basename),
+        encoding: request.encoding,
+        context: request.context,
+      );
+      return handler(modifiedRequest);
     }
     return shelf.Response.notFound('Not Found');
   }
