@@ -54,6 +54,7 @@ enum _ScaffoldSlot {
   drawer,
   endDrawer,
   statusBar,
+  additionalFloatingActionButton,
 }
 
 /// The geometry of the [Scaffold] after all its contents have been laid out
@@ -543,6 +544,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       floatingActionButtonRect = fabOffset & fabSize;
     }
 
+    // TODO: Add additional FAB.
+    if (hasChild(_ScaffoldSlot.additionalFloatingActionButton)) {
+      print('Child found');
+    } else {
+      print('Child NOT found');
+    }
+
     if (hasChild(_ScaffoldSlot.snackBar)) {
       if (snackBarSize == Size.zero) {
         snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
@@ -795,8 +803,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
-class _FloatingActionButtonConfiguration {
-  _FloatingActionButtonConfiguration({@required this.button, @required this.location});
+class FloatingActionButtonConfiguration {
+  FloatingActionButtonConfiguration({@required this.button, @required this.location});
 
   final FloatingActionButton button;
   final FloatingActionButtonLocation location;
@@ -1086,7 +1094,7 @@ class Scaffold extends StatefulWidget {
   final FloatingActionButtonAnimator floatingActionButtonAnimator;
 
   // TODO: Document.
-  final List<_FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
+  final List<FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
@@ -2409,6 +2417,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeRightPadding: true,
       removeBottomPadding: true,
     );
+
+    for (FloatingActionButtonConfiguration configuration in widget.additionalFloatingActionButtonConfigurations) {
+      _addIfNonNull(
+        children,
+        configuration.button,
+        _ScaffoldSlot.additionalFloatingActionButton,
+        removeLeftPadding: true,
+        removeTopPadding: true,
+        removeRightPadding: true,
+        removeBottomPadding: true,
+      );
+    }
 
     switch (themeData.platform) {
       case TargetPlatform.iOS:
