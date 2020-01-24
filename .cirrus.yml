@@ -303,6 +303,9 @@ task:
         - ./dev/bots/firebase_testlab.sh
 
     - name: deploy_gallery-linux # linux- and macos- only
+      # Do not add more tasks here. Nothing is currently deployed from master branch, so it is safe to run
+      # even if a test has failed. The behavior of failing dependencies is non-ideal for infra health.
+      # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
       environment:
@@ -613,6 +616,9 @@ task:
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
     - name: deploy_gallery-macos # linux- and macos- only
+      # Do not add more tasks here. Nothing is currently deployed from master branch, so it is safe to run
+      # even if a test has failed. The behavior of failing dependencies is non-ideal for infra health.
+      # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
       environment:
@@ -636,6 +642,8 @@ docker_builder:
   only_if: $CIRRUS_TAG != ''
   environment:
     GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
+  # Do not add more tasks here. The behavior of failing dependencies is non-ideal for infra health.
+  # See also: https://github.com/flutter/flutter/pull/49454
   depends_on:
     - docs-linux
     - analyze-linux
