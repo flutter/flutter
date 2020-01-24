@@ -67,8 +67,12 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void drawRect(ui.Rect rect, SurfacePaintData paint) {
+    _drawRect(rect, paint, 'draw-rect');
+  }
+
+  html.Element _drawRect(ui.Rect rect, SurfacePaintData paint, String tagName) {
     assert(paint.shader == null);
-    final html.Element rectangle = html.Element.tag('draw-rect');
+    final html.Element rectangle = html.Element.tag(tagName);
     assert(() {
       rectangle.setAttribute('flt-rect', '$rect');
       rectangle.setAttribute('flt-paint', '$paint');
@@ -104,8 +108,8 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
       ..transformOrigin = '0 0 0'
       ..transform = effectiveTransform;
 
-    final String cssColor =
-        paint.color == null ? '#000000' : colorToCssString(paint.color);
+    final String cssColor = paint.color == null ? '#000000'
+        : colorToCssString(paint.color);
 
     if (paint.maskFilter != null) {
       style.filter = 'blur(${paint.maskFilter.webOnlySigma}px)';
@@ -124,11 +128,13 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
     }
 
     currentElement.append(rectangle);
+    return rectangle;
   }
 
   @override
   void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
-    throw UnimplementedError();
+    html.Element element = _drawRect(rrect.outerRect, paint, 'draw-rrect');
+    element.style.borderRadius = '${rrect.blRadiusX.toStringAsFixed(3)}px';
   }
 
   @override
