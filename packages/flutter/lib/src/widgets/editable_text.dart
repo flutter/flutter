@@ -1205,6 +1205,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // TextInputClient implementation:
 
   TextEditingValue _lastKnownRemoteTextEditingValue;
+  TextEditingValue _receivedRemoteTextEditingValue;
 
   @override
   TextEditingValue get currentTextEditingValue => _value;
@@ -1224,9 +1225,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _obscureLatestCharIndex = _value.selection.baseOffset;
       }
     }
-    _lastKnownRemoteTextEditingValue = value;
+    print('Updating-remoteValue: ${value.text}');
+    _receivedRemoteTextEditingValue = value;
     _formatAndSetValue(value);
-
+    _lastKnownRemoteTextEditingValue = value;
     // To keep the cursor from blinking while typing, we want to restart the
     // cursor timer every time a new character is typed.
     _stopCursorTimer(resetCharTicks: false);
@@ -1351,8 +1353,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection)
       return;
     final TextEditingValue localValue = _value;
-    if (localValue == _lastKnownRemoteTextEditingValue)
+    if (localValue == _receivedRemoteTextEditingValue)
       return;
+    print('Setting IMM: ${localValue.text}');
     _lastKnownRemoteTextEditingValue = localValue;
     _textInputConnection.setEditingState(localValue);
   }
@@ -1616,7 +1619,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _formatAndSetValue(TextEditingValue value) {
-    final bool textChanged = _value?.text != value?.text;
+    final bool textChanged = _value?.text != value?.text && value?.text != _lastKnownRemoteTextEditingValue?.text;
     if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
       for (final TextInputFormatter formatter in widget.inputFormatters)
         value = formatter.formatEditUpdate(_value, value);
@@ -1627,6 +1630,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
+    print('Finish Format: ${_value.text}');
   }
 
   void _onCursorColorTick() {
