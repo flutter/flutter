@@ -6,8 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-import 'semantics_tester.dart';
-
 void main() {
   testWidgets('OverflowEntries context contains Overlay', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
@@ -27,9 +25,6 @@ void main() {
                 return Container();
               },
             ),
-            OverlayEntry(
-              builder: (BuildContext context) => Container(),
-            )
           ],
         ),
       ),
@@ -41,42 +36,36 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#744c9\n'
-        ' │ parentData: <none>\n'
-        ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' │ size: Size(800.0, 600.0)\n'
-        ' │ skipCount: 0\n'
-        ' │ textDirection: ltr\n'
-        ' │\n'
-        ' ├─onstage 1: RenderLimitedBox#bb803\n'
-        ' │ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
-        ' │ │   size)\n'
-        ' │ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' │ │ size: Size(800.0, 600.0)\n'
-        ' │ │ maxWidth: 0.0\n'
-        ' │ │ maxHeight: 0.0\n'
-        ' │ │\n'
-        ' │ └─child: RenderConstrainedBox#62707\n'
-        ' │     parentData: <none> (can use size)\n'
-        ' │     constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' │     size: Size(800.0, 600.0)\n'
-        ' │     additionalConstraints: BoxConstraints(biggest)\n'
-        ' │\n'
-        ' ├─onstage 2: RenderLimitedBox#af5f1\n'
-        ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
-        ' ╎ │   size)\n'
-        ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' ╎ │ size: Size(800.0, 600.0)\n'
-        ' ╎ │ maxWidth: 0.0\n'
-        ' ╎ │ maxHeight: 0.0\n'
-        ' ╎ │\n'
-        ' ╎ └─child: RenderConstrainedBox#69c48\n'
-        ' ╎     parentData: <none> (can use size)\n'
-        ' ╎     constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' ╎     size: Size(800.0, 600.0)\n'
-        ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
-        ' ╎\n'
-        ' └╌no offstage children\n'
+        '_RenderTheatre#f5cf2\n'
+            ' │ parentData: <none>\n'
+            ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+            ' │ size: Size(800.0, 600.0)\n'
+            ' │\n'
+            ' ├─onstage: RenderStack#39819\n'
+            ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+            ' ╎ │   size)\n'
+            ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+            ' ╎ │ size: Size(800.0, 600.0)\n'
+            ' ╎ │ alignment: AlignmentDirectional.topStart\n'
+            ' ╎ │ textDirection: ltr\n'
+            ' ╎ │ fit: expand\n'
+            ' ╎ │ overflow: clip\n'
+            ' ╎ │\n'
+            ' ╎ └─child 1: RenderLimitedBox#d1448\n'
+            ' ╎   │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+            ' ╎   │   size)\n'
+            ' ╎   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+            ' ╎   │ size: Size(800.0, 600.0)\n'
+            ' ╎   │ maxWidth: 0.0\n'
+            ' ╎   │ maxHeight: 0.0\n'
+            ' ╎   │\n'
+            ' ╎   └─child: RenderConstrainedBox#e8b87\n'
+            ' ╎       parentData: <none> (can use size)\n'
+            ' ╎       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+            ' ╎       size: Size(800.0, 600.0)\n'
+            ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
+            ' ╎\n'
+            ' └╌no offstage children\n'
       ),
     );
   });
@@ -114,52 +103,60 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#385b3\n'
+        '_RenderTheatre#b22a8\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ skipCount: 2\n'
-        ' │ textDirection: ltr\n'
         ' │\n'
-        ' ├─onstage 1: RenderLimitedBox#0a77a\n'
+        ' ├─onstage: RenderStack#eab87\n'
         ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
         ' ╎ │   size)\n'
         ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' ╎ │ size: Size(800.0, 600.0)\n'
-        ' ╎ │ maxWidth: 0.0\n'
-        ' ╎ │ maxHeight: 0.0\n'
+        ' ╎ │ alignment: AlignmentDirectional.topStart\n'
+        ' ╎ │ textDirection: ltr\n'
+        ' ╎ │ fit: expand\n'
+        ' ╎ │ overflow: clip\n'
         ' ╎ │\n'
-        ' ╎ └─child: RenderConstrainedBox#21f3a\n'
-        ' ╎     parentData: <none> (can use size)\n'
-        ' ╎     constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' ╎     size: Size(800.0, 600.0)\n'
-        ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
+        ' ╎ └─child 1: RenderLimitedBox#ca15b\n'
+        ' ╎   │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+        ' ╎   │   size)\n'
+        ' ╎   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎   │ size: Size(800.0, 600.0)\n'
+        ' ╎   │ maxWidth: 0.0\n'
+        ' ╎   │ maxHeight: 0.0\n'
+        ' ╎   │\n'
+        ' ╎   └─child: RenderConstrainedBox#dffe5\n'
+        ' ╎       parentData: <none> (can use size)\n'
+        ' ╎       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎       size: Size(800.0, 600.0)\n'
+        ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' ╎╌offstage 1: RenderLimitedBox#62c8c NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' ╎╌offstage 1: RenderLimitedBox#b6f09 NEEDS-LAYOUT NEEDS-PAINT\n'
         ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
         ' ╎ │ constraints: MISSING\n'
         ' ╎ │ size: MISSING\n'
         ' ╎ │ maxWidth: 0.0\n'
         ' ╎ │ maxHeight: 0.0\n'
         ' ╎ │\n'
-        ' ╎ └─child: RenderConstrainedBox#425fa NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' ╎ └─child: RenderConstrainedBox#5a057 NEEDS-LAYOUT NEEDS-PAINT\n'
         ' ╎     parentData: <none>\n'
         ' ╎     constraints: MISSING\n'
         ' ╎     size: MISSING\n'
         ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' └╌offstage 2: RenderLimitedBox#03ae2 NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' └╌offstage 2: RenderLimitedBox#f689e NEEDS-LAYOUT NEEDS-PAINT\n'
         '   │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
         '   │ constraints: MISSING\n'
         '   │ size: MISSING\n'
         '   │ maxWidth: 0.0\n'
         '   │ maxHeight: 0.0\n'
         '   │\n'
-        '   └─child: RenderConstrainedBox#b4d48 NEEDS-LAYOUT NEEDS-PAINT\n'
+        '   └─child: RenderConstrainedBox#c15f0 NEEDS-LAYOUT NEEDS-PAINT\n'
         '       parentData: <none>\n'
         '       constraints: MISSING\n'
         '       size: MISSING\n'
-        '       additionalConstraints: BoxConstraints(biggest)\n',
+        '       additionalConstraints: BoxConstraints(biggest)\n'
       ),
     );
   });
@@ -701,261 +698,4 @@ void main() {
     expect(find.byKey(root), findsNothing);
     expect(find.byKey(top), findsOneWidget);
   });
-
-  testWidgets('OverlayEntries do not rebuild when opaqueness changes', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/45797.
-
-    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
-    final Key bottom = UniqueKey();
-    final Key middle = UniqueKey();
-    final Key top = UniqueKey();
-    final Widget bottomWidget = StatefulTestWidget(key: bottom);
-    final Widget middleWidget = StatefulTestWidget(key: middle);
-    final Widget topWidget = StatefulTestWidget(key: top);
-
-    final OverlayEntry bottomEntry = OverlayEntry(
-      maintainState: true,
-      builder: (BuildContext context) {
-        return bottomWidget;
-      },
-    );
-    final OverlayEntry middleEntry = OverlayEntry(
-      maintainState: true,
-      builder: (BuildContext context) {
-        return middleWidget;
-      },
-    );
-    final OverlayEntry topEntry = OverlayEntry(
-      maintainState: true,
-      builder: (BuildContext context) {
-        return topWidget;
-      },
-    );
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          key: overlayKey,
-          initialEntries: <OverlayEntry>[
-            bottomEntry,
-            middleEntry,
-            topEntry,
-          ],
-        ),
-      ),
-    );
-
-    // All widgets are onstage.
-    expect(tester.state<StatefulTestState>(find.byKey(bottom)).rebuildCount, 1);
-    expect(tester.state<StatefulTestState>(find.byKey(middle)).rebuildCount, 1);
-    expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
-
-    middleEntry.opaque = true;
-    await tester.pump();
-
-    // Bottom widget is offstage and did not rebuild.
-    expect(find.byKey(bottom), findsNothing);
-    expect(tester.state<StatefulTestState>(find.byKey(bottom, skipOffstage: false)).rebuildCount, 1);
-    expect(tester.state<StatefulTestState>(find.byKey(middle)).rebuildCount, 1);
-    expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
-  });
-
-  testWidgets('OverlayEntries do not rebuild when opaque entry is added', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/45797.
-
-    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
-    final Key bottom = UniqueKey();
-    final Key middle = UniqueKey();
-    final Key top = UniqueKey();
-    final Widget bottomWidget = StatefulTestWidget(key: bottom);
-    final Widget middleWidget = StatefulTestWidget(key: middle);
-    final Widget topWidget = StatefulTestWidget(key: top);
-
-    final OverlayEntry bottomEntry = OverlayEntry(
-      maintainState: true,
-      builder: (BuildContext context) {
-        return bottomWidget;
-      },
-    );
-    final OverlayEntry middleEntry = OverlayEntry(
-      opaque: true,
-      maintainState: true,
-      builder: (BuildContext context) {
-        return middleWidget;
-      },
-    );
-    final OverlayEntry topEntry = OverlayEntry(
-      maintainState: true,
-      builder: (BuildContext context) {
-        return topWidget;
-      },
-    );
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          key: overlayKey,
-          initialEntries: <OverlayEntry>[
-            bottomEntry,
-            topEntry,
-          ],
-        ),
-      ),
-    );
-
-    // Both widgets are onstage.
-    expect(tester.state<StatefulTestState>(find.byKey(bottom)).rebuildCount, 1);
-    expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
-
-    overlayKey.currentState.rearrange(<OverlayEntry>[
-      bottomEntry, middleEntry, topEntry,
-    ]);
-    await tester.pump();
-
-    // Bottom widget is offstage and did not rebuild.
-    expect(find.byKey(bottom), findsNothing);
-    expect(tester.state<StatefulTestState>(find.byKey(bottom, skipOffstage: false)).rebuildCount, 1);
-    expect(tester.state<StatefulTestState>(find.byKey(middle)).rebuildCount, 1);
-    expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
-  });
-
-  testWidgets('entries below opaque entries are ignored for hit testing', (WidgetTester tester) async {
-    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
-    int bottomTapCount = 0;
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          key: overlayKey,
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              maintainState: true,
-              builder: (BuildContext context) {
-                return GestureDetector(
-                  onTap: () {
-                    bottomTapCount++;
-                  },
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    expect(bottomTapCount, 0);
-    await tester.tap(find.byKey(overlayKey));
-    expect(bottomTapCount, 1);
-
-    overlayKey.currentState.insert(OverlayEntry(
-      maintainState: true,
-      opaque: true,
-      builder: (BuildContext context) {
-        return Container();
-      },
-    ));
-    await tester.pump();
-
-    // Bottom is offstage and does not receive tap events.
-    expect(find.byType(GestureDetector), findsNothing);
-    expect(find.byType(GestureDetector, skipOffstage: false), findsOneWidget);
-    await tester.tap(find.byKey(overlayKey));
-    expect(bottomTapCount, 1);
-
-    int topTapCount = 0;
-    overlayKey.currentState.insert(OverlayEntry(
-      maintainState: true,
-      opaque: true,
-      builder: (BuildContext context) {
-        return GestureDetector(
-          onTap: () {
-            topTapCount++;
-          },
-        );
-      },
-    ));
-    await tester.pump();
-
-    expect(topTapCount, 0);
-    await tester.tap(find.byKey(overlayKey));
-    expect(topTapCount, 1);
-    expect(bottomTapCount, 1);
-  });
-
-  testWidgets('Semantics of entries below opaque entries are ignored', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          key: overlayKey,
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              maintainState: true,
-              builder: (BuildContext context) {
-                return const Text('bottom');
-              },
-            ),
-            OverlayEntry(
-              maintainState: true,
-              opaque: true,
-              builder: (BuildContext context) {
-                return const Text('top');
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-    expect(find.text('bottom'), findsNothing);
-    expect(find.text('bottom', skipOffstage: false), findsOneWidget);
-    expect(find.text('top'), findsOneWidget);
-    expect(semantics, includesNodeWith(label: 'top'));
-    expect(semantics, isNot(includesNodeWith(label: 'bottom')));
-
-    semantics.dispose();
-  });
-
-  testWidgets('Can used Positioned within OverlayEntry', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return const Positioned(
-                  left: 145,
-                  top: 123,
-                  child: Text('positioned child'),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    expect(tester.getTopLeft(find.text('positioned child')), const Offset(145, 123));
-  });
-}
-
-class StatefulTestWidget extends StatefulWidget {
-  const StatefulTestWidget({Key key}) : super(key: key);
-
-  @override
-  State<StatefulTestWidget> createState() => StatefulTestState();
-}
-
-class StatefulTestState extends State<StatefulTestWidget> {
-  int rebuildCount = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    rebuildCount += 1;
-    return Container();
-  }
 }

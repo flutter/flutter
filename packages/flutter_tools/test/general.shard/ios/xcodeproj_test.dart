@@ -8,6 +8,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -24,258 +26,272 @@ import '../../src/pubspec_schema.dart';
 const String xcodebuild = '/usr/bin/xcodebuild';
 
 void main() {
-  group('xcodebuild commands', () {
-    mocks.MockProcessManager mockProcessManager;
-    XcodeProjectInterpreter xcodeProjectInterpreter;
-    FakePlatform macOS;
-    FileSystem fs;
+  mocks.MockProcessManager processManager;
+  XcodeProjectInterpreter xcodeProjectInterpreter;
+  FakePlatform platform;
+  FileSystem fileSystem;
+  BufferLogger logger;
+  AnsiTerminal terminal;
 
-    setUp(() {
-      mockProcessManager = mocks.MockProcessManager();
-      xcodeProjectInterpreter = XcodeProjectInterpreter();
-      macOS = fakePlatform('macos');
-      fs = MemoryFileSystem();
-      fs.file(xcodebuild).createSync(recursive: true);
-    });
+  setUp(() {
+    processManager = mocks.MockProcessManager();
+    platform = fakePlatform('macos');
+    fileSystem = MemoryFileSystem();
+    fileSystem.file(xcodebuild).createSync(recursive: true);
+    terminal = MockAnsiTerminal();
+    logger = BufferLogger(
+      outputPreferences: OutputPreferences.test(),
+      terminal: terminal
+    );
+    xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      terminal: terminal,
+    );
+  });
 
-    void testUsingOsxContext(String description, dynamic testMethod()) {
-      testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        Platform: () => macOS,
-        FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
-      });
-    }
+  testWithoutContext('xcodebuild versionText returns null when xcodebuild is not installed', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenThrow(const ProcessException(xcodebuild, <String>['-version']));
 
-    testUsingOsxContext('versionText returns null when xcodebuild is not installed', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenThrow(const ProcessException(xcodebuild, <String>['-version']));
-      expect(xcodeProjectInterpreter.versionText, isNull);
-    });
+    expect(xcodeProjectInterpreter.versionText, isNull);
+  });
 
-    testUsingOsxContext('versionText returns null when xcodebuild is not fully installed', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version'])).thenReturn(
-        ProcessResult(
-          0,
-          1,
-          "xcode-select: error: tool 'xcodebuild' requires Xcode, "
-          "but active developer directory '/Library/Developer/CommandLineTools' "
-          'is a command line tools instance',
-          '',
-        ),
-      );
-      expect(xcodeProjectInterpreter.versionText, isNull);
-    });
-
-    testUsingOsxContext('versionText returns formatted version text', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.versionText, 'Xcode 8.3.3, Build version 8E3004b');
-    });
-
-    testUsingOsxContext('versionText handles Xcode version string with unexpected format', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.versionText, 'Xcode Ultra5000, Build version 8E3004b');
-    });
-
-    testUsingOsxContext('majorVersion returns major version', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 10.3.3\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.majorVersion, 10);
-    });
-
-    testUsingOsxContext('majorVersion is null when version has unexpected format', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.majorVersion, isNull);
-    });
-
-    testUsingOsxContext('minorVersion returns minor version', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.minorVersion, 3);
-    });
-
-    testUsingOsxContext('minorVersion returns 0 when minor version is unspecified', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 8\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.minorVersion, 0);
-    });
-
-    testUsingOsxContext('minorVersion is null when version has unexpected format', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.minorVersion, isNull);
-    });
-
-    testUsingContext('isInstalled is false when not on MacOS', () {
-      fs.file(xcodebuild).deleteSync();
-      expect(xcodeProjectInterpreter.isInstalled, isFalse);
-    }, overrides: <Type, Generator>{
-      Platform: () => fakePlatform('notMacOS'),
-    });
-
-    testUsingOsxContext('isInstalled is false when xcodebuild does not exist', () {
-      fs.file(xcodebuild).deleteSync();
-      expect(xcodeProjectInterpreter.isInstalled, isFalse);
-    });
-
-    testUsingOsxContext('isInstalled is false when Xcode is not fully installed', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version'])).thenReturn(
-        ProcessResult(
-          0,
-          1,
-          "xcode-select: error: tool 'xcodebuild' requires Xcode, "
-          "but active developer directory '/Library/Developer/CommandLineTools' "
-          'is a command line tools instance',
-          '',
-        ),
-      );
-      expect(xcodeProjectInterpreter.isInstalled, isFalse);
-    });
-
-    testUsingOsxContext('isInstalled is false when version has unexpected format', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.isInstalled, isFalse);
-    });
-
-    testUsingOsxContext('isInstalled is true when version has expected format', () {
-      when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.isInstalled, isTrue);
-    });
-
-    testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () async {
-      when(mockProcessManager.runSync(
-               argThat(contains(xcodebuild)),
-               workingDirectory: anyNamed('workingDirectory'),
-               environment: anyNamed('environment')))
-          .thenReturn(ProcessResult(0, 1, '', ''));
-      expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
-    });
-
-    testUsingContext('build settings flakes', () async {
-      const Duration delay = Duration(seconds: 1);
-      mockProcessManager.processFactory = mocks.flakyProcessFactory(
-        flakes: 1,
-        delay: delay + const Duration(seconds: 1),
-      );
-      expect(await xcodeProjectInterpreter.getBuildSettings(
-                 '', '', timeout: delay),
-             const <String, String>{});
-      // build settings times out and is killed once, then succeeds.
-      verify(mockProcessManager.killPid(any)).called(1);
-      // The verbose logs should tell us something timed out.
-      expect(testLogger.traceText, contains('timed out'));
-    }, overrides: <Type, Generator>{
-      Platform: () => macOS,
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingOsxContext('build settings contains Flutter Xcode environment variables', () async {
-      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
-        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
-        'FLUTTER_XCODE_ARCHS': 'arm64'
-      });
-      when(mockProcessManager.runSync(<String>[
-        xcodebuild,
-        '-project',
-        macOS.pathSeparator,
-        '-target',
+  testWithoutContext('xcodebuild versionText returns null when xcodebuild is not fully installed', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version'])).thenReturn(
+      ProcessResult(
+        0,
+        1,
+        "xcode-select: error: tool 'xcodebuild' requires Xcode, "
+        "but active developer directory '/Library/Developer/CommandLineTools' "
+        'is a command line tools instance',
         '',
-        '-showBuildSettings',
-        'CODE_SIGN_STYLE=Manual',
-        'ARCHS=arm64'
-      ],
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment')))
-        .thenReturn(ProcessResult(1, 0, '', ''));
-      expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
-    });
+      ),
+    );
 
-    testUsingOsxContext('clean contains Flutter Xcode environment variables', () async {
-      macOS.environment = Map<String, String>.unmodifiable(<String, String>{
-        'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
-        'FLUTTER_XCODE_ARCHS': 'arm64'
-      });
-      when(mockProcessManager.runSync(
-        any,
-        workingDirectory: anyNamed('workingDirectory')))
-        .thenReturn(ProcessResult(1, 0, '', ''));
-      xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Runner');
-      final List<dynamic> captured = verify(mockProcessManager.runSync(
-        captureAny,
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'))).captured;
-      expect(captured.first, <String>[
-        xcodebuild,
-        '-workspace',
-        'workspace_path',
-        '-scheme',
-        'Runner',
-        '-quiet',
-        'clean',
-        'CODE_SIGN_STYLE=Manual',
-        'ARCHS=arm64'
-      ]);
-    });
+    expect(xcodeProjectInterpreter.versionText, isNull);
   });
 
-  group('xcodebuild -list', () {
-    mocks.MockProcessManager mockProcessManager;
-    FakePlatform macOS;
-    FileSystem fs;
+  testWithoutContext('xcodebuild versionText returns formatted version text', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
 
-    setUp(() {
-      mockProcessManager = mocks.MockProcessManager();
-      macOS = fakePlatform('macos');
-      fs = MemoryFileSystem();
-      fs.file(xcodebuild).createSync(recursive: true);
-    });
-
-    void testUsingOsxContext(String description, dynamic testMethod()) {
-      testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        Platform: () => macOS,
-        FileSystem: () => fs,
-        ProcessManager: () => mockProcessManager,
-      });
-    }
-
-    testUsingOsxContext('getInfo returns something when xcodebuild -list succeeds', () async {
-      const String workingDirectory = '/';
-      when(mockProcessManager.run(
-        <String>[xcodebuild, '-list'],
-        environment: anyNamed('environment'),
-        workingDirectory: workingDirectory),
-      ).thenAnswer((_) {
-        return Future<ProcessResult>.value(ProcessResult(1, 0, '', ''));
-      });
-      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
-      expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
-    });
-
-    testUsingOsxContext('getInfo throws a tool exit when it is unable to find a project', () async {
-      const String workingDirectory = '/';
-      const String stderr = 'Useful Xcode failure message about missing project.';
-      when(mockProcessManager.run(
-        <String>[xcodebuild, '-list'],
-        environment: anyNamed('environment'),
-        workingDirectory: workingDirectory),
-      ).thenAnswer((_) {
-        return Future<ProcessResult>.value(ProcessResult(1, 66, '', stderr));
-      });
-      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
-      expect(
-          () async => await xcodeProjectInterpreter.getInfo(workingDirectory),
-          throwsToolExit(message: stderr));
-    });
+    expect(xcodeProjectInterpreter.versionText, 'Xcode 8.3.3, Build version 8E3004b');
   });
 
-  group('Xcode project properties', () {
-    test('properties from default project can be parsed', () {
-      const String output = '''
+  testWithoutContext('xcodebuild versionText handles Xcode version string with unexpected format', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+
+    expect(xcodeProjectInterpreter.versionText, 'Xcode Ultra5000, Build version 8E3004b');
+  });
+
+  testWithoutContext('xcodebuild majorVersion returns major version', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenReturn(ProcessResult(1, 0, 'Xcode 10.3.3\nBuild version 8E3004b', ''));
+
+    expect(xcodeProjectInterpreter.majorVersion, 10);
+  });
+
+  testWithoutContext('xcodebuild majorVersion is null when version has unexpected format', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+
+    expect(xcodeProjectInterpreter.majorVersion, isNull);
+  });
+
+  testWithoutContext('xcodebuild inorVersion returns minor version', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+
+    expect(xcodeProjectInterpreter.minorVersion, 3);
+  });
+
+  testWithoutContext('xcodebuild minorVersion returns 0 when minor version is unspecified', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenReturn(ProcessResult(1, 0, 'Xcode 8\nBuild version 8E3004b', ''));
+
+    expect(xcodeProjectInterpreter.minorVersion, 0);
+  });
+
+  testWithoutContext('xcodebuild minorVersion is null when version has unexpected format', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+
+    expect(xcodeProjectInterpreter.minorVersion, isNull);
+  });
+
+  testWithoutContext('xcodebuild isInstalled is false when not on MacOS', () {
+    final Platform platform = fakePlatform('notMacOS');
+    xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      terminal: terminal,
+    );
+    fileSystem.file(xcodebuild).deleteSync();
+
+    expect(xcodeProjectInterpreter.isInstalled, isFalse);
+  });
+
+  testWithoutContext('xcodebuild isInstalled is false when xcodebuild does not exist', () {
+    fileSystem.file(xcodebuild).deleteSync();
+
+    expect(xcodeProjectInterpreter.isInstalled, isFalse);
+  });
+
+  testWithoutContext('xcodebuild isInstalled is false when Xcode is not fully installed', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version'])).thenReturn(
+      ProcessResult(
+        0,
+        1,
+        "xcode-select: error: tool 'xcodebuild' requires Xcode, "
+        "but active developer directory '/Library/Developer/CommandLineTools' "
+        'is a command line tools instance',
+        '',
+      ),
+    );
+
+    expect(xcodeProjectInterpreter.isInstalled, isFalse);
+  });
+
+  testWithoutContext('xcodebuild isInstalled is false when version has unexpected format', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+
+    expect(xcodeProjectInterpreter.isInstalled, isFalse);
+  });
+
+  testWithoutContext('xcodebuild isInstalled is true when version has expected format', () {
+    when(processManager.runSync(<String>[xcodebuild, '-version']))
+        .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+
+    expect(xcodeProjectInterpreter.isInstalled, isTrue);
+  });
+
+  testWithoutContext('xcodebuild build settings is empty when xcodebuild failed to get the build settings', () async {
+    when(processManager.runSync(
+              argThat(contains(xcodebuild)),
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')))
+        .thenReturn(ProcessResult(0, 1, '', ''));
+
+    expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+  });
+
+  testWithoutContext('xcodebuild build settings flakes', () async {
+    const Duration delay = Duration(seconds: 1);
+    processManager.processFactory = mocks.flakyProcessFactory(
+      flakes: 1,
+      delay: delay + const Duration(seconds: 1),
+    );
+
+    expect(await xcodeProjectInterpreter.getBuildSettings(
+                '', '', timeout: delay),
+            const <String, String>{});
+    // build settings times out and is killed once, then succeeds.
+    verify(processManager.killPid(any)).called(1);
+    // The verbose logs should tell us something timed out.
+    expect(logger.traceText, contains('timed out'));
+  });
+
+  testWithoutContext('xcodebuild build settings contains Flutter Xcode environment variables', () async {
+    platform.environment = Map<String, String>.unmodifiable(<String, String>{
+      'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+      'FLUTTER_XCODE_ARCHS': 'arm64'
+    });
+    when(processManager.runSync(<String>[
+      xcodebuild,
+      '-project',
+      platform.pathSeparator,
+      '-target',
+      '',
+      '-showBuildSettings',
+      'CODE_SIGN_STYLE=Manual',
+      'ARCHS=arm64'
+    ],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment')))
+      .thenReturn(ProcessResult(1, 0, '', ''));
+    expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+  });
+
+  testWithoutContext('xcodebuild clean contains Flutter Xcode environment variables', () async {
+    platform.environment = Map<String, String>.unmodifiable(<String, String>{
+      'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
+      'FLUTTER_XCODE_ARCHS': 'arm64'
+    });
+    when(processManager.runSync(
+      any,
+      workingDirectory: anyNamed('workingDirectory')))
+      .thenReturn(ProcessResult(1, 0, '', ''));
+    xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Runner');
+    final List<dynamic> captured = verify(processManager.runSync(
+      captureAny,
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'))).captured;
+
+    expect(captured.first, <String>[
+      xcodebuild,
+      '-workspace',
+      'workspace_path',
+      '-scheme',
+      'Runner',
+      '-quiet',
+      'clean',
+      'CODE_SIGN_STYLE=Manual',
+      'ARCHS=arm64'
+    ]);
+  });
+
+  testWithoutContext('xcodebuild -list getInfo returns something when xcodebuild -list succeeds', () async {
+    const String workingDirectory = '/';
+    when(processManager.run(
+      <String>[xcodebuild, '-list'],
+      environment: anyNamed('environment'),
+      workingDirectory: workingDirectory),
+    ).thenAnswer((_) {
+      return Future<ProcessResult>.value(ProcessResult(1, 0, '', ''));
+    });
+    final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      terminal: terminal,
+    );
+
+    expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
+  });
+
+  testWithoutContext('xcodebuild -list getInfo throws a tool exit when it is unable to find a project', () async {
+    const String workingDirectory = '/';
+    const String stderr = 'Useful Xcode failure message about missing project.';
+    when(processManager.run(
+      <String>[xcodebuild, '-list'],
+      environment: anyNamed('environment'),
+      workingDirectory: workingDirectory),
+    ).thenAnswer((_) {
+      return Future<ProcessResult>.value(ProcessResult(1, 66, '', stderr));
+    });
+    final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      terminal: terminal,
+    );
+
+    expect(
+        () async => await xcodeProjectInterpreter.getInfo(workingDirectory),
+        throwsToolExit(message: stderr));
+  });
+
+  testWithoutContext('Xcode project properties from default project can be parsed', () {
+    const String output = '''
 Information about project "Runner":
     Targets:
         Runner
@@ -290,13 +306,14 @@ Information about project "Runner":
         Runner
 
 ''';
-      final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output);
-      expect(info.targets, <String>['Runner']);
-      expect(info.schemes, <String>['Runner']);
-      expect(info.buildConfigurations, <String>['Debug', 'Release']);
-    });
-    test('properties from project with custom schemes can be parsed', () {
-      const String output = '''
+    final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output);
+    expect(info.targets, <String>['Runner']);
+    expect(info.schemes, <String>['Runner']);
+    expect(info.buildConfigurations, <String>['Debug', 'Release']);
+  });
+
+  testWithoutContext('Xcode project properties from project with custom schemes can be parsed', () {
+    const String output = '''
 Information about project "Runner":
     Targets:
         Runner
@@ -314,97 +331,105 @@ Information about project "Runner":
         Paid
 
 ''';
-      final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output);
-      expect(info.targets, <String>['Runner']);
-      expect(info.schemes, <String>['Free', 'Paid']);
-      expect(info.buildConfigurations, <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)']);
-    });
-    test('expected scheme for non-flavored build is Runner', () {
-      expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.debug), 'Runner');
-      expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.profile), 'Runner');
-      expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.release), 'Runner');
-    });
-    test('expected build configuration for non-flavored build is derived from BuildMode', () {
-      expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
-      expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.profile, 'Runner'), 'Profile');
-      expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
-    });
-    test('expected scheme for flavored build is the title-cased flavor', () {
-      expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.debug, 'hello')), 'Hello');
-      expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO')), 'HELLO');
-      expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello')), 'Hello');
-    });
-    test('expected build configuration for flavored build is Mode-Flavor', () {
-      expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.debug, 'hello'), 'Hello'), 'Debug-Hello');
-      expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO'), 'Hello'), 'Profile-Hello');
-      expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.release, 'Hello'), 'Hello'), 'Release-Hello');
-    });
-    test('scheme for default project is Runner', () {
-      final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner']);
-      expect(info.schemeFor(BuildInfo.debug), 'Runner');
-      expect(info.schemeFor(BuildInfo.profile), 'Runner');
-      expect(info.schemeFor(BuildInfo.release), 'Runner');
-      expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown')), isNull);
-    });
-    test('build configuration for default project is matched against BuildMode', () {
-      final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>['Runner']);
-      expect(info.buildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
-      expect(info.buildConfigurationFor(BuildInfo.profile, 'Runner'), 'Profile');
-      expect(info.buildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
-    });
-    test('scheme for project with custom schemes is matched against flavor', () {
-      final XcodeProjectInfo info = XcodeProjectInfo(
-        <String>['Runner'],
-        <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
-        <String>['Free', 'Paid'],
-      );
-      expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free')), 'Free');
-      expect(info.schemeFor(const BuildInfo(BuildMode.profile, 'Free')), 'Free');
-      expect(info.schemeFor(const BuildInfo(BuildMode.release, 'paid')), 'Paid');
-      expect(info.schemeFor(const BuildInfo(BuildMode.debug, null)), isNull);
-      expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown')), isNull);
-    });
-    test('build configuration for project with custom schemes is matched against BuildMode and flavor', () {
-      final XcodeProjectInfo info = XcodeProjectInfo(
-        <String>['Runner'],
-        <String>['debug (free)', 'Debug paid', 'profile - Free', 'Profile-Paid', 'release - Free', 'Release-Paid'],
-        <String>['Free', 'Paid'],
-      );
-      expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'free'), 'Free'), 'debug (free)');
-      expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Paid'), 'Paid'), 'Debug paid');
-      expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'FREE'), 'Free'), 'profile - Free');
-      expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid'), 'Paid'), 'Release-Paid');
-    });
-    test('build configuration for project with inconsistent naming is null', () {
-      final XcodeProjectInfo info = XcodeProjectInfo(
-        <String>['Runner'],
-        <String>['Debug-F', 'Dbg Paid', 'Rel Free', 'Release Full'],
-        <String>['Free', 'Paid'],
-      );
-      expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Free'), 'Free'), null);
-      expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free'), 'Free'), null);
-      expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid'), 'Paid'), null);
-    });
+    final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output);
+    expect(info.targets, <String>['Runner']);
+    expect(info.schemes, <String>['Free', 'Paid']);
+    expect(info.buildConfigurations, <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)']);
   });
 
-  group('environmentVariablesAsXcodeBuildSettings', () {
+  testWithoutContext('expected scheme for non-flavored build is Runner', () {
+    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.debug), 'Runner');
+    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.profile), 'Runner');
+    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.release), 'Runner');
+  });
+
+  testWithoutContext('expected build configuration for non-flavored build is derived from BuildMode', () {
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.profile, 'Runner'), 'Profile');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
+  });
+
+  testWithoutContext('expected scheme for flavored build is the title-cased flavor', () {
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.debug, 'hello')), 'Hello');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO')), 'HELLO');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello')), 'Hello');
+  });
+  testWithoutContext('expected build configuration for flavored build is Mode-Flavor', () {
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.debug, 'hello'), 'Hello'), 'Debug-Hello');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO'), 'Hello'), 'Profile-Hello');
+    expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.release, 'Hello'), 'Hello'), 'Release-Hello');
+  });
+
+  testWithoutContext('scheme for default project is Runner', () {
+    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner']);
+
+    expect(info.schemeFor(BuildInfo.debug), 'Runner');
+    expect(info.schemeFor(BuildInfo.profile), 'Runner');
+    expect(info.schemeFor(BuildInfo.release), 'Runner');
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown')), isNull);
+  });
+
+  testWithoutContext('build configuration for default project is matched against BuildMode', () {
+    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Profile', 'Release'], <String>['Runner']);
+
+    expect(info.buildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
+    expect(info.buildConfigurationFor(BuildInfo.profile, 'Runner'), 'Profile');
+    expect(info.buildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
+  });
+
+  testWithoutContext('scheme for project with custom schemes is matched against flavor', () {
+    final XcodeProjectInfo info = XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
+      <String>['Free', 'Paid'],
+    );
+
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free')), 'Free');
+    expect(info.schemeFor(const BuildInfo(BuildMode.profile, 'Free')), 'Free');
+    expect(info.schemeFor(const BuildInfo(BuildMode.release, 'paid')), 'Paid');
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, null)), isNull);
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown')), isNull);
+  });
+
+  testWithoutContext('build configuration for project with custom schemes is matched against BuildMode and flavor', () {
+    final XcodeProjectInfo info = XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['debug (free)', 'Debug paid', 'profile - Free', 'Profile-Paid', 'release - Free', 'Release-Paid'],
+      <String>['Free', 'Paid'],
+    );
+
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'free'), 'Free'), 'debug (free)');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Paid'), 'Paid'), 'Debug paid');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'FREE'), 'Free'), 'profile - Free');
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid'), 'Paid'), 'Release-Paid');
+  });
+
+  testWithoutContext('build configuration for project with inconsistent naming is null', () {
+    final XcodeProjectInfo info = XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug-F', 'Dbg Paid', 'Rel Free', 'Release Full'],
+      <String>['Free', 'Paid'],
+    );
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Free'), 'Free'), null);
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'Free'), 'Free'), null);
+    expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'Paid'), 'Paid'), null);
+  });
+ group('environmentVariablesAsXcodeBuildSettings', () {
     FakePlatform platform;
 
     setUp(() {
       platform = fakePlatform('ignored');
     });
 
-    testUsingContext('environment variables as Xcode build settings', () {
+    testWithoutContext('environment variables as Xcode build settings', () {
       platform.environment = Map<String, String>.unmodifiable(<String, String>{
         'Ignored': 'Bogus',
         'FLUTTER_NOT_XCODE': 'Bogus',
         'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
         'FLUTTER_XCODE_ARCHS': 'arm64'
       });
-      final List<String> environmentVariablesAsBuildSettings = environmentVariablesAsXcodeBuildSettings();
+      final List<String> environmentVariablesAsBuildSettings = environmentVariablesAsXcodeBuildSettings(platform);
       expect(environmentVariablesAsBuildSettings, <String>['CODE_SIGN_STYLE=Manual', 'ARCHS=arm64']);
-    }, overrides: <Type, Generator>{
-      Platform: () => platform
     });
   });
 
@@ -729,4 +754,9 @@ FakePlatform fakePlatform(String name) {
 
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter { }
+class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockLogger extends Mock implements Logger {}
+class MockAnsiTerminal extends Mock implements AnsiTerminal {
+  @override
+  bool get supportsColor => false;
+}
