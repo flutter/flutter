@@ -10,7 +10,6 @@ import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
