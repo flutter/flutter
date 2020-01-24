@@ -173,8 +173,18 @@ def ProcessCIPDPackage(upload, engine_version):
         os.path.join(_bucket_directory, 'fuchsia.cipd')
     ]
 
-  subprocess.check_call(command, cwd=_bucket_directory)
-
+  # Retry up to three times.  We've seen CIPD fail on verification in some
+  # instances. Normally verification takes slightly more than 1 minute when
+  # it succeeds.
+  num_tries = 3
+  for tries in range(num_tries):
+    try:
+      subprocess.check_call(command, cwd=_bucket_directory)
+      break
+    except subprocess.CalledProcessError:
+      print('Failed %s times' % tries + 1)
+      if tries == num_tries - 1:
+        raise
 
 def GetRunnerTarget(runner_type, product, aot):
   base = '%s/%s:' % (_fuchsia_base, runner_type)
