@@ -308,13 +308,25 @@ class _DefaultPub implements Pub {
     );
 
     // Pipe the Flutter tool stdin to the pub stdin.
-    unawaited(process.stdin.addStream(io.stdin));
+    unawaited(process.stdin.addStream(io.stdin)
+      // If pub exits unexpectedly with an error, that will be reported below
+      // by the tool exit after the exit code check.
+      .catchError((dynamic err, StackTrace stack) {
+        globals.printTrace('Echoing stdin to the pub subprocess failed:');
+        globals.printTrace('$err\n$stack');
+      }
+    ));
 
-    // Pipe the put stdout and stderr to the tool stdout and stderr.
-    await Future.wait<dynamic>(<Future<dynamic>>[
-      io.stdout.addStream(process.stdout),
-      io.stderr.addStream(process.stderr),
-    ]);
+    // Pipe the pub stdout and stderr to the tool stdout and stderr.
+    try {
+      await Future.wait<dynamic>(<Future<dynamic>>[
+        io.stdout.addStream(process.stdout),
+        io.stderr.addStream(process.stderr),
+      ]);
+    } catch (err, stack) {
+      globals.printTrace('Echoing stdout or stderr from the pub subprocess failed:');
+      globals.printTrace('$err\n$stack');
+    }
 
     // Wait for pub to exit.
     final int code = await process.exitCode;
