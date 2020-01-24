@@ -352,8 +352,13 @@ class HotRunner extends ResidentRunner {
         route: route,
       ).then((int result) => result == 0));
     }
-    final List<bool> results = await Future.wait(startupTasks);
-    if (!results.every((bool passed) => passed)) {
+    try {
+      final List<bool> results = await Future.wait(startupTasks);
+      if (!results.every((bool passed) => passed)) {
+        return 1;
+      }
+    } on Exception catch (err) {
+      globals.printError(err.toString());
       return 1;
     }
 
