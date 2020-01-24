@@ -394,7 +394,6 @@ class BitmapCanvas extends EngineCanvas {
         !requiresClipping) {
       drawImage(image, dst.topLeft, paint);
     } else {
-      _applyPaint(paint);
       final html.Element imgElement = htmlImage.cloneImageElement();
       final ui.BlendMode blendMode = paint.blendMode;
       imgElement.style.mixBlendMode = _stringForBlendMode(blendMode);
