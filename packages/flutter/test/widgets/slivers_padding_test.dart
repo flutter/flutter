@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -421,6 +422,33 @@ void main() {
     expect(
       tester.getRect(find.widgetWithText(Container, '0')),
       const Rect.fromLTRB(0.0, -200.0, 800.0, 200.0),
+    );
+  });
+
+  testWidgets('SliverPadding includes preceding padding in the precedingScrollExtent provided to child', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverPadding(
+            padding: const EdgeInsets.only(top: 30),
+            sliver: SliverFillRemaining(
+              hasScrollBody: false,
+              child: Container(
+                key: key,
+                color: Colors.red,
+              ),
+            )
+          ),
+        ]
+      ),
+    ));
+    await tester.pump();
+
+    expect(
+      tester.renderObject<RenderBox>(find.byKey(key)).size.height,
+      equals(570),
     );
   });
 }
