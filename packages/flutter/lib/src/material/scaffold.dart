@@ -795,6 +795,13 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
+class _FloatingActionButtonConfiguration {
+  _FloatingActionButtonConfiguration({@required this.button, @required this.location});
+
+  final FloatingActionButton button;
+  final FloatingActionButtonLocation location;
+}
+
 /// Implements the basic material design visual layout structure.
 ///
 /// This class provides APIs for showing drawers, snack bars, and bottom sheets.
@@ -983,6 +990,7 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.floatingActionButtonAnimator,
+    this.additionalFloatingActionButtonConfigurations,
     this.persistentFooterButtons,
     this.drawer,
     this.endDrawer,
@@ -1076,6 +1084,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// If null, the [ScaffoldState] will use the default animator, [FloatingActionButtonAnimator.scaling].
   final FloatingActionButtonAnimator floatingActionButtonAnimator;
+
+  final List<_FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
