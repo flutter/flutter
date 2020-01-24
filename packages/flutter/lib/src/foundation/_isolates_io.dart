@@ -80,7 +80,7 @@ class _IsolateConfiguration<Q, R> {
 Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
   R result;
   await Timeline.timeSync(
-    '${configuration.debugLabel}',
+    configuration.debugLabel,
     () async { result = await configuration.apply(); },
     flow: Flow.step(configuration.flowId),
   );
