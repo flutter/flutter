@@ -52,21 +52,6 @@ void main() {
     fs.directory(_kFlutterRoot).createSync(recursive: true);
   });
 
-  testWidgets('Golden test', (WidgetTester tester) async {
-    // The actual image this test generates is irrelevant. This test is intended
-    // to serve as a way to test changes on the Flutter Gold dashboard, without
-    // affecting golden file tests we care about.
-    await tester.pumpWidget(RepaintBoundary(
-      child: Container(
-        color: const Color(0xFF42A5F5),
-      ),
-    ));
-
-    await tester.pumpAndSettle();
-    matchesGoldenFile('inconsequential_golden_file.png');
-    // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
-  }, skip: isBrowser);
-
   group('SkiaGoldClient', () {
     SkiaGoldClient skiaClient;
     Directory workDirectory;
