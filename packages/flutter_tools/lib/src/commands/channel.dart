@@ -107,7 +107,7 @@ class ChannelCommand extends FlutterCommand {
     // print all remaining channels if showAll is true
     if (showAll) {
       for (final String branch in seenUnofficialChannels) {
-        if (currentBranch == branch){
+        if (currentBranch == branch) {
           globals.printStatus('* $branch');
         } else if (!branch.startsWith('HEAD ')) {
           globals.printStatus('  $branch');
