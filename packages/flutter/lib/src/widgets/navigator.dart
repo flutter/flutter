@@ -455,8 +455,8 @@ class RouteSettings {
   ///
   /// The initial route typically skips any entrance transition to speed startup.
   ///
-  /// This property has been deprecated. Uses onGenerateInitialRoutes to
-  /// customize initial routes instead. This feature was deprecated after
+  /// This property has been deprecated. Uses [Navigator.onGenerateInitialRoutes]
+  /// to customize initial routes instead. This feature was deprecated after
   /// v1.14.1.
   @Deprecated(
     'Uses onGenerateInitialRoutes to customize initial routes instead. '
@@ -929,7 +929,7 @@ class Navigator extends StatefulWidget {
   static const String defaultRouteName = '/';
 
   /// Called when the widget is created to generate the initial list of [Route]
-  /// objects, if [initialRoute] is not null.
+  /// objects if [initialRoute] is not null.
   ///
   /// Defaults to [defaultGenerateInitialRoutes].
   ///
