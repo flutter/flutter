@@ -13,7 +13,6 @@
 #include <lib/async/default.h>
 #include <lib/fdio/directory.h>
 #include <lib/fdio/namespace.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
 #include <lib/ui/scenic/cpp/view_token_pair.h>
 #include <lib/vfs/cpp/composed_service_dir.h>
 #include <lib/vfs/cpp/remote_dir.h>
@@ -616,7 +615,6 @@ void Application::CreateView(
       settings_,                     // settings
       std::move(isolate_snapshot_),  // isolate snapshot
       scenic::ToViewToken(std::move(view_token)),  // view token
-      scenic::ViewRefPair::New(),                  // view ref pair
       std::move(fdio_ns_),                         // FDIO namespace
       std::move(directory_request_)                // outgoing request
       ));

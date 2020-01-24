@@ -7,6 +7,7 @@
 #include "engine.h"
 
 #include <lib/async/cpp/task.h>
+#include <lib/ui/scenic/cpp/view_ref_pair.h>
 #include <zircon/status.h>
 #include <sstream>
 
@@ -55,7 +56,6 @@ Engine::Engine(Delegate& delegate,
                flutter::Settings settings,
                fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
                fuchsia::ui::views::ViewToken view_token,
-               scenic::ViewRefPair view_ref_pair,
                UniqueFDIONS fdio_ns,
                fidl::InterfaceRequest<fuchsia::io::Directory> directory_request)
     : delegate_(delegate),
@@ -111,8 +111,13 @@ Engine::Engine(Delegate& delegate,
         });
       };
 
+  auto view_ref_pair = scenic::ViewRefPair::New();
   fuchsia::ui::views::ViewRef view_ref;
   view_ref_pair.view_ref.Clone(&view_ref);
+
+  fuchsia::ui::views::ViewRef dart_view_ref;
+  view_ref_pair.view_ref.Clone(&dart_view_ref);
+  zx::eventpair dart_view_ref_event_pair(std::move(dart_view_ref.reference));
 
   // Setup the callback that will instantiate the platform view.
   flutter::Shell::CreateCallback<flutter::PlatformView>
@@ -256,9 +261,10 @@ Engine::Engine(Delegate& delegate,
     svc->Connect(environment.NewRequest());
 
     isolate_configurator_ = std::make_unique<IsolateConfigurator>(
-        std::move(fdio_ns),              //
-        std::move(environment),          //
-        directory_request.TakeChannel()  //
+        std::move(fdio_ns),                  //
+        std::move(environment),              //
+        directory_request.TakeChannel(),     //
+        std::move(dart_view_ref_event_pair)  //
     );
   }
 

@@ -36,10 +36,6 @@ SessionConnection::SessionConnection(
 
   session_wrapper_.SetDebugName(debug_label_);
 
-  // TODO(SCN-975): Re-enable.
-  //   view_->GetToken(std::bind(&PlatformView::ConnectSemanticsProvider, this,
-  //                             std::placeholders::_1));
-
   root_view_.AddChild(root_node_);
   root_node_.SetEventMask(fuchsia::ui::gfx::kMetricsEventMask |
                           fuchsia::ui::gfx::kSizeChangeHintEventMask);
