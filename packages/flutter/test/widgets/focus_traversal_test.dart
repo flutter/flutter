@@ -540,12 +540,12 @@ void main() {
     });
   });
 
-  group(OrderedFocusTraversalPolicy, () {
+  group(OrderedTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       await tester.pumpWidget(DefaultFocusTraversal(
-        policy: OrderedFocusTraversalPolicy(secondary: ReadingOrderTraversalPolicy()),
+        policy: OrderedTraversalPolicy(secondary: ReadingOrderTraversalPolicy()),
         child: FocusScope(
           child: Column(
             children: <Widget>[
@@ -587,7 +587,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.rtl,
           child: DefaultFocusTraversal(
-            policy: OrderedFocusTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
             child: FocusScope(
               child: Row(
                 children: List<Widget>.generate(
@@ -626,7 +626,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: DefaultFocusTraversal(
-            policy: OrderedFocusTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
             child: FocusScope(
               child: Row(
                 children: List<Widget>.generate(
@@ -670,7 +670,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: DefaultFocusTraversal(
-            policy: OrderedFocusTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
             child: FocusScope(
               child: Row(
                 children: List<Widget>.generate(
@@ -715,13 +715,13 @@ void main() {
             policy: WidgetOrderFocusTraversalPolicy(),
             child: FocusScope(
               node: scopeNode,
-              child: FocusTraversalPolicyGroup(
-                policy: OrderedFocusTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+              child: FocusTraversalGroup(
+                policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
                 child: Row(
                   children: <Widget>[
                     FocusTraversalOrder(
                       order: const NumericFocusOrder(0),
-                      child: FocusTraversalPolicyGroup(
+                      child: FocusTraversalGroup(
                         policy: WidgetOrderFocusTraversalPolicy(),
                         child: Row(children: <Widget>[
                           FocusTraversalOrder(
@@ -750,8 +750,8 @@ void main() {
                     ),
                     FocusTraversalOrder(
                       order: const NumericFocusOrder(1),
-                      child: FocusTraversalPolicyGroup(
-                        policy: OrderedFocusTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+                      child: FocusTraversalGroup(
+                        policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
                         child: Row(children: <Widget>[
                           FocusTraversalOrder(
                             order: const NumericFocusOrder(4),
@@ -779,8 +779,8 @@ void main() {
                     ),
                     FocusTraversalOrder(
                       order: const NumericFocusOrder(2),
-                      child: FocusTraversalPolicyGroup(
-                        policy: OrderedFocusTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+                      child: FocusTraversalGroup(
+                        policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
                         child: Row(children: <Widget>[
                           FocusTraversalOrder(
                             order: const LexicalFocusOrder('D'),
@@ -839,7 +839,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: DefaultFocusTraversal(
-            policy: OrderedFocusTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
             child: Center(
               child: Builder(builder: (BuildContext context) {
                 return FocusTraversalOrder(
