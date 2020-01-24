@@ -230,7 +230,11 @@ template("test_fixtures") {
   # must always be known to tests.
   fixtures_location_target_name = "fixtures_location_$target_name"
   fixtures_location(fixtures_location_target_name) {
-    assets_dir = "$target_gen_dir/assets"
+    if (is_fuchsia) {
+      assets_dir = "/pkg/data/assets"
+    } else {
+      assets_dir = "$target_gen_dir/assets"
+    }
   }
   test_deps = [ ":$fixtures_location_target_name" ]
 
