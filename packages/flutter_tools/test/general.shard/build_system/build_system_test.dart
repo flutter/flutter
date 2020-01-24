@@ -309,7 +309,7 @@ void main() {
     barTarget.dependencies.add(fooTarget);
     fooTarget.dependencies.add(barTarget);
 
-    expect(() => checkCycles(barTarget), throwsA(isA<CycleException>()));
+    expect(() => checkCycles(barTarget), throwsA(isInstanceOf<CycleException>()));
   });
 
   test('Target with depfile dependency will not run twice without invalidation', () => testbed.run(() async {

@@ -217,7 +217,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(isA<RpcFormatError>()));
+      expect(failingFunction, throwsA(isInstanceOf<RpcFormatError>()));
     });
 
     test('get isolates by pattern', () async {
@@ -311,7 +311,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(isA<RpcFormatError>()));
+      expect(failingFunction, throwsA(isInstanceOf<RpcFormatError>()));
     });
   });
 
@@ -346,7 +346,7 @@ void main() {
         await vm.invokeRpc('somesillyfunction', timeout: timeoutTime);
       }
 
-      expect(failingFunction, throwsA(isA<TimeoutException>()));
+      expect(failingFunction, throwsA(isInstanceOf<TimeoutException>()));
     });
   });
 }

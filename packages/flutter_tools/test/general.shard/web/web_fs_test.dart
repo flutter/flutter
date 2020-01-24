@@ -8,6 +8,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -17,10 +18,8 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -31,13 +30,11 @@ void main() {
   MockHttpMultiServer mockHttpMultiServer;
   MockBuildDaemonClient mockBuildDaemonClient;
   MockOperatingSystemUtils mockOperatingSystemUtils;
-  MockProcessManager mockProcessManager;
+  MockProcessUtils mockProcessUtils;
   bool lastInitializePlatform;
-  dynamic lastAddress;
   int lastPort;
 
   setUp(() {
-    lastAddress = null;
     lastPort = null;
     lastInitializePlatform = null;
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
@@ -46,7 +43,7 @@ void main() {
     mockBuildDaemonClient = MockBuildDaemonClient();
     mockOperatingSystemUtils = MockOperatingSystemUtils();
     mockDwds = MockDwds();
-    mockProcessManager = MockProcessManager();
+    mockProcessUtils = MockProcessUtils();
     when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release'), initializePlatform: anyNamed('initializePlatform')))
       .thenAnswer((Invocation invocation) async {
         lastInitializePlatform = invocation.namedArguments[#initializePlatform] as bool;
@@ -55,14 +52,15 @@ void main() {
     when(mockOperatingSystemUtils.findFreePort()).thenAnswer((Invocation _) async {
       return 1234;
     });
-    when(mockProcessManager.start(
+    when(mockProcessUtils.stream(
       any,
       workingDirectory: anyNamed('workingDirectory'),
+      mapFunction: anyNamed('mapFunction'),
       environment: anyNamed('environment'),
     )).thenAnswer((Invocation invocation) async {
       final String workingDirectory = invocation.namedArguments[#workingDirectory] as String;
       globals.fs.file(globals.fs.path.join(workingDirectory, '.packages')).createSync(recursive: true);
-      return FakeProcess();
+      return 0;
     });
     when(mockBuildDaemonClient.buildResults).thenAnswer((Invocation _) {
       return Stream<BuildResults>.fromFuture(Future<BuildResults>.value(
@@ -93,9 +91,8 @@ void main() {
         OperatingSystemUtils: () => mockOperatingSystemUtils,
         BuildDaemonCreator: () => mockBuildDaemonCreator,
         ChromeLauncher: () => mockChromeLauncher,
-        ProcessManager: () => mockProcessManager,
+        ProcessUtils: () => mockProcessUtils,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
-          lastAddress = address;
           lastPort = port;
           return mockHttpMultiServer;
         },
@@ -178,15 +175,17 @@ void main() {
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
-      hostname: 'foo',
+      hostname: 'localhost',
       port: '1234',
       urlTunneller: null,
       dartDefines: const <String>[],
     );
 
-    expect(webFs.uri, contains('foo:1234'));
+    // Might be either ipv4 or ipv6 for localhost.
+    final bool hasExpectedUri = webFs.uri.toString().contains('[::1]:1234') ||
+                                webFs.uri.toString().contains('127.0.0.1:1234');
+    expect(hasExpectedUri, true);
     expect(lastPort, 1234);
-    expect(lastAddress, contains('foo'));
   }));
 
   test('Throws exception if build fails', () => testbed.run(() async {
@@ -216,7 +215,7 @@ void main() {
       port: '1234',
       urlTunneller: null,
       dartDefines: const <String>[],
-    ), throwsException);
+    ), throwsA(isInstanceOf<Exception>()));
   }));
 }
 
@@ -226,5 +225,5 @@ class MockDwds extends Mock implements Dwds {}
 class MockHttpMultiServer extends Mock implements HttpMultiServer {}
 class MockChromeLauncher extends Mock implements ChromeLauncher {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockProcessUtils extends Mock implements ProcessUtils {}
 class MockPub extends Mock implements Pub {}
-class MockProcessManager extends Mock implements ProcessManager {}

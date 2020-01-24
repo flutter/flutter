@@ -47,7 +47,7 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
-      expect(response['result'], isA<String>());
+      expect(response['result'] is String, true);
       await responses.close();
       await commands.close();
     });

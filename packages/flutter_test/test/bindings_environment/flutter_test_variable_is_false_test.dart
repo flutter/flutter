@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('$WidgetsBinding initializes with $LiveTestWidgetsFlutterBinding when FLUTTER_TEST = "false"', () {
     TestWidgetsFlutterBinding.ensureInitialized(<String, String>{'FLUTTER_TEST': 'false'});
-    expect(WidgetsBinding.instance, isA<LiveTestWidgetsFlutterBinding>());
+    expect(WidgetsBinding.instance, isInstanceOf<LiveTestWidgetsFlutterBinding>());
   }, onPlatform: const <String, dynamic>{
     'browser': <Skip>[Skip('Browser will not use the live binding')]
   });

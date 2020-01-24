@@ -187,8 +187,8 @@ class Plugin {
 
     if (usesOldPluginFormat && usesNewPluginFormat) {
       const String errorMessage =
-          'The flutter.plugin.platforms key cannot be used in combination with the old'
-          'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys.'
+          'The flutter.plugin.platforms key cannot be used in combination with the old '
+          'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys. '
           'See: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin';
       return <String>[errorMessage];
     }
@@ -202,15 +202,22 @@ class Plugin {
 
   static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
     bool isInvalid(String key, bool Function(YamlMap) validate) {
+      if (!yaml.containsKey(key)) {
+        return false;
+      }
       final dynamic value = yaml[key];
       if (value is! YamlMap) {
-        return false;
+        return true;
       }
       final YamlMap yamlValue = value as YamlMap;
       if (yamlValue.containsKey('default_package')) {
         return false;
       }
       return !validate(yamlValue);
+    }
+
+    if (yaml == null) {
+      return <String>['Invalid "platforms" specification.'];
     }
     final List<String> errors = <String>[];
     if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {
@@ -376,8 +383,7 @@ List<Plugin> findPlugins(FlutterProject project) {
 /// }
 ///
 ///
-/// Finally, returns [true] if .flutter-plugins-dependencies has changed,
-/// otherwise returns [false].
+/// Finally, returns [true] if the plugins list has changed, otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
@@ -414,11 +420,17 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   result['date_created'] = systemClock.now().toString();
   result['version'] = flutterVersion.frameworkVersion;
 
-  final String oldPluginFileContent = _readFileContent(pluginsFile);
+  // Only notify if the plugins list has changed. [date_created] will always be different,
+  // [version] is not relevant for this check.
+  final String oldPluginsFileStringContent = _readFileContent(pluginsFile);
+  bool pluginsChanged = true;
+  if (oldPluginsFileStringContent != null) {
+    pluginsChanged = oldPluginsFileStringContent.contains(pluginsMap.toString());
+  }
   final String pluginFileContent = json.encode(result);
   pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
 
-  return oldPluginFileContent != pluginFileContent;
+  return pluginsChanged;
 }
 
 List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
@@ -444,7 +456,6 @@ List<dynamic> _createPluginLegacyDependencyGraph(List<Plugin> plugins) {
 ///
 /// Finally, returns [true] if .flutter-plugins has changed, otherwise returns [false].
 bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
-
   final File pluginsFile = project.flutterPluginsFile;
   if (plugins.isEmpty) {
     if (pluginsFile.existsSync()) {

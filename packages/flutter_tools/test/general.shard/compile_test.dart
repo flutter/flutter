@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../src/common.dart';
@@ -24,7 +25,7 @@ void main() {
     final Future<CompilerOutput> output = stdoutHandler.compilerOutput.future;
     stdoutHandler.handler('message with no result');
 
-    expect(output, throwsToolExit());
+    expect(output, throwsA(isInstanceOf<ToolExit>()));
   });
 
   test('TargetModel values', () {
@@ -40,6 +41,6 @@ void main() {
     expect(TargetModel('dartdevc'), TargetModel.dartdevc);
     expect(TargetModel.dartdevc.toString(), 'dartdevc');
 
-    expect(() => TargetModel('foobar'), throwsAssertionError);
+    expect(() => TargetModel('foobar'), throwsA(isInstanceOf<AssertionError>()));
   });
 }

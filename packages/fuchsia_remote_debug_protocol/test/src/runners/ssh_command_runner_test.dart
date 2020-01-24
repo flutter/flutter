@@ -98,7 +98,7 @@ void main() {
         await runner.run('oihaw');
       }
 
-      expect(failingFunction, throwsA(isA<SshCommandError>()));
+      expect(failingFunction, throwsA(isInstanceOf<SshCommandError>()));
     });
 
     test('verify correct args with config', () async {

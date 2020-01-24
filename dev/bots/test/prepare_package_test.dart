@@ -25,7 +25,7 @@ void main() {
         expectAsync1((List<String> commandLine) async {
           return processRunner.runProcess(commandLine);
         })(<String>['this_executable_better_not_exist_2857632534321']),
-        throwsA(isA<PreparePackageException>()));
+        throwsA(isInstanceOf<PreparePackageException>()));
     try {
       await processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']);
     } on PreparePackageException catch (e) {
@@ -64,7 +64,7 @@ void main() {
             expectAsync1((List<String> commandLine) async {
               return processRunner.runProcess(commandLine);
             })(<String>['echo', 'test']),
-            throwsA(isA<PreparePackageException>()));
+            throwsA(isInstanceOf<PreparePackageException>()));
       });
     });
     group('ArchiveCreator for $platformName', () {
@@ -185,7 +185,8 @@ void main() {
           'git reset --hard $testRef': <ProcessResult>[ProcessResult(0, -1, 'output2', '')],
         };
         processManager.fakeResults = calls;
-        expect(expectAsync0(creator.initializeRepo), throwsA(isA<PreparePackageException>()));
+        expect(expectAsync0(creator.initializeRepo),
+            throwsA(isInstanceOf<PreparePackageException>()));
       });
 
       test('non-strict mode calls the right commands', () async {

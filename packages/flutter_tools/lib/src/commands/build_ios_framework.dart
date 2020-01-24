@@ -159,7 +159,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     cache ??= globals.cache;
 
     for (final BuildMode mode in buildModes) {
-      globals.printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
+      globals.printStatus('Building frameworks for $iosProject in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
@@ -175,7 +175,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         produceFlutterPodspec(mode, modeDirectory);
       } else {
         // Copy Flutter.framework.
-        await _produceFlutterFramework(outputDirectory, mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
+        await _produceFlutterFramework(mode, modeDirectory);
       }
 
       // Build aot, create module.framework and copy.
@@ -266,10 +266,7 @@ end
   }
 
   Future<void> _produceFlutterFramework(
-    Directory outputDirectory,
     BuildMode mode,
-    Directory iPhoneBuildOutput,
-    Directory simulatorBuildOutput,
     Directory modeDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
@@ -329,17 +326,17 @@ end
   Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
     const String appFrameworkName = 'App.framework';
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
-    destinationAppFrameworkDirectory.createSync(recursive: true);
 
     if (mode == BuildMode.debug) {
       final Status status = globals.logger.startProgress(' ├─Adding placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
       try {
+        destinationAppFrameworkDirectory.createSync(recursive: true);
         await _produceStubAppFrameworkIfNeeded(mode, iPhoneBuildOutput, simulatorBuildOutput, destinationAppFrameworkDirectory);
       } finally {
         status.stop();
       }
     } else {
-      await _produceAotAppFrameworkIfNeeded(mode, iPhoneBuildOutput, destinationAppFrameworkDirectory);
+      await _produceAotAppFrameworkIfNeeded(mode, modeDirectory);
     }
 
     final File sourceInfoPlist = _project.ios.hostAppRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
@@ -401,8 +398,7 @@ end
 
   Future<void> _produceAotAppFrameworkIfNeeded(
     BuildMode mode,
-    Directory iPhoneBuildOutput,
-    Directory destinationAppFrameworkDirectory,
+    Directory destinationDirectory,
   ) async {
     if (mode == BuildMode.debug) {
       return;
@@ -414,7 +410,7 @@ end
     try {
       await aotBuilder.build(
         platform: TargetPlatform.ios,
-        outputPath: iPhoneBuildOutput.path,
+        outputPath: destinationDirectory.path,
         buildMode: mode,
         // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
         mainDartFile: globals.fs.path.absolute(targetFile),
@@ -423,12 +419,6 @@ end
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
         dartDefines: dartDefines,
-      );
-
-      const String appFrameworkName = 'App.framework';
-      fsUtils.copyDirectorySync(
-        iPhoneBuildOutput.childDirectory(appFrameworkName),
-        destinationAppFrameworkDirectory,
       );
     } finally {
       status.stop();
@@ -446,6 +436,15 @@ end
     final Status status = globals.logger.startProgress(
       ' ├─Building plugins...', timeout: timeoutConfiguration.slowOperation);
     try {
+      // Regardless of the last "flutter build" build mode,
+      // copy the corresponding engine.
+      // A plugin framework built with bitcode must link against the bitcode version
+      // of Flutter.framework (Release).
+      _project.ios.copyEngineArtifactToProject(mode);
+
+      final String bitcodeGenerationMode = mode == BuildMode.release ?
+          'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.
+
       List<String> pluginsBuildCommand = <String>[
         'xcrun',
         'xcodebuild',
@@ -455,6 +454,7 @@ end
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
+        'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
         'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
       ];
 
@@ -592,7 +592,7 @@ end
 
       final Status status = globals.logger.startProgress(
         ' ├─Creating $frameworkBinaryName.xcframework...',
-        timeout: timeoutConfiguration.fastOperation,
+        timeout: timeoutConfiguration.slowOperation,
       );
       try {
         if (mode == BuildMode.debug) {

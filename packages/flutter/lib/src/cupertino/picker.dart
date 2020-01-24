@@ -35,8 +35,7 @@ const double _kOverAndUnderCenterOpacity = 0.447;
 /// that child the initially selected child.
 ///
 /// Can be used with [showCupertinoModalPopup] to display the picker modally at the
-/// bottom of the screen. When calling [showCupertinoModalPopup], be sure to set
-/// `semanticsDismissible` to true to enable dismissing the modal via semantics.
+/// bottom of the screen.
 ///
 /// Sizes itself to its parent. All children are sized to the same size based
 /// on [itemExtent].

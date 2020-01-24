@@ -23,6 +23,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
+  'dwds': '0.8.5', // Requires updates to web_fs due to breaking changes.
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -61,7 +62,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       )
       ..addFlag(
         'consumer-only',
-        help: 'Only prints the dependency graph that is the transitive closure'
+        help: 'Only prints the dependency graph that is the transitive closure '
               'that a consumer of the Flutter SDK will observe (When combined '
               'with transitive-closure)',
         defaultsTo: false,
@@ -366,7 +367,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     for (_DependencyLink path in paths) {
       final StringBuffer buf = StringBuffer();
       while (path != null) {
-        buf.write('${path.to}');
+        buf.write(path.to);
         path = path.from;
         if (path != null) {
           buf.write(' <- ');

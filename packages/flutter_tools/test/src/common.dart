@@ -22,7 +22,7 @@ export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Def
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that
@@ -91,9 +91,6 @@ void updateFileModificationTime(
   globals.fs.file(path).setLastModifiedSync(modificationTime);
 }
 
-/// Matcher for functions that throw [AssertionError].
-final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
-
 /// Matcher for functions that throw [ToolExit].
 Matcher throwsToolExit({ int exitCode, Pattern message }) {
   Matcher matcher = isToolExit;
@@ -107,7 +104,7 @@ Matcher throwsToolExit({ int exitCode, Pattern message }) {
 }
 
 /// Matcher for [ToolExit]s.
-final test_package.TypeMatcher<ToolExit> isToolExit = isA<ToolExit>();
+final Matcher isToolExit = isInstanceOf<ToolExit>();
 
 /// Matcher for functions that throw [ProcessExit].
 Matcher throwsProcessExit([ dynamic exitCode ]) {
@@ -117,7 +114,7 @@ Matcher throwsProcessExit([ dynamic exitCode ]) {
 }
 
 /// Matcher for [ProcessExit]s.
-final test_package.TypeMatcher<ProcessExit> isProcessExit = isA<ProcessExit>();
+final Matcher isProcessExit = isInstanceOf<ProcessExit>();
 
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.

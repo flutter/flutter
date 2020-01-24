@@ -1449,7 +1449,7 @@ void main() {
           ),
         ),
       );
-    }, throwsAssertionError);
+    }, throwsA(isInstanceOf<AssertionError>()));
   });
 
   testWidgets(

@@ -544,7 +544,7 @@ String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
 }
 
 String genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
-  const String prefix = 'static const List<Locale> supportedLocales = <Locale>[\n    Locale(''';
+  const String prefix = 'static const List<Locale> supportedLocales = <Locale>[\n    Locale(';
   const String suffix = '),\n  ];';
 
   String resultingProperty = prefix;

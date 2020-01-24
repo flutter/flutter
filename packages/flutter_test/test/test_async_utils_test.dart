@@ -153,15 +153,15 @@ void main() {
       real_test.expect(information[3].level, DiagnosticLevel.info);
       real_test.expect(information[4].level, DiagnosticLevel.info);
       real_test.expect(information[5].level, DiagnosticLevel.info);
-      real_test.expect(information[0], isA<DiagnosticsProperty<void>>());
-      real_test.expect(information[1], isA<DiagnosticsProperty<void>>());
-      real_test.expect(information[2], isA<DiagnosticsProperty<void>>());
-      real_test.expect(information[3], isA<DiagnosticsProperty<void>>());
-      real_test.expect(information[4], isA<DiagnosticsProperty<void>>());
-      real_test.expect(information[5], isA<DiagnosticsStackTrace>());
+      real_test.expect(information[0], isInstanceOf<DiagnosticsProperty<void>>());
+      real_test.expect(information[1], isInstanceOf<DiagnosticsProperty<void>>());
+      real_test.expect(information[2], isInstanceOf<DiagnosticsProperty<void>>());
+      real_test.expect(information[3], isInstanceOf<DiagnosticsProperty<void>>());
+      real_test.expect(information[4], isInstanceOf<DiagnosticsProperty<void>>());
+      real_test.expect(information[5], isInstanceOf<DiagnosticsStackTrace>());
       final DiagnosticsStackTrace stackTraceProperty = information[5] as DiagnosticsStackTrace;
       real_test.expect(stackTraceProperty.name, '\nWhen the first method was called, this was the stack');
-      real_test.expect(stackTraceProperty.value, isA<StackTrace>());
+      real_test.expect(stackTraceProperty.value, isInstanceOf<StackTrace>());
     }
     await f1;
     await f2;

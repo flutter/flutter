@@ -48,7 +48,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
 
   @override
   void didReplace(Route<dynamic> oldRoute) {
-    expect(oldRoute, isA<TestRoute>());
+    expect(oldRoute, isInstanceOf<TestRoute>());
     final TestRoute castRoute = oldRoute as TestRoute;
     log('didReplace ${castRoute.name}');
     super.didReplace(castRoute);
@@ -65,7 +65,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
-    expect(nextRoute, isA<TestRoute>());
+    expect(nextRoute, isInstanceOf<TestRoute>());
     final TestRoute castRoute = nextRoute as TestRoute;
     log('didPopNext ${castRoute.name}');
     super.didPopNext(castRoute);
@@ -73,7 +73,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
 
   @override
   void didChangeNext(Route<dynamic> nextRoute) {
-    expect(nextRoute, anyOf(isNull, isA<TestRoute>()));
+    expect(nextRoute, anyOf(isNull, isInstanceOf<TestRoute>()));
     final TestRoute castRoute = nextRoute as TestRoute;
     log('didChangeNext ${castRoute?.name}');
     super.didChangeNext(castRoute);
