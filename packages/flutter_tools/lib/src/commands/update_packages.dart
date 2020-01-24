@@ -367,7 +367,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     for (_DependencyLink path in paths) {
       final StringBuffer buf = StringBuffer();
       while (path != null) {
-        buf.write('${path.to}');
+        buf.write(path.to);
         path = path.from;
         if (path != null) {
           buf.write(' <- ');

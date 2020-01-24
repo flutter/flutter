@@ -555,7 +555,7 @@ abstract class CachedArtifact extends ArtifactSet {
 
   /// Download an archive from the given [url] and unzip it to [location].
   Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
-    return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
+    return _withDownloadFile(flattenNameSubdirs(url), (File tempFile) async {
       if (!verifier(tempFile)) {
         final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
         try {
