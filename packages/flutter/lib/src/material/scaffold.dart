@@ -1085,6 +1085,7 @@ class Scaffold extends StatefulWidget {
   /// If null, the [ScaffoldState] will use the default animator, [FloatingActionButtonAnimator.scaling].
   final FloatingActionButtonAnimator floatingActionButtonAnimator;
 
+  // TODO: Document.
   final List<_FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
