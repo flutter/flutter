@@ -256,8 +256,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.didChangeNext(nextRoute);
   }
 
-  // A callback method to remove existing status listener added while waiting
-  // for train hopping in _updateSecondaryAnimation.
+  // A callback method that removes existing status listener added while waiting
+  // for train to hop in _updateSecondaryAnimation.
   //
   // This field is non-null if there is a train hopping in progress.
   VoidCallback _nextTrainStatusListenerRemover;
@@ -282,14 +282,14 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         } else {
           // Two trains animate at different values. We have to do train hopping.
           // There are three possibilities of train hopping:
-          //  - We hop on the nextTrain when two trains meet in the middle using
-          //    TrainHoppingAnimation.
-          //  - There is no chance to hop on nextTrain because two trains never
-          //    cross each other. We have to directly set the animation to
-          //    nextTrain once the nextTrain stops animating.
-          //  - A new update secondary animation is called before train hopping
-          //    finishes. We leave a listener remover for the next call to
-          //    properly clean up the existing train hopping
+          //  1. We hop on the nextTrain when two trains meet in the middle using
+          //     TrainHoppingAnimation.
+          //  2. There is no chance to hop on nextTrain because two trains never
+          //     cross each other. We have to directly set the animation to
+          //     nextTrain once the nextTrain stops animating.
+          //  3. A new update secondary animation is called before train hopping
+          //     finishes. We leave a listener remover for the next call to
+          //     properly clean up the existing train hopping
           TrainHoppingAnimation newAnimation;
           void _jumpOnAnimationEnd(AnimationStatus status) {
             switch (status) {
@@ -340,7 +340,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   void _setSecondaryAnimation(Animation<double> animation, [Future<dynamic> disposed]) {
     _secondaryAnimation.parent = animation;
-    // Release the reference to the next route's animation when that route
+    // Releases the reference to the next route's animation when that route
     // is disposed.
     disposed?.then((dynamic _) {
       if (_secondaryAnimation.parent == animation) {
