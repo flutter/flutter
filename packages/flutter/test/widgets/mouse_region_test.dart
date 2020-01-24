@@ -905,8 +905,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
-          child: _PaintDelegateWidget(
-            onPaint: () { paintCount += 1; },
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { paintCount += 1; }),
             child: const Text('123'),
           ),
         ),
@@ -928,8 +928,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
-          child: _PaintDelegateWidget(
-            onPaint: () { paintCount += 1; },
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { paintCount += 1; }),
             child: const Text('123'),
           ),
         ),
@@ -1312,6 +1312,7 @@ void main() {
 
   testWidgets("Changing MouseRegion's callbacks is effective and doesn't repaint", (WidgetTester tester) async {
     final List<String> logs = <String>[];
+    const Key key = ValueKey<int>(1);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(20, 20));
@@ -1325,7 +1326,9 @@ void main() {
           onEnter: (_) { logs.add('enter1'); },
           onHover: (_) { logs.add('hover1'); },
           onExit: (_) { logs.add('exit1'); },
-          child: _PaintDelegateWidget(onPaint: () { logs.add('paint'); })
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { logs.add('paint'); }, key: key),
+          ),
         ),
       ),
     ));
@@ -1344,7 +1347,9 @@ void main() {
           onEnter: (_) { logs.add('enter2'); },
           onHover: (_) { logs.add('hover2'); },
           onExit: (_) { logs.add('exit2'); },
-          child: _PaintDelegateWidget(onPaint: () { logs.add('paint'); })
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { logs.add('paint'); }, key: key),
+          ),
         ),
       ),
     ));
@@ -1353,6 +1358,21 @@ void main() {
     await gesture.moveTo(const Offset(6, 6));
     expect(logs, <String>['hover2']);
     logs.clear();
+
+    // Compare: It repaints if the MouseRegion is unactivated.
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          opaque: false,
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { logs.add('paint'); }, key: key),
+          ),
+        ),
+      ),
+    ));
+    expect(logs, <String>['paint']);
   });
 
   testWidgets('Changing MouseRegion.opaque is effective and repaints', (WidgetTester tester) async {
@@ -1374,7 +1394,7 @@ void main() {
           // Dummy callback so that MouseRegion stays affective after opaque
           // turns false.
           onHover: onHover,
-          child: _PaintDelegateWidget(onPaint: onPaintChild),
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
@@ -1392,7 +1412,7 @@ void main() {
         child: MouseRegion(
           opaque: false,
           onHover: onHover,
-          child: _PaintDelegateWidget(onPaint: onPaintChild),
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
         ),
       ),
       background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
@@ -1480,39 +1500,19 @@ class _Scaffold extends StatelessWidget {
   }
 }
 
-// This widget allows you to send a callback that is called during `onPaint`.
-@immutable
-class _PaintDelegateWidget extends SingleChildRenderObjectWidget {
-  const _PaintDelegateWidget({Key key, Widget child, this.onPaint})
-    : super(key: key, child: child);
-
+class _DelegatedPainter extends CustomPainter {
+  _DelegatedPainter({this.key, this.onPaint});
+  final Key key;
   final VoidCallback onPaint;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _PaintCallbackObject(onPaint: onPaint);
+  void paint(Canvas canvas, Size size) {
+    onPaint();
   }
 
   @override
-  void updateRenderObject(BuildContext context, _PaintCallbackObject renderObject) {
-    renderObject..onPaint = onPaint;
-  }
-}
-
-class _PaintCallbackObject extends RenderProxyBox {
-  _PaintCallbackObject({
-    RenderBox child,
-    this.onPaint,
-  }) : super(child);
-
-  void Function() onPaint;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (onPaint != null)
-      onPaint();
-    super.paint(context, offset);
-  }
+  bool shouldRepaint(CustomPainter oldDelegate) =>
+    !(oldDelegate is _DelegatedPainter && key == oldDelegate.key);
 }
 
 class _HoverClientWithClosures extends StatefulWidget {
