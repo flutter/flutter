@@ -16,7 +16,7 @@
 
 namespace flutter {
 
-// A queue that holds Skia objects that must be destructed on the the given task
+// A queue that holds Skia objects that must be destructed on the given task
 // runner.
 class SkiaUnrefQueue : public fml::RefCountedThreadSafe<SkiaUnrefQueue> {
  public:

@@ -463,7 +463,7 @@ class SemanticsFlag {
 
   /// Whether the semantics node represents an image.
   ///
-  /// Both TalkBack and VoiceOver will inform the user the the semantics node
+  /// Both TalkBack and VoiceOver will inform the user the semantics node
   /// represents an image.
   static const SemanticsFlag isImage = SemanticsFlag._(_kIsImageIndex);
 

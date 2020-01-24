@@ -775,7 +775,7 @@ class SurfacePath implements ui.Path {
   }
 
   /// Adds the given path to this path by extending the current segment of this
-  /// path with the the first segment of the given path.
+  /// path with the first segment of the given path.
   ///
   /// If `matrix4` is specified, the path will be transformed by this matrix
   /// after the matrix is translated by the given `offset`.  The matrix is a 4x4

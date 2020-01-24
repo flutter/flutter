@@ -36,7 +36,7 @@ class GpuThreadMerger : public fml::RefCountedThreadSafe<GpuThreadMerger> {
   GpuThreadMerger(fml::TaskQueueId platform_queue_id,
                   fml::TaskQueueId gpu_queue_id);
 
-  // Returns true if the the current thread owns rasterizing.
+  // Returns true if the current thread owns rasterizing.
   // When the threads are merged, platform thread owns rasterizing.
   // When un-merged, gpu thread owns rasterizing.
   bool IsOnRasterizingThread();

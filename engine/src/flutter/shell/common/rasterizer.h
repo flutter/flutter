@@ -200,7 +200,7 @@ class Rasterizer final : public SnapshotDelegate {
   ///             This is used as an optimization in cases where there are
   ///             external textures (video or camera streams for example) in
   ///             referenced in the layer tree. These textures may be updated at
-  ///             a cadence different from that of the the Flutter application.
+  ///             a cadence different from that of the Flutter application.
   ///             Flutter can re-render the layer tree with just the updated
   ///             textures instead of waiting for the framework to do the work
   ///             to generate the layer tree describing the same contents.

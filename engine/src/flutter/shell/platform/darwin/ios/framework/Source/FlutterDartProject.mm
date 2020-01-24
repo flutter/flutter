@@ -59,7 +59,7 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   // The command line arguments may not always be complete. If they aren't, attempt to fill in
   // defaults.
 
-  // Flutter ships the ICU data file in the the bundle of the engine. Look for it there.
+  // Flutter ships the ICU data file in the bundle of the engine. Look for it there.
   if (settings.icu_data_path.size() == 0) {
     NSString* icuDataPath = [engineBundle pathForResource:@"icudtl" ofType:@"dat"];
     if (icuDataPath.length > 0) {

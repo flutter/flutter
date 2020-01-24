@@ -187,7 +187,7 @@ struct Settings {
   // Window.getPersistentIsolateData callback. This is meant for information
   // that the isolate cannot request asynchronously (platform messages can be
   // used for that purpose). This data is held for the lifetime of the shell and
-  // is available on isolate restarts in the the shell instance. Due to this,
+  // is available on isolate restarts in the shell instance. Due to this,
   // the buffer must be as small as possible.
   std::shared_ptr<const fml::Mapping> persistent_isolate_data;
 

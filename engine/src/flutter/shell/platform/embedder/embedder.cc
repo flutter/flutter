@@ -1665,7 +1665,7 @@ FlutterEngineResult FlutterEnginePostDartObject(
           SAFE_ACCESS(object->buffer_value, buffer_collect_callback, nullptr);
       auto user_data = SAFE_ACCESS(object->buffer_value, user_data, nullptr);
 
-      // The the user has provided a callback, let them manage the lifecycle of
+      // The user has provided a callback, let them manage the lifecycle of
       // the underlying data. If not, copy it out from the provided buffer.
 
       if (callback == nullptr) {

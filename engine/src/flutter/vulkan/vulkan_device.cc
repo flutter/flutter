@@ -318,7 +318,7 @@ bool VulkanDevice::ChoosePresentMode(const VulkanSurface& surface,
   // VK_PRESENT_MODE_FIFO_KHR is preferable on mobile platforms. The problems
   // mentioned in the ticket w.r.t the application being faster that the refresh
   // rate of the screen should not be faced by any Flutter platforms as they are
-  // powered by Vsync pulses instead of depending the the submit to block.
+  // powered by Vsync pulses instead of depending the submit to block.
   // However, for platforms that don't have VSync providers setup, it is better
   // to fall back to FIFO. For platforms that do have VSync providers, there
   // should be little difference. In case there is a need for a mode other than
