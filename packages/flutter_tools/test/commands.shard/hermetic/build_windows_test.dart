@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -76,7 +77,7 @@ void main() {
     setUpMockProjectFilesForBuild();
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
-    ), throwsToolExit());
+    ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
@@ -109,7 +110,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
-    ), throwsToolExit());
+    ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),

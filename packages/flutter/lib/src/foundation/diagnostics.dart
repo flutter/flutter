@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'object.dart';
 
 // Examples can assume:
 // int rows, columns;
@@ -1276,7 +1277,7 @@ class TextTreeRenderer {
         // with cases where a single line properties output may not have single
         // linebreak.
         final String propertyRender = render(property,
-          prefixLineOne: '${propertyStyle.prefixLineOne}',
+          prefixLineOne: propertyStyle.prefixLineOne,
           prefixOtherLines: '${propertyStyle.childLinkSpace}${propertyStyle.prefixOtherLines}',
           parentConfiguration: config,
         );
@@ -1305,7 +1306,7 @@ class TextTreeRenderer {
     if (!config.lineBreakProperties)
       builder.write(config.lineBreak);
 
-    final String prefixChildren = '${config.bodyIndent}';
+    final String prefixChildren = config.bodyIndent;
     final String prefixChildrenRaw = '$prefixOtherLines$prefixChildren';
     if (children.isEmpty &&
         config.addBlankLineIfNoChildren &&
@@ -2962,7 +2963,7 @@ String shortHash(Object object) {
 ///    distinguish instances of the same class (hash collisions are
 ///    possible, but rare enough that its use in debug output is useful).
 ///  * [Object.runtimeType], the [Type] of an object.
-String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(object)}';
+String describeIdentity(Object object) => '${objectRuntimeType(object, '<optimized out>')}#${shortHash(object)}';
 
 // This method exists as a workaround for https://github.com/dart-lang/sdk/issues/30021
 /// Returns a short description of an enum value.

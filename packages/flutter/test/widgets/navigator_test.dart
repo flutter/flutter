@@ -155,7 +155,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
-    expect(exception, isFlutterError);
+    expect(exception, isInstanceOf<FlutterError>());
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
@@ -1027,13 +1027,61 @@ void main() {
     );
 
     final dynamic exception = tester.takeException();
-    expect(exception, isA<String>());
+    expect(exception is String, isTrue);
     expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
 
     // Only the root route should've been pushed.
     expect(find.byKey(keyRoot), findsOneWidget);
     expect(find.byKey(keyA), findsNothing);
     expect(find.byKey(keyAB), findsNothing);
+  });
+
+  testWidgets("Popping immediately after pushing doesn't crash", (WidgetTester tester) async {
+    // Added this test to protect against regression of https://github.com/flutter/flutter/issues/45539
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () {
+        Navigator.pushNamed(context, '/A');
+        Navigator.of(context).pop();
+      }),
+      '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
+    };
+    bool isPushed = false;
+    bool isPopped = false;
+    final TestObserver observer = TestObserver()
+      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        // Pushes the initial route.
+        expect(route is PageRoute && route.settings.name == '/', isTrue);
+        expect(previousRoute, isNull);
+        isPushed = true;
+      }
+      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        isPopped = true;
+      };
+
+    await tester.pumpWidget(MaterialApp(
+      routes: routes,
+      navigatorObservers: <NavigatorObserver>[observer],
+    ));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(isPushed, isTrue);
+    expect(isPopped, isFalse);
+
+    isPushed = false;
+    isPopped = false;
+    observer.onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      expect(route is PageRoute && route.settings.name == '/A', isTrue);
+      expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+      isPushed = true;
+    };
+
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(isPushed, isTrue);
+    expect(isPopped, isTrue);
   });
 
   group('error control test', () {
@@ -1048,7 +1096,7 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
-      expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -1075,7 +1123,7 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
-      expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(

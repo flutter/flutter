@@ -15,7 +15,7 @@ import 'package:flutter/scheduler.dart';
 /// actual data of the image once it has been obtained.
 @immutable
 class ImageInfo {
-  /// Creates an [ImageInfo] object for the given [image] and [scale].
+  /// Creates an [ImageInfo] object for the given image and scale.
   ///
   /// Both the image and the scale must not be null.
   const ImageInfo({ @required this.image, this.scale = 1.0 })
@@ -35,9 +35,9 @@ class ImageInfo {
   ///
   /// For example, if this is 2.0 it means that there are four image pixels for
   /// every one logical pixel, and the image's actual width and height (as given
-  /// by the [dart:ui.Image.width] and [dart:ui.Image.height] properties) are
-  /// double the height and width that should be used when painting the image
-  /// (e.g. in the arguments given to [Canvas.drawImage]).
+  /// by the [dart:ui.Image.width] and [dart:ui.Image.height] properties) are double the
+  /// height and width that should be used when painting the image (e.g. in the
+  /// arguments given to [Canvas.drawImage]).
   final double scale;
 
   @override
@@ -58,11 +58,11 @@ class ImageInfo {
 
 /// Interface for receiving notifications about the loading of an image.
 ///
-/// This class overrides [operator ==] and [hashCode] to compare the individual
+/// This class overrides `operator ==` and `hashCode` to compare the individual
 /// callbacks in the listener, meaning that if you add an instance of this class
 /// as a listener (e.g. via [ImageStream.addListener]), you can instantiate a
 /// _different_ instance of this class when you remove the listener, and the
-/// listener will be properly removed as long as all associated callbacks are
+/// listener will be properly removed as long all associated callbacks are
 /// equal.
 ///
 /// Used by [ImageStream] and [ImageStreamCompleter].

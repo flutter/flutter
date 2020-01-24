@@ -144,8 +144,8 @@ void main() {
           expect(lines.length, equals(1));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(ansiSpinner.stop, throwsAssertionError);
-          expect(ansiSpinner.cancel, throwsAssertionError);
+          expect(ansiSpinner.stop, throwsA(isInstanceOf<AssertionError>()));
+          expect(ansiSpinner.cancel, throwsA(isInstanceOf<AssertionError>()));
           done = true;
         });
         expect(done, isTrue);
@@ -323,8 +323,8 @@ void main() {
           expect(lines[1], equals(''));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(() { ansiStatus.cancel(); }, throwsAssertionError);
-          expect(() { ansiStatus.stop(); }, throwsAssertionError);
+          expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
+          expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
           done = true;
         });
         expect(done, isTrue);
@@ -367,8 +367,8 @@ void main() {
           expect(lines[1], equals(''));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(ansiStatus.stop, throwsAssertionError);
-          expect(ansiStatus.cancel, throwsAssertionError);
+          expect(ansiStatus.stop, throwsA(isInstanceOf<AssertionError>()));
+          expect(ansiStatus.cancel, throwsA(isInstanceOf<AssertionError>()));
           done = true;
         });
         expect(done, isTrue);
@@ -736,8 +736,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(summaryStatus.cancel, throwsAssertionError);
-      expect(summaryStatus.stop, throwsAssertionError);
+      expect(summaryStatus.cancel, throwsA(isInstanceOf<AssertionError>()));
+      expect(summaryStatus.stop, throwsA(isInstanceOf<AssertionError>()));
     });
 
     testWithoutContext('SummaryStatus works when stopped', () async {
@@ -759,8 +759,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(summaryStatus.stop, throwsAssertionError);
-      expect(summaryStatus.cancel, throwsAssertionError);
+      expect(summaryStatus.stop, throwsA(isInstanceOf<AssertionError>()));
+      expect(summaryStatus.cancel, throwsA(isInstanceOf<AssertionError>()));
     });
 
     testWithoutContext('sequential startProgress calls with StdoutLogger', () async {

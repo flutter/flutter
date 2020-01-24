@@ -136,7 +136,7 @@ abstract class Route<T> {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      navigator.focusScopeNode.requestFocus();
+      navigator?.focusScopeNode?.requestFocus();
     });
   }
 

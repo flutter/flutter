@@ -159,268 +159,268 @@ void main() {
     Locale locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations is MaterialLocalizationZh, true);
 
     locale = const Locale('zh', 'TW');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHantTw>());
+    expect(localizations is MaterialLocalizationZhHantTw, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: null, countryCode: 'HK');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHantHk>());
+    expect(localizations is MaterialLocalizationZhHantHk, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: null, countryCode: 'TW');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHantTw>());
+    expect(localizations is MaterialLocalizationZhHantTw, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHans>());
+    expect(localizations is MaterialLocalizationZhHans, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHant>());
+    expect(localizations is MaterialLocalizationZhHant, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHans>());
+    expect(localizations is MaterialLocalizationZhHans, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHans>());
+    expect(localizations is MaterialLocalizationZhHans, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'TW');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHans>());
+    expect(localizations is MaterialLocalizationZhHans, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'CN');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHant>());
+    expect(localizations is MaterialLocalizationZhHant, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHant>());
+    expect(localizations is MaterialLocalizationZhHant, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: null, countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations is MaterialLocalizationZh, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Latn', countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations is MaterialLocalizationZh, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Latn', countryCode: 'TW');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations is MaterialLocalizationZh, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: null, countryCode: 'TW');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations is MaterialLocalizationEn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Cyrl', countryCode: 'RU');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations is MaterialLocalizationZh, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: null, countryCode: 'RU');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations is MaterialLocalizationZh, true);
 
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Cyrl', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations is MaterialLocalizationZh, true);
   });
 
   testWidgets('Serbian resolution', (WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationSr>());
+    expect(localizations is MaterialLocalizationSr, true);
 
     locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: 'Cyrl', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationSrCyrl>());
+    expect(localizations is MaterialLocalizationSrCyrl, true);
 
     locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: 'Latn', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationSrLatn>());
+    expect(localizations is MaterialLocalizationSrLatn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: null, countryCode: 'SR');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationSr>());
+    expect(localizations is MaterialLocalizationSr, true);
 
     locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: 'Cyrl', countryCode: 'SR');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationSrCyrl>());
+    expect(localizations is MaterialLocalizationSrCyrl, true);
 
     locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: 'Latn', countryCode: 'SR');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationSrLatn>());
+    expect(localizations is MaterialLocalizationSrLatn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: 'Cyrl', countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationSrCyrl>());
+    expect(localizations is MaterialLocalizationSrCyrl, true);
 
     locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: 'Latn', countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationSrLatn>());
+    expect(localizations is MaterialLocalizationSrLatn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: null, countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationSr>());
+    expect(localizations is MaterialLocalizationSr, true);
   });
 
   testWidgets('Misc resolution', (WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations is MaterialLocalizationEn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Cyrl', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations is MaterialLocalizationEn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: null, countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations is MaterialLocalizationEn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: null, countryCode: 'AU');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEnAu>());
+    expect(localizations is MaterialLocalizationEnAu, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: null, countryCode: 'GB');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEnGb>());
+    expect(localizations is MaterialLocalizationEnGb, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: null, countryCode: 'SG');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEnSg>());
+    expect(localizations is MaterialLocalizationEnSg, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: null, countryCode: 'MX');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations is MaterialLocalizationEn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Hant', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations is MaterialLocalizationEn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Hant', countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations is MaterialLocalizationEn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Hans', countryCode: 'CN');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations is MaterialLocalizationEn, true);
 
     locale = const Locale.fromSubtags(languageCode: 'es', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEs>());
+    expect(localizations is MaterialLocalizationEs, true);
 
     locale = const Locale.fromSubtags(languageCode: 'es', scriptCode: null, countryCode: '419');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEs419>());
+    expect(localizations is MaterialLocalizationEs419, true);
 
     locale = const Locale.fromSubtags(languageCode: 'es', scriptCode: null, countryCode: 'MX');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEsMx>());
+    expect(localizations is MaterialLocalizationEsMx, true);
 
     locale = const Locale.fromSubtags(languageCode: 'es', scriptCode: null, countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEsUs>());
+    expect(localizations is MaterialLocalizationEsUs, true);
 
     locale = const Locale.fromSubtags(languageCode: 'es', scriptCode: null, countryCode: 'AR');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEsAr>());
+    expect(localizations is MaterialLocalizationEsAr, true);
 
     locale = const Locale.fromSubtags(languageCode: 'es', scriptCode: null, countryCode: 'ES');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEs>());
+    expect(localizations is MaterialLocalizationEs, true);
 
     locale = const Locale.fromSubtags(languageCode: 'es', scriptCode: 'Latn', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEs>());
+    expect(localizations is MaterialLocalizationEs, true);
 
     locale = const Locale.fromSubtags(languageCode: 'es', scriptCode: 'Latn', countryCode: 'US');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationEsUs>());
+    expect(localizations is MaterialLocalizationEsUs, true);
 
     locale = const Locale.fromSubtags(languageCode: 'fr', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationFr>());
+    expect(localizations is MaterialLocalizationFr, true);
 
     locale = const Locale.fromSubtags(languageCode: 'fr', scriptCode: null, countryCode: 'CA');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationFrCa>());
+    expect(localizations is MaterialLocalizationFrCa, true);
 
     locale = const Locale.fromSubtags(languageCode: 'de', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationDe>());
+    expect(localizations is MaterialLocalizationDe, true);
 
     locale = const Locale.fromSubtags(languageCode: 'de', scriptCode: null, countryCode: 'CH');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationDeCh>());
+    expect(localizations is MaterialLocalizationDeCh, true);
 
     locale = const Locale.fromSubtags(languageCode: 'th', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationTh>());
+    expect(localizations is MaterialLocalizationTh, true);
 
     locale = const Locale.fromSubtags(languageCode: 'ru', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationRu>());
+    expect(localizations is MaterialLocalizationRu, true);
   });
 
   testWidgets('Chinese translations spot check', (WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZh>());
+    expect(localizations is MaterialLocalizationZh, true);
     expect(localizations.alertDialogLabel, '提醒');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '关闭');
@@ -429,7 +429,7 @@ void main() {
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHans>());
+    expect(localizations is MaterialLocalizationZhHans, true);
     expect(localizations.alertDialogLabel, '提醒');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '关闭');
@@ -438,7 +438,7 @@ void main() {
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHant>());
+    expect(localizations is MaterialLocalizationZhHant, true);
     expect(localizations.alertDialogLabel, '通知');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '關閉');
@@ -447,7 +447,7 @@ void main() {
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHantTw>());
+    expect(localizations is MaterialLocalizationZhHantTw, true);
     expect(localizations.alertDialogLabel, '快訊');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '關閉');
@@ -456,7 +456,7 @@ void main() {
     locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
-    expect(localizations, isA<MaterialLocalizationZhHantHk>());
+    expect(localizations is MaterialLocalizationZhHantHk, true);
     expect(localizations.alertDialogLabel, '通知');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '關閉');

@@ -22,14 +22,14 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
     find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement)
   );
   expect(element, isNotNull);
-  expect(element.renderObject, isA<RenderStack>());
+  expect(element.renderObject is RenderStack, isTrue);
   final RenderStack renderObject = element.renderObject as RenderStack;
   try {
     RenderObject child = renderObject.firstChild;
     for (final TestParentData expected in expectedParentData) {
-      expect(child, isA<RenderDecoratedBox>());
+      expect(child is RenderDecoratedBox, isTrue);
       final RenderDecoratedBox decoratedBox = child as RenderDecoratedBox;
-      expect(decoratedBox.parentData, isA<StackParentData>());
+      expect(decoratedBox.parentData is StackParentData, isTrue);
       final StackParentData parentData = decoratedBox.parentData as StackParentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));

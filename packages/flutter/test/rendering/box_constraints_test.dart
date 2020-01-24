@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('BoxConstraints toString', () {
@@ -153,9 +153,9 @@ void main() {
       minHeight: 20.0,
       maxHeight: 30.0,
     );
-    expect(() => BoxConstraints.lerp(constraints1, constraints2, 0.5), throwsAssertionError);
-    expect(() => BoxConstraints.lerp(constraints1, constraints3, 0.5), throwsAssertionError);
-    expect(() => BoxConstraints.lerp(constraints2, constraints3, 0.5), throwsAssertionError);
+    expect(() => BoxConstraints.lerp(constraints1, constraints2, 0.5), throwsA(isInstanceOf<AssertionError>()));
+    expect(() => BoxConstraints.lerp(constraints1, constraints3, 0.5), throwsA(isInstanceOf<AssertionError>()));
+    expect(() => BoxConstraints.lerp(constraints2, constraints3, 0.5), throwsA(isInstanceOf<AssertionError>()));
   });
 
   test('BoxConstraints normalize', () {

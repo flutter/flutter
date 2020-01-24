@@ -20,9 +20,9 @@ void main() {
 
   test('doctor validators includes desktop when features are enabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        contains(isA<LinuxDoctorValidator>()));
+        contains(isInstanceOf<LinuxDoctorValidator>()));
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        contains(isA<VisualStudioValidator>()));
+        contains(isInstanceOf<VisualStudioValidator>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isLinuxEnabled: true,
@@ -32,9 +32,9 @@ void main() {
 
   test('doctor validators does not include desktop when features are enabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        isNot(contains(isA<LinuxDoctorValidator>())));
+        isNot(contains(isInstanceOf<LinuxDoctorValidator>())));
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        isNot(contains(isA<VisualStudioValidator>())));
+        isNot(contains(isInstanceOf<VisualStudioValidator>())));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isLinuxEnabled: false,
@@ -44,7 +44,7 @@ void main() {
 
   test('doctor validators includes web when feature is enabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        contains(isA<WebValidator>()));
+        contains(isInstanceOf<WebValidator>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isWebEnabled: true,
@@ -53,7 +53,7 @@ void main() {
 
   test('doctor validators does not include web when feature is disabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        isNot(contains(isA<WebValidator>())));
+        isNot(contains(isInstanceOf<WebValidator>())));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
       isWebEnabled: false,

@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -49,7 +50,7 @@ void main() {
       expect(
           createTestCommandRunner(command)
               .run(const <String>['build', 'fuchsia']),
-          throwsToolExit());
+          throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
@@ -66,7 +67,7 @@ void main() {
       expect(
           createTestCommandRunner(command)
               .run(const <String>['build', 'fuchsia']),
-          throwsToolExit());
+          throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
@@ -88,7 +89,7 @@ void main() {
       expect(
           createTestCommandRunner(command)
               .run(const <String>['build', 'fuchsia']),
-          throwsToolExit());
+          throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
       FileSystem: () => MemoryFileSystem(),
@@ -110,7 +111,7 @@ void main() {
       expect(
           createTestCommandRunner(command)
               .run(const <String>['build', 'fuchsia']),
-          throwsToolExit());
+          throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),

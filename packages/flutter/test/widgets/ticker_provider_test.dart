@@ -118,7 +118,7 @@ void main() {
           'calling dispose() on the AnimationController itself. Otherwise,\n'
           'the ticker will leak.\n'
         );
-        expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
+        expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
             '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
@@ -161,7 +161,7 @@ void main() {
           'calling dispose() on the AnimationController itself. Otherwise,\n'
           'the ticker will leak.\n'
         );
-        expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
+        expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   _SingleTickerTestState#00000(ticker active) was disposed with an\n'
@@ -204,7 +204,7 @@ void main() {
           'calling dispose() on the AnimationController itself. Otherwise,\n'
           'the ticker will leak.\n'
         );
-        expect(error.diagnostics[3], isA<DiagnosticsProperty<Ticker>>());
+        expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Ticker>>());
         expect(error.toStringDeep().split('\n').take(14).join('\n'), equalsIgnoringHashCodes(
           'FlutterError\n'
           '   _MultipleTickerTestState#00000(tickers: tracking 2 tickers) was\n'

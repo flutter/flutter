@@ -262,7 +262,7 @@ void main() {
 
     expect(find.byType(Column), findsOneWidget);
     for (final Widget child in foundChildren) {
-      expect(child, isA<KeyedSubtree>());
+      expect(child, isInstanceOf<KeyedSubtree>());
     }
 
     await tester.pumpWidget(
@@ -280,7 +280,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     for (final Widget child in foundChildren) {
-      expect(child, isA<KeyedSubtree>());
+      expect(child, isInstanceOf<KeyedSubtree>());
       expect(
         find.descendant(of: find.byWidget(child), matching: find.byType(SizeTransition)),
         findsOneWidget,
@@ -430,7 +430,7 @@ void main() {
 
     expect(foundChildren.length, equals(3));
     for (final Widget child in foundChildren) {
-      expect(child, isA<KeyedSubtree>());
+      expect(child, isInstanceOf<KeyedSubtree>());
       expect(
         find.descendant(of: find.byWidget(child), matching: find.byType(FadeTransition)),
         findsOneWidget,
@@ -460,7 +460,7 @@ void main() {
 
     expect(foundChildren.length, equals(3));
     for (final Widget child in foundChildren) {
-      expect(child, isA<KeyedSubtree>());
+      expect(child, isInstanceOf<KeyedSubtree>());
       expect(
         find.descendant(of: find.byWidget(child), matching: find.byType(ScaleTransition)),
         findsOneWidget,

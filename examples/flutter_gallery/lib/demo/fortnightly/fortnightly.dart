@@ -131,7 +131,7 @@ class FruitPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'How these crazy fruits sweetened our hearts, relationships,'
+                      'How these crazy fruits sweetened our hearts, relationships, '
                           'and puffed pastries',
                       style: textTheme.body1,
                     ),

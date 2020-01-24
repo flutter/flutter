@@ -25,7 +25,7 @@ abstract class AotAssemblyBase extends Target {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
-    final String buildOutputPath = environment.buildDir.path;
+    final String buildOutputPath = environment.outputDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_assembly');
     }
@@ -41,50 +41,37 @@ abstract class AotAssemblyBase extends Target {
       throw Exception('aot_assembly is only supported for iOS applications');
     }
 
-    // If we're building for a single architecture (common), then skip the lipo.
-    if (iosArchs.length == 1) {
-      final int snapshotExitCode = await snapshotter.build(
+    // If we're building multiple iOS archs the binaries need to be lipo'd
+    // together.
+    final List<Future<int>> pending = <Future<int>>[];
+    for (final DarwinArch iosArch in iosArchs) {
+      pending.add(snapshotter.build(
         platform: targetPlatform,
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
-        outputPath: environment.outputDir.path,
-        darwinArch: iosArchs.single,
+        outputPath: globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
+        darwinArch: iosArch,
         bitcode: bitcode,
-      );
-      if (snapshotExitCode != 0) {
-        throw Exception('AOT snapshotter exited with code $snapshotExitCode');
-      }
-    } else {
-      // If we're building multiple iOS archs the binaries need to be lipo'd
-      // together.
-      final List<Future<int>> pending = <Future<int>>[];
-      for (final DarwinArch iosArch in iosArchs) {
-        pending.add(snapshotter.build(
-          platform: targetPlatform,
-          buildMode: buildMode,
-          mainPath: environment.buildDir.childFile('app.dill').path,
-          packagesPath: environment.projectDir.childFile('.packages').path,
-          outputPath: globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
-          darwinArch: iosArch,
-          bitcode: bitcode,
-        ));
-      }
-      final List<int> results = await Future.wait(pending);
-      if (results.any((int result) => result != 0)) {
-        throw Exception('AOT snapshotter exited with code ${results.join()}');
-      }
-      final ProcessResult result = await globals.processManager.run(<String>[
-        'lipo',
-        ...iosArchs.map((DarwinArch iosArch) =>
-            globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
-        '-create',
-        '-output',
-        globals.fs.path.join(environment.outputDir.path, 'App.framework', 'App'),
-      ]);
-      if (result.exitCode != 0) {
-        throw Exception('lipo exited with code ${result.exitCode}');
-      }
+        quiet: true,
+      ));
+    }
+    final List<int> results = await Future.wait(pending);
+    if (results.any((int result) => result != 0)) {
+      throw Exception('AOT snapshotter exited with code ${results.join()}');
+    }
+    final String resultPath = globals.fs.path.join(environment.outputDir.path, 'App.framework', 'App');
+    globals.fs.directory(resultPath).parent.createSync(recursive: true);
+    final ProcessResult result = await globals.processManager.run(<String>[
+      'lipo',
+      ...iosArchs.map((DarwinArch iosArch) =>
+          globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
+      '-create',
+      '-output',
+      resultPath,
+    ]);
+    if (result.exitCode != 0) {
+      throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
     }
   }
 }
@@ -103,10 +90,13 @@ class AotAssemblyRelease extends AotAssemblyBase {
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
-    Source.artifact(Artifact.genSnapshot,
-      platform: TargetPlatform.ios,
-      mode: BuildMode.release,
-    ),
+    // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
+    // it resolves to a file (ios/gen_snapshot) that never exists. This was
+    // split into gen_snapshot_arm64 and gen_snapshot_armv7.
+    // Source.artifact(Artifact.genSnapshot,
+    //   platform: TargetPlatform.ios,
+    //   mode: BuildMode.release,
+    // ),
   ];
 
   @override
@@ -135,10 +125,13 @@ class AotAssemblyProfile extends AotAssemblyBase {
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
-    Source.artifact(Artifact.genSnapshot,
-      platform: TargetPlatform.ios,
-      mode: BuildMode.profile,
-    ),
+    // TODO(jonahwilliams): cannot reference gen_snapshot with artifacts since
+    // it resolves to a file (ios/gen_snapshot) that never exists. This was
+    // split into gen_snapshot_arm64 and gen_snapshot_armv7.
+    // Source.artifact(Artifact.genSnapshot,
+    //   platform: TargetPlatform.ios,
+    //   mode: BuildMode.profile,
+    // ),
   ];
 
   @override

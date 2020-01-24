@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/async_guard.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -81,7 +82,7 @@ void main() {
       '/path/to/main.dart',
       null, /* invalidatedFiles */
       outputPath: '/build/',
-    )), throwsToolExit());
+    )), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
@@ -99,7 +100,7 @@ void main() {
       '/path/to/main.dart',
       null, /* invalidatedFiles */
       outputPath: '/build/',
-    )), throwsToolExit());
+    )), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),

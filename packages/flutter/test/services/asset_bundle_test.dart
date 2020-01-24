@@ -68,7 +68,7 @@ void main() {
     }
     expect(error, isNotNull);
     expect(error.diagnostics.length, 2);
-    expect(error.diagnostics.last, isA<IntProperty>());
+    expect(error.diagnostics.last, isInstanceOf<IntProperty>());
     expect(
       error.toStringDeep(),
       'FlutterError\n'

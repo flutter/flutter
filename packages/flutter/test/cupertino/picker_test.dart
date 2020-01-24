@@ -153,6 +153,7 @@ void main() {
     testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
@@ -199,11 +200,15 @@ void main() {
             arguments: 'HapticFeedbackType.selectionClick',
           ),
         );
-    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets(
       'do not trigger haptic effects on non-iOS devices',
       (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
@@ -233,9 +238,13 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, -100.0));
         expect(selectedItems, <int>[1]);
         expect(systemCalls, isEmpty);
-    }, variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()));
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets('a drag in between items settles back', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final FixedExtentScrollController controller =
           FixedExtentScrollController(initialItem: 10);
       final List<int> selectedItems = <int>[];
@@ -288,9 +297,11 @@ void main() {
         moreOrLessEquals(350.0, epsilon: 0.5),
       );
       expect(selectedItems, <int>[9]);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets('a big fling that overscrolls springs back', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final FixedExtentScrollController controller =
           FixedExtentScrollController(initialItem: 10);
       final List<int> selectedItems = <int>[];
@@ -346,6 +357,8 @@ void main() {
         // Falling back to 0 shouldn't produce more callbacks.
         <int>[8, 6, 4, 2, 0],
       );
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
   });
 }

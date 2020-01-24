@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -75,7 +76,7 @@ void main() {
         final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
         when(version.ensureVersionFile()).thenThrow(const FileSystemException());
 
-        expect(() async => await runner.run(<String>['dummy']), throwsToolExit());
+        expect(() async => await runner.run(<String>['dummy']), throwsA(isA<ToolExit>()));
 
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -90,7 +91,7 @@ void main() {
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
 
         // Verify that this also works if the sky_engine path is a symlink to the engine root.
-        fs.link('/symlink').createSync('$_kArbitraryEngineRoot');
+        fs.link('/symlink').createSync(_kArbitraryEngineRoot);
         fs.file(_kDotPackages).writeAsStringSync('sky_engine:file:///symlink/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{

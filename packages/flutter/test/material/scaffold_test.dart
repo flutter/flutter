@@ -1720,8 +1720,8 @@ void main() {
           expect(error, isNotNull);
           expect(error.toStringDeep(), equalsIgnoringHashCodes(
             'FlutterError\n'
-            '   Scaffold.bottomSheet cannot be specified while a bottom\n'
-            '   sheetdisplayed with showBottomSheet() is still visible.\n'
+            '   Scaffold.bottomSheet cannot be specified while a bottom sheet\n'
+            '   displayed with showBottomSheet() is still visible.\n'
             '   Rebuild the Scaffold with a null bottomSheet before calling\n'
             '   showBottomSheet().\n',
           ));
@@ -1824,7 +1824,7 @@ void main() {
           'the ScaffoldState rather than using the Scaffold.of() function.\n',
         ),
       );
-      expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
+      expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
       expect(error.toStringDeep(),
         'FlutterError\n'
         '   Scaffold.of() called with a context that does not contain a\n'
@@ -1893,7 +1893,7 @@ void main() {
           'Scaffold.geometryOf().\n',
         ),
       );
-      expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
+      expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
       expect(error.toStringDeep(),
         'FlutterError\n'
         '   Scaffold.geometryOf() called with a context that does not contain\n'

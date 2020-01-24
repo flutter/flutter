@@ -1101,14 +1101,14 @@ void main() {
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(Padding), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-    expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
+    expect(tester.widget<Padding>(find.byType(Padding)).child, isInstanceOf<RawImage>());
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     await tester.pump();
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(Padding), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-    expect(tester.widget<Center>(find.byType(Center)).child, isA<Padding>());
-    expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
+    expect(tester.widget<Center>(find.byType(Center)).child, isInstanceOf<Padding>());
+    expect(tester.widget<Padding>(find.byType(Padding)).child, isInstanceOf<RawImage>());
   }, skip: isBrowser);
 
   testWidgets('Image state handles loadingBuilder update from null to non-null', (WidgetTester tester) async {
