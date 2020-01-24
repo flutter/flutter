@@ -547,6 +547,19 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // TODO: Add additional FAB.
     if (hasChild(_ScaffoldSlot.additionalFloatingActionButton)) {
       print('Child found');
+      final Size fabSize = layoutChild(_ScaffoldSlot.additionalFloatingActionButton, looseConstraints);
+      final ScaffoldPrelayoutGeometry currentGeometry = ScaffoldPrelayoutGeometry(
+        bottomSheetSize: bottomSheetSize,
+        contentBottom: contentBottom,
+        contentTop: contentTop,
+        floatingActionButtonSize: fabSize,
+        minInsets: minInsets,
+        scaffoldSize: size,
+        snackBarSize: snackBarSize,
+        textDirection: textDirection,
+      );
+      final Offset fabOffset = FloatingActionButtonLocation.endTop.getOffset(currentGeometry);
+      positionChild(_ScaffoldSlot.additionalFloatingActionButton, fabOffset);
     } else {
       print('Child NOT found');
     }
