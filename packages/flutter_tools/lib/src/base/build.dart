@@ -244,12 +244,12 @@ class AOTSnapshotter {
     final String assemblyO = globals.fs.path.join(outputPath, 'snapshot_assembly.o');
     List<String> isysrootArgs;
     if (isIOS) {
-      final String iPhoneSDKLocation = await xcode.sdkLocation(SdkType.iPhone);
+      final String iPhoneSDKLocation = await globals.xcode.sdkLocation(SdkType.iPhone);
       if (iPhoneSDKLocation != null) {
         isysrootArgs = <String>['-isysroot', iPhoneSDKLocation];
       }
     }
-    final RunResult compileResult = await xcode.cc(<String>[
+    final RunResult compileResult = await globals.xcode.cc(<String>[
       '-arch', targetArch,
       if (isysrootArgs != null) ...isysrootArgs,
       if (bitcode) embedBitcodeArg,
@@ -277,7 +277,7 @@ class AOTSnapshotter {
       '-o', appLib,
       assemblyO,
     ];
-    final RunResult linkResult = await xcode.clang(linkArgs);
+    final RunResult linkResult = await globals.xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
       globals.printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
     }
