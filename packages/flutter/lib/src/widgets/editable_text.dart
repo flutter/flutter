@@ -1276,7 +1276,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         break;
       default:
         // Finalize editing, but don't give up focus because this keyboard
-        //  action does not imply the user is done inputting information.
+        // action does not imply the user is done inputting information.
         _finalizeEditing(false);
         break;
     }
