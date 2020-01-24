@@ -231,7 +231,7 @@ class _ThemeModeItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Theme'),
                 Text(
-                  '${modeLabels[options.themeMode]}',
+                  modeLabels[options.themeMode],
                   style: Theme.of(context).primaryTextTheme.body1,
                 ),
               ],
@@ -278,7 +278,7 @@ class _TextScaleFactorItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Text size'),
                 Text(
-                  '${options.textScaleFactor.label}',
+                  options.textScaleFactor.label,
                   style: Theme.of(context).primaryTextTheme.body1,
                 ),
               ],
@@ -324,7 +324,7 @@ class _VisualDensityItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Visual density'),
                 Text(
-                  '${options.visualDensity.label}',
+                  options.visualDensity.label,
                   style: Theme.of(context).primaryTextTheme.body1,
                 ),
               ],
@@ -431,7 +431,7 @@ class _PlatformItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Platform mechanics'),
                  Text(
-                   '${_platformLabel(options.platform)}',
+                   _platformLabel(options.platform),
                    style: Theme.of(context).primaryTextTheme.body1,
                  ),
               ],

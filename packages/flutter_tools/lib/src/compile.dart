@@ -609,8 +609,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stdin.writeln('recompile $mainUri$inputKey');
     globals.printTrace('<- recompile $mainUri$inputKey');
     for (final Uri fileUri in request.invalidatedFiles) {
-      _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
-      globals.printTrace('${_mapFileUri(fileUri.toString(), packageUriMapper)}');
+      final String message = _mapFileUri(fileUri.toString(), packageUriMapper);
+      _server.stdin.writeln(message);
+      globals.printTrace(message);
     }
     _server.stdin.writeln(inputKey);
     globals.printTrace('<- $inputKey');
