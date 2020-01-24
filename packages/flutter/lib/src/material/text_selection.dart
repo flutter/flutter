@@ -98,6 +98,11 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       final double itemsWidth = renderBoxContainer.size.width - remainingContainerWidth;
 
       setState(() {
+        // TODO(justinmc): There is a bug where this is too aggressive. At the
+        // end of the line with no selection, tap "Select all". The resulting
+        // menu will show the "more" button even when it should have enough room
+        // to fit everything. I suspect a problem with this method not getting
+        // called again when the selection changes.
         _itemsInFirstMenu = indexWhereOverflows == -1 ? _itemKeys.length : indexWhereOverflows;
         _menuContentWidth = _shouldShowMoreButton
           ? itemsWidth + moreButtonWidth
@@ -170,70 +175,34 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return Container(width: 0.0, height: 0.0);
     }
 
-    final moreButton = IconButton(
-      key: _moreButtonKey,
-      icon: Icon(Icons.more_vert),
-      tooltip: 'More',
-      onPressed: () {
-        setState(() {
-          _overflowOpen = true;
-        });
-      },
-    );
-
-    // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
-    // frame of measurement.
-    if (_itemsInFirstMenu == null || _itemsInFirstMenu > items.length) {
-      // TODO(justinmc): Clean up this duplication and overall division of
-      // widgets.
-      return Offstage(
-        child: Material(
-          elevation: 1.0,
-          child: Container(
-            key: _containerKey,
-            height: _kToolbarHeight,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ...items,
-                moreButton,
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
     Widget menuContent;
-    if (_overflowOpen) {
-      menuContent = Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            ...items.sublist(_itemsInFirstMenu, items.length),
-            IconButton(
-              icon: Icon(Icons.arrow_back),
-              tooltip: 'Back',
-              onPressed: () {
-                setState(() {
-                  _overflowOpen = false;
-                });
-              },
-            ),
-          ],
-        ),
+    // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
+    // frame for measurement.
+    if (_itemsInFirstMenu == null || _itemsInFirstMenu > items.length) {
+      menuContent = _TextSelectionToolbarContent(
+        items: items,
+        showMoreButton: true,
+        moreButtonKey: _moreButtonKey,
+      );
+    } else if (_overflowOpen) {
+      menuContent = _TextSelectionToolbarContentOverflow(
+        items: items.sublist(_itemsInFirstMenu, items.length),
+        onBackPressed: () {
+          setState(() {
+            _overflowOpen = false;
+          });
+        },
       );
     } else {
-      menuContent = Container(
-        height: _kToolbarHeight,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ...items.sublist(0, _itemsInFirstMenu),
-            if (_itemsInFirstMenu < items.length) moreButton,
-          ],
-        ),
+      menuContent = _TextSelectionToolbarContent(
+        items: items.sublist(0, _itemsInFirstMenu),
+        showMoreButton: _itemsInFirstMenu < items.length,
+        moreButtonKey: _moreButtonKey,
+        onMorePressed: () {
+          setState(() {
+            _overflowOpen = true;
+          });
+        },
       );
     }
 
@@ -248,12 +217,81 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
           elevation: 1.0,
           child: AnimatedSize(
             vsync: this,
-            // This duration was eyeballed on an emulator for Pixel 2 running
-            // Android API 28.
+            // This duration was eyeballed on a Pixel 2 emulator running Android
+            // API 28.
             duration: const Duration(milliseconds: 140),
             child: menuContent,
           ),
         ),
+      ),
+    );
+  }
+}
+
+// The content of the text selection menu when the overflow menu is closed,
+// including when the more button is not shown at all.
+class _TextSelectionToolbarContent extends StatelessWidget {
+  const _TextSelectionToolbarContent({
+    Key key,
+    @required this.items,
+    this.onMorePressed,
+    this.showMoreButton = false,
+    this.moreButtonKey,
+  }) : assert(items != null),
+       super(key: key);
+
+  final List<Widget> items;
+  final VoidCallback onMorePressed;
+  final bool showMoreButton;
+  final GlobalKey moreButtonKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: _kToolbarHeight,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          ...items,
+          if (showMoreButton) IconButton(
+            key: moreButtonKey,
+            icon: Icon(Icons.more_vert),
+            tooltip: 'More',
+            onPressed: onMorePressed,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// The content of the text selection menu when the overflow menu is open.
+class _TextSelectionToolbarContentOverflow extends StatelessWidget {
+  const _TextSelectionToolbarContentOverflow({
+    Key key,
+    @required this.items,
+    @required this.onBackPressed,
+  }) : assert(items != null),
+       assert(onBackPressed != null),
+       super(key: key);
+
+  final List<Widget> items;
+  final VoidCallback onBackPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          ...items,
+          IconButton(
+            icon: Icon(Icons.arrow_back),
+            tooltip: 'Back',
+            onPressed: onBackPressed,
+          ),
+        ],
       ),
     );
   }
