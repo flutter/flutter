@@ -272,7 +272,7 @@ class Scrollable extends StatefulWidget {
     if (widget == null) {
       return false;
     }
-    return widget.position.recommendDeferredLoading();
+    return widget.position.recommendDeferredLoading(context);
   }
 
   /// Scrolls the scrollables that enclose the given context so as to make the

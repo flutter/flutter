@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
 import 'binding.dart' show WidgetsBinding;
+import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
@@ -170,13 +171,15 @@ class ScrollPhysics {
   /// Returning true from this method indicates that the current scroll velocity
   /// is great enough that expensive operations impacting the UI should be
   /// deferred.
-  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics) {
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
     assert(velocity != null);
+    assert(metrics != null);
+    assert(context != null);
     if (parent == null) {
       final double maxPhysicalPixels = WidgetsBinding.instance.window.physicalSize.longestSide;
       return velocity.abs() > maxPhysicalPixels;
     }
-    return parent.recommendDeferredLoading(velocity, metrics);
+    return parent.recommendDeferredLoading(velocity, metrics, context);
   }
 
   /// Determines the overscroll by applying the boundary conditions.
