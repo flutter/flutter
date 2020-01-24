@@ -5,6 +5,7 @@
 #ifndef FLUTTER_RUNTIME_DART_ISOLATE_GROUP_DATA_H_
 #define FLUTTER_RUNTIME_DART_ISOLATE_GROUP_DATA_H_
 
+#include <mutex>
 #include <string>
 
 #include "flutter/common/settings.h"
@@ -37,25 +38,32 @@ class DartIsolateGroupData {
   ~DartIsolateGroupData();
 
   const Settings& GetSettings() const;
+
   fml::RefPtr<const DartSnapshot> GetIsolateSnapshot() const;
+
   const std::string& GetAdvisoryScriptURI() const;
+
   const std::string& GetAdvisoryScriptEntrypoint() const;
-  const ChildIsolatePreparer& GetChildIsolatePreparer() const;
+
+  ChildIsolatePreparer GetChildIsolatePreparer() const;
+
   const fml::closure& GetIsolateCreateCallback() const;
+
   const fml::closure& GetIsolateShutdownCallback() const;
 
   void SetChildIsolatePreparer(const ChildIsolatePreparer& value);
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(DartIsolateGroupData);
-
   const Settings settings_;
   const fml::RefPtr<const DartSnapshot> isolate_snapshot_;
   const std::string advisory_script_uri_;
   const std::string advisory_script_entrypoint_;
+  mutable std::mutex child_isolate_preparer_mutex_;
   ChildIsolatePreparer child_isolate_preparer_;
   const fml::closure isolate_create_callback_;
   const fml::closure isolate_shutdown_callback_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(DartIsolateGroupData);
 };
 
 }  // namespace flutter

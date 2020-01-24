@@ -44,8 +44,8 @@ const std::string& DartIsolateGroupData::GetAdvisoryScriptEntrypoint() const {
   return advisory_script_entrypoint_;
 }
 
-const ChildIsolatePreparer& DartIsolateGroupData::GetChildIsolatePreparer()
-    const {
+ChildIsolatePreparer DartIsolateGroupData::GetChildIsolatePreparer() const {
+  std::scoped_lock lock(child_isolate_preparer_mutex_);
   return child_isolate_preparer_;
 }
 
@@ -59,6 +59,7 @@ const fml::closure& DartIsolateGroupData::GetIsolateShutdownCallback() const {
 
 void DartIsolateGroupData::SetChildIsolatePreparer(
     const ChildIsolatePreparer& value) {
+  std::scoped_lock lock(child_isolate_preparer_mutex_);
   child_isolate_preparer_ = value;
 }
 
