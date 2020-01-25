@@ -77,7 +77,7 @@ enum TraversalDirection {
 ///  * [FocusTraversalGroup], a widget that groups together and imposes a
 ///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 ///  * [FocusNode], which is affected by the traversal policy.
-///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///  * [WidgetOrderTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
 ///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
 ///    natural "reading order" for the current [Directionality].
@@ -85,7 +85,7 @@ enum TraversalDirection {
 ///    explicitly using [FocusTraversalOrder] widgets.
 ///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
 ///    focus traversal in a direction.
-abstract class FocusTraversalPolicy {
+abstract class FocusTraversalPolicy extends Diagnosticable {
   /// A const constructor so subclasses can be const.
   const FocusTraversalPolicy();
 
@@ -364,7 +364,7 @@ class _DirectionalPolicyData {
 ///  * [FocusNode], for a description of the focus system.
 ///  * [FocusTraversalGroup], a widget that groups together and imposes a
 ///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
-///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///  * [WidgetOrderTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
 ///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
 ///    natural "reading order" for the current [Directionality].
@@ -741,7 +741,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
 ///    focus traversal in a direction.
 ///  * [OrderedTraversalPolicy], a policy that describes the order
 ///    explicitly using [FocusTraversalOrder] widgets.
-class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {}
+class WidgetOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {}
 
 // This class exists mainly for efficiency reasons: the rect is copied out of
 // the node, because it will be accessed many times in the reading order
@@ -776,7 +776,7 @@ class _ReadingOrderSortData {
 ///  * [FocusNode], for a description of the focus system.
 ///  * [FocusTraversalGroup], a widget that groups together and imposes a
 ///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
-///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///  * [WidgetOrderTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
 ///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
 ///    focus traversal in a direction.
@@ -917,6 +917,12 @@ class NumericFocusOrder extends FocusOrder {
 
   @override
   int doCompare(NumericFocusOrder other) => order.compareTo(other.order);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('order', order));
+  }
 }
 
 /// Can be given to a [FocusTraversalOrder] widget to use a String to assign a
@@ -949,6 +955,12 @@ class LexicalFocusOrder extends FocusOrder {
 
   @override
   int doCompare(LexicalFocusOrder other) => order.compareTo(other.order);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('order', order));
+  }
 }
 
 // Used to help sort the focus nodes in an OrderedFocusTraversalPolicy.
@@ -1127,6 +1139,12 @@ class FocusTraversalOrder extends InheritedWidget {
   // need to force a rebuild of anything that depends upon it.
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => false;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<FocusOrder>('order', order));
+  }
 }
 
 /// A widget that describes the inherited focus policy for focus traversal for
@@ -1142,7 +1160,7 @@ class FocusTraversalOrder extends InheritedWidget {
 /// See also:
 ///
 ///  * [FocusNode], for a description of the focus system.
-///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///  * [WidgetOrderTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
 ///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
 ///    natural "reading order" for the current [Directionality].
@@ -1185,7 +1203,7 @@ class FocusTraversalGroup extends StatelessWidget {
   ///
   ///  * [FocusTraversalPolicy] for the API used to impose traversal order
   ///    policy.
-  ///  * [WidgetOrderFocusTraversalPolicy] for a traversal policy that traverses
+  ///  * [WidgetOrderTraversalPolicy] for a traversal policy that traverses
   ///    nodes in the order they are added to the widget tree.
   ///  * [ReadingOrderTraversalPolicy] for a traversal policy that traverses
   ///    nodes in the reading order defined in the widget tree, and then top to
@@ -1238,6 +1256,12 @@ class FocusTraversalGroup extends StatelessWidget {
       child: child,
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<FocusTraversalPolicy>('policy', policy));
+  }
 }
 
 /// A deprecated widget that describes the inherited focus policy for focus
@@ -1270,7 +1294,7 @@ class DefaultFocusTraversal extends InheritedWidget {
   ///
   ///  * [FocusTraversalPolicy] for the API used to impose traversal order
   ///    policy.
-  ///  * [WidgetOrderFocusTraversalPolicy] for a traversal policy that traverses
+  ///  * [WidgetOrderTraversalPolicy] for a traversal policy that traverses
   ///    nodes in the order they are added to the widget tree.
   ///  * [ReadingOrderTraversalPolicy] for a traversal policy that traverses
   ///    nodes in the reading order defined in the widget tree, and then top to

@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  group(WidgetOrderFocusTraversalPolicy, () {
+  group(WidgetOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -20,7 +20,7 @@ void main() {
       final GlobalKey key4 = GlobalKey(debugLabel: '4');
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
       await tester.pumpWidget(FocusTraversalGroup(
-        policy: WidgetOrderFocusTraversalPolicy(),
+        policy: WidgetOrderTraversalPolicy(),
         child: FocusScope(
           key: key1,
           child: Column(
@@ -65,7 +65,7 @@ void main() {
       bool focus5;
       await tester.pumpWidget(
         FocusTraversalGroup(
-          policy: WidgetOrderFocusTraversalPolicy(),
+          policy: WidgetOrderTraversalPolicy(),
           child: FocusScope(
             debugLabel: 'key1',
             key: key1,
@@ -178,7 +178,7 @@ void main() {
       final GlobalKey key6 = GlobalKey(debugLabel: '6');
       await tester.pumpWidget(
         FocusTraversalGroup(
-          policy: WidgetOrderFocusTraversalPolicy(),
+          policy: WidgetOrderTraversalPolicy(),
           child: FocusScope(
             key: key1,
             child: Column(
@@ -251,7 +251,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: FocusTraversalGroup(
-            policy: WidgetOrderFocusTraversalPolicy(),
+            policy: WidgetOrderTraversalPolicy(),
             child: Center(
               child: Builder(builder: (BuildContext context) {
                 return MaterialButton(
@@ -587,7 +587,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.rtl,
           child: FocusTraversalGroup(
-            policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
             child: FocusScope(
               child: Row(
                 children: List<Widget>.generate(
@@ -626,7 +626,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: FocusTraversalGroup(
-            policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
             child: FocusScope(
               child: Row(
                 children: List<Widget>.generate(
@@ -670,7 +670,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: FocusTraversalGroup(
-            policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
             child: FocusScope(
               child: Row(
                 children: List<Widget>.generate(
@@ -712,17 +712,17 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: FocusTraversalGroup(
-            policy: WidgetOrderFocusTraversalPolicy(),
+            policy: WidgetOrderTraversalPolicy(),
             child: FocusScope(
               node: scopeNode,
               child: FocusTraversalGroup(
-                policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+                policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
                 child: Row(
                   children: <Widget>[
                     FocusTraversalOrder(
                       order: const NumericFocusOrder(0),
                       child: FocusTraversalGroup(
-                        policy: WidgetOrderFocusTraversalPolicy(),
+                        policy: WidgetOrderTraversalPolicy(),
                         child: Row(children: <Widget>[
                           FocusTraversalOrder(
                             order: const NumericFocusOrder(9),
@@ -751,7 +751,7 @@ void main() {
                     FocusTraversalOrder(
                       order: const NumericFocusOrder(1),
                       child: FocusTraversalGroup(
-                        policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+                        policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
                         child: Row(children: <Widget>[
                           FocusTraversalOrder(
                             order: const NumericFocusOrder(4),
@@ -780,7 +780,7 @@ void main() {
                     FocusTraversalOrder(
                       order: const NumericFocusOrder(2),
                       child: FocusTraversalGroup(
-                        policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+                        policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
                         child: Row(children: <Widget>[
                           FocusTraversalOrder(
                             order: const LexicalFocusOrder('D'),
@@ -839,7 +839,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: FocusTraversalGroup(
-            policy: OrderedTraversalPolicy(secondary: WidgetOrderFocusTraversalPolicy()),
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
             child: Center(
               child: Builder(builder: (BuildContext context) {
                 return FocusTraversalOrder(
@@ -918,7 +918,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: FocusTraversalGroup(
-            policy: WidgetOrderFocusTraversalPolicy(),
+            policy: WidgetOrderTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'Scope',
               child: Column(
@@ -1071,7 +1071,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: FocusTraversalGroup(
-            policy: WidgetOrderFocusTraversalPolicy(),
+            policy: WidgetOrderTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'Scope',
               child: Column(
@@ -1192,7 +1192,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: FocusTraversalGroup(
-            policy: WidgetOrderFocusTraversalPolicy(),
+            policy: WidgetOrderTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'scope',
               child: Column(

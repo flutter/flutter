@@ -235,7 +235,7 @@ class FocusAttachment {
 /// the app can go in widget order, and part can go in reading order, depending
 /// upon the use case.
 ///
-/// Predefined policies include [WidgetOrderFocusTraversalPolicy],
+/// Predefined policies include [WidgetOrderTraversalPolicy],
 /// [ReadingOrderTraversalPolicy], and [DirectionalFocusTraversalPolicyMixin],
 /// but custom policies can be built based upon these policies.
 ///
