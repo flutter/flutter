@@ -69,8 +69,6 @@ class WebAssetServer {
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
 
-  final RegExp _drivePath = RegExp(r'\/[A-Z]:\/');
-
   final Packages _packages;
   final InternetAddress internetAddress;
 
@@ -92,12 +90,8 @@ class WebAssetServer {
       await response.close();
       return;
     }
-    // TODO(jonahwilliams): better path normalization in frontend_server to remove
-    // this workaround.
-    String requestPath = request.uri.path;
-    if (requestPath.startsWith(_drivePath)) {
-      requestPath = requestPath.substring(3);
-    }
+
+    final String requestPath = request.uri.path;
 
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
@@ -347,17 +341,20 @@ class WebDevFS implements DevFS {
         'web',
         'dart_stack_trace_mapper.js',
       ));
+      final String entrypoint = PackageUriMapper(mainPath, '.packages', null, null)
+        .map(mainPath)
+        ?.pathSegments?.join('/') ?? mainPath;
       _webAssetServer.writeFile(
           '/main.dart.js',
           generateBootstrapScript(
             requireUrl: _filePathToUriFragment(requireJS.path),
             mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
-            entrypoint: '${_filePathToUriFragment(mainPath)}.lib.js',
+            entrypoint: '/packages/$entrypoint.lib.js',
           ));
       _webAssetServer.writeFile(
           '/main_module.js',
           generateMainModule(
-            entrypoint: '${_filePathToUriFragment(mainPath)}.lib.js',
+            entrypoint: '/packages/$entrypoint.lib.js',
           ));
       _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
       _webAssetServer.writeFile(

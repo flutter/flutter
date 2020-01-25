@@ -36,7 +36,6 @@ void main() {
   MockHttpHeaders headers;
   Completer<void> closeCompleter;
   WebAssetServer webAssetServer;
-  MockPlatform windows;
   MockPlatform linux;
   Packages packages;
 
@@ -45,10 +44,7 @@ void main() {
   });
 
   setUp(() {
-    windows = MockPlatform();
     linux = MockPlatform();
-    when(windows.environment).thenReturn(const <String, String>{});
-    when(windows.isWindows).thenReturn(true);
     when(linux.isWindows).thenReturn(false);
     when(linux.environment).thenReturn(const <String, String>{});
     testbed = Testbed(setup: () {
@@ -140,29 +136,6 @@ void main() {
     Platform: () => linux,
   }));
 
-  test('serves JavaScript files from in memory cache on Windows', () => testbed.run(() async {
-    final File source = globals.fs.file('source')
-      ..writeAsStringSync('main() {}');
-    final File sourcemap = globals.fs.file('sourcemap')
-      ..writeAsStringSync('{}');
-    final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/C:/foo.js': <String, Object>{
-        'code': <int>[0, source.lengthSync()],
-        'sourcemap': <int>[0, 2],
-      }}));
-    webAssetServer.write(source, manifest, sourcemap);
-
-    when(request.uri).thenReturn(Uri.parse('http://foobar/C:/foo.js'));
-    requestController.add(request);
-    await closeCompleter.future;
-
-    verify(headers.add('Content-Length', source.lengthSync())).called(1);
-    verify(headers.add('Content-Type', 'application/javascript')).called(1);
-    verify(response.add(source.readAsBytesSync())).called(1);
-  }, overrides: <Type, Generator>{
-    Platform: () => windows,
-  }));
-
   test('serves JavaScript files from in memory cache not from manifest', () => testbed.run(() async {
     webAssetServer.writeFile('/foo.js', 'main() {}');
 
@@ -192,21 +165,6 @@ void main() {
     await closeCompleter.future;
 
     verify(response.statusCode = 404).called(1);
-  }));
-
-  test('serves Dart files from in filesystem on Windows', () => testbed.run(() async {
-    final File source = globals.fs.file('foo.dart').absolute
-      ..createSync(recursive: true)
-      ..writeAsStringSync('void main() {}');
-
-    when(request.uri).thenReturn(Uri.parse('http://foobar/C:/foo.dart'));
-    requestController.add(request);
-    await closeCompleter.future;
-
-    verify(headers.add('Content-Length', source.lengthSync())).called(1);
-    verify(response.addStream(any)).called(1);
-  }, overrides: <Type,  Generator>{
-    Platform: () => windows,
   }));
 
   test('serves Dart files from in filesystem on Linux/macOS', () => testbed.run(() async {
@@ -245,23 +203,6 @@ void main() {
     verify(headers.add('Content-Type', 'image/png')).called(1);
     verify(response.addStream(any)).called(1);
   }));
-
-  test('serves asset files from in filesystem with known mime type on Windows', () => testbed.run(() async {
-    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo.png'))
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(kTransparentImage);
-
-    when(request.uri).thenReturn(Uri.parse('http://foobar/assets/foo.png'));
-    requestController.add(request);
-    await closeCompleter.future;
-
-    verify(headers.add('Content-Length', source.lengthSync())).called(1);
-    verify(headers.add('Content-Type', 'image/png')).called(1);
-    verify(response.addStream(any)).called(1);
-  }, overrides: <Type,  Generator>{
-    Platform: () => windows,
-  }));
-
 
   test('serves asset files files from in filesystem with unknown mime type and length > 12', () => testbed.run(() async {
     final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo'))
