@@ -149,7 +149,7 @@ class _FocusDemoState extends State<FocusDemo> {
         onKey: _handleKeyPress,
         autofocus: true,
         child: DefaultTextStyle(
-          style: textTheme.display1,
+          style: textTheme.headline4,
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Focus Demo'),
