@@ -69,7 +69,6 @@ void main() {
     final Key iOSKey = UniqueKey();
     final Key androidKey = UniqueKey();
 
-
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -90,6 +89,24 @@ void main() {
     final Icon iOSIcon = tester.widget(find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
     final Icon androidIcon = tester.widget(find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)));
     expect(iOSIcon == androidIcon, false);
+  });
+
+  testWidgets('BackButton color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: BackButton(
+            color: Colors.blue,
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+        of: find.byType(BackButton),
+        matching: find.byType(RichText)
+    ));
+    expect(iconText.text.style.color, Colors.blue);
   });
 
   testWidgets('BackButton semantics', (WidgetTester tester) async {
@@ -122,5 +139,23 @@ void main() {
       isFocusable: true,
     ));
     handle.dispose();
+  });
+
+  testWidgets('CloseButton color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: CloseButton(
+            color: Colors.red,
+          ),
+        ),
+      ),
+    );
+
+    final RichText iconText = tester.firstWidget(find.descendant(
+        of: find.byType(CloseButton),
+        matching: find.byType(RichText)
+    ));
+    expect(iconText.text.style.color, Colors.red);
   });
 }

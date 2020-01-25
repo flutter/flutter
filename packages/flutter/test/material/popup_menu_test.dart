@@ -910,7 +910,7 @@ void main() {
             textDirection: textDirection,
             child: PopupMenuTheme(
               data: PopupMenuTheme.of(context).copyWith(
-                textStyle: Theme.of(context).textTheme.subhead.copyWith(fontSize: fontSize),
+                textStyle: Theme.of(context).textTheme.subtitle1.copyWith(fontSize: fontSize),
               ),
               child: child,
             ),

@@ -168,7 +168,7 @@ void main() {
           platform: TargetPlatform.iOS,
           accentColor: _accentColor,
           unselectedWidgetColor: _unselectedWidgetColor,
-          textTheme: const TextTheme(subhead: TextStyle(color: _headerColor)),
+          textTheme: const TextTheme(subtitle1: TextStyle(color: _headerColor)),
         ),
         home: Material(
           child: SingleChildScrollView(

@@ -85,7 +85,7 @@ class OnTapPage extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Container(
           child: Center(
-            child: Text(id, style: Theme.of(context).textTheme.display2),
+            child: Text(id, style: Theme.of(context).textTheme.headline3),
           ),
         ),
       ),
@@ -1034,6 +1034,54 @@ void main() {
     expect(find.byKey(keyRoot), findsOneWidget);
     expect(find.byKey(keyA), findsNothing);
     expect(find.byKey(keyAB), findsNothing);
+  });
+
+  testWidgets("Popping immediately after pushing doesn't crash", (WidgetTester tester) async {
+    // Added this test to protect against regression of https://github.com/flutter/flutter/issues/45539
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () {
+        Navigator.pushNamed(context, '/A');
+        Navigator.of(context).pop();
+      }),
+      '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
+    };
+    bool isPushed = false;
+    bool isPopped = false;
+    final TestObserver observer = TestObserver()
+      ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        // Pushes the initial route.
+        expect(route is PageRoute && route.settings.name == '/', isTrue);
+        expect(previousRoute, isNull);
+        isPushed = true;
+      }
+      ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        isPopped = true;
+      };
+
+    await tester.pumpWidget(MaterialApp(
+      routes: routes,
+      navigatorObservers: <NavigatorObserver>[observer],
+    ));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(isPushed, isTrue);
+    expect(isPopped, isFalse);
+
+    isPushed = false;
+    isPopped = false;
+    observer.onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      expect(route is PageRoute && route.settings.name == '/A', isTrue);
+      expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+      isPushed = true;
+    };
+
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(isPushed, isTrue);
+    expect(isPopped, isTrue);
   });
 
   group('error control test', () {

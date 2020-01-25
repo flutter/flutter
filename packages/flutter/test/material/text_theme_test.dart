@@ -15,7 +15,7 @@ void main() {
   });
 
   test('TextTheme copyWith apply, merge basics with Typography.black', () {
-    final Typography typography = Typography(platform: TargetPlatform.android);
+    final Typography typography = Typography.material2018(platform: TargetPlatform.android);
     expect(typography.black, equals(typography.black.copyWith()));
     expect(typography.black, equals(typography.black.apply()));
     expect(typography.black, equals(typography.black.merge(null)));
@@ -27,20 +27,20 @@ void main() {
   });
 
   test('TextTheme copyWith', () {
-    final Typography typography = Typography(platform: TargetPlatform.android);
+    final Typography typography = Typography.material2018(platform: TargetPlatform.android);
     final TextTheme whiteCopy = typography.black.copyWith(
-      display4: typography.white.display4,
-      display3: typography.white.display3,
-      display2: typography.white.display2,
-      display1: typography.white.display1,
-      headline: typography.white.headline,
-      title: typography.white.title,
-      subhead: typography.white.subhead,
-      body2: typography.white.body2,
-      body1: typography.white.body1,
+      headline1: typography.white.headline1,
+      headline2: typography.white.headline2,
+      headline3: typography.white.headline3,
+      headline4: typography.white.headline4,
+      headline5: typography.white.headline5,
+      headline6: typography.white.headline6,
+      subtitle1: typography.white.subtitle1,
+      bodyText1: typography.white.bodyText1,
+      bodyText2: typography.white.bodyText2,
       caption: typography.white.caption,
       button: typography.white.button,
-      subtitle: typography.white.subtitle,
+      subtitle2: typography.white.subtitle2,
       overline: typography.white.overline,
     );
     expect(typography.white, equals(whiteCopy));
@@ -48,31 +48,31 @@ void main() {
 
 
   test('TextTheme merges properly in the presence of null fields.', () {
-    const TextTheme partialTheme = TextTheme(title: TextStyle(color: Color(0xcafefeed)));
+    const TextTheme partialTheme = TextTheme(headline6: TextStyle(color: Color(0xcafefeed)));
     final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
-    expect(fullTheme.title.color, equals(partialTheme.title.color));
+    expect(fullTheme.headline6.color, equals(partialTheme.headline6.color));
 
     const TextTheme onlyHeadlineAndTitle = TextTheme(
-      headline: TextStyle(color: Color(0xcafefeed)),
-      title: TextStyle(color: Color(0xbeefcafe)),
+      headline5: TextStyle(color: Color(0xcafefeed)),
+      headline6: TextStyle(color: Color(0xbeefcafe)),
     );
     const TextTheme onlyBody1AndTitle = TextTheme(
-      body1: TextStyle(color: Color(0xfeedfeed)),
-      title: TextStyle(color: Color(0xdeadcafe)),
+      bodyText2: TextStyle(color: Color(0xfeedfeed)),
+      headline6: TextStyle(color: Color(0xdeadcafe)),
     );
     TextTheme merged = onlyHeadlineAndTitle.merge(onlyBody1AndTitle);
-    expect(merged.body2, isNull);
-    expect(merged.body1.color, equals(onlyBody1AndTitle.body1.color));
-    expect(merged.headline.color, equals(onlyHeadlineAndTitle.headline.color));
-    expect(merged.title.color, equals(onlyBody1AndTitle.title.color));
+    expect(merged.bodyText1, isNull);
+    expect(merged.bodyText2.color, equals(onlyBody1AndTitle.bodyText2.color));
+    expect(merged.headline5.color, equals(onlyHeadlineAndTitle.headline5.color));
+    expect(merged.headline6.color, equals(onlyBody1AndTitle.headline6.color));
 
     merged = onlyHeadlineAndTitle.merge(null);
     expect(merged, equals(onlyHeadlineAndTitle));
   });
 
   test('TextTheme apply', () {
-    // The `displayColor` is applied to [display4], [display3], [display2],
-    // [display1], and [caption]. The `bodyColor` is applied to the remaining
+    // The `displayColor` is applied to [headline1], [headline2], [headline3],
+    // [headline4], and [caption]. The `bodyColor` is applied to the remaining
     // text styles.
     const Color displayColor = Color(0x00000001);
     const Color bodyColor = Color(0x00000002);
@@ -84,7 +84,7 @@ void main() {
       TextDecoration.lineThrough,
     ]);
 
-    final Typography typography = Typography(platform: TargetPlatform.android);
+    final Typography typography = Typography.material2018(platform: TargetPlatform.android);
     final TextTheme theme = typography.black.apply(
       fontFamily: fontFamily,
       displayColor: displayColor,
@@ -94,33 +94,33 @@ void main() {
       decorationStyle: decorationStyle,
     );
 
-    expect(theme.display4.color, displayColor);
-    expect(theme.display3.color, displayColor);
-    expect(theme.display2.color, displayColor);
-    expect(theme.display1.color, displayColor);
+    expect(theme.headline1.color, displayColor);
+    expect(theme.headline2.color, displayColor);
+    expect(theme.headline3.color, displayColor);
+    expect(theme.headline4.color, displayColor);
     expect(theme.caption.color, displayColor);
-    expect(theme.headline.color, bodyColor);
-    expect(theme.title.color, bodyColor);
-    expect(theme.subhead.color, bodyColor);
-    expect(theme.body2.color, bodyColor);
-    expect(theme.body1.color, bodyColor);
+    expect(theme.headline5.color, bodyColor);
+    expect(theme.headline6.color, bodyColor);
+    expect(theme.subtitle1.color, bodyColor);
+    expect(theme.bodyText1.color, bodyColor);
+    expect(theme.bodyText2.color, bodyColor);
     expect(theme.button.color, bodyColor);
-    expect(theme.subtitle.color, bodyColor);
+    expect(theme.subtitle2.color, bodyColor);
     expect(theme.overline.color, bodyColor);
 
     final List<TextStyle> themeStyles = <TextStyle>[
-      theme.display4,
-      theme.display3,
-      theme.display2,
-      theme.display1,
+      theme.headline1,
+      theme.headline2,
+      theme.headline3,
+      theme.headline4,
       theme.caption,
-      theme.headline,
-      theme.title,
-      theme.subhead,
-      theme.body2,
-      theme.body1,
+      theme.headline5,
+      theme.headline6,
+      theme.subtitle1,
+      theme.bodyText1,
+      theme.bodyText2,
       theme.button,
-      theme.subtitle,
+      theme.subtitle2,
       theme.overline,
     ];
     expect(themeStyles.every((TextStyle style) => style.fontFamily == fontFamily), true);
@@ -130,80 +130,80 @@ void main() {
   });
 
   test('TextTheme apply fontSizeFactor fontSizeDelta', () {
-    final Typography typography = Typography(platform: TargetPlatform.android);
-    final TextTheme baseTheme = Typography.englishLike2014.merge(typography.black);
+    final Typography typography = Typography.material2018(platform: TargetPlatform.android);
+    final TextTheme baseTheme = Typography.englishLike2018.merge(typography.black);
     final TextTheme sizeTheme = baseTheme.apply(
       fontSizeFactor: 2.0,
       fontSizeDelta: 5.0,
     );
 
-    expect(sizeTheme.display4.fontSize, baseTheme.display4.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.display3.fontSize, baseTheme.display3.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.display2.fontSize, baseTheme.display2.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.display1.fontSize, baseTheme.display1.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.headline1.fontSize, baseTheme.headline1.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.headline2.fontSize, baseTheme.headline2.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.headline3.fontSize, baseTheme.headline3.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.headline4.fontSize, baseTheme.headline4.fontSize * 2.0 + 5.0);
     expect(sizeTheme.caption.fontSize, baseTheme.caption.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.headline.fontSize, baseTheme.headline.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.title.fontSize, baseTheme.title.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.subhead.fontSize, baseTheme.subhead.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.body2.fontSize, baseTheme.body2.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.body1.fontSize, baseTheme.body1.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.headline5.fontSize, baseTheme.headline5.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.headline6.fontSize, baseTheme.headline6.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.subtitle1.fontSize, baseTheme.subtitle1.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.bodyText1.fontSize, baseTheme.bodyText1.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.bodyText2.fontSize, baseTheme.bodyText2.fontSize * 2.0 + 5.0);
     expect(sizeTheme.button.fontSize, baseTheme.button.fontSize * 2.0 + 5.0);
-    expect(sizeTheme.subtitle.fontSize, baseTheme.subtitle.fontSize * 2.0 + 5.0);
+    expect(sizeTheme.subtitle2.fontSize, baseTheme.subtitle2.fontSize * 2.0 + 5.0);
     expect(sizeTheme.overline.fontSize, baseTheme.overline.fontSize * 2.0 + 5.0);
   });
 
   test('TextTheme lerp with second parameter null', () {
-    final TextTheme theme = Typography().black;
+    final TextTheme theme = Typography.material2018().black;
     final TextTheme lerped = TextTheme.lerp(theme, null, 0.25);
 
-    expect(lerped.display4, TextStyle.lerp(theme.display4, null, 0.25));
-    expect(lerped.display3, TextStyle.lerp(theme.display3, null, 0.25));
-    expect(lerped.display2, TextStyle.lerp(theme.display2, null, 0.25));
-    expect(lerped.display1, TextStyle.lerp(theme.display1, null, 0.25));
+    expect(lerped.headline1, TextStyle.lerp(theme.headline1, null, 0.25));
+    expect(lerped.headline2, TextStyle.lerp(theme.headline2, null, 0.25));
+    expect(lerped.headline3, TextStyle.lerp(theme.headline3, null, 0.25));
+    expect(lerped.headline4, TextStyle.lerp(theme.headline4, null, 0.25));
     expect(lerped.caption, TextStyle.lerp(theme.caption, null, 0.25));
-    expect(lerped.headline, TextStyle.lerp(theme.headline, null, 0.25));
-    expect(lerped.title, TextStyle.lerp(theme.title, null, 0.25));
-    expect(lerped.subhead, TextStyle.lerp(theme.subhead, null, 0.25));
-    expect(lerped.body2, TextStyle.lerp(theme.body2, null, 0.25));
-    expect(lerped.body1, TextStyle.lerp(theme.body1, null, 0.25));
+    expect(lerped.headline5, TextStyle.lerp(theme.headline5, null, 0.25));
+    expect(lerped.headline6, TextStyle.lerp(theme.headline6, null, 0.25));
+    expect(lerped.subtitle1, TextStyle.lerp(theme.subtitle1, null, 0.25));
+    expect(lerped.bodyText1, TextStyle.lerp(theme.bodyText1, null, 0.25));
+    expect(lerped.bodyText2, TextStyle.lerp(theme.bodyText2, null, 0.25));
     expect(lerped.button, TextStyle.lerp(theme.button, null, 0.25));
-    expect(lerped.subtitle, TextStyle.lerp(theme.subtitle, null, 0.25));
+    expect(lerped.subtitle2, TextStyle.lerp(theme.subtitle2, null, 0.25));
     expect(lerped.overline, TextStyle.lerp(theme.overline, null, 0.25));
   });
 
   test('TextTheme lerp with first parameter null', () {
-    final TextTheme theme = Typography().black;
+    final TextTheme theme = Typography.material2018().black;
     final TextTheme lerped = TextTheme.lerp(null, theme, 0.25);
 
-    expect(lerped.display4, TextStyle.lerp(null, theme.display4, 0.25));
-    expect(lerped.display3, TextStyle.lerp(null, theme.display3, 0.25));
-    expect(lerped.display2, TextStyle.lerp(null, theme.display2, 0.25));
-    expect(lerped.display1, TextStyle.lerp(null, theme.display1, 0.25));
+    expect(lerped.headline1, TextStyle.lerp(null, theme.headline1, 0.25));
+    expect(lerped.headline2, TextStyle.lerp(null, theme.headline2, 0.25));
+    expect(lerped.headline3, TextStyle.lerp(null, theme.headline3, 0.25));
+    expect(lerped.headline4, TextStyle.lerp(null, theme.headline4, 0.25));
     expect(lerped.caption, TextStyle.lerp(null, theme.caption, 0.25));
-    expect(lerped.headline, TextStyle.lerp(null, theme.headline, 0.25));
-    expect(lerped.title, TextStyle.lerp(null, theme.title, 0.25));
-    expect(lerped.subhead, TextStyle.lerp(null, theme.subhead, 0.25));
-    expect(lerped.body2, TextStyle.lerp(null, theme.body2, 0.25));
-    expect(lerped.body1, TextStyle.lerp(null, theme.body1, 0.25));
+    expect(lerped.headline5, TextStyle.lerp(null, theme.headline5, 0.25));
+    expect(lerped.headline6, TextStyle.lerp(null, theme.headline6, 0.25));
+    expect(lerped.subtitle1, TextStyle.lerp(null, theme.subtitle1, 0.25));
+    expect(lerped.bodyText1, TextStyle.lerp(null, theme.bodyText1, 0.25));
+    expect(lerped.bodyText2, TextStyle.lerp(null, theme.bodyText2, 0.25));
     expect(lerped.button, TextStyle.lerp(null, theme.button, 0.25));
-    expect(lerped.subtitle, TextStyle.lerp(null, theme.subtitle, 0.25));
+    expect(lerped.subtitle2, TextStyle.lerp(null, theme.subtitle2, 0.25));
     expect(lerped.overline, TextStyle.lerp(null, theme.overline, 0.25));
   });
 
   test('TextTheme lerp with null parameters', () {
     final TextTheme lerped = TextTheme.lerp(null, null, 0.25);
-    expect(lerped.display4, null);
-    expect(lerped.display3, null);
-    expect(lerped.display2, null);
-    expect(lerped.display1, null);
+    expect(lerped.headline1, null);
+    expect(lerped.headline2, null);
+    expect(lerped.headline3, null);
+    expect(lerped.headline4, null);
     expect(lerped.caption, null);
-    expect(lerped.headline, null);
-    expect(lerped.title, null);
-    expect(lerped.subhead, null);
-    expect(lerped.body2, null);
-    expect(lerped.body1, null);
+    expect(lerped.headline5, null);
+    expect(lerped.headline6, null);
+    expect(lerped.subtitle1, null);
+    expect(lerped.bodyText1, null);
+    expect(lerped.bodyText2, null);
     expect(lerped.button, null);
-    expect(lerped.subtitle, null);
+    expect(lerped.subtitle2, null);
     expect(lerped.overline, null);
   });
 }

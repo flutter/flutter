@@ -26,7 +26,7 @@ class OnTapPage extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Container(
           child: Center(
-            child: Text(id, style: Theme.of(context).textTheme.display2),
+            child: Text(id, style: Theme.of(context).textTheme.headline3),
           ),
         ),
       ),
