@@ -435,6 +435,7 @@ action("robolectric_tests") {
     "test/io/flutter/plugin/common/StandardMessageCodecTest.java",
     "test/io/flutter/plugin/editing/TextInputPluginTest.java",
     "test/io/flutter/plugin/platform/SingleViewPresentationTest.java",
+    "test/io/flutter/plugins/GeneratedPluginRegistrant.java",
     "test/io/flutter/util/PreconditionsTest.java",
   ]
 

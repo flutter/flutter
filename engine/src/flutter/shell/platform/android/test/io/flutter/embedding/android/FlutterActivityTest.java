@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import io.flutter.plugins.GeneratedPluginRegistrant;
+import java.util.List;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -30,6 +34,16 @@ import static org.mockito.Mockito.when;
 @Config(manifest=Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class FlutterActivityTest {
+  @Before
+  public void setUp() {
+    GeneratedPluginRegistrant.clearRegisteredEngines();
+  }
+
+  @After
+  public void tearDown() {
+    GeneratedPluginRegistrant.clearRegisteredEngines();
+  }
+
   @Test
   public void itCreatesDefaultIntentWithExpectedDefaults() {
     Intent intent = FlutterActivity.createDefaultIntent(RuntimeEnvironment.application);
@@ -122,6 +136,19 @@ public class FlutterActivityTest {
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
   }
 
+  @Test
+  public void itRegistersPluginsAtConfigurationTime() {
+    FlutterActivity activity = Robolectric.buildActivity(FlutterActivityWithProvidedEngine.class).get();
+    activity.onCreate(null);
+
+    assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
+    activity.configureFlutterEngine(activity.getFlutterEngine());
+
+    List<FlutterEngine> registeredEngines = GeneratedPluginRegistrant.getRegisteredEngines();
+    assertEquals(1, registeredEngines.size());
+    assertEquals(activity.getFlutterEngine(), registeredEngines.get(0));
+  }
+
   static class FlutterActivityWithProvidedEngine extends FlutterActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -140,7 +167,7 @@ public class FlutterActivityTest {
           mock(FlutterLoader.class),
           flutterJNI,
           new String[]{},
-          true
+          false
         );
     }
   }
