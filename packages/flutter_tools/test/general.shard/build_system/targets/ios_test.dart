@@ -25,6 +25,7 @@ void main() {
     );
     await const GenerateDebugSymbols().build(environment);
   }, overrides: <Type, Generator>{
+    Platform: () => FakePlatform(operatingSystem: 'macos'),
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
         'xcrun',
