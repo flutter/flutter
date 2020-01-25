@@ -3089,6 +3089,8 @@ class RenderIgnorePointer extends RenderProxyBox {
     if (value == _ignoring)
       return;
     _ignoring = value;
+    markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
     if (_ignoringSemantics == null || !_ignoringSemantics)
       markNeedsSemanticsUpdate();
   }
@@ -3123,6 +3125,18 @@ class RenderIgnorePointer extends RenderProxyBox {
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     if (child != null && !_effectiveIgnoringSemantics)
       visitor(child);
+  }
+
+  @override
+  bool get needsCompositing => ignoring || super.needsCompositing;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (ignoring) {
+      context.pushLayer(IgnoreAnnotationLayer(), super.paint, offset);
+    } else {
+      super.paint(context, offset);
+    }
   }
 
   @override
@@ -3295,6 +3309,8 @@ class RenderAbsorbPointer extends RenderProxyBox {
     if (_absorbing == value)
       return;
     _absorbing = value;
+    markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
     if (ignoringSemantics == null)
       markNeedsSemanticsUpdate();
   }
@@ -3328,6 +3344,18 @@ class RenderAbsorbPointer extends RenderProxyBox {
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     if (child != null && !_effectiveIgnoringSemantics)
       visitor(child);
+  }
+
+  @override
+  bool get needsCompositing => absorbing || super.needsCompositing;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (absorbing) {
+      context.pushLayer(AbsorbAnnotationLayer(), super.paint, offset);
+    } else {
+      super.paint(context, offset);
+    }
   }
 
   @override

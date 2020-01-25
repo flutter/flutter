@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('AbsorbPointer blocks widgets behind', (WidgetTester tester) async {
+  testWidgets('IgnorePointer allows widgets behind', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Stack(
@@ -18,8 +18,8 @@ void main() {
           GestureDetector(
             onTap: () {log.add('background');},
           ),
-          AbsorbPointer(
-            absorbing: true,
+          IgnorePointer(
+            ignoring: true,
             child: GestureDetector(
               onTap: () {log.add('foreground');},
             ),
@@ -28,8 +28,9 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(AbsorbPointer));
-    expect(log, <String>[]);
+    await tester.tap(find.byType(IgnorePointer));
+    expect(log, <String>['background']);
+    log.clear();
 
     await tester.pumpWidget(
       Stack(
@@ -38,8 +39,8 @@ void main() {
           GestureDetector(
             onTap: () {log.add('background');},
           ),
-          AbsorbPointer(
-            absorbing: false,
+          IgnorePointer(
+            ignoring: false,
             child: GestureDetector(
               onTap: () {log.add('foreground');},
             ),
@@ -48,38 +49,15 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(AbsorbPointer));
+    await tester.tap(find.byType(IgnorePointer));
     expect(log, <String>['foreground']);
   });
 
-  testWidgets('AbsorbPointer do not block siblings', (WidgetTester tester) async {
-    bool tapped = false;
-    await tester.pumpWidget(
-      Column(
-        children: <Widget>[
-          Expanded(
-            child: GestureDetector(
-              onTap: () => tapped = true,
-            ),
-          ),
-          const Expanded(
-            child: AbsorbPointer(
-              absorbing: true,
-            ),
-          ),
-        ],
-      ),
-    );
-
-    await tester.tap(find.byType(GestureDetector));
-    expect(tapped, true);
-  });
-
-  testWidgets('AbsorbPointer semantics', (WidgetTester tester) async {
+  testWidgets('IgnorePointer semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      AbsorbPointer(
-        absorbing: true,
+      IgnorePointer(
+        ignoring: true,
         child: Semantics(
           label: 'test',
           textDirection: TextDirection.ltr,
@@ -90,8 +68,8 @@ void main() {
       TestSemantics.root(), ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
     await tester.pumpWidget(
-      AbsorbPointer(
-        absorbing: false,
+      IgnorePointer(
+        ignoring: false,
         child: Semantics(
           label: 'test',
           textDirection: TextDirection.ltr,
@@ -112,7 +90,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('AbsorbPointer blocks mouse events', (WidgetTester tester) async {
+  testWidgets('IgnorePointer allows mouse events', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.moveTo(const Offset(200, 200));
@@ -128,8 +106,8 @@ void main() {
             textDirection: TextDirection.ltr,
             children: <Widget>[
               MouseRegion(onEnter: (_) {logs.add('background');}),
-              AbsorbPointer(
-                absorbing: true,
+              IgnorePointer(
+                ignoring: true,
                 child: MouseRegion(onEnter: (_) {logs.add('foreground');}),
               ),
             ],
@@ -139,7 +117,8 @@ void main() {
     );
 
     await gesture.moveTo(const Offset(50, 50));
-    expect(logs, <String>[]);
+    expect(logs, <String>['background']);
+    logs.clear();
 
     await tester.pumpWidget(
       Container(
@@ -151,8 +130,8 @@ void main() {
             textDirection: TextDirection.ltr,
             children: <Widget>[
               MouseRegion(onEnter: (_) {logs.add('background');}),
-              AbsorbPointer(
-                absorbing: false,
+              IgnorePointer(
+                ignoring: false,
                 child: MouseRegion(onEnter: (_) {logs.add('foreground');}),
               ),
             ],

@@ -2559,3 +2559,37 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: false));
   }
 }
+
+/// A layer that absorbs the annotation search from its children, and stops the
+/// search.
+///
+/// This layer's [findAnnotations] immediately returns `true` without searching
+/// its children, which makes it opaque in the annotation search, so that any
+/// non-ancestral layers behind it will be skipped.
+///
+/// See also:
+///
+///   * [AbsorbPointer] and [RenderAbsorbPointer], which uses this layer.
+class AbsorbAnnotationLayer extends ContainerLayer {
+  @override
+  bool findAnnotations<S>(AnnotationResult<S> result, ui.Offset localPosition, {bool onlyFirst}) {
+    return true;
+  }
+}
+
+/// A layer that ignores the annotation search, so that the search moves on
+/// without going into its children.
+///
+/// This layer's [findAnnotations] immediately returns `false` without searching
+/// its children, which makes it transparent in the annotation search, so that
+/// any non-ancestral layers behind it will continue to be searched.
+///
+/// See also:
+///
+///   * [AbsorbPointer] and [RenderAbsorbPointer], which uses this layer.
+class IgnoreAnnotationLayer extends ContainerLayer {
+  @override
+  bool findAnnotations<S>(AnnotationResult<S> result, ui.Offset localPosition, {bool onlyFirst}) {
+    return false;
+  }
+}
