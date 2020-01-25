@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -57,7 +58,7 @@ void main() {
 
     group('run', () {
       testUsingContext('checks that Flutter installation is up-to-date', () async {
-        final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
+        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
         bool versionChecked = false;
         when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
           versionChecked = true;
@@ -73,7 +74,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('does not check that Flutter installation is up-to-date with --machine flag', () async {
-        final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
+        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
         bool versionChecked = false;
         when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
           versionChecked = true;
@@ -89,7 +90,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('throw tool exit if the version file cannot be written', () async {
-        final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
+        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
         when(version.ensureVersionFile()).thenThrow(const FileSystemException());
 
         expect(() async => await runner.run(<String>['dummy']), throwsA(isA<ToolExit>()));
