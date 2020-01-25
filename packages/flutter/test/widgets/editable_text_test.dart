@@ -4180,7 +4180,7 @@ void main() {
   });
 
   testWidgets('updateEditingValue filters multiple calls from formatter', (WidgetTester tester) async {
-    MockTextFormatter formatter = MockTextFormatter();
+    final MockTextFormatter formatter = MockTextFormatter();
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -4213,20 +4213,20 @@ void main() {
     expect(tester.testTextInput.editingState['text'], equals('test'));
     expect(state.wantKeepAlive, true);
 
-    state.updateEditingValue(TextEditingValue(text: ''));
-    state.updateEditingValue(TextEditingValue(text: 'a'));
-    state.updateEditingValue(TextEditingValue(text: 'aa'));
-    state.updateEditingValue(TextEditingValue(text: 'aaa'));
-    state.updateEditingValue(TextEditingValue(text: 'aa'));
-    state.updateEditingValue(TextEditingValue(text: 'aaa'));
-    state.updateEditingValue(TextEditingValue(text: 'aaaa'));
-    state.updateEditingValue(TextEditingValue(text: 'aa'));
-    state.updateEditingValue(TextEditingValue(text: 'aaaaaaa'));
-    state.updateEditingValue(TextEditingValue(text: 'aa'));
-    state.updateEditingValue(TextEditingValue(text: 'aaaaaaaaa'));
-    state.updateEditingValue(TextEditingValue(text: 'aaaaaaaaa')); // Skipped
+    state.updateEditingValue(const TextEditingValue(text: ''));
+    state.updateEditingValue(const TextEditingValue(text: 'a'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaaaaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa')); // Skipped
 
-    List<String> referenceLog = [];
+    final List<String> referenceLog = [];
     referenceLog.add('[1]: , a');
     referenceLog.add('[1]: normal aa');
     referenceLog.add('[2]: aa, aaa');
