@@ -8,7 +8,6 @@ import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart' as globals;
-import '../macos/xcode.dart';
 import 'ios_workflow.dart';
 import 'simulators.dart';
 
@@ -45,7 +44,7 @@ class IOSEmulator extends Emulator {
         'open',
         ...additionalArgs,
         '-a',
-        xcode.getSimulatorPath(),
+        globals.xcode.getSimulatorPath(),
       ];
 
       final RunResult launchResult = await processUtils.run(args);
@@ -69,7 +68,7 @@ class IOSEmulator extends Emulator {
 
 /// Return the list of iOS Simulators (there can only be zero or one).
 List<IOSEmulator> getEmulators() {
-  final String simulatorPath = xcode.getSimulatorPath();
+  final String simulatorPath = globals.xcode.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }
