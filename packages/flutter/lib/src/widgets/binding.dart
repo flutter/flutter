@@ -272,19 +272,19 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   void _debugAddStackFilters() {
-    const PartialStackFrame elementInflateWidget = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'Element', method: 'inflateWidget', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame elementUpdateChild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'Element', method: 'updateChild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame elementRebuild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'Element', method: 'rebuild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame componentElementPerformRebuild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'ComponentElement', method: 'performRebuild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame componentElementFristBuild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'ComponentElement', method: '_firstBuild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame componentElementMount = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'ComponentElement', method: 'mount', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame statefulElementFristBuild = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'StatefulElement', method: '_firstBuild', packagePath: 'src/widgets/framework.dart');
-    const PartialStackFrame singleChildMount = PartialStackFrame(packageScheme: 'package', package: 'flutter', className: 'SingleChildRenderObjectElement', method: 'mount', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame elementInflateWidget = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'inflateWidget');
+    const PartialStackFrame elementUpdateChild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'updateChild');
+    const PartialStackFrame elementRebuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'rebuild');
+    const PartialStackFrame componentElementPerformRebuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'ComponentElement', method: 'performRebuild');
+    const PartialStackFrame componentElementFristBuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'ComponentElement', method: '_firstBuild');
+    const PartialStackFrame componentElementMount = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'ComponentElement', method: 'mount');
+    const PartialStackFrame statefulElementFristBuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'StatefulElement', method: '_firstBuild');
+    const PartialStackFrame singleChildMount = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'SingleChildRenderObjectElement', method: 'mount');
 
     const String replacementString = '...     Normal element mounting';
 
     // ComponentElement variations
-    FlutterError.addDefaultStackFilter(const SubStackFilter(
+    FlutterError.addDefaultStackFilter(const RepetitiveStackFrameFilter(
       frames: <PartialStackFrame>[
         elementInflateWidget,
         elementUpdateChild,
@@ -295,7 +295,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       ],
       replacement: replacementString,
     ));
-    FlutterError.addDefaultStackFilter(const SubStackFilter(
+    FlutterError.addDefaultStackFilter(const RepetitiveStackFrameFilter(
       frames: <PartialStackFrame>[
         elementUpdateChild,
         componentElementPerformRebuild,
@@ -307,7 +307,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     ));
 
     // StatefulElement variations
-    FlutterError.addDefaultStackFilter(const SubStackFilter(
+    FlutterError.addDefaultStackFilter(const RepetitiveStackFrameFilter(
       frames: <PartialStackFrame>[
         elementInflateWidget,
         elementUpdateChild,
@@ -319,7 +319,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       ],
       replacement: replacementString,
     ));
-    FlutterError.addDefaultStackFilter(const SubStackFilter(
+    FlutterError.addDefaultStackFilter(const RepetitiveStackFrameFilter(
       frames: <PartialStackFrame>[
         elementUpdateChild,
         componentElementPerformRebuild,
@@ -332,7 +332,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     ));
 
     // SingleChildRenderObjectElement variations
-    FlutterError.addDefaultStackFilter(const SubStackFilter(
+    FlutterError.addDefaultStackFilter(const RepetitiveStackFrameFilter(
       frames: <PartialStackFrame>[
         elementInflateWidget,
         elementUpdateChild,
@@ -340,7 +340,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       ],
       replacement: replacementString,
     ));
-    FlutterError.addDefaultStackFilter(const SubStackFilter(
+    FlutterError.addDefaultStackFilter(const RepetitiveStackFrameFilter(
       frames: <PartialStackFrame>[
         elementUpdateChild,
         singleChildMount,
