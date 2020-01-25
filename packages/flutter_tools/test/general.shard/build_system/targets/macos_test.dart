@@ -49,6 +49,7 @@ void main() {
   Testbed testbed;
   Environment environment;
   MockPlatform mockPlatform;
+  MockXcode mockXcode;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -56,6 +57,7 @@ void main() {
   });
 
   setUp(() {
+    mockXcode = MockXcode();
     mockPlatform = MockPlatform();
     when(mockPlatform.isWindows).thenReturn(false);
     when(mockPlatform.isMacOS).thenReturn(true);
@@ -202,10 +204,10 @@ void main() {
       environment.buildDir.childFile('snapshot_assembly.S').createSync();
       return Future<int>.value(0);
     });
-    when(xcode.cc(any)).thenAnswer((Invocation invocation) {
+    when(mockXcode.cc(any)).thenAnswer((Invocation invocation) {
       return Future<RunResult>.value(RunResult(FakeProcessResult()..exitCode = 0, <String>['test']));
     });
-    when(xcode.clang(any)).thenAnswer((Invocation invocation) {
+    when(mockXcode.clang(any)).thenAnswer((Invocation invocation) {
       return Future<RunResult>.value(RunResult(FakeProcessResult()..exitCode = 0, <String>['test']));
     });
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
@@ -218,7 +220,7 @@ flutter_tools:lib/''');
     await const CompileMacOSFramework().build(environment..defines[kBuildMode] = 'release');
   }, overrides: <Type, Generator>{
     GenSnapshot: () => MockGenSnapshot(),
-    Xcode: () => MockXCode(),
+    Xcode: () => mockXcode,
   }));
 }
 
@@ -226,7 +228,7 @@ class MockPlatform extends Mock implements Platform {}
 class MockCocoaPods extends Mock implements CocoaPods {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockGenSnapshot extends Mock implements GenSnapshot {}
-class MockXCode extends Mock implements Xcode {}
+class MockXcode extends Mock implements Xcode {}
 class FakeProcessResult implements ProcessResult {
   @override
   int exitCode;
