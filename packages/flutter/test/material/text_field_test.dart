@@ -5423,7 +5423,7 @@ void main() {
 
     final ThemeData themeData = ThemeData(
       textTheme: TextTheme(
-        subhead: TextStyle(
+        subtitle1: TextStyle(
           color: Colors.blue[500],
         ),
       ),
@@ -5445,12 +5445,12 @@ void main() {
     // Empty TextStyle is overridden by theme
     await tester.pumpWidget(buildFrame(const TextStyle()));
     EditableText editableText = tester.widget(find.byType(EditableText));
-    expect(editableText.style.color, themeData.textTheme.subhead.color);
-    expect(editableText.style.background, themeData.textTheme.subhead.background);
-    expect(editableText.style.shadows, themeData.textTheme.subhead.shadows);
-    expect(editableText.style.decoration, themeData.textTheme.subhead.decoration);
-    expect(editableText.style.locale, themeData.textTheme.subhead.locale);
-    expect(editableText.style.wordSpacing, themeData.textTheme.subhead.wordSpacing);
+    expect(editableText.style.color, themeData.textTheme.subtitle1.color);
+    expect(editableText.style.background, themeData.textTheme.subtitle1.background);
+    expect(editableText.style.shadows, themeData.textTheme.subtitle1.shadows);
+    expect(editableText.style.decoration, themeData.textTheme.subtitle1.decoration);
+    expect(editableText.style.locale, themeData.textTheme.subtitle1.locale);
+    expect(editableText.style.wordSpacing, themeData.textTheme.subtitle1.wordSpacing);
 
     // Properties set on TextStyle override theme
     const Color setColor = Colors.red;

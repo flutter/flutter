@@ -800,7 +800,7 @@ class _ToggleButton extends StatelessWidget {
       currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
-    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.body1;
+    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.bodyText2;
     final BoxConstraints currentConstraints = constraints ?? toggleButtonsTheme.constraints ?? const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension);
 
     final Widget result = ClipRRect(
