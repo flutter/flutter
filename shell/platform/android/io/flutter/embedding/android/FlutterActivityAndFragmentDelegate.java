@@ -27,6 +27,8 @@ import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
+import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.plugin.platform.PlatformPlugin;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
@@ -223,7 +225,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     // FlutterView.
     Log.v(TAG, "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
         + " this FlutterFragment.");
-    flutterEngine = new FlutterEngine(host.getContext(), host.getFlutterShellArgs().toArray());
+    flutterEngine = new FlutterEngine(host.getContext(), host.getFlutterShellArgs().toArray(), /*automaticallyRegisterPlugins=*/false);
     isFlutterEngineFromHost = false;
   }
 

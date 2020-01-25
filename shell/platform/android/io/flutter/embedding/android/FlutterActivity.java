@@ -33,6 +33,9 @@ import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DART_ENTRYPOINT_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_BACKGROUND_MODE;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_DART_ENTRYPOINT;
@@ -873,14 +876,18 @@ public class FlutterActivity extends Activity
   }
 
   /**
-   * Hook for subclasses to easily configure a {@code FlutterEngine}, e.g., register
-   * plugins.
-   * <p>
-   * This method is called after {@link #provideFlutterEngine(Context)}.
+   * Hook for subclasses to easily configure a {@code FlutterEngine}.
+   *
+   * <p>This method is called after {@link #provideFlutterEngine(Context)}.
+   *
+   * <p>All plugins listed in the app's pubspec are registered in the base implementation of this
+   * method. To avoid automatic plugin registration, override this method without invoking super().
+   * To keep automatic plugin registration and further configure the flutterEngine, override this
+   * method, invoke super(), and then configure the flutterEngine as desired.
    */
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    // No-op. Hook for subclasses.
+    registerPlugins(flutterEngine);
   }
 
   /**
@@ -950,4 +957,28 @@ public class FlutterActivity extends Activity
     // no-op
   }
 
+  /**
+   * Registers all plugins that an app lists in its pubspec.yaml.
+   * <p>
+   * The Flutter tool generates a class called GeneratedPluginRegistrant, which includes the code
+   * necessary to register every plugin in the pubspec.yaml with a given {@code FlutterEngine}.
+   * The GeneratedPluginRegistrant must be generated per app, because each app uses different sets
+   * of plugins. Therefore, the Android embedding cannot place a compile-time dependency on this
+   * generated class. This method uses reflection to attempt to locate the generated file and then
+   * use it at runtime.
+   * <p>
+   * This method fizzles if the GeneratedPluginRegistrant cannot be found or invoked. This situation
+   * should never occur, but if any eventuality comes up that prevents an app from using this
+   * behavior, that app can still write code that explicitly registers plugins.
+   */
+  private static void registerPlugins(@NonNull FlutterEngine flutterEngine) {
+    try {
+      Class<?> generatedPluginRegistrant = Class.forName("io.flutter.plugins.GeneratedPluginRegistrant");
+      Method registrationMethod = generatedPluginRegistrant.getDeclaredMethod("registerWith", FlutterEngine.class);
+      registrationMethod.invoke(null, flutterEngine);
+    } catch (Exception e) {
+      Log.w(TAG, "Tried to automatically register plugins with FlutterEngine ("
+          + flutterEngine + ") but could not find and invoke the GeneratedPluginRegistrant.");
+    }
+  }
 }

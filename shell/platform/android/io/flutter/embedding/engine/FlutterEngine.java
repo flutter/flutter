@@ -126,8 +126,7 @@ public class FlutterEngine {
    * {@link RenderSurface} is registered. See
    * {@link #getRenderer()} and {@link FlutterRenderer#startRenderingToSurface(RenderSurface)}.
    * <p>
-   * A new {@code FlutterEngine} does not come with any Flutter plugins attached. To attach plugins,
-   * see {@link #getPlugins()}.
+   * A new {@code FlutterEngine} automatically attaches all plugins. See {@link #getPlugins()}.
    * <p>
    * A new {@code FlutterEngine} does come with all default system channels attached.
    * <p>
@@ -150,6 +149,19 @@ public class FlutterEngine {
    */
   public FlutterEngine(@NonNull Context context, @Nullable String[] dartVmArgs) {
     this(context, FlutterLoader.getInstance(), new FlutterJNI(), dartVmArgs, true);
+  }
+
+  /**
+   * Same as {@link #FlutterEngine(Context)} with added support for passing Dart
+   * VM arguments and avoiding automatic plugin registration.
+   * <p>
+   * If the Dart VM has already started, the given arguments will have no effect.
+   */
+  public FlutterEngine(
+      @NonNull Context context,
+      @Nullable String[] dartVmArgs,
+      boolean automaticallyRegisterPlugins) {
+    this(context, FlutterLoader.getInstance(), new FlutterJNI(), dartVmArgs, automaticallyRegisterPlugins);
   }
 
   /**
