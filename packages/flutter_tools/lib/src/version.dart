@@ -39,6 +39,7 @@ class FlutterVersion {
     return !<String>['dev', 'beta', 'stable'].contains(branchName);
   }
 
+  // Beware: Keep order in accordance with stability
   static const Set<String> officialChannels = <String>{
     'master',
     'dev',
