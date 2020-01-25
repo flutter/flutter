@@ -844,14 +844,20 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   }
 }
 
-/// Base class for all sort keys for [OrderedTraversalPolicy] traversal.
+/// Base class for all sort orders for [OrderedTraversalPolicy] traversal.
 ///
+/// {@template flutter.widgets.focusorder.comparable}
 /// Only orders of the same type are comparable. If a set of widgets in the same
-/// [FocusScope] contains keys that are not comparable with each other, it will
-/// assert, since the ordering is undefined.
+/// [FocusScope] contains orders that are not comparable with each other, it
+/// will assert, since the ordering between such keys is undefined. To avoid
+/// collisions, use a [FocusTraversalGroup] to group similarly ordered widgets
+/// together.
+/// {@endtemplate}
 ///
 /// See also:
 ///
+///  * [FocusTraversalGroup], a widget that groups together and imposes a
+///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 ///  * [FocusTraversalOrder], a widget that assigns an order to a widget subtree
 ///    for the [OrderedFocusTraversalPolicy] to use.
 ///  * [NumericFocusOrder], for a focus order that describes its order with a
@@ -889,8 +895,7 @@ abstract class FocusOrder extends Diagnosticable implements Comparable<FocusOrde
 /// to a widget subtree that is using a [OrderedTraversalPolicy] to define the
 /// order in which widgets should be traversed with the keyboard.
 ///
-/// Focus order types cannot be mixed when they might be compared to each other,
-/// so don't use different types of [FocusOrder] within the same focus scope.
+/// {@macro flutter.widgets.focusorder.comparable}
 ///
 /// See also:
 ///
@@ -922,8 +927,7 @@ class NumericFocusOrder extends FocusOrder {
 /// This sorts strings using Dart's default string comparison, which is not
 /// locale specific.
 ///
-/// Focus order types cannot be mixed when they might be compared to each other,
-/// so don't use different types of [FocusOrder] within the same focus scope.
+/// {@macro flutter.widgets.focusorder.comparable}
 ///
 /// See also:
 ///
@@ -960,7 +964,7 @@ class _OrderedFocusInfo {
 /// A [FocusTraversalPolicy] that orders nodes by an explicit order that resides
 /// in the nearest [FocusTraversalOrder] widget ancestor.
 ///
-///
+/// {@macro flutter.widgets.focusorder.comparable}
 ///
 /// {@tool sample --template=stateless_widget_scaffold_center}
 /// This sample shows how to assign a traversal order to a widget. In the
@@ -1031,6 +1035,10 @@ class _OrderedFocusInfo {
 ///
 /// See also:
 ///
+///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///    creation order to describe the order of traversal.
+///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
+///    natural "reading order" for the current [Directionality].
 ///  * [NumericFocusOrder], a focus order that assigns a numeric traversal order
 ///    to a [FocusTraversalOrder] widget.
 ///  * [LexicalFocusOrder], a focus order that assigns a string-based lexical
@@ -1081,6 +1089,8 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
 /// An inherited widget that describes the order in which its child subtree
 /// should be traversed.
 ///
+/// {@macro flutter.widgets.focusorder.comparable}
+///
 /// The order for a widget is determined by the [FocusOrder] returned by
 /// [FocusTraversalOrder.of] for a particular context.
 class FocusTraversalOrder extends InheritedWidget {
@@ -1102,9 +1112,9 @@ class FocusTraversalOrder extends InheritedWidget {
     final FocusOrder order = marker?.order;
     if (order == null) {
       if (!nullOk) {
-        throw FlutterError('TraversalOrder.of() was called with a context that does not contain '
+        throw FlutterError('FocusTraversalOrder.of() was called with a context that does not contain '
             'a TraversalOrder widget. No TraversalOrder widget ancestor could be found starting '
-            'from the context that was passed to TraversalOrder.of().\n'
+            'from the context that was passed to FocusTraversalOrder.of().\n'
             'The context used was:\n'
             '  $context');
       }
@@ -1124,10 +1134,10 @@ class FocusTraversalOrder extends InheritedWidget {
 ///
 /// A traversal group is treated as one entity when sorted by the traversal
 /// algorithm, so it can be used to segregate different parts of the widget tree
-/// that need to be sorted using different algorithms.
+/// that need to be sorted using different algorithms and/or sort orders when
+/// using an [OrderedTraversalPolicy].
 ///
-/// By default, traverses in reading order using
-/// [ReadingOrderFocusTraversalPolicy].
+/// By default, traverses in reading order using [ReadingOrderTraversalPolicy].
 ///
 /// See also:
 ///
@@ -1162,7 +1172,7 @@ class FocusTraversalGroup extends StatelessWidget {
 
   // The internal focus node used to collect the children of this node into a
   // group, and to provide a context for the traversal algorithm to sort the
-  // groups with.
+  // group with.
   final FocusNode _focusNode;
 
   /// The policy used to move the focus from one focus node to another when
@@ -1235,8 +1245,7 @@ class FocusTraversalGroup extends StatelessWidget {
 ///
 /// _This widget has been deprecated: use [FocusTraversalGroup] instead._
 @Deprecated(
-  'Use FocusTraversalGroup as a replacement for DefaultFocusTraversal. '
-  'Be aware that FocusTraversalGroup does add an (unfocusable) Focus widget to the hierarchy that DefaultFocusTraversal does not. '
+  'Use FocusTraversalGroup as a replacement for DefaultFocusTraversal. Be aware that FocusTraversalGroup does add an (unfocusable) Focus widget to the hierarchy that DefaultFocusTraversal does not. Use FocusTraversalGroup.of(context).policy as a replacement for DefaultFocusTraversal.of(context). '
   'This feature was deprecated after v1.14.3.'
 )
 class DefaultFocusTraversal extends InheritedWidget {
@@ -1251,6 +1260,8 @@ class DefaultFocusTraversal extends InheritedWidget {
 
   /// The policy used to move the focus from one focus node to another when
   /// traversing them using a keyboard.
+  ///
+  /// _This widget has been deprecated: use [FocusTraversalGroup] instead._
   ///
   /// If not specified, traverses in reading order using
   /// [ReadingOrderTraversalPolicy].
@@ -1269,15 +1280,14 @@ class DefaultFocusTraversal extends InheritedWidget {
   /// Returns the [FocusTraversalPolicy] that most tightly encloses the given
   /// [BuildContext].
   ///
+  /// _This method has been deprecated: use
+  /// `FocusTraversalGroup.of(context).policy` instead._
+  ///
   /// It does not create a rebuild dependency because changing the traversal
   /// order doesn't change the widget tree, so nothing needs to be rebuilt as a
   /// result of an order change.
   ///
   /// The [context] argument must not be null.
-  @Deprecated(
-      'Use FocusTraversalGroup.of(context).policy as a replacement for DefaultFocusTraversal.of(context) '
-      'This feature was deprecated after v1.14.3.'
-  )
   static FocusTraversalPolicy of(BuildContext context, {bool nullOk = false}) {
     final DefaultFocusTraversal inherited = context?.findAncestorWidgetOfExactType<DefaultFocusTraversal>();
     assert(() {
