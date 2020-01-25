@@ -51,6 +51,7 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/xml",
     "//third_party/dart-pkg/pub/yaml",
     "//third_party/dart-pkg/pub/node_preamble",
+    "//third_party/dart-pkg/pub/native_stack_traces"
   ]
 }
 

@@ -143,7 +143,6 @@ class AOTSnapshotter {
       outputPaths.add(aotSharedLibrary);
       genSnapshotArgs.add('--snapshot_kind=app-aot-elf');
       genSnapshotArgs.add('--elf=$aotSharedLibrary');
-      genSnapshotArgs.add('--strip');
     }
 
     if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {
@@ -155,6 +154,12 @@ class AOTSnapshotter {
       // Not supported by the Pixel in 32-bit mode.
       genSnapshotArgs.add('--no-use-integer-division');
     }
+
+    genSnapshotArgs.addAll(<String>[
+      '--strip',
+      '--dwarf-stack-traces',
+      '--save-debugging-info=${globals.fs.path.join(outputDir.path, 'app.debug')}',
+    ]);
 
     genSnapshotArgs.add(mainPath);
 
