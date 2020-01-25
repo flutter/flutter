@@ -4226,7 +4226,7 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa'));
     state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa')); // Skipped
 
-    final List<String> referenceLog = [];
+    final List<String> referenceLog = <String>[];
     referenceLog.add('[1]: , a');
     referenceLog.add('[1]: normal aa');
     referenceLog.add('[2]: aa, aaa');
@@ -4250,9 +4250,8 @@ void main() {
   });
 }
 
-@immutable
 class MockTextFormatter extends TextInputFormatter {
-  MockTextFormatter() : _counter = 0, log = [];
+  MockTextFormatter() : _counter = 0, log = <String>[];
 
   int _counter;
   List<String> log;
@@ -4276,13 +4275,13 @@ class MockTextFormatter extends TextInputFormatter {
 
   TextEditingValue _handleTextDeletion(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    String result = 'a' * (_counter - 2);
+    final String result = 'a' * (_counter - 2);
     log.add('[$_counter]: deleting $result');
     return TextEditingValue(text: result);
   }
 
   TextEditingValue _formatText(TextEditingValue value) {
-    String result = 'a' * _counter * 2;
+    final String result = 'a' * _counter * 2;
     log.add('[$_counter]: normal $result');
     return TextEditingValue(text: result);
   }
