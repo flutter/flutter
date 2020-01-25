@@ -10,10 +10,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/src/widgets/disposable_build_context.dart';
 
 import 'basic.dart';
 import 'binding.dart';
+import 'disposable_build_context.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
