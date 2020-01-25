@@ -145,8 +145,11 @@ void main() {
         fail('Expect exception');
       } catch (e) {
         expect(e, isInstanceOf<ToolExit>());
-        expect(e.toString(), contains('Target file "lib/main.dart" not found.'));
       }
+      final BufferLogger bufferLogger = globals.logger as BufferLogger;
+      expect(bufferLogger.statusText, contains(
+        'Changing current working directory to:'
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
