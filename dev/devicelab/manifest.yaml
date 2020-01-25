@@ -707,6 +707,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  web_benchmarks_chrome_linux:
+    description: >
+      Runs Web benchmarks on Chrome on a Linux machine.
+    stage: devicelab
+    required_agent_capabilities: ["linux-vm"]
+    # TODO(yjbanov): This is a new test. Marking temporarily as flaky while debugging on devicelab.
+    flaky: true
+
   # run_without_leak_linux:
   #   description: >
   #     Checks that `flutter run` does not leak dart on Linux.
