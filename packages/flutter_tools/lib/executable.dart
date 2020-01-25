@@ -45,6 +45,7 @@ import 'src/commands/unpack.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
+import 'src/globals.dart' as globals;
 import 'src/runner/flutter_command.dart';
 import 'src/web/compile.dart';
 import 'src/web/web_runner.dart';
@@ -63,7 +64,14 @@ Future<void> main(List<String> args) async {
   final bool verboseHelp = help && verbose;
 
   await runner.run(args, <FlutterCommand>[
-    AnalyzeCommand(verboseHelp: verboseHelp),
+    AnalyzeCommand(
+      verboseHelp: verboseHelp,
+      fileSystem: globals.fs,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      logger: globals.logger,
+      terminal: globals.terminal,
+    ),
     AssembleCommand(),
     AttachCommand(verboseHelp: verboseHelp),
     BuildCommand(verboseHelp: verboseHelp),

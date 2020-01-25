@@ -79,6 +79,11 @@ class AnalyzeOnce extends AnalyzeBase {
     final AnalysisServer server = AnalysisServer(
       sdkPath,
       directories.toList(),
+      fileSystem: globals.fs,
+      platform: globals.platform,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      terminal: globals.terminal,
     );
 
     StreamSubscription<bool> subscription;
