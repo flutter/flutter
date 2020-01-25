@@ -5,18 +5,23 @@
 import 'dart:convert' show jsonEncode;
 
 import 'package:platform/platform.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
+import '../../src/mocks.dart' as mocks;
 
 final Platform _kNoAnsiPlatform = FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final String red = RegExp.escape(AnsiTerminal.red);
 final String bold = RegExp.escape(AnsiTerminal.bold);
 final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
 final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
+
+class MockStdio extends Mock implements Stdio {}
+class MockStdout extends Mock implements Stdout {}
 
 void main() {
   group('AppContext', () {
@@ -25,10 +30,11 @@ void main() {
     setUp(() {
       fakeStopWatch = FakeStopwatch();
     });
+
     testWithoutContext('error', () async {
       final BufferLogger mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: MockStdio(),
+          stdio: mocks.MockStdio(),
           platform: _kNoAnsiPlatform,
         ),
         outputPreferences: OutputPreferences.test(showColor: false),
@@ -51,7 +57,7 @@ void main() {
     testWithoutContext('ANSI colored errors', () async {
       final BufferLogger mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio:  MockStdio(),
+          stdio:  mocks.MockStdio(),
           platform: FakePlatform()..stdoutSupportsAnsi = true,
         ),
         outputPreferences: OutputPreferences.test(showColor: true),
@@ -75,8 +81,40 @@ void main() {
     });
   });
 
+  testWithoutContext('Logger does not throw when stdio write throws', () async {
+    final MockStdio stdio = MockStdio();
+    final MockStdout stdout = MockStdout();
+    final MockStdout stderr = MockStdout();
+    bool stdoutThrew = false;
+    bool stderrThrew = false;
+    when(stdio.stdout).thenReturn(stdout);
+    when(stdio.stderr).thenReturn(stderr);
+    when(stdout.write(any)).thenAnswer((_) {
+      stdoutThrew = true;
+      throw 'Error';
+    });
+    when(stderr.write(any)).thenAnswer((_) {
+      stderrThrew = true;
+      throw 'Error';
+    });
+    final Logger logger = StdoutLogger(
+      terminal: AnsiTerminal(
+        stdio: stdio,
+        platform: _kNoAnsiPlatform,
+      ),
+      stdio: stdio,
+      outputPreferences: OutputPreferences.test(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+      platform: FakePlatform(),
+    );
+    logger.printStatus('message');
+    logger.printError('error message');
+    expect(stdoutThrew, true);
+    expect(stderrThrew, true);
+  });
+
   group('Spinners', () {
-    MockStdio mockStdio;
+    mocks.MockStdio mockStdio;
     FakeStopwatch mockStopwatch;
     FakeStopwatchFactory stopwatchFactory;
     int called;
@@ -85,7 +123,7 @@ void main() {
 
     setUp(() {
       mockStopwatch = FakeStopwatch();
-      mockStdio = MockStdio();
+      mockStdio = mocks.MockStdio();
       called = 0;
       stopwatchFactory = FakeStopwatchFactory(mockStopwatch);
     });
@@ -375,14 +413,15 @@ void main() {
       });
     }
   });
+
   group('Output format', () {
-    MockStdio mockStdio;
+    mocks.MockStdio mockStdio;
     SummaryStatus summaryStatus;
     int called;
     final RegExp secondDigits = RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
-      mockStdio = MockStdio();
+      mockStdio = mocks.MockStdio();
       called = 0;
       summaryStatus = SummaryStatus(
         message: 'Hello world',

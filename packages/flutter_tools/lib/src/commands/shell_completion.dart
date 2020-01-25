@@ -49,7 +49,8 @@ class ShellCompletionCommand extends FlutterCommand {
     }
 
     if (argResults.rest.isEmpty || argResults.rest.first == '-') {
-      stdout.write(generateCompletionScript(<String>['flutter']));
+      final String script = generateCompletionScript(<String>['flutter']);
+      safeStdioWrite(stdout, script);
       return FlutterCommandResult.warning();
     }
 
