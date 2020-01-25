@@ -308,8 +308,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -334,14 +334,14 @@ void main() {
         'main.dill',
       ]);
 
-      final VerificationResult toVerifyCC = verify(xcode.cc(captureAny));
+      final VerificationResult toVerifyCC = verify(mockXcode.cc(captureAny));
       expect(toVerifyCC.callCount, 1);
       final dynamic ccArgs = toVerifyCC.captured.first;
       expect(ccArgs, contains('-fembed-bitcode'));
       expect(ccArgs, contains('-isysroot'));
       expect(ccArgs, contains(kSDKPath));
 
-      final VerificationResult toVerifyClang = verify(xcode.clang(captureAny));
+      final VerificationResult toVerifyClang = verify(mockXcode.clang(captureAny));
       expect(toVerifyClang.callCount, 1);
       final dynamic clangArgs = toVerifyClang.captured.first;
       expect(clangArgs, contains('-fembed-bitcode'));
@@ -365,8 +365,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -391,14 +391,14 @@ void main() {
         'main.dill',
       ]);
 
-      final VerificationResult toVerifyCC = verify(xcode.cc(captureAny));
+      final VerificationResult toVerifyCC = verify(mockXcode.cc(captureAny));
       expect(toVerifyCC.callCount, 1);
       final dynamic ccArgs = toVerifyCC.captured.first;
       expect(ccArgs, contains('-fembed-bitcode'));
       expect(ccArgs, contains('-isysroot'));
       expect(ccArgs, contains(kSDKPath));
 
-      final VerificationResult toVerifyClang = verify(xcode.clang(captureAny));
+      final VerificationResult toVerifyClang = verify(mockXcode.clang(captureAny));
       expect(toVerifyClang.callCount, 1);
       final dynamic clangArgs = toVerifyClang.captured.first;
       expect(clangArgs, contains('-fembed-bitcode'));
@@ -425,8 +425,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -450,11 +450,11 @@ void main() {
         '--no-use-integer-division',
         'main.dill',
       ]);
-      verifyNever(xcode.cc(argThat(contains('-fembed-bitcode'))));
-      verifyNever(xcode.clang(argThat(contains('-fembed-bitcode'))));
+      verifyNever(mockXcode.cc(argThat(contains('-fembed-bitcode'))));
+      verifyNever(mockXcode.clang(argThat(contains('-fembed-bitcode'))));
 
-      verify(xcode.cc(argThat(contains('-isysroot')))).called(1);
-      verify(xcode.clang(argThat(contains('-isysroot')))).called(1);
+      verify(mockXcode.cc(argThat(contains('-isysroot')))).called(1);
+      verify(mockXcode.clang(argThat(contains('-isysroot')))).called(1);
 
       final File assemblyFile = globals.fs.file(assembly);
       expect(assemblyFile.existsSync(), true);
@@ -472,8 +472,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -508,8 +508,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -546,8 +546,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -640,8 +640,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotterWithTimings.build(
         platform: TargetPlatform.android_arm,

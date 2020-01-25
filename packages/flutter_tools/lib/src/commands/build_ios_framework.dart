@@ -127,7 +127,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     if (!boolArg('universal') && !boolArg('xcframework')) {
       throwToolExit('--universal or --xcframework is required.');
     }
-    if (boolArg('xcframework') && xcode.majorVersion < 11) {
+    if (boolArg('xcframework') && globals.xcode.majorVersion < 11) {
       throwToolExit('--xcframework requires Xcode 11.');
     }
     if (buildModes.isEmpty) {
