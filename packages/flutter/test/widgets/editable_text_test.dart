@@ -4259,25 +4259,23 @@ void main() {
 
     List<String> referenceLog = [];
     referenceLog.add('[1]: , a');
-    referenceLog.add('[1]: normal a');
-    referenceLog.add('[2]: a, aa');
-    referenceLog.add('[2]: normal aa');
-    referenceLog.add('[3]: aa, aaa');
-    referenceLog.add('[3]: normal aaa');
-    referenceLog.add('[4]: aaa, aa');
-    referenceLog.add('[4]: deleting aa');
-    referenceLog.add('[5]: aa, aaa');
-    referenceLog.add('[5]: normal aaaaa');
-    referenceLog.add('[6]: aaaaa, aaaa');
+    referenceLog.add('[1]: normal aa');
+    referenceLog.add('[2]: aa, aaa');
+    referenceLog.add('[2]: normal aaaa');
+    referenceLog.add('[3]: aaaa, aa');
+    referenceLog.add('[3]: deleting a');
+    referenceLog.add('[4]: a, aaa');
+    referenceLog.add('[4]: normal aaaaaaaa');
+    referenceLog.add('[5]: aaaaaaaa, aaaa');
+    referenceLog.add('[5]: deleting aaa');
+    referenceLog.add('[6]: aaa, aa');
     referenceLog.add('[6]: deleting aaaa');
-    referenceLog.add('[7]: aaaa, aa');
-    referenceLog.add('[7]: deleting aaaaa');
-    referenceLog.add('[8]: aaaaa, aaaaaaa');
-    referenceLog.add('[8]: normal aaaaaaaa');
-    referenceLog.add('[9]: aaaaaaaa, aa');
-    referenceLog.add('[9]: deleting aaaaaaa');
-    referenceLog.add('[10]: aaaaaaa, aaaaaaaaa');
-    referenceLog.add('[10]: normal aaaaaaaaaa');
+    referenceLog.add('[7]: aaaa, aaaaaaa');
+    referenceLog.add('[7]: normal aaaaaaaaaaaaaa');
+    referenceLog.add('[8]: aaaaaaaaaaaaaa, aa');
+    referenceLog.add('[8]: deleting aaaaaa');
+    referenceLog.add('[9]: aaaaaa, aaaaaaaaa');
+    referenceLog.add('[9]: normal aaaaaaaaaaaaaaaaaa');
 
     expect(formatter.log, referenceLog);
   });
@@ -4315,7 +4313,7 @@ class MockTextFormatter extends TextInputFormatter {
   }
 
   TextEditingValue _formatText(TextEditingValue value) {
-    String result = 'a' * _counter;
+    String result = 'a' * _counter * 2;
     log.add('[$_counter]: normal $result');
     return TextEditingValue(text: result);
   }
