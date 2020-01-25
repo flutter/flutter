@@ -18,7 +18,6 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../dart/sdk.dart' as sdk;
-// import '../globals.dart' as globals;
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
