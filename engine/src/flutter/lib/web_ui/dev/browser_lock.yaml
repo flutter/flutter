@@ -1,10 +1,10 @@
 chrome:
   # It seems Chrome can't always release from the same build for all operating
   # systems, so we specify per-OS build number.
-  Linux: 695653
-  Mac: 695656
-  Win: 695655
+  Linux: 735129
+  Mac: 735116
+  Win: 735105
 firefox:
-  version: '71.0'
+  version: '72.0'
 edge:
   launcher_version: '1.2.0.0'
