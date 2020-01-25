@@ -77,7 +77,14 @@ void setElementTransform(html.Element element, Float64List matrix4) {
   final bool isHighDevicePixelRatioScreen =
       EngineWindow.browserDevicePixelRatio > 1.0;
 
-  if (transformKind == TransformKind.complex || isHighDevicePixelRatioScreen) {
+  if (transformKind == TransformKind.scaleAndTranslate2d) {
+    final String cssTransform = float64ListToCssTransform2d(matrix4);
+    element.style
+      ..transformOrigin = '0 0 0'
+      ..transform = cssTransform
+      ..top = null
+      ..left = null;
+  } else if (transformKind == TransformKind.complex || isHighDevicePixelRatioScreen) {
     final String cssTransform = float64ListToCssTransform3d(matrix4);
     element.style
       ..transformOrigin = '0 0 0'
@@ -107,6 +114,9 @@ enum TransformKind {
   /// No effect.
   identity,
 
+  /// A transform that contains only 2d scale and transform.
+  scaleAndTranslate2d,
+
   /// A translation along either X or Y axes, or both.
   translation2d,
 
@@ -123,12 +133,13 @@ TransformKind transformKindOf(Float64List matrix) {
 
   // If matrix contains scaling, rotation, z translation or
   // perspective transform, it is not considered simple.
-  final bool isSimpleTransform = m[0] == 1.0 &&
+  final bool isSimple2dTransform =
+      // m[0] - scale x is simple
       m[1] == 0.0 &&
       m[2] == 0.0 &&
       m[3] == 0.0 &&
       m[4] == 0.0 &&
-      m[5] == 1.0 &&
+      // m[5] - scale y is simple
       m[6] == 0.0 &&
       m[7] == 0.0 &&
       m[8] == 0.0 &&
@@ -140,15 +151,19 @@ TransformKind transformKindOf(Float64List matrix) {
       m[14] == 0.0 && // z translation is NOT simple
       m[15] == 1.0;
 
-  if (!isSimpleTransform) {
+  if (!isSimple2dTransform) {
     return TransformKind.complex;
   }
 
-  if (ty != 0.0 || tx != 0.0) {
-    return TransformKind.translation2d;
+  if (m[0] == 1.0 && m[5] == 1.0) {
+    if (ty != 0.0 || tx != 0.0) {
+      return TransformKind.translation2d;
+    } else {
+      return TransformKind.identity;
+    }
+  } else {
+    return TransformKind.scaleAndTranslate2d;
   }
-
-  return TransformKind.identity;
 }
 
 /// Returns `true` is the [matrix] describes an identity transformation.
@@ -158,28 +173,37 @@ bool isIdentityFloat64ListTransform(Float64List matrix) {
 }
 
 /// Converts [matrix] to CSS transform value.
+String float64ListToCssTransform2d(Float64List matrix) {
+  assert (transformKindOf(matrix) == TransformKind.scaleAndTranslate2d);
+  return 'matrix(${matrix[0]},0,0,${matrix[5]},${matrix[12]},${matrix[13]})';
+}
+
+/// Converts [matrix] to CSS transform value.
 String float64ListToCssTransform(Float64List matrix) {
   assert(matrix.length == 16);
   final Float64List m = matrix;
-  if (m[0] == 1.0 &&
-      m[1] == 0.0 &&
+  if (m[1] == 0.0 &&
       m[2] == 0.0 &&
       m[3] == 0.0 &&
       m[4] == 0.0 &&
-      m[5] == 1.0 &&
       m[6] == 0.0 &&
       m[7] == 0.0 &&
       m[8] == 0.0 &&
       m[9] == 0.0 &&
       m[10] == 1.0 &&
       m[11] == 0.0 &&
-      // 12 can be anything
-      // 13 can be anything
+      // 12 can be anything (translation)
+      // 13 can be anything (translation)
       m[14] == 0.0 &&
       m[15] == 1.0) {
     final double tx = m[12];
     final double ty = m[13];
-    return 'translate(${tx}px, ${ty}px)';
+    if (m[0] == 1.0 &&
+          m[5] == 1.0) {
+        return 'translate(${tx}px, ${ty}px)';
+    } else {
+      return 'matrix(${m[0]},0,0,${m[5]},${tx},${ty})';
+    }
   } else {
     return 'matrix3d(${m[0]},${m[1]},${m[2]},${m[3]},${m[4]},${m[5]},${m[6]},${m[7]},${m[8]},${m[9]},${m[10]},${m[11]},${m[12]},${m[13]},${m[14]},${m[15]})';
   }
