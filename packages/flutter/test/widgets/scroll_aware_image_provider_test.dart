@@ -17,6 +17,10 @@ void main() {
     return Scrollable.of(find.byType(TestWidget).evaluate().first).position.physics as RecordingPhysics;
   }
 
+  ScrollMetrics _findMetrics(WidgetTester tester) {
+    return Scrollable.of(find.byType(TestWidget).evaluate().first).position;
+  }
+
   testWidgets('DisposableBuildContext asserts on disposed state', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
@@ -142,7 +146,14 @@ void main() {
     expect(physics.velocities.length, 0);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     expect(physics.velocities.length, 1);
-    expect(const ScrollPhysics().recommendDeferredLoading(physics.velocities.first), false);
+    expect(
+      const ScrollPhysics().recommendDeferredLoading(
+        physics.velocities.first,
+        _findMetrics(tester),
+        find.byType(TestWidget).evaluate().first,
+      ),
+      false,
+    );
 
     expect(testImageProvider.configuration, ImageConfiguration.empty);
     expect(stream.completer, isNotNull);
@@ -193,7 +204,14 @@ void main() {
     expect(physics.velocities.length, 0);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     expect(physics.velocities.length, 1);
-    expect(const ScrollPhysics().recommendDeferredLoading(physics.velocities.first), true);
+    expect(
+      const ScrollPhysics().recommendDeferredLoading(
+        physics.velocities.first,
+        _findMetrics(tester),
+        find.byType(TestWidget).evaluate().first,
+      ),
+      true,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(stream.completer, null);
@@ -254,7 +272,14 @@ void main() {
     expect(physics.velocities.length, 0);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     expect(physics.velocities.length, 1);
-    expect(const ScrollPhysics().recommendDeferredLoading(physics.velocities.first), true);
+    expect(
+      const ScrollPhysics().recommendDeferredLoading(
+        physics.velocities.first,
+        _findMetrics(tester),
+        find.byType(TestWidget).evaluate().first,
+      ),
+      true,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(stream.completer, null);
@@ -303,8 +328,8 @@ class RecordingPhysics extends ScrollPhysics {
   }
 
   @override
-  bool recommendDeferredLoading(double velocity) {
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
     velocities.add(velocity);
-    return super.recommendDeferredLoading(velocity);
+    return super.recommendDeferredLoading(velocity, metrics, context);
   }
 }
