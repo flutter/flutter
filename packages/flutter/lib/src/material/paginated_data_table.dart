@@ -374,7 +374,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         .map<DropdownMenuItem<int>>((int value) {
           return DropdownMenuItem<int>(
             value: value,
-            child: Text('$value'),
+            child: Text(localizations.formatDecimal(value)),
           );
         })
         .toList();
