@@ -710,6 +710,81 @@ void main() {
       );
     }
   });
+  group('ComponentElement.debugIsInsideBuild', () {
+    testWidgets('is true inside build and false outside', (WidgetTester tester) async {
+      bool didChangeDependenciesIsInsideBuild;
+      bool buildIsInsideBuild;
+
+      await tester.pumpWidget(
+        StatefulTest(
+          didChangeDependencies: (ComponentElement element) {
+            didChangeDependenciesIsInsideBuild = element.debugIsInsideBuild;
+          },
+          build: (ComponentElement element) {
+            buildIsInsideBuild = element.debugIsInsideBuild;
+          },
+          child: Container(),
+        ),
+      );
+
+      final ComponentElement element = tester.element(find.byType(StatefulTest));
+      expect(element.debugIsInsideBuild, isFalse);
+      expect(buildIsInsideBuild, isTrue);
+      expect(didChangeDependenciesIsInsideBuild, isFalse);
+    });
+    testWidgets('is false inside ErrorWidget.builder', (WidgetTester tester) async {
+      bool errorBuilderIsInsideBuild;
+      ComponentElement failingElement;
+
+      final Widget Function(FlutterErrorDetails) previousBuilder = ErrorWidget.builder;
+      ErrorWidget.builder = (FlutterErrorDetails details) {
+        errorBuilderIsInsideBuild = failingElement.debugIsInsideBuild;
+        return previousBuilder(details);
+      };
+
+      await tester.pumpWidget(
+        StatefulTest(
+          build: (ComponentElement element) {
+            failingElement = element;
+            throw Error();
+          },
+          child: Container(),
+        ),
+      );
+
+      ErrorWidget.builder = previousBuilder;
+
+      expect(tester.takeException(), isNotNull);
+      final ComponentElement element = tester.element(find.byType(StatefulTest));
+      expect(element.debugIsInsideBuild, isFalse);
+      expect(errorBuilderIsInsideBuild, isFalse);
+    });
+  });
+}
+
+class StatefulTest extends StatefulWidget {
+  const StatefulTest({Key key, this.didChangeDependencies, this.build, this.child}) : super(key: key);
+
+  final void Function(ComponentElement element) didChangeDependencies;
+  final void Function(ComponentElement element) build;
+  final Widget child;
+
+  @override
+  _StatefulTestState createState() => _StatefulTestState();
+}
+
+class _StatefulTestState extends State<StatefulTest> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.didChangeDependencies?.call(context as ComponentElement);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    widget.build?.call(context as ComponentElement);
+    return widget.child;
+  }
 }
 
 class NullChildTest extends Widget {

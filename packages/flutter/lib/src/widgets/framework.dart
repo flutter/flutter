@@ -4300,6 +4300,12 @@ abstract class ComponentElement extends Element {
 
   Element _child;
 
+  bool _debugIsInsideBuild = false;
+  /// Whether this [Element] is currently calling [build] or not.
+  ///
+  /// This does not include [ErrorWidget.builder] if [build] trew.
+  bool get debugIsInsideBuild => _debugIsInsideBuild;
+
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
@@ -4327,9 +4333,12 @@ abstract class ComponentElement extends Element {
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
     try {
+      _debugIsInsideBuild = true;
       built = build();
+      _debugIsInsideBuild = false;
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
+      _debugIsInsideBuild = false;
       built = ErrorWidget.builder(
         _debugReportException(
           ErrorDescription('building $this'),
