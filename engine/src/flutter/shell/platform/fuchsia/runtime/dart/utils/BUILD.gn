@@ -43,7 +43,7 @@ template("make_utils") {
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:vfs_cpp",
              "$fuchsia_sdk_root/pkg:zx",
-             "//third_party/tonic",
+             "$flutter_root/third_party/tonic",
            ]
 
     public_configs = [ ":utils_config" ]

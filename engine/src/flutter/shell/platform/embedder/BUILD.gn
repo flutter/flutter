@@ -64,9 +64,9 @@ template("embedder_source_set") {
       "$flutter_root/lib/ui",
       "$flutter_root/runtime:libdart",
       "$flutter_root/shell/common",
+      "$flutter_root/third_party/tonic",
       "//third_party/dart/runtime/bin:dart_io_api",
       "//third_party/skia",
-      "//third_party/tonic",
     ]
 
     public_configs += [ "$flutter_root:config" ]
@@ -135,9 +135,9 @@ if (current_toolchain == host_toolchain) {
       "$flutter_root/testing:dart",
       "$flutter_root/testing:opengl",
       "$flutter_root/testing:skia",
+      "$flutter_root/third_party/tonic",
       "//third_party/dart/runtime/bin:elf_loader",
       "//third_party/skia",
-      "//third_party/tonic",
     ]
   }
 }

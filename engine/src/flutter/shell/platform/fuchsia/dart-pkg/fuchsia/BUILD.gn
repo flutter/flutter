@@ -22,10 +22,10 @@ source_set("sdk_ext") {
 
   deps = [
     "$flutter_root/fml",
+    "$flutter_root/third_party/tonic",
     "$fuchsia_sdk_root/fidl:fuchsia.sys",
     "$fuchsia_sdk_root/pkg:async-cpp",
     "../zircon",
-    "//third_party/tonic",
   ]
 
   public_configs = [ ":sdk_ext_config" ]

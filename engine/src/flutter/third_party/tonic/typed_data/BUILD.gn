@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("typed_data") {
+  visibility = [ "../*" ]
+
+  configs += [ "../:config" ]
+
+  sources = [
+    "dart_byte_data.cc",
+    "dart_byte_data.h",
+    "typed_list.cc",
+    "typed_list.h",
+
+    # Deprecated.
+    "float32_list.h",
+    "float64_list.h",
+    "int32_list.h",
+    "uint16_list.h",
+    "uint8_list.h",
+  ]
+
+  deps = [
+    "../common",
+  ]
+
+  public_deps = [
+    "../converter",
+    "../logging",
+    "//third_party/dart/runtime:dart_api",
+  ]
+}
