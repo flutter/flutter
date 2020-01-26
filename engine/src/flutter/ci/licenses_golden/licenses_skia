@@ -1,4 +1,4 @@
-Signature: 397585347a23d8df53020ca6616ad4cf
+Signature: 569a4da77a077a383a573c85bf61cb55
 
 UNUSED LICENSES:
 
@@ -3597,7 +3597,6 @@ FILE: ../../../third_party/skia/src/pdf/SkClusterator.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFTag.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFTag.h
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLByteCode.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.cpp
@@ -3984,6 +3983,7 @@ FILE: ../../../third_party/skia/bench/GrQuadBench.cpp
 FILE: ../../../third_party/skia/gm/crbug_1041204.cpp
 FILE: ../../../third_party/skia/gm/crbug_224618.cpp
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
+FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC
 
