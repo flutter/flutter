@@ -67,7 +67,7 @@ template("runner") {
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:trace-provider-so",
              "$fuchsia_sdk_root/pkg:vfs_cpp",
-             "//third_party/tonic",
+             "$flutter_root/third_party/tonic",
            ] + dart_deps + extra_deps
   }
 }

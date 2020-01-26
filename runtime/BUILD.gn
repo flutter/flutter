@@ -79,11 +79,11 @@ source_set("runtime") {
     "$flutter_root/fml",
     "$flutter_root/lib/io",
     "$flutter_root/lib/ui",
+    "$flutter_root/third_party/tonic",
     "$flutter_root/third_party/txt",
     "//third_party/dart/runtime:dart_api",
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/skia",
-    "//third_party/tonic",
   ]
 
   # On Windows the engine finds the Dart snapshot data through symbols
@@ -146,8 +146,8 @@ source_set("runtime_unittests_common") {
     "$flutter_root/lib/snapshot",
     "$flutter_root/shell/common",
     "$flutter_root/testing:dart",
+    "$flutter_root/third_party/tonic",
     "//third_party/skia",
-    "//third_party/tonic",
   ]
 }
 

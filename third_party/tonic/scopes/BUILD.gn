@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("scopes") {
+  visibility = [ "../*" ]
+
+  configs += [ "../:config" ]
+
+  sources = [
+    "dart_api_scope.h",
+    "dart_isolate_scope.cc",
+    "dart_isolate_scope.h",
+  ]
+
+  deps = [
+    "../common",
+  ]
+
+  public_deps = [
+    "//third_party/dart/runtime:dart_api",
+  ]
+}

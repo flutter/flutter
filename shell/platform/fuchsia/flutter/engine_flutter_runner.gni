@@ -125,7 +125,7 @@ template("flutter_runner") {
              "$fuchsia_sdk_root/pkg:vfs_cpp",
              "$fuchsia_sdk_root/pkg:zx",
              "//third_party/skia",
-             "//third_party/tonic",
+             "$flutter_root/third_party/tonic",
            ] + fuchsia_deps + flutter_deps + extra_deps
 
     # The flags below are needed so that Dart's CPU profiler can walk the

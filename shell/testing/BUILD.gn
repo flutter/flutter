@@ -22,10 +22,10 @@ executable("testing") {
     "$flutter_root/fml",
     "$flutter_root/lib/snapshot",
     "$flutter_root/shell/common",
+    "$flutter_root/third_party/tonic",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/skia",
-    "//third_party/tonic",
   ]
 
   if (is_fuchsia) {

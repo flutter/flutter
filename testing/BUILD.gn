@@ -46,7 +46,7 @@ source_set("dart") {
   public_deps = [
     ":testing",
     "$flutter_root/runtime:libdart",
-    "//third_party/tonic",
+    "$flutter_root/third_party/tonic",
   ]
 }
 

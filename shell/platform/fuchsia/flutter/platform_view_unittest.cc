@@ -17,7 +17,7 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/window.h"
 #include "fuchsia/ui/views/cpp/fidl.h"
-#include "googletest/googletest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flutter_runner_test::flutter_runner_a11y_test {
 
