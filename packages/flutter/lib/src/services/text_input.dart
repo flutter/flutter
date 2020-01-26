@@ -407,6 +407,36 @@ enum TextCapitalization {
   none,
 }
 
+/// Configures how the platform will offer auto-fill suggestions for the input
+enum TextContentType {
+  name,
+  namePrefix,
+  middleName,
+  familyName,
+  nameSuffix,
+  nickname,
+  jobTitle,
+  organizationName,
+  location,
+  fullStreetAddress,
+  addressLine1,
+  addressLine2,
+  addressCity,
+  addressState,
+  addressCityAndState,
+  sublocality,
+  countryName,
+  postalCode,
+  telephoneNumber,
+  emailAddress,
+  url,
+  creditCardNumber,
+  username,
+  password,
+  newPassword,
+  oneTimeCode
+}
+
 /// Controls the visual appearance of the text input control.
 ///
 /// Many [TextInputAction]s are common between Android and iOS. However, if an
@@ -433,6 +463,7 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.obscureText = false,
     this.autocorrect = true,
+    this.textContentType,
     SmartDashesType smartDashesType,
     SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
@@ -462,6 +493,14 @@ class TextInputConfiguration {
   ///
   /// Defaults to true.
   final bool autocorrect;
+
+  /// Specifies the expected input type to inform the platform's auto-fill system
+  ///
+  /// Defaults to null.
+  ///
+  /// See also:
+  ///  * <https://developer.apple.com/documentation/uikit/uitextcontenttype>
+  final TextContentType textContentType;
 
   /// {@template flutter.services.textInput.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -564,6 +603,7 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
+      'textContentType': textContentType.toString(),
     };
   }
 }

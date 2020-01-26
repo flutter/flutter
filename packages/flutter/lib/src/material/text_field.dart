@@ -306,6 +306,7 @@ class TextField extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
+    this.textContentType,
     SmartDashesType smartDashesType,
     SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
@@ -462,6 +463,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.textContentType}
+  final TextContentType textContentType;
 
   /// {@macro flutter.services.textInput.smartDashesType}
   final SmartDashesType smartDashesType;
@@ -697,6 +701,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<TextContentType>('textContentType', textContentType, defaultValue: null));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
     properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
@@ -985,6 +990,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
+        textContentType: widget.textContentType,
         smartDashesType: widget.smartDashesType,
         smartQuotesType: widget.smartQuotesType,
         enableSuggestions: widget.enableSuggestions,
