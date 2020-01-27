@@ -710,6 +710,22 @@ void main() {
       );
     }
   });
+
+  testWidgets('didUpdateDependencies is not called on a State that never rebuilds', (WidgetTester tester) async {
+    final GlobalKey<DependentState> key = GlobalKey<DependentState>();
+    await tester.pumpWidget(Inherited(1, child: DependentStatefulWidget(key: key)));
+    final DependentState state = key.currentState;
+    expect(key.currentState, isNotNull);
+    expect(state.didChangeDependenciesCount, 1);
+
+    await tester.pumpWidget(Inherited(2, child: DependentStatefulWidget(key: key)));
+    expect(key.currentState, isNotNull);
+    expect(state.didChangeDependenciesCount, 2);
+
+    await tester.pumpWidget(const Inherited(3, child: SizedBox()));
+    expect(key.currentState, isNull);
+    expect(state.didChangeDependenciesCount, 2);
+  });
 }
 
 class NullChildTest extends Widget {
@@ -754,4 +770,36 @@ class DirtyElementWithCustomBuildOwner extends Element {
 
   @override
   bool get dirty => true;
+}
+
+class Inherited extends InheritedWidget {
+  const Inherited(this.value, {Widget child, Key key}) : super(key: key, child: child);
+
+  final int value;
+
+  @override
+  bool updateShouldNotify(Inherited oldWidget) => oldWidget.value != value;
+}
+
+class DependentStatefulWidget extends StatefulWidget {
+  const DependentStatefulWidget({Key key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => DependentState();
+}
+
+class DependentState extends State<DependentStatefulWidget> {
+  int didChangeDependenciesCount = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    didChangeDependenciesCount += 1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    context.dependOnInheritedWidgetOfExactType<Inherited>();
+    return const SizedBox();
+  }
 }
