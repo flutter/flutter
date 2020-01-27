@@ -1328,12 +1328,12 @@ void main() {
               color: Color(0xff00ff00),
             ),
             child: Column(
-              children: <Widget>[
-                const Text('Hello\nLine 2\nLine 3',
+              children: const <Widget>[
+                Text('Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5,),
                 ),
-                const Text('Hello\nLine 2\nLine 3',
+                Text('Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5,),
                   textHeightBehavior: TextHeightBehavior(
@@ -1341,7 +1341,7 @@ void main() {
                     applyHeightToLastDescent: false,
                   ),
                 ),
-                const Text('Hello',
+                Text('Hello',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5,),
                   textHeightBehavior: TextHeightBehavior(
