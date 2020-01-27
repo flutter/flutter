@@ -42,16 +42,13 @@ class IOSDeviceNotFoundError implements Exception {
 /// Exception representing an attempt to find information on an iOS device
 /// that failed because the user had not paired the device with the host yet.
 class IOSDeviceNotTrustedError implements Exception {
-  const IOSDeviceNotTrustedError(this.message, this.lockdownCode);
-
-  /// The error message to show to the user.
-  final String message;
+  const IOSDeviceNotTrustedError(this.lockdownCode);
 
   /// The associated `lockdownd` error code.
   final LockdownReturnCode lockdownCode;
 
   @override
-  String toString() => '$message (lockdownd error code ${lockdownCode.code})';
+  String toString() => '${lockdownCode.userMessage} (lockdownd error code ${lockdownCode.code})';
 }
 
 /// Class specifying possible return codes from `lockdownd`.
@@ -60,33 +57,83 @@ class IOSDeviceNotTrustedError implements Exception {
 /// as we only care about a limited subset. These values should be kept in sync with
 /// https://github.com/libimobiledevice/libimobiledevice/blob/26373b3/include/libimobiledevice/lockdown.h#L37
 class LockdownReturnCode {
-  const LockdownReturnCode._(this.code);
+  const LockdownReturnCode._(
+    this.code, {
+      this.userMessage,
+    }
+  );
+
+  /// Parses [stderr] from ideviceinfo and returns the lockdownd error code.
+  ///
+  /// If the parsing fails, `null` will be returned.
+  factory LockdownReturnCode.fromErrorText(String stderr) {
+    if (!stderr.contains('Could not connect to lockdownd')) {
+      return null;
+    }
+    final RegExp regex = RegExp(r'error code -([\d]{1,3})');
+    final Match match = regex.firstMatch(stderr);
+    if (match == null) {
+      return null;
+    }
+    final int code = int.tryParse(match.group(1));
+    final LockdownReturnCode lockdownReturnCode = knownCodes[code];
+    if (lockdownReturnCode != null) {
+      return lockdownReturnCode;
+    } else {
+      return null;
+    }
+  }
 
   /// Creates a new [LockdownReturnCode] from the specified OS exit code.
   ///
   /// If the [code] maps to one of the known codes, a `const` instance will be
   /// returned.
   factory LockdownReturnCode.fromCode(int code) {
-    final Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
-      pairingDialogResponsePending.code: pairingDialogResponsePending,
-      invalidHostId.code: invalidHostId,
-    };
+    //final Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
+    //  pairingDialogResponsePending.code: pairingDialogResponsePending,
+    //  invalidHostId.code: invalidHostId,
+    //};
 
     return knownCodes.containsKey(code) ? knownCodes[code] : LockdownReturnCode._(code);
   }
 
+  static const Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
+    19: pairingDialogResponsePending,
+    21: invalidHostId,
+  };
+
   /// The OS exit code.
   final int code;
 
-  /// Error code indicating that the pairing dialog has been shown to the user,
-  /// and the user has not yet responded as to whether to trust the host.
-  static const LockdownReturnCode pairingDialogResponsePending = LockdownReturnCode._(19);
+  /// Message to show the user when this error occurs.
+  final String userMessage;
 
-  /// Error code indicating that the host is not trusted.
+  /// Error code (19) indicating that the pairing dialog has been shown to the
+  /// user, and the user has not yet responded as to whether to trust the host.
+  static const LockdownReturnCode pairingDialogResponsePending = LockdownReturnCode._(
+    19,
+    userMessage: 'Device info unavailable. Is the device asking to "Trust This Computer?"',
+  );
+
+  /// Error code (21) indicating that the host is not trusted.
   ///
   /// This can happen if the user explicitly says "do not trust this  computer"
   /// or if they revoke all trusted computers in the device settings.
-  static const LockdownReturnCode invalidHostId = LockdownReturnCode._(21);
+  static const LockdownReturnCode invalidHostId = LockdownReturnCode._(
+    21,
+    userMessage: 'Device info unavailable. Device pairing "trust" may have been revoked.',
+  );
+
+  static void handleLockdownError(LockdownReturnCode lockdownReturnCode) {
+    switch (lockdownReturnCode) {
+      case pairingDialogResponsePending:
+        throw const IOSDeviceNotTrustedError(pairingDialogResponsePending);
+        break;
+      case invalidHostId:
+        throw const IOSDeviceNotTrustedError(invalidHostId);
+        break;
+    }
+  }
 }
 
 class IMobileDevice {
@@ -206,18 +253,11 @@ class IMobileDevice {
       if (result.exitCode == 255 && stdout != null && stdout.contains('No device found')) {
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n$stdout. Try unlocking attached devices.');
       }
-      if (result.exitCode == 255 && stderr != null && stderr.contains('Could not connect to lockdownd')) {
-        if (stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
-          throw const IOSDeviceNotTrustedError(
-            'Device info unavailable. Is the device asking to "Trust This Computer?"',
-            LockdownReturnCode.pairingDialogResponsePending,
-          );
-        }
-        if (stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
-          throw const IOSDeviceNotTrustedError(
-            'Device info unavailable. Device pairing "trust" may have been revoked.',
-            LockdownReturnCode.invalidHostId,
-          );
+      if (result.exitCode == 255 && stderr != null) {
+        // if this is a known lockdownd error, throw exception with user-friendly message
+        final LockdownReturnCode returnCode = LockdownReturnCode.fromErrorText(stderr);
+        if (returnCode != null) {
+          LockdownReturnCode.handleLockdownError(returnCode);
         }
       }
       if (result.exitCode != 0) {

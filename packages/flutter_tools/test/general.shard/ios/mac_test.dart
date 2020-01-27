@@ -146,7 +146,7 @@ void main() {
           1,
           255,
           '',
-          'ERROR: Could not connect to lockdownd, error code -12345',
+          'ERROR: Could not connect to lockdownd, error code -567',
         );
         return Future<ProcessResult>.value(result);
       });
