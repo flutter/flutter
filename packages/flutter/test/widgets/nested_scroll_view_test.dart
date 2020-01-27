@@ -671,7 +671,7 @@ void main() {
     expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Regression test for https://github.com/flutter/flutter/issues/39963.
   testWidgets('NestedScrollView with SliverOverlapAbsorber in or out of the first screen', (WidgetTester tester) async {
