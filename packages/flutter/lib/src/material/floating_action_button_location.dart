@@ -110,7 +110,7 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a top [AppBar]
   /// or that use a [SliverAppBar] in the scaffold body itself.
-  static const FloatingActionButtonLocation miniStartTop = _MiniStartTopFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation miniStartTop = _StandardFloatingActionButtonLocation(_startOffsetX, _topOffsetY, 'miniStartTop', adjustment: 4.0);
 
   /// End-aligned [FloatingActionButton], floating over the transition between
   /// the [Scaffold.appBar] and the [Scaffold.body].
@@ -140,16 +140,18 @@ class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation
     this.offsetXFunction,
     this.offsetYFunction,
     this.name,
+    {this.adjustment = 0,}
   );
 
   final _OffsetXFunction offsetXFunction;
   final _OffsetYFunction offsetYFunction;
   final String name;
+  final double adjustment;
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      offsetXFunction(scaffoldGeometry),
+      offsetXFunction(scaffoldGeometry, offset: adjustment),
       offsetYFunction(scaffoldGeometry),
     );
   }
@@ -236,24 +238,6 @@ double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
 
   final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight;
   return math.min(maxFabY, fabY);
-}
-
-class _MiniStartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _MiniStartTopFloatingActionButtonLocation();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    // We have to offset the FAB by four pixels because the FAB itself _adds_
-    // four pixels in every direction in order to have a hit target area of 48
-    // pixels in each dimension, despite being a circle of radius 40.
-    return Offset(
-      _startOffsetX(scaffoldGeometry, offset: 4.0),
-      _topOffsetY(scaffoldGeometry),
-    );
-  }
-
-  @override
-  String toString() => 'FloatingActionButtonLocation.miniStartTop';
 }
 
 /// Provider of animations to move the [FloatingActionButton] between [FloatingActionButtonLocation]s.
