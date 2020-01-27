@@ -112,12 +112,12 @@ Future<int> _handleToolError(
     }
   } else {
     // We've crashed; emit a log report.
-    stderr.writeln();
+    safeStdioWrite(stderr, '\n');
 
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
-      stderr.writeln('$error');
-      stderr.writeln(stackTrace.toString());
+      safeStdioWrite(stderr, '$error\n');
+      safeStdioWrite(stderr, '$stackTrace\n');
       return _exit(1);
     }
 
@@ -138,9 +138,10 @@ Future<int> _handleToolError(
 
       return _exit(1);
     } catch (error) {
-      stderr.writeln(
+      safeStdioWrite(
+        stderr,
         'Unable to generate crash report due to secondary error: $error\n'
-            'please let us know at https://github.com/flutter/flutter/issues.',
+        'please let us know at https://github.com/flutter/flutter/issues.\n',
       );
       // Any exception throw here (including one thrown by `_exit()`) will
       // get caught by our zone's `onError` handler. In order to avoid an

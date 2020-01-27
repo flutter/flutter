@@ -14,6 +14,8 @@ import 'base/process.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/dart.dart';
+import 'build_system/targets/ios.dart';
+import 'cache.dart';
 import 'dart/package_map.dart';
 import 'globals.dart' as globals;
 import 'ios/bitcode.dart';
@@ -39,18 +41,17 @@ class AotBuilder {
       throwToolExit('No AOT build platform specified');
     }
 
-    // This code is currently dead, but will be updated as we move iOS to assemble.
-    // See also: https://github.com/flutter/flutter/issues/32925
     if (_canUseAssemble(platform)
         && extraGenSnapshotOptions?.isEmpty != false
         && extraFrontEndOptions?.isEmpty != false) {
-      assert(false);
       await _buildWithAssemble(
         targetFile: mainDartFile,
         outputDir: outputPath,
         targetPlatform: platform,
         buildMode: buildMode,
         quiet: quiet,
+        iosArchs: iosBuildArchs ?? defaultIOSArchs,
+        bitcode: bitcode ?? kBitcodeEnabledDefault,
       );
       return;
     }
@@ -175,12 +176,13 @@ class AotBuilder {
 
   bool _canUseAssemble(TargetPlatform targetPlatform) {
     switch (targetPlatform) {
+      case TargetPlatform.ios:
+        return true;
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x86:
       case TargetPlatform.darwin_x64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.ios:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia_arm64:
@@ -197,11 +199,10 @@ class AotBuilder {
     BuildMode buildMode,
     String targetFile,
     String outputDir,
-    bool quiet
+    bool quiet,
+    Iterable<DarwinArch> iosArchs,
+    bool bitcode,
   }) async {
-    // This code is currently dead, but will be updated as we move iOS to assemble.
-    // See also: https://github.com/flutter/flutter/issues/32925
-    assert(false);
     Status status;
     if (!quiet) {
       final String typeName = globals.artifacts.getEngineType(targetPlatform, buildMode);
@@ -211,10 +212,14 @@ class AotBuilder {
       );
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    const Target target = null;
+    final Target target = buildMode == BuildMode.profile
+      ? const AotAssemblyProfile()
+      : const AotAssemblyRelease();
 
-    final BuildResult result = await buildSystem.build(target, Environment.test(
-      flutterProject.directory,
+    final BuildResult result = await buildSystem.build(target, Environment(
+      projectDir: flutterProject.directory,
+      cacheDir: globals.cache.getRoot(),
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
       outputDir: globals.fs.directory(outputDir),
       buildDir: flutterProject.directory
         .childDirectory('.dart_tool')
@@ -223,6 +228,8 @@ class AotBuilder {
         kBuildMode: getNameForBuildMode(buildMode),
         kTargetPlatform: getNameForTargetPlatform(targetPlatform),
         kTargetFile: targetFile,
+        kIosArchs: iosArchs.map(getNameForDarwinArch).join(','),
+        kBitcodeFlag: bitcode.toString()
       }
     ));
     status?.stop();

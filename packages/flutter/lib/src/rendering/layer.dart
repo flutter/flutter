@@ -1655,9 +1655,8 @@ class TransformLayer extends OffsetLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
-    final Vector4 result = _invertedTransform.transform(vector);
-    return Offset(result[0], result[1]);
+
+    return MatrixUtils.transformPoint(_invertedTransform, localPosition);
   }
 
   @override

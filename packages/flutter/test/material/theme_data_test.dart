@@ -23,7 +23,7 @@ void main() {
   test('Defaults to the default typography for the platform', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
       final ThemeData theme = ThemeData(platform: platform);
-      final Typography typography = Typography(platform: platform);
+      final Typography typography = Typography.material2018(platform: platform);
       expect(theme.textTheme, typography.black.apply(decoration: TextDecoration.none),
           reason: 'Not using default typography for $platform');
     }
@@ -32,65 +32,65 @@ void main() {
   test('Default text theme contrasts with brightness', () {
     final ThemeData lightTheme = ThemeData(brightness: Brightness.light);
     final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
-    final Typography typography = Typography(platform: lightTheme.platform);
+    final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.textTheme.title.color, typography.black.title.color);
-    expect(darkTheme.textTheme.title.color, typography.white.title.color);
+    expect(lightTheme.textTheme.headline6.color, typography.black.headline6.color);
+    expect(darkTheme.textTheme.headline6.color, typography.white.headline6.color);
   });
 
   test('Default primary text theme contrasts with primary brightness', () {
     final ThemeData lightTheme = ThemeData(primaryColorBrightness: Brightness.light);
     final ThemeData darkTheme = ThemeData(primaryColorBrightness: Brightness.dark);
-    final Typography typography = Typography(platform: lightTheme.platform);
+    final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.primaryTextTheme.title.color, typography.black.title.color);
-    expect(darkTheme.primaryTextTheme.title.color, typography.white.title.color);
+    expect(lightTheme.primaryTextTheme.headline6.color, typography.black.headline6.color);
+    expect(darkTheme.primaryTextTheme.headline6.color, typography.white.headline6.color);
   });
 
   test('Default accent text theme contrasts with accent brightness', () {
     final ThemeData lightTheme = ThemeData(accentColorBrightness: Brightness.light);
     final ThemeData darkTheme = ThemeData(accentColorBrightness: Brightness.dark);
-    final Typography typography = Typography(platform: lightTheme.platform);
+    final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.accentTextTheme.title.color, typography.black.title.color);
-    expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
+    expect(lightTheme.accentTextTheme.headline6.color, typography.black.headline6.color);
+    expect(darkTheme.accentTextTheme.headline6.color, typography.white.headline6.color);
   });
 
-  test('Default chip label style gets a default body2 if textTheme.body2 is null', () {
-    const TextTheme noBody2TextTheme = TextTheme(body2: null);
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBody2TextTheme);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, textTheme: noBody2TextTheme);
-    final Typography typography = Typography(platform: lightTheme.platform);
+  test('Default chip label style gets a default bodyText1 if textTheme.bodyText1 is null', () {
+    const TextTheme noBodyText1TextTheme = TextTheme(bodyText1: null);
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBodyText1TextTheme);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, textTheme: noBodyText1TextTheme);
+    final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.chipTheme.labelStyle.color, equals(typography.black.body2.color.withAlpha(0xde)));
-    expect(darkTheme.chipTheme.labelStyle.color, equals(typography.white.body2.color.withAlpha(0xde)));
+    expect(lightTheme.chipTheme.labelStyle.color, equals(typography.black.bodyText1.color.withAlpha(0xde)));
+    expect(darkTheme.chipTheme.labelStyle.color, equals(typography.white.bodyText1.color.withAlpha(0xde)));
   });
 
   test('Default icon theme contrasts with brightness', () {
     final ThemeData lightTheme = ThemeData(brightness: Brightness.light);
     final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
-    final Typography typography = Typography(platform: lightTheme.platform);
+    final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.textTheme.title.color, typography.black.title.color);
-    expect(darkTheme.textTheme.title.color, typography.white.title.color);
+    expect(lightTheme.textTheme.headline6.color, typography.black.headline6.color);
+    expect(darkTheme.textTheme.headline6.color, typography.white.headline6.color);
   });
 
   test('Default primary icon theme contrasts with primary brightness', () {
     final ThemeData lightTheme = ThemeData(primaryColorBrightness: Brightness.light);
     final ThemeData darkTheme = ThemeData(primaryColorBrightness: Brightness.dark);
-    final Typography typography = Typography(platform: lightTheme.platform);
+    final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.primaryTextTheme.title.color, typography.black.title.color);
-    expect(darkTheme.primaryTextTheme.title.color, typography.white.title.color);
+    expect(lightTheme.primaryTextTheme.headline6.color, typography.black.headline6.color);
+    expect(darkTheme.primaryTextTheme.headline6.color, typography.white.headline6.color);
   });
 
   test('Default accent icon theme contrasts with accent brightness', () {
     final ThemeData lightTheme = ThemeData(accentColorBrightness: Brightness.light);
     final ThemeData darkTheme = ThemeData(accentColorBrightness: Brightness.dark);
-    final Typography typography = Typography(platform: lightTheme.platform);
+    final Typography typography = Typography.material2018(platform: lightTheme.platform);
 
-    expect(lightTheme.accentTextTheme.title.color, typography.black.title.color);
-    expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
+    expect(lightTheme.accentTextTheme.headline6.color, typography.black.headline6.color);
+    expect(darkTheme.accentTextTheme.headline6.color, typography.white.headline6.color);
   });
 
   test('Defaults to MaterialTapTargetBehavior.expanded', () {
@@ -103,16 +103,16 @@ void main() {
     final ThemeData themeData = ThemeData(
       fontFamily: 'Ahem',
       textTheme: const TextTheme(
-        title: TextStyle(fontFamily: 'Roboto'),
+        headline6: TextStyle(fontFamily: 'Roboto'),
       ),
     );
 
-    expect(themeData.textTheme.body2.fontFamily, equals('Ahem'));
-    expect(themeData.primaryTextTheme.display2.fontFamily, equals('Ahem'));
-    expect(themeData.accentTextTheme.display4.fontFamily, equals('Ahem'));
+    expect(themeData.textTheme.bodyText1.fontFamily, equals('Ahem'));
+    expect(themeData.primaryTextTheme.headline3.fontFamily, equals('Ahem'));
+    expect(themeData.accentTextTheme.headline1.fontFamily, equals('Ahem'));
 
     // Shouldn't override the specified style's family
-    expect(themeData.textTheme.title.fontFamily, equals('Roboto'));
+    expect(themeData.textTheme.headline6.fontFamily, equals('Roboto'));
   });
 
   test('Can estimate brightness - directly', () {
@@ -255,7 +255,7 @@ void main() {
       colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
-      typography: Typography(platform: TargetPlatform.android),
+      typography: Typography.material2018(platform: TargetPlatform.android),
       cupertinoOverrideTheme: null,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.black),
@@ -334,7 +334,7 @@ void main() {
       colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.white),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
-      typography: Typography(platform: TargetPlatform.iOS),
+      typography: Typography.material2018(platform: TargetPlatform.iOS),
       cupertinoOverrideTheme: ThemeData.light().cupertinoOverrideTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
       bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white),

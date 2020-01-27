@@ -83,12 +83,13 @@ class FlutterWebPlatform extends PlatformPlugin {
     FlutterProject flutterProject,
     String shellPath,
     bool updateGoldens = false,
+    bool pauseAfterLoad = false,
   }) async {
     final shelf_io.IOServer server =
         shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return FlutterWebPlatform._(
       server,
-      Configuration.current,
+      Configuration.current.change(pauseAfterLoad: pauseAfterLoad),
       root,
       flutterProject: flutterProject,
       shellPath: shellPath,
@@ -339,6 +340,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       browser,
       hostUrl,
       completer.future,
+      headless: !_config.pauseAfterLoad,
     );
 
     // Store null values for browsers that error out so we know not to load them
@@ -587,6 +589,8 @@ class BrowserManager {
   /// [future]. If [debug] is true, starts the browser in debug mode, with its
   /// debugger interfaces on and detected.
   ///
+  /// The browser will start in headless mode if [headless] is true.
+  ///
   /// The [settings] indicate how to invoke this browser's executable.
   ///
   /// Returns the browser manager, or throws an [ApplicationException] if a
@@ -596,9 +600,10 @@ class BrowserManager {
     Uri url,
     Future<WebSocketChannel> future, {
     bool debug = false,
+    bool headless = true,
   }) async {
     final Chrome chrome =
-        await chromeLauncher.launch(url.toString(), headless: true);
+        await chromeLauncher.launch(url.toString(), headless: headless);
 
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 

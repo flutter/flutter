@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
 import 'binding.dart' show WidgetsBinding;
+import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
@@ -133,6 +134,58 @@ class ScrollPhysics {
     if (parent == null)
       return position.pixels != 0.0 || position.minScrollExtent != position.maxScrollExtent;
     return parent.shouldAcceptUserOffset(position);
+  }
+
+  /// Provides a heuristic to determine if expensive frame-bound tasks should be
+  /// deferred.
+  ///
+  /// The velocity parameter must not be null, but may be positive, negative, or
+  /// zero.
+  ///
+  /// The metrics parameter must not be null.
+  ///
+  /// The context parameter must not be null. It normally refers to the
+  /// [BuildContext] of the widget making the call, such as an [Image] widget
+  /// in a [ListView].
+  ///
+  /// This can be used to determine whether decoding or fetching complex data
+  /// for the currently visible part of the viewport should be delayed
+  /// to avoid doing work that will not have a chance to appear before a new
+  /// frame is rendered.
+  ///
+  /// For example, a list of images could use this logic to delay decoding
+  /// images until scrolling is slow enough to actually render the decoded
+  /// image to the screen.
+  ///
+  /// The default implementation is a heuristic that compares the current
+  /// scroll velocity in local logical pixels to the longest side of the window
+  /// in physical pixels. Implementers can change this heuristic by overriding
+  /// this method and providing their custom physics to the scrollable widget.
+  /// For example, an application that changes the local coordinate system with
+  /// a large perspective transform could provide a more or less aggressive
+  /// heuristic depending on whether the transform was increasing or decreasing
+  /// the overall scale between the global screen and local scrollable
+  /// coordinate systems.
+  ///
+  /// The default implementation is stateless, and simply provides a point-in-
+  /// time decision about how fast the scrollable is scrolling. It would always
+  /// return true for a scrollable that is animating back and forth at high
+  /// velocity in a loop. It is assumed that callers will handle such
+  /// a case, or that a custom stateful implementation would be written that
+  /// tracks the sign of the velocity on successive calls.
+  ///
+  /// Returning true from this method indicates that the current scroll velocity
+  /// is great enough that expensive operations impacting the UI should be
+  /// deferred.
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
+    assert(velocity != null);
+    assert(metrics != null);
+    assert(context != null);
+    if (parent == null) {
+      final double maxPhysicalPixels = WidgetsBinding.instance.window.physicalSize.longestSide;
+      return velocity.abs() > maxPhysicalPixels;
+    }
+    return parent.recommendDeferredLoading(velocity, metrics, context);
   }
 
   /// Determines the overscroll by applying the boundary conditions.
