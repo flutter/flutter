@@ -395,6 +395,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.isSnackBarFloating,
     @required this.extendBody,
     @required this.extendBodyBehindAppBar,
+    @required this.additionalFloatingActionButtonConfigurations,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
@@ -415,6 +416,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final bool isSnackBarFloating;
+
+  final List<FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
   @override
   void performLayout(Size size) {
@@ -545,23 +548,25 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     // TODO: Add additional FAB.
-    if (hasChild(_ScaffoldSlot.additionalFloatingActionButton)) {
-      print('Child found');
-      final Size fabSize = layoutChild(_ScaffoldSlot.additionalFloatingActionButton, looseConstraints);
-      final ScaffoldPrelayoutGeometry currentGeometry = ScaffoldPrelayoutGeometry(
-        bottomSheetSize: bottomSheetSize,
-        contentBottom: contentBottom,
-        contentTop: contentTop,
-        floatingActionButtonSize: fabSize,
-        minInsets: minInsets,
-        scaffoldSize: size,
-        snackBarSize: snackBarSize,
-        textDirection: textDirection,
-      );
-      final Offset fabOffset = FloatingActionButtonLocation.endTop.getOffset(currentGeometry);
-      positionChild(_ScaffoldSlot.additionalFloatingActionButton, fabOffset);
-    } else {
-      print('Child NOT found');
+    for (int index = 0; index < additionalFloatingActionButtonConfigurations.length; index ++) {
+      if (hasChild(ValueKey<int>(index))) {
+        print('Child $index (${additionalFloatingActionButtonConfigurations[index]}) found');
+        final Size fabSize = layoutChild(ValueKey<int>(index), looseConstraints);
+        final ScaffoldPrelayoutGeometry currentGeometry = ScaffoldPrelayoutGeometry(
+          bottomSheetSize: bottomSheetSize,
+          contentBottom: contentBottom,
+          contentTop: contentTop,
+          floatingActionButtonSize: fabSize,
+          minInsets: minInsets,
+          scaffoldSize: size,
+          snackBarSize: snackBarSize,
+          textDirection: textDirection,
+        );
+        final Offset fabOffset = additionalFloatingActionButtonConfigurations[index].location.getOffset(currentGeometry);
+        positionChild(ValueKey<int>(index), fabOffset);
+      } else {
+        print('Child $index NOT found');
+      }
     }
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
@@ -2431,11 +2436,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeBottomPadding: true,
     );
 
-    for (FloatingActionButtonConfiguration configuration in widget.additionalFloatingActionButtonConfigurations) {
+    for (int index = 0; index < widget.additionalFloatingActionButtonConfigurations.length; index ++) {
+      final FloatingActionButtonConfiguration configuration = widget.additionalFloatingActionButtonConfigurations[index];
       _addIfNonNull(
         children,
         configuration.button,
-        _ScaffoldSlot.additionalFloatingActionButton,
+        ValueKey<int>(index),
         removeLeftPadding: true,
         removeTopPadding: true,
         removeRightPadding: true,
@@ -2503,6 +2509,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
+                additionalFloatingActionButtonConfigurations: widget.additionalFloatingActionButtonConfigurations,
               ),
             );
           }),
