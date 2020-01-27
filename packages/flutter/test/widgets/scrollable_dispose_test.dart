@@ -28,10 +28,9 @@ void main() {
     await tester.pump(const Duration(hours: 5));
   });
 
-  testWidgets('Disposing a (nested) Scrollable while holding in overscroll (iOS) does not crash', (WidgetTester tester) async {
+  testWidgets('Disposing a (nested) Scrollable while holding in overscroll does not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/27707.
 
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final ScrollController controller = ScrollController();
     final Key outterContainer = GlobalKey();
 
@@ -88,7 +87,5 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(controller.hasClients, isFalse);
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 }
