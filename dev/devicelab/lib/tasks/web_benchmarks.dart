@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:io' as io;
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
@@ -14,10 +15,6 @@ import 'package:shelf_static/shelf_static.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-Future<void> main() async {
-  await task(_runWebBenchmark);
-}
-
 /// List of benchmarks we want to run in the devicelab.
 const List<String> benchmarks = <String>[
   'draw_rect',
@@ -25,28 +22,19 @@ const List<String> benchmarks = <String>[
   'bench_simple_lazy_text_scroll',
 ];
 
-Future<TaskResult> _runWebBenchmark() async {
+Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
   final String macrobenchmarksDirectory = path.join('${flutterDirectory.path}', 'dev', 'benchmarks', 'macrobenchmarks');
   return await inDirectory(macrobenchmarksDirectory, () async {
-    final Map<String, dynamic> taskResult = <String, dynamic>{};
-    final List<String> benchmarkScoreKeys = <String>[];
-    await _runBenchmarksForBackend(taskResult, benchmarkScoreKeys, false);
-    await _runBenchmarksForBackend(taskResult, benchmarkScoreKeys, true);
-    return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
-  });
-}
-
-Future<void> _runBenchmarksForBackend(Map<String, dynamic> taskResult, List<String> benchmarkScoreKeys, bool useSkiaBackend) async {
-    final String macrobenchmarksDirectory = path.join('${flutterDirectory.path}', 'dev', 'benchmarks', 'macrobenchmarks');
     await evalFlutter('build', options: <String>[
       'web',
-      if (useSkiaBackend)
+      if (useCanvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
-      '--release',
+      '--profile',
       '-t',
       'lib/web_benchmarks.dart',
-    ]);
-    final String backend = useSkiaBackend ? 'skia' : 'html';
+    ], environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    });
     final Completer<List<String>> profileData = Completer<List<String>>();
     final Iterator<String> benchmarkIterator = benchmarks.iterator;
     final List<String> collectedProfiles = <String>[];
@@ -74,6 +62,7 @@ Future<void> _runBenchmarksForBackend(Map<String, dynamic> taskResult, List<Stri
     ));
 
     final io.HttpServer server = await io.HttpServer.bind('localhost', 8080);
+    io.Process chromeProcess;
     try {
       shelf_io.serveRequests(server, cascade.handler);
 
@@ -100,7 +89,7 @@ Future<void> _runBenchmarksForBackend(Map<String, dynamic> taskResult, List<Stri
         // '--remote-debugging-port=$kDevtoolsPort',
       ];
 
-      final io.Process process = await io.Process.start(
+      chromeProcess = await io.Process.start(
         _findSystemChromeExecutable(),
         args,
         workingDirectory: cwd,
@@ -108,6 +97,9 @@ Future<void> _runBenchmarksForBackend(Map<String, dynamic> taskResult, List<Stri
 
       print('Waiting for the benchmark to report benchmark profile.');
 
+      final String backend = useCanvasKit ? 'canvaskit' : 'html';
+      final Map<String, dynamic> taskResult = <String, dynamic>{};
+      final List<String> benchmarkScoreKeys = <String>[];
       for (final String profileJson in await profileData.future) {
         final Map<String, dynamic> profile = json.decode(profileJson) as Map<String, dynamic>;
         final String benchmarkName = profile['name'] as String;
@@ -115,11 +107,12 @@ Future<void> _runBenchmarksForBackend(Map<String, dynamic> taskResult, List<Stri
         taskResult['$benchmarkName.$backend.drawFrameDurationNoise'] = profile['drawFrameDurationNoise'].toDouble(); // micros
         benchmarkScoreKeys.add('$benchmarkName.$backend.averageDrawFrameDuration');
       }
-
-      process.kill();
+      return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
     } finally {
       server.close();
+      chromeProcess?.kill();
     }
+  });
 }
 
 String _findSystemChromeExecutable() {

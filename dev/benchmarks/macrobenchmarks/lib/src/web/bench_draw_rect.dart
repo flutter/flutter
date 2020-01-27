@@ -27,7 +27,7 @@ class BenchDrawRect extends RawRecorder {
   double wobbleCounter = 0;
 
   @override
-  void onDrawFrame(SceneBuilder sceneBuilder, FrameMetricsBuilder metricsBuilder) {
+  void onDrawFrame(SceneBuilder sceneBuilder) {
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
     final Paint paint = Paint()..color = const Color.fromARGB(255, 255, 0, 0);

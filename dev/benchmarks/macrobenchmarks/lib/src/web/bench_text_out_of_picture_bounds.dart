@@ -56,7 +56,7 @@ class BenchTextOutOfPictureBounds extends RawRecorder {
   List<Paragraph> multiLineParagraphs;
 
   @override
-  void onDrawFrame(SceneBuilder sceneBuilder, FrameMetricsBuilder metricsBuilder) {
+  void onDrawFrame(SceneBuilder sceneBuilder) {
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
     final Size screenSize = window.physicalSize;
@@ -67,7 +67,8 @@ class BenchTextOutOfPictureBounds extends RawRecorder {
       canvas.save();
       double topOffset = 0;
       while (topOffset < screenSize.height) {
-        final Paragraph paragraph = textSource[_random.nextInt(textSource.length)];
+        final Paragraph paragraph =
+            textSource[_random.nextInt(textSource.length)];
 
         // Give it enough space to make sure it ends up being a single-line paragraph.
         paragraph.layout(ParagraphConstraints(width: screenSize.width / 2));
@@ -86,7 +87,9 @@ class BenchTextOutOfPictureBounds extends RawRecorder {
       for (int col = 0; col < 3; col++) {
         canvas.drawRect(
           Offset.zero & screenSize,
-          Paint()..style = PaintingStyle.stroke ..strokeWidth = 2.0,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.0,
         );
         // Fill single-line text.
         fillCellWithText(singleLineParagraphs);
@@ -123,23 +126,26 @@ class BenchTextOutOfPictureBounds extends RawRecorder {
     Color color,
   }) {
     final List<Paragraph> strings = <Paragraph>[];
-    int wordPointer = 0;  // points to the next word in lipsum to extract
+    int wordPointer = 0; // points to the next word in lipsum to extract
     for (int i = 0; i < paragraphCount; i++) {
-      final int wordCount = minWordCountPerParagraph + _random.nextInt(maxWordCountPerParagraph - minWordCountPerParagraph);
+      final int wordCount = minWordCountPerParagraph +
+          _random.nextInt(maxWordCountPerParagraph - minWordCountPerParagraph);
       final List<String> string = <String>[];
       for (int j = 0; j < wordCount; j++) {
         string.add(lipsum[wordPointer]);
         wordPointer = (wordPointer + 1) % lipsum.length;
       }
 
-      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
-        ..pushStyle(TextStyle(color: color, fontSize: 18.0))
-        ..addText(string.join(' '))
-        ..pop();
+      final ParagraphBuilder builder =
+          ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+            ..pushStyle(TextStyle(color: color, fontSize: 18.0))
+            ..addText(string.join(' '))
+            ..pop();
       final Paragraph paragraph = builder.build();
 
       // Fill half the screen.
-      paragraph.layout(ParagraphConstraints(width: window.physicalSize.width / 2));
+      paragraph
+          .layout(ParagraphConstraints(width: window.physicalSize.width / 2));
       strings.add(paragraph);
     }
     return strings;
