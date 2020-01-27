@@ -398,6 +398,7 @@ class _FocusState extends State<Focus> {
   @override
   void deactivate() {
     super.deactivate();
+    _focusAttachment?.reparent();
     _didAutofocus = false;
   }
 

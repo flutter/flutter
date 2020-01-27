@@ -722,9 +722,14 @@ void main() {
     expect(key.currentState, isNotNull);
     expect(state.didChangeDependenciesCount, 2);
 
-    await tester.pumpWidget(const Inherited(3, child: SizedBox()));
+    // reparent it
+    await tester.pumpWidget(Inherited(3, child: SizedBox(child: DependentStatefulWidget(key: key))));
+    expect(key.currentState, isNotNull);
+    expect(state.didChangeDependenciesCount, 3);
+
+    await tester.pumpWidget(const Inherited(4, child: SizedBox()));
     expect(key.currentState, isNull);
-    expect(state.didChangeDependenciesCount, 2);
+    expect(state.didChangeDependenciesCount, 3);
   });
 }
 
