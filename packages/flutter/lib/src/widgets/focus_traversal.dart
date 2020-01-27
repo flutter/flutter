@@ -751,8 +751,10 @@ class WidgetOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFo
 class _ReadingOrderSortData {
   _ReadingOrderSortData(this.node)
       : assert(node != null),
-        rect = node.rect;
+        rect = node.rect,
+        directionality = Directionality.of(node.context);
 
+  final TextDirection directionality;
   final Rect rect;
   final FocusNode node;
 }
@@ -798,11 +800,25 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       });
     }
 
-    final BuildContext context = descendants.first.enclosingScope.context;
-    final TextDirection textDirection = context == null ? TextDirection.ltr : Directionality.of(context);
     _ReadingOrderSortData pickFirst(List<_ReadingOrderSortData> candidates) {
       int compareBeginningSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
-        return textDirection == TextDirection.ltr ? a.rect.left.compareTo(b.rect.left) : -a.rect.right.compareTo(b.rect.right);
+        if (a.directionality == b.directionality) {
+          if (a.directionality == TextDirection.ltr) {
+            return a.rect.left.compareTo(b.rect.left);
+          } else {
+            return -a.rect.right.compareTo(b.rect.right);
+          }
+        }
+        // If the directionalities are different, sort ltr to the left, and
+        // rtl to the right.
+        switch(a.directionality) {
+          case TextDirection.ltr:
+            return -1;
+          case TextDirection.rtl:
+            return 1;
+        }
+        assert(false, 'Directionality ${a.directionality} not handled.');
+        return 0;
       }
 
       int compareTopSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
