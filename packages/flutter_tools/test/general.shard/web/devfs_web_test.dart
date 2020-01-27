@@ -41,7 +41,9 @@ void main() {
   MockPlatform windows;
 
   setUpAll(() async {
-    packages = await loadPackagesFile(Uri.base.resolve('.packages'));
+    packages = await loadPackagesFile(Uri.base.resolve('.packages'), loader: (Uri uri) async {
+      return utf8.encode('\n');
+    });
   });
 
   setUp(() {
