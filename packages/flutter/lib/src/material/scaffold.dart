@@ -54,7 +54,6 @@ enum _ScaffoldSlot {
   drawer,
   endDrawer,
   statusBar,
-  additionalFloatingActionButton,
 }
 
 /// The geometry of the [Scaffold] after all its contents have been laid out
