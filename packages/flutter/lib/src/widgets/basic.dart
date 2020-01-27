@@ -5949,11 +5949,7 @@ class MouseRegion extends StatefulWidget {
   /// that unconditionally creates the `MouseRegion`, you can ignore the
   /// aforementioned restriction.
   ///
-  /// ```dart imports
-  /// import 'package:flutter/gestures.dart';
-  /// ```
-  ///
-  /// ```dart code
+  /// ```dart
   ///   bool hovered = false;
   ///
   ///   @override
@@ -5983,10 +5979,6 @@ class MouseRegion extends StatefulWidget {
   /// case, since it has access to the event that triggers the disappearance of
   /// the `MouseRegion`, it simply trigger the exit callback during that event
   /// as well.
-  ///
-  /// ```dart imports
-  /// import 'package:flutter/gestures.dart';
-  /// ```
   ///
   /// ```dart preamble
   /// // A region that hides its content one second after being hovered.
@@ -6041,7 +6033,7 @@ class MouseRegion extends StatefulWidget {
   /// }
   /// ```
   ///
-  /// ```dart code
+  /// ```dart
   ///   Key key = UniqueKey();
   ///   bool hovering = false;
   ///
