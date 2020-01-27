@@ -60,11 +60,14 @@ class Tab extends StatelessWidget {
   /// Creates a material design [TabBar] tab.
   ///
   /// At least one of [text], [icon], and [child] must be non-null. The [text]
-  /// and [child] arguments must not be used at the same time.
+  /// and [child] arguments must not be used at the same time. The
+  /// [iconMargin] is only useful when [icon] and either one of [text] or
+  /// [child] is non-null.
   const Tab({
     Key key,
     this.text,
     this.icon,
+    this.iconMargin = const EdgeInsets.only(bottom: 10.0),
     this.child,
   }) : assert(text != null || child != null || icon != null),
        assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/34180
@@ -84,6 +87,12 @@ class Tab extends StatelessWidget {
 
   /// An icon to display as the tab's label.
   final Widget icon;
+
+  /// The margin added around the tab's icon.
+  ///
+  /// Only useful when used in combination with [icon], and either one of
+  /// [text] or [child] is non-null.
+  final EdgeInsetsGeometry iconMargin;
 
   Widget _buildLabelText() {
     return child ?? Text(text, softWrap: false, overflow: TextOverflow.fade);
@@ -109,7 +118,7 @@ class Tab extends StatelessWidget {
         children: <Widget>[
           Container(
             child: icon,
-            margin: const EdgeInsets.only(bottom: 10.0),
+            margin: iconMargin,
           ),
           _buildLabelText(),
         ],
@@ -162,12 +171,12 @@ class _TabStyle extends AnimatedWidget {
     // the same value of inherit. Force that to be inherit=true here.
     final TextStyle defaultStyle = (labelStyle
       ?? tabBarTheme.labelStyle
-      ?? themeData.primaryTextTheme.body2
+      ?? themeData.primaryTextTheme.bodyText1
     ).copyWith(inherit: true);
     final TextStyle defaultUnselectedStyle = (unselectedLabelStyle
       ?? tabBarTheme.unselectedLabelStyle
       ?? labelStyle
-      ?? themeData.primaryTextTheme.body2
+      ?? themeData.primaryTextTheme.bodyText1
     ).copyWith(inherit: true);
     final TextStyle textStyle = selected
       ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
@@ -175,7 +184,7 @@ class _TabStyle extends AnimatedWidget {
 
     final Color selectedColor = labelColor
        ?? tabBarTheme.labelColor
-       ?? themeData.primaryTextTheme.body2.color;
+       ?? themeData.primaryTextTheme.bodyText1.color;
     final Color unselectedColor = unselectedLabelColor
       ?? tabBarTheme.unselectedLabelColor
       ?? selectedColor.withAlpha(0xB2); // 70% alpha
@@ -692,7 +701,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// opacity unless [unselectedLabelColor] is non-null.
   ///
   /// If this parameter is null, then the color of the [ThemeData.primaryTextTheme]'s
-  /// body2 text color is used.
+  /// bodyText1 text color is used.
   final Color labelColor;
 
   /// The color of unselected tab labels.
@@ -707,7 +716,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// both selected and unselected label styles.
   ///
   /// If this property is null, then the text style of the
-  /// [ThemeData.primaryTextTheme]'s body2 definition is used.
+  /// [ThemeData.primaryTextTheme]'s bodyText1 definition is used.
   final TextStyle labelStyle;
 
   /// The padding added to each of the tab labels.
@@ -719,7 +728,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If this property is null, then the [labelStyle] value is used. If [labelStyle]
   /// is null, then the text style of the [ThemeData.primaryTextTheme]'s
-  /// body2 definition is used.
+  /// bodyText1 definition is used.
   final TextStyle unselectedLabelStyle;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
@@ -741,7 +750,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [AppBar] uses this size to compute its own preferred size.
   @override
   Size get preferredSize {
-    for (Widget item in tabs) {
+    for (final Widget item in tabs) {
       if (item is Tab) {
         final Tab tab = item;
         if (tab.text != null && tab.icon != null)
@@ -992,7 +1001,7 @@ class _TabBarState extends State<TabBar> {
     assert(() {
       if (_controller.length != widget.tabs.length) {
         throw FlutterError(
-          'Controller\'s length property (${_controller.length}) does not match the \n'
+          'Controller\'s length property (${_controller.length}) does not match the '
           'number of tabs (${widget.tabs.length}) present in TabBar\'s tabs property.'
         );
       }
@@ -1317,7 +1326,7 @@ class _TabBarViewState extends State<TabBarView> {
     assert(() {
       if (_controller.length != widget.children.length) {
         throw FlutterError(
-          'Controller\'s length property (${_controller.length}) does not match the \n'
+          'Controller\'s length property (${_controller.length}) does not match the '
           'number of tabs (${widget.children.length}) present in TabBar\'s tabs property.'
         );
       }

@@ -5,14 +5,14 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:pedantic/pedantic.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -47,7 +47,7 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
-      expect(response['result'] is String, true);
+      expect(response['result'], isA<String>());
       await responses.close();
       await commands.close();
     });
@@ -61,7 +61,7 @@ void main() {
         notifyingLogger: notifyingLogger,
         dartDefines: const <String>[],
       );
-      printError('daemon.logMessage test');
+      globals.printError('daemon.logMessage test');
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
         return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
       });
@@ -89,7 +89,7 @@ void main() {
           logToStdout: true,
           dartDefines: const <String>[],
         );
-        printStatus('daemon.logMessage test');
+        globals.printStatus('daemon.logMessage test');
         // Service the event loop.
         await Future<void>.value();
       }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {

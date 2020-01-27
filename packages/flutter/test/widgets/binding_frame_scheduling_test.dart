@@ -19,7 +19,7 @@ void main() {
     expect(window.onDrawFrame, isNull);
 
     // Instantiation does nothing with regards to frame scheduling.
-    final WidgetsFlutterBinding binding = WidgetsFlutterBinding.ensureInitialized();
+    final WidgetsFlutterBinding binding = WidgetsFlutterBinding.ensureInitialized() as WidgetsFlutterBinding;
     expect(binding.hasScheduledFrame, isFalse);
     expect(window.onBeginFrame, isNull);
     expect(window.onDrawFrame, isNull);

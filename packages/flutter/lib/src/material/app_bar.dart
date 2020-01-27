@@ -214,7 +214,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
   /// will use a [BackButton] that calls [Navigator.maybePop].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following code shows how the drawer button could be manually specified
   /// instead of relying on [automaticallyImplyLeading]:
@@ -434,12 +434,12 @@ class _AppBarState extends State<AppBar> {
     IconThemeData actionsIconTheme = widget.actionsIconTheme
       ?? appBarTheme.actionsIconTheme
       ?? overallIconTheme;
-    TextStyle centerStyle = widget.textTheme?.title
-      ?? appBarTheme.textTheme?.title
-      ?? theme.primaryTextTheme.title;
-    TextStyle sideStyle = widget.textTheme?.body1
-      ?? appBarTheme.textTheme?.body1
-      ?? theme.primaryTextTheme.body1;
+    TextStyle centerStyle = widget.textTheme?.headline6
+      ?? appBarTheme.textTheme?.headline6
+      ?? theme.primaryTextTheme.headline6;
+    TextStyle sideStyle = widget.textTheme?.bodyText2
+      ?? appBarTheme.textTheme?.bodyText2
+      ?? theme.primaryTextTheme.bodyText2;
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -835,7 +835,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
 /// specified then it is stacked behind the toolbar and the bottom widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This is an example that could be included in a [CustomScrollView]'s
 /// [CustomScrollView.slivers] list:
@@ -966,7 +966,7 @@ class SliverAppBar extends StatefulWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Scaffold(

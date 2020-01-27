@@ -57,7 +57,7 @@ Future<void> main(List<String> arguments) async {
   // https://github.com/dart-lang/dartdoc/issues/1982
   buf.writeln('version: 0.0.0');
   buf.writeln('dependencies:');
-  for (String package in findPackageNames()) {
+  for (final String package in findPackageNames()) {
     buf.writeln('  $package:');
     buf.writeln('    sdk: flutter');
   }
@@ -72,7 +72,7 @@ Future<void> main(List<String> arguments) async {
   libDir.createSync();
 
   final StringBuffer contents = StringBuffer('library temp_doc;\n\n');
-  for (String libraryRef in libraryRefs()) {
+  for (final String libraryRef in libraryRefs()) {
     contents.writeln('import \'package:$libraryRef\';');
   }
   File('$kDocsRoot/lib/temp_doc.dart').writeAsStringSync(contents.toString());
@@ -313,7 +313,7 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
   if (!destDir.existsSync())
     destDir.createSync(recursive: true);
 
-  for (FileSystemEntity entity in srcDir.listSync()) {
+  for (final FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = path.join(destDir.path, path.basename(entity.path));
     if (entity is File) {
       final File newFile = File(newPath);
@@ -361,7 +361,7 @@ void sanityCheckDocs() {
     '$kPublishRoot/api/material/Tooltip-class.html',
     '$kPublishRoot/api/widgets/Widget-class.html',
   ];
-  for (String canary in canaries) {
+  for (final String canary in canaries) {
     if (!File(canary).existsSync())
       throw Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
   }
@@ -470,9 +470,9 @@ List<Directory> findPackages() {
 
 /// Returns import or on-disk paths for all libraries in the Flutter SDK.
 Iterable<String> libraryRefs() sync* {
-  for (Directory dir in findPackages()) {
+  for (final Directory dir in findPackages()) {
     final String dirName = path.basename(dir.path);
-    for (FileSystemEntity file in Directory('${dir.path}/lib').listSync()) {
+    for (final FileSystemEntity file in Directory('${dir.path}/lib').listSync()) {
       if (file is File && file.path.endsWith('.dart')) {
         yield '$dirName/${path.basename(file.path)}';
       }

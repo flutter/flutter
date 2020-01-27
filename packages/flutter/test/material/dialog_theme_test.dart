@@ -38,7 +38,7 @@ Material _getMaterialFromDialog(WidgetTester tester) {
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject;
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject as RenderParagraph;
 }
 
 void main() {
@@ -132,7 +132,7 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('dialog_theme.dialog_with_custom_border.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Custom Title Text Style - Constructor Param', (WidgetTester tester) async {
     const String titleText = 'Title';
@@ -175,7 +175,7 @@ void main() {
       title: Text(titleText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(title: titleTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(headline6: titleTextStyle));
 
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -226,7 +226,7 @@ void main() {
       content: Text(contentText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(subhead: contentTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(subtitle1: contentTextStyle));
 
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));

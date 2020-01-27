@@ -180,7 +180,7 @@ class MethodChannel {
   /// in Dart using a MethodChannel and how to implement those methods in Java
   /// (for Android) and Objective-C (for iOS).
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The code might be packaged up as a musical plugin, see
   /// <https://flutter.dev/developing-packages/>:
@@ -233,7 +233,7 @@ class MethodChannel {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Java (for Android):
   ///
@@ -273,7 +273,7 @@ class MethodChannel {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Objective-C (for iOS):
   ///
@@ -289,7 +289,7 @@ class MethodChannel {
   ///   } else if ([@"getSongs" isEqualToString:call.method]) {
   ///     NSArray* items = [BWPlayApi items];
   ///     NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
-  ///     for (BWPlayItem* item in items) {
+  ///     for (final BWPlayItem* item in items) {
   ///       [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
   ///     }
   ///     result(json);

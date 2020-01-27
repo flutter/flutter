@@ -160,7 +160,7 @@ void _checkIsNotBlank(dynamic value, String variableName, String ownerName) {
 }
 
 void _checkKeys(Map<dynamic, dynamic> map, String variableName, List<String> allowedKeys) {
-  for (String key in map.keys.cast<String>()) {
+  for (final String key in map.keys.cast<String>()) {
     if (!allowedKeys.contains(key)) {
       throw ManifestError(
         'Unrecognized property "$key" in $variableName. '

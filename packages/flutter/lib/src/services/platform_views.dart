@@ -422,7 +422,6 @@ enum _AndroidViewState {
   waitingForSize,
   creating,
   created,
-  createFailed,
   disposed,
 }
 
@@ -633,7 +632,7 @@ class AndroidViewController {
     }
     _textureId = await SystemChannels.platform_views.invokeMethod('create', args);
     _state = _AndroidViewState.created;
-    for (PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
+    for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
       callback(id);
     }
   }

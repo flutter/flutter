@@ -530,12 +530,12 @@ void main() {
     element.visitChildren((Element e) {
       childElement = e;
     });
-    element.removeChild(childElement.renderObject);
+    element.removeChild(childElement.renderObject as RenderBox);
     element.createChild(0, after: null);
     element.visitChildren((Element e) {
       childElement = e;
     });
-    element.removeChild(childElement.renderObject);
+    element.removeChild(childElement.renderObject as RenderBox);
     element.createChild(0, after: null);
   });
 
@@ -597,7 +597,7 @@ void main() {
         Container(),
       ],
     ));
-    final MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext as MultiChildRenderObjectElement;
     expect(
       element.children.map((Element element) => element.widget.key),
       <Key>[null, key1, null, key2, null],
@@ -616,7 +616,7 @@ void main() {
         Container(),
       ],
     ));
-    final MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext as MultiChildRenderObjectElement;
 
     expect(element, hasAGoodToStringDeep);
     expect(
@@ -644,7 +644,7 @@ void main() {
   });
 
   testWidgets('Element diagnostics with null child', (WidgetTester tester) async {
-    await tester.pumpWidget(NullChildTest());
+    await tester.pumpWidget(const NullChildTest());
     final NullChildElement test = tester.element<NullChildElement>(find.byType(NullChildTest));
     test.includeChild = true;
     expect(
@@ -713,6 +713,7 @@ void main() {
 }
 
 class NullChildTest extends Widget {
+  const NullChildTest({ Key key }) : super(key: key);
   @override
   Element createElement() => NullChildElement(this);
 }

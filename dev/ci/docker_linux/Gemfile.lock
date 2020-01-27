@@ -18,7 +18,7 @@ GEM
       unf (>= 0.0.5, < 1.0.0)
     dotenv (2.7.5)
     emoji_regex (1.0.1)
-    excon (0.67.0)
+    excon (0.71.0)
     faraday (0.17.0)
       multipart-post (>= 1.2, < 3)
     faraday-cookie_jar (0.0.6)
@@ -153,7 +153,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  fastlane
+  fastlane (= 2.134.0)
 
 BUNDLED WITH
   2.0.2

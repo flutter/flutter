@@ -107,8 +107,8 @@ void main() {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer(location: Offset.zero);
       addTearDown(gesture.removePointer);
-      await gesture.moveTo(const Offset(400.0, 300.0));
       await tester.pump();
+      await gesture.moveTo(const Offset(400.0, 300.0));
       expect(move, isNotNull);
       expect(move.position, equals(const Offset(400.0, 300.0)));
       expect(enter, isNotNull);
@@ -230,8 +230,8 @@ void main() {
         ),
       );
       final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
-      final RenderMouseRegion renderListener1 = listeners[0];
-      final RenderMouseRegion renderListener2 = listeners[1];
+      final RenderMouseRegion renderListener1 = listeners[0] as RenderMouseRegion;
+      final RenderMouseRegion renderListener2 = listeners[1] as RenderMouseRegion;
       Offset center = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center);
       await tester.pump();
@@ -315,8 +315,8 @@ void main() {
         ),
       );
       final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
-      final RenderMouseRegion renderListener1 = listeners[0];
-      final RenderMouseRegion renderListener2 = listeners[1];
+      final RenderMouseRegion renderListener1 = listeners[0] as RenderMouseRegion;
+      final RenderMouseRegion renderListener2 = listeners[1] as RenderMouseRegion;
       final Offset center1 = tester.getCenter(find.byKey(key1));
       final Offset center2 = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center1);
@@ -593,8 +593,8 @@ void main() {
       TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer(location: Offset.zero);
       addTearDown(() => gesture?.removePointer());
-      await gesture.moveTo(tester.getCenter(find.byType(Container)));
       await tester.pumpAndSettle();
+      await gesture.moveTo(tester.getCenter(find.byType(Container)));
 
       expect(enter.length, 1);
       expect(enter.single.position, const Offset(400.0, 300.0));

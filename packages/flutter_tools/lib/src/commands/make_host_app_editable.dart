@@ -60,6 +60,6 @@ class MakeHostAppEditableCommand extends FlutterCommand {
       await _project.ios.makeHostAppEditable();
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

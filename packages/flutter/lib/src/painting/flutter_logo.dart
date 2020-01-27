@@ -206,7 +206,7 @@ class FlutterLogoDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     assert(debugAssertIsValid());
     if (identical(this, other))
       return true;

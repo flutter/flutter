@@ -46,12 +46,12 @@ void main() {
       const Locale('ar', 'AR'): <String, dynamic>{
         'textDirection': TextDirection.rtl,
         'expectedDaysOfWeek': <String>['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
-        'expectedDaysOfMonth': List<String>.generate(30, (int i) => '${arabicNumbers.format(i + 1)}'),
+        'expectedDaysOfMonth': List<String>.generate(30, (int i) => arabicNumbers.format(i + 1)),
         'expectedMonthYearHeader': 'سبتمبر ٢٠١٧',
       },
     };
 
-    for (Locale locale in testLocales.keys) {
+    for (final Locale locale in testLocales.keys) {
       testWidgets('shows dates for $locale', (WidgetTester tester) async {
         final List<String> expectedDaysOfWeek = testLocales[locale]['expectedDaysOfWeek'] as List<String>;
         final List<String> expectedDaysOfMonth = testLocales[locale]['expectedDaysOfMonth'] as List<String>;
@@ -70,12 +70,12 @@ void main() {
 
         expect(find.text(expectedMonthYearHeader), findsOneWidget);
 
-        for (String dayOfWeek in expectedDaysOfWeek) {
+        for (final String dayOfWeek in expectedDaysOfWeek) {
           expect(find.text(dayOfWeek), findsWidgets);
         }
 
         Offset previousCellOffset;
-        for (String dayOfMonth in expectedDaysOfMonth) {
+        for (final String dayOfMonth in expectedDaysOfMonth) {
           final Finder dayCell = find.descendant(of: find.byType(GridView), matching: find.text(dayOfMonth));
           expect(dayCell, findsOneWidget);
 

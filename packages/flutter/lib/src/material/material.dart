@@ -351,7 +351,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     Widget contents = widget.child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
-        style: widget.textStyle ?? Theme.of(context).textTheme.body1,
+        style: widget.textStyle ?? Theme.of(context).textTheme.bodyText2,
         duration: widget.animationDuration,
         child: contents,
       );
@@ -524,7 +524,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Offset.zero & size);
-      for (InkFeature inkFeature in _inkFeatures)
+      for (final InkFeature inkFeature in _inkFeatures)
         inkFeature._paint(canvas);
       canvas.restore();
     }

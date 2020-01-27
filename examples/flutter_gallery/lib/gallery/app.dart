@@ -51,11 +51,9 @@ class _GalleryAppState extends State<GalleryApp> {
     // For a different example of how to set up an application routing table
     // using named routes, consider the example in the Navigator class documentation:
     // https://docs.flutter.io/flutter/widgets/Navigator-class.html
-    return Map<String, WidgetBuilder>.fromIterable(
-      kAllGalleryDemos,
-      key: (dynamic demo) => '${(demo as GalleryDemo).routeName}',
-      value: (dynamic demo) => (demo as GalleryDemo).buildRoute,
-    );
+    return <String, WidgetBuilder>{
+      for (final GalleryDemo demo in kAllGalleryDemos) demo.routeName: demo.buildRoute,
+    };
   }
 
   @override
@@ -64,6 +62,7 @@ class _GalleryAppState extends State<GalleryApp> {
     _options = GalleryOptions(
       themeMode: ThemeMode.system,
       textScaleFactor: kAllGalleryTextScaleValues[0],
+      visualDensity: kAllGalleryVisualDensityValues[0],
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );
@@ -140,8 +139,8 @@ class _GalleryAppState extends State<GalleryApp> {
     return ScopedModel<AppStateModel>(
       model: model,
       child: MaterialApp(
-        theme: kLightGalleryTheme.copyWith(platform: _options.platform),
-        darkTheme: kDarkGalleryTheme.copyWith(platform: _options.platform),
+        theme: kLightGalleryTheme.copyWith(platform: _options.platform, visualDensity: _options.visualDensity.visualDensity),
+        darkTheme: kDarkGalleryTheme.copyWith(platform: _options.platform, visualDensity: _options.visualDensity.visualDensity),
         themeMode: _options.themeMode,
         title: 'Flutter Gallery',
         color: Colors.grey,

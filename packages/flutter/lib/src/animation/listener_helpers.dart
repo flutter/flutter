@@ -118,7 +118,7 @@ mixin AnimationLocalListenersMixin {
   /// will not change which listeners are called during this iteration.
   void notifyListeners() {
     final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
-    for (VoidCallback listener in localListeners) {
+    for (final VoidCallback listener in localListeners) {
       try {
         if (_listeners.contains(listener))
           listener();
@@ -187,7 +187,7 @@ mixin AnimationLocalStatusListenersMixin {
   /// will not change which listeners are called during this iteration.
   void notifyStatusListeners(AnimationStatus status) {
     final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.from(_statusListeners);
-    for (AnimationStatusListener listener in localListeners) {
+    for (final AnimationStatusListener listener in localListeners) {
       try {
         if (_statusListeners.contains(listener))
           listener(status);

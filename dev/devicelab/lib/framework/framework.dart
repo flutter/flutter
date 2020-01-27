@@ -179,7 +179,7 @@ class TaskResult {
         message = 'success' {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
-      for (String key in benchmarkScoreKeys) {
+      for (final String key in benchmarkScoreKeys) {
         if (!data.containsKey(key)) {
           throw 'Invalid Golem score key "$key". It does not exist in task '
               'result data ${prettyJson.convert(data)}';

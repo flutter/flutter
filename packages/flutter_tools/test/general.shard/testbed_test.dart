@@ -10,8 +10,11 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/error_handling_file_system.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/testbed.dart';
 
 void main() {
@@ -22,7 +25,7 @@ void main() {
 
       FileSystem localFileSystem;
       await testbed.run(() {
-        localFileSystem = fs;
+        localFileSystem = globals.fs;
       });
 
       expect(localFileSystem, isA<ErrorHandlingFileSystem>());
@@ -75,7 +78,7 @@ void main() {
 
       expect(testbed.run(() async {
         Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
-      }), throwsA(isInstanceOf<StateError>()));
+      }), throwsStateError);
     });
 
     test('Doesnt throw a StateError if Timer is left cleaned up', () async {
@@ -85,6 +88,14 @@ void main() {
         final Timer timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
         timer.cancel();
       });
+    });
+
+    test('Throws if ProcessUtils is injected',() {
+      final Testbed testbed = Testbed(overrides: <Type, Generator>{
+        ProcessUtils: () => null,
+      });
+
+      expect(() => testbed.run(() {}), throwsA(isInstanceOf<StateError>()));
     });
   });
 }

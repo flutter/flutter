@@ -36,7 +36,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
 ///
@@ -124,6 +124,7 @@ class TextFormField extends FormField<String> {
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool enableInteractiveSelection = true,
     InputCounterWidgetBuilder buildCounter,
+    ScrollPhysics scrollPhysics,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -201,6 +202,7 @@ class TextFormField extends FormField<String> {
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
         scrollPadding: scrollPadding,
+        scrollPhysics: scrollPhysics,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: enableInteractiveSelection,
         buildCounter: buildCounter,

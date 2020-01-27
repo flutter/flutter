@@ -63,7 +63,7 @@ class HealthCheckResult {
     if (details != null && details.trim().isNotEmpty) {
       buf.writeln();
       // Indent details by 4 spaces
-      for (String line in details.trim().split('\n')) {
+      for (final String line in details.trim().split('\n')) {
         buf.writeln('    $line');
       }
     }
@@ -119,7 +119,7 @@ void recursiveCopy(Directory source, Directory target) {
   if (!target.existsSync())
     target.createSync();
 
-  for (FileSystemEntity entity in source.listSync(followLinks: false)) {
+  for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
     if (entity is Directory && !entity.path.contains('.dart_tool'))
       recursiveCopy(entity, Directory(path.join(target.path, name)));
@@ -286,7 +286,7 @@ Future<void> forceQuitRunningProcesses() async {
   await Future<void>.delayed(const Duration(seconds: 1));
 
   // Whatever's left, kill it.
-  for (ProcessInfo p in _runningProcesses) {
+  for (final ProcessInfo p in _runningProcesses) {
     print('Force-quitting process:\n$p');
     if (!p.process.kill()) {
       print('Failed to force quit process');
@@ -636,7 +636,7 @@ void checkFileNotExists(String file) {
 
 /// Check that `collection` contains all entries in `values`.
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
-  for (T value in values) {
+  for (final T value in values) {
     if (!collection.contains(value)) {
       throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
     }
@@ -645,7 +645,7 @@ void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
 
 /// Check that `collection` does not contain any entries in `values`
 void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
-  for (T value in values) {
+  for (final T value in values) {
     if (collection.contains(value)) {
       throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
     }
@@ -656,7 +656,7 @@ void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection
 /// [Pattern]s, otherwise throws a [TaskResult].
 void checkFileContains(List<Pattern> patterns, String filePath) {
   final String fileContent = File(filePath).readAsStringSync();
-  for (Pattern pattern in patterns) {
+  for (final Pattern pattern in patterns) {
     if (!fileContent.contains(pattern)) {
       throw TaskResult.failure(
         'Expected to find `$pattern` in `$filePath` '

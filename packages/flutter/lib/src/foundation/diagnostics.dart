@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'object.dart';
 
 // Examples can assume:
 // int rows, columns;
@@ -843,7 +844,7 @@ class _PrefixedStringBuilder {
     );
     int i = 0;
     final int length = lines.length;
-    for (String line in lines) {
+    for (final String line in lines) {
       i++;
       _writeLine(
         line,
@@ -1132,7 +1133,7 @@ class TextTreeRenderer {
       const int maxLines = 25;
       int lines = 0;
       void visitor(DiagnosticsNode node) {
-        for (DiagnosticsNode child in node.getChildren()) {
+        for (final DiagnosticsNode child in node.getChildren()) {
           if (lines < maxLines) {
             depth += 1;
             descendants.add('$prefixOtherLines${"  " * depth}$child');
@@ -1276,7 +1277,7 @@ class TextTreeRenderer {
         // with cases where a single line properties output may not have single
         // linebreak.
         final String propertyRender = render(property,
-          prefixLineOne: '${propertyStyle.prefixLineOne}',
+          prefixLineOne: propertyStyle.prefixLineOne,
           prefixOtherLines: '${propertyStyle.childLinkSpace}${propertyStyle.prefixOtherLines}',
           parentConfiguration: config,
         );
@@ -1305,7 +1306,7 @@ class TextTreeRenderer {
     if (!config.lineBreakProperties)
       builder.write(config.lineBreak);
 
-    final String prefixChildren = '${config.bodyIndent}';
+    final String prefixChildren = config.bodyIndent;
     final String prefixChildrenRaw = '$prefixOtherLines$prefixChildren';
     if (children.isEmpty &&
         config.addBlankLineIfNoChildren &&
@@ -1630,6 +1631,7 @@ abstract class DiagnosticsNode {
       return toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
 
     final String description = toDescription(parentConfiguration: parentConfiguration);
+    assert(description != null);
 
     if (name == null || name.isEmpty || !showName)
       return description;
@@ -1715,7 +1717,7 @@ abstract class DiagnosticsNode {
 
 /// Debugging message displayed like a property.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following two properties are better expressed using this
 /// [MessageProperty] class, rather than [StringProperty], as the intent is to
@@ -1727,7 +1729,7 @@ abstract class DiagnosticsNode {
 /// var usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// On the other hand, [StringProperty] is better suited when the property has a
 /// concrete value that is a string:
@@ -2054,7 +2056,7 @@ class PercentProperty extends DoubleProperty {
 /// when `visible` is false and nothing when visible is true, in contrast to
 /// `visible: true` or `visible: false`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// FlagProperty(
@@ -2064,7 +2066,7 @@ class PercentProperty extends DoubleProperty {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// [FlagProperty] should also be used instead of [DiagnosticsProperty<bool>]
 /// if showing the bool value would not clearly indicate the meaning of the
@@ -2508,7 +2510,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
   // For a null value, it is omitted unless `includeEmtpy` is true and
   // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues() sync* {
-    for (MapEntry<String, T> entry in value.entries) {
+    for (final MapEntry<String, T> entry in value.entries) {
       if (entry.value != null) {
         yield entry.key;
       }
@@ -2961,14 +2963,14 @@ String shortHash(Object object) {
 ///    distinguish instances of the same class (hash collisions are
 ///    possible, but rare enough that its use in debug output is useful).
 ///  * [Object.runtimeType], the [Type] of an object.
-String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(object)}';
+String describeIdentity(Object object) => '${objectRuntimeType(object, '<optimized out>')}#${shortHash(object)}';
 
 // This method exists as a workaround for https://github.com/dart-lang/sdk/issues/30021
 /// Returns a short description of an enum value.
 ///
 /// Strips off the enum class name from the `enumEntry.toString()`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// enum Day {
@@ -3188,7 +3190,7 @@ mixin DiagnosticableMixin {
   /// `toString` method implementation works fine using [DiagnosticsProperty]
   /// directly.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shows best practices for implementing [debugFillProperties]
   /// illustrating use of all common [DiagnosticsProperty] subclasses and all

@@ -52,7 +52,7 @@ import 'transitions.dart';
 /// different image. This is known as "gapless playback" (see also
 /// [Image.gaplessPlayback]).
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// FadeInImage(

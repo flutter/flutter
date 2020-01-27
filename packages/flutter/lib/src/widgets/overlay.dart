@@ -233,8 +233,18 @@ class Overlay extends StatefulWidget {
   /// ```dart
   /// OverlayState overlay = Overlay.of(context);
   /// ```
-  static OverlayState of(BuildContext context, { Widget debugRequiredFor }) {
-    final OverlayState result = context.findAncestorStateOfType<OverlayState>();
+  ///
+  /// If `rootOverlay` is set to true, the state from the furthest instance of
+  /// this class is given instead. Useful for installing overlay entries
+  /// above all subsequent instances of [Overlay].
+  static OverlayState of(
+    BuildContext context, {
+    bool rootOverlay = false,
+    Widget debugRequiredFor,
+  }) {
+    final OverlayState result = rootOverlay
+        ? context.findRootAncestorStateOfType<OverlayState>()
+        : context.findAncestorStateOfType<OverlayState>();
     assert(() {
       if (debugRequiredFor != null && result == null) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
@@ -337,7 +347,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     );
     if (entries.isEmpty)
       return;
-    for (OverlayEntry entry in entries) {
+    for (final OverlayEntry entry in entries) {
       assert(entry._overlay == null);
       entry._overlay = this;
     }
@@ -390,7 +400,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     if (listEquals(_entries, newEntriesList))
       return;
     final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.from(_entries);
-    for (OverlayEntry entry in newEntriesList) {
+    for (final OverlayEntry entry in newEntriesList) {
       entry._overlay ??= this;
     }
     setState(() {
@@ -561,7 +571,7 @@ class _TheatreElement extends RenderObjectElement {
   void visitChildren(ElementVisitor visitor) {
     if (_onstage != null)
       visitor(_onstage);
-    for (Element child in _offstage) {
+    for (final Element child in _offstage) {
       if (!_forgottenOffstageChildren.contains(child))
         visitor(child);
     }

@@ -12,6 +12,7 @@ import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
+import 'src/text.dart';
 
 const String kMacrobenchmarks ='Macrobenchmarks';
 
@@ -34,6 +35,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
         kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
         kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
+        kTextRouteName: (BuildContext context) => TextPage(),
       },
     );
   }
@@ -95,6 +97,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Large Images'),
             onPressed: () {
               Navigator.pushNamed(context, kLargeImagesRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kTextRouteName),
+            child: const Text('Text'),
+            onPressed: () {
+              Navigator.pushNamed(context, kTextRouteName);
             },
           ),
         ],
