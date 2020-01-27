@@ -67,11 +67,8 @@ void main() {
 
   testWidgets('BackButton icon', (WidgetTester tester) async {
     final Key androidKey = UniqueKey();
-<<<<<<< HEAD
-=======
     final Key iOSKey = UniqueKey();
     final Key macOSKey = UniqueKey();
->>>>>>> parent of b67d5ec6e... [a11y] Make sure RenderFractionalTranslation updates its semantics after the translation field is set (#48985)
 
     await tester.pumpWidget(
       MaterialApp(

@@ -742,11 +742,7 @@ void main() {
               key: editableTextKey,
               controller: TextEditingController(),
               focusNode: FocusNode(),
-<<<<<<< HEAD
               style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1,
-=======
-              style: Typography(platform: debugDefaultTargetPlatformOverride).black.subhead,
->>>>>>> parent of b67d5ec6e... [a11y] Make sure RenderFractionalTranslation updates its semantics after the translation field is set (#48985)
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
