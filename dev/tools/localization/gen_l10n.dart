@@ -492,6 +492,9 @@ class LocalizationsGenerator {
   }
 
   static bool _isValidClassName(String className) {
+    // Public Dart class name cannot begin with an underscore
+    if (className[0] == '_')
+      return false;
     // Dart class name cannot contain non-alphanumeric symbols
     if (className.contains(RegExp(r'[^a-zA-Z_\d]')))
       return false;
@@ -508,11 +511,11 @@ class LocalizationsGenerator {
   /// classes.
   @visibleForTesting
   set className(String classNameString) {
-    if (classNameString == null)
-      throw L10nException('classNameString argument cannot be null');
+    if (classNameString == null || classNameString.isEmpty)
+      throw L10nException('classNameString argument cannot be null or empty');
     if (!_isValidClassName(classNameString))
       throw L10nException(
-        "The 'output-class', $classNameString, is not a valid Dart class name.\n"
+        "The 'output-class', $classNameString, is not a valid public Dart class name.\n"
       );
     _className = classNameString;
   }
@@ -597,10 +600,13 @@ class LocalizationsGenerator {
   }
 
   static bool _isValidGetterAndMethodName(String name) {
+    // Public Dart method name must not start with an underscore
+    if (name[0] == '_')
+      return false;
     // Dart getter and method name cannot contain non-alphanumeric symbols
     if (name.contains(RegExp(r'[^a-zA-Z_\d]')))
       return false;
-    // Dart class name must start with lower case character
+    // Dart method name must start with lower case character
     if (name[0].contains(RegExp(r'[A-Z]')))
       return false;
     // Dart class name cannot start with a number
@@ -662,7 +668,7 @@ class LocalizationsGenerator {
       if (!_isValidGetterAndMethodName(key)) {
         throw L10nException(
           'Invalid key format: $key \n It has to be in camel case, cannot start '
-          'with a number, and cannot contain non-alphanumeric characters.'
+          'with a number or underscore, and cannot contain non-alphanumeric characters.'
         );
       }
 

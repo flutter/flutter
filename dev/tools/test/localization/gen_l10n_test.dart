@@ -193,7 +193,7 @@ void main() {
         try {
           generator.className = 'String with spaces';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
@@ -206,12 +206,12 @@ void main() {
         try {
           generator.className = 'TestClass@123';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
 
@@ -219,12 +219,12 @@ void main() {
         try {
           generator.className = 'camelCaseClassName';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
 
@@ -232,12 +232,12 @@ void main() {
         try {
           generator.className = '123ClassName';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
     });
