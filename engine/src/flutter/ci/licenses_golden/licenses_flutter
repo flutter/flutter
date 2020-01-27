@@ -1168,9 +1168,6 @@ FILE: ../../../flutter/third_party/tonic/logging/dart_invoke.cc
 FILE: ../../../flutter/third_party/tonic/logging/dart_invoke.h
 FILE: ../../../flutter/third_party/tonic/parsers/packages_map.cc
 FILE: ../../../flutter/third_party/tonic/parsers/packages_map.h
-FILE: ../../../flutter/third_party/tonic/platform/platform_utils.h
-FILE: ../../../flutter/third_party/tonic/platform/platform_utils_posix.cc
-FILE: ../../../flutter/third_party/tonic/platform/platform_utils_win.cc
 FILE: ../../../flutter/third_party/tonic/scopes/dart_api_scope.h
 FILE: ../../../flutter/third_party/tonic/scopes/dart_isolate_scope.cc
 FILE: ../../../flutter/third_party/tonic/scopes/dart_isolate_scope.h

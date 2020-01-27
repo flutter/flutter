@@ -25,7 +25,6 @@ source_set("file_loader") {
     "../converter",
     "../filesystem",
     "../parsers",
-    "../platform",
     "//third_party/dart/runtime:dart_api",
   ]
 }
