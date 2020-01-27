@@ -261,7 +261,6 @@ void main() {
         onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
-    final RenderMouseRegion renderListener = tester.renderObject(find.byType(MouseRegion));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
     addTearDown(gesture.removePointer);
