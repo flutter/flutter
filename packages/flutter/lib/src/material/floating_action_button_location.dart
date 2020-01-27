@@ -53,12 +53,12 @@ abstract class FloatingActionButtonLocation {
   /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
   ///
   /// This is the default alignment of [FloatingActionButton]s in Material applications.
-  static const FloatingActionButtonLocation endFloat = _EndFloatFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation endFloat = _StandardFloatingActionButtonLocation(_endOffsetX, _floatingOffsetY, 'endFloat');
 
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
-  static const FloatingActionButtonLocation centerFloat = _CenterFloatFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation centerFloat = _StandardFloatingActionButtonLocation(_centerOffsetX, _floatingOffsetY, 'centerFloat');
 
-  static const FloatingActionButtonLocation startFloat = _StartFloatFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation startFloat = _StandardFloatingActionButtonLocation(_startOffsetX, _floatingOffsetY, 'startFloat');
 
   /// End-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
@@ -70,7 +70,7 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
-  static const FloatingActionButtonLocation endDocked = _EndDockedFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation endDocked = _StandardFloatingActionButtonLocation(_endOffsetX, _dockedOffsetY, 'endDocked');
 
   /// Center-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
@@ -82,11 +82,11 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
-  static const FloatingActionButtonLocation centerDocked = _CenterDockedFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation centerDocked = _StandardFloatingActionButtonLocation(_centerOffsetX, _dockedOffsetY, 'centerDocked');
 
-  static const FloatingActionButtonLocation startDocked = _StartDockedFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation startDocked = _StandardFloatingActionButtonLocation(_startOffsetX, _dockedOffsetY, 'startDocked');
 
-  static const FloatingActionButtonLocation centerTop = _CenterTopFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation centerTop = _StandardFloatingActionButtonLocation(_centerOffsetX, _topOffsetY, 'centerTop');
 
   /// Start-aligned [FloatingActionButton], floating over the transition between
   /// the [Scaffold.appBar] and the [Scaffold.body].
@@ -97,7 +97,7 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a top [AppBar]
   /// or that use a [SliverAppBar] in the scaffold body itself.
-  static const FloatingActionButtonLocation startTop = _StartTopFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation startTop = _StandardFloatingActionButtonLocation(_startOffsetX, _topOffsetY, 'startTop');
 
   /// Start-aligned [FloatingActionButton], floating over the transition between
   /// the [Scaffold.appBar] and the [Scaffold.body], optimized for mini floating
@@ -117,7 +117,7 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a top [AppBar]
   /// or that use a [SliverAppBar] in the scaffold body itself.
-  static const FloatingActionButtonLocation endTop = _EndTopFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation endTop = _StandardFloatingActionButtonLocation(_endOffsetX, _topOffsetY, 'endTop');
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   ///
@@ -194,7 +194,7 @@ double _endOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset =
   return null;
 }
 
-double _centerOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+double _centerOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
 }
 
