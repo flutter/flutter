@@ -504,4 +504,8 @@ DartVM::GetConcurrentWorkerTaskRunner() const {
   return concurrent_message_loop_->GetTaskRunner();
 }
 
+std::shared_ptr<fml::ConcurrentMessageLoop> DartVM::GetConcurrentMessageLoop() {
+  return concurrent_message_loop_;
+}
+
 }  // namespace flutter

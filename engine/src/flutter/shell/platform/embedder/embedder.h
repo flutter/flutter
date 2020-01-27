@@ -934,6 +934,31 @@ typedef struct {
   };
 } FlutterEngineDartObject;
 
+/// This enum allows embedders to determine the type of the engine thread in the
+/// FlutterNativeThreadCallback. Based on the thread type, the embedder may be
+/// able to tweak the thread priorities for optimum performance.
+typedef enum {
+  /// The Flutter Engine considers the thread on which the FlutterEngineRun call
+  /// is made to be the platform thread. There is only one such thread per
+  /// engine instance.
+  kFlutterNativeThreadTypePlatform,
+  /// This is the thread the Flutter Engine uses to execute rendering commands
+  /// based on the selected client rendering API. There is only one such thread
+  /// per engine instance.
+  kFlutterNativeThreadTypeRender,
+  /// This is a dedicated thread on which the root Dart isolate is serviced.
+  /// There is only one such thread per engine instance.
+  kFlutterNativeThreadTypeUI,
+  /// Multiple threads are used by the Flutter engine to perform long running
+  /// background tasks.
+  kFlutterNativeThreadTypeWorker,
+} FlutterNativeThreadType;
+
+/// A callback made by the engine in response to
+/// `FlutterEnginePostCallbackOnAllNativeThreads` on all internal thread.
+typedef void (*FlutterNativeThreadCallback)(FlutterNativeThreadType type,
+                                            void* user_data);
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
@@ -1666,6 +1691,45 @@ FlutterEngineResult FlutterEnginePostDartObject(
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineNotifyLowMemoryWarning(
     FLUTTER_API_SYMBOL(FlutterEngine) engine);
+
+//------------------------------------------------------------------------------
+/// @brief      Schedule a callback to be run on all engine managed threads.
+///             The engine will attempt to service this callback the next time
+///             the message loop for each managed thread is idle. Since the
+///             engine manages the entire lifecycle of multiple threads, there
+///             is no opportunity for the embedders to finely tune the
+///             priorities of threads directly, or, perform other thread
+///             specific configuration (for example, setting thread names for
+///             tracing). This callback gives embedders a chance to affect such
+///             tuning.
+///
+/// @attention  This call is expensive and must be made as few times as
+///             possible. The callback must also return immediately as not doing
+///             so may risk performance issues (especially for callbacks of type
+///             kFlutterNativeThreadTypeUI and kFlutterNativeThreadTypeRender).
+///
+/// @attention  Some callbacks (especially the ones of type
+///             kFlutterNativeThreadTypeWorker) may be called after the
+///             FlutterEngine instance has shut down. Embedders must be careful
+///             in handling the lifecycle of objects associated with the user
+///             data baton.
+///
+/// @attention  In case there are multiple running Flutter engine instances,
+///             their workers are shared.
+///
+/// @param[in]  engine     A running engine instance.
+/// @param[in]  callback   The callback that will get called multiple times on
+///                        each engine managed thread.
+/// @param[in]  user_data  A baton passed by the engine to the callback. This
+///                        baton is not interpreted by the engine in any way.
+///
+/// @return     Returns if the callback was successfully posted to all threads.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEnginePostCallbackOnAllNativeThreads(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterNativeThreadCallback callback,
+    void* user_data);
 
 #if defined(__cplusplus)
 }  // extern "C"

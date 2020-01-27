@@ -247,7 +247,34 @@ bool EmbedderEngine::RunTask(const FlutterTask* task) {
                                 task->task);
 }
 
-const Shell& EmbedderEngine::GetShell() const {
+bool EmbedderEngine::PostTaskOnEngineManagedNativeThreads(
+    std::function<void(FlutterNativeThreadType)> closure) const {
+  if (!IsValid() || closure == nullptr) {
+    return false;
+  }
+
+  const auto trampoline = [closure](FlutterNativeThreadType type,
+                                    fml::RefPtr<fml::TaskRunner> runner) {
+    runner->PostTask([closure, type] { closure(type); });
+  };
+
+  // Post the task to all thread host threads.
+  const auto& task_runners = shell_->GetTaskRunners();
+  trampoline(kFlutterNativeThreadTypeRender, task_runners.GetGPUTaskRunner());
+  trampoline(kFlutterNativeThreadTypeWorker, task_runners.GetIOTaskRunner());
+  trampoline(kFlutterNativeThreadTypeUI, task_runners.GetUITaskRunner());
+  trampoline(kFlutterNativeThreadTypePlatform,
+             task_runners.GetPlatformTaskRunner());
+
+  // Post the task to all worker threads.
+  auto vm = shell_->GetDartVM();
+  vm->GetConcurrentMessageLoop()->PostTaskToAllWorkers(
+      [closure]() { closure(kFlutterNativeThreadTypeWorker); });
+
+  return true;
+}
+
+Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();
 }

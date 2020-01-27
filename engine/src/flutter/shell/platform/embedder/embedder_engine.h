@@ -80,7 +80,10 @@ class EmbedderEngine {
 
   bool RunTask(const FlutterTask* task);
 
-  const Shell& GetShell() const;
+  bool PostTaskOnEngineManagedNativeThreads(
+      std::function<void(FlutterNativeThreadType)> closure) const;
+
+  Shell& GetShell();
 
  private:
   const std::unique_ptr<EmbedderThreadHost> thread_host_;
