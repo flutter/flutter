@@ -82,7 +82,7 @@ Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) a
   await Timeline.timeSync(
     configuration.debugLabel,
     () async {
-      FutureOr<R> applicationResult = await configuration.apply();
+      final FutureOr<R> applicationResult = await configuration.apply();
       result = await applicationResult;
     },
     flow: Flow.step(configuration.flowId),
