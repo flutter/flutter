@@ -409,26 +409,67 @@ enum TextCapitalization {
 
 /// Configures how the platform will offer auto-fill suggestions for the input
 enum TextContentType {
+  /// Accepts full name
   name,
+
+  /// Accepts name prefix (Mr., Mrs., etc)
   namePrefix,
+
+  /// Accepts first name
   givenName,
+
+  /// Accepts middle name
   middleName,
+
+  /// Accepts last name
   familyName,
+
+  /// Accepts name suffix (Jr.)
   nameSuffix,
+
+  /// Accepts a full street address
   fullStreetAddress,
+
+  /// Accepts the first line of an address
   addressLine1,
+
+  /// Accepts the second line of an address
   addressLine2,
+
+  /// Accepts an address city/locality
   addressCity,
+
+  /// Accepts an address state/region
   addressState,
+
+  /// Accepts a country name
   countryName,
+
+  /// Accepts a postal code
   postalCode,
+
+  /// Accepts a phone number
   telephoneNumber,
+
+  /// Accepts and email address
   emailAddress,
+
+  /// Accepts a url
   url,
+
+  /// Accepts a credit card number
   creditCardNumber,
+
+  /// Accepts a username
   username,
+
+  /// Accepts a password
   password,
+
+  /// Accepts suggestions for new passwords
   newPassword,
+
+  /// Accepts a one time code from an SMS message
   oneTimeCode
 }
 
