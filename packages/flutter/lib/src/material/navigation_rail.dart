@@ -36,7 +36,7 @@ enum NavigationRailGroupAlignment {
 /// TODO
 class NavigationRailDestination {
   /// TODO
-  NavigationRailDestination({
+  const NavigationRailDestination({
     @required this.icon,
     this.title,
     Widget activeIcon,
