@@ -187,9 +187,11 @@ class RunCommand extends RunCommandBase {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
+      // TODO(jonahwilliams): Off by default with  nvestigating whether this
+      // is slower for certain use cases.
       ..addFlag('fast-start',
         negatable: true,
-        defaultsTo: true,
+        defaultsTo: false,
         help: 'Whether to quickly bootstrap applications with a minimal app. '
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
