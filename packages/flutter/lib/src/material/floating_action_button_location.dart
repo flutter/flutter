@@ -29,6 +29,8 @@ const Duration kFloatingActionButtonSegue = Duration(milliseconds: 200);
 /// Its value corresponds to 0.125 of a full circle, equivalent to 45 degrees or pi/4 radians.
 const double kFloatingActionButtonTurnInterval = 0.125;
 
+// TODO: Adjust order.
+
 /// An object that defines a position for the [FloatingActionButton]
 /// based on the [Scaffold]'s [ScaffoldPrelayoutGeometry].
 ///
@@ -58,6 +60,7 @@ abstract class FloatingActionButtonLocation {
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
   static const FloatingActionButtonLocation centerFloat = _StandardFloatingActionButtonLocation(_centerOffsetX, _floatingOffsetY, 'centerFloat');
 
+  // TODO: Document.
   static const FloatingActionButtonLocation startFloat = _StandardFloatingActionButtonLocation(_startOffsetX, _floatingOffsetY, 'startFloat');
 
   /// End-aligned [FloatingActionButton], floating over the
@@ -84,8 +87,10 @@ abstract class FloatingActionButtonLocation {
   /// navigation bar.
   static const FloatingActionButtonLocation centerDocked = _StandardFloatingActionButtonLocation(_centerOffsetX, _dockedOffsetY, 'centerDocked');
 
+  // TODO: Document.
   static const FloatingActionButtonLocation startDocked = _StandardFloatingActionButtonLocation(_startOffsetX, _dockedOffsetY, 'startDocked');
 
+  // TODO: Document.
   static const FloatingActionButtonLocation centerTop = _StandardFloatingActionButtonLocation(_centerOffsetX, _topOffsetY, 'centerTop');
 
   /// Start-aligned [FloatingActionButton], floating over the transition between
@@ -128,6 +133,9 @@ abstract class FloatingActionButtonLocation {
   /// complete its layout.
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
 
+  // TODO: Add mini{Start,End}{Top,Float,Docked}
+  // TODO: Name 4.0 and make constant.
+
   @override
   String toString() => '$runtimeType';
 }
@@ -159,6 +167,8 @@ class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation
   @override
   String toString() => 'FloatingActionButtonLocation.$name';
 }
+
+// TODO: Adjust order.
 
 double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   return kFloatingActionButtonMargin
