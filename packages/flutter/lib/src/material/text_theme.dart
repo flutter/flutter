@@ -338,7 +338,7 @@ class TextTheme extends Diagnosticable {
   /// specification calls this `body2`, and it is exposed in this API as
   /// [textBody2].
   @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
+    'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
     'This feature was deprecated after v1.13.8.'
   )
   TextStyle get body1 => bodyText2;
