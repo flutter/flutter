@@ -3988,7 +3988,7 @@ String _concatStrings({
 /// implements. If [SemanticsProperties.sortKey] is specified, sort keys within
 /// the same semantic group must all be of the same type.
 ///
-/// Keys with no [name] are compared to to other keys with no [name], and will
+/// Keys with no [name] are compared to other keys with no [name], and will
 /// be traversed before those with a [name].
 ///
 /// If no sort key is applied to a semantics node, then it will be ordered using
@@ -4007,7 +4007,7 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
   ///
   /// Sort keys must have the same `runtimeType` when compared.
   ///
-  /// Keys with no [name] are compared to to other keys with no [name], and will
+  /// Keys with no [name] are compared to other keys with no [name], and will
   /// be traversed before those with a [name].
   final String name;
 
@@ -4063,7 +4063,7 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
 /// speficied sort keys in the same semantics group must also be
 /// [OrdinalSortKey]s.
 ///
-/// Keys with no [name] are compared to to other keys with no [name], and will
+/// Keys with no [name] are compared to other keys with no [name], and will
 /// be traversed before those with a [name].
 ///
 /// The ordinal value [order] is typically a whole number, though it can be

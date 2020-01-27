@@ -266,6 +266,9 @@ void main() {
       for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
     ];
     expect(results, orderedEquals(expectedResults));
+
+    // Differing types should throw an assertion.
+    expect(() => const OrdinalSortKey(0.0).compareTo(const CustomSortKey(0.0)), throwsAssertionError);
   });
 
   test('OrdinalSortKey compares correctly when the names are different', () {
