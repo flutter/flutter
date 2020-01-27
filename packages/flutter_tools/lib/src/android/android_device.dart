@@ -37,6 +37,7 @@ const Map<String, _HardwareType> _kKnownHardware = <String, _HardwareType>{
   'samsungexynos7420': _HardwareType.physical,
   'samsungexynos7580': _HardwareType.physical,
   'samsungexynos7870': _HardwareType.physical,
+  'samsungexynos7880': _HardwareType.physical,
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
   'samsungexynos9810': _HardwareType.physical,
