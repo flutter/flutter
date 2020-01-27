@@ -2004,8 +2004,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   FloatingActionButtonAnimator _floatingActionButtonAnimator;
   FloatingActionButtonLocation _previousFloatingActionButtonLocation;
   FloatingActionButtonLocation _floatingActionButtonLocation;
-
   AnimationController _floatingActionButtonVisibilityController;
+
+  // Additional Floating Action Button API
+  Map<Key, AnimationController> _additionalFloatingActionButtonMoveControllers;
+  Map<Key, FloatingActionButtonAnimator> _additionalFloatingActionButtonAnimator;
+  Map<Key, FloatingActionButtonLocation> _additionalPreviousFloatingActionButtonLocation;
+  Map<Key, FloatingActionButtonLocation> _additionalFloatingActionButtonLocation;
+  Map<Key, AnimationController> _additionalFloatingActionButtonVisibilityController;
 
   /// Gets the current value of the visibility animation for the
   /// [Scaffold.floatingActionButton].
