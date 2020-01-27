@@ -132,6 +132,32 @@ abstract class FloatingActionButtonLocation {
   String toString() => '$runtimeType';
 }
 
+typedef _OffsetXFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry, {double offset});
+typedef _OffsetYFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry);
+
+class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _StandardFloatingActionButtonLocation(
+    this.offsetXFunction,
+    this.offsetYFunction,
+    this.name,
+  );
+
+  final _OffsetXFunction offsetXFunction;
+  final _OffsetYFunction offsetYFunction;
+  final String name;
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    return Offset(
+      offsetXFunction(scaffoldGeometry),
+      offsetYFunction(scaffoldGeometry),
+    );
+  }
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.$name';
+}
+
 double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   return kFloatingActionButtonMargin
        + scaffoldGeometry.minInsets.left
