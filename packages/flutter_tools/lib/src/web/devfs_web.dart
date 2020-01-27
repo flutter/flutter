@@ -343,18 +343,18 @@ class WebDevFS implements DevFS {
       ));
       final String entrypoint = PackageUriMapper(mainPath, '.packages', null, null)
         .map(mainPath)
-        ?.pathSegments?.join('/') ?? mainPath;
+        ?.pathSegments?.join('/');
       _webAssetServer.writeFile(
           '/main.dart.js',
           generateBootstrapScript(
             requireUrl: _filePathToUriFragment(requireJS.path),
             mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
-            entrypoint: '/packages/$entrypoint.lib.js',
+            entrypoint: entrypoint != null ? '/packages/$entrypoint.lib.js' : '$mainPath.lib.js',
           ));
       _webAssetServer.writeFile(
           '/main_module.js',
           generateMainModule(
-            entrypoint: '/packages/$entrypoint.lib.js',
+            entrypoint: entrypoint != null ? '/packages/$entrypoint.lib.js' : '$mainPath.lib.js',
           ));
       _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
       _webAssetServer.writeFile(
