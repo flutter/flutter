@@ -189,6 +189,7 @@ class RunCommand extends RunCommandBase {
       )
       // TODO(jonahwilliams): Off by default with investigating whether this
       // is slower for certain use cases.
+      // See: https://github.com/flutter/flutter/issues/49499
       ..addFlag('fast-start',
         negatable: true,
         defaultsTo: false,
