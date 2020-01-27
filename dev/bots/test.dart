@@ -328,7 +328,7 @@ Future<void> _runBuildTests() async {
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
   print('${green}Testing AOT build$reset for $cyan$relativePathToApplication$reset...');
-  final String absoluteTarget = path.absolute(relativePathToApplication);
+  final String absoluteTarget = path.join(path.absolute(relativePathToApplication), 'lib', 'main.dart');
   await runCommand(flutter,
     <String>[
       'assemble',
