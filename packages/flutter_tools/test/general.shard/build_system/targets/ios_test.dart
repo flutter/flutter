@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:platform/platform.dart';
 
 import 'package:process/process.dart';
 
