@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 /// Defines the behavior of the labels of a [NavigationRail].
 ///
 /// See also:
+///
 ///   * [NavigationRail]
 enum NavigationRailLabelType {
   /// Only the icons of a navigation rail item are shown.
@@ -30,12 +31,19 @@ enum NavigationRailGroupAlignment {
   center,
 
   /// Place the [NavigationRailDestination]s at the bottom of the rail.
-  bottom
+  bottom,
 }
 
-/// TODO
+/// A description for an interactive button within a [NavigationRail].
+///
+/// See also:
+///
+///  * [NavigationRail]
 class NavigationRailDestination {
-  /// TODO
+  /// Creates an destination that is used with [NavigationRail.destinations].
+  ///
+  /// [icon] should not be null and [title] should not be null when this
+  /// destination is used in the [NavigationRail].
   const NavigationRailDestination({
     @required this.icon,
     Widget activeIcon,
@@ -63,6 +71,7 @@ class NavigationRailDestination {
   /// either state.
   ///
   /// See also:
+  ///
   ///  * [NavigationRailDestination.icon], for a description of how to pair
   ///    icons.
   final Widget activeIcon;
@@ -118,6 +127,7 @@ class NavigationRail extends StatefulWidget {
   /// Defines the layout and behavior of the labels in the [NavigationRail].
   ///
   /// See also:
+  ///
   ///   * [NavigationRailLabelType] for information on the meaning of different
   ///   types.
   final NavigationRailLabelType labelType;
