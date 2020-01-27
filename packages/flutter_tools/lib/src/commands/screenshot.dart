@@ -32,7 +32,7 @@ class ScreenshotCommand extends FlutterCommand {
       valueHelp: 'URI',
       help: 'The observatory URI to connect to.\n'
           'This is required when --$_kType is "$_kSkiaType" or "$_kRasterizerType".\n'
-          'To find the observatory URI, use "flutter run" and look for'
+          'To find the observatory URI, use "flutter run" and look for '
           '"An Observatory ... is available at" in the output.',
     );
     argParser.addOption(

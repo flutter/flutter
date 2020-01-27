@@ -253,6 +253,22 @@ Stream<List<int>> get stdin => globals.stdio.stdin;
 io.IOSink get stderr => globals.stdio.stderr;
 bool get stdinHasTerminal => globals.stdio.stdinHasTerminal;
 
+/// Writes [message] to [sink], falling back on [fallback] if the write
+/// throws any exception. The default fallback calls [print] on [message].
+void safeStdioWrite(io.IOSink sink, String message, {
+  void Function(String, dynamic, StackTrace) fallback,
+}) {
+  try {
+    sink.write(message);
+  } catch (err, stack) {
+    if (fallback == null) {
+      print(message);
+    } else {
+      fallback(message, err, stack);
+    }
+  }
+}
+
 // TODO(zra): Move pid and writePidFile into `ProcessInfo`.
 void writePidFile(String pidFile) {
   if (pidFile != null) {

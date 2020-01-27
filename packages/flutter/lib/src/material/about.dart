@@ -41,7 +41,7 @@ import 'theme.dart';
 /// ```dart
 ///
 ///  Widget build(BuildContext context) {
-///    final TextStyle textStyle = Theme.of(context).textTheme.body1;
+///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
 ///      SizedBox(height: 24),
 ///      RichText(
@@ -374,8 +374,8 @@ class AboutDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: ListBody(
                       children: <Widget>[
-                        Text(name, style: Theme.of(context).textTheme.headline),
-                        Text(version, style: Theme.of(context).textTheme.body1),
+                        Text(name, style: Theme.of(context).textTheme.headline5),
+                        Text(version, style: Theme.of(context).textTheme.bodyText2),
                         Container(height: 18.0),
                         Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
                       ],
@@ -576,13 +576,13 @@ class _LicensePageState extends State<LicensePage> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
                 children: <Widget>[
-                  Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
+                  Text(name, style: Theme.of(context).textTheme.headline5, textAlign: TextAlign.center),
                   if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
-                  Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+                  Text(version, style: Theme.of(context).textTheme.bodyText2, textAlign: TextAlign.center),
                   Container(height: 18.0),
                   Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
                   Container(height: 18.0),
-                  Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+                  Text('Powered by Flutter', style: Theme.of(context).textTheme.bodyText2, textAlign: TextAlign.center),
                   Container(height: 24.0),
                   ..._licenses,
                   if (!_loaded)

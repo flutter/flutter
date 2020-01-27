@@ -339,7 +339,7 @@ String describeLocale(String tag) {
   assert(subtags.isNotEmpty);
   assert(_languages.containsKey(subtags[0]));
   final String language = _languages[subtags[0]];
-  String output = '$language';
+  String output = language;
   String region;
   String script;
   if (subtags.length == 2) {
