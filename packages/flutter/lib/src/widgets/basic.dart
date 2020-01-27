@@ -5911,11 +5911,11 @@ class MouseRegion extends StatefulWidget {
   /// when the exit is caused by the disappearance of this widget. More
   /// specifically, this callback is triggered by the following cases:
   ///
-  ///  * This widget, which is being hovered by a pointer, has moved away.
-  ///  * A pointer that is hovering this widget has been removed.
   ///  * A pointer that is hovering this widget has moved away.
+  ///  * A pointer that is hovering this widget has been removed.
+  ///  * This widget, which is being hovered by a pointer, has moved away.
   ///
-  /// And is __not__ triggered by the following case,
+  /// And is __not__ triggered by the following case:
   ///
   ///  * This widget, which is being hovered by a pointer, has disappeared.
   ///
@@ -5943,75 +5943,131 @@ class MouseRegion extends StatefulWidget {
   ///    override [State.dispose] and call [onExit], or create your own widget
   ///    using [RenderMouseRegion].
   ///
-  /// {@tool snippet}
-  /// The following example shows a stateful widget where the hover state is
-  /// completely contained within a widget that unconditionally creates a
-  /// `MouseRegion`. In this case, you can ignore this restriction.
+  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// The following example shows a blue rectangular that turns yellow when
+  /// hovered. Since the hover state is completely contained within a widget
+  /// that unconditionally creates the `MouseRegion`, you can ignore the
+  /// aforementioned restriction.
   ///
-  /// ```dart
-  /// class MyButton extends StatefulWidget {
-  ///   @override
-  ///   State<StatefulWidget> createState() => _MyButtonState();
-  /// }
+  /// ```dart imports
+  /// import 'package:flutter/gestures.dart';
+  /// ```
   ///
-  /// class _MyButtonState extends State<MyButton> {
+  /// ```dart code
   ///   bool hovered = false;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return MouseRegion(
-  ///       onEnter: (_) { setState(() { hovered = true; }); }
-  ///       onExit: (_) { setState(() { hovered = false; }); }
+  ///     return Container(
+  ///       height: 100,
+  ///       width: 100,
+  ///       decoration: BoxDecoration(color: hovered ? Colors.yellow : Colors.blue),
+  ///       child: MouseRegion(
+  ///         onEnter: (PointerEnterEvent event) {
+  ///           setState(() { hovered = true; });
+  ///         },
+  ///         onExit: (PointerExitEvent event) {
+  ///           setState(() { hovered = false; });
+  ///         },
+  ///       ),
   ///     );
   ///   }
-  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// The following example shows a widget that hides its content one second
+  /// after behing hovered, and also exposes the enter and exit callbacks.
+  /// Because the widget conditionally creates the `MouseRegion`, and leaks the
+  /// hover state, it needs to take the restriction into consideration. In this
+  /// case, since it has access to the event that triggers the disappearance of
+  /// the `MouseRegion`, it simply trigger the exit callback during that event
+  /// as well.
+  ///
+  /// ```dart imports
+  /// import 'package:flutter/gestures.dart';
   /// ```
   ///
-  /// The following example shows a stateful widget that conditionally creates a
-  /// `MouseRegion`, and leaks the hover state to outside. Since this widget has
-  /// access to the event that triggers the disappearance of the `MouseRegion`,
-  /// it should trigger the callback during that event as well.
-  ///
-  /// ```dart
-  /// // MyListenerButton listens to the network and hides its MouseRegion if told
-  /// // so. It also leaks the exit event to its parent.
-  /// class MyListenerButton extends StatefulWidget {
-  ///   MyListenerButton({ this.onEnterButton, this.onExitButton });
+  /// ```dart preamble
+  /// // A region that hides its content one second after being hovered.
+  /// class MyTimedButton extends StatefulWidget {
+  ///   MyTimedButton({ Key key, this.onEnterButton, this.onExitButton })
+  ///     : super(key: key);
   ///
   ///   final VoidCallback onEnterButton;
   ///   final VoidCallback onExitButton;
   ///
   ///   @override
-  ///   State<StatefulWidget> createState() => _MyListenerButtonState();
+  ///   _MyTimedButton createState() => _MyTimedButton();
   /// }
   ///
-  /// class _MyListenerButtonState extends State<MyListenerButton> {
-  ///   final bool hideButton = false;
-  ///   final bool hovered = false;
+  /// class _MyTimedButton extends State<MyTimedButton> {
+  ///   bool regionIsHidden = false;
+  ///   bool hovered = false;
+  ///
+  ///   void startCountdown() async {
+  ///     await Future.delayed(const Duration(seconds: 1));
+  ///     hideButton();
+  ///   }
+  ///
+  ///   void hideButton() {
+  ///     setState(() { regionIsHidden = true; });
+  ///     // This statement is necessary.
+  ///     if (hovered)
+  ///       widget.onExitButton();
+  ///   }
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return MyNetworkListener(
-  ///       onRequestedToHideButton: () {
-  ///         setState(() {
-  ///           hideButton = true;
-  ///         });
-  ///         // The following statement is necessary.
-  ///         if (hovered)
-  ///           widget.onExitButton();
-  ///       },
-  ///       child: hideButton ? null : MouseRegion(
-  ///         onEnter: (_) {
-  ///           widget.onEnterButton();
-  ///           setState(() { hovered = true; });
-  ///         },
-  ///         onExit: (_) {
-  ///           setState(() { hovered = false; });
-  ///           widget.onExitButton();
-  ///         },
+  ///     return Container(
+  ///       width: 100,
+  ///       height: 100,
+  ///       child: MouseRegion(
+  ///         child: regionIsHidden ? null : MouseRegion(
+  ///           onEnter: (_) {
+  ///             widget.onEnterButton();
+  ///             setState(() { hovered = true; });
+  ///             startCountdown();
+  ///           },
+  ///           onExit: (_) {
+  ///             setState(() { hovered = false; });
+  ///             widget.onExitButton();
+  ///           },
+  ///           child: Container(color: Colors.red),
+  ///         ),
   ///       ),
   ///     );
   ///   }
   /// }
+  /// ```
+  ///
+  /// ```dart code
+  ///   Key key = UniqueKey();
+  ///   bool hovering = false;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Column(
+  ///       children: <Widget>[
+  ///         RaisedButton(
+  ///           onPressed: () {
+  ///             setState(() { key = UniqueKey(); });
+  ///           },
+  ///           child: Text('Refresh'),
+  ///         ),
+  ///         hovering ? Text('Hovering') : Text('Not hovering'),
+  ///         MyTimedButton(
+  ///           key: key,
+  ///           onEnterButton: () {
+  ///             setState(() { hovering = true; });
+  ///           },
+  ///           onExitButton: () {
+  ///             setState(() { hovering = false; });
+  ///           },
+  ///         ),
+  ///       ],
+  ///     );
+  ///   }
   /// ```
   /// {@end-tool}
   ///
