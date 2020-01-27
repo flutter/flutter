@@ -17,7 +17,7 @@ void main() {
         log.add('build');
         expect(Theme.of(context).primaryColor, Colors.green);
         expect(Directionality.of(context), TextDirection.ltr);
-        expect(child, isInstanceOf<Navigator>());
+        expect(child, isA<Navigator>());
         return const Placeholder();
       },
     );

@@ -66,7 +66,7 @@ Future<void> main() async {
       shape: BorderDirectional(start: BorderSide(color: Colors.red, width: 3)),
     );
 
-    expect(decoration.padding, isInstanceOf<EdgeInsetsDirectional>());
+    expect(decoration.padding, isA<EdgeInsetsDirectional>());
   });
 
   testWidgets('TestBorder and Directionality - 1', (WidgetTester tester) async {
