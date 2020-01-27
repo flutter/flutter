@@ -329,6 +329,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         'main.dill',
@@ -361,7 +362,7 @@ void main() {
 
       final String assembly = globals.fs.path.join(outputPath, 'snapshot_assembly.S');
       genSnapshot.outputs = <String, String>{
-        assembly: 'blah blah\n.section __DWARF\nblah blah\n',
+        assembly: 'blah blah\n',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -386,6 +387,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         'main.dill',
@@ -406,11 +408,7 @@ void main() {
       expect(clangArgs, contains(kSDKPath));
 
       final File assemblyFile = globals.fs.file(assembly);
-      final File assemblyBitcodeFile = globals.fs.file('$assembly.stripped.S');
       expect(assemblyFile.existsSync(), true);
-      expect(assemblyBitcodeFile.existsSync(), true);
-      expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
-      expect(assemblyBitcodeFile.readAsStringSync().contains('.section __DWARF'), false);
     }, overrides: contextOverrides);
 
     testUsingContext('builds iOS armv7 profile AOT snapshot', () async {
@@ -446,6 +444,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         'main.dill',
@@ -493,6 +492,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -529,6 +529,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         'main.dill',
@@ -567,6 +568,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
