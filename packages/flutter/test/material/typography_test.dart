@@ -50,20 +50,20 @@ void main() {
   });
 
   test('Typography on macOS defaults to the correct SF font family based on size', () {
-    final Typography typography = Typography(platform: TargetPlatform.macOS);
+    final Typography typography = Typography.material2018(platform: TargetPlatform.macOS);
     for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
-      expect(textTheme.display4, isDisplayFont);
-      expect(textTheme.display3, isDisplayFont);
-      expect(textTheme.display2, isDisplayFont);
-      expect(textTheme.display1, isDisplayFont);
-      expect(textTheme.headline, isDisplayFont);
-      expect(textTheme.title, isDisplayFont);
-      expect(textTheme.subhead, isTextFont);
-      expect(textTheme.body2, isTextFont);
-      expect(textTheme.body1, isTextFont);
+      expect(textTheme.headline1, isDisplayFont);
+      expect(textTheme.headline2, isDisplayFont);
+      expect(textTheme.headline3, isDisplayFont);
+      expect(textTheme.headline4, isDisplayFont);
+      expect(textTheme.headline5, isDisplayFont);
+      expect(textTheme.headline6, isDisplayFont);
+      expect(textTheme.subtitle1, isTextFont);
+      expect(textTheme.bodyText1, isTextFont);
+      expect(textTheme.bodyText2, isTextFont);
       expect(textTheme.caption, isTextFont);
       expect(textTheme.button, isTextFont);
-      expect(textTheme.subtitle, isTextFont);
+      expect(textTheme.subtitle2, isTextFont);
       expect(textTheme.overline, isTextFont);
     }
   });
