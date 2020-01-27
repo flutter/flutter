@@ -45,25 +45,27 @@ class _TextSelectionToolbar extends StatefulWidget {
   _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
 
-class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
+class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
   final GlobalKey _containerKey = GlobalKey();
   final GlobalKey _moreButtonKey = GlobalKey();
-  final List<GlobalKey> _itemKeys = <GlobalKey>[];
   double _menuContentWidth;
 
-  // The number of items that fit in the main selection menu. Any others go in
-  // the overflow menu. Must be less than or equal to items.length.
-  int _itemsInFirstMenu;
+  // Keys for all items in the menu.
+  final List<GlobalKey> _itemKeys = <GlobalKey>[];
+  // The index of the item that overflows the selection menu, or -1 if
+  // everything fits.
+  int _indexWhereOverflows;
 
   // Whether or not the overflow menu is open.
   bool _overflowOpen = false;
 
   // Whether the overflow menu exists.
   bool get _shouldShowMoreButton {
-    if (_itemKeys.isEmpty || _itemsInFirstMenu == null) {
+    final int itemsInFirstMenu = _indexWhereOverflows == -1 ? _itemKeys.length : _indexWhereOverflows;
+    if (_itemKeys.isEmpty || itemsInFirstMenu == null) {
       return false;
     }
-    return _itemsInFirstMenu < _itemKeys.length;
+    return itemsInFirstMenu < _itemKeys.length;
   }
 
   @override
@@ -80,7 +82,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       final RenderBox renderBoxContainer = _containerKey.currentContext.findRenderObject() as RenderBox;
       double remainingContainerWidth = renderBoxContainer.size.width;
 
-      final int indexWhereOverflows = _itemKeys.indexWhere((GlobalKey key) {
+      _indexWhereOverflows = _itemKeys.indexWhere((GlobalKey key) {
         assert(key.currentContext != null);
         final RenderBox renderBox = key.currentContext.findRenderObject() as RenderBox;
 
@@ -102,7 +104,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         // menu will show the "more" button even when it should have enough room
         // to fit everything. I suspect a problem with this method not getting
         // called again when the selection changes.
-        _itemsInFirstMenu = indexWhereOverflows == -1 ? _itemKeys.length : indexWhereOverflows;
         _menuContentWidth = _shouldShowMoreButton
           ? itemsWidth + moreButtonWidth
           : itemsWidth;
@@ -174,40 +175,75 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return Container(width: 0.0, height: 0.0);
     }
 
-    Widget menuContent;
     // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
     // frame for measurement.
-    if (_itemsInFirstMenu == null || _itemsInFirstMenu > items.length) {
-      menuContent = _TextSelectionToolbarContent(
-        items: items,
-        showMoreButton: true,
-        moreButtonKey: _moreButtonKey,
+    if (_menuContentWidth == null) {
+      // TODO(justinmc): This doesn't actually do Offstage...
+      return _TextSelectionToolbarContainer(
+        key: _containerKey,
+        child: _TextSelectionToolbarContent(
+          items: items,
+          showMoreButton: true,
+          moreButtonKey: _moreButtonKey,
+        ),
       );
-    } else if (_overflowOpen) {
-      menuContent = _TextSelectionToolbarContentOverflow(
-        items: items.sublist(_itemsInFirstMenu, items.length),
-        onBackPressed: () {
-          setState(() {
-            _overflowOpen = false;
-          });
-        },
+    }
+
+    final int itemsInFirstMenu = _indexWhereOverflows == -1
+      ? _itemKeys.length
+      : _indexWhereOverflows;
+
+    if (_overflowOpen) {
+      return _TextSelectionToolbarContainer(
+        key: _containerKey,
+        width: _menuContentWidth,
+        child: _TextSelectionToolbarContentOverflow(
+          items: items.sublist(itemsInFirstMenu, items.length),
+          onBackPressed: () {
+            setState(() {
+              _overflowOpen = false;
+            });
+          },
+        ),
       );
-    } else {
-      menuContent = _TextSelectionToolbarContent(
-        items: items.sublist(0, _itemsInFirstMenu),
-        showMoreButton: _itemsInFirstMenu < items.length,
+    }
+
+    return _TextSelectionToolbarContainer(
+      key: _containerKey,
+      width: _menuContentWidth,
+      child: _TextSelectionToolbarContent(
+        items: items.sublist(0, itemsInFirstMenu),
+        showMoreButton: itemsInFirstMenu < items.length,
         moreButtonKey: _moreButtonKey,
         onMorePressed: () {
           setState(() {
             _overflowOpen = true;
           });
         },
-      );
-    }
+      ),
+    );
+  }
+}
 
+class _TextSelectionToolbarContainer extends StatefulWidget {
+  const _TextSelectionToolbarContainer({
+    Key key,
+    this.width,
+    this.child,
+  }) : super(key: key);
+
+  final Widget child;
+  final double width;
+
+  @override
+  _TextSelectionToolbarContainerState createState() => _TextSelectionToolbarContainerState();
+}
+
+class _TextSelectionToolbarContainerState extends State<_TextSelectionToolbarContainer> with TickerProviderStateMixin {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      key: _containerKey,
-      width: _menuContentWidth,
+      width: widget.width,
       child: Align(
         alignment: Alignment.topRight,
         heightFactor: 1.0,
@@ -219,7 +255,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
             // This duration was eyeballed on a Pixel 2 emulator running Android
             // API 28.
             duration: const Duration(milliseconds: 140),
-            child: menuContent,
+            child: widget.child,
           ),
         ),
       ),
