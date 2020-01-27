@@ -707,7 +707,7 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  web_benchmarks_chrome_linux:
+  web_benchmarks:
     description: >
       Runs Web benchmarks on Chrome on a Linux machine.
     stage: devicelab
