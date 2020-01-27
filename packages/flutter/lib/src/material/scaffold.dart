@@ -821,6 +821,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
+// TODO: Document.
 class FloatingActionButtonConfiguration {
   FloatingActionButtonConfiguration({@required this.button, @required this.location, this.animator});
 
