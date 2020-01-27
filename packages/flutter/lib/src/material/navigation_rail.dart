@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Defines the behavior of the labels of a [NavigationRail].
 ///
 /// See also:
-///   [NavigationRail]
+///   * [NavigationRail]
 enum NavigationRailLabelType {
   /// Only the icons of a navigation rail item are shown.
   none,
@@ -38,18 +38,38 @@ class NavigationRailDestination {
   /// TODO
   const NavigationRailDestination({
     @required this.icon,
-    this.title,
     Widget activeIcon,
+    this.title,
   }) : activeIcon = activeIcon ?? icon,
         assert(icon != null);
-  /// TODO
+  /// The icon of the destination.
+  ///
+  /// Typically the icon is an [Icon] or an [ImageIcon] widget. If another type
+  /// of widget is provided then it should configure itself to match the current
+  /// [IconTheme] size and color.
+  ///
+  /// If [activeIcon] is provided, this will only be displayed when the
+  /// destination is not selected.
+  ///
+  /// To make the [NavigationRail] more accessible, consider choosing an
+  /// icon with a stroked and filled version, such as [Icons.cloud] and
+  /// [Icons.cloud_queue]. [icon] should be set to the stroked version and
+  /// [activeIcon] to the filled version.
   final Widget icon;
 
-  /// TODO
-  final Widget title;
-
-  /// TODO
+  /// An alternative icon displayed when this destination is selected.
+  ///
+  /// If this icon is not provided, the [NavigationRail] will display [icon] in
+  /// either state.
+  ///
+  /// See also:
+  ///  * [NavigationRailDestination.icon], for a description of how to pair
+  ///    icons.
   final Widget activeIcon;
+
+  /// The title of the item. If the title is not provided only the icon will be
+  /// shown when not used in a [NavigationRail].
+  final Widget title;
 }
 
 /// TODO
@@ -83,7 +103,7 @@ class NavigationRail extends StatefulWidget {
 
   /// Called when one of the [destinations] is selected.
   ///
-  /// The stateful widget that creates the bottom navigation bar needs to keep
+  /// The stateful widget that creates the navigation rail needs to keep
   /// track of the index of the selected [NavigationRailDestination] and call
   /// `setState` to rebuild the navigation rail with the new [currentIndex].
   final ValueChanged<int> onDestinationSelected;
