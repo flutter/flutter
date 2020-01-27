@@ -822,10 +822,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 }
 
 class FloatingActionButtonConfiguration {
-  FloatingActionButtonConfiguration({@required this.button, @required this.location});
+  FloatingActionButtonConfiguration({@required this.button, @required this.location, this.animator});
 
   final FloatingActionButton button;
   final FloatingActionButtonLocation location;
+  final FloatingActionButtonAnimator animator;
 }
 
 /// Implements the basic material design visual layout structure.
