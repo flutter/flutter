@@ -14,7 +14,6 @@
 #include "tonic/common/macros.h"
 #include "tonic/converter/dart_converter.h"
 #include "tonic/parsers/packages_map.h"
-#include "tonic/platform/platform_utils.h"
 
 namespace tonic {
 namespace {
