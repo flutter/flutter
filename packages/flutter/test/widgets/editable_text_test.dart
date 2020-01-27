@@ -1170,7 +1170,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: FocusNode(),
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -1205,7 +1205,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -1235,7 +1235,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -1272,7 +1272,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -1312,7 +1312,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -1352,7 +1352,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         maxLines: 1,
         onEditingComplete: () {
@@ -1392,7 +1392,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         maxLines: 3,
         onEditingComplete: () {
@@ -1445,9 +1445,9 @@ void main() {
                       backgroundCursorColor: Colors.grey,
                       controller: currentController,
                       focusNode: focusNode,
-                      style: Typography(platform: TargetPlatform.android)
+                      style: Typography.material2018(platform: TargetPlatform.android)
                           .black
-                          .subhead,
+                          .subtitle1,
                       cursorColor: Colors.blue,
                       selectionControls: materialTextSelectionControls,
                       keyboardType: TextInputType.text,
@@ -2552,7 +2552,7 @@ void main() {
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
           ),
@@ -2583,7 +2583,7 @@ void main() {
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
           ),
@@ -2629,7 +2629,7 @@ void main() {
                 key: ValueKey<String>(controller1.text),
                 controller: controller1,
                 focusNode: FocusNode(),
-                style: Typography(platform: TargetPlatform.android).black.subhead,
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
               ),
@@ -2638,7 +2638,7 @@ void main() {
                 key: ValueKey<String>(controller2.text),
                 controller: controller2,
                 focusNode: FocusNode(),
-                style: Typography(platform: TargetPlatform.android).black.subhead,
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 minLines: 10,
@@ -2863,7 +2863,7 @@ void main() {
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardAppearance: Brightness.dark,
@@ -2936,7 +2936,7 @@ void main() {
             showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -3103,7 +3103,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -3227,7 +3227,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -3774,7 +3774,7 @@ void main() {
               showSelectionHandles: true,
               controller: controller,
               focusNode: FocusNode(),
-              style: Typography(platform: TargetPlatform.iOS).black.subhead,
+              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: cupertinoTextSelectionControls,
@@ -3943,7 +3943,7 @@ void main() {
             maxLines: 2,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -4020,7 +4020,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -4056,7 +4056,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -4101,7 +4101,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -4215,7 +4215,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
               child: EditableText(
                 controller: TextEditingController(),
                 focusNode: FocusNode(),
-                style: Typography(platform: TargetPlatform.android).black.subhead,
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
               ),

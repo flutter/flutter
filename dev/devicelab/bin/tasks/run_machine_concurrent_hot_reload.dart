@@ -48,6 +48,7 @@ void main() {
           'run',
           '--machine',
           '--verbose',
+          '--no-fast-start',
           '-d',
           device.deviceId,
           'lib/commands.dart',

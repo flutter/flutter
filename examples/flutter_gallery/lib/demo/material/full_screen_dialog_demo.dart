@@ -32,7 +32,7 @@ class DateTimeItem extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return DefaultTextStyle(
-      style: theme.textTheme.subhead,
+      style: theme.textTheme.subtitle1,
       child: Row(
         children: <Widget>[
           Expanded(
@@ -115,7 +115,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
       return true;
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
+    final TextStyle dialogTextStyle = theme.textTheme.subtitle1.copyWith(color: theme.textTheme.caption.color);
 
     return await showDialog<bool>(
       context: context,
@@ -153,7 +153,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         title: Text(_hasName ? _eventName : 'Event Name TBD'),
         actions: <Widget> [
           FlatButton(
-            child: Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
+            child: Text('SAVE', style: theme.textTheme.bodyText2.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);
             },
@@ -174,7 +174,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                     labelText: 'Event name',
                     filled: true,
                   ),
-                  style: theme.textTheme.headline,
+                  style: theme.textTheme.headline5,
                   onChanged: (String value) {
                     setState(() {
                       _hasName = value.isNotEmpty;

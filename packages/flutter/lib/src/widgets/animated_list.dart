@@ -229,7 +229,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     TextStyle textStyle = Theme.of(context).textTheme.display1;
+///     TextStyle textStyle = Theme.of(context).textTheme.headline4;
 ///     if (selected)
 ///       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
 ///     return Padding(
@@ -712,7 +712,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///               child: Center(
 ///                 child: Text(
 ///                   'Item $item',
-///                   style: Theme.of(context).textTheme.display1,
+///                   style: Theme.of(context).textTheme.headline4,
 ///                 ),
 ///               ),
 ///             ),

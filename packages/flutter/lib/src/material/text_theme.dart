@@ -7,14 +7,28 @@ import 'package:flutter/painting.dart';
 
 import 'typography.dart';
 
+// Eventually we'll get rid of the deprecated members, but for now, we have to use them
+// in order to implement them.
+// ignore_for_file: deprecated_member_use_from_same_package
+
 /// Material design text theme.
 ///
-/// Definitions for the various typographical styles found in material design
+/// Definitions for the various typographical styles found in Material Design
 /// (e.g., button, caption). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
 /// To obtain the current text theme, call [Theme.of] with the current
 /// [BuildContext] and read the [ThemeData.textTheme] property.
+///
+/// The names of the TextTheme properties match this table from the
+/// [Material Design spec](https://material.io/design/typography/the-type-system.html#type-scale)
+/// with two exceptions: the styles called H1-H6 in the spec are
+/// headline1-headline6 in the API, and body1,body2 are called
+/// bodyText1 and bodyText2.
+///
+/// ![](https://storage.googleapis.com/spec-host-backup/mio-design%2Fassets%2F1W8kyGVruuG_O8psvyiOaCf1lLFIMzB-N%2Ftypesystem-typescale.png)
+///
+/// ## Migrating from the 2014 names
 ///
 /// The Material Design typography scheme was significantly changed in the
 /// current (2018) version of the specification
@@ -25,32 +39,33 @@ import 'typography.dart';
 /// NAME         SIZE  WEIGHT  SPACING
 /// headline1    96.0  light   -1.5
 /// headline2    60.0  light   -0.5
-/// headline3    48.0  normal   0.0
-/// headline4    34.0  normal   0.25
-/// headline5    24.0  normal   0.0
+/// headline3    48.0  regular  0.0
+/// headline4    34.0  regular  0.25
+/// headline5    24.0  regular  0.0
 /// headline6    20.0  medium   0.15
-/// subtitle1    16.0  normal   0.15
+/// subtitle1    16.0  regular  0.15
 /// subtitle2    14.0  medium   0.1
-/// body1        16.0  normal   0.5
-/// body2        14.0  normal   0.25
-/// button       14.0  medium   0.75
-/// caption      12.0  normal   0.4
-/// overline     10.0  normal   1.5
-///
+/// body1        16.0  regular  0.5   (bodyText1)
+/// body2        14.0  regular  0.25  (bodyText2)
+/// button       14.0  medium   1.25
+/// caption      12.0  regular  0.4
+/// overline     10.0  regular  1.5
 /// ```
-/// Where "light" is `FontWeight.w300`, "normal" is `FontWeight.w400` and
+///
+/// ...where "light" is `FontWeight.w300`, "regular" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`.
 ///
-/// The [TextTheme] API is based on the original material (2014)
+/// The [TextTheme] API was originally based on the original material (2014)
 /// design spec, which used different text style names. For backwards
-/// compatibility's sake, this API continues to use the original
-/// names. The table below should help with understanding the API in
-/// terms of the 2018 material spec.
+/// compatibility's sake, this API continues to expose the old names. The table
+/// below should help with understanding the mapping of the API's old names and
+/// the new names (those in terms of the 2018 material specification).
 ///
 /// Each of the [TextTheme] text styles corresponds to one of the
 /// styles from 2018 spec. By default, the font sizes, font weights
 /// and letter spacings have not changed from their original,
 /// 2014, values.
+///
 /// ```
 /// NAME       SIZE   WEIGHT   SPACING  2018 NAME
 /// display4   112.0  thin     0.0      headline1
@@ -60,8 +75,8 @@ import 'typography.dart';
 /// headline   24.0   normal   0.0      headline5
 /// title      20.0   medium   0.0      headline6
 /// subhead    16.0   normal   0.0      subtitle1
-/// body2      14.0   medium   0.0      body1
-/// body1      14.0   normal   0.0      body2
+/// body2      14.0   medium   0.0      body1 (bodyText1)
+/// body1      14.0   normal   0.0      body2 (bodyText2)
 /// caption    12.0   normal   0.0      caption
 /// button     14.0   medium   0.0      button
 /// subtitle   14.0   medium   0.0      subtitle2
@@ -72,21 +87,14 @@ import 'typography.dart';
 /// "medium" is `FontWeight.w500`. Letter spacing for all of the original
 /// text styles was 0.0.
 ///
+/// The old names are deprecated in this API.
+///
+/// Since the names `body1` and `body2` are used in both specifications but with
+/// different meanings, the API uses the terms `bodyText1` and `bodyText2` for
+/// the new API.
+///
 /// To configure a [Theme] for the new sizes, weights, and letter spacings,
-/// initialize its [ThemeData.typography] value with a [Typography] that
-/// object that specifies the 2018 versions of the geometry themes:
-/// [Typography.englishLike2018], [Typography.dense2018],
-/// and [Typography.tall2018].
-///
-/// The following image [from the material design
-/// specification](https://material.io/go/design-typography#typography-styles)
-/// shows the recommended styles for each of the properties of a [TextTheme].
-/// This image uses the `Roboto` font, which is the font used on Android. On
-/// iOS, the [San Francisco
-/// font](https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/)
-/// is automatically used instead.
-///
-/// ![To see the image, visit the typography site referenced below.](https://storage.googleapis.com/material-design/publish/material_v_11/assets/0Bzhp5Z4wHba3alhXZ2pPWGk3Zjg/style_typography_styles_scale.png)
+/// initialize its [ThemeData.typography] value using [Typography.material2018].
 ///
 /// See also:
 ///
@@ -107,53 +115,120 @@ class TextTheme extends Diagnosticable {
   /// If you do decide to create your own text theme, consider using one of
   /// those predefined themes as a starting point for [copyWith] or [apply].
   const TextTheme({
-    this.display4,
-    this.display3,
-    this.display2,
-    this.display1,
-    this.headline,
-    this.title,
-    this.subhead,
-    this.body2,
-    this.body1,
+    TextStyle headline1,
+    TextStyle headline2,
+    TextStyle headline3,
+    TextStyle headline4,
+    TextStyle headline5,
+    TextStyle headline6,
+    TextStyle subtitle1,
+    TextStyle subtitle2,
+    TextStyle bodyText1,
+    TextStyle bodyText2,
     this.caption,
     this.button,
-    this.subtitle,
     this.overline,
-  });
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline1. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle display4,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline2. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle display3,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline3. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle display2,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline4. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle display1,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline5. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle headline,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline6. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle title,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is subtitle1. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle subhead,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is subtitle2. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle subtitle,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle body2,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle body1,
+  }) : assert(
+         (headline1 == null && headline2 == null && headline3 == null && headline4 == null && headline5 == null && headline6 == null &&
+          subtitle1 == null && subtitle2 == null &&
+          bodyText1 == null && bodyText2 == null) ||
+         (display4 == null && display3 == null && display2 == null && display1 == null && headline == null && title == null &&
+          subhead == null && subtitle == null &&
+          body2 == null && body1 == null), 'Cannot mix 2014 and 2018 terms in call to TextTheme() constructor.'),
+       headline1 = headline1 ?? display4,
+       headline2 = headline2 ?? display3,
+       headline3 = headline3 ?? display2,
+       headline4 = headline4 ?? display1,
+       headline5 = headline5 ?? headline,
+       headline6 = headline6 ?? title,
+       subtitle1 = subtitle1 ?? subhead,
+       subtitle2 = subtitle2 ?? subtitle,
+       bodyText1 = bodyText1 ?? body2,
+       bodyText2 = bodyText2 ?? body1;
 
   /// Extremely large text.
-  ///
-  /// The font size is 112 pixels.
-  final TextStyle display4;
+  final TextStyle headline1;
 
   /// Very, very large text.
   ///
   /// Used for the date in the dialog shown by [showDatePicker].
-  final TextStyle display3;
+  final TextStyle headline2;
 
   /// Very large text.
-  final TextStyle display2;
+  final TextStyle headline3;
 
   /// Large text.
-  final TextStyle display1;
+  final TextStyle headline4;
 
   /// Used for large text in dialogs (e.g., the month and year in the dialog
   /// shown by [showDatePicker]).
-  final TextStyle headline;
+  final TextStyle headline5;
 
   /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title]
   /// and [AlertDialog.title]).
-  final TextStyle title;
+  final TextStyle headline6;
 
   /// Used for the primary text in lists (e.g., [ListTile.title]).
-  final TextStyle subhead;
+  final TextStyle subtitle1;
 
-  /// Used for emphasizing text that would otherwise be [body1].
-  final TextStyle body2;
+  /// For medium emphasis text that's a little smaller than [subtitle1].
+  final TextStyle subtitle2;
+
+  /// Used for emphasizing text that would otherwise be [bodyText2].
+  final TextStyle bodyText1;
 
   /// Used for the default text style for [Material].
-  final TextStyle body1;
+  final TextStyle bodyText2;
 
   /// Used for auxiliary text associated with images.
   final TextStyle caption;
@@ -161,13 +236,113 @@ class TextTheme extends Diagnosticable {
   /// Used for text on [RaisedButton] and [FlatButton].
   final TextStyle button;
 
-  /// For medium emphasis text that's a little smaller than [subhead].
-  final TextStyle subtitle;
-
-  /// The smallest style,
+  /// The smallest style.
   ///
   /// Typically used for captions or to introduce a (larger) headline.
   final TextStyle overline;
+
+  /// Extremely large text.
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this [headline1].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is headline1. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get display4 => headline1;
+
+  /// Very, very large text.
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this [headline2].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is headline2. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get display3 => headline2;
+
+  /// Very large text.
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this [headline3].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is headline3. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get display2 => headline3;
+
+  /// Large text.
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this [headline4].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is headline4. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get display1 => headline4;
+
+  /// Used for large text in dialogs.
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this [headline5].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is headline5. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get headline => headline5;
+
+  /// Used for the primary text in app bars and dialogs.
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this [headline6].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is headline6. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get title => headline6;
+
+  /// Used for the primary text in lists (e.g., [ListTile.title]).
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this [subtitle1].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is subtitle1. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get subhead => subtitle1;
+
+  /// For medium emphasis text that's a little smaller than [subhead].
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this [subtitle2].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is subtitle2. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get subtitle => subtitle2;
+
+  /// Used for emphasizing text that would otherwise be [body1].
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this `body1`, and it is exposed in this API as
+  /// [textBody1].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get body2 => bodyText1;
+
+  /// Used for the default text style for [Material].
+  ///
+  /// This was the name used in the material design 2014 specification. The new
+  /// specification calls this `body2`, and it is exposed in this API as
+  /// [textBody2].
+  @Deprecated(
+    'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
+    'This feature was deprecated after v1.13.8.'
+  )
+  TextStyle get body1 => bodyText2;
+
 
   /// Creates a copy of this text theme but with the given fields replaced with
   /// the new values.
@@ -193,7 +368,7 @@ class TextTheme extends Diagnosticable {
   ///     return Theme(
   ///       data: theme.copyWith(
   ///         textTheme: theme.textTheme.copyWith(
-  ///           title: theme.textTheme.title.copyWith(
+  ///           headline6: theme.textTheme.headline6.copyWith(
   ///             color: titleColor,
   ///           ),
   ///         ),
@@ -210,33 +385,90 @@ class TextTheme extends Diagnosticable {
   ///  * [merge] is used instead of [copyWith] when you want to merge all
   ///    of the fields of a TextTheme instead of individual fields.
   TextTheme copyWith({
-    TextStyle display4,
-    TextStyle display3,
-    TextStyle display2,
-    TextStyle display1,
-    TextStyle headline,
-    TextStyle title,
-    TextStyle subhead,
-    TextStyle body2,
-    TextStyle body1,
+    TextStyle headline1,
+    TextStyle headline2,
+    TextStyle headline3,
+    TextStyle headline4,
+    TextStyle headline5,
+    TextStyle headline6,
+    TextStyle subtitle1,
+    TextStyle subtitle2,
+    TextStyle bodyText1,
+    TextStyle bodyText2,
     TextStyle caption,
     TextStyle button,
-    TextStyle subtitle,
     TextStyle overline,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline1. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle display4,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline2. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle display3,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline3. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle display2,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline4. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle display1,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline5. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle headline,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is headline6. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle title,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is subtitle1. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle subhead,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is subtitle2. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle subtitle,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle body2,
+    @Deprecated(
+      'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
+      'This feature was deprecated after v1.13.8.'
+    )
+    TextStyle body1,
   }) {
+    assert(
+      (headline1 == null && headline2 == null && headline3 == null && headline4 == null && headline5 == null && headline6 == null &&
+       subtitle1 == null && subtitle2 == null &&
+       bodyText1 == null && bodyText2 == null) ||
+      (display4 == null && display3 == null && display2 == null && display1 == null && headline == null && title == null &&
+       subhead == null && subtitle == null &&
+       body2 == null && body1 == null), 'Cannot mix 2014 and 2018 terms in call to TextTheme.copyWith().');
     return TextTheme(
-      display4: display4 ?? this.display4,
-      display3: display3 ?? this.display3,
-      display2: display2 ?? this.display2,
-      display1: display1 ?? this.display1,
-      headline: headline ?? this.headline,
-      title: title ?? this.title,
-      subhead: subhead ?? this.subhead,
-      body2: body2 ?? this.body2,
-      body1: body1 ?? this.body1,
+      headline1: headline1 ?? display4 ?? this.headline1,
+      headline2: headline2 ?? display3 ?? this.headline2,
+      headline3: headline3 ?? display2 ?? this.headline3,
+      headline4: headline4 ?? display1 ?? this.headline4,
+      headline5: headline5 ?? headline ?? this.headline5,
+      headline6: headline6 ?? title ?? this.headline6,
+      subtitle1: subtitle1 ?? subhead ?? this.subtitle1,
+      subtitle2: subtitle2 ?? subtitle ?? this.subtitle2,
+      bodyText1: bodyText1 ?? body2 ?? this.bodyText1,
+      bodyText2: bodyText2 ?? body1 ?? this.bodyText2,
       caption: caption ?? this.caption,
       button: button ?? this.button,
-      subtitle: subtitle ?? this.subtitle,
       overline: overline ?? this.overline,
     );
   }
@@ -279,7 +511,7 @@ class TextTheme extends Diagnosticable {
   ///     // set the title, but everything else would be null. This isn't very
   ///     // useful, so merge it with the existing theme to keep all of the
   ///     // preexisting definitions for the other styles.
-  ///     TextTheme partialTheme = TextTheme(title: TextStyle(color: titleColor));
+  ///     TextTheme partialTheme = TextTheme(headline6: TextStyle(color: titleColor));
   ///     theme = theme.copyWith(textTheme: theme.textTheme.merge(partialTheme));
   ///     return Theme(data: theme, child: child);
   ///   }
@@ -296,18 +528,18 @@ class TextTheme extends Diagnosticable {
     if (other == null)
       return this;
     return copyWith(
-      display4: display4?.merge(other.display4) ?? other.display4,
-      display3: display3?.merge(other.display3) ?? other.display3,
-      display2: display2?.merge(other.display2) ?? other.display2,
-      display1: display1?.merge(other.display1) ?? other.display1,
-      headline: headline?.merge(other.headline) ?? other.headline,
-      title: title?.merge(other.title) ?? other.title,
-      subhead: subhead?.merge(other.subhead) ?? other.subhead,
-      body2: body2?.merge(other.body2) ?? other.body2,
-      body1: body1?.merge(other.body1) ?? other.body1,
+      headline1: headline1?.merge(other.headline1) ?? other.headline1,
+      headline2: headline2?.merge(other.headline2) ?? other.headline2,
+      headline3: headline3?.merge(other.headline3) ?? other.headline3,
+      headline4: headline4?.merge(other.headline4) ?? other.headline4,
+      headline5: headline5?.merge(other.headline5) ?? other.headline5,
+      headline6: headline6?.merge(other.headline6) ?? other.headline6,
+      subtitle1: subtitle1?.merge(other.subtitle1) ?? other.subtitle1,
+      subtitle2: subtitle2?.merge(other.subtitle2) ?? other.subtitle2,
+      bodyText1: bodyText1?.merge(other.bodyText1) ?? other.bodyText1,
+      bodyText2: bodyText2?.merge(other.bodyText2) ?? other.bodyText2,
       caption: caption?.merge(other.caption) ?? other.caption,
       button: button?.merge(other.button) ?? other.button,
-      subtitle: subtitle?.merge(other.subtitle) ?? other.subtitle,
       overline: overline?.merge(other.overline) ?? other.overline,
     );
   }
@@ -315,8 +547,8 @@ class TextTheme extends Diagnosticable {
   /// Creates a copy of this text theme but with the given field replaced in
   /// each of the individual text styles.
   ///
-  /// The `displayColor` is applied to [display4], [display3], [display2],
-  /// [display1], and [caption]. The `bodyColor` is applied to the remaining
+  /// The `displayColor` is applied to [headline4], [headline3], [headline2],
+  /// [headline1], and [caption]. The `bodyColor` is applied to the remaining
   /// text styles.
   ///
   /// Consider using [Typography.black] or [Typography.white], which implement
@@ -333,7 +565,7 @@ class TextTheme extends Diagnosticable {
     TextDecorationStyle decorationStyle,
   }) {
     return TextTheme(
-      display4: display4?.apply(
+      headline1: headline1?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -342,7 +574,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      display3: display3?.apply(
+      headline2: headline2?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -351,7 +583,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      display2: display2?.apply(
+      headline3: headline3?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -360,7 +592,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      display1: display1?.apply(
+      headline4: headline4?.apply(
         color: displayColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -369,7 +601,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      headline: headline?.apply(
+      headline5: headline5?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -378,7 +610,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      title: title?.apply(
+      headline6: headline6?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -387,7 +619,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      subhead: subhead?.apply(
+      subtitle1: subtitle1?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -396,7 +628,7 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      body2: body2?.apply(
+      subtitle2: subtitle2?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -405,7 +637,16 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      body1: body1?.apply(
+      bodyText1: bodyText1?.apply(
+        color: bodyColor,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationStyle: decorationStyle,
+        fontFamily: fontFamily,
+        fontSizeFactor: fontSizeFactor,
+        fontSizeDelta: fontSizeDelta,
+      ),
+      bodyText2: bodyText2?.apply(
         color: bodyColor,
         decoration: decoration,
         decorationColor: decorationColor,
@@ -432,15 +673,6 @@ class TextTheme extends Diagnosticable {
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
       ),
-      subtitle: subtitle?.apply(
-        color: bodyColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
       overline: overline?.apply(
         color: bodyColor,
         decoration: decoration,
@@ -459,18 +691,18 @@ class TextTheme extends Diagnosticable {
   static TextTheme lerp(TextTheme a, TextTheme b, double t) {
     assert(t != null);
     return TextTheme(
-      display4: TextStyle.lerp(a?.display4, b?.display4, t),
-      display3: TextStyle.lerp(a?.display3, b?.display3, t),
-      display2: TextStyle.lerp(a?.display2, b?.display2, t),
-      display1: TextStyle.lerp(a?.display1, b?.display1, t),
-      headline: TextStyle.lerp(a?.headline, b?.headline, t),
-      title: TextStyle.lerp(a?.title, b?.title, t),
-      subhead: TextStyle.lerp(a?.subhead, b?.subhead, t),
-      body2: TextStyle.lerp(a?.body2, b?.body2, t),
-      body1: TextStyle.lerp(a?.body1, b?.body1, t),
+      headline1: TextStyle.lerp(a?.headline1, b?.headline1, t),
+      headline2: TextStyle.lerp(a?.headline2, b?.headline2, t),
+      headline3: TextStyle.lerp(a?.headline3, b?.headline3, t),
+      headline4: TextStyle.lerp(a?.headline4, b?.headline4, t),
+      headline5: TextStyle.lerp(a?.headline5, b?.headline5, t),
+      headline6: TextStyle.lerp(a?.headline6, b?.headline6, t),
+      subtitle1: TextStyle.lerp(a?.subtitle1, b?.subtitle1, t),
+      subtitle2: TextStyle.lerp(a?.subtitle2, b?.subtitle2, t),
+      bodyText1: TextStyle.lerp(a?.bodyText1, b?.bodyText1, t),
+      bodyText2: TextStyle.lerp(a?.bodyText2, b?.bodyText2, t),
       caption: TextStyle.lerp(a?.caption, b?.caption, t),
       button: TextStyle.lerp(a?.button, b?.button, t),
-      subtitle: TextStyle.lerp(a?.subtitle, b?.subtitle, t),
       overline: TextStyle.lerp(a?.overline, b?.overline, t),
     );
   }
@@ -482,37 +714,37 @@ class TextTheme extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     return other is TextTheme
-        && other.display4 == display4
-        && other.display3 == display3
-        && other.display2 == display2
-        && other.display1 == display1
-        && other.headline == headline
-        && other.title == title
-        && other.subhead == subhead
-        && other.body2 == body2
-        && other.body1 == body1
-        && other.caption == caption
-        && other.button == button
-        && other.subtitle == subtitle
-        && other.overline == overline;
+      && headline1 == other.headline1
+      && headline2 == other.headline2
+      && headline3 == other.headline3
+      && headline4 == other.headline4
+      && headline5 == other.headline5
+      && headline6 == other.headline6
+      && subtitle1 == other.subtitle1
+      && subtitle2 == other.subtitle2
+      && bodyText1 == other.bodyText1
+      && bodyText2 == other.bodyText2
+      && caption == other.caption
+      && button == other.button
+      && overline == other.overline;
   }
 
   @override
   int get hashCode {
     // The hashValues() function supports up to 20 arguments.
     return hashValues(
-      display4,
-      display3,
-      display2,
-      display1,
-      headline,
-      title,
-      subhead,
-      body2,
-      body1,
+      headline1,
+      headline2,
+      headline3,
+      headline4,
+      headline5,
+      headline6,
+      subtitle1,
+      subtitle2,
+      bodyText1,
+      bodyText2,
       caption,
       button,
-      subtitle,
       overline,
     );
   }
@@ -520,19 +752,19 @@ class TextTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final TextTheme defaultTheme = Typography(platform: defaultTargetPlatform).black;
-    properties.add(DiagnosticsProperty<TextStyle>('display4', display4, defaultValue: defaultTheme.display4));
-    properties.add(DiagnosticsProperty<TextStyle>('display3', display3, defaultValue: defaultTheme.display3));
-    properties.add(DiagnosticsProperty<TextStyle>('display2', display2, defaultValue: defaultTheme.display2));
-    properties.add(DiagnosticsProperty<TextStyle>('display1', display1, defaultValue: defaultTheme.display1));
-    properties.add(DiagnosticsProperty<TextStyle>('headline', headline, defaultValue: defaultTheme.headline));
-    properties.add(DiagnosticsProperty<TextStyle>('title', title, defaultValue: defaultTheme.title));
-    properties.add(DiagnosticsProperty<TextStyle>('subhead', subhead, defaultValue: defaultTheme.subhead));
-    properties.add(DiagnosticsProperty<TextStyle>('body2', body2, defaultValue: defaultTheme.body2));
-    properties.add(DiagnosticsProperty<TextStyle>('body1', body1, defaultValue: defaultTheme.body1));
+    final TextTheme defaultTheme = Typography.material2018(platform: defaultTargetPlatform).black;
+    properties.add(DiagnosticsProperty<TextStyle>('headline1', headline1, defaultValue: defaultTheme.headline1));
+    properties.add(DiagnosticsProperty<TextStyle>('headline2', headline2, defaultValue: defaultTheme.headline2));
+    properties.add(DiagnosticsProperty<TextStyle>('headline3', headline3, defaultValue: defaultTheme.headline3));
+    properties.add(DiagnosticsProperty<TextStyle>('headline4', headline4, defaultValue: defaultTheme.headline4));
+    properties.add(DiagnosticsProperty<TextStyle>('headline5', headline5, defaultValue: defaultTheme.headline5));
+    properties.add(DiagnosticsProperty<TextStyle>('headline6', headline6, defaultValue: defaultTheme.headline6));
+    properties.add(DiagnosticsProperty<TextStyle>('subtitle1', subtitle1, defaultValue: defaultTheme.subtitle1));
+    properties.add(DiagnosticsProperty<TextStyle>('subtitle2', subtitle2, defaultValue: defaultTheme.subtitle2));
+    properties.add(DiagnosticsProperty<TextStyle>('bodyText1', bodyText1, defaultValue: defaultTheme.bodyText1));
+    properties.add(DiagnosticsProperty<TextStyle>('bodyText2', bodyText2, defaultValue: defaultTheme.bodyText2));
     properties.add(DiagnosticsProperty<TextStyle>('caption', caption, defaultValue: defaultTheme.caption));
     properties.add(DiagnosticsProperty<TextStyle>('button', button, defaultValue: defaultTheme.button));
-    properties.add(DiagnosticsProperty<TextStyle>('subtitle)', subtitle, defaultValue: defaultTheme.subtitle));
     properties.add(DiagnosticsProperty<TextStyle>('overline', overline, defaultValue: defaultTheme.overline));
   }
 }

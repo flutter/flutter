@@ -291,7 +291,7 @@ class _ChipDemoState extends State<ChipDemo> {
         child: Center(
           child: Text(
             _createResult(),
-            style: theme.textTheme.title,
+            style: theme.textTheme.headline6,
           ),
         ),
       ),

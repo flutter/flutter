@@ -83,7 +83,8 @@ class WebEntrypointTarget extends Target {
         .childDirectory('lib')
         .childFile('generated_plugin_registrant.dart')
         .absolute.path;
-      final Uri generatedImport = packageUriMapper.map(generatedPath);
+      final String generatedImport = packageUriMapper.map(generatedPath)?.toString()
+        ?? globals.fs.file(generatedPath).absolute.uri.toString();
       contents = '''
 import 'dart:ui' as ui;
 

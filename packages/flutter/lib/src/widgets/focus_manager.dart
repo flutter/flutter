@@ -342,7 +342,7 @@ class FocusAttachment {
 /// Widget build(BuildContext context) {
 ///   final TextTheme textTheme = Theme.of(context).textTheme;
 ///   return DefaultTextStyle(
-///     style: textTheme.display1,
+///     style: textTheme.headline4,
 ///     child: ColorfulButton(),
 ///   );
 /// }
