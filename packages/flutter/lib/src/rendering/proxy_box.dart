@@ -2708,6 +2708,12 @@ class RenderMouseRegion extends RenderProxyBox {
 
   /// Called when a mouse pointer starts being contained by the region (with or
   /// without buttons pressed) for any reason.
+  ///
+  /// This callback is always matched by a later [onExit].
+  ///
+  /// See also:
+  ///
+  ///  * [MouseRegion.onEnter], which uses this callback.
   PointerEnterEventListener get onEnter => _onEnter;
   set onEnter(PointerEnterEventListener value) {
     if (_onEnter != value) {
@@ -2738,6 +2744,13 @@ class RenderMouseRegion extends RenderProxyBox {
 
   /// Called when a pointer is no longer contained by the region (with or
   /// without buttons pressed) for any reason.
+  ///
+  /// This callback is always matched by an earlier [onEnter].
+  ///
+  /// See also:
+  ///
+  ///  * [MouseRegion.onExit], which uses this callback, but is not triggered in
+  ///    certain cases and does not always match its earier [MouseRegion.onEnter].
   PointerExitEventListener get onExit => _onExit;
   set onExit(PointerExitEventListener value) {
     if (_onExit != value) {

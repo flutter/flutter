@@ -44,8 +44,8 @@ class MouseTrackerAnnotation extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [MouseRegion.onEnter], which uses this callback.
   ///  * [onExit], which is triggered when a mouse pointer exits the region.
+  ///  * [MouseRegion.onEnter], which uses this callback.
   final PointerEnterEventListener onEnter;
 
   /// Triggered when a pointer has moved within the annotated region without
@@ -67,14 +67,14 @@ class MouseTrackerAnnotation extends Diagnosticable {
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// exited the annotated region when the annotated region still exists.
   ///
-  /// This callback is triggered when the pointer has stopped to be contained
+  /// This callback is triggered when the pointer has stopped being contained
   /// by the region for any reason, which means it always matches an earlier
-  /// [onEnter]. This is different from [MouseRegion.onExit], which is not
-  /// triggered in certain cases and does not always match [MouseRegion.onEnter].
+  /// [onEnter].
   ///
   /// See also:
   ///
   ///  * [onEnter], which is triggered when a mouse pointer enters the region.
+  ///  * [RenderMouseRegion.onExit], which uses this callback.
   ///  * [MouseRegion.onExit], which uses this callback, but is not triggered in
   ///    certain cases and does not always match its earier [MouseRegion.onEnter].
   final PointerExitEventListener onExit;
@@ -418,15 +418,15 @@ class MouseTracker extends ChangeNotifier {
       }
     }
 
-    // Send hover events to annotations that are in next, in reverse visual order.
-    // We chose reverse visual order only to keep it aligned with enter events
-    // for simplicity.
+    // Send hover events to annotations that are in next, in reverse visual
+    // order. The reverse visual order is chosen only because of the simplicity
+    // by keeping the hover events aligned with enter events.
     if (unhandledEvent is PointerHoverEvent) {
       final Offset lastHoverPosition = previousEvent is PointerHoverEvent ? previousEvent.position : null;
       final bool pointerHasMoved = lastHoverPosition == null || lastHoverPosition != unhandledEvent.position;
       // If the hover event follows a non-hover event, or has moved since the
-      // last hover, then trigger hover the callback to all annotations.
-      // Otherwise, trigger the hover callback only to annotations that it
+      // last hover, then trigger the hover callback on all annotations.
+      // Otherwise, trigger the hover callback only on annotations that it
       // newly enters.
       final Iterable<MouseTrackerAnnotation> hoveringAnnotations = pointerHasMoved ? nextAnnotations.toList().reversed : enteringAnnotations;
       for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
