@@ -22,6 +22,9 @@ const List<String> benchmarks = <String>[
   'bench_simple_lazy_text_scroll',
 ];
 
+/// The port number used by the local benchmark server.
+const int benchmarkServerPort = 9999;
+
 Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
   final String macrobenchmarksDirectory = path.join('${flutterDirectory.path}', 'dev', 'benchmarks', 'macrobenchmarks');
   return await inDirectory(macrobenchmarksDirectory, () async {
@@ -35,14 +38,25 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     ], environment: <String, String>{
       'FLUTTER_WEB': 'true',
     });
-    final Completer<List<String>> profileData = Completer<List<String>>();
+    final Completer<List<Map<String, dynamic>>> profileData = Completer<List<Map<String, dynamic>>>();
     final Iterator<String> benchmarkIterator = benchmarks.iterator;
-    final List<String> collectedProfiles = <String>[];
+    final List<Map<String, dynamic>> collectedProfiles = <Map<String, dynamic>>[];
 
+    io.HttpServer server;
     Cascade cascade = Cascade();
     cascade = cascade.add((Request request) async {
       if (request.requestedUri.path.endsWith('/profile-data')) {
-        collectedProfiles.add(await request.readAsString());
+        final Map<String, dynamic> profile = json.decode(await request.readAsString()) as Map<String, dynamic>;
+        final String benchmarkName = profile['name'] as String;
+        if (benchmarkName != benchmarkIterator.current) {
+          profileData.completeError(Exception(
+            'Browser returned benchmark results from a wrong benchmark.\n'
+            'Requested to run bechmark ${benchmarkIterator.current}, but '
+            'got results for $benchmarkName.',
+          ));
+          server.close();
+        }
+        collectedProfiles.add(profile);
         return Response.ok('Profile received');
       } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
         if (benchmarkIterator.moveNext()) {
@@ -61,7 +75,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       path.join('$macrobenchmarksDirectory', 'build', 'web'),
     ));
 
-    final io.HttpServer server = await io.HttpServer.bind('localhost', 8080);
+    server = await io.HttpServer.bind('localhost', benchmarkServerPort);
     io.Process chromeProcess;
     try {
       shelf_io.serveRequests(server, cascade.handler);
@@ -73,7 +87,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       final String userDataDir = io.Directory(dartToolDirectory).createTempSync('chrome_user_data_').path;
       final List<String> args = <String>[
         '--user-data-dir=$userDataDir',
-        'http://localhost:8080/index.html',
+        'http://localhost:$benchmarkServerPort/index.html',
         // '--headless',
         if (isChromeNoSandbox)
           '--no-sandbox',
@@ -100,8 +114,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       final String backend = useCanvasKit ? 'canvaskit' : 'html';
       final Map<String, dynamic> taskResult = <String, dynamic>{};
       final List<String> benchmarkScoreKeys = <String>[];
-      for (final String profileJson in await profileData.future) {
-        final Map<String, dynamic> profile = json.decode(profileJson) as Map<String, dynamic>;
+      for (final Map<String, dynamic> profile in await profileData.future) {
         final String benchmarkName = profile['name'] as String;
         taskResult['$benchmarkName.$backend.averageDrawFrameDuration'] = profile['averageDrawFrameDuration'].toDouble(); // micros
         taskResult['$benchmarkName.$backend.drawFrameDurationNoise'] = profile['drawFrameDurationNoise'].toDouble(); // micros

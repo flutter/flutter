@@ -432,7 +432,9 @@ class _RecordingWidgetsBinding extends BindingBase
         WidgetsBinding {
   /// Makes an instance of [_RecordingWidgetsBinding] the current binding.
   static _RecordingWidgetsBinding ensureInitialized() {
-    if (WidgetsBinding.instance == null) _RecordingWidgetsBinding();
+    if (WidgetsBinding.instance == null) {
+      _RecordingWidgetsBinding();
+    }
     return WidgetsBinding.instance as _RecordingWidgetsBinding;
   }
 

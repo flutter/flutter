@@ -40,7 +40,7 @@ Future<void> main() async {
   // - The benchmark is ran using plain `flutter run`, which does not provide "next-benchmark" handler.
   // - We ran all benchmarks and the benchmark is telling us there are no more benchmarks to run.
   if (request.status == 404) {
-    _fallbackToManual('Server does not support automatic benchmarking.');
+    _fallbackToManual('The server did not tell us which benchmark to run next.');
     return;
   }
 
