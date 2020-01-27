@@ -11,7 +11,6 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
-import '../macos/xcode.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -34,7 +33,7 @@ class CleanCommand extends FlutterCommand {
     // Clean Xcode to remove intermediate DerivedData artifacts.
     // Do this before removing ephemeral directory, which would delete the xcworkspace.
     final FlutterProject flutterProject = FlutterProject.current();
-    if (xcode.isInstalledAndMeetsVersionCheck) {
+    if (globals.xcode.isInstalledAndMeetsVersionCheck) {
       await _cleanXcode(flutterProject.ios);
       await _cleanXcode(flutterProject.macos);
     }

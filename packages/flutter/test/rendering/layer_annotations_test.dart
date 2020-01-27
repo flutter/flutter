@@ -90,7 +90,7 @@ void main() {
   });
 
   test('ContainerLayer.findAllAnnotations returns children\'s opacity (true)', () {
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         ContainerLayer(),
         children: <Object>[
@@ -108,7 +108,7 @@ void main() {
   });
 
   test('ContainerLayer.findAllAnnotations returns children\'s opacity (false)', () {
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         ContainerLayer(),
         children: <Object>[
@@ -127,7 +127,7 @@ void main() {
   });
 
   test('ContainerLayer.findAllAnnotations returns false as opacity when finding nothing', () {
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         ContainerLayer(),
         children: <Object>[
@@ -148,7 +148,7 @@ void main() {
     const Offset insidePosition = Offset(-5, 5);
     const Offset outsidePosition = Offset(5, 5);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         OffsetLayer(offset: const Offset(-10, 0)),
         children: <Object>[
@@ -175,7 +175,7 @@ void main() {
     const Offset insidePosition = Offset(11, 11);
     const Offset outsidePosition = Offset(19, 19);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         ClipRectLayer(clipRect: const Offset(10, 10) & const Size(5, 5)),
         children: <Object>[
@@ -214,7 +214,7 @@ void main() {
     const Offset insidePosition = Offset(12, 12);
     const Offset outsidePosition = Offset(11, 11);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         ClipRRectLayer(clipRRect: rrect),
         children: <Object>[
@@ -258,7 +258,7 @@ void main() {
     const Offset insidePosition = Offset(11, 11);
     const Offset outsidePosition = Offset(12, 12);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         ClipPathLayer(clipPath: path),
         children: <Object>[
@@ -296,7 +296,7 @@ void main() {
     const Offset insidePosition = Offset(40, 80);
     const Offset outsidePosition = Offset(20, 40);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         TransformLayer(transform: transform),
         children: <Object>[
@@ -324,10 +324,92 @@ void main() {
     );
   });
 
+  test('TransformLayer.findAllAnnotations correctly transforms with perspective', () {
+    // Test the 4 corners of a transformed annotated region.
+    final Matrix4 transform = Matrix4.identity()
+      ..setEntry(3, 2, 0.005)
+      ..rotateX(-0.2)
+      ..rotateY(0.2);
+
+    final Layer root = _withBackgroundAnnotation(0,
+      _Layers(
+        TransformLayer(transform: transform),
+        children: <Object>[
+          _TestAnnotatedLayer(
+            1,
+            opaque: true,
+            size: const Size(30, 40),
+            offset: const Offset(10, 20),
+          ),
+        ]
+      ).build(),
+    );
+
+    void expectOneAnnotation({
+      @required Offset globalPosition,
+      @required int value,
+      @required Offset localPosition,
+    }) {
+      expect(
+        root.findAllAnnotations<int>(globalPosition).entries.toList(),
+        _equalToAnnotationResult<int>(
+          <AnnotationEntry<int>>[
+            AnnotationEntry<int>(annotation: value, localPosition: localPosition),
+          ],
+          maxCoordinateRelativeDiff: 0.005,
+        ),
+      );
+    }
+
+    expectOneAnnotation(
+      globalPosition: const Offset(10.0, 19.7),
+      value: 0,
+      localPosition: const Offset(10.0, 19.7),
+    );
+    expectOneAnnotation(
+      globalPosition: const Offset(10.1, 19.8),
+      value: 1,
+      localPosition: const Offset(10.0, 20.0),
+    );
+
+    expectOneAnnotation(
+      globalPosition: const Offset(10.5, 62.8),
+      value: 0,
+      localPosition: const Offset(10.5, 62.8),
+    );
+    expectOneAnnotation(
+      globalPosition: const Offset(10.6, 62.7),
+      value: 1,
+      localPosition: const Offset(10.1, 59.9),
+    );
+
+    expectOneAnnotation(
+      globalPosition: const Offset(42.6, 40.8),
+      value: 0,
+      localPosition: const Offset(42.6, 40.8),
+    );
+    expectOneAnnotation(
+      globalPosition: const Offset(42.5, 40.9),
+      value: 1,
+      localPosition: const Offset(39.9, 40.0),
+    );
+
+    expectOneAnnotation(
+      globalPosition: const Offset(43.5, 63.5),
+      value: 0,
+      localPosition: const Offset(43.5, 63.5),
+    );
+    expectOneAnnotation(
+      globalPosition: const Offset(43.4, 63.4),
+      value: 1,
+      localPosition: const Offset(39.9, 59.9),
+    );
+  });
+
   test('TransformLayer.findAllAnnotations skips when transform is irreversible', () {
     final Matrix4 transform = Matrix4.diagonal3Values(1, 0, 1);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         TransformLayer(transform: transform),
         children: <Object>[
@@ -360,7 +442,7 @@ void main() {
     const Offset insidePosition = Offset(11, 11);
     const Offset outsidePosition = Offset(12, 12);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         PhysicalModelLayer(
           clipPath: path,
@@ -398,7 +480,7 @@ void main() {
     const Offset insidePosition = Offset(-5, 5);
     const Offset outsidePosition = Offset(5, 5);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         LeaderLayer(
           link: LayerLink(),
@@ -428,7 +510,7 @@ void main() {
     'and return the given opacity (false) during a successful hit', () {
     const Offset position = Offset(5, 5);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         AnnotatedRegionLayer<int>(1, opaque: false),
         children: <Object>[
@@ -451,7 +533,7 @@ void main() {
     'and return the given opacity (true) during a successful hit', () {
     const Offset position = Offset(5, 5);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         AnnotatedRegionLayer<int>(1, opaque: true),
         children: <Object>[
@@ -472,7 +554,7 @@ void main() {
   test('AnnotatedRegionLayer.findAllAnnotations has default opacity as false', () {
     const Offset position = Offset(5, 5);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         AnnotatedRegionLayer<int>(1),
         children: <Object>[
@@ -495,7 +577,7 @@ void main() {
     'children\'s opacity (false) during a failed hit', () {
     const Offset position = Offset(5, 5);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         AnnotatedRegionLayer<int>(1, opaque: true, size: Size.zero),
         children: <Object>[
@@ -517,7 +599,7 @@ void main() {
     'children\'s opacity (true) during a failed hit', () {
     const Offset position = Offset(5, 5);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         AnnotatedRegionLayer<int>(1, opaque: false, size: Size.zero),
         children: <Object>[
@@ -538,7 +620,7 @@ void main() {
     'during a successful hit if it is not opaque', () {
     const Offset position = Offset(5, 5);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         AnnotatedRegionLayer<int>(1, opaque: false),
         children: <Object>[
@@ -561,7 +643,7 @@ void main() {
     'during a successful hit if it is opaque', () {
     const Offset position = Offset(5, 5);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         AnnotatedRegionLayer<int>(1, opaque: true),
         children: <Object>[
@@ -584,7 +666,7 @@ void main() {
     // The target position would have fallen outside if not for the offset.
     const Offset position = Offset(100, 100);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         AnnotatedRegionLayer<int>(
           1,
@@ -619,7 +701,7 @@ void main() {
     // The target position would have fallen inside if not for the offset.
     const Offset position = Offset(10, 10);
 
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
+    final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         AnnotatedRegionLayer<int>(
           1,
@@ -642,14 +724,12 @@ void main() {
   });
 }
 
-/// Append `value` to the result of the annotations test of `layer` if and only
-/// if it is opaque at the given location.
+/// A [ContainerLayer] that contains a stack of layers: `layer` in the front,
+/// and another layer annotated with `value` in the back.
 ///
 /// It is a utility function that helps checking the opacity returned by
 /// [Layer.findAnnotations].
-/// Technically it is a [ContainerLayer] that contains `layer` followed by
-/// another layer annotated with `value`.
-Layer _appendAnnotationIfNotOpaque(int value, Layer layer) {
+Layer _withBackgroundAnnotation(int value, Layer layer) {
   return _Layers(
     ContainerLayer(),
     children: <Object>[
@@ -746,11 +826,22 @@ class _TestAnnotatedLayer extends Layer {
   }
 }
 
-Matcher _equalToAnnotationResult<T>(List<AnnotationEntry<int>> list) {
+bool _almostEqual(double a, double b, double maxRelativeDiff) {
+  assert(maxRelativeDiff >= 0);
+  assert(maxRelativeDiff < 1);
+  return (a - b).abs() <= a.abs() * maxRelativeDiff;
+}
+
+Matcher _equalToAnnotationResult<T>(
+  List<AnnotationEntry<int>> list, {
+  double maxCoordinateRelativeDiff = 0,
+}) {
   return pairwiseCompare<AnnotationEntry<int>, AnnotationEntry<int>>(
     list,
     (AnnotationEntry<int> a, AnnotationEntry<int> b) {
-      return a.annotation == b.annotation && a.localPosition == b.localPosition;
+      return a.annotation == b.annotation
+          && _almostEqual(a.localPosition.dx, b.localPosition.dx, maxCoordinateRelativeDiff)
+          && _almostEqual(a.localPosition.dy, b.localPosition.dy, maxCoordinateRelativeDiff);
     },
     'equal to',
   );

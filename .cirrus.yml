@@ -303,20 +303,11 @@ task:
         - ./dev/bots/firebase_testlab.sh
 
     - name: deploy_gallery-linux # linux- and macos- only
+      # Do not add more tasks here. Nothing is currently deployed from master branch, so it is safe to run
+      # even if a test has failed. The behavior of failing dependencies is non-ideal for infra health.
+      # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-        - framework_tests-widgets-linux
-        - framework_tests-libraries-linux
-        - framework_tests-misc-linux
-        - tool_tests-general-linux
-        - tool_tests-commands-linux
-        - tool_tests-integration-linux
-        - build_tests-linux
-        - hostonly_devicelab_tests-0-linux
-        - hostonly_devicelab_tests-1-linux
-        - hostonly_devicelab_tests-2-linux
-        - hostonly_devicelab_tests-3_last-linux
-        - firebase_test_lab_tests-linux
       environment:
         # As of October 2019, 1 CPU and 4G of RAM let deploy_gallery-linux finish in about 15
         # minutes, once it got started.
@@ -625,20 +616,11 @@ task:
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
     - name: deploy_gallery-macos # linux- and macos- only
+      # Do not add more tasks here. Nothing is currently deployed from master branch, so it is safe to run
+      # even if a test has failed. The behavior of failing dependencies is non-ideal for infra health.
+      # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-        - framework_tests-widgets-macos
-        - framework_tests-libraries-macos
-        - framework_tests-misc-macos
-        - tool_tests-general-macos
-        - tool_tests-commands-macos
-        - tool_tests-integration-macos
-        - build_tests-macos
-        - hostonly_devicelab_tests-0-macos
-        - hostonly_devicelab_tests-1-macos
-        - hostonly_devicelab_tests-2-macos
-        - hostonly_devicelab_tests-3_last-macos
-        - firebase_test_lab_tests-linux
       environment:
         # Apple Fastlane password.
         FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
@@ -660,21 +642,11 @@ docker_builder:
   only_if: $CIRRUS_TAG != ''
   environment:
     GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
+  # Do not add more tasks here. The behavior of failing dependencies is non-ideal for infra health.
+  # See also: https://github.com/flutter/flutter/pull/49454
   depends_on:
     - docs-linux
     - analyze-linux
-    - framework_tests-widgets-linux
-    - framework_tests-libraries-linux
-    - framework_tests-misc-linux
-    - tool_tests-general-linux
-    - tool_tests-commands-linux
-    - tool_tests-integration-linux
-    - build_tests-linux
-    - hostonly_devicelab_tests-0-linux
-    - hostonly_devicelab_tests-1-linux
-    - hostonly_devicelab_tests-2-linux
-    - hostonly_devicelab_tests-3_last-linux
-    - firebase_test_lab_tests-linux
   build_script:
     - cd "$CIRRUS_WORKING_DIR/dev/ci/docker_linux"
     - ./docker_build.sh
