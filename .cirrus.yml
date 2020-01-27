@@ -50,13 +50,13 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/*.version
   setup_script:
     - date
-    - git clean -xffd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-    - flutter config --no-analytics
-    - flutter doctor -v
-    - flutter update-packages
-    - ./dev/bots/accept_android_sdk_licenses.sh
+    - time git clean -xffd
+    - time git fetch origin
+    - time git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+    - time flutter config --no-analytics
+    - time flutter doctor -v
+    - time flutter update-packages
+    - time ./dev/bots/accept_android_sdk_licenses.sh
     - date
   on_failure:
     failure_script:
@@ -509,15 +509,15 @@ task:
     MEMORY: 8G
   setup_script:
     - date
-    - which flutter
-    - bundle --version
-    - sudo bundle install --system --gemfile=dev/ci/mac/Gemfile
-    - git clean -xffd
-    - git fetch origin
-    - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-    - flutter config --no-analytics
-    - flutter doctor -v
-    - flutter update-packages
+    - time which flutter
+    - time bundle --version
+    - time sudo bundle install --system --gemfile=dev/ci/mac/Gemfile
+    - time git clean -xffd
+    - time git fetch origin
+    - time git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+    - time flutter config --no-analytics
+    - time flutter doctor -v
+    - time flutter update-packages
     - date
     - which flutter
   on_failure:
