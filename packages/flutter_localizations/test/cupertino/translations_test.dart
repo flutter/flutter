@@ -86,6 +86,7 @@ void main() {
       expect(localizations.copyButtonLabel, isNotNull);
       expect(localizations.pasteButtonLabel, isNotNull);
       expect(localizations.selectAllButtonLabel, isNotNull);
+      expect(localizations.closeButtonLabel, isNotNull);
     });
   }
 

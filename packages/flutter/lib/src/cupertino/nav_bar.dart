@@ -8,6 +8,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/cupertino/localizations.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -1013,12 +1014,14 @@ class _NavigationBarStaticComponents {
     @required Widget userLargeTitle,
     @required EdgeInsetsDirectional padding,
     @required bool large,
+    @required BuildContext context,
   }) : leading = createLeading(
          leadingKey: keys.leadingKey,
          userLeading: userLeading,
          route: route,
          automaticallyImplyLeading: automaticallyImplyLeading,
          padding: padding,
+         context: context
        ),
        backChevron = createBackChevron(
          backChevronKey: keys.backChevronKey,
@@ -1075,6 +1078,7 @@ class _NavigationBarStaticComponents {
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
     @required EdgeInsetsDirectional padding,
+    @required BuildContext context,
   }) {
     Widget leadingContent;
 
@@ -1086,8 +1090,9 @@ class _NavigationBarStaticComponents {
       route.canPop &&
       route.fullscreenDialog
     ) {
+      final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
       leadingContent = CupertinoButton(
-        child: const Text('Close'),
+        child: Text(localizations.closeButtonLabel),
         padding: EdgeInsets.zero,
         onPressed: () { route.navigator.maybePop(); },
       );

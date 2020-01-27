@@ -214,6 +214,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
 
+  /// The term used for closing
+  // The global version uses the translated string form the arb file.
+  String get closeButtonLabel;
+
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -378,6 +382,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   @override
   String get selectAllButtonLabel => 'Select All';
 
+  @override
+  String get closeButtonLabel => 'Close';
+
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.
   ///
@@ -391,4 +398,5 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// A [LocalizationsDelegate] that uses [DefaultCupertinoLocalizations.load]
   /// to create an instance of this class.
   static const LocalizationsDelegate<CupertinoLocalizations> delegate = _CupertinoLocalizationsDelegate();
+
 }
