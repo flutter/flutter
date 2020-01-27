@@ -33,7 +33,7 @@ class Placeholder {
 
   bool get requiresFormatting => <String>['DateTime', 'double', 'int', 'num'].contains(type);
   bool get isNumber => <String>['double', 'int', 'num'].contains(type);
-  bool get isDate => <String>['DateTime'].contains(type);
+  bool get isDate => 'DateTime' == type;
 
   static String _stringAttribute(
     String resourceId,

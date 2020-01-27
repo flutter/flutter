@@ -3,54 +3,54 @@
 // found in the LICENSE file.
 
 const String getterMethodTemplate = '''
-  String get @methodName {
+  String get @(methodName) {
     return Intl.message(
-      @message,
+      @(message),
       locale: _localeName,
-      @intlMethodArgs
+      @(intlMethodArgs)
     );
   }
 ''';
 
 const String simpleMethodTemplate = '''
-  String @methodName(@methodParameters) {
+  String @(methodName)(@(methodParameters)) {
     return Intl.message(
-      @message,
+      @(message),
       locale: _localeName,
-      @intlMethodArgs
+      @(intlMethodArgs)
     );
   }
 ''';
 
 const String formatMethodTemplate = '''
-  String @methodName(@methodParameters) {@dateFormatting@numberFormatting
-    String @methodName(@innerMethodParameters) {
+  String @(methodName)(@(methodParameters)) {@(dateFormatting)@(numberFormatting)
+    String @(methodName)(@(innerMethodParameters)) {
       return Intl.message(
-        @message,
+        @(message),
         locale: _localeName,
-        @intlMethodArgs
+        @(intlMethodArgs)
       );
     }
-    return @methodName(@innerMethodArgs);
+    return @(methodName)(@(innerMethodArgs));
   }
 ''';
 
 const String pluralMethodTemplate = '''
-  String @methodName(@methodParameters) {@dateFormatting@numberFormatting
+  String @(methodName)(@(methodParameters)) {@(dateFormatting)@(numberFormatting)
     return Intl.plural(
-      @intlMethodArgs
+      @(intlMethodArgs)
     );
   }
 ''';
 
 const String pluralFormatMethodTemplate = '''
-  String @methodName(@methodParameters) {@dateFormatting@numberFormatting
-    String @methodName(@innerMethodParameters) {
+  String @(methodName)(@(methodParameters)) {@(dateFormatting)@(numberFormatting)
+    String @(methodName)(@(innerMethodParameters)) {
       return Intl.plural(
-        @intlMethodArgs
+        @(intlMethodArgs)
       );
     }
-    return @methodName(@innerMethodArgs);
+    return @(methodName)(@(innerMethodArgs));
   }
 ''';
 
@@ -63,19 +63,19 @@ import 'package:intl/intl.dart';
 
 import 'messages_all.dart';
 
-/// Callers can lookup localized strings with an instance of @className returned
-/// by `@className.of(context)`.
+/// Callers can lookup localized strings with an instance of @(className) returned
+/// by `@(className).of(context)`.
 ///
-/// Applications need to include `@className.delegate()` in their app\'s
+/// Applications need to include `@(className).delegate()` in their app\'s
 /// localizationDelegates list, and the locales they support in the app\'s
 /// supportedLocales list. For example:
 ///
 /// ```
-/// import '@importFile';
+/// import '@(importFile)';
 ///
 /// return MaterialApp(
-///   localizationsDelegates: @className.localizationsDelegates,
-///   supportedLocales: @className.supportedLocales,
+///   localizationsDelegates: @(className).localizationsDelegates,
+///   supportedLocales: @(className).supportedLocales,
 ///   home: MyApplicationHome(),
 /// );
 /// ```
@@ -115,21 +115,21 @@ import 'messages_all.dart';
 /// you wish to add from the pop-up menu in the Value field. This list should
 /// be consistent with the languages listed in the @className.supportedLocales
 /// property.
-class @className {
-  @className(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
+class @(className) {
+  @(className)(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
   final String _localeName;
 
-  static Future<@className> load(Locale locale) {
+  static Future<@(className)> load(Locale locale) {
     return initializeMessages(locale.toString())
-      .then<@className>((_) => @className(locale));
+      .then<@(className)>((_) => @(className)(locale));
   }
 
-  static @className of(BuildContext context) {
-    return Localizations.of<@className>(context, @className);
+  static @(className) of(BuildContext context) {
+    return Localizations.of<@(className)>(context, @(className));
   }
 
-  static const LocalizationsDelegate<@className> delegate = _@classNameDelegate();
+  static const LocalizationsDelegate<@(className)> delegate = _@(classNameDelegate)();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -149,21 +149,21 @@ class @className {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  @supportedLocales
+  @(supportedLocales)
 
-@classMethods
+@(classMethods)
 }
 
-class _@classNameDelegate extends LocalizationsDelegate<@className> {
-  const _@classNameDelegate();
+class _@(className)Delegate extends LocalizationsDelegate<@(className)> {
+  const _@(className)Delegate();
 
   @override
-  Future<@className> load(Locale locale) => @className.load(locale);
+  Future<@(className)> load(Locale locale) => @(className).load(locale);
 
   @override
-  bool isSupported(Locale locale) => <String>[@supportedLanguageCodes].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[@(supportedLanguageCodes)].contains(locale.languageCode);
 
   @override
-  bool shouldReload(_@classNameDelegate old) => false;
+  bool shouldReload(_@(className)Delegate old) => false;
 }
 ''';

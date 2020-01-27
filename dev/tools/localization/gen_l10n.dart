@@ -125,7 +125,7 @@ const Set<String> numberFormatsWithNamedParameters = <String>{
   'simpleCurrency',
 };
 
-List<String> genIntlMethodArgs(Message message) {
+List<String> generateIntlMethodArgs(Message message) {
   final List<String> methodArgs = <String>['name: \'${message.resourceId}\''];
   if (message.description != null)
     methodArgs.add('desc: ${generateString(message.description)}');
@@ -138,7 +138,7 @@ List<String> genIntlMethodArgs(Message message) {
   return methodArgs;
 }
 
-List<String> genInnerMethodArgs(Message message) {
+List<String> generateInnerMethodArgs(Message message) {
   return message.placeholders.map((Placeholder placeholder) {
     final String arg = placeholder.name;
     return placeholder.requiresFormatting ? '${arg}String' : arg;
@@ -191,9 +191,9 @@ String generateNumberFormattingLogic(Message message) {
     if (!allowableNumberFormats.contains(placeholder.format)) {
       throw L10nException(
         'Number format ${placeholder.format} for the ${placeholder.name} '
-        'placeholder does not have a corresponding NumberFormat '
-        'constructor. \nCheck the intl library\'s NumberFormat class '
-        'constructors for allowed number formats.'
+        'placeholder does not have a corresponding NumberFormat constructor.\n'
+        'Check the intl library\'s NumberFormat class constructors for allowed '
+        'number formats.'
       );
     }
     if (numberFormatsWithNamedParameters.contains(placeholder.format)) {
@@ -237,32 +237,32 @@ String genSimpleMethod(Message message) {
 
   if (message.placeholdersRequireFormatting) {
     return formatMethodTemplate
-      .replaceAll('@methodName', message.resourceId)
-      .replaceAll('@methodParameters', genMethodParameters().join(', '))
-      .replaceAll('@dateFormatting', generateDateFormattingLogic(message))
-      .replaceAll('@numberFormatting', generateNumberFormattingLogic(message))
-      .replaceAll('@message', genSimpleMethodMessage())
-      .replaceAll('@innerMethodParameters', genMethodParameters('Object').join(', '))
-      .replaceAll('@innerMethodArgs', genInnerMethodArgs(message).join(', '))
-      .replaceAll('@intlMethodArgs', genIntlMethodArgs(message).join(',\n        '));
+      .replaceAll('@(methodName)', message.resourceId)
+      .replaceAll('@(methodParameters)', genMethodParameters().join(', '))
+      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+      .replaceAll('@(message)', genSimpleMethodMessage())
+      .replaceAll('@(innerMethodParameters)', genMethodParameters('Object').join(', '))
+      .replaceAll('@(innerMethodArgs)', generateInnerMethodArgs(message).join(', '))
+      .replaceAll('@(intlMethodArgs)', generateIntlMethodArgs(message).join(',\n        '));
   }
 
   if (message.placeholders.isNotEmpty) {
     return simpleMethodTemplate
-      .replaceAll('@methodName', message.resourceId)
-      .replaceAll('@methodParameters', genMethodParameters().join(', '))
-      .replaceAll('@message', genSimpleMethodMessage())
-      .replaceAll('@intlMethodArgs', genIntlMethodArgs(message).join(',\n      '));
+      .replaceAll('@(methodName)', message.resourceId)
+      .replaceAll('@(methodParameters)', genMethodParameters().join(', '))
+      .replaceAll('@(message)', genSimpleMethodMessage())
+      .replaceAll('@(intlMethodArgs)', generateIntlMethodArgs(message).join(',\n      '));
   }
 
   return getterMethodTemplate
-    .replaceAll('@methodName', message.resourceId)
-    .replaceAll('@message', '${genSimpleMethodMessage()}')
-    .replaceAll('@intlMethodArgs', genIntlMethodArgs(message).join(',\n      '));
+    .replaceAll('@(methodName)', message.resourceId)
+    .replaceAll('@(message)', '${genSimpleMethodMessage()}')
+    .replaceAll('@(intlMethodArgs)', generateIntlMethodArgs(message).join(',\n      '));
 }
 
 
-String genPluralMethod(Message message) {
+String generatePluralMethod(Message message) {
   if (message.placeholders.isEmpty) {
     throw L10nException(
       'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
@@ -290,7 +290,7 @@ String genPluralMethod(Message message) {
   final List<String> intlMethodArgs = <String>[
     countPlaceholder,
     'locale: _localeName',
-    ...genIntlMethodArgs(message),
+    ...generateIntlMethodArgs(message),
   ];
 
   for (final String pluralKey in pluralIds.keys) {
@@ -309,7 +309,7 @@ String genPluralMethod(Message message) {
     }
   }
 
-  List<String> genPluralMethodParameters([String type]) {
+  List<String> generatePluralMethodParameters([String type]) {
     return message.placeholders.map((Placeholder placeholder) {
       final String placeholderType = placeholder.name == countPlaceholder ? 'int' : (type ?? placeholder.type);
       return '$placeholderType ${placeholder.name}';
@@ -318,21 +318,21 @@ String genPluralMethod(Message message) {
 
   if (message.placeholdersRequireFormatting) {
     return pluralFormatMethodTemplate
-      .replaceAll('@methodName', message.resourceId)
-      .replaceAll('@methodParameters', genPluralMethodParameters().join(', '))
-      .replaceAll('@dateFormatting', generateDateFormattingLogic(message))
-      .replaceAll('@numberFormatting', generateNumberFormattingLogic(message))
-      .replaceAll('@innerMethodParameters', genPluralMethodParameters('Object').join(', '))
-      .replaceAll('@innerMethodArgs', genInnerMethodArgs(message).join(', '))
-      .replaceAll('@intlMethodArgs', intlMethodArgs.join(',\n      '));
+      .replaceAll('@(methodName)', message.resourceId)
+      .replaceAll('@(methodParameters)', generatePluralMethodParameters().join(', '))
+      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+      .replaceAll('@(innerMethodParameters)', generatePluralMethodParameters('Object').join(', '))
+      .replaceAll('@(innerMethodArgs)', generateInnerMethodArgs(message).join(', '))
+      .replaceAll('@(intlMethodArgs)', intlMethodArgs.join(',\n      '));
   }
 
   return pluralMethodTemplate
-    .replaceAll('@methodName', message.resourceId)
-    .replaceAll('@methodParameters', genPluralMethodParameters().join(', '))
-    .replaceAll('@dateFormatting', generateDateFormattingLogic(message))
-    .replaceAll('@numberFormatting', generateNumberFormattingLogic(message))
-    .replaceAll('@intlMethodArgs', intlMethodArgs.join(',\n      '));
+    .replaceAll('@(methodName)', message.resourceId)
+    .replaceAll('@(methodParameters)', generatePluralMethodParameters().join(', '))
+    .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+    .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+    .replaceAll('@(intlMethodArgs)', intlMethodArgs.join(',\n      '));
 }
 
 /// The localizations generation class used to generate the localizations
@@ -493,7 +493,7 @@ class LocalizationsGenerator {
 
   static bool _isValidClassName(String className) {
     // Dart class name cannot contain non-alphanumeric symbols
-    if (className.contains(RegExp(r'[^a-zA-Z\d]')))
+    if (className.contains(RegExp(r'[^a-zA-Z_\d]')))
       return false;
     // Dart class name must start with upper case character
     if (className[0].contains(RegExp(r'[a-z]')))
@@ -598,7 +598,7 @@ class LocalizationsGenerator {
 
   static bool _isValidGetterAndMethodName(String name) {
     // Dart getter and method name cannot contain non-alphanumeric symbols
-    if (name.contains(RegExp(r'[^a-zA-Z\d]')))
+    if (name.contains(RegExp(r'[^a-zA-Z_\d]')))
       return false;
     // Dart class name must start with lower case character
     if (name[0].contains(RegExp(r'[A-Z]')))
@@ -668,7 +668,7 @@ class LocalizationsGenerator {
 
       final Message message = Message(bundle, key);
       if (pluralValueRE.hasMatch(message.value))
-        classMethods.add(genPluralMethod(message));
+        classMethods.add(generatePluralMethod(message));
       else
         classMethods.add(genSimpleMethod(message));
     }
@@ -681,11 +681,11 @@ class LocalizationsGenerator {
     final String outputFileName = path.basename(outputFile.path);
     outputFile.writeAsStringSync(
       defaultFileTemplate
-        .replaceAll('@className', className)
-        .replaceAll('@classMethods', classMethods.join('\n'))
-        .replaceAll('@importFile', '$directory/$outputFileName')
-        .replaceAll('@supportedLocales', _genSupportedLocaleProperty(supportedLocales))
-        .replaceAll('@supportedLanguageCodes', supportedLanguageCodes.toList().join(', '))
+        .replaceAll('@(className)', className)
+        .replaceAll('@(classMethods)', classMethods.join('\n'))
+        .replaceAll('@(importFile)', '$directory/$outputFileName')
+        .replaceAll('@(supportedLocales)', _genSupportedLocaleProperty(supportedLocales))
+        .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.toList().join(', '))
     );
   }
 }
