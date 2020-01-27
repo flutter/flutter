@@ -49,7 +49,6 @@ class GenSnapshot {
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
-      '--causal_async_stacks',
       ...additionalArgs,
     ];
 
@@ -155,6 +154,13 @@ class AOTSnapshotter {
       // Not supported by the Pixel in 32-bit mode.
       genSnapshotArgs.add('--no-use-integer-division');
     }
+
+    // Optimization arguments.
+    genSnapshotArgs.addAll(<String>[
+      // Faster async/await
+      '--no-causal-async-stacks',
+      '--lazy-async-stacks',
+    ]);
 
     genSnapshotArgs.add(mainPath);
 

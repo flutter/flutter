@@ -277,7 +277,6 @@ class KernelCompiler {
     @required BuildMode buildMode,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    bool causalAsyncStacks = true,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
@@ -313,7 +312,7 @@ class KernelCompiler {
       '--sdk-root',
       sdkRoot,
       '--target=$targetModel',
-      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
+      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       ..._buildModeOptions(buildMode),
@@ -451,7 +450,6 @@ class _RejectRequest extends _CompilationRequest {
 abstract class ResidentCompiler {
   factory ResidentCompiler(String sdkRoot, {
     @required BuildMode buildMode,
-    bool causalAsyncStacks,
     bool trackWidgetCreation,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -512,7 +510,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(
     String sdkRoot, {
     @required this.buildMode,
-    this.causalAsyncStacks = true,
     this.trackWidgetCreation = true,
     this.packagesPath,
     this.fileSystemRoots,
@@ -531,7 +528,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
 
   final BuildMode buildMode;
-  final bool causalAsyncStacks;
   final bool trackWidgetCreation;
   final String packagesPath;
   final TargetModel targetModel;
@@ -651,7 +647,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       sdkRoot,
       '--incremental',
       '--target=$targetModel',
-      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
+      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       if (outputPath != null) ...<String>[
