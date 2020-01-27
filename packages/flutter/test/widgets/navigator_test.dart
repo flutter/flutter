@@ -93,6 +93,31 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
+class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
+  SlideInOutPageRoute({WidgetBuilder bodyBuilder, RouteSettings settings}) : super(
+    settings: settings,
+    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => bodyBuilder(context),
+    transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset.zero,
+              end: const Offset(-1.0, 0),
+            ).animate(secondaryAnimation),
+            child: child,
+          ),
+        );
+      },
+  );
+
+  @override
+  AnimationController get controller => super.controller;
+}
+
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -448,6 +473,212 @@ void main() {
     expect(find.text('/'), findsNothing);
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsOneWidget);
+  });
+
+  testWidgets('pushReplacement sets secondaryAnimation after transition, with history change during transition', (WidgetTester tester) async {
+    final Map<String, SlideInOutPageRoute<dynamic>> routes = <String, SlideInOutPageRoute<dynamic>>{};
+    final Map<String, WidgetBuilder> builders = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushNamed(context, '/A');
+        }
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pushNamed(context, '/B');
+        }
+      ),
+      '/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/C');
+        },
+      ),
+      '/C': (BuildContext context) => OnTapPage(
+        id: 'C',
+        onTap: () {
+          Navigator.removeRoute(context, routes['/']);
+        },
+      ),
+    };
+    await tester.pumpWidget(MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        final SlideInOutPageRoute<dynamic> ret = SlideInOutPageRoute<dynamic>(bodyBuilder: builders[settings.name], settings: settings);
+        routes[settings.name] = ret;
+        return ret;
+      }
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('/'));
+    await tester.pumpAndSettle();
+    final double a2 = routes['/A'].secondaryAnimation.value;
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(routes['/A'].secondaryAnimation.value, greaterThan(a2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(routes['/A'].secondaryAnimation.value, equals(1.0));
+    await tester.tap(find.text('C'));
+    await tester.pumpAndSettle();
+    expect(find.text('C'), isOnstage);
+    expect(routes['/A'].secondaryAnimation.value, equals(routes['/C'].animation.value));
+    final AnimationController controller = routes['/C'].controller;
+    controller.value = 1 - controller.value;
+    expect(routes['/A'].secondaryAnimation.value, equals(routes['/C'].animation.value));
+  });
+
+  testWidgets('new route removed from navigator history druing pushReplacement transition', (WidgetTester tester) async {
+    final Map<String, SlideInOutPageRoute<dynamic>> routes = <String, SlideInOutPageRoute<dynamic>>{};
+    final Map<String, WidgetBuilder> builders = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushNamed(context, '/A');
+        }
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/B');
+        }
+      ),
+      '/B': (BuildContext context) => OnTapPage(
+        id: 'B',
+        onTap: () {
+          Navigator.removeRoute(context, routes['/B']);
+        },
+      ),
+    };
+    await tester.pumpWidget(MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        final SlideInOutPageRoute<dynamic> ret = SlideInOutPageRoute<dynamic>(bodyBuilder: builders[settings.name], settings: settings);
+        routes[settings.name] = ret;
+        return ret;
+      }
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('/'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('A'), isOnstage);
+    expect(find.text('B'), isOnstage);
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    expect(find.text('/'), isOnstage);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(routes['/'].secondaryAnimation.value, equals(0.0));
+    expect(routes['/'].animation.value, equals(1.0));
+  });
+
+  testWidgets('pushReplacement triggers secondaryAnimation', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/A');
+        }
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/B');
+        }
+      ),
+      '/B': (BuildContext context) => const OnTapPage(id: 'B'),
+    };
+
+    await tester.pumpWidget(MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        return SlideInOutPageRoute<dynamic>(bodyBuilder: routes[settings.name]);
+      }
+    ));
+    await tester.pumpAndSettle();
+    final Offset rootOffsetOriginal = tester.getTopLeft(find.text('/'));
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(find.text('/'), isOnstage);
+    expect(find.text('A'), isOnstage);
+    expect(find.text('B'), findsNothing);
+    final Offset rootOffset = tester.getTopLeft(find.text('/'));
+    expect(rootOffset.dx, lessThan(rootOffsetOriginal.dx));
+
+    Offset aOffsetOriginal = tester.getTopLeft(find.text('A'));
+    await tester.pumpAndSettle();
+    Offset aOffset = tester.getTopLeft(find.text('A'));
+    expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
+
+    aOffsetOriginal = aOffset;
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), isOnstage);
+    expect(find.text('B'), isOnstage);
+    aOffset = tester.getTopLeft(find.text('A'));
+    expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
+  });
+
+  testWidgets('pushAndRemoveUntil triggers secondaryAnimation', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/' : (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushNamed(context, '/A');
+        }
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pushNamedAndRemoveUntil(context, '/B', (Route<dynamic> route) => false);
+        }
+      ),
+      '/B': (BuildContext context) => const OnTapPage(id: 'B'),
+    };
+
+    await tester.pumpWidget(MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        return SlideInOutPageRoute<dynamic>(bodyBuilder: routes[settings.name]);
+      }
+    ));
+    await tester.pumpAndSettle();
+    final Offset rootOffsetOriginal = tester.getTopLeft(find.text('/'));
+    await tester.tap(find.text('/'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(find.text('/'), isOnstage);
+    expect(find.text('A'), isOnstage);
+    expect(find.text('B'), findsNothing);
+    final Offset rootOffset = tester.getTopLeft(find.text('/'));
+    expect(rootOffset.dx, lessThan(rootOffsetOriginal.dx));
+
+    Offset aOffsetOriginal = tester.getTopLeft(find.text('A'));
+    await tester.pumpAndSettle();
+    Offset aOffset = tester.getTopLeft(find.text('A'));
+    expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
+
+    aOffsetOriginal = aOffset;
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), isOnstage);
+    expect(find.text('B'), isOnstage);
+    aOffset = tester.getTopLeft(find.text('A'));
+    expect(aOffset.dx, lessThan(aOffsetOriginal.dx));
+
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), isOnstage);
   });
 
   testWidgets('replaceNamed returned value', (WidgetTester tester) async {
