@@ -5877,4 +5877,102 @@ TEST_F(ParagraphTest, KhmerLineBreaker) {
   ASSERT_TRUE(Snapshot());
 }
 
+TEST_F(ParagraphTest, TextHeightBehaviorRectsParagraph) {
+  // clang-format off
+  const char* text =
+      "line1\nline2\nline3";
+  // clang-format on
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.text_height_behavior =
+      txt::TextHeightBehavior::kDisableFirstAscent |
+      txt::TextHeightBehavior::kDisableLastDescent;
+
+  txt::ParagraphBuilderTxt builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  text_style.font_families = std::vector<std::string>(1, "Roboto");
+  text_style.font_size = 30;
+  text_style.height = 5;
+  text_style.has_height_override = true;
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = BuildParagraph(builder);
+  paragraph->Layout(GetTestCanvasWidth() - 300);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
+
+  ASSERT_EQ(paragraph->records_.size(), 3ull);
+
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(1);
+
+  // Tests for GetRectsForRange()
+  Paragraph::RectHeightStyle rect_height_style =
+      Paragraph::RectHeightStyle::kMax;
+  Paragraph::RectWidthStyle rect_width_style =
+      Paragraph::RectWidthStyle::kTight;
+  paint.setColor(SK_ColorRED);
+  std::vector<txt::Paragraph::TextBox> boxes =
+      paragraph->GetRectsForRange(0, 0, rect_height_style, rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 0ull);
+
+  // First line. Shorter due to disabled height modifications on first ascent.
+  boxes =
+      paragraph->GetRectsForRange(0, 3, rect_height_style, rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 1ull);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 31.117188);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), -0.08203125);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom() - boxes[0].rect.top(), 59.082031);
+
+  // Second line. Normal.
+  boxes =
+      paragraph->GetRectsForRange(6, 10, rect_height_style, rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 1ull);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 47.011719);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 59);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 209);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom() - boxes[0].rect.top(), 150);
+
+  // Third line. Shorter due to disabled height modifications on last descent
+  boxes =
+      paragraph->GetRectsForRange(12, 17, rect_height_style, rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 1ull);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 63.859375);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 208.92578);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 335);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom() - boxes[0].rect.top(), 126.07422);
+
+  ASSERT_TRUE(Snapshot());
+}
+
 }  // namespace txt

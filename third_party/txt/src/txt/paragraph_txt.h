@@ -162,6 +162,7 @@ class ParagraphTxt : public Paragraph {
   FRIEND_TEST(ParagraphTest, FontFeaturesParagraph);
   FRIEND_TEST(ParagraphTest, GetGlyphPositionAtCoordinateSegfault);
   FRIEND_TEST(ParagraphTest, KhmerLineBreaker);
+  FRIEND_TEST(ParagraphTest, TextHeightBehaviorRectsParagraph);
 
   // Starting data to layout.
   std::vector<uint16_t> text_;
@@ -368,7 +369,10 @@ class ParagraphTxt : public Paragraph {
                          double& max_ascent,
                          double& max_descent,
                          double& max_unscaled_ascent,
-                         PlaceholderRun* placeholder_run);
+                         PlaceholderRun* placeholder_run,
+                         size_t line_number,
+                         size_t line_limit);
+
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.
   double GetLineXOffset(double line_total_advance,
