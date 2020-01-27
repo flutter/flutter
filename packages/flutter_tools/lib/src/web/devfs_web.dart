@@ -68,6 +68,7 @@ class WebAssetServer {
   // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
+  final RegExp _drivePath = RegExp(r'\/[A-Z]:\/');
 
   final Packages _packages;
   final InternetAddress internetAddress;
@@ -91,7 +92,12 @@ class WebAssetServer {
       return;
     }
 
-    final String requestPath = request.uri.path;
+    // TODO(jonahwilliams): better path normalization in frontend_server to remove
+    // this workaround.
+    String requestPath = request.uri.path;
+    if (requestPath.startsWith(_drivePath)) {
+      requestPath = requestPath.substring(3);
+    }
 
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
