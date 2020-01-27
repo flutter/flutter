@@ -66,29 +66,40 @@ void main() {
   });
 
   testWidgets('BackButton icon', (WidgetTester tester) async {
-    final Key iOSKey = UniqueKey();
     final Key androidKey = UniqueKey();
+<<<<<<< HEAD
+=======
+    final Key iOSKey = UniqueKey();
+    final Key macOSKey = UniqueKey();
+>>>>>>> parent of b67d5ec6e... [a11y] Make sure RenderFractionalTranslation updates its semantics after the translation field is set (#48985)
 
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
           children: <Widget>[
             Theme(
+              data: ThemeData(platform: TargetPlatform.android),
+              child: BackButtonIcon(key: androidKey),
+            ),
+            Theme(
               data: ThemeData(platform: TargetPlatform.iOS),
               child: BackButtonIcon(key: iOSKey),
             ),
             Theme(
-              data: ThemeData(platform: TargetPlatform.android),
-              child: BackButtonIcon(key: androidKey),
+              data: ThemeData(platform: TargetPlatform.macOS),
+              child: BackButtonIcon(key: macOSKey),
             ),
           ],
         ),
       ),
     );
 
-    final Icon iOSIcon = tester.widget(find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
     final Icon androidIcon = tester.widget(find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)));
-    expect(iOSIcon == androidIcon, false);
+    final Icon iOSIcon = tester.widget(find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
+    final Icon macOSIcon = tester.widget(find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
+    expect(iOSIcon.icon == androidIcon.icon, isFalse);
+    expect(macOSIcon.icon == androidIcon.icon, isFalse);
+    expect(macOSIcon.icon == iOSIcon.icon, isTrue);
   });
 
   testWidgets('BackButton color', (WidgetTester tester) async {

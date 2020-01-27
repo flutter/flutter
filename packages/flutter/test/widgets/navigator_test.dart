@@ -180,7 +180,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
@@ -1258,7 +1258,7 @@ void main() {
     );
 
     final dynamic exception = tester.takeException();
-    expect(exception is String, isTrue);
+    expect(exception, isA<String>());
     expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
 
     // Only the root route should've been pushed.
@@ -1327,7 +1327,7 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
-      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
@@ -1354,7 +1354,7 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
-      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(

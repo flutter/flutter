@@ -21,16 +21,16 @@ void main() {
     expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.headline6.fontFamily, 'Roboto');
   });
 
+  // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
+  final Matcher isDisplayFont = predicate((TextStyle s) {
+    return s.fontFamily == '.SF UI Display';
+  }, 'Uses SF Display font');
+
+  final Matcher isTextFont = predicate((TextStyle s) {
+    return s.fontFamily == '.SF UI Text';
+  }, 'Uses SF Text font');
+
   test('Typography on iOS defaults to the correct SF font family based on size', () {
-    // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
-    final Matcher isDisplayFont = predicate((TextStyle s) {
-      return s.fontFamily == '.SF UI Display';
-    }, 'Uses SF Display font');
-
-    final Matcher isTextFont = predicate((TextStyle s) {
-      return s.fontFamily == '.SF UI Text';
-    }, 'Uses SF Text font');
-
     final Typography typography = Typography.material2018(platform: TargetPlatform.iOS);
     for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.headline1, isDisplayFont);
@@ -45,6 +45,25 @@ void main() {
       expect(textTheme.caption, isTextFont);
       expect(textTheme.button, isTextFont);
       expect(textTheme.subtitle2, isTextFont);
+      expect(textTheme.overline, isTextFont);
+    }
+  });
+
+  test('Typography on macOS defaults to the correct SF font family based on size', () {
+    final Typography typography = Typography(platform: TargetPlatform.macOS);
+    for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
+      expect(textTheme.display4, isDisplayFont);
+      expect(textTheme.display3, isDisplayFont);
+      expect(textTheme.display2, isDisplayFont);
+      expect(textTheme.display1, isDisplayFont);
+      expect(textTheme.headline, isDisplayFont);
+      expect(textTheme.title, isDisplayFont);
+      expect(textTheme.subhead, isTextFont);
+      expect(textTheme.body2, isTextFont);
+      expect(textTheme.body1, isTextFont);
+      expect(textTheme.caption, isTextFont);
+      expect(textTheme.button, isTextFont);
+      expect(textTheme.subtitle, isTextFont);
       expect(textTheme.overline, isTextFont);
     }
   });
