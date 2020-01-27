@@ -337,8 +337,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     } else {
       _setSecondaryAnimation(kAlwaysDismissedAnimation);
     }
-    // Finally, we can dispose any previous train hopping animation because it
-    // shoulbe be successfully updated at this point.
+    // Finally, we dispose any previous train hopping animation because it
+    // should be successfully updated at this point.
     if (previousTrainHoppingListenerRemover != null) {
       previousTrainHoppingListenerRemover();
       if (previousTrainHoppingListenerRemover == _trainHoppingListenerRemover)
