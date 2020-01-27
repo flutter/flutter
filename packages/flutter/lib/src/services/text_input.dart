@@ -411,6 +411,7 @@ enum TextCapitalization {
 enum TextContentType {
   name,
   namePrefix,
+  givenName,
   middleName,
   familyName,
   nameSuffix,
