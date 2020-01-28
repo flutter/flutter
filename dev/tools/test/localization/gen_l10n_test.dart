@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
 import '../../localization/gen_l10n.dart';
+import '../../localization/gen_l10n_types.dart';
 import '../../localization/localizations_utils.dart';
 
 import '../common.dart';
@@ -192,7 +193,7 @@ void main() {
         try {
           generator.className = 'String with spaces';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
@@ -205,12 +206,12 @@ void main() {
         try {
           generator.className = 'TestClass@123';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
 
@@ -218,12 +219,12 @@ void main() {
         try {
           generator.className = 'camelCaseClassName';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
 
@@ -231,12 +232,12 @@ void main() {
         try {
           generator.className = '123ClassName';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
     });
@@ -665,6 +666,7 @@ void main() {
   }
 ''');
     });
+  });
 
     group('DateTime tests', () {
       test('correctly generates simple message with dates', () {
@@ -702,17 +704,20 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springBegins(Object springStartDate) {
+          '''  String springBegins(DateTime springStartDate) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
-    return Intl.message(
-      'Spring begins on \$springStartDateString',
-      locale: _localeName,
-      name: 'springBegins',
-      desc: r'The first day of spring',
-      args: <Object>[springStartDateString]
-    );
+    String springBegins(Object springStartDate) {
+      return Intl.message(
+        \'Spring begins on \$springStartDate\',
+        locale: _localeName,
+        name: \'springBegins\',
+        desc: r\'The first day of spring\',
+        args: <Object>[springStartDate]
+      );
+    }
+    return springBegins(springStartDateString);
   }
 ''');
       });
@@ -826,17 +831,20 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springGreetings(Object springStartDate, Object helloWorld) {
+          '''  String springGreetings(DateTime springStartDate, Object helloWorld) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
-    return Intl.message(
-      \'Since it\' "\'" r\'s \$springStartDateString, it\' "\'" r\'s finally spring! \$helloWorld!\',
-      locale: _localeName,
-      name: 'springGreetings',
-      desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
-      args: <Object>[springStartDateString, helloWorld]
-    );
+    String springGreetings(Object springStartDate, Object helloWorld) {
+      return Intl.message(
+        \'Since it\' "\'" r\'s \$springStartDate, it\' "\'" r\'s finally spring! \$helloWorld!\',
+        locale: _localeName,
+        name: \'springGreetings\',
+        desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
+        args: <Object>[springStartDate, helloWorld]
+      );
+    }
+    return springGreetings(springStartDateString, helloWorld);
   }
 ''');
       });
@@ -880,20 +888,23 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springRange(Object springStartDate, Object springEndDate) {
+          '''  String springRange(DateTime springStartDate, DateTime springEndDate) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
     final DateFormat springEndDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springEndDateString = springEndDateDateFormat.format(springEndDate);
 
-    return Intl.message(
-      \'Spring begins on \$springStartDateString and ends on \$springEndDateString\',
-      locale: _localeName,
-      name: 'springRange',
-      desc: r\'The range of dates for spring in the year\',
-      args: <Object>[springStartDateString, springEndDateString]
-    );
+    String springRange(Object springStartDate, Object springEndDate) {
+      return Intl.message(
+        \'Spring begins on \$springStartDate and ends on \$springEndDate\',
+        locale: _localeName,
+        name: \'springRange\',
+        desc: r\'The range of dates for spring in the year\',
+        args: <Object>[springStartDate, springEndDate]
+      );
+    }
+    return springRange(springStartDateString, springEndDateString);
   }
 ''');
       });
@@ -933,24 +944,25 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count, Object currentDate) {
+          '''  String helloWorlds(int count, DateTime currentDate) {
     final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String currentDateString = currentDateDateFormat.format(currentDate);
 
-    return Intl.plural(
-      count,
+    String helloWorlds(int count, Object currentDate) {
+      return Intl.plural(
+        count,
       locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, currentDateString],
-      one: 'Hello World, today is \$currentDateString',
-      two: 'Hello two worlds, today is \$currentDateString',
-      many: 'Hello all \$count worlds, today is \$currentDateString',
-      other: 'Hello other \$count worlds, today is \$currentDateString'
-    );
+      name: \'helloWorlds\',
+      args: <Object>[count, currentDate],
+      one: \'Hello World, today is \$currentDateString\',
+      two: \'Hello two worlds, today is \$currentDateString\',
+      many: \'Hello all \$count worlds, today is \$currentDateString\',
+      other: \'Hello other \$count worlds, today is \$currentDateString\'
+      );
+    }
+    return helloWorlds(count, currentDateString);
   }
-'''
-        );
-      });
+''');
     });
 
     group('Number tests', () {
@@ -961,7 +973,7 @@ void main() {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
+        "type": "double",
         "format": "compact"
       }
     }
@@ -989,19 +1001,22 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String courseCompletion(Object progress) {
+          '''  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.compact(
       locale: _localeName,
     );
     final String progressString = progressNumberFormat.format(progress);
 
-    return Intl.message(
-      'You have completed \$progressString of the course.',
-      locale: _localeName,
-      name: 'courseCompletion',
-      desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progressString]
-    );
+    String courseCompletion(Object progress) {
+      return Intl.message(
+        \'You have completed \$progress of the course.\',
+        locale: _localeName,
+        name: \'courseCompletion\',
+        desc: r\'The amount of progress the student has made in their class.\',
+        args: <Object>[progress]
+      );
+    }
+    return courseCompletion(progressString);
   }
 ''');
       });
@@ -1024,7 +1039,7 @@ void main() {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
+        "type": "double",
         "format": "$numberFormat",
         "optionalParameters": {
           "decimalDigits": 2
@@ -1055,23 +1070,25 @@ void main() {
           expect(generator.classMethods, isNotEmpty);
           expect(
             generator.classMethods.first,
-            '''  String courseCompletion(Object progress) {
+            '''  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(
       locale: _localeName,
       decimalDigits: 2,
     );
     final String progressString = progressNumberFormat.format(progress);
 
-    return Intl.message(
-      'You have completed \$progressString of the course.',
-      locale: _localeName,
-      name: 'courseCompletion',
-      desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progressString]
-    );
+    String courseCompletion(Object progress) {
+      return Intl.message(
+        \'You have completed \$progress of the course.\',
+        locale: _localeName,
+        name: \'courseCompletion\',
+        desc: r\'The amount of progress the student has made in their class.\',
+        args: <Object>[progress]
+      );
+    }
+    return courseCompletion(progressString);
   }
-''');
-        }
+''');}
       });
 
       test('correctly adds optional positional parameters to numbers', () {
@@ -1088,7 +1105,7 @@ void main() {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
+        "type": "double",
         "format": "$numberFormat"
       }
     }
@@ -1116,17 +1133,20 @@ void main() {
           expect(generator.classMethods, isNotEmpty);
           expect(
             generator.classMethods.first,
-            '''  String courseCompletion(Object progress) {
+            '''  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(_localeName);
     final String progressString = progressNumberFormat.format(progress);
 
-    return Intl.message(
-      'You have completed \$progressString of the course.',
-      locale: _localeName,
-      name: 'courseCompletion',
-      desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progressString]
-    );
+    String courseCompletion(Object progress) {
+      return Intl.message(
+        \'You have completed \$progress of the course.\',
+        locale: _localeName,
+        name: \'courseCompletion\',
+        desc: r\'The amount of progress the student has made in their class.\',
+        args: <Object>[progress]
+      );
+    }
+    return courseCompletion(progressString);
   }
 ''');
         }
@@ -1139,7 +1159,7 @@ void main() {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
+        "type": "double",
         "format": "asdf"
       }
     }
@@ -1306,20 +1326,23 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count, Object currentDate) {
+          '''  String helloWorlds(int count, DateTime currentDate) {
     final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String currentDateString = currentDateDateFormat.format(currentDate);
 
-    return Intl.plural(
-      count,
+    String helloWorlds(int count, Object currentDate) {
+      return Intl.plural(
+        count,
       locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, currentDateString],
-      one: 'Hello World, today is \$currentDateString',
-      two: 'Hello two worlds, today is \$currentDateString',
-      many: 'Hello all \$count worlds, today is \$currentDateString',
-      other: 'Hello other \$count worlds, today is \$currentDateString'
-    );
+      name: \'helloWorlds\',
+      args: <Object>[count, currentDate],
+      one: \'Hello World, today is \$currentDateString\',
+      two: \'Hello two worlds, today is \$currentDateString\',
+      many: \'Hello all \$count worlds, today is \$currentDateString\',
+      other: \'Hello other \$count worlds, today is \$currentDateString\'
+      );
+    }
+    return helloWorlds(count, currentDateString);
   }
 '''
         );
@@ -1332,7 +1355,7 @@ void main() {
     "placeholders": {
       "count": {},
       "population": {
-        "type": "Number",
+        "type": "int",
         "format": "compactLong"
       }
     }
@@ -1360,22 +1383,25 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count, Object population) {
+          '''  String helloWorlds(int count, int population) {
     final NumberFormat populationNumberFormat = NumberFormat.compactLong(
       locale: _localeName,
     );
     final String populationString = populationNumberFormat.format(population);
 
-    return Intl.plural(
-      count,
+    String helloWorlds(int count, Object population) {
+      return Intl.plural(
+        count,
       locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, populationString],
-      one: 'Hello World of \$populationString citizens',
-      two: 'Hello two worlds with \$populationString total citizens',
-      many: 'Hello all \$count worlds, with a total of \$populationString citizens',
-      other: 'Hello other \$count worlds, with a total of \$populationString citizens'
-    );
+      name: \'helloWorlds\',
+      args: <Object>[count, population],
+      one: \'Hello World of \$populationString citizens\',
+      two: \'Hello two worlds with \$populationString total citizens\',
+      many: \'Hello all \$count worlds, with a total of \$populationString citizens\',
+      other: \'Hello other \$count worlds, with a total of \$populationString citizens\'
+      );
+    }
+    return helloWorlds(count, populationString);
   }
 '''
         );
@@ -1463,8 +1489,7 @@ void main() {
           generator.parseArbFiles();
           generator.generateClassMethods();
         } on L10nException catch (e) {
-          expect(e.message, contains('Resource attribute'));
-          expect(e.message, contains('does not exist'));
+          expect(e.message, contains('Resource attribute "@helloWorlds" was not found'));
           return;
         }
         fail('Generating plural class method without resource attributes should not succeed');
@@ -1495,7 +1520,7 @@ void main() {
           generator.generateClassMethods();
         } on L10nException catch (e) {
           expect(e.message, contains('is not properly formatted'));
-          expect(e.message, contains('Ensure that it is a map with keys that are strings'));
+          expect(e.message, contains('Ensure that it is a map with string valued keys'));
           return;
         }
         fail('Generating class methods with incorrect placeholder format should not succeed');
