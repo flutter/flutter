@@ -2707,4 +2707,5 @@ class _FABKey extends ValueKey<int> {
   const _FABKey.primary() : super(0);
 }
 
+// TODO: Generalize _FABKey.
 const _FABKey _primaryFABKey = _FABKey.primary();
