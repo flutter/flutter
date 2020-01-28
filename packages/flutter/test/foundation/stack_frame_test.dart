@@ -68,7 +68,7 @@ void main() {
       expect(frames.contains(StackFrame.stackOverFlowElision), true);
     }
     expect(overflowed, true);
-  });
+  }, skip: isBrowser);
 }
 
 const String stackString = '''#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
