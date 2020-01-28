@@ -29,6 +29,21 @@ const Duration kFloatingActionButtonSegue = Duration(milliseconds: 200);
 /// Its value corresponds to 0.125 of a full circle, equivalent to 45 degrees or pi/4 radians.
 const double kFloatingActionButtonTurnInterval = 0.125;
 
+/// If a [FloatingActionButton] is used on a [Scaffold] in certain positions,
+/// it is moved [kMiniButtonOffsetAdjustment] pixels closer to the edge of the screen.
+///
+/// This is intended to be used with [FloatingActionButton.mini].
+///
+/// More specifically:
+/// * In the following positions, the [FloatingActionButton] is moved *horizontally*
+/// closer to the edge of the screen:
+///   * [FloatingActionButtonLocation.miniStartTop]
+///   // TODO: complete
+/// * In the following positions, the [FloatingActionButton] is moved *vertically*
+/// closer to the bottom of the screen:
+///   // TODO: complete
+const double kMiniButtonOffsetAdjustment = 4.0;
+
 /// An object that defines a position for the [FloatingActionButton]
 /// based on the [Scaffold]'s [ScaffoldPrelayoutGeometry].
 ///
@@ -82,7 +97,7 @@ abstract class FloatingActionButtonLocation {
         _startOffsetX,
         _topOffsetY,
         'miniStartTop',
-        adjustment: 4.0,
+        adjustment: kMiniButtonOffsetAdjustment,
       );
 
   /// Centered [FloatingActionButton], floating over the transition between
