@@ -272,13 +272,13 @@ double _centerOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offse
   return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
 }
 
-double _topOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+double _topOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
   return scaffoldGeometry.contentTop - fabHalfHeight;
 }
 
 // TODO: Add adjustment for _floatingOffsetY.
-double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
   final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
@@ -290,12 +290,12 @@ double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   if (bottomSheetHeight > 0.0)
     fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
-  return fabY;
+  return fabY + offset;
 }
 
 // Provider of common logic for [FloatingActionButtonLocation]s that
 // dock to the [BottomAppBar].
-double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
   final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
