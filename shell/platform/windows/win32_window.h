@@ -57,7 +57,7 @@ class Win32Window {
 
   // Registers a window class with default style attributes, cursor and
   // icon.
-  WNDCLASS ResgisterWindowClass(std::wstring& title);
+  WNDCLASS RegisterWindowClass(std::wstring& title);
 
   // OS callback called by message pump.  Handles the WM_NCCREATE message which
   // is passed when the non-client area is being created and enables automatic

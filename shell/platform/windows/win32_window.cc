@@ -6,16 +6,8 @@
 
 namespace flutter {
 
-Win32Window::Win32Window() {
-  // Assume Windows 10 1703 or greater for DPI handling.  When running on a
-  // older release of Windows where this context doesn't exist, DPI calls will
-  // fail and Flutter rendering will be impacted until this is fixed.
-  // To handle downlevel correctly, dpi_helper must use the most recent DPI
-  // context available should be used: Windows 1703: Per-Monitor V2, 8.1:
-  // Per-Monitor V1, Windows 7: System See
-  // https://docs.microsoft.com/en-us/windows/win32/hidpi/high-dpi-desktop-application-development-on-windows
-  // for more information.
-}
+Win32Window::Win32Window() {}
+
 Win32Window::~Win32Window() {
   Destroy();
 }
@@ -26,7 +18,7 @@ void Win32Window::InitializeChild(const char* title,
   Destroy();
   std::wstring converted_title = NarrowToWide(title);
 
-  WNDCLASS window_class = ResgisterWindowClass(converted_title);
+  WNDCLASS window_class = RegisterWindowClass(converted_title);
 
   auto* result = CreateWindowEx(
       0, window_class.lpszClassName, converted_title.c_str(),
@@ -54,7 +46,7 @@ std::wstring Win32Window::NarrowToWide(const char* source) {
   return wideTitle;
 }
 
-WNDCLASS Win32Window::ResgisterWindowClass(std::wstring& title) {
+WNDCLASS Win32Window::RegisterWindowClass(std::wstring& title) {
   window_class_name_ = title;
 
   WNDCLASS window_class{};
@@ -82,14 +74,7 @@ LRESULT CALLBACK Win32Window::WndProc(HWND const window,
                      reinterpret_cast<LONG_PTR>(cs->lpCreateParams));
 
     auto that = static_cast<Win32Window*>(cs->lpCreateParams);
-
-    // Since the application is running in Per-monitor V2 mode, turn on
-    // automatic titlebar scaling
-    BOOL result = that->dpi_helper_->EnableNonClientDpiScaling(window);
-    if (result != TRUE) {
-      OutputDebugString(L"Failed to enable non-client area autoscaling");
-    }
-    that->current_dpi_ = that->dpi_helper_->GetDpiForWindow(window);
+    that->current_dpi_ = that->dpi_helper_->GetDpi(window);
     that->window_handle_ = window;
   } else if (Win32Window* that = GetThisFromHandle(window)) {
     return that->MessageHandler(window, message, wparam, lparam);
@@ -282,7 +267,7 @@ Win32Window::HandleDpiChange(HWND hwnd,
     // The DPI is only passed for DPI change messages on top level windows,
     // hence call function to get DPI if needed.
     if (uDpi == 0) {
-      uDpi = dpi_helper_->GetDpiForWindow(hwnd);
+      uDpi = dpi_helper_->GetDpi(hwnd);
     }
     current_dpi_ = uDpi;
     window->OnDpiScale(uDpi);
