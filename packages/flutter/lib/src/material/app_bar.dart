@@ -266,7 +266,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Becomes the middle component of the [NavigationToolBar] built by this widget.
   /// The [title]'s width is constrained to fit within the toolbar's [leading]
-  /// and [actions] widgets. Its height is _not_ constrained however: the title
+  /// and [actions] widgets. Its height is _not_ constrained. The [title]
   /// is vertically centered and clipped to fit within the toolbar, whose
   /// height is [kToolbarHeight]. Typically this isn't noticeable because
   /// a simple [Text] [title] will fit within the toolbar by default.
