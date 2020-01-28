@@ -88,7 +88,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       final List<String> args = <String>[
         '--user-data-dir=$userDataDir',
         'http://localhost:$benchmarkServerPort/index.html',
-        // '--headless',
+        '--headless',
         if (isChromeNoSandbox)
           '--no-sandbox',
         '--window-size=1024,1024',
@@ -108,6 +108,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
         args,
         workingDirectory: cwd,
       );
+      forwardStandardStreams(chromeProcess);
 
       print('Waiting for the benchmark to report benchmark profile.');
 
