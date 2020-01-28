@@ -5959,10 +5959,10 @@ class MouseRegion extends StatefulWidget {
   ///       width: 100,
   ///       decoration: BoxDecoration(color: hovered ? Colors.yellow : Colors.blue),
   ///       child: MouseRegion(
-  ///         onEnter: (PointerEnterEvent event) {
+  ///         onEnter: (_) {
   ///           setState(() { hovered = true; });
   ///         },
-  ///         onExit: (PointerExitEvent event) {
+  ///         onExit: (_) {
   ///           setState(() { hovered = false; });
   ///         },
   ///       ),
