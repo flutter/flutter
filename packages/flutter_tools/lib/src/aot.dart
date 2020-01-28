@@ -214,7 +214,7 @@ class AotBuilder {
     final FlutterProject flutterProject = FlutterProject.current();
     final Target target = buildMode == BuildMode.profile
       ? const AotAssemblyProfile()
-      : const GenerateDebugSymbols();
+      : const AotAssemblyRelease();
 
     final BuildResult result = await buildSystem.build(target, Environment(
       projectDir: flutterProject.directory,
