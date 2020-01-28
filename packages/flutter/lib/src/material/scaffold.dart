@@ -416,7 +416,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final bool isSnackBarFloating;
 
-  final List<FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
+  final Map<Key, FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
   @override
   void performLayout(Size size) {
@@ -547,26 +547,29 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     // TODO: Add additional FAB.
-    for (int index = 0; index < additionalFloatingActionButtonConfigurations.length; index ++) {
-      if (hasChild(ValueKey<int>(index))) {
-        print('Child $index (${additionalFloatingActionButtonConfigurations[index]}) found');
-        final Size fabSize = layoutChild(ValueKey<int>(index), looseConstraints);
-        final ScaffoldPrelayoutGeometry currentGeometry = ScaffoldPrelayoutGeometry(
-          bottomSheetSize: bottomSheetSize,
-          contentBottom: contentBottom,
-          contentTop: contentTop,
-          floatingActionButtonSize: fabSize,
-          minInsets: minInsets,
-          scaffoldSize: size,
-          snackBarSize: snackBarSize,
-          textDirection: textDirection,
-        );
-        final Offset fabOffset = additionalFloatingActionButtonConfigurations[index].location.getOffset(currentGeometry);
-        positionChild(ValueKey<int>(index), fabOffset);
-      } else {
-        print('Child $index NOT found');
+
+    additionalFloatingActionButtonConfigurations.forEach(
+      (Key key, FloatingActionButtonConfiguration configuration) {
+        if (hasChild(key)) {
+          print('Child $key ($configuration) found');
+          final Size fabSize = layoutChild(key, looseConstraints);
+          final ScaffoldPrelayoutGeometry currentGeometry = ScaffoldPrelayoutGeometry(
+            bottomSheetSize: bottomSheetSize,
+            contentBottom: contentBottom,
+            contentTop: contentTop,
+            floatingActionButtonSize: fabSize,
+            minInsets: minInsets,
+            scaffoldSize: size,
+            snackBarSize: snackBarSize,
+            textDirection: textDirection,
+          );
+          final Offset fabOffset = configuration.location.getOffset(currentGeometry);
+          positionChild(key, fabOffset);
+        } else {
+          print('Child $key ($configuration) NOT found');
+        }
       }
-    }
+    );
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
       if (snackBarSize == Size.zero) {
@@ -1017,7 +1020,7 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.floatingActionButtonAnimator,
-    this.additionalFloatingActionButtonConfigurations = const <FloatingActionButtonConfiguration>[],
+    this.additionalFloatingActionButtonConfigurations = const <Key, FloatingActionButtonConfiguration>{},
     this.persistentFooterButtons,
     this.drawer,
     this.endDrawer,
@@ -1113,7 +1116,7 @@ class Scaffold extends StatefulWidget {
   final FloatingActionButtonAnimator floatingActionButtonAnimator;
 
   // TODO: Document.
-  final List<FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
+  final Map<Key, FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
@@ -2441,18 +2444,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeBottomPadding: true,
     );
 
-    for (int index = 0; index < widget.additionalFloatingActionButtonConfigurations.length; index ++) {
-      final FloatingActionButtonConfiguration configuration = widget.additionalFloatingActionButtonConfigurations[index];
-      _addIfNonNull(
-        children,
-        configuration.button,
-        ValueKey<int>(index),
-        removeLeftPadding: true,
-        removeTopPadding: true,
-        removeRightPadding: true,
-        removeBottomPadding: true,
-      );
-    }
+    widget.additionalFloatingActionButtonConfigurations.forEach(
+      (Key key, FloatingActionButtonConfiguration configuration) {
+        _addIfNonNull(
+          children,
+          configuration.button,
+          key,
+          removeLeftPadding: true,
+          removeTopPadding: true,
+          removeRightPadding: true,
+          removeBottomPadding: true,
+        );
+      }
+    );
 
     switch (themeData.platform) {
       case TargetPlatform.iOS:
