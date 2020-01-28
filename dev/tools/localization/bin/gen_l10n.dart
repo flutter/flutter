@@ -13,12 +13,12 @@ import '../gen_l10n.dart';
 import '../gen_l10n_types.dart';
 import '../localizations_utils.dart';
 
-String getFlutterPath() {
-  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
-  final String flutterPath = flutterRoot == null ? 'flutter' : path.join(flutterRoot, 'bin', 'flutter');
-  return Platform.isWindows && flutterPath.contains(' ') && !flutterPath.startsWith('"')
-    ? '"$flutterPath"'
-    : flutterPath;
+// On windows, applying Process.run to a pathname that contains a space
+// generates a "ProcessException: %1 is not a valid Win32 application"
+// error. Wrapping the path in double-quotes avoids the problem.
+String windowsSafePathname(String name) {
+  assert(name != null);
+  return Platform.isWindows && name.contains(' ') && !name.startsWith('"') ? '"$name"' : name;
 }
 
 Future<void> main(List<String> arguments) async {
@@ -71,7 +71,8 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
-  final String flutterBin = getFlutterPath();
+  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final String flutterBin = windowsSafePathname(flutterRoot == null ? 'flutter' : path.join(flutterRoot, 'bin', 'flutter'));
   final String arbPathString = results['arb-dir'] as String;
   final String outputFileString = results['output-localization-file'] as String;
   final String templateArbFileName = results['template-arb-file'] as String;
