@@ -304,9 +304,7 @@ void main() {
     await checkCursorToggle();
   });
 
-  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Cursor animates', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -340,13 +338,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(renderEditable.cursorColor.alpha, 0);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -359,9 +353,7 @@ void main() {
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     expect(renderEditable.cursorRadius, const Radius.circular(2.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('cursor has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -416,9 +408,7 @@ void main() {
     );
   });
 
-  testWidgets('Material cursor iOS golden', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Material cursor golden', (WidgetTester tester) async {
     final Widget widget = overlay(
       child: const RepaintBoundary(
         key: ValueKey<int>(1),
@@ -438,12 +428,13 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, testValue.length));
     await tester.pump();
 
-    debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.material.1.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test_${describeEnum(debugDefaultTargetPlatformOverride).toLowerCase()}.material.1.png',
+      ),
     );
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -496,14 +487,13 @@ void main() {
     );
   }, skip: isBrowser);
 
-  testWidgets('text field toolbar options correctly changes options (iOS)',
+  testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -544,9 +534,9 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Select All'), findsNothing);
-  }, skip: isBrowser);
+  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('text field toolbar options correctly changes options (Android)',
+  testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -577,10 +567,8 @@ void main() {
     expect(find.text('COPY'), findsOneWidget);
     expect(find.text('CUT'), findsNothing);
     expect(find.text('SELECT ALL'), findsNothing);
-  }, skip: isBrowser);
+  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
 
-  // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
-  /*
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
@@ -597,10 +585,10 @@ void main() {
 
     await expectLater(
       find.byType(TextField),
-      matchesGoldenFile('text_field_test.0.0.png'),
+      matchesGoldenFile('text_field_cursor_width_test.0.0.png', version: 0),
     );
     EditableText.debugDeterministicCursor = false;
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -619,11 +607,10 @@ void main() {
 
     await expectLater(
       find.byType(TextField),
-      matchesGoldenFile('text_field_test.1.0.png'),
+      matchesGoldenFile('text_field_cursor_width_test.1.0.png', version: 0),
     );
     EditableText.debugDeterministicCursor = false;
-  }, skip: !Platform.isLinux);
-  */
+  }, skip: !isLinux);
 
   testWidgets('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -870,6 +857,27 @@ void main() {
     expect(handle.opacity.value, equals(1.0));
   });
 
+
+  testWidgets('Long pressing a field with selection 0,0 shows the selection menu', (WidgetTester tester) async {
+    await tester.pumpWidget(overlay(
+      child: TextField(
+        controller: TextEditingController.fromValue(
+          const TextEditingValue(
+            selection: TextSelection(baseOffset: 0, extentOffset: 0),
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('PASTE'), findsNothing);
+
+    final Offset emptyPos = textOffsetToPosition(tester, 0);
+    await tester.longPressAt(emptyPos, pointer: 7);
+    await tester.pumpAndSettle();
+
+    expect(find.text('PASTE'), findsOneWidget);
+  });
+
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -978,11 +986,10 @@ void main() {
     expect(find.text('CUT'), findsNothing);
   });
 
-  testWidgets('does not paint toolbar when no options available on ios', (WidgetTester tester) async {
+  testWidgets('does not paint toolbar when no options available', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: TextField(
               readOnly: true,
             ),
@@ -998,9 +1005,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(CupertinoTextSelectionToolbar), paintsNothing);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('text field build empty toolbar when no options available android', (WidgetTester tester) async {
+  testWidgets('text field build empty toolbar when no options available', (WidgetTester tester) async {
     await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -1022,7 +1029,7 @@ void main() {
       matching: find.byType(Container),
     ));
     expect(container.size, Size.zero);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
 
   testWidgets('Sawping controllers should update selection', (WidgetTester tester) async {
     TextEditingController controller = TextEditingController(text: 'readonly');
@@ -5500,14 +5507,13 @@ void main() {
   });
 
   testWidgets(
-    'tap moves cursor to the edge of the word it tapped on (iOS)',
+    'tap moves cursor to the edge of the word it tapped',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -5531,12 +5537,9 @@ void main() {
 
       // But don't trigger the toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets(
-    'tap moves cursor to the position tapped (Android)',
-    (WidgetTester tester) async {
+  testWidgets('tap moves cursor to the position tapped', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
@@ -5565,18 +5568,16 @@ void main() {
 
       // But don't trigger the toolbar.
       expect(find.byType(FlatButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
 
   testWidgets(
-    'two slow taps do not trigger a word selection (iOS)',
+    'two slow taps do not trigger a word selection',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -5602,18 +5603,16 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'double tap selects word and first tap of double tap moves cursor (iOS)',
+    'double tap selects word and first tap of double tap moves cursor',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -5649,11 +5648,10 @@ void main() {
 
       // Selected text shows 3 toolbar buttons.
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'double tap selects word and first tap of double tap moves cursor and shows toolbar (Android)',
+    'double tap selects word and first tap of double tap moves cursor and shows toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -5695,11 +5693,10 @@ void main() {
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
       expect(find.byType(FlatButton), findsNWidgets(4));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
 
   testWidgets(
-    'double tap on top of cursor also selects word (Android)',
+    'double tap on top of cursor also selects word',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -5745,8 +5742,7 @@ void main() {
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
       expect(find.byType(FlatButton), findsNWidgets(4));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
 
   testWidgets(
     'double double tap just shows the selection menu',
@@ -5873,14 +5869,13 @@ void main() {
   );
 
   testWidgets(
-    'double tap hold selects word (iOS)',
+    'double tap hold selects word',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -5918,18 +5913,16 @@ void main() {
       );
       // The toolbar is still showing.
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'tap after a double tap select is not affected (iOS)',
+    'tap after a double tap select is not affected',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -5966,18 +5959,16 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long press moves cursor to the exact long press position and shows toolbar (iOS)',
+    'long press moves cursor to the exact long press position and shows toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -6001,11 +5992,10 @@ void main() {
 
       // Collapsed toolbar shows 2 buttons.
       expect(find.byType(CupertinoButton), findsNWidgets(2));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long press selects word and shows toolbar (Android)',
+    'long press selects word and shows toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -6034,18 +6024,16 @@ void main() {
 
       // Collapsed toolbar shows 4 buttons: cut, copy, paste, select all
       expect(find.byType(FlatButton), findsNWidgets(4));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
 
   testWidgets(
-    'long press tap cannot initiate a double tap (iOS)',
+    'long press tap cannot initiate a double tap',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -6073,18 +6061,16 @@ void main() {
 
       // Collapsed toolbar shows 2 buttons.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long press drag moves the cursor under the drag and shows toolbar on lift (iOS)',
+    'long press drag moves the cursor under the drag and shows toolbar on lift',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -6141,16 +6127,14 @@ void main() {
       );
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), findsNWidgets(2));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('long press drag can edge scroll (iOS)', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
         home: Material(
           child: Center(
             child: TextField(
@@ -6232,17 +6216,16 @@ void main() {
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
     expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257, epsilon: 1));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long tap after a double tap select is not affected (iOS)',
+    'long tap after a double tap select is not affected',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -6276,18 +6259,16 @@ void main() {
 
       // Long press toolbar.
       expect(find.byType(CupertinoButton), findsNWidgets(2));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'double tap after a long tap is not affected (iOS)',
+    'double tap after a long tap is not affected',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -6319,18 +6300,14 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets(
-    'double tap chains work (iOS)',
-    (WidgetTester tester) async {
+  testWidgets('double tap chains work', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
           home: Material(
             child: Center(
               child: TextField(
@@ -6387,10 +6364,9 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(3));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('force press does not select a word on (android)', (WidgetTester tester) async {
+  testWidgets('force press does not select a word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -6418,7 +6394,7 @@ void main() {
           pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 9.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: offset + const Offset(150.0, 9.0), pressure: 0.5, pressureMin: 0, pressureMax: 1,),);
 
     // We don't want this gesture to select any word on Android.
     expect(controller.selection, const TextSelection.collapsed(offset: -1));
@@ -6426,15 +6402,14 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(find.byType(FlatButton), findsNothing);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
 
-  testWidgets('force press selects word (iOS)', (WidgetTester tester) async {
+  testWidgets('force press selects word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
         home: Material(
           child: TextField(
             controller: controller,
@@ -6459,7 +6434,15 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 9.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(
+      PointerMoveEvent(
+        pointer: pointerValue,
+        position: textfieldStart + const Offset(150.0, 9.0),
+        pressure: 0.5,
+        pressureMin: 0,
+        pressureMax: 1,
+      ),
+    );
     // We expect the force press to select a word at the given location.
     expect(
       controller.selection,
@@ -6469,15 +6452,15 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(find.byType(CupertinoButton), findsNWidgets(3));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('tap on non-force-press-supported devices work (iOS)', (WidgetTester tester) async {
+  testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
+    await tester.pumpWidget(Container(key: GlobalKey()));
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
         home: Material(
           child: TextField(
             controller: controller,
@@ -6503,7 +6486,15 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 9.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(
+      PointerMoveEvent(
+        pointer: pointerValue,
+        position: textfieldStart + const Offset(150.0, 9.0),
+        pressure: 0.5,
+        pressureMin: 0,
+        pressureMax: 1,
+      ),
+    );
     await gesture.up();
     // The event should fallback to a normal tap and move the cursor.
     // Single taps selects the edge of the word.
@@ -6515,7 +6506,10 @@ void main() {
     await tester.pump();
     // Single taps shouldn't trigger the toolbar.
     expect(find.byType(CupertinoButton), findsNothing);
-  });
+
+    // TODO(gspencergoog): Add in TargetPlatform.macOS in the line below when we figure out what global state is leaking.
+    // https://github.com/flutter/flutter/issues/43445
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('default TextField debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -6922,7 +6916,6 @@ void main() {
   });
 
   testWidgets('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     const String testText = 'lorem ipsum';
     final TextEditingController controller = TextEditingController(text: testText);
 
@@ -6951,9 +6944,7 @@ void main() {
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Tap shows handles but not toolbar', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(

@@ -46,7 +46,7 @@ void main() {
       const Locale('ar', 'AR'): <String, dynamic>{
         'textDirection': TextDirection.rtl,
         'expectedDaysOfWeek': <String>['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
-        'expectedDaysOfMonth': List<String>.generate(30, (int i) => arabicNumbers.format(i + 1)),
+        'expectedDaysOfMonth': List<String>.generate(30, (int i) => '${arabicNumbers.format(i + 1)}'),
         'expectedMonthYearHeader': 'سبتمبر ٢٠١٧',
       },
     };

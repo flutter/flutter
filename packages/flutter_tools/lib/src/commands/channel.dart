@@ -53,8 +53,8 @@ class ChannelCommand extends FlutterCommand {
 
   Future<void> _listChannels({ bool showAll, bool verbose }) async {
     // Beware: currentBranch could contain PII. See getBranchName().
-    final String currentChannel = FlutterVersion.instance.channel;
-    final String currentBranch = FlutterVersion.instance.getBranchName();
+    final String currentChannel = globals.flutterVersion.channel;
+    final String currentBranch = globals.flutterVersion.getBranchName();
     final Set<String> seenUnofficialChannels = <String>{};
     final List<String> rawOutput = <String>[];
 
@@ -128,7 +128,7 @@ class ChannelCommand extends FlutterCommand {
   }
 
   static Future<void> upgradeChannel() async {
-    final String channel = FlutterVersion.instance.channel;
+    final String channel = globals.flutterVersion.channel;
     if (FlutterVersion.obsoleteBranches.containsKey(channel)) {
       final String alternative = FlutterVersion.obsoleteBranches[channel];
       globals.printStatus("Transitioning from '$channel' to '$alternative'...");

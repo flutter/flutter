@@ -32,6 +32,7 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 const String kCspMode = 'cspMode';
 
 /// Generates an entry point for a web target.
+// Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
 

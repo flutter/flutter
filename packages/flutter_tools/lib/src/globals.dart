@@ -15,6 +15,7 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'cache.dart';
 import 'macos/xcode.dart';
+import 'version.dart';
 
 Logger get logger => context.get<Logger>();
 Cache get cache => context.get<Cache>();
@@ -42,6 +43,7 @@ const Platform _kLocalPlatform = LocalPlatform();
 Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
 Xcode get xcode => context.get<Xcode>();
+FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
