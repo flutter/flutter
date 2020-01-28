@@ -467,6 +467,20 @@ void main() {
     // transform -> clip
     _testFittedBoxWithClipRectLayer();
   });
+
+  test('RenderMouseRegion can change properties when detached', () {
+    renderer.initMouseTracker(MouseTracker(
+      renderer.pointerRouter,
+      (_) => <MouseTrackerAnnotation>[],
+    ));
+    final RenderMouseRegion object = RenderMouseRegion();
+    object
+      ..opaque = false
+      ..onEnter = (_) {}
+      ..onExit = (_) {}
+      ..onHover = (_) {};
+    // Passes if no error is thrown
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
