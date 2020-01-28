@@ -39,18 +39,30 @@ task:
     CIRRUS_DOCKER_CONTEXT: "dev/"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
-  pub_cache:
-    folder: $HOME/.pub-cache
-    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
-  flutter_pkg_cache:
-    folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/*.version
   artifacts_cache:
     folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/*.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version; echo 1
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter precache
+  flutter_pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: echo $OS; cat bin/internal/*.version; echo 1
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter precache --no-android --no-ios
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"; echo 1
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter update-packages
   setup_script:
     - date
-    - git clean -xffd --exclude=bin/cache/
+    - git clean -xffd --exclude=bin/
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
@@ -339,7 +351,7 @@ task:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
-    - git clean -xffd --exclude=bin\cache\
+    - git clean -xffd --exclude=bin\
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
@@ -531,7 +543,7 @@ task:
     - which flutter
     - bundle --version
     - sudo bundle install --system --gemfile=dev/ci/mac/Gemfile
-    - git clean -xffd --exclude=bin/cache/
+    - git clean -xffd --exclude=bin/
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
