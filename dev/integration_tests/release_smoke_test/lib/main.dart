@@ -2,15 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show utf8;
+import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-void main() {
+Future<void> main() async {
   const Text text = Text('Hello, world!', textDirection: TextDirection.ltr);
   // These calls must not result in an error. They behave differently in
   // release mode compared to debug or profile.
   // The test will grep logcat for any errors emitted by Flutter.
   print(text.toDiagnosticsNode());
   print(text.toStringDeep());
+  // regression test for https://github.com/flutter/flutter/issues/49601
+  final List<int> computed = await compute(utf8.encode, 'test', debugLabel: null);
+  print(computed);
   runApp(
     const Center(
       child: text,
