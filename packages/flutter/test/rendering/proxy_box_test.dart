@@ -469,9 +469,8 @@ void main() {
   });
 
   test('RenderMouseRegion can change properties when detached', () {
-    TestRenderingFlutterBinding();
-    RendererBinding.instance.initMouseTracker(MouseTracker(
-      RendererBinding.instance.pointerRouter,
+    renderer.initMouseTracker(MouseTracker(
+      renderer.pointerRouter,
       (_) => <MouseTrackerAnnotation>[],
     ));
     final RenderMouseRegion object = RenderMouseRegion();
