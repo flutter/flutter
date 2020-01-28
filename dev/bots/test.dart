@@ -337,7 +337,7 @@ Future<void> _flutterBuildAot(String relativePathToApplication) async {
       '-dBuildMode=release',
       '--output=build/aot',
       'android_aot_bundle_release_android-arm64',
-      ''
+      'android_aot_bundle_release_android-arm',
     ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
