@@ -181,10 +181,7 @@ void main() {
       dartDefines: const <String>[],
     );
 
-    // Might be either ipv4 or ipv6 for localhost.
-    final bool hasExpectedUri = webFs.uri.toString().contains('[::1]:1234') ||
-                                webFs.uri.toString().contains('127.0.0.1:1234');
-    expect(hasExpectedUri, true);
+    expect(webFs.uri.toString(), contains('localhost'));
     expect(lastPort, 1234);
   }));
 
