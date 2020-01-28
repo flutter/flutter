@@ -15,11 +15,15 @@ Future<void> main() async {
   print(text.toDiagnosticsNode());
   print(text.toStringDeep());
   // regression test for https://github.com/flutter/flutter/issues/49601
-  final List<int> computed = await compute(utf8.encode, 'test', debugLabel: null);
+  final List<int> computed = await compute(_utf8Encode, 'test', debugLabel: null);
   print(computed);
   runApp(
     const Center(
       child: text,
     ),
   );
+}
+
+List<int> _utf8Encode(String data) {
+  return utf8.encode(data);
 }
