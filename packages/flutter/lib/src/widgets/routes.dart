@@ -354,7 +354,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   /// A short description of this route useful for debugging.
-  String get debugLabel => objectRuntimeType(this, 'TransitionRoute');
+  String get debugLabel => '${objectRuntimeType(this, 'TransitionRoute')}';
 
   @override
   String toString() => '${objectRuntimeType(this, 'TransitionRoute')}(animation: $_controller)';

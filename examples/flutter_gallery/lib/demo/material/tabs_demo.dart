@@ -113,7 +113,7 @@ class _CardDataItem extends StatelessWidget {
               alignment: page.id == 'H'
                 ? Alignment.centerLeft
                 : Alignment.centerRight,
-              child: CircleAvatar(child: Text(page.id)),
+              child: CircleAvatar(child: Text('${page.id}')),
             ),
             SizedBox(
               width: 144.0,
