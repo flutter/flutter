@@ -106,7 +106,6 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    print(_logger.runtimeType);
     if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults,
