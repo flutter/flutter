@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -14,6 +13,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
