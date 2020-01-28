@@ -511,7 +511,7 @@ task:
     populate_script:
       - git fetch origin
       - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-      - flutter precache --no-android
+      - flutter precache
   flutter_pkg_cache:
     folder: bin/cache/pkg
     fingerprint_script: echo $OS; cat bin/internal/*.version; echo 1
@@ -536,6 +536,7 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
+    - flutter update-packages
     - date
     - which flutter
   on_failure:
