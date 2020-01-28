@@ -27,6 +27,7 @@ import 'application_package.dart';
 import 'fuchsia_build.dart';
 import 'fuchsia_pm.dart';
 import 'fuchsia_sdk.dart';
+import 'fuchsia_utils.dart';
 import 'fuchsia_workflow.dart';
 import 'tiles_ctl.dart';
 
@@ -513,12 +514,7 @@ class FuchsiaDevice extends Device {
   void clearLogs() {}
 
   bool get ipv6 {
-    try {
-      Uri.parseIPv6Address(id);
-      return true;
-    } on FormatException {
-      return false;
-    }
+    return isIPv6Address(id);
   }
 
   /// List the ports currently running a dart observatory.
