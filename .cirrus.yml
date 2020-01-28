@@ -50,7 +50,7 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/*.version
   setup_script:
     - date
-    - git clean -xffd
+    - git clean -xffd --exclude=bin/cache/
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
@@ -339,7 +339,7 @@ task:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
-    - git clean -xffd
+    - git clean -xffd --exclude=bin\cache\
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
@@ -512,7 +512,7 @@ task:
     - which flutter
     - bundle --version
     - sudo bundle install --system --gemfile=dev/ci/mac/Gemfile
-    - git clean -xffd
+    - git clean -xffd --exclude=bin/cache/
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
