@@ -2698,3 +2698,7 @@ class _FABStatus {
 
   FloatingActionButtonLocation previousLocation;
 }
+
+class _FABKey extends ValueKey<int> {
+  const _FABKey.primary() : super(0);
+}
