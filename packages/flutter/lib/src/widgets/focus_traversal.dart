@@ -748,7 +748,7 @@ class WidgetOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFo
 // algorithm, and the FocusNode.rect accessor does coordinate transformation. If
 // not for this optimization, it could just be removed, and the node used
 // directly.
-class _ReadingOrderSortData {
+class _ReadingOrderSortData extends Diagnosticable {
   _ReadingOrderSortData(this.node)
       : assert(node != null),
         rect = node.rect,
@@ -757,9 +757,57 @@ class _ReadingOrderSortData {
   final TextDirection directionality;
   final Rect rect;
   final FocusNode node;
+
+  /// Finds the common Directional ancestor of an entire list of groups.
+  static TextDirection commonDirectionalityOf(List<_ReadingOrderSortData> list) {
+    final List<List<Directionality>> allAncestors = list.map<List<Directionality>>((_ReadingOrderSortData member) => member.directionalAncestors.toList()).toList();
+    Set<Directionality> common;
+    for (final List<Directionality> ancestorList in allAncestors) {
+      final Set<Directionality> ancestorSet = ancestorList.toSet();
+      common ??= ancestorSet;
+      common = common.intersection(ancestorSet);
+    }
+    if (common.isEmpty) {
+      // If there is no common ancestor, then arbitrarily pick the
+      // directionality of the first group, which is the equivalent of the "first
+      // strongly typed" item in a bidi algorithm.
+      return list.first.directionality;
+    }
+    // Find the closest common ancestor. The memberAncestors list contains the
+    // ancestors for all members, but the first member's ancestry was
+    // added in order from nearest to furthest, so we can still use that
+    // to determine the closest one.
+    return list.first.directionalAncestors.firstWhere(common.contains).textDirection;
+  }
+
+  /// Returns the list of Directionality ancestors, in order from nearest to
+  /// furthest.
+  Iterable<Directionality> get directionalAncestors {
+    List<Directionality> getDirectionalityAncestors(BuildContext context) {
+      final List<Directionality> result = <Directionality>[];
+      context.visitAncestorElements((Element element) {
+        if (element.widget is Directionality) {
+          result.add(element.widget as Directionality);
+        }
+        return true;
+      });
+      return result;
+    }
+    _directionalAncestors ??= getDirectionalityAncestors(node.context);
+    return _directionalAncestors;
+  }
+  List<Directionality> _directionalAncestors;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<TextDirection>('directionality', directionality));
+    properties.add(StringProperty('name', node.debugLabel, defaultValue: null));
+    properties.add(DiagnosticsProperty<Rect>('rect', rect));
+  }
 }
 
-class _ReadingOrderDirectionalGroupData {
+class _ReadingOrderDirectionalGroupData extends Diagnosticable {
   _ReadingOrderDirectionalGroupData(this.members);
   final List<_ReadingOrderSortData> members;
   TextDirection get directionality => members.first.directionality;
@@ -772,6 +820,27 @@ class _ReadingOrderDirectionalGroupData {
       }
     }
     return _rect;
+  }
+
+  List<Directionality> get memberAncestors {
+    if (_memberAncestors == null) {
+      _memberAncestors = <Directionality>[];
+      for (final _ReadingOrderSortData member in members) {
+        _memberAncestors.addAll(member.directionalAncestors);
+      }
+    }
+    return _memberAncestors;
+  }
+  List<Directionality> _memberAncestors;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<TextDirection>('directionality', directionality));
+    properties.add(DiagnosticsProperty<Rect>('rect', rect));
+    properties.add(IterableProperty<String>('members', members.map<String>((_ReadingOrderSortData member) {
+      return '"${member.node.debugLabel}"(${member.rect})';
+    })));
   }
 }
 
@@ -805,30 +874,19 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   // order based on the directionality of the context for each node.
   @override
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants) {
+    assert(descendants != null);
     if (descendants.length <= 1) {
       return descendants;
     }
 
-    Iterable<_ReadingOrderSortData> inBand(_ReadingOrderSortData current, Iterable<_ReadingOrderSortData> candidates) {
-      final Rect wide = Rect.fromLTRB(double.negativeInfinity, current.rect.top, double.infinity, current.rect.bottom);
-      return candidates.where((_ReadingOrderSortData item) {
-        return !item.rect.intersect(wide).isEmpty;
-      });
-    }
-
-    int compareBeginningSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
-      assert(a.directionality == b.directionality);
-      if (a.directionality == TextDirection.ltr) {
-        return a.rect.left.compareTo(b.rect.left);
-      } else {
-        return -a.rect.right.compareTo(b.rect.right);
-      }
-    }
-
+    // Collects the given candidates into groups by directionality. The candidates
+    // have already been sorted as if they all had the directionality of the
+    // nearest Directionality ancestor.
     List<_ReadingOrderDirectionalGroupData> collectDirectionalityGroups(Iterable<_ReadingOrderSortData> candidates) {
       TextDirection currentDirection = candidates.first.directionality;
       List<_ReadingOrderSortData> currentGroup = <_ReadingOrderSortData>[];
       final List<_ReadingOrderDirectionalGroupData> result = <_ReadingOrderDirectionalGroupData>[];
+      // Split candidates into runs of the same directionality.
       for (final _ReadingOrderSortData candidate in candidates) {
         if (candidate.directionality == currentDirection) {
           currentGroup.add(candidate);
@@ -841,96 +899,90 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       if (currentGroup.isNotEmpty) {
         result.add(_ReadingOrderDirectionalGroupData(currentGroup));
       }
-      // Sort the groups that all have the same directionality separately.
+      // Sort each group separately. Each group has the same directionality.
       for (final _ReadingOrderDirectionalGroupData bandGroup in result) {
-        mergeSort<_ReadingOrderSortData>(bandGroup.members, compare: compareBeginningSide);
+        if (bandGroup.members.length == 1) {
+          continue; // No need to sort one node.
+        }
+        mergeSort<_ReadingOrderSortData>(bandGroup.members, compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) {
+          // Sort the group based on its directionality.
+          switch(bandGroup.directionality) {
+            case TextDirection.ltr:
+              return a.rect.left.compareTo(b.rect.left);
+            case TextDirection.rtl:
+              return b.rect.right.compareTo(a.rect.right);
+          }
+          assert(false, 'Unhandled directionality ${bandGroup.directionality}');
+          return 0;
+        });
       }
       return result;
     }
 
     _ReadingOrderSortData pickNext(List<_ReadingOrderSortData> candidates) {
-      // Find out if we need to collect complex information about directionality or not.
-      TextDirection mainDirection;
-      for (final _ReadingOrderSortData candidate in candidates) {
-        mainDirection ??= candidate.directionality;
-        if (mainDirection != null && candidate.directionality != null && mainDirection != candidate.directionality) {
-          // If there is more than one directionality in the candidate group,
-          // then it's indeterminate, and we need to find out what the common
-          // ancestor Directionality is to determine what it should be.
-          mainDirection = null;
-          break;
-        }
-      }
-
-      int compareTopSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
-        return a.rect.top.compareTo(b.rect.top);
-      }
-
-      // Find the topmost node.
-      mergeSort<_ReadingOrderSortData>(candidates, compare: compareTopSide);
+      // Find the topmost node by sorting on the top of the rectangles.
+      mergeSort<_ReadingOrderSortData>(candidates, compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) => a.rect.top.compareTo(b.rect.top));
       final _ReadingOrderSortData topmost = candidates.first;
 
-      final List<_ReadingOrderSortData> inBandOfTop = inBand(topmost, candidates).toList();
+      // Find the candidates that are in the same horizontal band as the current one.
+      List<_ReadingOrderSortData> inBand(_ReadingOrderSortData current, Iterable<_ReadingOrderSortData> candidates) {
+        final Rect band = Rect.fromLTRB(double.negativeInfinity, current.rect.top, double.infinity, current.rect.bottom);
+        return candidates.where((_ReadingOrderSortData item) {
+          return !item.rect.intersect(band).isEmpty;
+        }).toList();
+      }
+      final List<_ReadingOrderSortData> inBandOfTop = inBand(topmost, candidates);
+      assert(topmost.rect.isEmpty || inBandOfTop.isNotEmpty); // It has to have at least topmost in it if the topmost is not degenerate.
 
-      // The topmost rect in is in a band by itself.
-      if (inBandOfTop.isEmpty) {
+      // The topmost rect in is in a band by itself, so just return that one.
+      if (inBandOfTop.length <= 1) {
         return topmost;
       }
 
       // Now that we know there are others in the same band as the topmost, then pick
       // the one at the beginning, depending on the text direction in force.
 
-      // Collect the top band into sorted groups with the same directionality.
+      // Find out the directionality of the nearest common Directionality
+      // ancestor for all nodes. This provides a base directionality to use for
+      // the ordering of the groups.
+      final TextDirection nearestCommonDirectionality = _ReadingOrderSortData.commonDirectionalityOf(inBandOfTop);
+
+      // Do an initial common-directionality-based sort to get consistent geometric
+      // ordering for grouping into directionality groups. It has to use the
+      // common directionality to be able to group into sane groups for the
+      // given directionality, since rectangles can overlap and give different
+      // results for different directionalities.
+      mergeSort<_ReadingOrderSortData>(inBandOfTop, compare: (_ReadingOrderSortData a,_ReadingOrderSortData b) {
+        switch(nearestCommonDirectionality) {
+          case TextDirection.ltr:
+            return a.rect.left.compareTo(b.rect.left);
+          case TextDirection.rtl:
+            return b.rect.right.compareTo(a.rect.right);
+        }
+        assert(false, 'Unhandled directionality $nearestCommonDirectionality');
+        return 0;
+      });
+
+      // Collect the top band into internally sorted groups with shared directionality.
       final List<_ReadingOrderDirectionalGroupData> bandGroups = collectDirectionalityGroups(inBandOfTop);
-      if (bandGroups.length > 1) {
-        // Here things get interesting.
-        // Since we have more than one group, that means that we need to
-        // determine what the "base" directionality of the groups is by finding
-        // the nearest common Directionality ancestor to determine how to order
-        // the groups themselves.
-        TextDirection commonDirectionality(_ReadingOrderSortData a, _ReadingOrderSortData b) {
-          List<Directionality> getDirectionalityAncestors(BuildContext context) {
-            final List<Directionality> result = <Directionality>[];
-            context.visitAncestorElements((Element element) {
-              if (element.widget is Directionality) {
-                result.add(element.widget as Directionality);
-              }
-              return true;
-            });
-            return result;
-          }
-          final List<Directionality> aAncestors = getDirectionalityAncestors(a.node.context);
-          final List<Directionality> bAncestors = getDirectionalityAncestors(b.node.context);
-          final Set<Directionality> common = aAncestors.toSet().intersection(bAncestors.toSet());
-          if (common.isEmpty) {
-            return null;
-          }
-          // Find the closest common one.
-          return aAncestors.firstWhere(common.contains).textDirection;
-        }
-
-        // Sort the groups based on their directionality and bounding boxes.
-        int compareGroupBeginningSide(_ReadingOrderDirectionalGroupData a, _ReadingOrderDirectionalGroupData b) {
-          if (a.directionality == b.directionality) {
-            switch(a.directionality) {
-              case TextDirection.ltr:
-                return a.rect.left.compareTo(b.rect.left);
-              case TextDirection.rtl:
-                return -a.rect.right.compareTo(b.rect.right);
-            }
-          }
-          TextDirection common = commonDirectionality(a, b);
-
-        }
-
-      } else {
+      if (bandGroups.length == 1) {
         // There's only one directionality group, so just send back the first
-        // one in that group.
-        if (inBandOfTop.isNotEmpty) {
-          return bandGroups.first.members.first;
-        }
+        // one in that group, since it's already sorted.
+        return bandGroups.first.members.first;
       }
-      return topmost;
+
+      // Sort the groups based on the common directionality and bounding boxes.
+      mergeSort<_ReadingOrderDirectionalGroupData>(bandGroups, compare: (_ReadingOrderDirectionalGroupData a, _ReadingOrderDirectionalGroupData b) {
+        switch(nearestCommonDirectionality) {
+          case TextDirection.ltr:
+            return a.rect.left.compareTo(b.rect.left);
+          case TextDirection.rtl:
+            return b.rect.right.compareTo(a.rect.right);
+        }
+        assert(false, 'Unhandled directionality $nearestCommonDirectionality');
+        return 0;
+      });
+      return bandGroups.first.members.first;
     }
 
     final List<_ReadingOrderSortData> data = <_ReadingOrderSortData>[

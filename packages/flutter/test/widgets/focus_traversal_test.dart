@@ -538,6 +538,220 @@ void main() {
       expect(secondFocusNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
     });
+
+    testWidgets('Focus order is correct in the presence of different directionalities.', (WidgetTester tester) async {
+      const int nodeCount = 10;
+      final FocusScopeNode scopeNode = FocusScopeNode();
+      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: FocusScope(
+              node: scopeNode,
+              child: Column(
+                children: <Widget>[
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Row(children: <Widget>[
+                      Focus(
+                        focusNode: nodes[0],
+                        child: Container(width: 10, height: 10),
+                      ),
+                      Focus(
+                        focusNode: nodes[1],
+                        child: Container(width: 10, height: 10),
+                      ),
+                      Focus(
+                        focusNode: nodes[2],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ]),
+                  ),
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Row(children: <Widget>[
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Focus(
+                          focusNode: nodes[3],
+                          child: Container(width: 10, height: 10),
+                        ),
+                      ),
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Focus(
+                          focusNode: nodes[4],
+                          child: Container(width: 10, height: 10),
+                        ),
+                      ),
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Focus(
+                          focusNode: nodes[5],
+                          child: Container(width: 10, height: 10),
+                        ),
+                      ),
+                    ]),
+                  ),
+                  Row(children: <Widget>[
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Focus(
+                        focusNode: nodes[6],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ),
+                    Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Focus(
+                        focusNode: nodes[7],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ),
+                    Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Focus(
+                        focusNode: nodes[8],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ),
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Focus(
+                        focusNode: nodes[9],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The last four *are* correct: the Row is sensitive to the directionality
+      // too.
+      final List<int> expectedOrder = <int>[0, 1, 2, 4, 3, 5, 6, 7, 8, 9];
+      final List<int> order = <int>[];
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(expectedOrder));
+    });
+
+    testWidgets('Focus order is reading order regardless of widget order, even when overlapping.', (WidgetTester tester) async {
+      const int nodeCount = 10;
+      final FocusScopeNode scopeNode = FocusScopeNode();
+      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: FocusScope(
+              node: scopeNode,
+              child: Stack(
+                alignment: const Alignment(-1, -1),
+                children: List<Widget>.generate(nodeCount, (int index) {
+                  // Boxes that all have the same origin corner.
+                  return Focus(
+                    focusNode: nodes[index],
+                    child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      List<int> expectedOrder = <int>[9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
+      List<int> order = <int>[];
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(expectedOrder));
+
+      // Concentric widgets.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: FocusScope(
+              node: scopeNode,
+              child: Stack(
+                alignment: const Alignment(0, 0),
+                children: List<Widget>.generate(nodeCount, (int index) {
+                  // Boxes that all have the same origin corner.
+                  return Focus(
+                    focusNode: nodes[index],
+                    child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expectedOrder = <int>[9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
+      order = <int>[];
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(expectedOrder));
+
+      // Stacked (vertically) and centered (horizontally, on each other)
+      // widgets, not overlapping.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: FocusScope(
+              node: scopeNode,
+              child: Stack(
+                alignment: const Alignment(0, 0),
+                children: List<Widget>.generate(nodeCount, (int index) {
+                  // Boxes that all have the same origin corner.
+                  return Positioned(
+                    top: 5.0 * index * (index + 1),
+                    left: 5.0 * (10 - index),
+                    child: Focus(
+                      focusNode: nodes[index],
+                      child: Container(
+                        decoration: BoxDecoration(border: Border.all()),
+                        width: 10.0 * (index + 1),
+                        height: 10.0 * (index + 1),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expectedOrder = <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+      order = <int>[];
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(expectedOrder));
+    });
   });
 
   group(OrderedTraversalPolicy, () {
