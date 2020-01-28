@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
@@ -105,13 +106,16 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    print(_logger.runtimeType);
     if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),
         fileSystem: _fileSystem,
-        logger: _logger,
+        // TODO(jonahwilliams): determine a better way to inject the logger,
+        // since it is constructed on-demand.
+        logger: _logger ?? globals.logger,
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,
