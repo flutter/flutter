@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
 import 'focus_manager.dart';
+import 'inherited_model.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
@@ -479,10 +480,16 @@ abstract class Widget extends DiagnosticableTree {
   // a mounted element. The encoding of each `Widget` must match the corresponding
   // `Element` encoding in `Element._debugConcreteSubtype`.
   static int _debugConcreteSubtype(Widget widget) {
-    return widget is StatelessWidget ? 1 :
-           widget is StatefulWidget ? 2 :
-           widget is SingleChildRenderObjectWidget ? 3 :
-           widget is InheritedWidget? 4 :
+    return widget is StatefulWidget ? 1 :
+           widget is StatelessWidget ? 2 :
+           widget is InheritedModel ? 3 :
+           widget is InheritedWidget ? 4 :
+           widget is ParentDataWidget ? 5 :
+           widget is ProxyWidget ? 6 :
+           widget is LeafRenderObjectWidget ? 7 :
+           widget is SingleChildRenderObjectWidget? 8 :
+           widget is MultiChildRenderObjectWidget ? 9 :
+           widget is RenderObjectWidget ? 10 :
            0;
     }
 }
@@ -2855,10 +2862,16 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   // a mounted element. The encoding of each `Element` must match the corresponding
   // `Widget`` encoding in `Widget._debugConcreteSubtype`.
   static int _debugConcreteSubtype(Element element) {
-    return element is StatelessElement ? 1 :
-           element is StatefulElement ? 2 :
-           element is SingleChildRenderObjectElement ? 3 :
+    return element is StatefulElement ? 1 :
+           element is StatelessElement ? 2 :
+           element is InheritedModelElement ? 3 :
            element is InheritedElement ? 4 :
+           element is ParentDataElement ? 5 :
+           element is ProxyElement ? 6 :
+           element is LeafRenderObjectElement ? 7 :
+           element is SingleChildRenderObjectElement ? 8 :
+           element is MultiChildRenderObjectElement ? 9 :
+           element is RenderObjectElement ? 10 :
            0;
   }
 
