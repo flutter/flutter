@@ -2101,6 +2101,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(Scaffold oldWidget) {
     // Update the Floating Action Button Animator, and then schedule the Floating Action Button for repositioning.
+    // TODO: Generalize. Update not only for FABs but for additionalFABs as well.
     if (widget.floatingActionButtonAnimator != oldWidget.floatingActionButtonAnimator) {
       _fabStatuses[_primaryFABKey].animator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
     }
