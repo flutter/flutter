@@ -10,6 +10,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 
 import 'fuchsia_sdk.dart';
+import 'fuchsia_utils.dart';
 
 /// This is a basic wrapper class for the Fuchsia SDK's `pm` tool.
 class FuchsiaPM {
@@ -109,14 +110,16 @@ class FuchsiaPM {
     if (fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
-    host = host.replaceAll('%', '%25');
+    if (isIPv6Address(host.split('%').first)) {
+      host = '[${host.replaceAll('%', '%25')}]';
+    }
     final List<String> command = <String>[
       fuchsiaArtifacts.pm.path,
       'serve',
       '-repo',
       repoPath,
       '-l',
-      '[$host]:$port',
+      '$host:$port',
     ];
     final Process process = await processUtils.start(command);
     process.stdout

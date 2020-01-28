@@ -32,7 +32,27 @@ void main() {
       mockProcessUtils = MockProcessUtils();
     });
 
-    testUsingContext('serve', () async {
+    testUsingContext('serve - IPv4 address', () async {
+      when(mockProcessUtils.start(any)).thenAnswer((_) {
+        return Future<Process>.value(createMockProcess());
+      });
+
+      await FuchsiaPM().serve('<repo>', '127.0.0.1', 43819);
+
+      verify(mockProcessUtils.start(<String>[
+        'pm',
+        'serve',
+        '-repo',
+        '<repo>',
+        '-l',
+        '127.0.0.1:43819',
+      ])).called(1);
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => mockFuchsiaArtifacts,
+      ProcessUtils: () => mockProcessUtils,
+    });
+
+    testUsingContext('serve - IPv6 address', () async {
       when(mockProcessUtils.start(any)).thenAnswer((_) {
         return Future<Process>.value(createMockProcess());
       });
