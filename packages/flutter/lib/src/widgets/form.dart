@@ -198,7 +198,7 @@ class FormState extends State<Form> {
   /// returns true if there are no errors.
   ///
   /// The form will rebuild to report the results.
-  /// 
+  ///
   /// See also:
   ///   * [isValid], which will only check validity, but not rebuild the UI.
   bool validate() {
@@ -215,7 +215,7 @@ class FormState extends State<Form> {
 
   /// Check whether all the fields in this form are valid without changing
   /// the display state.
-  /// 
+  ///
   /// See also:
   ///   * [validate], which will validate and show any error on screen.
   bool isValid() {
@@ -365,7 +365,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   bool get hasError => _errorText != null;
 
   /// True if the current value is valid.
-  /// 
+  ///
   /// Calling this will not set [errorText] or [hasError] and it will not
   /// display the error in Screen. Use [validate] for that.
   bool get isValid => widget.validator?.call(_value) == null;
@@ -386,7 +386,7 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
   /// were no errors.
-  /// 
+  ///
   /// In order to get the validity without setting [errorText] or [hasError],
   /// use [isValid] instead.
   bool validate() {
