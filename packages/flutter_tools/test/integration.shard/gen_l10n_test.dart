@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -29,11 +28,11 @@ void main() {
 
   tearDown(() async {
     await _flutter.stop();
-    //tryToDelete(tempDir);
+    tryToDelete(tempDir);
   });
 
   Future<void> runCommand(List<String> command) async {
-    final ProcessResult result = await LocalProcessManager().run(
+    final ProcessResult result = await const LocalProcessManager().run(
       command,
       workingDirectory: tempDir.path,
     );
@@ -58,10 +57,12 @@ void main() {
     final Completer<void> l10nEnd = Completer<void>();
     final StringBuffer stdout = StringBuffer();
     final StreamSubscription<String> subscription = _flutter.stdout.listen((String line) {
-      if (line.contains('#l10n END'))
-        l10nEnd.complete();
-      if (line.contains('#l10n'))
+      if (line.contains('#l10n')) {
         stdout.writeln(line.substring(line.indexOf('#l10n')));
+      }
+      if (line.contains('#l10n END')) {
+        l10nEnd.complete();
+      }
     });
     await _flutter.run();
     await l10nEnd.future;

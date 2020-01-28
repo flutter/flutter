@@ -15,7 +15,7 @@ class GenL10nProject extends Project {
   @override
   Future<void> setUpIn(Directory dir) {
     this.dir = dir;
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), app_en);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
     return super.setUpIn(dir);
   }
 
@@ -74,7 +74,7 @@ class Home extends StatelessWidget {
       }
     }
     finally {
-        print('#l10n END\n');
+      print('#l10n END\n');
     }
     return Container();
   }
@@ -91,7 +91,7 @@ void main() {
 }
 ''';
 
-  final String app_en = r'''
+  final String appEn = r'''
 {
   "@@locale": "en",
 
