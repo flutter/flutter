@@ -505,20 +505,6 @@ task:
     COCOAPODS_DISABLE_STATS: true
     CPU: 2
     MEMORY: 8G
-  pub_cache:
-    folder: $HOME/.pub-cache
-    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"; echo 1
-    populate_script:
-      - git fetch origin
-      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-      - flutter update-packages
-  flutter_pkg_cache:
-    folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/*.version; echo 1
-    populate_script:
-      - git fetch origin
-      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-      - flutter precache --no-android --no-ios
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version; echo 1
@@ -526,12 +512,26 @@ task:
       - git fetch origin
       - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
       - flutter precache
+  flutter_pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: echo $OS; cat bin/internal/*.version; echo 1
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter precache --no-android --no-ios
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"; echo 1
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter update-packages
   setup_script:
     - date
     - which flutter
     - bundle --version
     - sudo bundle install --system --gemfile=dev/ci/mac/Gemfile
-    - sudo bundle info xcpretty
+    - sudo bundle info xcpretty --system --gemfile=dev/ci/mac/Gemfile
     - git clean -xffd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
