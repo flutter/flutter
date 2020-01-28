@@ -205,11 +205,17 @@ class _PosixProcessSignal extends ProcessSignal {
   }
 }
 
+/// A class that wraps stdout, stderr, and stdin, and exposes the allowed
+/// operations.
 class Stdio {
   const Stdio();
 
   Stream<List<int>> get stdin => io.stdin;
+
+  @visibleForTesting
   io.Stdout get stdout => io.stdout;
+
+  @visibleForTesting
   io.IOSink get stderr => io.stderr;
 
   bool get hasTerminal => io.stdout.hasTerminal;
@@ -246,27 +252,41 @@ class Stdio {
   int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
   int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
   bool get supportsAnsiEscapes => hasTerminal && io.stdout.supportsAnsiEscapes;
-}
 
-io.Stdout get stdout => globals.stdio.stdout;
-Stream<List<int>> get stdin => globals.stdio.stdin;
-io.IOSink get stderr => globals.stdio.stderr;
-bool get stdinHasTerminal => globals.stdio.stdinHasTerminal;
+  /// Writes [message] to [stderr], falling back on [fallback] if the write
+  /// throws any exception. The default fallback calls [print] on [message].
+  void stderrWrite(
+    String message, {
+    void Function(String, dynamic, StackTrace) fallback,
+  }) => _stdioWrite(stderr, message, fallback: fallback);
 
-/// Writes [message] to [sink], falling back on [fallback] if the write
-/// throws any exception. The default fallback calls [print] on [message].
-void safeStdioWrite(io.IOSink sink, String message, {
-  void Function(String, dynamic, StackTrace) fallback,
-}) {
-  try {
-    sink.write(message);
-  } catch (err, stack) {
-    if (fallback == null) {
-      print(message);
-    } else {
-      fallback(message, err, stack);
+  /// Writes [message] to [stdout], falling back on [fallback] if the write
+  /// throws any exception. The default fallback calls [print] on [message].
+  void stdoutWrite(
+    String message, {
+    void Function(String, dynamic, StackTrace) fallback,
+  }) => _stdioWrite(stdout, message, fallback: fallback);
+
+  // Helper for safeStderrWrite and safeStdoutWrite.
+  void _stdioWrite(io.IOSink sink, String message, {
+    void Function(String, dynamic, StackTrace) fallback,
+  }) {
+    try {
+      sink.write(message);
+    } catch (err, stack) {
+      if (fallback == null) {
+        print(message);
+      } else {
+        fallback(message, err, stack);
+      }
     }
   }
+
+  /// Adds [stream] to [stdout].
+  Future<void> addStdoutStream(Stream<List<int>> stream) => stdout.addStream(stream);
+
+  /// Adds [srtream] to [stderr].
+  Future<void> addStderrStream(Stream<List<int>> stream) => stderr.addStream(stream);
 }
 
 // TODO(zra): Move pid and writePidFile into `ProcessInfo`.
