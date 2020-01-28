@@ -508,15 +508,24 @@ task:
   pub_cache:
     folder: $HOME/.pub-cache
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"; echo 1
-    populate_script: flutter update-packages
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter update-packages
   flutter_pkg_cache:
     folder: bin/cache/pkg
     fingerprint_script: echo $OS; cat bin/internal/*.version; echo 1
-    populate_script: flutter precache --no-android --no-ios
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter precache --no-android --no-ios
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version; echo 1
-    populate_script: flutter precache
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter precache
   setup_script:
     - date
     - which flutter
