@@ -183,7 +183,7 @@ void main() {
     'IsValid returns false when one of the fields is invalid and does not change error display',
     (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-      final GlobalKey<FormFieldState> fieldKey = GlobalKey<FormFieldState>();
+      final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
       const String validString = 'Valid string';
       String validator(String s) => s == validString ? null : 'Error text';
 
