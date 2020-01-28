@@ -284,6 +284,12 @@ TEST(MessageLoop, TaskObserverFire) {
   ASSERT_TRUE(terminated);
 }
 
+TEST(MessageLoop, ConcurrentMessageLoopHasNonZeroWorkers) {
+  auto loop = fml::ConcurrentMessageLoop::Create(
+      0u /* explicitly specify zero workers */);
+  ASSERT_GT(loop->GetWorkerCount(), 0u);
+}
+
 TEST(MessageLoop, CanCreateAndShutdownConcurrentMessageLoopsOverAndOver) {
   for (size_t i = 0; i < 10; ++i) {
     auto loop = fml::ConcurrentMessageLoop::Create(i + 1);
