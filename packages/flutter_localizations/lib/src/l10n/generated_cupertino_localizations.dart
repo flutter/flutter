@@ -55,6 +55,9 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'vm.';
 
   @override
+  String get closeButtonLabel => r'Maak toe';
+
+  @override
   String get copyButtonLabel => r'Kopieer';
 
   @override
@@ -201,6 +204,9 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'ጥዋት';
+
+  @override
+  String get closeButtonLabel => r'ዝጋ';
 
   @override
   String get copyButtonLabel => r'ቅዳ';
@@ -351,6 +357,9 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'ص';
 
   @override
+  String get closeButtonLabel => r'إغلاق';
+
+  @override
   String get copyButtonLabel => r'نسخ';
 
   @override
@@ -497,6 +506,9 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'পূৰ্বাহ্ন';
+
+  @override
+  String get closeButtonLabel => r'বন্ধ কৰক';
 
   @override
   String get copyButtonLabel => r'প্ৰতিলিপি কৰক';
@@ -647,6 +659,9 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Bağlayın';
+
+  @override
   String get copyButtonLabel => r'Kopyalayın';
 
   @override
@@ -793,6 +808,9 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'раніцы';
+
+  @override
+  String get closeButtonLabel => r'Закрыць';
 
   @override
   String get copyButtonLabel => r'Капіраваць';
@@ -943,6 +961,9 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Затваряне';
+
+  @override
   String get copyButtonLabel => r'Копиране';
 
   @override
@@ -1089,6 +1110,9 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'বন্ধ করুন';
 
   @override
   String get copyButtonLabel => r'কপি করুন';
@@ -1239,6 +1263,9 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'prijepodne';
 
   @override
+  String get closeButtonLabel => r'Zatvaranje';
+
+  @override
   String get copyButtonLabel => r'Kopiraj';
 
   @override
@@ -1385,6 +1412,9 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Tanca';
 
   @override
   String get copyButtonLabel => r'Copia';
@@ -1535,6 +1565,9 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Zavřít';
+
+  @override
   String get copyButtonLabel => r'Kopírovat';
 
   @override
@@ -1681,6 +1714,9 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Luk';
 
   @override
   String get copyButtonLabel => r'Kopiér';
@@ -1831,6 +1867,9 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Schließen';
+
+  @override
   String get copyButtonLabel => r'Kopieren';
 
   @override
@@ -1979,6 +2018,9 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'π.μ.';
 
   @override
+  String get closeButtonLabel => r'Κλείσιμο';
+
+  @override
   String get copyButtonLabel => r'Αντιγραφή';
 
   @override
@@ -2125,6 +2167,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Close';
 
   @override
   String get copyButtonLabel => r'Copy';
@@ -2545,6 +2590,9 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'A.M.';
+
+  @override
+  String get closeButtonLabel => r'Cerrar';
 
   @override
   String get copyButtonLabel => r'Copiar';
@@ -3615,6 +3663,9 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Sule';
+
+  @override
   String get copyButtonLabel => r'Kopeeri';
 
   @override
@@ -3761,6 +3812,9 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Itxi';
 
   @override
   String get copyButtonLabel => r'Kopiatu';
@@ -3911,6 +3965,9 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'ق.ظ.';
 
   @override
+  String get closeButtonLabel => r'بستن';
+
+  @override
   String get copyButtonLabel => r'کپی';
 
   @override
@@ -4057,6 +4114,9 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'ap';
+
+  @override
+  String get closeButtonLabel => r'Sulje';
 
   @override
   String get copyButtonLabel => r'Kopioi';
@@ -4207,6 +4267,9 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Isara';
+
+  @override
   String get copyButtonLabel => r'Kopyahin';
 
   @override
@@ -4353,6 +4416,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Fermer';
 
   @override
   String get copyButtonLabel => r'Copier';
@@ -4555,6 +4621,9 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
+  String get closeButtonLabel => r'Pechar';
+
+  @override
   String get copyButtonLabel => r'Copiar';
 
   @override
@@ -4701,6 +4770,9 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Schließen';
 
   @override
   String get copyButtonLabel => r'Kopieren';
@@ -4851,6 +4923,9 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'બંધ કરો';
+
+  @override
   String get copyButtonLabel => r'કૉપિ કરો';
 
   @override
@@ -4997,6 +5072,9 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'סגירה';
 
   @override
   String get copyButtonLabel => r'העתקה';
@@ -5147,6 +5225,9 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'बंद करें';
+
+  @override
   String get copyButtonLabel => r'कॉपी करें';
 
   @override
@@ -5293,6 +5374,9 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'prijepodne';
+
+  @override
+  String get closeButtonLabel => r'Zatvaranje';
 
   @override
   String get copyButtonLabel => r'Kopiraj';
@@ -5443,6 +5527,9 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'de.';
 
   @override
+  String get closeButtonLabel => r'Bezárás';
+
+  @override
   String get copyButtonLabel => r'Másolás';
 
   @override
@@ -5589,6 +5676,9 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Փակել';
 
   @override
   String get copyButtonLabel => r'Պատճենել';
@@ -5739,6 +5829,9 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Tutup';
+
+  @override
   String get copyButtonLabel => r'Salin';
 
   @override
@@ -5885,6 +5978,9 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'f.h.';
+
+  @override
+  String get closeButtonLabel => r'Loka';
 
   @override
   String get copyButtonLabel => r'Afrita';
@@ -6035,6 +6131,9 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Chiudi';
+
+  @override
   String get copyButtonLabel => r'Copia';
 
   @override
@@ -6181,6 +6280,9 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'閉じる';
 
   @override
   String get copyButtonLabel => r'コピー';
@@ -6331,6 +6433,9 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'დახურვა';
+
+  @override
   String get copyButtonLabel => r'კოპირება';
 
   @override
@@ -6477,6 +6582,9 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'түстен кейін';
+
+  @override
+  String get closeButtonLabel => r'Жабу';
 
   @override
   String get copyButtonLabel => r'Көшіру';
@@ -6627,6 +6735,9 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'បិទ';
+
+  @override
   String get copyButtonLabel => r'ចម្លង';
 
   @override
@@ -6773,6 +6884,9 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
+
+  @override
+  String get closeButtonLabel => '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
 
   @override
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
@@ -6923,6 +7037,9 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'오전';
 
   @override
+  String get closeButtonLabel => r'닫기';
+
+  @override
   String get copyButtonLabel => r'복사';
 
   @override
@@ -7069,6 +7186,9 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'түшкө чейин';
+
+  @override
+  String get closeButtonLabel => r'Жабуу';
 
   @override
   String get copyButtonLabel => r'Көчүрүү';
@@ -7219,6 +7339,9 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'ກ່ອນທ່ຽງ';
 
   @override
+  String get closeButtonLabel => r'ປິດ';
+
+  @override
   String get copyButtonLabel => r'ສຳເນົາ';
 
   @override
@@ -7365,6 +7488,9 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'priešpiet';
+
+  @override
+  String get closeButtonLabel => r'Uždaryti';
 
   @override
   String get copyButtonLabel => r'Kopijuoti';
@@ -7515,6 +7641,9 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'priekšpusdienā';
 
   @override
+  String get closeButtonLabel => r'Aizvērt';
+
+  @override
   String get copyButtonLabel => r'Kopēt';
 
   @override
@@ -7661,6 +7790,9 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'ПРЕТПЛАДНЕ';
+
+  @override
+  String get closeButtonLabel => r'Затвори';
 
   @override
   String get copyButtonLabel => r'Копирај';
@@ -7811,6 +7943,9 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'അടയ്‌ക്കുക';
+
+  @override
   String get copyButtonLabel => r'പകർത്തുക';
 
   @override
@@ -7957,6 +8092,9 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'ӨГЛӨӨ';
+
+  @override
+  String get closeButtonLabel => r'Хаах';
 
   @override
   String get copyButtonLabel => r'Хуулах';
@@ -8107,6 +8245,9 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'बंद करा';
+
+  @override
   String get copyButtonLabel => r'कॉपी करा';
 
   @override
@@ -8253,6 +8394,9 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'PG';
+
+  @override
+  String get closeButtonLabel => r'Tutup';
 
   @override
   String get copyButtonLabel => r'Salin';
@@ -8403,6 +8547,9 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'ပိတ်ရန်';
+
+  @override
   String get copyButtonLabel => r'မိတ္တူကူးရန်';
 
   @override
@@ -8549,6 +8696,9 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Lukk';
 
   @override
   String get copyButtonLabel => r'Kopiér';
@@ -8699,6 +8849,9 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'पूर्वाह्न';
 
   @override
+  String get closeButtonLabel => r'बन्द गर्नुहोस्';
+
+  @override
   String get copyButtonLabel => r'प्रतिलिपि गर्नुहोस्';
 
   @override
@@ -8845,6 +8998,9 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'am';
+
+  @override
+  String get closeButtonLabel => r'Sluiten';
 
   @override
   String get copyButtonLabel => r'Kopiëren';
@@ -8995,6 +9151,9 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'ବନ୍ଦ କରନ୍ତୁ';
+
+  @override
   String get copyButtonLabel => r'କପି କରନ୍ତୁ';
 
   @override
@@ -9141,6 +9300,9 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'ਬੰਦ ਕਰੋ';
 
   @override
   String get copyButtonLabel => r'ਕਾਪੀ ਕਰੋ';
@@ -9291,6 +9453,9 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Zamknij';
+
+  @override
   String get copyButtonLabel => r'Kopiuj';
 
   @override
@@ -9437,6 +9602,9 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Fechar';
 
   @override
   String get copyButtonLabel => r'Copiar';
@@ -9627,6 +9795,9 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
+  String get closeButtonLabel => r'Închideți';
+
+  @override
   String get copyButtonLabel => r'Copiați';
 
   @override
@@ -9773,6 +9944,9 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'АМ';
+
+  @override
+  String get closeButtonLabel => r'Закрыть';
 
   @override
   String get copyButtonLabel => r'Копировать';
@@ -9923,6 +10097,9 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'පෙ.ව.';
 
   @override
+  String get closeButtonLabel => r'වසන්න';
+
+  @override
   String get copyButtonLabel => r'පිටපත් කරන්න';
 
   @override
@@ -10069,6 +10246,9 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Zavrieť';
 
   @override
   String get copyButtonLabel => r'Kopírovať';
@@ -10219,6 +10399,9 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'DOP.';
 
   @override
+  String get closeButtonLabel => r'Zapiranje';
+
+  @override
   String get copyButtonLabel => r'Kopiraj';
 
   @override
@@ -10367,6 +10550,9 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'paradite';
 
   @override
+  String get closeButtonLabel => r'Mbyll';
+
+  @override
   String get copyButtonLabel => r'Kopjo';
 
   @override
@@ -10513,6 +10699,9 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'пре подне';
+
+  @override
+  String get closeButtonLabel => r'Затворите';
 
   @override
   String get copyButtonLabel => r'Копирај';
@@ -10691,6 +10880,9 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get anteMeridiemAbbreviation => r'pre podne';
 
   @override
+  String get closeButtonLabel => r'Zatvorite';
+
+  @override
   String get copyButtonLabel => r'Kopiraj';
 
   @override
@@ -10786,6 +10978,9 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'FM';
+
+  @override
+  String get closeButtonLabel => r'Stäng';
 
   @override
   String get copyButtonLabel => r'Kopiera';
@@ -10936,6 +11131,9 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Funga';
+
+  @override
   String get copyButtonLabel => r'Nakili';
 
   @override
@@ -11082,6 +11280,9 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'மூடுக';
 
   @override
   String get copyButtonLabel => r'நகலெடு';
@@ -11232,6 +11433,9 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'మూసివేయి';
+
+  @override
   String get copyButtonLabel => r'కాపీ చేయి';
 
   @override
@@ -11378,6 +11582,9 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'ปิด';
 
   @override
   String get copyButtonLabel => r'คัดลอก';
@@ -11528,6 +11735,9 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Isara';
+
+  @override
   String get copyButtonLabel => r'Kopyahin';
 
   @override
@@ -11674,6 +11884,9 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'ÖÖ';
+
+  @override
+  String get closeButtonLabel => r'Kapat';
 
   @override
   String get copyButtonLabel => r'Kopyala';
@@ -11824,6 +12037,9 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'дп';
 
   @override
+  String get closeButtonLabel => r'Закрити';
+
+  @override
   String get copyButtonLabel => r'Копіювати';
 
   @override
@@ -11970,6 +12186,9 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'بند کریں';
 
   @override
   String get copyButtonLabel => r'کاپی کریں';
@@ -12120,6 +12339,9 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
+  String get closeButtonLabel => r'Yopish';
+
+  @override
   String get copyButtonLabel => r'Nusxa olish';
 
   @override
@@ -12268,6 +12490,9 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get anteMeridiemAbbreviation => r'SÁNG';
 
   @override
+  String get closeButtonLabel => r'Đóng';
+
+  @override
   String get copyButtonLabel => r'Sao chép';
 
   @override
@@ -12414,6 +12639,9 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'上午';
+
+  @override
+  String get closeButtonLabel => r'关闭';
 
   @override
   String get copyButtonLabel => r'复制';
@@ -12589,6 +12817,9 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get alertDialogLabel => r'通知';
 
   @override
+  String get closeButtonLabel => r'關閉';
+
+  @override
   String get copyButtonLabel => r'複製';
 
   @override
@@ -12734,6 +12965,9 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get closeButtonLabel => r'Vala';
 
   @override
   String get copyButtonLabel => r'Kopisha';
