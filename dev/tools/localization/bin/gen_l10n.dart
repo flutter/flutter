@@ -13,6 +13,14 @@ import '../gen_l10n.dart';
 import '../gen_l10n_types.dart';
 import '../localizations_utils.dart';
 
+String getFlutterPath() {
+  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final String flutterPath = flutterRoot == null ? 'flutter' : path.join(flutterRoot, 'bin', 'flutter');
+  return Platform.isWindows && flutterPath.contains(' ') && !flutterPath.startsWith('"')
+    ? '"$flutterPath"'
+    : flutterPath;
+}
+
 Future<void> main(List<String> arguments) async {
   final argslib.ArgParser parser = argslib.ArgParser();
   parser.addFlag(
@@ -63,8 +71,7 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
-  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
-  final String flutterBin = flutterRoot == null ? 'flutter' : path.join(flutterRoot, 'bin', 'flutter');
+  final String flutterBin = getFlutterPath();
   final String arbPathString = results['arb-dir'] as String;
   final String outputFileString = results['output-localization-file'] as String;
   final String templateArbFileName = results['template-arb-file'] as String;
