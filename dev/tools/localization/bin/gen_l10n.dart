@@ -10,6 +10,7 @@ import 'package:file/local.dart' as local;
 import 'package:path/path.dart' as path;
 
 import '../gen_l10n.dart';
+import '../gen_l10n_types.dart';
 import '../localizations_utils.dart';
 
 Future<void> main(List<String> arguments) async {

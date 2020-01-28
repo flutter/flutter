@@ -121,7 +121,6 @@ void main() {
       verify(mockProcessManager.start(
         <String>[
           'gen_snapshot',
-          '--causal_async_stacks',
           '--additional_arg',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -146,7 +145,6 @@ void main() {
       verify(mockProcessManager.start(
         <String>[
           'gen_snapshot_armv7',
-          '--causal_async_stacks',
           '--additional_arg',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -171,7 +169,6 @@ void main() {
       verify(mockProcessManager.start(
         <String>[
           'gen_snapshot_arm64',
-          '--causal_async_stacks',
           '--additional_arg',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -184,7 +181,7 @@ void main() {
               platform: TargetPlatform.android_x64, mode: BuildMode.release))
           .thenReturn('gen_snapshot');
       when(mockProcessManager.start(
-              <String>['gen_snapshot', '--causal_async_stacks', '--strip'],
+              <String>['gen_snapshot', '--strip'],
               workingDirectory: anyNamed('workingDirectory'),
               environment: anyNamed('environment')))
           .thenAnswer((_) => Future<Process>.value(mockProc));
@@ -202,7 +199,7 @@ void main() {
           darwinArch: null,
           additionalArgs: <String>['--strip']);
       verify(mockProcessManager.start(
-              <String>['gen_snapshot', '--causal_async_stacks', '--strip'],
+              <String>['gen_snapshot', '--strip'],
               workingDirectory: anyNamed('workingDirectory'),
               environment: anyNamed('environment')))
           .called(1);
@@ -329,8 +326,11 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
 
@@ -361,7 +361,7 @@ void main() {
 
       final String assembly = globals.fs.path.join(outputPath, 'snapshot_assembly.S');
       genSnapshot.outputs = <String, String>{
-        assembly: 'blah blah\n.section __DWARF\nblah blah\n',
+        assembly: 'blah blah\n',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -386,8 +386,11 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
 
@@ -406,11 +409,7 @@ void main() {
       expect(clangArgs, contains(kSDKPath));
 
       final File assemblyFile = globals.fs.file(assembly);
-      final File assemblyBitcodeFile = globals.fs.file('$assembly.stripped.S');
       expect(assemblyFile.existsSync(), true);
-      expect(assemblyBitcodeFile.existsSync(), true);
-      expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
-      expect(assemblyBitcodeFile.readAsStringSync().contains('.section __DWARF'), false);
     }, overrides: contextOverrides);
 
     testUsingContext('builds iOS armv7 profile AOT snapshot', () async {
@@ -446,8 +445,11 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
       verifyNever(mockXcode.cc(argThat(contains('-fembed-bitcode'))));
@@ -493,6 +495,9 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -529,8 +534,11 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -567,6 +575,9 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -597,6 +608,8 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -625,6 +638,8 @@ void main() {
         '--snapshot_kind=app-aot-elf',
         '--elf=build/foo/app.so',
         '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
