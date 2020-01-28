@@ -103,6 +103,9 @@ class Cache {
        _fileSystem = fileSystem ?? globals.fs,
        _platform = platform ?? globals.platform ,
        _osUtils = osUtils ?? os {
+    // TODO(zra): Move to initializer list once logger and platform parameters
+    // are required.
+    _net = Net(logger: _logger, platform: _platform);
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
 
@@ -134,6 +137,8 @@ class Cache {
   final Platform _platform;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
+
+  Net _net;
 
   static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
@@ -386,7 +391,7 @@ class Cache {
     final File cachedFile = _fileSystem.file(_fileSystem.path.join(serviceDir.path, url.pathSegments.last));
     if (!cachedFile.existsSync()) {
       try {
-        await _downloadFile(url, cachedFile);
+        await downloadFile(url, cachedFile);
       } catch (e) {
         throwToolExit('Failed to fetch third-party artifact $url: $e');
       }
@@ -438,6 +443,26 @@ class Cache {
     }
     this.includeAllPlatforms = includeAllPlatformsState;
     return allAvailible;
+  }
+
+  /// Download a file from the given [url] and write it to [location].
+  Future<void> downloadFile(Uri url, File location) async {
+    _ensureExists(location.parent);
+    await _net.fetchUrl(url, destFile: location);
+  }
+
+  Future<bool> doesRemoteExist(String message, Uri url) async {
+    final Status status = globals.logger.startProgress(
+      message,
+      timeout: timeoutConfiguration.slowOperation,
+    );
+    bool exists;
+    try {
+      exists = await _net.doesRemoteFileExist(url);
+    } finally {
+      status.stop();
+    }
+    return exists;
   }
 }
 
@@ -559,7 +584,7 @@ abstract class CachedArtifact extends ArtifactSet {
       if (!verifier(tempFile)) {
         final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
         try {
-          await _downloadFile(url, tempFile);
+          await cache.downloadFile(url, tempFile);
           status.stop();
         } catch (exception) {
           status.cancel();
@@ -741,7 +766,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     bool exists = false;
     for (final String pkgName in getPackageDirs()) {
-      exists = await _doesRemoteExist('Checking package $pkgName is available...',
+      exists = await cache.doesRemoteExist('Checking package $pkgName is available...',
           Uri.parse(url + pkgName + '.zip'));
       if (!exists) {
         return false;
@@ -751,7 +776,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     for (final List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
-      exists = await _doesRemoteExist('Checking $cacheDir tools are available...',
+      exists = await cache.doesRemoteExist('Checking $cacheDir tools are available...',
           Uri.parse(url + urlPath));
       if (!exists) {
         return false;
@@ -1303,19 +1328,6 @@ String flattenNameSubdirs(Uri url) {
   final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return globals.fs.path.joinAll(convertedPieces);
-}
-
-/// Download a file from the given [url] and write it to [location].
-Future<void> _downloadFile(Uri url, File location) async {
-  _ensureExists(location.parent);
-  await fetchUrl(url, destFile: location);
-}
-
-Future<bool> _doesRemoteExist(String message, Uri url) async {
-  final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
-  final bool exists = await doesRemoteFileExist(url);
-  status.stop();
-  return exists;
 }
 
 /// Create the given [directory] and parents, as necessary.
