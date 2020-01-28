@@ -13,6 +13,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/time.dart';
@@ -512,14 +513,10 @@ class FuchsiaDevice extends Device {
   @override
   void clearLogs() {}
 
-  bool get ipv6 {
-    try {
-      Uri.parseIPv6Address(id);
-      return true;
-    } on FormatException {
-      return false;
-    }
-  }
+  bool _ipv6;
+
+  /// [true] if the current host address is IPv6.
+  bool get ipv6 => _ipv6 ??= isIPv6Address(id);
 
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
