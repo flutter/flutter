@@ -41,6 +41,16 @@ class _TextSelectionToolbar extends StatefulWidget {
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
 
+  // Returns true iff the menu items that this widget renders will produce a
+  // different width than that of oldWidget. Width depends on the existence of
+  // callbacks for their respective buttons.
+  bool menuWidthChanged(_TextSelectionToolbar oldWidget) {
+    return (handleCut == null) != (oldWidget.handleCut == null)
+      || (handleCopy == null) != (oldWidget.handleCopy == null)
+      || (handlePaste == null) != (oldWidget.handlePaste == null)
+      || (handleSelectAll == null) != (oldWidget.handleSelectAll == null);
+  }
+
   @override
   _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
@@ -69,14 +79,26 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
   }
 
   @override
-  void didChangeDependencies() {
-    _measureItems();
-    super.didChangeDependencies();
+  void initState() {
+    _measureItemsNextFrame();
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(Widget oldWidget) {
+    // If the widget has been updated, then the content in the menu could have
+    // changed, so it will be necessary to render another frame offscreen and
+    // re-measure.
+    if (widget.menuWidthChanged(oldWidget)) {
+      _menuContentWidth = null;
+      _measureItemsNextFrame();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   // Measure how many items fit inside the container in order to decide which
   // to put in the overflow menu.
-  void _measureItems() {
+  void _measureItemsNextFrame() {
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       assert(_containerKey.currentContext != null);
       final RenderBox renderBoxContainer = _containerKey.currentContext.findRenderObject() as RenderBox;
@@ -99,11 +121,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       final double itemsWidth = renderBoxContainer.size.width - remainingContainerWidth;
 
       setState(() {
-        // TODO(justinmc): There is a bug where this is too aggressive. At the
-        // end of the line with no selection, tap "Select all". The resulting
-        // menu will show the "more" button even when it should have enough room
-        // to fit everything. I suspect a problem with this method not getting
-        // called again when the selection changes.
         _menuContentWidth = _shouldShowMoreButton
           ? itemsWidth + moreButtonWidth
           : itemsWidth;
@@ -178,13 +195,14 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
     // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
     // frame for measurement.
     if (_menuContentWidth == null) {
-      // TODO(justinmc): This doesn't actually do Offstage...
-      return _TextSelectionToolbarContainer(
-        key: _containerKey,
-        child: _TextSelectionToolbarContent(
-          items: items,
-          showMoreButton: true,
-          moreButtonKey: _moreButtonKey,
+      return Offstage(
+        child: _TextSelectionToolbarContainer(
+          key: _containerKey,
+          child: _TextSelectionToolbarContent(
+            items: items,
+            showMoreButton: true,
+            moreButtonKey: _moreButtonKey,
+          ),
         ),
       );
     }
