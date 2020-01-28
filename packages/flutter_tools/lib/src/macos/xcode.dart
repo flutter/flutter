@@ -153,6 +153,13 @@ class Xcode {
     );
   }
 
+  Future<RunResult> dsymutil(List<String> args) {
+    return _processUtils.run(
+      <String>['xcrun', 'dsymutil', ...args],
+      throwOnError: true,
+    );
+  }
+
   Future<RunResult> clang(List<String> args) {
     return _processUtils.run(
       <String>['xcrun', 'clang', ...args],
