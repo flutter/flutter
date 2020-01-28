@@ -32,7 +32,7 @@ const double kFloatingActionButtonTurnInterval = 0.125;
 /// If a [FloatingActionButton] is used on a [Scaffold] in certain positions,
 /// it is moved [kMiniButtonOffsetAdjustment] pixels closer to the edge of the screen.
 ///
-/// This is intended to be used with [FloatingActionButton.mini].
+/// This is intended to be used with [FloatingActionButton.mini] set to true.
 ///
 /// More specifically:
 /// * In the following positions, the [FloatingActionButton] is moved *horizontally*
