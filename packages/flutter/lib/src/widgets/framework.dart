@@ -473,6 +473,18 @@ abstract class Widget extends DiagnosticableTree {
     return oldWidget.runtimeType == newWidget.runtimeType
         && oldWidget.key == newWidget.key;
   }
+
+  // Return a numeric encoding of the specific `Widget` concrete subtype.
+  // This is used to determine if a hot reload modified the type hierarchy of
+  // a mounted element. The encoding of each `Widget` must match the corresponding
+  // `Element` encoding in `Element._debugConcreteSubtype`.
+  static int _debugConcreteSubtype(Widget widget) {
+    return widget is StatelessWidget ? 1 :
+           widget is StatefulWidget ? 2 :
+           widget is SingleChildRenderObjectWidget ? 3 :
+           widget is InheritedWidget? 4 :
+           0;
+    }
 }
 
 /// A widget that does not require mutable state.
@@ -2838,6 +2850,18 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return 0;
   }
 
+  // Return a numeric encoding of the specific `Element` concrete subtype.
+  // This is used to determine if a hot reload modified the type hierarchy of
+  // a mounted element. The encoding of each `Element` must match the corresponding
+  // `Widget`` encoding in `Widget._debugConcreteSubtype`.
+  static int _debugConcreteSubtype(Element element) {
+    return element is StatelessElement ? 1 :
+           element is StatefulElement ? 2 :
+           element is SingleChildRenderObjectElement ? 3 :
+           element is InheritedElement ? 4 :
+           0;
+  }
+
   /// The configuration for this element.
   @override
   Widget get widget => _widget;
@@ -3069,7 +3093,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return null;
     }
     if (child != null) {
-      bool canUpdate = true;
+      bool hasSameSuperclass = true;
       // When the type of a widget is changed between Stateful and Stateless via
       // hot reload, the element tree will end up in a partially invalid state.
       // That is, if the widget was a StatefulWidget and is now a StatelessWidget,
@@ -3077,34 +3101,37 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // referencing a StatelessWidget (and likewise with StatelessElement).
       //
       // To avoid crashing due to type errors, we need to gently guide the invalid
-      // element out of the tree. To do so, we ensure that the `canUpdate` condition
+      // element out of the tree. To do so, we ensure that the `hasSameSuperclass` condition
       // returns false which prevents us from trying to update the existing element
       // incorrectly.
       //
       // For the case where the widget becomes Stateful, we also need to avoid
       // accessing `StatelessElement.widget` as the cast on the getter will
       // cause a type error to be thrown. Here we avoid that by short-circuiting
-      // the `Widget.canUpdate` check once `canUpdate` is false.
+      // the `Widget.canUpdate` check once `hasSameSuperclass` is false.
       assert(() {
-        canUpdate = !((child is StatelessElement && newWidget is StatefulWidget) ||
-                      (child is StatefulElement && newWidget is StatelessWidget));
+        final int oldElementClass = Element._debugConcreteSubtype(child);
+        final int newWidgetClass = Widget._debugConcreteSubtype(newWidget);
+        hasSameSuperclass = oldElementClass == newWidgetClass;
         return true;
       }());
-      if (canUpdate && child.widget == newWidget) {
-        if (child.slot != newSlot)
-          updateSlotForChild(child, newSlot);
-        return child;
-      }
-      if (canUpdate && Widget.canUpdate(child.widget, newWidget)) {
-        if (child.slot != newSlot)
-          updateSlotForChild(child, newSlot);
-        child.update(newWidget);
-        assert(child.widget == newWidget);
-        assert(() {
-          child.owner._debugElementWasRebuilt(child);
-          return true;
-        }());
-        return child;
+      if (hasSameSuperclass) {
+        if (child.widget == newWidget) {
+          if (child.slot != newSlot)
+            updateSlotForChild(child, newSlot);
+          return child;
+        }
+        if (Widget.canUpdate(child.widget, newWidget)) {
+          if (child.slot != newSlot)
+            updateSlotForChild(child, newSlot);
+          child.update(newWidget);
+          assert(child.widget == newWidget);
+          assert(() {
+            child.owner._debugElementWasRebuilt(child);
+            return true;
+          }());
+          return child;
+        }
       }
       deactivateChild(child);
       assert(child._parent == null);
