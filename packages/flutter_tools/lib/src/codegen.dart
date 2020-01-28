@@ -95,7 +95,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     bool linkPlatformKernelIn = false,
     bool aot = false,
     @required BuildMode buildMode,
-    bool causalAsyncStacks = true,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     // These arguments are currently unused.
@@ -110,7 +109,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     List<String> dartDefines,
   }) async {
     if (fileSystemRoots != null || fileSystemScheme != null || depFilePath != null || targetModel != null || sdkRoot != null || packagesPath != null) {
-      globals.printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel,'
+      globals.printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel, '
         'sdkRoot, packagesPath are not supported when using the experimental '
         'build* pipeline');
     }
@@ -133,7 +132,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       linkPlatformKernelIn: linkPlatformKernelIn,
       aot: aot,
       buildMode: buildMode,
-      causalAsyncStacks: causalAsyncStacks,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
       sdkRoot: sdkRoot,

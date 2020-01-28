@@ -11,7 +11,9 @@ import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/net.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
@@ -25,7 +27,6 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
-import '../version.dart';
 
 enum _ProjectType {
   /// This is the default project with the user-managed host code.
@@ -166,6 +167,14 @@ class CreateCommand extends FlutterCommand {
     };
   }
 
+  // Lazy-initialize the net utilities with values from the context.
+  Net _cachedNet;
+  Net get _net => _cachedNet ??= Net(
+    httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+    logger: globals.logger,
+    platform: globals.platform,
+  );
+
   // If it has a .metadata file with the project_type in it, use that.
   // If it has an android dir and an android/app dir, it's a legacy app
   // If it has an ios dir and an ios/Flutter dir, it's a legacy app
@@ -219,7 +228,7 @@ class CreateCommand extends FlutterCommand {
   }
 
   /// The hostname for the Flutter docs for the current channel.
-  String get _snippetsHost => FlutterVersion.instance.channel == 'stable'
+  String get _snippetsHost => globals.flutterVersion.channel == 'stable'
         ? 'docs.flutter.io'
         : 'master-docs.flutter.io';
 
@@ -230,13 +239,14 @@ class CreateCommand extends FlutterCommand {
         'documentation and try again.');
     }
 
-    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/$sampleId.dart')));
+    final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
+    return utf8.decode(await _net.fetchUrl(snippetsUri));
   }
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String> _fetchSamplesIndexFromServer() async {
-    return utf8.decode(
-      await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json'), maxAttempts: 2));
+    final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
+    return utf8.decode(await _net.fetchUrl(snippetsUri, maxAttempts: 2));
   }
 
   /// Fetches the samples index file from the server and writes it to
@@ -628,8 +638,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
-      'flutterRevision': FlutterVersion.instance.frameworkRevision,
-      'flutterChannel': FlutterVersion.instance.channel,
+      'flutterRevision': globals.flutterVersion.frameworkRevision,
+      'flutterChannel': globals.flutterVersion.channel,
       'web': web,
       'macos': macos,
       'year': DateTime.now().year,
@@ -853,8 +863,10 @@ String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite 
   // If the destination directory is actually a file, then we refuse to
   // overwrite, on the theory that the user probably didn't expect it to exist.
   if (globals.fs.isFileSync(dirPath)) {
-    return "Invalid project name: '$dirPath' - refers to an existing file."
-        '${overwrite ? ' Refusing to overwrite a file with a directory.' : ''}';
+    final String message = "Invalid project name: '$dirPath' - refers to an existing file.";
+    return overwrite
+      ? '$message Refusing to overwrite a file with a directory.'
+      : message;
   }
 
   if (overwrite) {

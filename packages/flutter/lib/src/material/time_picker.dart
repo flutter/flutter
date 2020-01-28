@@ -239,13 +239,15 @@ class _DayPeriodControl extends StatelessWidget {
     final Color activeColor = fragmentContext.activeColor;
     final Color inactiveColor = fragmentContext.inactiveColor;
     final bool amSelected = selectedTime.period == DayPeriod.am;
-    final TextStyle amStyle = headerTextTheme.subhead.copyWith(
+    final TextStyle amStyle = headerTextTheme.subtitle1.copyWith(
       color: amSelected ? activeColor: inactiveColor
     );
-    final TextStyle pmStyle = headerTextTheme.subhead.copyWith(
+    final TextStyle pmStyle = headerTextTheme.subtitle1.copyWith(
       color: !amSelected ? activeColor: inactiveColor
     );
     final bool layoutPortrait = orientation == Orientation.portrait;
+
+    final double buttonTextScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
 
     final Widget amButton = ConstrainedBox(
       constraints: _kMinTappableRegion,
@@ -261,7 +263,11 @@ class _DayPeriodControl extends StatelessWidget {
               heightFactor: 1,
               child: Semantics(
                 selected: amSelected,
-                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
+                child: Text(
+                    materialLocalizations.anteMeridiemAbbreviation,
+                    style: amStyle,
+                    textScaleFactor: buttonTextScaleFactor,
+                ),
               ),
             ),
           ),
@@ -284,7 +290,11 @@ class _DayPeriodControl extends StatelessWidget {
               heightFactor: 1,
               child: Semantics(
                 selected: !amSelected,
-                child: Text(materialLocalizations.postMeridiemAbbreviation, style: pmStyle),
+                child: Text(
+                    materialLocalizations.postMeridiemAbbreviation,
+                    style: pmStyle,
+                    textScaleFactor: buttonTextScaleFactor,
+                ),
               ),
             ),
           ),
@@ -383,7 +393,12 @@ class _HourControl extends StatelessWidget {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
-            child: Text(formattedHour, style: hourStyle, textAlign: TextAlign.end),
+            child: Text(
+              formattedHour,
+              style: hourStyle,
+              textAlign: TextAlign.end,
+              textScaleFactor: 1.0,
+            ),
           ),
         ),
       ),
@@ -404,7 +419,7 @@ class _StringFragment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
-      child: Text(value, style: fragmentContext.inactiveStyle),
+      child: Text(value, style: fragmentContext.inactiveStyle, textScaleFactor: 1.0),
     );
   }
 }
@@ -453,7 +468,7 @@ class _MinuteControl extends StatelessWidget {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
-            child: Text(formattedMinute, style: minuteStyle, textAlign: TextAlign.start),
+            child: Text(formattedMinute, style: minuteStyle, textAlign: TextAlign.start, textScaleFactor: 1.0),
           ),
         ),
       ),
@@ -756,9 +771,9 @@ class _TimePickerHeader extends StatelessWidget {
     assert(orientation != null);
     switch (orientation) {
       case Orientation.portrait:
-        return headerTextTheme.display3.copyWith(fontSize: 60.0);
+        return headerTextTheme.headline2.copyWith(fontSize: 60.0);
       case Orientation.landscape:
-        return headerTextTheme.display2.copyWith(fontSize: 50.0);
+        return headerTextTheme.headline3.copyWith(fontSize: 50.0);
     }
     return null;
   }
@@ -1325,14 +1340,14 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   _TappableLabel _buildTappableLabel(TextTheme textTheme, int value, String label, VoidCallback onTap) {
-    final TextStyle style = textTheme.subhead;
-    // TODO(abarth): Handle textScaleFactor.
-    // https://github.com/flutter/flutter/issues/5939
+    final TextStyle style = textTheme.subtitle1;
+    final double labelScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
     return _TappableLabel(
       value: value,
       painter: TextPainter(
         text: TextSpan(style: style, text: label),
         textDirection: TextDirection.ltr,
+        textScaleFactor: labelScaleFactor,
       )..layout(),
       onTap: onTap,
     );

@@ -133,7 +133,7 @@ enum MaterialTapTargetSize {
 /// This sample creates a [MaterialApp] widget that stores `ThemeData` and
 /// passes the `ThemeData` to descendant widgets. The [AppBar] widget uses the
 /// [primaryColor] to create a blue background. The [Text] widget uses the
-/// [TextTheme.body1] to create purple text. The [FloatingActionButton] widget
+/// [TextTheme.bodyText2] to create purple text. The [FloatingActionButton] widget
 /// uses the [accentColor] to create a green background.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
@@ -143,7 +143,7 @@ enum MaterialTapTargetSize {
 ///   theme: ThemeData(
 ///     primaryColor: Colors.blue,
 ///     accentColor: Colors.green,
-///     textTheme: TextTheme(body1: TextStyle(color: Colors.purple)),
+///     textTheme: TextTheme(bodyText2: TextStyle(color: Colors.purple)),
 ///   ),
 ///   home: Scaffold(
 ///     appBar: AppBar(
@@ -316,7 +316,7 @@ class ThemeData extends Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
-    typography ??= Typography(platform: platform);
+    typography ??= Typography.material2014(platform: platform);
     TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
@@ -360,7 +360,7 @@ class ThemeData extends Diagnosticable {
     chipTheme ??= ChipThemeData.fromDefaults(
       secondaryColor: primaryColor,
       brightness: brightness,
-      labelStyle: textTheme.body2,
+      labelStyle: textTheme.bodyText1,
     );
     dialogTheme ??= const DialogTheme();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
@@ -688,7 +688,7 @@ class ThemeData extends Diagnosticable {
   /// is -4), to [VisualDensity.maximumDensity] (which is 4), inclusive, where
   /// negative values indicate a denser, more compact, UI, and positive values
   /// indicate a less dense, more expanded, UI. If a component doesn't support
-  /// the value given, it will clamp to the the nearest supported value.
+  /// the value given, it will clamp to the nearest supported value.
   ///
   /// The default for visual densities is zero for both vertical and horizontal
   /// densities, which corresponds to the default visual density of components
@@ -1812,6 +1812,16 @@ class VisualDensity extends Diagnosticable {
     return VisualDensity(
       horizontal: lerpDouble(a.horizontal, b.horizontal, t),
       vertical: lerpDouble(a.horizontal, b.horizontal, t),
+    );
+  }
+
+  /// Return a copy of [constraints] whose minimum width and height have been
+  /// updated with the [baseSizeAdjustment].
+  BoxConstraints effectiveConstraints(BoxConstraints constraints){
+    assert(constraints != null && constraints.debugAssertIsValid());
+    return constraints.copyWith(
+      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, double.infinity).toDouble(),
+      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, double.infinity).toDouble(),
     );
   }
 

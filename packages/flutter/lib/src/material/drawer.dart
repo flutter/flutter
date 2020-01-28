@@ -542,18 +542,20 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           child: Stack(
             children: <Widget>[
               BlockSemantics(
-                child: GestureDetector(
+                child: ExcludeSemantics(
                   // On Android, the back button is used to dismiss a modal.
-                  excludeFromSemantics: platformHasBackButton,
-                  onTap: close,
-                  child: Semantics(
-                    label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
-                    child: MouseRegion(
-                      opaque: true,
-                      child: Container( // The drawer's "scrim"
-                        color: _scrimColorTween.evaluate(_controller),
+                  excluding: platformHasBackButton,
+                  child: GestureDetector(
+                    onTap: close,
+                    child: Semantics(
+                      label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
+                      child: MouseRegion(
+                        opaque: true,
+                        child: Container( // The drawer's "scrim"
+                          color: _scrimColorTween.evaluate(_controller),
+                        ),
                       ),
-                    )
+                    ),
                   ),
                 ),
               ),

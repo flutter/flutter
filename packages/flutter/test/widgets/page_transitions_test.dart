@@ -157,10 +157,7 @@ void main() {
       ),
     };
 
-    await tester.pumpWidget(MaterialApp(
-      routes: routes,
-      theme: ThemeData(platform: TargetPlatform.iOS),
-    ));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     Navigator.pushNamed(containerKey1.currentContext, '/settings');
 
@@ -199,7 +196,7 @@ void main() {
     settingsOffset = tester.getTopLeft(find.text('Settings'));
     expect(settingsOffset.dx, greaterThan(100.0));
     expect(settingsOffset.dy, 100.0);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Check back gesture doesn\'t start during transitions', (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
@@ -209,10 +206,7 @@ void main() {
       '/settings': (_) => Scaffold(key: containerKey2, body: const Text('Settings')),
     };
 
-    await tester.pumpWidget(MaterialApp(
-      routes: routes,
-      theme: ThemeData(platform: TargetPlatform.iOS),
-    ));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     Navigator.pushNamed(containerKey1.currentContext, '/settings');
 
@@ -245,7 +239,7 @@ void main() {
 
     expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), findsNothing);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
   testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
@@ -256,10 +250,7 @@ void main() {
       '/sheet': (_) => PersistentBottomSheetTest(key: containerKey2),
     };
 
-    await tester.pumpWidget(MaterialApp(
-      routes: routes,
-      theme: ThemeData(platform: TargetPlatform.iOS),
-    ));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     Navigator.pushNamed(containerKey1.currentContext, '/sheet');
 
@@ -302,7 +293,7 @@ void main() {
 
     // Sheet did not call setState (since the gesture did nothing).
     expect(sheet.setStateCalled, isFalse);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Test completed future', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{

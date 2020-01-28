@@ -99,10 +99,10 @@ ThemeData _buildShrineTheme() {
 
 TextTheme _buildShrineTextTheme(TextTheme base) {
   return base.copyWith(
-    headline: base.headline.copyWith(fontWeight: FontWeight.w500),
-    title: base.title.copyWith(fontSize: 18.0),
+    headline5: base.headline5.copyWith(fontWeight: FontWeight.w500),
+    headline6: base.headline6.copyWith(fontSize: 18.0),
     caption: base.caption.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
-    body2: base.body2.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+    bodyText1: base.bodyText1.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
     button: base.button.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
   ).apply(
     fontFamily: 'Raleway',

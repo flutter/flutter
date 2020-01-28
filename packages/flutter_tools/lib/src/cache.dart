@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 
 import 'android/gradle_utils.dart';
 import 'base/common.dart';
@@ -89,7 +90,22 @@ class DevelopmentArtifact {
 class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
-  Cache({ Directory rootOverride, List<ArtifactSet> artifacts }) : _rootOverride = rootOverride {
+  Cache({
+    Directory rootOverride,
+    List<ArtifactSet> artifacts,
+    // TODO(jonahwilliams): make required once migrated to context-free.
+    Logger logger,
+    FileSystem fileSystem,
+    Platform platform,
+    OperatingSystemUtils osUtils,
+  }) : _rootOverride = rootOverride,
+       _logger = logger ?? globals.logger,
+       _fileSystem = fileSystem ?? globals.fs,
+       _platform = platform ?? globals.platform ,
+       _osUtils = osUtils ?? os {
+    // TODO(zra): Move to initializer list once logger and platform parameters
+    // are required.
+    _net = Net(logger: _logger, platform: _platform);
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
 
@@ -111,10 +127,18 @@ class Cache {
       for (final String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
+      _artifacts.add(FontSubsetArtifacts(this));
     } else {
       _artifacts.addAll(artifacts);
     }
   }
+
+  final Logger _logger;
+  final Platform _platform;
+  final FileSystem _fileSystem;
+  final OperatingSystemUtils _osUtils;
+
+  Net _net;
 
   static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
@@ -217,7 +241,7 @@ class Cache {
     if (_dartSdkVersion == null) {
       // Make the version string more customer-friendly.
       // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
-      final String justVersion = globals.platform.version.split(' ')[0];
+      final String justVersion = _platform.version.split(' ')[0];
       _dartSdkVersion = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
         final String noFlutter = match[2].replaceAll('.flutter-', ' ');
         return '${match[1]} (build ${match[1]}$noFlutter)';
@@ -234,7 +258,7 @@ class Cache {
   String _engineRevision;
 
   String get storageBaseUrl {
-    final String overrideUrl = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    final String overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
     if (overrideUrl == null) {
       return 'https://storage.googleapis.com';
     }
@@ -254,7 +278,7 @@ class Cache {
     if (_hasWarnedAboutStorageOverride) {
       return;
     }
-    globals.logger.printStatus(
+    _logger.printStatus(
       'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
       emphasis: true,
     );
@@ -264,18 +288,18 @@ class Cache {
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
     if (_rootOverride != null) {
-      return globals.fs.directory(globals.fs.path.join(_rootOverride.path, 'bin', 'cache'));
+      return _fileSystem.directory(_fileSystem.path.join(_rootOverride.path, 'bin', 'cache'));
     } else {
-      return globals.fs.directory(globals.fs.path.join(flutterRoot, 'bin', 'cache'));
+      return _fileSystem.directory(_fileSystem.path.join(flutterRoot, 'bin', 'cache'));
     }
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
   Directory getCacheDir(String name) {
-    final Directory dir = globals.fs.directory(globals.fs.path.join(getRoot().path, name));
+    final Directory dir = _fileSystem.directory(_fileSystem.path.join(getRoot().path, name));
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
-      os.chmod(dir, '755');
+      _osUtils.chmod(dir, '755');
     }
     return dir;
   }
@@ -287,7 +311,7 @@ class Cache {
   Directory getCacheArtifacts() => getCacheDir('artifacts');
 
   /// Location of LICENSE file.
-  File getLicenseFile() => globals.fs.file(globals.fs.path.join(flutterRoot, 'LICENSE'));
+  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot, 'LICENSE'));
 
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
@@ -323,7 +347,7 @@ class Cache {
   }
 
   String getVersionFor(String artifactName) {
-    final File versionFile = globals.fs.file(globals.fs.path.join(
+    final File versionFile = _fileSystem.file(globals.fs.path.join(
         _rootOverride?.path ?? flutterRoot, 'bin', 'internal',
         '$artifactName.version'));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
@@ -339,7 +363,7 @@ class Cache {
   }
 
   File getStampFileFor(String artifactName) {
-    return globals.fs.file(globals.fs.path.join(getRoot().path, '$artifactName.stamp'));
+    return _fileSystem.file(_fileSystem.path.join(getRoot().path, '$artifactName.stamp'));
   }
 
   /// Returns `true` if either [entity] is older than the tools stamp or if
@@ -358,16 +382,16 @@ class Cache {
     final Uri url = Uri.parse(urlStr);
     final Directory thirdPartyDir = getArtifactDirectory('third_party');
 
-    final Directory serviceDir = globals.fs.directory(globals.fs.path.join(thirdPartyDir.path, serviceName));
+    final Directory serviceDir = _fileSystem.directory(_fileSystem.path.join(thirdPartyDir.path, serviceName));
     if (!serviceDir.existsSync()) {
       serviceDir.createSync(recursive: true);
-      os.chmod(serviceDir, '755');
+      _osUtils.chmod(serviceDir, '755');
     }
 
-    final File cachedFile = globals.fs.file(globals.fs.path.join(serviceDir.path, url.pathSegments.last));
+    final File cachedFile = _fileSystem.file(_fileSystem.path.join(serviceDir.path, url.pathSegments.last));
     if (!cachedFile.existsSync()) {
       try {
-        await _downloadFile(url, cachedFile);
+        await downloadFile(url, cachedFile);
       } catch (e) {
         throwToolExit('Failed to fetch third-party artifact $url: $e');
       }
@@ -383,7 +407,7 @@ class Cache {
     }
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
-        globals.printTrace('Artifact $artifact is not required, skipping update.');
+        _logger.printTrace('Artifact $artifact is not required, skipping update.');
         continue;
       }
       if (artifact.isUpToDate()) {
@@ -393,7 +417,7 @@ class Cache {
         await artifact.update();
       } on SocketException catch (e) {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
-          globals.printError(
+          _logger.printError(
             'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
             'If you\'re in China, please see this page: '
             'https://flutter.dev/community/china',
@@ -409,16 +433,36 @@ class Cache {
     String engineVersion,
     bool includeAllPlatforms = true,
   }) async {
-    final bool includeAllPlatformsState = globals.cache.includeAllPlatforms;
+    final bool includeAllPlatformsState = this.includeAllPlatforms;
     bool allAvailible = true;
-    globals.cache.includeAllPlatforms = includeAllPlatforms;
+    this.includeAllPlatforms = includeAllPlatforms;
     for (final ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
         allAvailible &= await cachedArtifact.checkForArtifacts(engineVersion);
       }
     }
-    globals.cache.includeAllPlatforms = includeAllPlatformsState;
+    this.includeAllPlatforms = includeAllPlatformsState;
     return allAvailible;
+  }
+
+  /// Download a file from the given [url] and write it to [location].
+  Future<void> downloadFile(Uri url, File location) async {
+    _ensureExists(location.parent);
+    await _net.fetchUrl(url, destFile: location);
+  }
+
+  Future<bool> doesRemoteExist(String message, Uri url) async {
+    final Status status = globals.logger.startProgress(
+      message,
+      timeout: timeoutConfiguration.slowOperation,
+    );
+    bool exists;
+    try {
+      exists = await _net.doesRemoteFileExist(url);
+    } finally {
+      status.stop();
+    }
+    return exists;
   }
 }
 
@@ -493,7 +537,16 @@ abstract class CachedArtifact extends ArtifactSet {
       }
     }
     await updateInner();
-    cache.setStampFor(stampName, version);
+    try {
+      cache.setStampFor(stampName, version);
+    } on FileSystemException catch (err) {
+      globals.printError(
+        'The new artifact "$name" was downloaded, but Flutter failed to update '
+        'its stamp file, receiving the error "$err". '
+        'Flutter can continue, but the artifact may be re-downloaded on '
+        'subsequent invocations until the problem is resolved.',
+      );
+    }
     _removeDownloadedFiles();
   }
 
@@ -531,7 +584,7 @@ abstract class CachedArtifact extends ArtifactSet {
       if (!verifier(tempFile)) {
         final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
         try {
-          await _downloadFile(url, tempFile);
+          await cache.downloadFile(url, tempFile);
           status.stop();
         } catch (exception) {
           status.cancel();
@@ -682,7 +735,10 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = globals.fs.directory(globals.fs.path.join(location.path, cacheDir));
-      await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
+
+      // Avoid printing things like 'Downloading linux-x64 tools...' multiple times.
+      final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
+      await _downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 
@@ -710,7 +766,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     bool exists = false;
     for (final String pkgName in getPackageDirs()) {
-      exists = await _doesRemoteExist('Checking package $pkgName is available...',
+      exists = await cache.doesRemoteExist('Checking package $pkgName is available...',
           Uri.parse(url + pkgName + '.zip'));
       if (!exists) {
         return false;
@@ -720,7 +776,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     for (final List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
-      exists = await _doesRemoteExist('Checking $cacheDir tools are available...',
+      exists = await cache.doesRemoteExist('Checking $cacheDir tools are available...',
           Uri.parse(url + urlPath));
       if (!exists) {
         return false;
@@ -1149,6 +1205,33 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   }
 }
 
+/// Cached artifacts for font subsetting.
+class FontSubsetArtifacts extends EngineCachedArtifact {
+  FontSubsetArtifacts(Cache cache) : super(artifactName, cache, DevelopmentArtifact.universal);
+
+  static const String artifactName = 'font-subset';
+
+  @override
+  List<List<String>> getBinaryDirs() {
+    const Map<String, List<String>> artifacts = <String, List<String>> {
+      'macos': <String>['darwin-x64', 'darwin-x64/$artifactName.zip'],
+      'linux': <String>['linux-x64', 'linux-x64/$artifactName.zip'],
+      'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
+    };
+    final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
+    if (binaryDirs == null) {
+      throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+    }
+    return <List<String>>[binaryDirs];
+  }
+
+  @override
+  List<String> getLicenseDirs() => const <String>[];
+
+  @override
+  List<String> getPackageDirs() => const <String>[];
+}
+
 /// Cached iOS/USB binary artifacts.
 class IosUsbArtifacts extends CachedArtifact {
   IosUsbArtifacts(String name, Cache cache) : super(
@@ -1245,19 +1328,6 @@ String flattenNameSubdirs(Uri url) {
   final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return globals.fs.path.joinAll(convertedPieces);
-}
-
-/// Download a file from the given [url] and write it to [location].
-Future<void> _downloadFile(Uri url, File location) async {
-  _ensureExists(location.parent);
-  await fetchUrl(url, destFile: location);
-}
-
-Future<bool> _doesRemoteExist(String message, Uri url) async {
-  final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
-  final bool exists = await doesRemoteFileExist(url);
-  status.stop();
-  return exists;
 }
 
 /// Create the given [directory] and parents, as necessary.

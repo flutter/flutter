@@ -233,8 +233,8 @@ class ProxyAnimation extends Animation<double>
   @override
   String toString() {
     if (parent == null)
-      return '$runtimeType(null; ${super.toStringDetails()} ${value.toStringAsFixed(3)})';
-    return '$parent\u27A9$runtimeType';
+      return '${objectRuntimeType(this, 'ProxyAnimation')}(null; ${super.toStringDetails()} ${value.toStringAsFixed(3)})';
+    return '$parent\u27A9${objectRuntimeType(this, 'ProxyAnimation')}';
   }
 }
 
@@ -310,7 +310,7 @@ class ReverseAnimation extends Animation<double>
 
   @override
   String toString() {
-    return '$parent\u27AA$runtimeType';
+    return '$parent\u27AA${objectRuntimeType(this, 'ReverseAnimation')}';
   }
 }
 
@@ -594,8 +594,8 @@ class TrainHoppingAnimation extends Animation<double>
   @override
   String toString() {
     if (_nextTrain != null)
-      return '$currentTrain\u27A9$runtimeType(next: $_nextTrain)';
-    return '$currentTrain\u27A9$runtimeType(no next)';
+      return '$currentTrain\u27A9${objectRuntimeType(this, 'TrainHoppingAnimation')}(next: $_nextTrain)';
+    return '$currentTrain\u27A9${objectRuntimeType(this, 'TrainHoppingAnimation')}(no next)';
   }
 }
 
@@ -655,7 +655,7 @@ abstract class CompoundAnimation<T> extends Animation<T>
 
   @override
   String toString() {
-    return '$runtimeType($first, $next)';
+    return '${objectRuntimeType(this, 'CompoundAnimation')}($first, $next)';
   }
 
   AnimationStatus _lastStatus;
