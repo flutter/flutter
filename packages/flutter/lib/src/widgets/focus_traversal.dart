@@ -800,25 +800,43 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       });
     }
 
+    List<List<_ReadingOrderSortData>> collectGroups(Iterable<_ReadingOrderSortData> candidates) {
+      TextDirection currentDirection = candidates.first.directionality;
+      List<_ReadingOrderSortData> currentGroup = <_ReadingOrderSortData>[];
+      final List<List<_ReadingOrderSortData>> result = <List<_ReadingOrderSortData>>[];
+      for (final _ReadingOrderSortData candidate in candidates) {
+        if (candidate.directionality == currentDirection) {
+          currentGroup.add(candidate);
+          continue;
+        }
+        currentDirection = candidate.directionality;
+        result.add(currentGroup);
+        currentGroup = <_ReadingOrderSortData>[candidate];
+      }
+      return result;
+    }
+
     _ReadingOrderSortData pickFirst(List<_ReadingOrderSortData> candidates) {
+      // Find out if we need to collect complex information about directionality or not.
+      TextDirection mainDirection;
+      for (final _ReadingOrderSortData candidate in candidates) {
+        mainDirection ??= candidate.directionality;
+        if (mainDirection != null && candidate.directionality != null && mainDirection != candidate.directionality) {
+          // If there is more than one directionality in the candidate group,
+          // then it's indeterminate, and we need to find out what the common
+          // ancestor Directionality is to determine what it should be.
+          mainDirection = null;
+          break;
+        }
+      }
+
       int compareBeginningSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
-        if (a.directionality == b.directionality) {
-          if (a.directionality == TextDirection.ltr) {
-            return a.rect.left.compareTo(b.rect.left);
-          } else {
-            return -a.rect.right.compareTo(b.rect.right);
-          }
+        assert(a.directionality == b.directionality);
+        if (a.directionality == TextDirection.ltr) {
+          return a.rect.left.compareTo(b.rect.left);
+        } else {
+          return -a.rect.right.compareTo(b.rect.right);
         }
-        // If the directionalities are different, sort ltr to the left, and
-        // rtl to the right.
-        switch(a.directionality) {
-          case TextDirection.ltr:
-            return -1;
-          case TextDirection.rtl:
-            return 1;
-        }
-        assert(false, 'Directionality ${a.directionality} not handled.');
-        return 0;
       }
 
       int compareTopSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
@@ -831,7 +849,19 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       // If there are any others in the band of the topmost, then pick the
       // leftmost one.
       final List<_ReadingOrderSortData> inBandOfTop = inBand(topmost, candidates).toList();
-      mergeSort<_ReadingOrderSortData>(inBandOfTop, compare: compareBeginningSide);
+      final List<List<_ReadingOrderSortData>> bandGroups = collectGroups(inBandOfTop);
+      // Sort the groups that all have the same directionality.
+      for (final List<_ReadingOrderSortData> bandGroup in bandGroups) {
+        mergeSort<_ReadingOrderSortData>(bandGroup, compare: compareBeginningSide);
+      }
+      if (bandGroups.length > 1) {
+        // Here things get interesting.
+        // Since we have more than one group, that means that we need to
+        // determine what the "base" directionality of the groups is by finding
+        // the nearest common Directionality ancestor to determine how to order
+        // the groups themselves.
+        // TBD...
+      }
       if (inBandOfTop.isNotEmpty) {
         return inBandOfTop.first;
       }
@@ -856,7 +886,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       sortedList.add(current);
       unplaced.remove(current);
     }
-    return sortedList.map((_ReadingOrderSortData item) => item.node);
+    return sortedList.map<FocusNode>((_ReadingOrderSortData item) => item.node);
   }
 }
 
