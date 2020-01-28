@@ -202,6 +202,7 @@ class AndroidAot extends AotElfBase {
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
     final Directory output = environment.buildDir.childDirectory(_androidAbiName);
+    final String saveDebuggingInformation = environment.defines[kSaveDebuggingInformation];
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');
     }
@@ -219,6 +220,7 @@ class AndroidAot extends AotElfBase {
       outputPath: output.path,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
+      saveDebuggingInformation: saveDebuggingInformation,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

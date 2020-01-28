@@ -18,6 +18,7 @@ class BuildInfo {
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
+    this.saveDebuggingInformation,
   });
 
   final BuildMode mode;
@@ -54,6 +55,11 @@ class BuildInfo {
   /// On Android it is used as versionName.
   /// On Xcode builds it is used as CFBundleShortVersionString,
   final String buildName;
+
+  /// If provided, a file path to save debugging information from dwarf stack
+  /// traces. If null, stack trace information is not stripped from the
+  /// executable.
+  final String saveDebuggingInformation;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);

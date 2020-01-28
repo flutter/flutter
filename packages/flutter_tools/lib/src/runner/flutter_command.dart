@@ -363,6 +363,13 @@ abstract class FlutterCommand extends Command<void> {
       negatable: false,
       hide: !verboseHelp,
       help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    argParser.addOption('save-debugging-info',
+      help: 'Save a debug file used to symbolicate crashes from release mode applications. When provided '
+        'Allows more information to be removed from the snapshot, reducing code size. Requires usage of '
+        'the "flutter symbolicate" command to translate back into a readable stack trace.',
+      valueHelp: '/some/where/safe/',
+      hide: true,
+    );
   }
 
   void addShrinkingFlag() {

@@ -93,6 +93,7 @@ class AOTSnapshotter {
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
+    @required String saveDebuggingInformation,
     bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
@@ -165,6 +166,10 @@ class AOTSnapshotter {
       // Faster async/await
       '--no-causal-async-stacks',
       '--lazy-async-stacks',
+      if (saveDebuggingInformation != null) ...<String>[
+        '--dwarf-stack-traces',
+        '--save-debugging-info=${globals.fs.path.join(saveDebuggingInformation, 'app.debug')}'
+      ]
     ]);
 
     genSnapshotArgs.add(mainPath);

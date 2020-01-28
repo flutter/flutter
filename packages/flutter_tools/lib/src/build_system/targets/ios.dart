@@ -35,6 +35,7 @@ abstract class AotAssemblyBase extends Target {
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+    final String saveDebuggingInformation = environment.defines[kSaveDebuggingInformation];
     final List<DarwinArch> iosArchs = environment.defines[kIosArchs]?.split(',')?.map(getIOSArchForName)?.toList()
         ?? <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
@@ -54,6 +55,7 @@ abstract class AotAssemblyBase extends Target {
         darwinArch: iosArch,
         bitcode: bitcode,
         quiet: true,
+        saveDebuggingInformation: saveDebuggingInformation,
       ));
     }
     final List<int> results = await Future.wait(pending);
