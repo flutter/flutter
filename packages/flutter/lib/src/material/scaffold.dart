@@ -2718,3 +2718,7 @@ class _ScaffoldScope extends InheritedWidget {
     return hasDrawer != oldWidget.hasDrawer;
   }
 }
+
+class _FABStatus {
+
+}
