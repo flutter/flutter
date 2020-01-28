@@ -85,7 +85,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
   }
 
   @override
-  void didUpdateWidget(Widget oldWidget) {
+  void didUpdateWidget(_TextSelectionToolbar oldWidget) {
     // If the widget has been updated, then the content in the menu could have
     // changed, so it will be necessary to render another frame offscreen and
     // re-measure.
