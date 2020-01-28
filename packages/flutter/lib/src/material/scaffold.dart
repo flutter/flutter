@@ -2003,15 +2003,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // Floating Action Button API
   AnimationController _floatingActionButtonMoveController;
-  FloatingActionButtonAnimator _floatingActionButtonAnimator;
-  FloatingActionButtonLocation _previousFloatingActionButtonLocation;
-  FloatingActionButtonLocation _floatingActionButtonLocation;
   AnimationController _floatingActionButtonVisibilityController;
-
-  // Additional Floating Action Button API
-  Map<Key, FloatingActionButtonLocation> _additionalFloatingActionButtonPreviousLocations;
-  Map<Key, FloatingActionButtonLocation> _additionalFloatingActionButtonLocations;
-  Map<Key, FloatingActionButtonAnimator> _additionalFloatingActionButtonAnimators;
 
   /// Gets the current value of the visibility animation for the
   /// [Scaffold.floatingActionButton].
@@ -2442,26 +2434,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeTopPadding: true,
       removeRightPadding: true,
       removeBottomPadding: true,
-    );
-
-    widget.additionalFloatingActionButtonConfigurations.forEach(
-      (Key key, FloatingActionButtonConfiguration configuration) {
-        _addIfNonNull(
-          children,
-          _FloatingActionButtonTransition(
-            child: configuration.button,
-            fabMoveAnimation: _floatingActionButtonMoveController,
-            fabMotionAnimator: _additionalFloatingActionButtonAnimators[key],
-            geometryNotifier: _geometryNotifier,
-            currentController: _floatingActionButtonVisibilityController,
-          ),
-          key,
-          removeLeftPadding: true,
-          removeTopPadding: true,
-          removeRightPadding: true,
-          removeBottomPadding: true,
-        );
-      }
     );
 
     switch (themeData.platform) {
