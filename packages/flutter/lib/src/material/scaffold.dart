@@ -2448,7 +2448,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       (Key key, FloatingActionButtonConfiguration configuration) {
         _addIfNonNull(
           children,
-          configuration.button,
+          _FloatingActionButtonTransition(
+            child: configuration.button,
+            fabMoveAnimation: _floatingActionButtonMoveController,
+            fabMotionAnimator: _additionalFloatingActionButtonAnimators[key],
+            geometryNotifier: _geometryNotifier,
+            currentController: _floatingActionButtonVisibilityController,
+          ),
           key,
           removeLeftPadding: true,
           removeTopPadding: true,
