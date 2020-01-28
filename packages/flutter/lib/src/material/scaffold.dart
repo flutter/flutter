@@ -547,7 +547,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     // TODO: Add additional FAB.
-
+    // TODO: Handle later.
+    /*
     additionalFloatingActionButtonConfigurations.forEach(
       (Key key, FloatingActionButtonConfiguration configuration) {
         if (hasChild(key)) {
@@ -570,6 +571,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         }
       }
     );
+     */
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
       if (snackBarSize == Size.zero) {
