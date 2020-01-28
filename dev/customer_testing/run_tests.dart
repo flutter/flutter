@@ -272,7 +272,7 @@ Future<bool> shell(String command, Directory directory, { bool verbose = false, 
     print('>> $command');
   Process process;
   if (Platform.isWindows) {
-    process = await Process.start('CMD.EXE', <String>['/S', '/C', command], workingDirectory: directory.path);
+    process = await Process.start('CMD.EXE', <String>['/S', '/C', '$command'], workingDirectory: directory.path);
   } else {
     final List<String> segments = command.trim().split(_spaces);
     process = await Process.start(segments.first, segments.skip(1).toList(), workingDirectory: directory.path);

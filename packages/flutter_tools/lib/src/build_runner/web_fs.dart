@@ -455,7 +455,7 @@ class DebugAssetServer extends AssetServer {
           flutterProject.dartTool.path,
           'build',
           'flutter_web',
-          flutterProject.manifest.appName,
+          '${flutterProject.manifest.appName}',
           'lib',
           '${targetBaseName}_web_entrypoint.dart.js.tar.gz',
         ));

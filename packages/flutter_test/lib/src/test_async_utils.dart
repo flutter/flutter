@@ -344,14 +344,14 @@ class TestAsyncUtils {
             // a 'dart:' API, like from the Future/microtask mechanism, because dart: URLs in the
             // stack trace don't have a column number and so don't match the regexp above.
             information.add(ErrorSummary('(Unable to parse the stack frame of the method that called the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
-            information.add(ErrorDescription(stack[index]));
+            information.add(ErrorDescription('${stack[index]}'));
           }
         } else {
           information.add(ErrorSummary('(Unable to find the stack frame of the method that called the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
         }
       } else {
         information.add(ErrorSummary('(Unable to parse the stack frame of the method that called $_className.$method(). The stack may be incomplete or bogus.)'));
-        information.add(ErrorDescription(stack[index]));
+        information.add(ErrorDescription('${stack[index]}'));
       }
     } else {
       information.add(ErrorSummary('(Unable to find the method that called $_className.$method(). The stack may be incomplete or bogus.)'));

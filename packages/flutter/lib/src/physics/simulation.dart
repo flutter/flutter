@@ -54,5 +54,5 @@ abstract class Simulation {
   Tolerance tolerance;
 
   @override
-  String toString() => objectRuntimeType(this, 'Simulation');
+  String toString() => '${objectRuntimeType(this, 'Simulation')}';
 }
