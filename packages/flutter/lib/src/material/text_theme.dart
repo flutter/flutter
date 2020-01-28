@@ -227,7 +227,7 @@ class TextTheme extends Diagnosticable {
   /// Used for emphasizing text that would otherwise be [bodyText2].
   final TextStyle bodyText1;
 
-  /// Used for the default text style for [Material].
+  /// The default text style for [Material].
   final TextStyle bodyText2;
 
   /// Used for auxiliary text associated with images.
@@ -325,7 +325,7 @@ class TextTheme extends Diagnosticable {
   ///
   /// This was the name used in the material design 2014 specification. The new
   /// specification calls this `body1`, and it is exposed in this API as
-  /// [textBody1].
+  /// [bodyText1].
   @Deprecated(
     'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
     'This feature was deprecated after v1.13.8.'
@@ -336,9 +336,9 @@ class TextTheme extends Diagnosticable {
   ///
   /// This was the name used in the material design 2014 specification. The new
   /// specification calls this `body2`, and it is exposed in this API as
-  /// [textBody2].
+  /// [bodyText2].
   @Deprecated(
-    'This is the term used in the 2014 version of material design. The modern term is bodyText1. '
+    'This is the term used in the 2014 version of material design. The modern term is bodyText2. '
     'This feature was deprecated after v1.13.8.'
   )
   TextStyle get body1 => bodyText2;

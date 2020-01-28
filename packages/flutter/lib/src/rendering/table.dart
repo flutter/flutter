@@ -76,7 +76,7 @@ abstract class TableColumnWidth {
   double flex(Iterable<RenderBox> cells) => null;
 
   @override
-  String toString() => objectRuntimeType(this, 'TableColumnWidth');
+  String toString() => '${objectRuntimeType(this, 'TableColumnWidth')}';
 }
 
 /// Sizes the column according to the intrinsic dimensions of all the

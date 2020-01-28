@@ -9,149 +9,9 @@ import 'package:file/file.dart' as file;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import 'gen_l10n_templates.dart';
+import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
-
-const String defaultFileTemplate = '''
-import 'dart:async';
-
-import 'package:flutter/widgets.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
-
-import 'messages_all.dart';
-
-/// Callers can lookup localized strings with an instance of @className returned
-/// by `@className.of(context)`.
-///
-/// Applications need to include `@className.delegate()` in their app\'s
-/// localizationDelegates list, and the locales they support in the app\'s
-/// supportedLocales list. For example:
-///
-/// ```
-/// import '@importFile';
-///
-/// return MaterialApp(
-///   localizationsDelegates: @className.localizationsDelegates,
-///   supportedLocales: @className.supportedLocales,
-///   home: MyApplicationHome(),
-/// );
-/// ```
-///
-/// ## Update pubspec.yaml
-///
-/// Please make sure to update your pubspec.yaml to include the following
-/// packages:
-///
-/// ```
-/// dependencies:
-///   # Internationalization support.
-///   flutter_localizations:
-///     sdk: flutter
-///   intl: 0.16.0
-///   intl_translation: 0.17.7
-///
-///   # rest of dependencies
-/// ```
-///
-/// ## iOS Applications
-///
-/// iOS applications define key application metadata, including supported
-/// locales, in an Info.plist file that is built into the application bundle.
-/// To configure the locales supported by your app, you’ll need to edit this
-/// file.
-///
-/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
-/// Then, in the Project Navigator, open the Info.plist file under the Runner
-/// project’s Runner folder.
-///
-/// Next, select the Information Property List item, select Add Item from the
-/// Editor menu, then select Localizations from the pop-up menu.
-///
-/// Select and expand the newly-created Localizations item then, for each
-/// locale your application supports, add a new item and select the locale
-/// you wish to add from the pop-up menu in the Value field. This list should
-/// be consistent with the languages listed in the @className.supportedLocales
-/// property.
-class @className {
-  @className(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
-
-  final String _localeName;
-
-  static Future<@className> load(Locale locale) {
-    return initializeMessages(locale.toString())
-      .then<@className>((_) => @className(locale));
-  }
-
-  static @className of(BuildContext context) {
-    return Localizations.of<@className>(context, @className);
-  }
-
-  static const LocalizationsDelegate<@className> delegate = _@classNameDelegate();
-
-  /// A list of this localizations delegate along with the default localizations
-  /// delegates.
-  ///
-  /// Returns a list of localizations delegates containing this delegate along with
-  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
-  /// and GlobalWidgetsLocalizations.delegate.
-  ///
-  /// Additional delegates can be added by appending to this list in
-  /// MaterialApp. This list does not have to be used at all if a custom list
-  /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
-
-  /// A list of this localizations delegate's supported locales.
-  @supportedLocales
-
-@classMethods
-}
-
-class _@classNameDelegate extends LocalizationsDelegate<@className> {
-  const _@classNameDelegate();
-
-  @override
-  Future<@className> load(Locale locale) => @className.load(locale);
-
-  @override
-  bool isSupported(Locale locale) => <String>[@supportedLanguageCodes].contains(locale.languageCode);
-
-  @override
-  bool shouldReload(_@classNameDelegate old) => false;
-}
-''';
-
-const String getterMethodTemplate = '''
-  String get @methodName {
-    return Intl.message(
-      @message,
-      locale: _localeName,
-      @intlMethodArgs
-    );
-  }
-''';
-
-const String simpleMethodTemplate = '''
-  String @methodName(@methodParameters) {@dateFormatting@numberFormatting
-    return Intl.message(
-      @message,
-      locale: _localeName,
-      @intlMethodArgs
-    );
-  }
-''';
-
-const String pluralMethodTemplate = '''
-  String @methodName(@methodParameters) {@dateFormatting@numberFormatting
-    return Intl.plural(
-      @intlMethodArgs
-    );
-  }
-''';
 
 // The set of date formats that can be automatically localized.
 //
@@ -265,245 +125,159 @@ const Set<String> numberFormatsWithNamedParameters = <String>{
   'simpleCurrency',
 };
 
-bool _isDateParameter(Map<String, dynamic> placeholderValue) => placeholderValue['type'] == 'DateTime';
-bool _isNumberParameter(Map<String, dynamic> placeholderValue) => placeholderValue['type'] == 'Number';
-bool _containsFormatKey(Map<String, dynamic> placeholderValue, String placeholder) {
-  if (placeholderValue.containsKey('format'))
-    return true;
-  throw L10nException(
-    'The placeholder, $placeholder, has its "type" resource attribute set to '
-    'the "${placeholderValue['type']}" type. To properly resolve for the right '
-    '${placeholderValue['type']} format, the "format" attribute needs to be set '
-    'to determine which DateFormat to use. \n'
-    'Check the intl library\'s DateFormat class constructors for allowed '
-    'date formats.'
-  );
-}
-
-bool _isValidDateParameter(Map<String, dynamic> placeholderValue, String placeholder) {
-  if (allowableDateFormats.contains(placeholderValue['format']))
-    return true;
-  throw L10nException(
-    'Date format ${placeholderValue['format']} for $placeholder \n'
-    'placeholder does not have a corresponding DateFormat \n'
-    'constructor. Check the intl library\'s DateFormat class \n'
-    'constructors for allowed date formats.'
-  );
-}
-
-bool _isValidNumberParameter(Map<String, dynamic> placeholderValue, String placeholder) {
-  if (allowableNumberFormats.contains(placeholderValue['format']))
-    return true;
-  throw L10nException(
-    'Number format ${placeholderValue['format']} for the $placeholder \n'
-    'placeholder does not have a corresponding NumberFormat \n'
-    'constructor. Check the intl library\'s NumberFormat class \n'
-    'constructors for allowed number formats.'
-  );
-}
-
-List<String> genMethodParameters(Map<String, dynamic> bundle, String resourceId, String type) {
-  final Map<String, dynamic> attributesMap = bundle['@$resourceId'] as Map<String, dynamic>;
-  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
-    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    return placeholders.keys.map((String parameter) => '$type $parameter').toList();
+List<String> generateIntlMethodArgs(Message message) {
+  final List<String> methodArgs = <String>['name: \'${message.resourceId}\''];
+  if (message.description != null)
+    methodArgs.add('desc: ${generateString(message.description)}');
+  if (message.placeholders.isNotEmpty) {
+    final String args = message.placeholders.map<String>((Placeholder placeholder) {
+      return placeholder.name;
+    }).join(', ');
+    methodArgs.add('args: <Object>[$args]');
   }
-  return <String>[];
+  return methodArgs;
 }
 
-List<String> genPluralMethodParameters(Iterable<String> placeholderKeys, String countPlaceholder, String resourceId) {
-  if (placeholderKeys.isEmpty)
-    throw L10nException(
-      'Placeholders map for the $resourceId message is empty.\n'
-      'Check to see if the plural message is in the proper ICU syntax format '
-      'and ensure that placeholders are properly specified.'
-    );
-
-  return placeholderKeys.map((String parameter) {
-    if (parameter == countPlaceholder) {
-      return 'int $parameter';
-    }
-    return 'Object $parameter';
+List<String> generateInnerMethodArgs(Message message) {
+  return message.placeholders.map((Placeholder placeholder) {
+    final String arg = placeholder.name;
+    return placeholder.requiresFormatting ? '${arg}String' : arg;
   }).toList();
 }
 
-String generateDateFormattingLogic(Map<String, dynamic> arbBundle, String resourceId) {
+String generateDateFormattingLogic(Message message) {
+  if (message.placeholders.isEmpty)
+    return '';
+
   final StringBuffer result = StringBuffer();
-  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
-  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
-    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    for (final String placeholder in placeholders.keys) {
-      final dynamic value = placeholders[placeholder];
-      if (value is Map<String, dynamic> && _isValidDateFormat(value, placeholder)) {
-        result.write('''
-
-    final DateFormat ${placeholder}DateFormat = DateFormat.${value['format']}(_localeName);
-    final String ${placeholder}String = ${placeholder}DateFormat.format($placeholder);
-''');
-      }
+  for (final Placeholder placeholder in message.placeholders) {
+    if (!placeholder.isDate)
+      continue;
+    if (placeholder.format == null) {
+      throw L10nException(
+        'The placeholder, ${placeholder.name}, has its "type" resource attribute set to '
+        'the "${placeholder.type}" type. To properly resolve for the right '
+        '${placeholder.type} format, the "format" attribute needs to be set '
+        'to determine which DateFormat to use. \n'
+        'Check the intl library\'s DateFormat class constructors for allowed '
+        'date formats.'
+      );
     }
-  }
+    if (!allowableDateFormats.contains(placeholder.format)) {
+      throw L10nException(
+        'Date format "${placeholder.format}" for placeholder '
+        '${placeholder.name} does not have a corresponding DateFormat '
+        'constructor\n. Check the intl library\'s DateFormat class '
+        'constructors for allowed date formats.'
+      );
+    }
+    result.write('''
 
+    final DateFormat ${placeholder.name}DateFormat = DateFormat.${placeholder.format}(_localeName);
+    final String ${placeholder.name}String = ${placeholder.name}DateFormat.format(${placeholder.name});
+''');
+  }
   return result.toString();
 }
 
-String generateNumberFormattingLogic(Map<String, dynamic> arbBundle, String resourceId) {
-  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
-  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
-    final StringBuffer result = StringBuffer();
-    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    final StringBuffer optionalParametersString = StringBuffer();
-    for (final String placeholder in placeholders.keys) {
-      final dynamic value = placeholders[placeholder];
-      if (value is Map<String, dynamic> && _isValidNumberFormat(value, placeholder)) {
-        if (numberFormatsWithNamedParameters.contains(value['format'])) {
-          if (value.containsKey('optionalParameters')) {
-            final Map<String, dynamic> optionalParameters = value['optionalParameters'] as Map<String, dynamic>;
-            for (final String parameter in optionalParameters.keys)
-              optionalParametersString.write('\n      $parameter: ${optionalParameters[parameter]},');
-          }
+String generateNumberFormattingLogic(Message message) {
+  if (message.placeholders.isEmpty)
+    return '';
 
+  final StringBuffer result = StringBuffer();
+  for (final Placeholder placeholder in message.placeholders) {
+    if (!placeholder.isNumber)
+      continue;
+    if (!allowableNumberFormats.contains(placeholder.format)) {
+      throw L10nException(
+        'Number format ${placeholder.format} for the ${placeholder.name} '
+        'placeholder does not have a corresponding NumberFormat constructor.\n'
+        'Check the intl library\'s NumberFormat class constructors for allowed '
+        'number formats.'
+      );
+    }
+    if (numberFormatsWithNamedParameters.contains(placeholder.format)) {
+      final StringBuffer optionalParametersString = StringBuffer();
+      for (final OptionalParameter parameter in placeholder.optionalParameters)
+        optionalParametersString.write('\n      ${parameter.name}: ${parameter.value},');
+      result.write('''
+
+    final NumberFormat ${placeholder.name}NumberFormat = NumberFormat.${placeholder.format}(
+      locale: _localeName,${optionalParametersString.toString()}
+    );
+    final String ${placeholder.name}String = ${placeholder.name}NumberFormat.format(${placeholder.name});
+''');
+
+    } else {
           result.write('''
 
-    final NumberFormat ${placeholder}NumberFormat = NumberFormat.${value['format']}(
-      locale: _localeName,@optionalParameters
-    );
-    final String ${placeholder}String = ${placeholder}NumberFormat.format($placeholder);
+    final NumberFormat ${placeholder.name}NumberFormat = NumberFormat.${placeholder.format}(_localeName);
+    final String ${placeholder.name}String = ${placeholder.name}NumberFormat.format(${placeholder.name});
 ''');
-        } else {
-          result.write('''
-
-    final NumberFormat ${placeholder}NumberFormat = NumberFormat.${value['format']}(_localeName);
-    final String ${placeholder}String = ${placeholder}NumberFormat.format($placeholder);
-''');
-        }
-      }
-    }
-
-    return result
-      .toString()
-      .replaceAll('@optionalParameters', optionalParametersString.toString());
-  }
-
-  return '';
-}
-
-bool _isValidDateFormat(Map<String, dynamic> value, String placeholder) {
-  return _isDateParameter(value)
-      && _containsFormatKey(value, placeholder)
-      && _isValidDateParameter(value, placeholder);
-}
-
-bool _isValidNumberFormat(Map<String, dynamic> value, String placeholder) {
-  return _isNumberParameter(value)
-      && _containsFormatKey(value, placeholder)
-      && _isValidNumberParameter(value, placeholder);
-}
-
-bool _isValidPlaceholder(Map<String, dynamic> value, String placeholder) {
-  return _isValidDateFormat(value, placeholder) || _isValidNumberFormat(value, placeholder);
-}
-
-List<String> genIntlMethodArgs(Map<String, dynamic> arbBundle, String resourceId) {
-  final List<String> attributes = <String>['name: \'$resourceId\''];
-  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
-  if (attributesMap != null) {
-    if (attributesMap.containsKey('description')) {
-      final String description = attributesMap['description'] as String;
-      attributes.add('desc: ${generateString(description)}');
-    }
-    if (attributesMap.containsKey('placeholders')) {
-      final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-      if (placeholders.isNotEmpty) {
-        final List<String> argumentList = <String>[];
-        for (final String placeholder in placeholders.keys) {
-          final dynamic value = placeholders[placeholder];
-          if (value is Map<String, dynamic> && _isValidPlaceholder(value, placeholder)) {
-            argumentList.add('${placeholder}String');
-          } else {
-            argumentList.add(placeholder);
-          }
-        }
-        final String args = argumentList.join(', ');
-        attributes.add('args: <Object>[$args]');
-      }
     }
   }
-  return attributes;
+  return result.toString();
 }
 
-String genSimpleMethod(Map<String, dynamic> arbBundle, String resourceId) {
-  String genSimpleMethodMessage(Map<String, dynamic> arbBundle, String resourceId) {
-    String message = arbBundle[resourceId] as String;
-    final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
-    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    for (final String placeholder in placeholders.keys) {
-      final dynamic value = placeholders[placeholder];
-      if (value is Map<String, dynamic> && (_isDateParameter(value) || _isNumberParameter(value))) {
-        message = message.replaceAll('{$placeholder}', '\$${placeholder}String');
-      } else {
-        message = message.replaceAll('{$placeholder}', '\$$placeholder');
-      }
+String genSimpleMethod(Message message) {
+  String genSimpleMethodMessage() {
+    String messageValue = message.value;
+    for (final Placeholder placeholder in message.placeholders) {
+        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}');
     }
-    return generateString(message);
+    final String rawMessage = generateString(messageValue); // "r'...'"
+    return rawMessage.substring(1);
   }
 
-  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
-  if (attributesMap == null)
-    throw L10nException(
-      'Resource attribute "@$resourceId" was not found. Please ensure that each '
-      'resource id has a corresponding resource attribute.'
-    );
+  List<String> genMethodParameters([String type]) {
+    return message.placeholders.map((Placeholder placeholder) {
+      return '${type ?? placeholder.type} ${placeholder.name}';
+    }).toList();
+  }
 
-  if (attributesMap.containsKey('placeholders')) {
-    final String rawMessageString = genSimpleMethodMessage(arbBundle, resourceId); // "r'...'"
+  if (message.placeholdersRequireFormatting) {
+    return formatMethodTemplate
+      .replaceAll('@(methodName)', message.resourceId)
+      .replaceAll('@(methodParameters)', genMethodParameters().join(', '))
+      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+      .replaceAll('@(message)', genSimpleMethodMessage())
+      .replaceAll('@(innerMethodParameters)', genMethodParameters('Object').join(', '))
+      .replaceAll('@(innerMethodArgs)', generateInnerMethodArgs(message).join(', '))
+      .replaceAll('@(intlMethodArgs)', generateIntlMethodArgs(message).join(',\n        '));
+  }
+
+  if (message.placeholders.isNotEmpty) {
     return simpleMethodTemplate
-      .replaceAll('@methodName', resourceId)
-      .replaceAll('@methodParameters', genMethodParameters(arbBundle, resourceId, 'Object').join(', '))
-      .replaceAll('@dateFormatting', generateDateFormattingLogic(arbBundle, resourceId))
-      .replaceAll('@numberFormatting', generateNumberFormattingLogic(arbBundle, resourceId))
-      .replaceAll('@message', '${rawMessageString.substring(1)}')
-      .replaceAll('@intlMethodArgs', genIntlMethodArgs(arbBundle, resourceId).join(',\n      '));
+      .replaceAll('@(methodName)', message.resourceId)
+      .replaceAll('@(methodParameters)', genMethodParameters().join(', '))
+      .replaceAll('@(message)', genSimpleMethodMessage())
+      .replaceAll('@(intlMethodArgs)', generateIntlMethodArgs(message).join(',\n      '));
   }
 
-  final String rawMessageString = generateString(arbBundle[resourceId] as String); // "r'...'"
   return getterMethodTemplate
-    .replaceAll('@methodName', resourceId)
-    .replaceAll('@message', '${rawMessageString.substring(1)}')
-    .replaceAll('@intlMethodArgs', genIntlMethodArgs(arbBundle, resourceId).join(',\n      '));
+    .replaceAll('@(methodName)', message.resourceId)
+    .replaceAll('@(message)', '${genSimpleMethodMessage()}')
+    .replaceAll('@(intlMethodArgs)', generateIntlMethodArgs(message).join(',\n      '));
 }
 
-String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
-  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
-  if (attributesMap == null)
-    throw L10nException('Resource attribute for $resourceId does not exist.');
-  if (!attributesMap.containsKey('placeholders'))
+
+String generatePluralMethod(Message message) {
+  if (message.placeholders.isEmpty) {
     throw L10nException(
-      'Unable to find placeholders for the plural message: $resourceId.\n'
+      'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
       'Check to see if the plural message is in the proper ICU syntax format '
       'and ensure that placeholders are properly specified.'
     );
-  if (attributesMap['placeholders'] is! Map<String, dynamic>)
-    throw L10nException(
-      'The "placeholders" resource attribute for the message, $resourceId, '
-      'is not properly formatted. Ensure that it is a map with keys that are '
-      'strings.'
-    );
-
-  final Map<String, dynamic> placeholdersMap = attributesMap['placeholders'] as Map<String, dynamic>;
-  final Iterable<String> placeholders = placeholdersMap.keys;
-
-  // Used to determine which placeholder is the plural count placeholder
-  final String resourceValue = arbBundle[resourceId] as String;
-  final String countPlaceholder = resourceValue.split(',')[0].substring(1);
+  }
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String message = arbBundle[resourceId] as String;
-  for (final String placeholder in placeholders)
-    message = message.replaceAll('{$placeholder}', '#$placeholder#');
+  String easyMessage = message.value;
+  for (final Placeholder placeholder in message.placeholders)
+    easyMessage = easyMessage.replaceAll('{${placeholder.name}}', '#${placeholder.name}#');
 
-  final Map<String, String> pluralIds = <String, String>{
+  const Map<String, String> pluralIds = <String, String>{
     '=0': 'zero',
     '=1': 'one',
     '=2': 'two',
@@ -512,94 +286,53 @@ String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
     'other': 'other'
   };
 
-  final List<String> methodArgs = <String>[
+  final String countPlaceholder = message.value.split(',')[0].substring(1);
+  final List<String> intlMethodArgs = <String>[
     countPlaceholder,
     'locale: _localeName',
-    ...genIntlMethodArgs(arbBundle, resourceId),
+    ...generateIntlMethodArgs(message),
   ];
 
   for (final String pluralKey in pluralIds.keys) {
     final RegExp expRE = RegExp('($pluralKey){([^}]+)}');
-    final RegExpMatch match = expRE.firstMatch(message);
+    final RegExpMatch match = expRE.firstMatch(easyMessage);
     if (match != null && match.groupCount == 2) {
       String argValue = match.group(2);
-      for (final String placeholder in placeholders) {
-        final dynamic value = placeholdersMap[placeholder];
-        if (value is Map<String, dynamic> && (_isDateParameter(value) || _isNumberParameter(value))) {
-          argValue = argValue.replaceAll('#$placeholder#', '\$${placeholder}String');
+      for (final Placeholder placeholder in message.placeholders) {
+        if (placeholder.requiresFormatting) {
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}String');
         } else {
-          argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}');
         }
       }
-      methodArgs.add("${pluralIds[pluralKey]}: '$argValue'");
+      intlMethodArgs.add("${pluralIds[pluralKey]}: '$argValue'");
     }
   }
 
-  return pluralMethodTemplate
-    .replaceAll('@methodName', resourceId)
-    .replaceAll('@methodParameters', genPluralMethodParameters(placeholders, countPlaceholder, resourceId).join(', '))
-    .replaceAll('@dateFormatting', generateDateFormattingLogic(arbBundle, resourceId))
-    .replaceAll('@numberFormatting', generateNumberFormattingLogic(arbBundle, resourceId))
-    .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
-}
-
-String genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
-  const String prefix = 'static const List<Locale> supportedLocales = <Locale>[\n    Locale(';
-  const String suffix = '),\n  ];';
-
-  String resultingProperty = prefix;
-  for (final LocaleInfo locale in supportedLocales) {
-    final String languageCode = locale.languageCode;
-    final String countryCode = locale.countryCode;
-
-    resultingProperty += '\'$languageCode\'';
-    if (countryCode != null)
-      resultingProperty += ', \'$countryCode\'';
-    resultingProperty += '),\n    Locale(';
+  List<String> generatePluralMethodParameters([String type]) {
+    return message.placeholders.map((Placeholder placeholder) {
+      final String placeholderType = placeholder.name == countPlaceholder ? 'int' : (type ?? placeholder.type);
+      return '$placeholderType ${placeholder.name}';
+    }).toList();
   }
-  resultingProperty = resultingProperty.substring(0, resultingProperty.length - '),\n    Locale('.length);
-  resultingProperty += suffix;
 
-  return resultingProperty;
-}
+  if (message.placeholdersRequireFormatting) {
+    return pluralFormatMethodTemplate
+      .replaceAll('@(methodName)', message.resourceId)
+      .replaceAll('@(methodParameters)', generatePluralMethodParameters().join(', '))
+      .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+      .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+      .replaceAll('@(innerMethodParameters)', generatePluralMethodParameters('Object').join(', '))
+      .replaceAll('@(innerMethodArgs)', generateInnerMethodArgs(message).join(', '))
+      .replaceAll('@(intlMethodArgs)', intlMethodArgs.join(',\n      '));
+  }
 
-bool _isValidClassName(String className) {
-  // Dart class name cannot contain non-alphanumeric symbols
-  if (className.contains(RegExp(r'[^a-zA-Z\d]')))
-    return false;
-  // Dart class name must start with upper case character
-  if (className[0].contains(RegExp(r'[a-z]')))
-    return false;
-  // Dart class name cannot start with a number
-  if (className[0].contains(RegExp(r'\d')))
-    return false;
-  return true;
-}
-
-bool _isNotReadable(FileStat fileStat) {
-  final String rawStatString = fileStat.modeString();
-  // Removes potential prepended permission bits, such as '(suid)' and '(guid)'.
-  final String statString = rawStatString.substring(rawStatString.length - 9);
-  return !(statString[0] == 'r' || statString[3] == 'r' || statString[6] == 'r');
-}
-bool _isNotWritable(FileStat fileStat) {
-  final String rawStatString = fileStat.modeString();
-  // Removes potential prepended permission bits, such as '(suid)' and '(guid)'.
-  final String statString = rawStatString.substring(rawStatString.length - 9);
-  return !(statString[1] == 'w' || statString[4] == 'w' || statString[7] == 'w');
-}
-
-bool _isValidGetterAndMethodName(String name) {
-  // Dart getter and method name cannot contain non-alphanumeric symbols
-  if (name.contains(RegExp(r'[^a-zA-Z\d]')))
-    return false;
-  // Dart class name must start with lower case character
-  if (name[0].contains(RegExp(r'[A-Z]')))
-    return false;
-  // Dart class name cannot start with a number
-  if (name[0].contains(RegExp(r'\d')))
-    return false;
-  return true;
+  return pluralMethodTemplate
+    .replaceAll('@(methodName)', message.resourceId)
+    .replaceAll('@(methodParameters)', generatePluralMethodParameters().join(', '))
+    .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
+    .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
+    .replaceAll('@(intlMethodArgs)', intlMethodArgs.join(',\n      '));
 }
 
 /// The localizations generation class used to generate the localizations
@@ -699,6 +432,20 @@ class LocalizationsGenerator {
     className = classNameString;
   }
 
+  static bool _isNotReadable(FileStat fileStat) {
+    final String rawStatString = fileStat.modeString();
+    // Removes potential prepended permission bits, such as '(suid)' and '(guid)'.
+    final String statString = rawStatString.substring(rawStatString.length - 9);
+    return !(statString[0] == 'r' || statString[3] == 'r' || statString[6] == 'r');
+  }
+
+  static bool _isNotWritable(FileStat fileStat) {
+    final String rawStatString = fileStat.modeString();
+    // Removes potential prepended permission bits, such as '(suid)' and '(guid)'.
+    final String statString = rawStatString.substring(rawStatString.length - 9);
+    return !(statString[1] == 'w' || statString[4] == 'w' || statString[7] == 'w');
+  }
+
   /// Sets the reference [Directory] for [l10nDirectory].
   @visibleForTesting
   void setL10nDirectory(String arbPathString) {
@@ -744,15 +491,31 @@ class LocalizationsGenerator {
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
+  static bool _isValidClassName(String className) {
+    // Public Dart class name cannot begin with an underscore
+    if (className[0] == '_')
+      return false;
+    // Dart class name cannot contain non-alphanumeric symbols
+    if (className.contains(RegExp(r'[^a-zA-Z_\d]')))
+      return false;
+    // Dart class name must start with upper case character
+    if (className[0].contains(RegExp(r'[a-z]')))
+      return false;
+    // Dart class name cannot start with a number
+    if (className[0].contains(RegExp(r'\d')))
+      return false;
+    return true;
+  }
+
   /// Sets the [className] for the localizations and localizations delegate
   /// classes.
   @visibleForTesting
   set className(String classNameString) {
-    if (classNameString == null)
-      throw L10nException('classNameString argument cannot be null');
+    if (classNameString == null || classNameString.isEmpty)
+      throw L10nException('classNameString argument cannot be null or empty');
     if (!_isValidClassName(classNameString))
       throw L10nException(
-        "The 'output-class', $classNameString, is not a valid Dart class name.\n"
+        "The 'output-class', $classNameString, is not a valid public Dart class name.\n"
       );
     _className = classNameString;
   }
@@ -836,6 +599,42 @@ class LocalizationsGenerator {
     supportedLocales.addAll(localeInfoList);
   }
 
+  static bool _isValidGetterAndMethodName(String name) {
+    // Public Dart method name must not start with an underscore
+    if (name[0] == '_')
+      return false;
+    // Dart getter and method name cannot contain non-alphanumeric symbols
+    if (name.contains(RegExp(r'[^a-zA-Z_\d]')))
+      return false;
+    // Dart method name must start with lower case character
+    if (name[0].contains(RegExp(r'[A-Z]')))
+      return false;
+    // Dart class name cannot start with a number
+    if (name[0].contains(RegExp(r'\d')))
+      return false;
+    return true;
+  }
+
+  static String _genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
+    const String prefix = 'static const List<Locale> supportedLocales = <Locale>[\n    Locale(';
+    const String suffix = '),\n  ];';
+
+    String resultingProperty = prefix;
+    for (final LocaleInfo locale in supportedLocales) {
+      final String languageCode = locale.languageCode;
+      final String countryCode = locale.countryCode;
+
+      resultingProperty += '\'$languageCode\'';
+      if (countryCode != null)
+        resultingProperty += ', \'$countryCode\'';
+      resultingProperty += '),\n    Locale(';
+    }
+    resultingProperty = resultingProperty.substring(0, resultingProperty.length - '),\n    Locale('.length);
+    resultingProperty += suffix;
+
+    return resultingProperty;
+  }
+
   /// Generates the methods for the localizations class.
   ///
   /// The method parses [templateArbFile] and uses its resource ids as the
@@ -866,15 +665,18 @@ class LocalizationsGenerator {
     for (final String key in sortedArbKeys) {
       if (key.startsWith('@'))
         continue;
-      if (!_isValidGetterAndMethodName(key))
+      if (!_isValidGetterAndMethodName(key)) {
         throw L10nException(
           'Invalid key format: $key \n It has to be in camel case, cannot start '
-          'with a number, and cannot contain non-alphanumeric characters.'
+          'with a number or underscore, and cannot contain non-alphanumeric characters.'
         );
-      if (pluralValueRE.hasMatch(bundle[key] as String))
-        classMethods.add(genPluralMethod(bundle, key));
+      }
+
+      final Message message = Message(bundle, key);
+      if (pluralValueRE.hasMatch(message.value))
+        classMethods.add(generatePluralMethod(message));
       else
-        classMethods.add(genSimpleMethod(bundle, key));
+        classMethods.add(genSimpleMethod(message));
     }
   }
 
@@ -885,17 +687,11 @@ class LocalizationsGenerator {
     final String outputFileName = path.basename(outputFile.path);
     outputFile.writeAsStringSync(
       defaultFileTemplate
-        .replaceAll('@className', className)
-        .replaceAll('@classMethods', classMethods.join('\n'))
-        .replaceAll('@importFile', '$directory/$outputFileName')
-        .replaceAll('@supportedLocales', genSupportedLocaleProperty(supportedLocales))
-        .replaceAll('@supportedLanguageCodes', supportedLanguageCodes.toList().join(', '))
+        .replaceAll('@(className)', className)
+        .replaceAll('@(classMethods)', classMethods.join('\n'))
+        .replaceAll('@(importFile)', '$directory/$outputFileName')
+        .replaceAll('@(supportedLocales)', _genSupportedLocaleProperty(supportedLocales))
+        .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.toList().join(', '))
     );
   }
-}
-
-class L10nException implements Exception {
-  L10nException(this.message);
-
-  final String message;
 }

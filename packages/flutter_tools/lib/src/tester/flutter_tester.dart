@@ -65,7 +65,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
-    final FlutterVersion flutterVersion = FlutterVersion.instance;
+    final FlutterVersion flutterVersion = globals.flutterVersion;
     return 'Flutter ${flutterVersion.frameworkRevisionShort}';
   }
 

@@ -115,7 +115,7 @@ void main() {
         <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
       )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotFoundError>()));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotFoundError>()));
     });
 
     testWithoutContext('getInfoForDevice throws IOSDeviceNotFoundError when user has not yet trusted the host', () async {
@@ -170,7 +170,7 @@ void main() {
         );
         return Future<ProcessResult>.value(result);
       });
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotTrustedError>()));
     });
 
     group('screenshot', () {

@@ -25,7 +25,7 @@ void main() {
     expect(exception ,isFlutterError);
     final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 3);
-    expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics.last, isA<DiagnosticsProperty<Element>>());
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(
