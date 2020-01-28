@@ -429,94 +429,6 @@ enum TextDecorationStyle {
   wavy
 }
 
-/// {@template flutter.dart:ui.textHeightBehavior}
-/// Defines how the paragraph will apply [TextStyle.height] to the ascent of the
-/// first line and descent of the last line.
-///
-/// Each boolean value represents whether the [TextStyle.height] modifier will
-/// be applied to the corresponding metric. By default, all properties are true,
-/// and [TextStyle.height] is applied as normal. When set to false, the font's
-/// default ascent will be used.
-/// {@endtemplate}
-class TextHeightBehavior {
-
-  /// Creates a new TextHeightBehavior object.
-  ///
-  ///  * applyHeightToFirstAscent: When true, the [TextStyle.height] modifier
-  ///    will be applied to the ascent of the first line. When false, the font's
-  ///    default ascent will be used.
-  ///  * applyHeightToLastDescent: When true, the [TextStyle.height] modifier
-  ///    will be applied to the descent of the last line. When false, the font's
-  ///    default descent will be used.
-  ///
-  /// All properties default to true (height modifications applied as normal).
-  const TextHeightBehavior({
-    this.applyHeightToFirstAscent = true,
-    this.applyHeightToLastDescent = true,
-  });
-
-  /// Creates a new TextHeightBehavior object from an encoded form.
-  ///
-  /// See [encode] for the creation of the encoded form.
-  const TextHeightBehavior.fromEncoded(int encoded) : applyHeightToFirstAscent = (encoded & 0x1) == 0,
-                                                      applyHeightToLastDescent = (encoded & 0x2) == 0;
-
-
-  /// Whether to apply the [TextStyle.height] modifier to the ascent of the first
-  /// line in the paragraph.
-  ///
-  /// When true, the [TextStyle.height] modifier will be applied to to the ascent
-  /// of the first line. When false, the font's default ascent will be used and
-  /// the [TextStyle.height] will have no effect on the ascent of the first line.
-  ///
-  /// This property only has effect if a non-null [TextStyle.height] is specified.
-  ///
-  /// Defaults to true (height modifications applied as normal).
-  final bool applyHeightToFirstAscent;
-
-  /// Whether to apply the [TextStyle.height] modifier to the descent of the last
-  /// line in the paragraph.
-  ///
-  /// When true, the [TextStyle.height] modifier will be applied to to the descent
-  /// of the last line. When false, the font's default descent will be used and
-  /// the [TextStyle.height] will have no effect on the descent of the last line.
-  ///
-  /// This property only has effect if a non-null [TextStyle.height] is specified.
-  ///
-  /// Defaults to true (height modifications applied as normal).
-  final bool applyHeightToLastDescent;
-
-  /// Returns an encoded int representation of this object.
-  int encode() {
-    return (applyHeightToFirstAscent ? 0 : 1 << 0) | (applyHeightToLastDescent ? 0 : 1 << 1);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is TextHeightBehavior
-        && other.applyHeightToFirstAscent == applyHeightToFirstAscent
-        && other.applyHeightToLastDescent == applyHeightToLastDescent;
-  }
-
-  @override
-  int get hashCode {
-    return hashValues(
-      applyHeightToFirstAscent,
-      applyHeightToLastDescent,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'TextHeightBehavior('
-             'applyHeightToFirstAscent: $applyHeightToFirstAscent, '
-             'applyHeightToLastDescent: $applyHeightToLastDescent'
-           ')';
-  }
-}
-
 /// Determines if lists [a] and [b] are deep equivalent.
 ///
 /// Returns true if the lists are both null, or if they are both non-null, have
@@ -834,8 +746,6 @@ class TextStyle {
 //
 //  - Element 5: The value of |maxLines|.
 //
-//  - Element 6: The encoded value of |textHeightBehavior|.
-//
 Int32List _encodeParagraphStyle(
   TextAlign textAlign,
   TextDirection textDirection,
@@ -843,14 +753,13 @@ Int32List _encodeParagraphStyle(
   String fontFamily,
   double fontSize,
   double height,
-  TextHeightBehavior textHeightBehavior,
   FontWeight fontWeight,
   FontStyle fontStyle,
   StrutStyle strutStyle,
   String ellipsis,
   Locale locale,
 ) {
-  final Int32List result = Int32List(7); // also update paragraph_builder.cc
+  final Int32List result = Int32List(6); // also update paragraph_builder.cc
   if (textAlign != null) {
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
@@ -871,32 +780,28 @@ Int32List _encodeParagraphStyle(
     result[0] |= 1 << 5;
     result[5] = maxLines;
   }
-  if (textHeightBehavior != null) {
-    result[0] |= 1 << 6;
-    result[6] = textHeightBehavior.encode();
-  }
   if (fontFamily != null) {
-    result[0] |= 1 << 7;
+    result[0] |= 1 << 6;
     // Passed separately to native.
   }
   if (fontSize != null) {
-    result[0] |= 1 << 8;
+    result[0] |= 1 << 7;
     // Passed separately to native.
   }
   if (height != null) {
-    result[0] |= 1 << 9;
+    result[0] |= 1 << 8;
     // Passed separately to native.
   }
   if (strutStyle != null) {
-    result[0] |= 1 << 10;
+    result[0] |= 1 << 9;
     // Passed separately to native.
   }
   if (ellipsis != null) {
-    result[0] |= 1 << 11;
+    result[0] |= 1 << 10;
     // Passed separately to native.
   }
   if (locale != null) {
-    result[0] |= 1 << 12;
+    result[0] |= 1 << 11;
     // Passed separately to native.
   }
   return result;
@@ -937,9 +842,6 @@ class ParagraphStyle {
   ///   the line height to take the height as defined by the font, which may not
   ///   be exactly the height of the `fontSize`.
   ///
-  /// * `textHeightBehavior`: Specifies how the `height` multiplier is
-  ///   applied to ascent of the first line and the descent of the last line.
-  ///
   /// * `fontWeight`: The typeface thickness to use when painting the text
   ///   (e.g., bold).
   ///
@@ -967,7 +869,6 @@ class ParagraphStyle {
     String fontFamily,
     double fontSize,
     double height,
-    TextHeightBehavior textHeightBehavior,
     FontWeight fontWeight,
     FontStyle fontStyle,
     StrutStyle strutStyle,
@@ -980,7 +881,6 @@ class ParagraphStyle {
          fontFamily,
          fontSize,
          height,
-         textHeightBehavior,
          fontWeight,
          fontStyle,
          strutStyle,
@@ -1029,14 +929,11 @@ class ParagraphStyle {
              'fontWeight: ${    _encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[3]]    : "unspecified"}, '
              'fontStyle: ${     _encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[4]]     : "unspecified"}, '
              'maxLines: ${      _encoded[0] & 0x020 == 0x020 ? _encoded[5]                       : "unspecified"}, '
-             'textHeightBehavior: ${
-                                _encoded[0] & 0x040 == 0x040 ?
-                                          TextHeightBehavior.fromEncoded(_encoded[6]).toString() : "unspecified"}, '
-             'fontFamily: ${    _encoded[0] & 0x080 == 0x080 ? _fontFamily                       : "unspecified"}, '
-             'fontSize: ${      _encoded[0] & 0x100 == 0x100 ? _fontSize                         : "unspecified"}, '
-             'height: ${        _encoded[0] & 0x200 == 0x200 ? "${_height}x"                     : "unspecified"}, '
-             'ellipsis: ${      _encoded[0] & 0x400 == 0x400 ? "\"$_ellipsis\""                  : "unspecified"}, '
-             'locale: ${        _encoded[0] & 0x800 == 0x800 ? _locale                           : "unspecified"}'
+             'fontFamily: ${    _encoded[0] & 0x040 == 0x040 ? _fontFamily                       : "unspecified"}, '
+             'fontSize: ${      _encoded[0] & 0x080 == 0x080 ? _fontSize                         : "unspecified"}, '
+             'height: ${        _encoded[0] & 0x100 == 0x100 ? "${_height}x"                     : "unspecified"}, '
+             'ellipsis: ${      _encoded[0] & 0x200 == 0x200 ? "\"$_ellipsis\""                  : "unspecified"}, '
+             'locale: ${        _encoded[0] & 0x400 == 0x400 ? _locale                           : "unspecified"}'
            ')';
   }
 }
