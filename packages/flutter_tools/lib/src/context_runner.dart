@@ -102,7 +102,14 @@ Future<T> runInContext<T>(
       GenSnapshot: () => const GenSnapshot(),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
-      IMobileDevice: () => IMobileDevice(),
+      IMobileDevice: () => IMobileDevice(
+        artifacts: globals.artifacts,
+        cache: globals.cache,
+        processUtils: ProcessUtils(
+          processManager: globals.processManager,
+          logger: globals.logger,
+        ),
+      ),
       IOSDeploy: () => const IOSDeploy(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),

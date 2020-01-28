@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -17,6 +18,7 @@ import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
@@ -63,7 +65,7 @@ class LockdownReturnCode {
     }
   );
 
-  /// Parses [stderr] from ideviceinfo and returns the lockdownd error code.
+  /// Creates a new [LockdownReturnCode] from the stderr from ideviceinfo.
   ///
   /// If the parsing fails, `null` will be returned.
   factory LockdownReturnCode.fromErrorText(String stderr) {
@@ -84,19 +86,6 @@ class LockdownReturnCode {
     }
   }
 
-  /// Creates a new [LockdownReturnCode] from the specified OS exit code.
-  ///
-  /// If the [code] maps to one of the known codes, a `const` instance will be
-  /// returned.
-  factory LockdownReturnCode.fromCode(int code) {
-    //final Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
-    //  pairingDialogResponsePending.code: pairingDialogResponsePending,
-    //  invalidHostId.code: invalidHostId,
-    //};
-
-    return knownCodes.containsKey(code) ? knownCodes[code] : LockdownReturnCode._(code);
-  }
-
   static const Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
     19: pairingDialogResponsePending,
     21: invalidHostId,
@@ -108,6 +97,12 @@ class LockdownReturnCode {
   /// Message to show the user when this error occurs.
   final String userMessage;
 
+  static const LockdownReturnCode userDeniedPairing = LockdownReturnCode._(
+    18,
+    userMessage: 'Device info unavailable. You must accept the pairing dialog '
+      'on the iOS device.',
+  );
+
   /// Error code (19) indicating that the pairing dialog has been shown to the
   /// user, and the user has not yet responded as to whether to trust the host.
   static const LockdownReturnCode pairingDialogResponsePending = LockdownReturnCode._(
@@ -117,7 +112,7 @@ class LockdownReturnCode {
 
   /// Error code (21) indicating that the host is not trusted.
   ///
-  /// This can happen if the user explicitly says "do not trust this  computer"
+  /// This can happen if the user explicitly says "do not trust this computer"
   /// or if they revoke all trusted computers in the device settings.
   static const LockdownReturnCode invalidHostId = LockdownReturnCode._(
     21,
@@ -137,12 +132,24 @@ class LockdownReturnCode {
 }
 
 class IMobileDevice {
-  IMobileDevice()
-      : _ideviceIdPath = globals.artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
-        _ideviceinfoPath = globals.artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
-        _idevicenamePath = globals.artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
-        _idevicesyslogPath = globals.artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
-        _idevicescreenshotPath = globals.artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+  IMobileDevice({
+    @required Artifacts artifacts,
+    @required Cache cache,
+    @required ProcessUtils processUtils,
+  })
+      : _cache = cache,
+        _processUtils = processUtils,
+        _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
+        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
+        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
+        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+//  IMobileDevice()
+//      : _ideviceIdPath = globals.artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
+//        _ideviceinfoPath = globals.artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
+//        _idevicenamePath = globals.artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
+//        _idevicesyslogPath = globals.artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+//        _idevicescreenshotPath = globals.artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
 
   final String _ideviceIdPath;
   final String _ideviceinfoPath;
@@ -150,14 +157,17 @@ class IMobileDevice {
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
 
+  final Cache _cache;
+  final ProcessUtils _processUtils;
+
   bool get isInstalled {
-    _isInstalled ??= processUtils.exitsHappySync(
+    _isInstalled ??= _processUtils.exitsHappySync(
       <String>[
         _ideviceIdPath,
         '-h',
       ],
       environment: Map<String, String>.fromEntries(
-        <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+        <MapEntry<String, String>>[_cache.dyLdLibEntry]
       ),
     );
     return _isInstalled;
@@ -178,9 +188,9 @@ class IMobileDevice {
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
     final Map<String, String> executionEnv = Map<String, String>.fromEntries(
-      <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+      <MapEntry<String, String>>[_cache.dyLdLibEntry]
     );
-    final ProcessResult ideviceResult = (await processUtils.run(
+    final ProcessResult ideviceResult = (await _processUtils.run(
       <String>[
         _ideviceinfoPath,
         '-u',
@@ -194,7 +204,7 @@ class IMobileDevice {
     }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
-    final ProcessResult result = (await processUtils.run(
+    final ProcessResult result = (await _processUtils.run(
       <String>[
         _ideviceIdPath,
         '-l',
@@ -205,7 +215,7 @@ class IMobileDevice {
       _isWorking = true;
     } else {
       // Check that we can look up the names of any attached devices.
-      _isWorking = await processUtils.exitsHappy(
+      _isWorking = await _processUtils.exitsHappy(
         <String>[_idevicenamePath],
         environment: executionEnv,
       );
@@ -216,19 +226,19 @@ class IMobileDevice {
 
   Future<String> getAvailableDeviceIDs() async {
     try {
-      final ProcessResult result = await globals.processManager.run(
+      final RunResult result = await _processUtils.run(
         <String>[
           _ideviceIdPath,
           '-l',
         ],
         environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+          <MapEntry<String, String>>[_cache.dyLdLibEntry]
         ),
       );
       if (result.exitCode != 0) {
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
       }
-      return result.stdout as String;
+      return result.stdout;
     } on ProcessException {
       throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
     }
@@ -236,7 +246,7 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result = await globals.processManager.run(
+      final RunResult result = await _processUtils.run(
         <String>[
           _ideviceinfoPath,
           '-u',
@@ -245,11 +255,11 @@ class IMobileDevice {
           key,
         ],
         environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+          <MapEntry<String, String>>[_cache.dyLdLibEntry]
         ),
       );
-      final String stdout = result.stdout as String;
-      final String stderr = result.stderr as String;
+      final String stdout = result.stdout;
+      final String stderr = result.stderr;
       if (result.exitCode == 255 && stdout != null && stdout.contains('No device found')) {
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n$stdout. Try unlocking attached devices.');
       }
@@ -271,28 +281,28 @@ class IMobileDevice {
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
-    return processUtils.start(
+    return _processUtils.start(
       <String>[
         _idevicesyslogPath,
         '-u',
         deviceID,
       ],
       environment: Map<String, String>.fromEntries(
-        <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+        <MapEntry<String, String>>[_cache.dyLdLibEntry]
       ),
     );
   }
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
-    return processUtils.run(
+    return _processUtils.run(
       <String>[
         _idevicescreenshotPath,
         outputFile.path,
       ],
       throwOnError: true,
       environment: Map<String, String>.fromEntries(
-        <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+        <MapEntry<String, String>>[_cache.dyLdLibEntry]
       ),
     );
   }
