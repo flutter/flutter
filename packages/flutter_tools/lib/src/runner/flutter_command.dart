@@ -630,7 +630,8 @@ abstract class FlutterCommand extends Command<void> {
       final Map<CustomDimensions, String> additionalUsageValues =
         <CustomDimensions, String>{
           ...?await usageValues,
-          CustomDimensions.commandHasTerminal: io.stdout.hasTerminal ? 'true' : 'false',
+          CustomDimensions.commandHasTerminal:
+            globals.stdio.hasTerminal ? 'true' : 'false',
         };
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
