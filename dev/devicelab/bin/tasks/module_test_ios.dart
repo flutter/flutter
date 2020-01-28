@@ -393,4 +393,3 @@ Future<bool> _isAppAotBuild(Directory app) async {
 
   return symbolTable.contains('kDartIsolateSnapshotInstructions');
 }
-
