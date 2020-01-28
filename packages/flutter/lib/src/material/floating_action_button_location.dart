@@ -203,14 +203,14 @@ abstract class FloatingActionButtonLocation {
 }
 
 typedef _OffsetXFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry, {double offset});
-typedef _OffsetYFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry);
+typedef _OffsetYFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry, {double offset});
 
 class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation {
   const _StandardFloatingActionButtonLocation(
     this.offsetXFunction,
     this.offsetYFunction,
     this.name,
-    {this.adjustment = 0,}
+    {this.adjustment = 0.0,}
   );
 
   final _OffsetXFunction offsetXFunction;
@@ -222,7 +222,7 @@ class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
       offsetXFunction(scaffoldGeometry, offset: adjustment),
-      offsetYFunction(scaffoldGeometry),
+      offsetYFunction(scaffoldGeometry, offset: adjustment),
     );
   }
 
