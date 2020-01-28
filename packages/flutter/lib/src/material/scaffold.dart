@@ -2078,6 +2078,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _geometryNotifier = _ScaffoldGeometryNotifier(const ScaffoldGeometry(), context);
+
+    _fabStatuses = <Key, _FABStatus> {};
+
     _fabStatuses[const _FABKey.primary()] = _FABStatus(
       button: widget.floatingActionButton,
       location: widget.floatingActionButtonLocation ?? _kDefaultFloatingActionButtonLocation,
