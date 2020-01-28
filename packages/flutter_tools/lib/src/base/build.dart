@@ -49,7 +49,6 @@ class GenSnapshot {
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
-      '--causal_async_stacks',
       ...additionalArgs,
     ];
 
@@ -138,6 +137,11 @@ class AOTSnapshotter {
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
       genSnapshotArgs.add('--assembly=$assembly');
+      // TODO(jonahwilliams): determine the correct time to use strip
+      // since this is required for the future dwarf strack traces option.
+      if (bitcode && buildMode == BuildMode.release) {
+        genSnapshotArgs.add('--strip');
+      }
     } else {
       final String aotSharedLibrary = globals.fs.path.join(outputDir.path, 'app.so');
       outputPaths.add(aotSharedLibrary);
@@ -155,6 +159,13 @@ class AOTSnapshotter {
       // Not supported by the Pixel in 32-bit mode.
       genSnapshotArgs.add('--no-use-integer-division');
     }
+
+    // Optimization arguments.
+    genSnapshotArgs.addAll(<String>[
+      // Faster async/await
+      '--no-causal-async-stacks',
+      '--lazy-async-stacks',
+    ]);
 
     genSnapshotArgs.add(mainPath);
 
@@ -178,23 +189,6 @@ class AOTSnapshotter {
       return genSnapshotExitCode;
     }
 
-    // TODO(dnfield): This should be removed when https://github.com/dart-lang/sdk/issues/37560
-    // is resolved.
-    // The DWARF section confuses Xcode tooling, so this strips it. Ideally,
-    // gen_snapshot would provide an argument to do this automatically.
-    final bool stripSymbols = platform == TargetPlatform.ios && buildMode == BuildMode.release && bitcode;
-    if (stripSymbols) {
-      final IOSink sink = globals.fs.file('$assembly.stripped.S').openWrite();
-      for (final String line in globals.fs.file(assembly).readAsLinesSync()) {
-        if (line.startsWith('.section __DWARF')) {
-          break;
-        }
-        sink.writeln(line);
-      }
-      await sink.flush();
-      await sink.close();
-    }
-
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
     // TODO(jonahwilliams): remove when all callers are using assemble.
@@ -207,7 +201,7 @@ class AOTSnapshotter {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch,
         isIOS: platform == TargetPlatform.ios,
-        assemblyPath: stripSymbols ? '$assembly.stripped.S' : assembly,
+        assemblyPath: assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
         quiet: quiet,
@@ -244,12 +238,12 @@ class AOTSnapshotter {
     final String assemblyO = globals.fs.path.join(outputPath, 'snapshot_assembly.o');
     List<String> isysrootArgs;
     if (isIOS) {
-      final String iPhoneSDKLocation = await xcode.sdkLocation(SdkType.iPhone);
+      final String iPhoneSDKLocation = await globals.xcode.sdkLocation(SdkType.iPhone);
       if (iPhoneSDKLocation != null) {
         isysrootArgs = <String>['-isysroot', iPhoneSDKLocation];
       }
     }
-    final RunResult compileResult = await xcode.cc(<String>[
+    final RunResult compileResult = await globals.xcode.cc(<String>[
       '-arch', targetArch,
       if (isysrootArgs != null) ...isysrootArgs,
       if (bitcode) embedBitcodeArg,
@@ -277,7 +271,7 @@ class AOTSnapshotter {
       '-o', appLib,
       assemblyO,
     ];
-    final RunResult linkResult = await xcode.clang(linkArgs);
+    final RunResult linkResult = await globals.xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
       globals.printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
     }

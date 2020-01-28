@@ -302,7 +302,7 @@ class Slider extends StatefulWidget {
   /// as part of the value indicator shape.
   ///
   /// The label is rendered using the active [ThemeData]'s
-  /// [ThemeData.textTheme.body2] text style, with the
+  /// [ThemeData.textTheme.bodyText1] text style, with the
   /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text style
   /// can be overridden with [SliderThemeData.valueIndicatorTextStyle].
   ///
@@ -543,7 +543,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
       valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2.copyWith(
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
     );

@@ -130,9 +130,9 @@ class Tooltip extends StatefulWidget {
   ///
   /// If null, the message's [TextStyle] will be determined based on
   /// [ThemeData]. If [ThemeData.brightness] is set to [Brightness.dark],
-  /// [ThemeData.textTheme.body1] will be used with [Colors.white]. Otherwise,
+  /// [ThemeData.textTheme.bodyText2] will be used with [Colors.white]. Otherwise,
   /// if [ThemeData.brightness] is set to [Brightness.light],
-  /// [ThemeData.textTheme.body1] will be used with [Colors.black].
+  /// [ThemeData.textTheme.bodyText2] will be used with [Colors.black].
   final TextStyle textStyle;
 
   /// The length of time that a pointer must hover over a tooltip's widget
@@ -362,7 +362,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     TextStyle defaultTextStyle;
     BoxDecoration defaultDecoration;
     if (theme.brightness == Brightness.dark) {
-      defaultTextStyle = theme.textTheme.body1.copyWith(
+      defaultTextStyle = theme.textTheme.bodyText2.copyWith(
         color: Colors.black,
       );
       defaultDecoration = BoxDecoration(
@@ -370,7 +370,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         borderRadius: const BorderRadius.all(Radius.circular(4)),
       );
     } else {
-      defaultTextStyle = theme.textTheme.body1.copyWith(
+      defaultTextStyle = theme.textTheme.bodyText2.copyWith(
         color: Colors.white,
       );
       defaultDecoration = BoxDecoration(
@@ -504,7 +504,7 @@ class _TooltipOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.body1,
+                style: Theme.of(context).textTheme.bodyText2,
                 child: Container(
                   decoration: decoration,
                   padding: padding,

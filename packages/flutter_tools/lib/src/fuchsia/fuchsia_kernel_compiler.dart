@@ -71,6 +71,7 @@ class FuchsiaKernelCompiler {
 
       if (buildInfo.isProfile) '-Ddart.vm.profile=true',
       if (buildInfo.mode.isRelease) '-Ddart.vm.release=true',
+      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
 
       // Use bytecode and drop the ast in JIT release mode.
       if (buildInfo.isJitRelease) ...<String>[
