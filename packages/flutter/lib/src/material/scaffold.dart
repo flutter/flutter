@@ -2429,7 +2429,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _FloatingActionButtonTransition(
         child: widget.floatingActionButton,
         fabMoveAnimation: _floatingActionButtonMoveController,
-        fabMotionAnimator: _fabStatuses[_FABKey.primary()].animator,
+        fabMotionAnimator: _fabStatuses[_primaryFABKey].animator,
         geometryNotifier: _geometryNotifier,
         currentController: _floatingActionButtonVisibilityController,
       ),
