@@ -11,7 +11,9 @@ import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/net.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
@@ -165,6 +167,14 @@ class CreateCommand extends FlutterCommand {
     };
   }
 
+  // Lazy-initialize the net utilities with values from the context.
+  Net _cachedNet;
+  Net get _net => _cachedNet ??= Net(
+    httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+    logger: globals.logger,
+    platform: globals.platform,
+  );
+
   // If it has a .metadata file with the project_type in it, use that.
   // If it has an android dir and an android/app dir, it's a legacy app
   // If it has an ios dir and an ios/Flutter dir, it's a legacy app
@@ -229,13 +239,14 @@ class CreateCommand extends FlutterCommand {
         'documentation and try again.');
     }
 
-    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/$sampleId.dart')));
+    final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
+    return utf8.decode(await _net.fetchUrl(snippetsUri));
   }
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String> _fetchSamplesIndexFromServer() async {
-    return utf8.decode(
-      await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json'), maxAttempts: 2));
+    final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
+    return utf8.decode(await _net.fetchUrl(snippetsUri, maxAttempts: 2));
   }
 
   /// Fetches the samples index file from the server and writes it to

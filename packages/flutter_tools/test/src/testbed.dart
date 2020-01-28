@@ -922,4 +922,13 @@ class FakeCache implements Cache {
   @override
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
   }
+
+  @override
+  Future<void> downloadFile(Uri url, File location) async {
+  }
+
+  @override
+  Future<bool> doesRemoteExist(String message, Uri url) async {
+    return true;
+  }
 }
