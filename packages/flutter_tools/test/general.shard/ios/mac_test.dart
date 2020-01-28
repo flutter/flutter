@@ -68,68 +68,67 @@ void main() {
       );
     });
 
-    testUsingContext('isWorking returns false if libimobiledevice is not installed', () async {
-      when(mockProcessManager.runSync(
+    testWithoutContext('isWorking returns false if libimobiledevice is not installed', () async {
+      when(mockProcessUtils.exitsHappySync(
         <String>[ideviceIdPath, '-h'], environment: anyNamed('environment'),
-      )).thenReturn(ProcessResult(123, 1, '', ''));
+      )).thenReturn(false);
       expect(await iMobileDevice.isWorking, false);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Artifacts: () => mockArtifacts,
     });
 
-    testUsingContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {
-      when(mockProcessManager.run(
+    testWithoutContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {
+      when(mockProcessUtils.run(
         <String>[ideviceIdPath, '-l'],
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
       )).thenThrow(ProcessException(ideviceIdPath, <String>['-l']));
       expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
     });
 
-    testUsingContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceIdPath, '-l'],
+    testWithoutContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
+      final List<String> command = <String>[ideviceIdPath, '-l'];
+      when(mockProcessUtils.run(
+        command,
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', 'Sad today')));
+      )).thenAnswer((_) => Future<RunResult>.value(
+        RunResult(ProcessResult(1, 1, '', 'Sad today'), command)
+      ));
       expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
     });
 
-    testUsingContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceIdPath, '-l'],
+    testWithoutContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
+      final List<String> command = <String>[ideviceIdPath, '-l'];
+      when(mockProcessUtils.run(
+        command,
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'foo', '')));
+      )).thenAnswer((_) => Future<RunResult>.value(
+        RunResult(ProcessResult(1, 0, 'foo', ''), command)
+      ));
       expect(await iMobileDevice.getAvailableDeviceIDs(), 'foo');
     });
 
     testWithoutContext('getInfoForDevice throws IOSDeviceNotFoundError when ideviceinfo returns specific error code and message', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+      final List<String> command = <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'];
+      when(mockProcessUtils.run(
+        command,
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
+      )).thenAnswer((_) => Future<RunResult>.value(
+        RunResult(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', ''), command)
+      ));
       expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotFoundError>()));
     });
 
     testWithoutContext('getInfoForDevice throws IOSDeviceNotFoundError when user has not yet trusted the host', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+      final List<String> command = <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'];
+      when(mockProcessUtils.run(
+        command,
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
       )).thenAnswer((_) {
-        final ProcessResult result = ProcessResult(
+        final ProcessResult processResult = ProcessResult(
           1,
           255,
           '',
           'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.pairingDialogResponsePending.code}',
         );
-        return Future<ProcessResult>.value(result);
+        return Future<RunResult>.value(RunResult(processResult, command));
       });
       try {
         await iMobileDevice.getInfoForDevice('foo', 'bar');
@@ -142,40 +141,41 @@ void main() {
     });
 
     testWithoutContext('getInfoForDevice throws ToolExit lockdownd fails for unknown reason', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+      final List<String> command = <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'];
+      when(mockProcessUtils.run(
+        command,
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) {
-        final ProcessResult result = ProcessResult(
+      )).thenAnswer((Invocation invocation) {
+        final ProcessResult processResult = ProcessResult(
           1,
           255,
           '',
           'ERROR: Could not connect to lockdownd, error code -567',
         );
-        return Future<ProcessResult>.value(result);
+        return Future<RunResult>.value(RunResult(processResult, command));
       });
       expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsToolExit());
     });
 
     testWithoutContext('getInfoForDevice throws IOSDeviceNotFoundError when host trust is revoked', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+      final List<String> command = <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'];
+      when(mockProcessUtils.run(
+        command,
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) {
-        final ProcessResult result = ProcessResult(
+      )).thenAnswer((Invocation invocation) {
+        final ProcessResult processResult = ProcessResult(
           1,
           255,
           '',
           'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.invalidHostId.code}',
         );
-        return Future<ProcessResult>.value(result);
+        return Future<RunResult>.value(RunResult(processResult, command));
       });
       expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotTrustedError>()));
     });
 
     group('screenshot', () {
       final String outputPath = globals.fs.path.join('some', 'test', 'path', 'image.png');
-      MockProcessManager mockProcessManager;
       MockFile mockOutputFile;
 
       setUp(() {
@@ -183,20 +183,17 @@ void main() {
         mockOutputFile = MockFile();
       });
 
-      testUsingContext('error if idevicescreenshot is not installed', () async {
+      testWithoutContext('error if idevicescreenshot is not installed', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
-
+        final List<String> command = <String>[idevicescreenshotPath, outputPath];
         // Let `idevicescreenshot` fail with exit code 1.
-        when(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
-            environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-            workingDirectory: null,
-        )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
-
+        when(mockProcessUtils.run(
+          command,
+          environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+          throwOnError: true,
+          workingDirectory: null,
+        )).thenThrow(ProcessException(idevicescreenshotPath, <String>[]));
         expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Platform: () => osx,
-        Cache: () => mockCache,
       });
 
       testWithoutContext('idevicescreenshot captures and returns screenshot', () async {
