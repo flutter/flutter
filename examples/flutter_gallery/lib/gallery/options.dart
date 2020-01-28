@@ -278,13 +278,8 @@ class _TextScaleFactorItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Text size'),
                 Text(
-<<<<<<< HEAD
-                  options.textScaleFactor.label,
-                  style: Theme.of(context).primaryTextTheme.bodyText2,
-=======
                   '${options.textScaleFactor.label}',
-                  style: Theme.of(context).primaryTextTheme.body1,
->>>>>>> parent of 92cbaa3ef... remove unnecessary string interpolations (#49352)
+                  style: Theme.of(context).primaryTextTheme.bodyText2,
                 ),
               ],
             ),
@@ -329,13 +324,8 @@ class _VisualDensityItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Visual density'),
                 Text(
-<<<<<<< HEAD
-                  options.visualDensity.label,
-                  style: Theme.of(context).primaryTextTheme.bodyText2,
-=======
                   '${options.visualDensity.label}',
-                  style: Theme.of(context).primaryTextTheme.body1,
->>>>>>> parent of 92cbaa3ef... remove unnecessary string interpolations (#49352)
+                  style: Theme.of(context).primaryTextTheme.bodyText2,
                 ),
               ],
             ),
@@ -441,13 +431,8 @@ class _PlatformItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Platform mechanics'),
                  Text(
-<<<<<<< HEAD
-                   _platformLabel(options.platform),
-                   style: Theme.of(context).primaryTextTheme.bodyText2,
-=======
                    '${_platformLabel(options.platform)}',
-                   style: Theme.of(context).primaryTextTheme.body1,
->>>>>>> parent of 92cbaa3ef... remove unnecessary string interpolations (#49352)
+                   style: Theme.of(context).primaryTextTheme.bodyText2,
                  ),
               ],
             ),
