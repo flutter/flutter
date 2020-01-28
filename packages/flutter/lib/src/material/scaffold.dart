@@ -1017,7 +1017,7 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.floatingActionButtonAnimator,
-    this.additionalFloatingActionButtonConfigurations,
+    this.additionalFloatingActionButtonConfigurations = const <FloatingActionButtonConfiguration>[],
     this.persistentFooterButtons,
     this.drawer,
     this.endDrawer,
