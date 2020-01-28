@@ -63,6 +63,8 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
+  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final String flutterBin = flutterRoot == null ? 'flutter' : path.join(flutterRoot, 'bin', 'flutter');
   final String arbPathString = results['arb-dir'] as String;
   final String outputFileString = results['output-localization-file'] as String;
   final String templateArbFileName = results['template-arb-file'] as String;
@@ -91,13 +93,13 @@ Future<void> main(List<String> arguments) async {
     exitWithError(e.message);
   }
 
-  final ProcessResult pubGetResult = await Process.run('flutter', <String>['pub', 'get']);
+  final ProcessResult pubGetResult = await Process.run(flutterBin, <String>['pub', 'get']);
   if (pubGetResult.exitCode != 0) {
     stderr.write(pubGetResult.stderr);
     exit(1);
   }
 
-  final ProcessResult generateFromArbResult = await Process.run('flutter', <String>[
+  final ProcessResult generateFromArbResult = await Process.run(flutterBin, <String>[
     'pub',
     'run',
     'intl_translation:generate_from_arb',

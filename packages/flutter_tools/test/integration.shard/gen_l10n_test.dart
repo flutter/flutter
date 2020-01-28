@@ -41,6 +41,7 @@ void main() {
     final ProcessResult result = await const LocalProcessManager().run(
       command,
       workingDirectory: tempDir.path,
+      environment: <String, String>{ 'FLUTTER_ROOT': getFlutterRoot() },
     );
     if (result.exitCode != 0) {
       throw Exception('FAILED: ${command.join(' ')}\n${result.stderr}\n${result.stdout}');
