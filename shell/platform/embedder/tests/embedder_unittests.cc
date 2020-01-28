@@ -3936,7 +3936,6 @@ TEST_F(EmbedderTest, CanPostTaskToAllNativeThreads) {
 
   sync_latch.Wait();
 
-  ASSERT_GT(worker_count, 4u /* three base threads plus workers */);
   const auto engine_threads_count = worker_count + 4u;
 
   struct Captures {
