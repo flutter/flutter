@@ -211,7 +211,6 @@ abstract class FloatingActionButtonLocation {
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
 
   // TODO: Add mini{Start,End}{Top,Float,Docked}
-  // TODO: Name 4.0 and make constant.
 
   @override
   String toString() => '$runtimeType';
