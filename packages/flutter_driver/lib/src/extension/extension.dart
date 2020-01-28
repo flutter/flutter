@@ -107,20 +107,16 @@ typedef FinderConstructor = Finder Function(SerializableFinder finder);
 class FlutterDriverExtension {
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(this._requestDataHandler, this._silenceErrors) {
-    _testTextInput.register();
-
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
       'get_layer_tree': _getLayerTree,
       'get_render_tree': _getRenderTree,
-      'enter_text': _enterText,
       'get_text': _getText,
       'request_data': _requestData,
       'scroll': _scroll,
       'scrollIntoView': _scrollIntoView,
       'set_frame_sync': _setFrameSync,
       'set_semantics': _setSemantics,
-      'set_text_entry_emulation': _setTextEntryEmulation,
       'tap': _tap,
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
@@ -137,14 +133,12 @@ class FlutterDriverExtension {
       'get_health': (Map<String, String> params) => GetHealth.deserialize(params),
       'get_layer_tree': (Map<String, String> params) => GetLayerTree.deserialize(params),
       'get_render_tree': (Map<String, String> params) => GetRenderTree.deserialize(params),
-      'enter_text': (Map<String, String> params) => EnterText.deserialize(params),
       'get_text': (Map<String, String> params) => GetText.deserialize(params),
       'request_data': (Map<String, String> params) => RequestData.deserialize(params),
       'scroll': (Map<String, String> params) => Scroll.deserialize(params),
       'scrollIntoView': (Map<String, String> params) => ScrollIntoView.deserialize(params),
       'set_frame_sync': (Map<String, String> params) => SetFrameSync.deserialize(params),
       'set_semantics': (Map<String, String> params) => SetSemantics.deserialize(params),
-      'set_text_entry_emulation': (Map<String, String> params) => SetTextEntryEmulation.deserialize(params),
       'tap': (Map<String, String> params) => Tap.deserialize(params),
       'waitFor': (Map<String, String> params) => WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
@@ -168,8 +162,6 @@ class FlutterDriverExtension {
       'Descendant': (SerializableFinder finder) => _createDescendantFinder(finder as Descendant),
     });
   }
-
-  final TestTextInput _testTextInput = TestTextInput();
 
   final DataHandler _requestDataHandler;
   final bool _silenceErrors;
@@ -569,26 +561,6 @@ class FlutterDriverExtension {
     }
 
     return GetTextResult(text);
-  }
-
-  Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {
-    final SetTextEntryEmulation setTextEntryEmulationCommand = command as SetTextEntryEmulation;
-    if (setTextEntryEmulationCommand.enabled) {
-      _testTextInput.register();
-    } else {
-      _testTextInput.unregister();
-    }
-    return const SetTextEntryEmulationResult();
-  }
-
-  Future<EnterTextResult> _enterText(Command command) async {
-    if (!_testTextInput.isRegistered) {
-      throw 'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
-            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
-    }
-    final EnterText enterTextCommand = command as EnterText;
-    _testTextInput.enterText(enterTextCommand.text);
-    return const EnterTextResult();
   }
 
   Future<RequestDataResult> _requestData(Command command) async {

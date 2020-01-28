@@ -396,6 +396,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       binding.deviceEventDispatcher = this;
   }
 
+  WidgetTester(TestWidgetsFlutterBinding binding) : super(binding) {
+    if (binding is LiveTestWidgetsFlutterBinding)
+      binding.deviceEventDispatcher = this;
+  }
+
   /// The description string of the test currently being run.
   String get testDescription => _testDescription;
   String _testDescription = '';

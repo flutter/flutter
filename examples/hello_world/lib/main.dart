@@ -55,6 +55,17 @@ class _MyHomePageState extends State<MyHomePage> {
               key: Key('counter'),
               style: Theme.of(context).textTheme.display1,
             ),
+            TextFormField(
+              key: Key('input'),
+              enabled: true,
+              initialValue: '',
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Tell us about yourself (e.g., write down what you do or what hobbies you have)',
+                helperText: 'Keep it short, this is just a demo.',
+                labelText: 'Life story',
+              ),
+            ),
           ],
         ),
       ),

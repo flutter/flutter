@@ -9,6 +9,7 @@ void main() {
     // be the same as the Strings we used for the Keys in step 1.
     final SerializableFinder counterTextFinder = find.byValueKey('counter');
     final SerializableFinder buttonFinder = find.byValueKey('increment');
+    final SerializableFinder textFieldFinder = find.byValueKey('input');
 
     FlutterDriver driver;
 
@@ -35,6 +36,14 @@ void main() {
 
       // Then, verify the counter text is incremented by 1.
       expect(await driver.getText(counterTextFinder), '1');
+    });
+
+    test('test texts', () async {
+      // First, tap the button.
+      await driver.tap(textFieldFinder);
+
+      // Then, verify the input field is on DOM.
+      expect(await driver.requestData('input'), '1');
     });
   });
 }
