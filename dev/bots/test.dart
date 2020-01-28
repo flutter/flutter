@@ -328,17 +328,8 @@ Future<void> _runBuildTests() async {
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
   print('${green}Testing AOT build$reset for $cyan$relativePathToApplication$reset...');
-  final String absoluteTarget = path.join(path.absolute(relativePathToApplication), 'lib', 'main.dart');
   await runCommand(flutter,
-    <String>[
-      'assemble',
-      '-dTargetFile=$absoluteTarget',
-      '-dTargetPlatform=android',
-      '-dBuildMode=release',
-      '--output=build/aot',
-      'android_aot_bundle_release_android-arm64',
-      'android_aot_bundle_release_android-arm',
-    ],
+    <String>['build', 'aot', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
 }
