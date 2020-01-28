@@ -2099,9 +2099,9 @@ class SizedBox extends SingleChildRenderObjectWidget {
     } else if (width == 0.0 && height == 0.0) {
       type = '${objectRuntimeType(this, 'SizedBox')}.shrink';
     } else {
-      type = '${objectRuntimeType(this, 'SizedBox')}';
+      type = objectRuntimeType(this, 'SizedBox');
     }
-    return key == null ? '$type' : '$type-$key';
+    return key == null ? type : '$type-$key';
   }
 
   @override
