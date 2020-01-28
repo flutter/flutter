@@ -424,92 +424,6 @@ enum TextDecorationStyle {
   wavy
 }
 
-/// Defines how the paragraph will apply [TextStyle.height] the ascent of the
-/// first line and descent of the last line.
-///
-/// The boolean value represents whether the [TextStyle.height] modifier will
-/// be applied to the corresponding metric. By default, all properties are true,
-/// and [TextStyle.height] is applied as normal. When set to false, the font's
-/// default ascent will be used.
-class TextHeightBehavior {
-
-  /// Creates a new TextHeightBehavior object.
-  ///
-  ///  * applyHeightToFirstAscent: When true, the [TextStyle.height] modifier
-  ///    will be applied to the ascent of the first line. When false, the font's
-  ///    default ascent will be used.
-  ///  * applyHeightToLastDescent: When true, the [TextStyle.height] modifier
-  ///    will be applied to the descent of the last line. When false, the font's
-  ///    default descent will be used.
-  ///
-  /// All properties default to true (height modifications applied as normal).
-  const TextHeightBehavior({
-    this.applyHeightToFirstAscent = true,
-    this.applyHeightToLastDescent = true,
-  });
-
-  /// Creates a new TextHeightBehavior object from an encoded form.
-  ///
-  /// See [encode] for the creation of the encoded form.
-  const TextHeightBehavior.fromEncoded(int encoded) : applyHeightToFirstAscent = (encoded & 0x1) == 0,
-                                                      applyHeightToLastDescent = (encoded & 0x2) == 0;
-
-
-  /// Whether to apply the [TextStyle.height] modifier to the ascent of the first
-  /// line in the paragraph.
-  ///
-  /// When true, the [TextStyle.height] modifier will be applied to to the ascent
-  /// of the first line. When false, the font's default ascent will be used and
-  /// the [TextStyle.height] will have no effect on the ascent of the first line.
-  ///
-  /// This property only has effect if a non-null [TextStyle.height] is specified.
-  ///
-  /// Defaults to true (height modifications applied as normal).
-  final bool applyHeightToFirstAscent;
-
-  /// Whether to apply the [TextStyle.height] modifier to the descent of the last
-  /// line in the paragraph.
-  ///
-  /// When true, the [TextStyle.height] modifier will be applied to to the descent
-  /// of the last line. When false, the font's default descent will be used and
-  /// the [TextStyle.height] will have no effect on the descent of the last line.
-  ///
-  /// This property only has effect if a non-null [TextStyle.height] is specified.
-  ///
-  /// Defaults to true (height modifications applied as normal).
-  final bool applyHeightToLastDescent;
-
-  /// Returns an encoded int representation of this object.
-  int encode() {
-    return (applyHeightToFirstAscent ? 0 : 1 << 0) | (applyHeightToLastDescent ? 0 : 1 << 1);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is TextHeightBehavior
-        && other.applyHeightToFirstAscent == applyHeightToFirstAscent
-        && other.applyHeightToLastDescent == applyHeightToLastDescent;
-  }
-
-  @override
-  int get hashCode {
-    return hashValues(
-      applyHeightToFirstAscent,
-      applyHeightToLastDescent,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'TextHeightBehavior('
-             'applyHeightToFirstAscent: $applyHeightToFirstAscent, '
-             'applyHeightToLastDescent: $applyHeightToLastDescent'
-           ')';
-  }
-}
-
 /// An opaque object that determines the size, position, and rendering of text.
 abstract class TextStyle {
   /// Creates a new TextStyle object.
@@ -670,7 +584,6 @@ abstract class ParagraphStyle {
     String fontFamily,
     double fontSize,
     double height,
-    TextHeightBehavior textHeightBehavior,
     FontWeight fontWeight,
     FontStyle fontStyle,
     StrutStyle strutStyle,
@@ -685,7 +598,6 @@ abstract class ParagraphStyle {
         fontFamily: fontFamily,
         fontSize: fontSize,
         height: height,
-        textHeightBehavior: textHeightBehavior,
         fontWeight: fontWeight,
         fontStyle: fontStyle,
         strutStyle: strutStyle,
@@ -700,7 +612,6 @@ abstract class ParagraphStyle {
         fontFamily: fontFamily,
         fontSize: fontSize,
         height: height,
-        textHeightBehavior: textHeightBehavior,
         fontWeight: fontWeight,
         fontStyle: fontStyle,
         strutStyle: strutStyle,

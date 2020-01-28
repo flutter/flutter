@@ -1113,8 +1113,7 @@ void ParagraphTxt::Layout(double width) {
     for (const PaintRecord& paint_record : paint_records) {
       UpdateLineMetrics(paint_record.metrics(), paint_record.style(),
                         max_ascent, max_descent, max_unscaled_ascent,
-                        paint_record.GetPlaceholderRun(), line_number,
-                        line_limit);
+                        paint_record.GetPlaceholderRun());
     }
 
     // If no fonts were actually rendered, then compute a baseline based on the
@@ -1126,7 +1125,7 @@ void ParagraphTxt::Layout(double width) {
       font.setSize(style.font_size);
       font.getMetrics(&metrics);
       UpdateLineMetrics(metrics, style, max_ascent, max_descent,
-                        max_unscaled_ascent, nullptr, line_number, line_limit);
+                        max_unscaled_ascent, nullptr);
     }
 
     // Calculate the baselines. This is only done on the first line.
@@ -1182,9 +1181,7 @@ void ParagraphTxt::UpdateLineMetrics(const SkFontMetrics& metrics,
                                      double& max_ascent,
                                      double& max_descent,
                                      double& max_unscaled_ascent,
-                                     PlaceholderRun* placeholder_run,
-                                     size_t line_number,
-                                     size_t line_limit) {
+                                     PlaceholderRun* placeholder_run) {
   if (!strut_.force_strut) {
     double ascent;
     double descent;
@@ -1245,21 +1242,6 @@ void ParagraphTxt::UpdateLineMetrics(const SkFontMetrics& metrics,
       ascent = (-metrics.fAscent + metrics.fLeading / 2);
       descent = (metrics.fDescent + metrics.fLeading / 2);
     }
-
-    // Account for text_height_behavior in paragraph_style_.
-    //
-    // Disable first line ascent modifications.
-    if (line_number == 0 && paragraph_style_.text_height_behavior &
-                                TextHeightBehavior::kDisableFirstAscent) {
-      ascent = -metrics.fAscent;
-    }
-    // Disable last line descent modifications.
-    if (line_number == line_limit - 1 &&
-        paragraph_style_.text_height_behavior &
-            TextHeightBehavior::kDisableLastDescent) {
-      descent = metrics.fDescent;
-    }
-
     ComputePlaceholder(placeholder_run, ascent, descent);
 
     max_ascent = std::max(ascent, max_ascent);
