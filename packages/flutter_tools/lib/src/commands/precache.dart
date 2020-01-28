@@ -9,7 +9,6 @@ import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
-import '../version.dart';
 
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({bool verboseHelp = false}) {
@@ -94,7 +93,7 @@ class PrecacheCommand extends FlutterCommand {
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
-      if (!FlutterVersion.instance.isMaster && artifact.unstable) {
+      if (!globals.flutterVersion.isMaster && artifact.unstable) {
         continue;
       }
       if (artifact.feature != null && !featureFlags.isEnabled(artifact.feature)) {

@@ -24,7 +24,6 @@ import 'src/reporting/github_template.dart';
 import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
-import 'src/version.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
 Future<int> run(
@@ -57,7 +56,7 @@ Future<int> run(
       onFailure: (String _) => 'en_US',
     );
 
-    String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString(redactUnknownBranches: true);
+    String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
     Object firstError;
     StackTrace firstStackTrace;
     return await runZoned<Future<int>>(() async {
