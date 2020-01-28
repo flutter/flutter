@@ -505,14 +505,14 @@ task:
     COCOAPODS_DISABLE_STATS: true
     CPU: 2
     MEMORY: 8G
-  pub_cache:  
-    folder: $HOME/.pub-cache  
-    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR" 
-  flutter_pkg_cache:  
-    folder: bin/cache/pkg 
-    fingerprint_script: echo $OS; cat bin/internal/*.version  
-  artifacts_cache:  
-    folder: bin/cache/artifacts 
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+  flutter_pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: echo $OS; cat bin/internal/*.version
+  artifacts_cache:
+    folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - date
