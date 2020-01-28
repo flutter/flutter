@@ -1138,7 +1138,7 @@ abstract class CustomClipper<T> {
   bool shouldReclip(covariant CustomClipper<T> oldClipper);
 
   @override
-  String toString() => objectRuntimeType(this, 'CustomClipper');
+  String toString() => '${objectRuntimeType(this, 'CustomClipper')}';
 }
 
 /// A [CustomClipper] that clips to the outer path of a [ShapeBorder].
