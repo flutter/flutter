@@ -2784,7 +2784,7 @@ class RenderMouseRegion extends RenderProxyBox {
   //
   // This method must not be called during `paint`.
   void _markPropertyUpdated({@required bool mustRepaint}) {
-    assert(!owner.debugDoingPaint);
+    assert(owner == null || !owner.debugDoingPaint);
     final bool newAnnotationIsActive = (
         _onEnter != null ||
         _onHover != null ||

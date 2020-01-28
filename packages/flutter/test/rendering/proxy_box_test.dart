@@ -466,6 +466,21 @@ void main() {
     box.translation = const Offset(0.3, 0.3);
     expect(box.markNeedsSemanticsUpdateCallCount, 3);
   });
+
+  test('RenderMouseRegion can change properties when detached', () {
+    TestRenderingFlutterBinding();
+    RendererBinding.instance.initMouseTracker(MouseTracker(
+      RendererBinding.instance.pointerRouter,
+      (_) => <MouseTrackerAnnotation>[],
+    ));
+    final RenderMouseRegion object = RenderMouseRegion();
+    object
+      ..opaque = false
+      ..onEnter = (_) {}
+      ..onExit = (_) {}
+      ..onHover = (_) {};
+    // Passes if no error is thrown
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
