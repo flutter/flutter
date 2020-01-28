@@ -88,7 +88,6 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       final List<String> args = <String>[
         '--user-data-dir=$userDataDir',
         'http://localhost:$benchmarkServerPort/index.html',
-        '--headless',
         if (isChromeNoSandbox)
           '--no-sandbox',
         '--window-size=1024,1024',
@@ -100,14 +99,31 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
         '--no-default-browser-check',
         '--disable-default-apps',
         '--disable-translate',
-        // '--remote-debugging-port=$kDevtoolsPort',
       ];
+
+      final bool isUncalibratedSmokeTest =
+          io.Platform.environment['UNCALIBRATED_SMOKE_TEST'] == 'true';
+      if (isUncalibratedSmokeTest) {
+        args.add('--headless');
+        // When running in headless mode Chrome exits immediately unless
+        // a debug port is specified.
+        args.add('--remote-debugging-port=${benchmarkServerPort + 1}');
+      }
 
       chromeProcess = await io.Process.start(
         _findSystemChromeExecutable(),
         args,
         workingDirectory: cwd,
       );
+
+      bool receivedProfileData = false;
+      chromeProcess.exitCode.then((int exitCode) {
+        if (!receivedProfileData) {
+          profileData.completeError(Exception(
+            'Chrome process existed prematurely with exit code $exitCode',
+          ));
+        }
+      });
       forwardStandardStreams(chromeProcess);
 
       print('Waiting for the benchmark to report benchmark profile.');
@@ -115,7 +131,10 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       final String backend = useCanvasKit ? 'canvaskit' : 'html';
       final Map<String, dynamic> taskResult = <String, dynamic>{};
       final List<String> benchmarkScoreKeys = <String>[];
-      for (final Map<String, dynamic> profile in await profileData.future) {
+      final List<Map<String, dynamic>> profiles = await profileData.future;
+      print('Received profile data');
+      receivedProfileData = true;
+      for (final Map<String, dynamic> profile in profiles) {
         final String benchmarkName = profile['name'] as String;
         taskResult['$benchmarkName.$backend.averageDrawFrameDuration'] = profile['averageDrawFrameDuration'].toDouble(); // micros
         taskResult['$benchmarkName.$backend.drawFrameDurationNoise'] = profile['drawFrameDurationNoise'].toDouble(); // micros
@@ -130,12 +149,18 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 }
 
 String _findSystemChromeExecutable() {
-  final io.ProcessResult which =
-      io.Process.runSync('which', <String>['google-chrome']);
+  if (io.Platform.isLinux) {
+    final io.ProcessResult which =
+        io.Process.runSync('which', <String>['google-chrome']);
 
-  if (which.exitCode != 0) {
-    throw Exception('Failed to locate system Chrome installation.');
+    if (which.exitCode != 0) {
+      throw Exception('Failed to locate system Chrome installation.');
+    }
+
+    return (which.stdout as String).trim();
+  } else if (io.Platform.isMacOS) {
+    return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  } else {
+    throw Exception('Web benchmarks cannot run on ${io.Platform.operatingSystem} yet.');
   }
-
-  return (which.stdout as String).trim();
 }
