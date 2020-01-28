@@ -3943,6 +3943,7 @@ TEST_F(EmbedderTest, CanPostTaskToAllNativeThreads) {
     fml::CountDownLatch latch;
 
     // Ensures that the expect number of distinct threads were serviced.
+    std::mutex thread_ids_mutex;
     std::set<std::thread::id> thread_ids;
 
     size_t platform_threads_count = 0;
@@ -3960,7 +3961,6 @@ TEST_F(EmbedderTest, CanPostTaskToAllNativeThreads) {
                   engine.get(),
                   [](FlutterNativeThreadType type, void* baton) {
                     auto captures = reinterpret_cast<Captures*>(baton);
-
                     switch (type) {
                       case kFlutterNativeThreadTypeRender:
                         captures->render_threads_count++;
@@ -3975,8 +3975,10 @@ TEST_F(EmbedderTest, CanPostTaskToAllNativeThreads) {
                         captures->platform_threads_count++;
                         break;
                     }
-
-                    captures->thread_ids.insert(std::this_thread::get_id());
+                    {
+                      std::scoped_lock lock(captures->thread_ids_mutex);
+                      captures->thread_ids.insert(std::this_thread::get_id());
+                    }
                     captures->latch.CountDown();
                   },
                   &captures),
