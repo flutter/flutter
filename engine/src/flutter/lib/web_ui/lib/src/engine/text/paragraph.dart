@@ -545,8 +545,21 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
   }
 
   @override
-  int get hashCode =>
-      ui.hashValues(_fontFamily, _fontSize, _height, _ellipsis, _locale);
+  int get hashCode {
+    return ui.hashValues(
+      _textAlign,
+      _textDirection,
+      _fontWeight,
+      _fontStyle,
+      _maxLines,
+      _fontFamily,
+      _fontSize,
+      _height,
+      _textHeightBehavior,
+      _ellipsis,
+      _locale
+    );
+  }
 
   @override
   String toString() {
@@ -557,6 +570,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
           'fontWeight: ${_fontWeight ?? "unspecified"}, '
           'fontStyle: ${_fontStyle ?? "unspecified"}, '
           'maxLines: ${_maxLines ?? "unspecified"}, '
+          'textHeightBehavior: ${_textHeightBehavior ?? "unspecified"}, '
           'fontFamily: ${_fontFamily ?? "unspecified"}, '
           'fontSize: ${_fontSize != null ? _fontSize.toStringAsFixed(1) : "unspecified"}, '
           'height: ${_height != null ? "${_height.toStringAsFixed(1)}x" : "unspecified"}, '

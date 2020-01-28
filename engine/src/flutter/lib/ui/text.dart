@@ -1031,7 +1031,7 @@ class ParagraphStyle {
              'maxLines: ${      _encoded[0] & 0x020 == 0x020 ? _encoded[5]                       : "unspecified"}, '
              'textHeightBehavior: ${
                                 _encoded[0] & 0x040 == 0x040 ?
-                                  TextHeightBehavior.fromEncoded(_encoded[6]).toString() : "unspecified"}, '
+                                          TextHeightBehavior.fromEncoded(_encoded[6]).toString() : "unspecified"}, '
              'fontFamily: ${    _encoded[0] & 0x080 == 0x080 ? _fontFamily                       : "unspecified"}, '
              'fontSize: ${      _encoded[0] & 0x100 == 0x100 ? _fontSize                         : "unspecified"}, '
              'height: ${        _encoded[0] & 0x200 == 0x200 ? "${_height}x"                     : "unspecified"}, '
