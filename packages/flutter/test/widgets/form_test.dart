@@ -179,47 +179,53 @@ void main() {
     expect(formKey.currentState.isValid(), isTrue);
   });
 
-  testWidgets('IsValid returns false when one of the fields is invalid', (WidgetTester tester) async {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    const String validString = 'Valid string';
-    String validator(String s) => s == validString ? null : 'Error text';
+  testWidgets(
+    'IsValid returns false when one of the fields is invalid and does not change error display',
+    (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      final GlobalKey<FormFieldState> fieldKey = GlobalKey<FormFieldState>();
+      const String validString = 'Valid string';
+      String validator(String s) => s == validString ? null : 'Error text';
 
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(devicePixelRatio: 1.0),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  key: formKey,
-                  child: ListView(
-                    children: <Widget>[
-                      TextFormField(
-                        initialValue: '',
-                        validator: validator,
-                        autovalidate: true
-                      ),
-                      TextFormField(
-                        initialValue: validString,
-                        validator: validator,
-                        autovalidate: true
-                      ),
-                    ],
+      Widget builder() {
+        return MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    key: formKey,
+                    child: ListView(
+                      children: <Widget>[
+                        TextFormField(
+                          initialValue: validString,
+                          validator: validator,
+                          autovalidate: false,
+                        ),
+                        TextFormField(
+                          key: fieldKey,
+                          initialValue: '',
+                          validator: validator,
+                          autovalidate: false,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    await tester.pumpWidget(builder());
+      await tester.pumpWidget(builder());
 
-    expect(formKey.currentState.isValid(), isFalse);
-  });
+      expect(formKey.currentState.isValid(), isFalse);
+      expect(fieldKey.currentState.hasError, isFalse);
+    },
+  );
 
   testWidgets('Multiple TextFormFields communicate', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
