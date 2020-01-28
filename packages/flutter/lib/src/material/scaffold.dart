@@ -2720,5 +2720,9 @@ class _ScaffoldScope extends InheritedWidget {
 }
 
 class _FABStatus {
+  FloatingActionButton button;
+  FloatingActionButtonLocation location;
+  FloatingActionButtonAnimator animator;
 
+  FloatingActionButtonLocation previousLocation;
 }
