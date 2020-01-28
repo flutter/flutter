@@ -184,6 +184,11 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
 
   SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner());
 
+  if (tonic::LogIfError(
+          Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag))) {
+    return false;
+  }
+
   if (!UpdateThreadPoolNames()) {
     return false;
   }
@@ -618,9 +623,10 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
 
   tonic::DartState::Scope scope(service_isolate);
   if (!DartServiceIsolate::Startup(
-          settings.observatory_host,  // server IP address
-          settings.observatory_port,  // server observatory port
-          false,                      //  disable websocket origin check
+          settings.observatory_host,           // server IP address
+          settings.observatory_port,           // server observatory port
+          tonic::DartState::HandleLibraryTag,  // embedder library tag handler
+          false,  //  disable websocket origin check
           settings.disable_service_auth_codes,  // disable VM service auth codes
           error                                 // error (out)
           )) {
