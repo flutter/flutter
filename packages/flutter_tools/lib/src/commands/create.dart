@@ -25,7 +25,6 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
-import '../version.dart';
 
 enum _ProjectType {
   /// This is the default project with the user-managed host code.
@@ -219,7 +218,7 @@ class CreateCommand extends FlutterCommand {
   }
 
   /// The hostname for the Flutter docs for the current channel.
-  String get _snippetsHost => FlutterVersion.instance.channel == 'stable'
+  String get _snippetsHost => globals.flutterVersion.channel == 'stable'
         ? 'docs.flutter.io'
         : 'master-docs.flutter.io';
 
@@ -628,8 +627,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
-      'flutterRevision': FlutterVersion.instance.frameworkRevision,
-      'flutterChannel': FlutterVersion.instance.channel,
+      'flutterRevision': globals.flutterVersion.frameworkRevision,
+      'flutterChannel': globals.flutterVersion.channel,
       'web': web,
       'macos': macos,
       'year': DateTime.now().year,

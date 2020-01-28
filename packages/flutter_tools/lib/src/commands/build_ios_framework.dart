@@ -180,7 +180,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
       if (boolArg('cocoapods')) {
         // FlutterVersion.instance kicks off git processing which can sometimes fail, so don't try it until needed.
-        _flutterVersion ??= FlutterVersion.instance;
+        _flutterVersion ??= globals.flutterVersion;
         produceFlutterPodspec(mode, modeDirectory);
       } else {
         // Copy Flutter.framework.
