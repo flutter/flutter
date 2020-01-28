@@ -276,13 +276,7 @@ class WebDevFS implements DevFS {
   @override
   Future<Uri> create() async {
     _webAssetServer = await WebAssetServer.start(hostname, port);
-    final InternetAddress internetAddress = _webAssetServer.internetAddress;
-    // Format ipv6 hosts according to RFC 5952.
-    return Uri.parse(
-      internetAddress.type == InternetAddressType.IPv4
-        ? 'http://${internetAddress.address}:$port'
-        : 'http://[${internetAddress.address}]:$port'
-    );
+    return Uri.parse('http://$hostname:$port');
   }
 
   @override
