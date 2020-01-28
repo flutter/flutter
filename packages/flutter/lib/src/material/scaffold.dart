@@ -387,10 +387,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.textDirection,
     @required this.geometryNotifier,
     // for floating action button
-    @required this.previousFloatingActionButtonLocation,
-    @required this.currentFloatingActionButtonLocation,
+    @required this.fabStatuses,
     @required this.floatingActionButtonMoveAnimationProgress,
-    @required this.floatingActionButtonMotionAnimator,
     @required this.isSnackBarFloating,
     @required this.extendBody,
     @required this.extendBodyBehindAppBar,
@@ -398,8 +396,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
-       assert(previousFloatingActionButtonLocation != null),
-       assert(currentFloatingActionButtonLocation != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null);
 
@@ -409,10 +405,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
-  final FloatingActionButtonLocation previousFloatingActionButtonLocation;
-  final FloatingActionButtonLocation currentFloatingActionButtonLocation;
   final double floatingActionButtonMoveAnimationProgress;
-  final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
+  final Map<Key, _FABStatus> fabStatuses;
 
   final bool isSnackBarFloating;
 
@@ -2499,11 +2493,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 extendBody: _extendBody,
                 extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
                 minInsets: minInsets,
-                currentFloatingActionButtonLocation: _fabStatuses[const _FABKey.primary()].location,
+                fabStatuses: _fabStatuses,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-                floatingActionButtonMotionAnimator: _fabStatuses[const _FABKey.primary()].animator,
                 geometryNotifier: _geometryNotifier,
-                previousFloatingActionButtonLocation: _fabStatuses[const _FABKey.primary()].previousLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
                 additionalFloatingActionButtonConfigurations: widget.additionalFloatingActionButtonConfigurations,
