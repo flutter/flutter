@@ -3942,8 +3942,12 @@ TEST_F(EmbedderTest, CanPostTaskToAllNativeThreads) {
     // Waits the adequate number of callbacks to fire.
     fml::CountDownLatch latch;
 
+    // This class will be accessed from multiple threads concurrently to track
+    // thread specific information that is later checked. All updates to fields
+    // in this struct must be made with this mutex acquired.
+
+    std::mutex captures_mutex;
     // Ensures that the expect number of distinct threads were serviced.
-    std::mutex thread_ids_mutex;
     std::set<std::thread::id> thread_ids;
 
     size_t platform_threads_count = 0;
@@ -3961,22 +3965,22 @@ TEST_F(EmbedderTest, CanPostTaskToAllNativeThreads) {
                   engine.get(),
                   [](FlutterNativeThreadType type, void* baton) {
                     auto captures = reinterpret_cast<Captures*>(baton);
-                    switch (type) {
-                      case kFlutterNativeThreadTypeRender:
-                        captures->render_threads_count++;
-                        break;
-                      case kFlutterNativeThreadTypeWorker:
-                        captures->worker_threads_count++;
-                        break;
-                      case kFlutterNativeThreadTypeUI:
-                        captures->ui_threads_count++;
-                        break;
-                      case kFlutterNativeThreadTypePlatform:
-                        captures->platform_threads_count++;
-                        break;
-                    }
                     {
-                      std::scoped_lock lock(captures->thread_ids_mutex);
+                      std::scoped_lock lock(captures->captures_mutex);
+                      switch (type) {
+                        case kFlutterNativeThreadTypeRender:
+                          captures->render_threads_count++;
+                          break;
+                        case kFlutterNativeThreadTypeWorker:
+                          captures->worker_threads_count++;
+                          break;
+                        case kFlutterNativeThreadTypeUI:
+                          captures->ui_threads_count++;
+                          break;
+                        case kFlutterNativeThreadTypePlatform:
+                          captures->platform_threads_count++;
+                          break;
+                      }
                       captures->thread_ids.insert(std::this_thread::get_id());
                     }
                     captures->latch.CountDown();
