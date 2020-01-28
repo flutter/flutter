@@ -145,6 +145,50 @@ class AotAssemblyProfile extends AotAssemblyBase {
   ];
 }
 
+/// Handle strip and dysm generate for iOS release.
+///
+/// Xcode calls `symbols` during app store upload, which uses Spotlight to
+/// find dSYM files for embedded frameworks. When it finds the dSYM file for
+/// `App.framework` it throws an error, which aborts the app store upload.
+/// To avoid this, we place the dSYM files in a folder ending with ".noindex",
+/// which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
+class GenerateDebugSymbols extends Target {
+  const GenerateDebugSymbols();
+
+  @override
+  String get name => 'generate_debug_symbols';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotAssemblyRelease()
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/App.framework/App'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/dSYMs.noindex/App.framework.dSYM'),
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final Directory appFramework = environment.outputDir.childDirectory('App.framework');
+    final Directory noIndex = environment.outputDir.childDirectory('dSYMs.noindex')
+      ..createSync();
+    final RunResult result = await globals.xcode.dsymutil(<String>[
+      '-o',
+      noIndex.childFile('App.framework.dSYM').path,
+      appFramework.childFile('App').path,
+    ]);
+    if (result.exitCode != 0) {
+      throwToolExit('Failed to generate debug symbols (dSYM) file for ${appFramework.path}/App.');
+    }
+  }
+}
+
 /// Create an App.framework for debug iOS targets.
 ///
 /// This framework needs to exist for the Xcode project to link/bundle,
