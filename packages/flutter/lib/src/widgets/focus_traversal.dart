@@ -759,6 +759,22 @@ class _ReadingOrderSortData {
   final FocusNode node;
 }
 
+class _ReadingOrderDirectionalGroupData {
+  _ReadingOrderDirectionalGroupData(this.members);
+  final List<_ReadingOrderSortData> members;
+  TextDirection get directionality => members.first.directionality;
+  Rect _rect;
+  Rect get rect {
+    if (_rect == null) {
+      for (final Rect rect in members.map<Rect>((_ReadingOrderSortData data) => data.rect)){
+        _rect ??= rect;
+        _rect = _rect.expandToInclude(rect);
+      }
+    }
+    return _rect;
+  }
+}
+
 /// Traverses the focus order in "reading order".
 ///
 /// By default, reading order traversal goes in the reading direction, and then
@@ -800,23 +816,39 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       });
     }
 
-    List<List<_ReadingOrderSortData>> collectGroups(Iterable<_ReadingOrderSortData> candidates) {
+    int compareBeginningSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
+      assert(a.directionality == b.directionality);
+      if (a.directionality == TextDirection.ltr) {
+        return a.rect.left.compareTo(b.rect.left);
+      } else {
+        return -a.rect.right.compareTo(b.rect.right);
+      }
+    }
+
+    List<_ReadingOrderDirectionalGroupData> collectDirectionalityGroups(Iterable<_ReadingOrderSortData> candidates) {
       TextDirection currentDirection = candidates.first.directionality;
       List<_ReadingOrderSortData> currentGroup = <_ReadingOrderSortData>[];
-      final List<List<_ReadingOrderSortData>> result = <List<_ReadingOrderSortData>>[];
+      final List<_ReadingOrderDirectionalGroupData> result = <_ReadingOrderDirectionalGroupData>[];
       for (final _ReadingOrderSortData candidate in candidates) {
         if (candidate.directionality == currentDirection) {
           currentGroup.add(candidate);
           continue;
         }
         currentDirection = candidate.directionality;
-        result.add(currentGroup);
+        result.add(_ReadingOrderDirectionalGroupData(currentGroup));
         currentGroup = <_ReadingOrderSortData>[candidate];
+      }
+      if (currentGroup.isNotEmpty) {
+        result.add(_ReadingOrderDirectionalGroupData(currentGroup));
+      }
+      // Sort the groups that all have the same directionality separately.
+      for (final _ReadingOrderDirectionalGroupData bandGroup in result) {
+        mergeSort<_ReadingOrderSortData>(bandGroup.members, compare: compareBeginningSide);
       }
       return result;
     }
 
-    _ReadingOrderSortData pickFirst(List<_ReadingOrderSortData> candidates) {
+    _ReadingOrderSortData pickNext(List<_ReadingOrderSortData> candidates) {
       // Find out if we need to collect complex information about directionality or not.
       TextDirection mainDirection;
       for (final _ReadingOrderSortData candidate in candidates) {
@@ -830,40 +862,73 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
         }
       }
 
-      int compareBeginningSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
-        assert(a.directionality == b.directionality);
-        if (a.directionality == TextDirection.ltr) {
-          return a.rect.left.compareTo(b.rect.left);
-        } else {
-          return -a.rect.right.compareTo(b.rect.right);
-        }
-      }
-
       int compareTopSide(_ReadingOrderSortData a, _ReadingOrderSortData b) {
         return a.rect.top.compareTo(b.rect.top);
       }
 
-      // Get the topmost
+      // Find the topmost node.
       mergeSort<_ReadingOrderSortData>(candidates, compare: compareTopSide);
       final _ReadingOrderSortData topmost = candidates.first;
-      // If there are any others in the band of the topmost, then pick the
-      // leftmost one.
+
       final List<_ReadingOrderSortData> inBandOfTop = inBand(topmost, candidates).toList();
-      final List<List<_ReadingOrderSortData>> bandGroups = collectGroups(inBandOfTop);
-      // Sort the groups that all have the same directionality.
-      for (final List<_ReadingOrderSortData> bandGroup in bandGroups) {
-        mergeSort<_ReadingOrderSortData>(bandGroup, compare: compareBeginningSide);
+
+      // The topmost rect in is in a band by itself.
+      if (inBandOfTop.isEmpty) {
+        return topmost;
       }
+
+      // Now that we know there are others in the same band as the topmost, then pick
+      // the one at the beginning, depending on the text direction in force.
+
+      // Collect the top band into sorted groups with the same directionality.
+      final List<_ReadingOrderDirectionalGroupData> bandGroups = collectDirectionalityGroups(inBandOfTop);
       if (bandGroups.length > 1) {
         // Here things get interesting.
         // Since we have more than one group, that means that we need to
         // determine what the "base" directionality of the groups is by finding
         // the nearest common Directionality ancestor to determine how to order
         // the groups themselves.
-        // TBD...
-      }
-      if (inBandOfTop.isNotEmpty) {
-        return inBandOfTop.first;
+        TextDirection commonDirectionality(_ReadingOrderSortData a, _ReadingOrderSortData b) {
+          List<Directionality> getDirectionalityAncestors(BuildContext context) {
+            final List<Directionality> result = <Directionality>[];
+            context.visitAncestorElements((Element element) {
+              if (element.widget is Directionality) {
+                result.add(element.widget as Directionality);
+              }
+              return true;
+            });
+            return result;
+          }
+          final List<Directionality> aAncestors = getDirectionalityAncestors(a.node.context);
+          final List<Directionality> bAncestors = getDirectionalityAncestors(b.node.context);
+          final Set<Directionality> common = aAncestors.toSet().intersection(bAncestors.toSet());
+          if (common.isEmpty) {
+            return null;
+          }
+          // Find the closest common one.
+          return aAncestors.firstWhere(common.contains).textDirection;
+        }
+
+        // Sort the groups based on their directionality and bounding boxes.
+        int compareGroupBeginningSide(_ReadingOrderDirectionalGroupData a, _ReadingOrderDirectionalGroupData b) {
+          if (a.directionality == b.directionality) {
+            switch(a.directionality) {
+              case TextDirection.ltr:
+                return a.rect.left.compareTo(b.rect.left);
+              case TextDirection.rtl:
+                return -a.rect.right.compareTo(b.rect.right);
+            }
+          }
+          TextDirection common = commonDirectionality(a, b);
+
+        }
+
+      } else {
+        // There's only one directionality group, so just send back the first
+        // one in that group.
+        if (inBandOfTop.isNotEmpty) {
+          return bandGroups.first.members.first;
+        }
       }
       return topmost;
     }
@@ -876,12 +941,12 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     // topmost, or the topmost, if there are no others in its band.
     final List<_ReadingOrderSortData> sortedList = <_ReadingOrderSortData>[];
     final List<_ReadingOrderSortData> unplaced = data.toList();
-    _ReadingOrderSortData current = pickFirst(unplaced);
+    _ReadingOrderSortData current = pickNext(unplaced);
     sortedList.add(current);
     unplaced.remove(current);
 
     while (unplaced.isNotEmpty) {
-      final _ReadingOrderSortData next = pickFirst(unplaced);
+      final _ReadingOrderSortData next = pickNext(unplaced);
       current = next;
       sortedList.add(current);
       unplaced.remove(current);
