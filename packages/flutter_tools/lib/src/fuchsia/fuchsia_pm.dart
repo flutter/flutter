@@ -109,13 +109,14 @@ class FuchsiaPM {
     if (fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
+    host = host.replaceAll('%', '%25');
     final List<String> command = <String>[
       fuchsiaArtifacts.pm.path,
       'serve',
       '-repo',
       repoPath,
       '-l',
-      '$host:$port',
+      '[$host]:$port',
     ];
     final Process process = await processUtils.start(command);
     process.stdout
