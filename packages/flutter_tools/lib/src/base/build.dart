@@ -139,7 +139,7 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--assembly=$assembly');
       // TODO(jonahwilliams): determine the correct time to use strip
       // since this is required for the future dwarf strack traces option.
-      if (bitcode) {
+      if (bitcode && buildMode == BuildMode.release) {
         genSnapshotArgs.add('--strip');
       }
     } else {
