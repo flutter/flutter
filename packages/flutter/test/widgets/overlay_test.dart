@@ -634,9 +634,9 @@ void main() {
                 'The most common way to add an Overlay to an application is to\n'
                 'include a MaterialApp or Navigator widget in the runApp() call.\n',
               ));
-              expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Widget>>());
+              expect(error.diagnostics[3], isA<DiagnosticsProperty<Widget>>());
               expect(error.diagnostics[3].value, debugRequiredFor);
-              expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+              expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
               expect(error.toStringDeep(), equalsIgnoringHashCodes(
                 'FlutterError\n'
                 '   No Overlay widget found.\n'

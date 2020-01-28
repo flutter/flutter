@@ -33,8 +33,7 @@ void main() {
         ),
       );
 
-      expect(() => tester.getSemantics(find.text('hello')),
-        throwsA(isInstanceOf<StateError>()));
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
     }, semanticsEnabled: false);
 
     testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
@@ -53,8 +52,7 @@ void main() {
         ),
       );
 
-      expect(() => tester.getSemantics(find.text('hello')),
-          throwsA(isInstanceOf<StateError>()));
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
       semanticsHandle.dispose();
     });
 
@@ -472,7 +470,7 @@ void main() {
 
       expect(
         expectAsync0(tester.pageBack),
-        throwsA(isInstanceOf<TestFailure>()),
+        throwsA(isA<TestFailure>()),
       );
     });
 
@@ -629,7 +627,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async { }), throwsA(isInstanceOf<TestFailure>()));
+      expect(() => tester.runAsync(() async { }), throwsA(isA<TestFailure>()));
       completer.complete();
     });
 
@@ -685,7 +683,7 @@ void main() {
         'calling dispose() on the AnimationController itself. Otherwise,\n'
         'the ticker will leak.\n',
       );
-      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
+      expect(error.diagnostics.last, isA<DiagnosticsProperty<Ticker>>());
       expect(error.diagnostics.last.value, ticker);
       expect(error.toStringDeep(), startsWith(
         'FlutterError\n'
@@ -746,7 +744,6 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
   });
-
 }
 
 class FakeMatcher extends AsyncMatcher {

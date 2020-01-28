@@ -3613,7 +3613,7 @@ void main() {
 
   testWidgets('uses alphabetic baseline for CJK layout', (WidgetTester tester) async {
     await tester.binding.setLocale('zh', 'CN');
-    final Typography typography = Typography();
+    final Typography typography = Typography.material2018();
 
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController();
