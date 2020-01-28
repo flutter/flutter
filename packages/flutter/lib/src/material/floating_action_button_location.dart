@@ -291,7 +291,6 @@ double _topOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset =
   return scaffoldGeometry.contentTop - fabHalfHeight;
 }
 
-// TODO: Add adjustment for _floatingOffsetY.
 double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
