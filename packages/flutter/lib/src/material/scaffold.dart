@@ -529,9 +529,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         snackBarSize: snackBarSize,
         textDirection: textDirection,
       );
-      final Offset currentFabOffset = currentFloatingActionButtonLocation.getOffset(currentGeometry);
-      final Offset previousFabOffset = previousFloatingActionButtonLocation.getOffset(currentGeometry);
-      final Offset fabOffset = floatingActionButtonMotionAnimator.getOffset(
+      final Offset currentFabOffset = fabStatuses[const _FABKey.primary()].location.getOffset(currentGeometry);
+      final Offset previousFabOffset = fabStatuses[const _FABKey.primary()].previousLocation.getOffset(currentGeometry);
+      final Offset fabOffset = fabStatuses[const _FABKey.primary()].animator.getOffset(
         begin: previousFabOffset,
         end: currentFabOffset,
         progress: floatingActionButtonMoveAnimationProgress,
@@ -603,8 +603,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     return oldDelegate.minInsets != minInsets
         || oldDelegate.textDirection != textDirection
         || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
-        || oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation
-        || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation
+        || oldDelegate.fabStatuses[const _FABKey.primary()].previousLocation != fabStatuses[const _FABKey.primary()].previousLocation
+        || oldDelegate.fabStatuses[const _FABKey.primary()].location != fabStatuses[const _FABKey.primary()].location
         || oldDelegate.extendBody != extendBody
         || oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
   }
