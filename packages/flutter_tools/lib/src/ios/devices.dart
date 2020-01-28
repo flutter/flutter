@@ -50,7 +50,7 @@ class IOSDeploy {
       '--justlaunch',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
-        launchArguments.join(' '),
+        '${launchArguments.join(" ")}',
       ],
     ];
 

@@ -25,7 +25,7 @@ class CodeGenerator {
         currentLine += ' $word';
       } else {
         result.writeln('$prefix$currentLine');
-        currentLine = word;
+        currentLine = '$word';
       }
     }
     if (currentLine.isNotEmpty) {
