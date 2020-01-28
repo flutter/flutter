@@ -29,8 +29,6 @@ const Duration kFloatingActionButtonSegue = Duration(milliseconds: 200);
 /// Its value corresponds to 0.125 of a full circle, equivalent to 45 degrees or pi/4 radians.
 const double kFloatingActionButtonTurnInterval = 0.125;
 
-// TODO: Adjust order.
-
 /// An object that defines a position for the [FloatingActionButton]
 /// based on the [Scaffold]'s [ScaffoldPrelayoutGeometry].
 ///
