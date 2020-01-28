@@ -5854,7 +5854,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
 ///    have buttons pressed.
-class MouseRegion extends SingleChildRenderObjectWidget {
+class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   const MouseRegion({
     Key key,
@@ -5862,16 +5862,15 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onExit,
     this.onHover,
     this.opaque = true,
-    Widget child,
+    this.child,
   }) : assert(opaque != null),
-       super(key: key, child: child);
+       super(key: key);
 
-  /// Called when a mouse pointer, with or without buttons pressed, has
-  /// entered this widget.
+  /// Called when a mouse pointer has entered this widget.
   ///
-  /// This callback is triggered when the pointer has started to be contained
-  /// by the region of this widget. More specifically, the callback is triggered
-  /// by the following cases:
+  /// This callback is triggered when the pointer, with or without buttons
+  /// pressed, has started to be contained by the region of this widget. More
+  /// specifically, the callback is triggered by the following cases:
   ///
   ///  * This widget has appeared under a pointer.
   ///  * This widget has moved to under a pointer.
@@ -5880,8 +5879,13 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///
   /// This callback is not always matched by an [onExit]. If the [MouseRegion]
   /// is unmounted while being hovered by a pointer, the [onExit] of the widget
-  /// callback will never called, despite the earlier call of [onEnter]. For
-  /// more details, see [onExit].
+  /// callback will never called. For more details, see [onExit].
+  ///
+  /// {@template flutter.mouseRegion.triggerTime}
+  /// The time that this callback is triggered is always between frames: either
+  /// during the post-frame callbacks, or during the callback of a pointer
+  /// event.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -5890,47 +5894,182 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///    internally implemented.
   final PointerEnterEventListener onEnter;
 
-  /// Called when a mouse pointer changes position without buttons pressed, and
-  /// the new position is within the region defined by this widget.
+  /// Called when a mouse pointer moves within this widget without buttons
+  /// pressed.
   ///
-  /// This callback is triggered when:
+  /// This callback is not triggered when the [MouseRegion] has moved
+  /// while being hovered by the mouse pointer.
   ///
-  ///  * An annotation that did not contain the pointer has moved to under a
-  ///    pointer that has no buttons pressed.
-  ///  * A pointer has moved onto, or moved within an annotation without buttons
-  ///    pressed.
-  ///
-  /// This callback is not triggered when
-  ///
-  ///  * An annotation that is containing the pointer has moved, and still
-  ///    contains the pointer.
+  /// {@macro flutter.mouseRegion.triggerTime}
   final PointerHoverEventListener onHover;
 
-  /// Called when a mouse pointer, with or without buttons pressed, has exited
-  /// this widget when the widget is still mounted.
+  /// Called when a mouse pointer has exited this widget when the widget is
+  /// still mounted.
   ///
-  /// This callback is triggered when the pointer has stopped to be contained
-  /// by the region of this widget, except when it's caused by the removal of
-  /// this widget. More specifically, the callback is triggered by
-  /// the following cases:
+  /// This callback is triggered when the pointer, with or without buttons
+  /// pressed, has stopped being contained by the region of this widget, except
+  /// when the exit is caused by the disappearance of this widget. More
+  /// specifically, this callback is triggered by the following cases:
   ///
-  ///  * This widget, which used to contain a pointer, has moved away.
-  ///  * A pointer that used to be within this widget has been removed.
-  ///  * A pointer that used to be within this widget has moved away.
+  ///  * A pointer that is hovering this widget has moved away.
+  ///  * A pointer that is hovering this widget has been removed.
+  ///  * This widget, which is being hovered by a pointer, has moved away.
   ///
-  /// And is __not__ triggered by the following case,
+  /// And is __not__ triggered by the following case:
   ///
-  ///  * This widget, which used to contain a pointer, has disappeared.
+  ///  * This widget, which is being hovered by a pointer, has disappeared.
   ///
-  /// The last case is the only case when [onExit] does not match an earlier
-  /// [onEnter].
-  /// {@macro flutter.mouseTracker.onExit}
+  /// This means that a [MouseRegion.onExit] might not be matched by a
+  /// [MouseRegion.onEnter].
+  ///
+  /// This restriction aims to prevent a common misuse: if [setState] is called
+  /// during [MouseRegion.onExit] without checking whether the widget is still
+  /// mounted, an exception will occur. This is because the callback is
+  /// triggered during the post-frame phase, at which point the widget has been
+  /// unmounted. Since [setState] is exclusive to widgets, the restriction is
+  /// specific to [MouseRegion], and does not apply to its lower-level
+  /// counterparts, [RenderMouseRegion] and [MouseTrackerAnnotation].
+  ///
+  /// There are a few ways to mitigate this restriction:
+  ///
+  ///  * If the hover state is completely contained within a widget that
+  ///    unconditionally creates this [MouseRegion], then this will not be a
+  ///    concern, since after the [MouseRegion] is unmounted the state is no
+  ///    longer used.
+  ///  * Otherwise, the outer widget very likely has access to the variable that
+  ///    controls whether this [MouseRegion] is present. If so, call [onExit] at
+  ///    the event that turns the condition from true to false.
+  ///  * In cases where the solutions above won't work, you can always
+  ///    override [State.dispose] and call [onExit], or create your own widget
+  ///    using [RenderMouseRegion].
+  ///
+  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// The following example shows a blue rectangular that turns yellow when
+  /// hovered. Since the hover state is completely contained within a widget
+  /// that unconditionally creates the `MouseRegion`, you can ignore the
+  /// aforementioned restriction.
+  ///
+  /// ```dart
+  ///   bool hovered = false;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Container(
+  ///       height: 100,
+  ///       width: 100,
+  ///       decoration: BoxDecoration(color: hovered ? Colors.yellow : Colors.blue),
+  ///       child: MouseRegion(
+  ///         onEnter: (_) {
+  ///           setState(() { hovered = true; });
+  ///         },
+  ///         onExit: (_) {
+  ///           setState(() { hovered = false; });
+  ///         },
+  ///       ),
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// The following example shows a widget that hides its content one second
+  /// after behing hovered, and also exposes the enter and exit callbacks.
+  /// Because the widget conditionally creates the `MouseRegion`, and leaks the
+  /// hover state, it needs to take the restriction into consideration. In this
+  /// case, since it has access to the event that triggers the disappearance of
+  /// the `MouseRegion`, it simply trigger the exit callback during that event
+  /// as well.
+  ///
+  /// ```dart preamble
+  /// // A region that hides its content one second after being hovered.
+  /// class MyTimedButton extends StatefulWidget {
+  ///   MyTimedButton({ Key key, this.onEnterButton, this.onExitButton })
+  ///     : super(key: key);
+  ///
+  ///   final VoidCallback onEnterButton;
+  ///   final VoidCallback onExitButton;
+  ///
+  ///   @override
+  ///   _MyTimedButton createState() => _MyTimedButton();
+  /// }
+  ///
+  /// class _MyTimedButton extends State<MyTimedButton> {
+  ///   bool regionIsHidden = false;
+  ///   bool hovered = false;
+  ///
+  ///   void startCountdown() async {
+  ///     await Future.delayed(const Duration(seconds: 1));
+  ///     hideButton();
+  ///   }
+  ///
+  ///   void hideButton() {
+  ///     setState(() { regionIsHidden = true; });
+  ///     // This statement is necessary.
+  ///     if (hovered)
+  ///       widget.onExitButton();
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Container(
+  ///       width: 100,
+  ///       height: 100,
+  ///       child: MouseRegion(
+  ///         child: regionIsHidden ? null : MouseRegion(
+  ///           onEnter: (_) {
+  ///             widget.onEnterButton();
+  ///             setState(() { hovered = true; });
+  ///             startCountdown();
+  ///           },
+  ///           onExit: (_) {
+  ///             setState(() { hovered = false; });
+  ///             widget.onExitButton();
+  ///           },
+  ///           child: Container(color: Colors.red),
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ```dart
+  ///   Key key = UniqueKey();
+  ///   bool hovering = false;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Column(
+  ///       children: <Widget>[
+  ///         RaisedButton(
+  ///           onPressed: () {
+  ///             setState(() { key = UniqueKey(); });
+  ///           },
+  ///           child: Text('Refresh'),
+  ///         ),
+  ///         hovering ? Text('Hovering') : Text('Not hovering'),
+  ///         MyTimedButton(
+  ///           key: key,
+  ///           onEnterButton: () {
+  ///             setState(() { hovering = true; });
+  ///           },
+  ///           onExitButton: () {
+  ///             setState(() { hovering = false; });
+  ///           },
+  ///         ),
+  ///       ],
+  ///     );
+  ///   }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@macro flutter.mouseRegion.triggerTime}
   ///
   /// See also:
   ///
   ///  * [onEnter], which is triggered when a mouse pointer enters the region.
-  ///  * [MouseTrackerAnnotation.onExit], which is how this callback is
-  ///    internally implemented.
+  ///  * [RenderMouseRegion] and [MouseTrackerAnnotation.onExit], which are how
+  ///    this callback is internally implemented, but without the restriction.
   final PointerExitEventListener onExit;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it
@@ -5949,27 +6088,13 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// This defaults to true.
   final bool opaque;
 
-  @override
-  _MouseRegionElement createElement() => _MouseRegionElement(this);
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
 
   @override
-  RenderMouseRegion createRenderObject(BuildContext context) {
-    return RenderMouseRegion(
-      onEnter: onEnter,
-      onHover: onHover,
-      onExit: onExit,
-      opaque: opaque,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
-    renderObject
-      ..onEnter = onEnter
-      ..onHover = onHover
-      ..onExit = onExit
-      ..opaque = opaque;
-  }
+  _MouseRegionState createState() => _MouseRegionState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -5986,21 +6111,46 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   }
 }
 
-class _MouseRegionElement extends SingleChildRenderObjectElement {
-  _MouseRegionElement(SingleChildRenderObjectWidget widget) : super(widget);
+class _MouseRegionState extends State<MouseRegion> {
+  void handleExit(PointerExitEvent event) {
+    if (widget.onExit != null && mounted)
+      widget.onExit(event);
+  }
 
-  @override
-  void activate() {
-    super.activate();
-    final RenderMouseRegion renderMouseRegion = renderObject as RenderMouseRegion;
-    renderMouseRegion.postActivate();
+  PointerExitEventListener getHandleExit() {
+    return widget.onExit == null ? null : handleExit;
   }
 
   @override
-  void deactivate() {
-    final RenderMouseRegion renderMouseRegion = renderObject as RenderMouseRegion;
-    renderMouseRegion.preDeactivate();
-    super.deactivate();
+  Widget build(BuildContext context) {
+    return _RawMouseRegion(this);
+  }
+}
+
+class _RawMouseRegion extends SingleChildRenderObjectWidget {
+  _RawMouseRegion(this.owner) : super(child: owner.widget.child);
+
+  final _MouseRegionState owner;
+
+  @override
+  RenderMouseRegion createRenderObject(BuildContext context) {
+    final MouseRegion widget = owner.widget;
+    return RenderMouseRegion(
+      onEnter: widget.onEnter,
+      onHover: widget.onHover,
+      onExit: owner.getHandleExit(),
+      opaque: widget.opaque,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
+    final MouseRegion widget = owner.widget;
+    renderObject
+      ..onEnter = widget.onEnter
+      ..onHover = widget.onHover
+      ..onExit = owner.getHandleExit()
+      ..opaque = widget.opaque;
   }
 }
 

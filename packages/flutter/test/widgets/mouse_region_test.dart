@@ -261,7 +261,6 @@ void main() {
         onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
-    final RenderMouseRegion renderListener = tester.renderObject(find.byType(MouseRegion));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
     addTearDown(gesture.removePointer);
@@ -279,7 +278,6 @@ void main() {
     expect(enter, isNull);
     expect(move, isNull);
     expect(exit, isNull);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
   });
 
   testWidgets('triggers pointer enter when widget moves in', (WidgetTester tester) async {
@@ -415,8 +413,6 @@ void main() {
         ],
       ),
     );
-    final RenderMouseRegion renderListener1 = tester.renderObject(find.byKey(key1));
-    final RenderMouseRegion renderListener2 = tester.renderObject(find.byKey(key2));
     Offset center = tester.getCenter(find.byKey(key2));
     await gesture.moveTo(center);
     await tester.pump();
@@ -428,8 +424,6 @@ void main() {
     expect(enter1, isNotEmpty);
     expect(enter1.last.position, equals(center));
     expect(exit1, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
     clearLists();
 
     // Now make sure that exiting the child only triggers the child exit, not
@@ -444,8 +438,6 @@ void main() {
     expect(move1.last.position, equals(center));
     expect(enter1, isEmpty);
     expect(exit1, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
     clearLists();
   });
 
@@ -500,8 +492,6 @@ void main() {
         ],
       ),
     );
-    final RenderMouseRegion renderListener1 = tester.renderObject(find.byKey(key1));
-    final RenderMouseRegion renderListener2 = tester.renderObject(find.byKey(key2));
     final Offset center1 = tester.getCenter(find.byKey(key1));
     final Offset center2 = tester.getCenter(find.byKey(key2));
     await gesture.moveTo(center1);
@@ -514,8 +504,6 @@ void main() {
     expect(move2, isEmpty);
     expect(enter2, isEmpty);
     expect(exit2, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
     clearLists();
     await gesture.moveTo(center2);
     await tester.pump();
@@ -528,8 +516,6 @@ void main() {
     expect(enter2, isNotEmpty);
     expect(enter2.last.position, equals(center2));
     expect(exit2, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
     clearLists();
     await gesture.moveTo(const Offset(400.0, 450.0));
     await tester.pump();
@@ -540,8 +526,6 @@ void main() {
     expect(enter2, isEmpty);
     expect(exit2, isNotEmpty);
     expect(exit2.last.position, equals(const Offset(400.0, 450.0)));
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
     clearLists();
     await tester.pumpWidget(Container());
     expect(move1, isEmpty);
@@ -550,8 +534,6 @@ void main() {
     expect(move2, isEmpty);
     expect(enter2, isEmpty);
     expect(exit2, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isFalse);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isFalse);
   });
 
   testWidgets('MouseRegion uses updated callbacks', (WidgetTester tester) async {
@@ -713,8 +695,8 @@ void main() {
         child: const MouseRegion(opaque: false),
       ),
     );
-    final RenderMouseRegion listener = tester.renderObject(find.byType(MouseRegion));
-    expect(listener.needsCompositing, isFalse);
+    final RenderMouseRegion mouseRegion = tester.renderObject(find.byType(MouseRegion));
+    expect(mouseRegion.needsCompositing, isFalse);
     // No TransformLayer for `Transform.scale` is added because composting is
     // not required and therefore the transform is executed on the canvas
     // directly. (One TransformLayer is always present for the root
@@ -731,7 +713,7 @@ void main() {
         ),
       ),
     );
-    expect(listener.needsCompositing, isTrue);
+    expect(mouseRegion.needsCompositing, isTrue);
     // Compositing is required, therefore a dedicated TransformLayer for
     // `Transform.scale` is added.
     expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
@@ -742,7 +724,7 @@ void main() {
         child: const MouseRegion(opaque: false),
       ),
     );
-    expect(listener.needsCompositing, isFalse);
+    expect(mouseRegion.needsCompositing, isFalse);
     // TransformLayer for `Transform.scale` is removed again as transform is
     // executed directly on the canvas.
     expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
@@ -756,7 +738,7 @@ void main() {
         ),
       ),
     );
-    expect(listener.needsCompositing, isTrue);
+    expect(mouseRegion.needsCompositing, isTrue);
     // Compositing is required, therefore a dedicated TransformLayer for
     // `Transform.scale` is added.
     expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
@@ -767,20 +749,20 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.addPointer(location: Offset.zero);
 
-    int numEntries = 0;
+    int numEntrances = 0;
     int numExits = 0;
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
-        onEnter: () => numEntries++,
-        onExit: () => numExits++,
+        onEnter: () { numEntrances += 1; },
+        onExit: () { numExits += 1; },
       )),
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Text)));
     await tester.pumpAndSettle();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
     expect(find.text('HOVERING'), findsOneWidget);
 
@@ -788,18 +770,18 @@ void main() {
       Container(),
     );
     await tester.pump();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
-        onEnter: () => numEntries++,
-        onExit: () => numExits++,
+        onEnter: () { numEntrances += 1; },
+        onExit: () { numExits += 1; },
       )),
     );
     await tester.pump();
-    expect(numEntries, equals(2));
+    expect(numEntrances, equals(2));
     expect(numExits, equals(0));
   });
 
@@ -809,41 +791,43 @@ void main() {
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
 
-    int numEntries = 0;
+    int numEntrances = 0;
     int numExits = 0;
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
         key: feedbackKey,
-        onEnter: () => numEntries++,
-        onExit: () => numExits++,
+        onEnter: () { numEntrances += 1; },
+        onExit: () { numExits += 1; },
       )),
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Text)));
     await tester.pumpAndSettle();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
     expect(find.text('HOVERING'), findsOneWidget);
 
     await tester.pumpWidget(
       Center(
-          child: Container(
-              child: HoverFeedback(
-        key: feedbackKey,
-        onEnter: () => numEntries++,
-        onExit: () => numExits++,
-      ))),
+        child: Container(
+          child: HoverFeedback(
+            key: feedbackKey,
+            onEnter: () { numEntrances += 1; },
+            onExit: () { numExits += 1; },
+          ),
+        ),
+      ),
     );
     await tester.pump();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
     await tester.pumpWidget(
       Container(),
     );
     await tester.pump();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
   });
 
@@ -920,8 +904,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
-          child: _PaintDelegateWidget(
-            onPaint: _VoidDelegate(() => paintCount++),
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { paintCount += 1; }),
             child: const Text('123'),
           ),
         ),
@@ -943,8 +927,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
-          child: _PaintDelegateWidget(
-            onPaint: _VoidDelegate(() => paintCount++),
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { paintCount += 1; }),
             child: const Text('123'),
           ),
         ),
@@ -1299,12 +1283,12 @@ void main() {
             Align(
               alignment: Alignment.topLeft,
               child: MouseRegion(
-                  onEnter: (_) { bottomRegionIsHovered = true; },
-                  onHover: (_) { bottomRegionIsHovered = true; },
-                  onExit: (_) { bottomRegionIsHovered = true; },
-                  child: Container(
-                    width: 10,
-                    height: 10,
+                onEnter: (_) { bottomRegionIsHovered = true; },
+                onHover: (_) { bottomRegionIsHovered = true; },
+                onExit: (_) { bottomRegionIsHovered = true; },
+                child: Container(
+                  width: 10,
+                  height: 10,
                 ),
               ),
             ),
@@ -1325,7 +1309,118 @@ void main() {
     expect(bottomRegionIsHovered, isFalse);
   });
 
-  testWidgets('RenderMouseRegion\'s debugFillProperties when default', (WidgetTester tester) async {
+  testWidgets("Changing MouseRegion's callbacks is effective and doesn't repaint", (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+    const Key key = ValueKey<int>(1);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(20, 20));
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          onEnter: (_) { logs.add('enter1'); },
+          onHover: (_) { logs.add('hover1'); },
+          onExit: (_) { logs.add('exit1'); },
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { logs.add('paint'); }, key: key),
+          ),
+        ),
+      ),
+    ));
+    expect(logs, <String>['paint']);
+    logs.clear();
+
+    await gesture.moveTo(const Offset(5, 5));
+    expect(logs, <String>['enter1', 'hover1']);
+    logs.clear();
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          onEnter: (_) { logs.add('enter2'); },
+          onHover: (_) { logs.add('hover2'); },
+          onExit: (_) { logs.add('exit2'); },
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { logs.add('paint'); }, key: key),
+          ),
+        ),
+      ),
+    ));
+    expect(logs, isEmpty);
+
+    await gesture.moveTo(const Offset(6, 6));
+    expect(logs, <String>['hover2']);
+    logs.clear();
+
+    // Compare: It repaints if the MouseRegion is unactivated.
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          opaque: false,
+          child: CustomPaint(
+            painter: _DelegatedPainter(onPaint: () { logs.add('paint'); }, key: key),
+          ),
+        ),
+      ),
+    ));
+    expect(logs, <String>['paint']);
+  });
+
+  testWidgets('Changing MouseRegion.opaque is effective and repaints', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(5, 5));
+    addTearDown(gesture.removePointer);
+
+    final PointerHoverEventListener onHover = (_) {};
+    final VoidCallback onPaintChild = () { logs.add('paint'); };
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          opaque: true,
+          // Dummy callback so that MouseRegion stays affective after opaque
+          // turns false.
+          onHover: onHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+        ),
+      ),
+      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
+    ));
+    expect(logs, <String>['paint']);
+    logs.clear();
+
+    expect(logs, isEmpty);
+    logs.clear();
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          opaque: false,
+          onHover: onHover,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+        ),
+      ),
+      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
+    ));
+
+    expect(logs, <String>['paint', 'hover-enter']);
+  });
+
+  testWidgets("RenderMouseRegion's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderMouseRegion().debugFillProperties(builder);
 
@@ -1339,7 +1434,7 @@ void main() {
     ]);
   });
 
-  testWidgets('RenderMouseRegion\'s debugFillProperties when full', (WidgetTester tester) async {
+  testWidgets("RenderMouseRegion's debugFillProperties when full", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderMouseRegion(
       onEnter: (PointerEnterEvent event) {},
@@ -1377,64 +1472,46 @@ void main() {
     await gesture.moveBy(const Offset(10.0, 10.0));
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
+}
 
-  testWidgets("MouseTracker's attachAnnotation doesn't schedule any frames", (WidgetTester tester) async {
-    // This test is here because MouseTracker can't use testWidgets.
-    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
-      onEnter: (PointerEnterEvent event) {},
-      onHover: (PointerHoverEvent event) {},
-      onExit: (PointerExitEvent event) {},
+// Render widget `topLeft` at the top-left corner, stacking on top of the widget
+// `background`.
+class _Scaffold extends StatelessWidget {
+  const _Scaffold({this.topLeft, this.background});
+
+  final Widget topLeft;
+  final Widget background;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          if (background != null) background,
+          Align(
+            alignment: Alignment.topLeft,
+            child: topLeft,
+          ),
+        ],
+      ),
     );
-    RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    expect(tester.binding.hasScheduledFrame, isFalse);
-    expect(RendererBinding.instance.mouseTracker.isAnnotationAttached(annotation), isTrue);
-    RendererBinding.instance.mouseTracker.detachAnnotation(annotation);
-  });
-}
-
-// This widget allows you to send a callback that is called during `onPaint`.
-@immutable
-class _PaintDelegateWidget extends SingleChildRenderObjectWidget {
-  const _PaintDelegateWidget({
-    Key key,
-    Widget child,
-    this.onPaint,
-  }) : super(key: key, child: child);
-
-  final _VoidDelegate onPaint;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _PaintCallbackObject(onPaint: onPaint?.callback);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _PaintCallbackObject renderObject) {
-    renderObject..onPaint = onPaint?.callback;
   }
 }
 
-class _VoidDelegate {
-  _VoidDelegate(this.callback);
-
-  void Function() callback;
-}
-
-class _PaintCallbackObject extends RenderProxyBox {
-  _PaintCallbackObject({
-    RenderBox child,
-    this.onPaint,
-  }) : super(child);
-
-  void Function() onPaint;
+class _DelegatedPainter extends CustomPainter {
+  _DelegatedPainter({this.key, this.onPaint});
+  final Key key;
+  final VoidCallback onPaint;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    if (onPaint != null) {
-      onPaint();
-    }
-    super.paint(context, offset);
+  void paint(Canvas canvas, Size size) {
+    onPaint();
   }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) =>
+    !(oldDelegate is _DelegatedPainter && key == oldDelegate.key);
 }
 
 class _HoverClientWithClosures extends StatefulWidget {
