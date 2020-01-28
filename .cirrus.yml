@@ -493,8 +493,6 @@ task:
         - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
 # MACOS SHARDS
-# Mac doesn't use caches because they apparently take longer to populate and save
-# than just fetching the data in the first place.
 task:
   osx_instance:
     image: mojave-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
@@ -507,6 +505,15 @@ task:
     COCOAPODS_DISABLE_STATS: true
     CPU: 2
     MEMORY: 8G
+  pub_cache:  
+    folder: $HOME/.pub-cache  
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR" 
+  flutter_pkg_cache:  
+    folder: bin/cache/pkg 
+    fingerprint_script: echo $OS; cat bin/internal/*.version  
+  artifacts_cache:  
+    folder: bin/cache/artifacts 
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - date
     - which flutter
