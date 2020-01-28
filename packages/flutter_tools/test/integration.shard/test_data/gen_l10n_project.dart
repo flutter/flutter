@@ -72,8 +72,7 @@ class Home extends StatelessWidget {
         print('#l10n $n ($result)\n');
         n += 1;
       }
-    }
-    finally {
+    } finally {
       print('#l10n END\n');
     }
     return Container();
