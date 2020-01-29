@@ -513,40 +513,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     Rect floatingActionButtonRect;
-    if (hasChild(_primaryFABKey)) {
-      final Size fabSize = layoutChild(_primaryFABKey, looseConstraints);
-
-      // To account for the FAB position being changed, we'll animate between
-      // the old and new positions.
-      final ScaffoldPrelayoutGeometry currentGeometry = ScaffoldPrelayoutGeometry(
-        bottomSheetSize: bottomSheetSize,
-        contentBottom: contentBottom,
-        contentTop: contentTop,
-        floatingActionButtonSize: fabSize,
-        minInsets: minInsets,
-        scaffoldSize: size,
-        snackBarSize: snackBarSize,
-        textDirection: textDirection,
-      );
-      final Offset currentFabOffset = fabStatuses[_primaryFABKey].location.getOffset(currentGeometry);
-      final Offset previousFabOffset = fabStatuses[_primaryFABKey].previousLocation.getOffset(currentGeometry);
-      final Offset fabOffset = fabStatuses[_primaryFABKey].animator.getOffset(
-        begin: previousFabOffset,
-        end: currentFabOffset,
-        progress: floatingActionButtonMoveAnimationProgress,
-      );
-      positionChild(_primaryFABKey, fabOffset);
-      floatingActionButtonRect = fabOffset & fabSize;
-    }
-
-    // TODO: Add additional FAB.
-    // TODO: Handle later.
-    /*
-    additionalFloatingActionButtonConfigurations.forEach(
-      (Key key, FloatingActionButtonConfiguration configuration) {
+    fabStatuses.forEach(
+      (Key key, _FABStatus status) {
         if (hasChild(key)) {
-          print('Child $key ($configuration) found');
           final Size fabSize = layoutChild(key, looseConstraints);
+
+          // To account for the FAB position being changed, we'll animate between
+          // the old and new positions.
           final ScaffoldPrelayoutGeometry currentGeometry = ScaffoldPrelayoutGeometry(
             bottomSheetSize: bottomSheetSize,
             contentBottom: contentBottom,
@@ -557,14 +530,18 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
             snackBarSize: snackBarSize,
             textDirection: textDirection,
           );
-          final Offset fabOffset = configuration.location.getOffset(currentGeometry);
+          final Offset currentFabOffset = status.location.getOffset(currentGeometry);
+          final Offset previousFabOffset = status.previousLocation.getOffset(currentGeometry);
+          final Offset fabOffset = status.animator.getOffset(
+            begin: previousFabOffset,
+            end: currentFabOffset,
+            progress: floatingActionButtonMoveAnimationProgress,
+          );
           positionChild(key, fabOffset);
-        } else {
-          print('Child $key ($configuration) NOT found');
+          floatingActionButtonRect = fabOffset & fabSize;
         }
-      }
+      },
     );
-     */
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
       if (snackBarSize == Size.zero) {
