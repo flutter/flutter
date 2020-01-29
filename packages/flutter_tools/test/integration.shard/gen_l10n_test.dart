@@ -37,8 +37,8 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  Future<void> runCommand(List<String> command) async {
-    final ProcessResult result = await const LocalProcessManager().run(
+  void runCommand(List<String> command) {
+    final ProcessResult result = const LocalProcessManager().runSync(
       command,
       workingDirectory: tempDir.path,
       environment: <String, String>{ 'FLUTTER_ROOT': getFlutterRoot() },
@@ -53,13 +53,13 @@ void main() {
     // Get the intl packages before running gen_l10n.
     final String flutterBin = globals.platform.isWindows ? 'flutter.bat' : 'flutter';
     final String flutterPath = globals.fs.path.join(getFlutterRoot(), 'bin', flutterBin);
-    await runCommand(<String>[flutterPath, 'pub', 'get']);
+    runCommand(<String>[flutterPath, 'pub', 'get']);
 
     // Generate lib/l10n/app_localizations.dart
     final String genL10nPath = globals.fs.path.join(getFlutterRoot(), 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart');
     final String dartBin = globals.platform.isWindows ? 'dart.exe' : 'dart';
     final String dartPath = globals.fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk', 'bin', dartBin);
-    await runCommand(<String>[dartPath, genL10nPath]);
+    runCommand(<String>[dartPath, genL10nPath]);
 
     // Run the app defined in GenL10nProject.main and wait for it to
     // send '#l10n END' to its stdout.
