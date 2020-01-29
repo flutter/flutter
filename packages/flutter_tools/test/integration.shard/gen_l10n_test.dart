@@ -53,6 +53,7 @@ void main() {
   /// generates a "ProcessException: %1 is not a valid Win32 application"
   /// error. Wrapping the path in double-quotes avoids the problem.
   String windowsSafePath(String path) {
+    return path;
     assert(path != null);
     return globals.platform.isWindows && path.contains(' ') && !path.startsWith('"') ? '"$path"' : path;
   }
