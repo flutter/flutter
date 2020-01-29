@@ -458,7 +458,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // e.g. `flutter build bundle`.
   buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
   buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
-  buildCommands.addAll(environmentVariablesAsXcodeBuildSettings());
+  buildCommands.addAll(environmentVariablesAsXcodeBuildSettings(globals.platform));
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
@@ -551,7 +551,10 @@ Future<XcodeBuildResult> buildXcodeProject({
         // (for example, kernel binary files produced from previous run).
         globals.fs.directory(outputDir).deleteSync(recursive: true);
       }
-      copyDirectorySync(globals.fs.directory(expectedOutputDirectory), globals.fs.directory(outputDir));
+      fsUtils.copyDirectorySync(
+        globals.fs.directory(expectedOutputDirectory),
+        globals.fs.directory(outputDir),
+      );
     } else {
       globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
     }
@@ -714,7 +717,7 @@ bool _checkXcodeVersion() {
     globals.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
-  if (!xcode.isVersionSatisfactory) {
+  if (!globals.xcode.isVersionSatisfactory) {
     globals.printError('Found "${xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
     return false;
   }

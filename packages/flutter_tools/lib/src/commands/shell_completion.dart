@@ -8,7 +8,6 @@ import 'package:completion/completion.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
@@ -49,8 +48,9 @@ class ShellCompletionCommand extends FlutterCommand {
     }
 
     if (argResults.rest.isEmpty || argResults.rest.first == '-') {
-      stdout.write(generateCompletionScript(<String>['flutter']));
-      return null;
+      final String script = generateCompletionScript(<String>['flutter']);
+      globals.stdio.stdoutWrite(script);
+      return FlutterCommandResult.warning();
     }
 
     final File outputFile = globals.fs.file(argResults.rest.first);
@@ -67,6 +67,6 @@ class ShellCompletionCommand extends FlutterCommand {
       throwToolExit('Unable to write shell completion setup script.\n$error', exitCode: 1);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

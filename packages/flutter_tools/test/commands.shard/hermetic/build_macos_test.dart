@@ -6,7 +6,6 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:platform/platform.dart';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -67,12 +66,17 @@ void main() {
     when(notMacosPlatform.isWindows).thenReturn(false);
   });
 
-  // Sets up the minimal mock project files necessary for macOS builds to succeed.
-  void createMinimalMockProjectFiles() {
-    globals.fs.directory('macos').createSync();
+  // Sets up the minimal mock project files necessary to look like a Flutter project.
+  void createCoreMockProjectFiles() {
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+  }
+
+  // Sets up the minimal mock project files necessary for macOS builds to succeed.
+  void createMinimalMockProjectFiles() {
+    globals.fs.directory(globals.fs.path.join('macos', 'Runner.xcworkspace')).createSync(recursive: true);
+    createCoreMockProjectFiles();
   }
 
   // Mocks the process manager to handle an xcodebuild call to build the app
@@ -102,11 +106,14 @@ void main() {
   testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
+    createCoreMockProjectFiles();
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit(message: 'No macOS desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
@@ -119,7 +126,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -198,7 +205,7 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'macos']),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });

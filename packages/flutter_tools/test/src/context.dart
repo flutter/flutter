@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -63,6 +64,9 @@ void testUsingContext(
       'that you are dealing with in your test.'
     );
   }
+  if (overrides.containsKey(ProcessUtils)) {
+    throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
+  }
 
   // Ensure we don't rely on the default [Config] constructor which will
   // leak a sticky $HOME/.flutter_settings behind!
@@ -92,6 +96,7 @@ void testUsingContext(
       return context.run<dynamic>(
         name: 'mocks',
         overrides: <Type, Generator>{
+          AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(),
@@ -103,7 +108,10 @@ void testUsingContext(
             return mock;
           },
           OutputPreferences: () => OutputPreferences.test(),
-          Logger: () => BufferLogger(),
+          Logger: () => BufferLogger(
+            terminal: globals.terminal,
+            outputPreferences: outputPreferences,
+          ),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
           SimControl: () => MockSimControl(),

@@ -284,7 +284,7 @@ class ScrollController extends ChangeNotifier {
 /// It tracks the most recently updated scroll position and reports it as its
 /// `initialScrollOffset`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// In this example each [PageView] page contains a [ListView] and all three
 /// [ListView]'s share a [TrackingScrollController]. The scroll offsets of all

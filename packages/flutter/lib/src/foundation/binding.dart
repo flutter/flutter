@@ -15,6 +15,7 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
 
@@ -453,7 +454,7 @@ abstract class BindingBase {
   /// not wrapped in a guard that allows the tree shaker to remove it (see
   /// sample code below).
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// The following code registers a service extension that is only included in
   /// debug builds.
   ///
@@ -467,7 +468,7 @@ abstract class BindingBase {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// A service extension registered with the following code snippet is
   /// available in debug and profile mode.
   ///
@@ -546,7 +547,7 @@ abstract class BindingBase {
   }
 
   @override
-  String toString() => '<$runtimeType>';
+  String toString() => '<${objectRuntimeType(this, 'BindingBase')}>';
 }
 
 /// Terminate the Flutter application.

@@ -211,7 +211,12 @@ class Doctor {
         lineBuffer.write(' (${result.statusInfo})');
       }
 
-      buffer.write(wrapText(lineBuffer.toString(), hangingIndent: result.leadingBox.length + 1));
+      buffer.write(wrapText(
+        lineBuffer.toString(),
+        hangingIndent: result.leadingBox.length + 1,
+        columnWidth: outputPreferences.wrapColumn,
+        shouldWrap: outputPreferences.wrapText,
+      ));
       buffer.writeln();
 
       if (result.type != ValidationType.installed) {
@@ -253,6 +258,10 @@ class Doctor {
       final Status status = Status.withSpinner(
         timeout: timeoutConfiguration.fastOperation,
         slowWarningCallback: () => validator.slowWarning,
+        timeoutConfiguration: timeoutConfiguration,
+        stopwatch: Stopwatch(),
+        supportsColor: globals.terminal.supportsColor,
+        platform: globals.platform,
       );
       ValidationResult result;
       try {
@@ -594,7 +603,7 @@ class FlutterValidator extends DoctorValidator {
     String frameworkVersion;
 
     try {
-      final FlutterVersion version = FlutterVersion.instance;
+      final FlutterVersion version = globals.flutterVersion;
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
       messages.add(ValidationMessage(userMessages.flutterVersion(

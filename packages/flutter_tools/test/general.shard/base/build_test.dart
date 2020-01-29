@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -122,7 +121,6 @@ void main() {
       verify(mockProcessManager.start(
         <String>[
           'gen_snapshot',
-          '--causal_async_stacks',
           '--additional_arg',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -147,7 +145,6 @@ void main() {
       verify(mockProcessManager.start(
         <String>[
           'gen_snapshot_armv7',
-          '--causal_async_stacks',
           '--additional_arg',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -172,7 +169,6 @@ void main() {
       verify(mockProcessManager.start(
         <String>[
           'gen_snapshot_arm64',
-          '--causal_async_stacks',
           '--additional_arg',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -185,7 +181,7 @@ void main() {
               platform: TargetPlatform.android_x64, mode: BuildMode.release))
           .thenReturn('gen_snapshot');
       when(mockProcessManager.start(
-              <String>['gen_snapshot', '--causal_async_stacks', '--strip'],
+              <String>['gen_snapshot', '--strip'],
               workingDirectory: anyNamed('workingDirectory'),
               environment: anyNamed('environment')))
           .thenAnswer((_) => Future<Process>.value(mockProc));
@@ -203,7 +199,7 @@ void main() {
           darwinArch: null,
           additionalArgs: <String>['--strip']);
       verify(mockProcessManager.start(
-              <String>['gen_snapshot', '--causal_async_stacks', '--strip'],
+              <String>['gen_snapshot', '--strip'],
               workingDirectory: anyNamed('workingDirectory'),
               environment: anyNamed('environment')))
           .called(1);
@@ -225,7 +221,6 @@ void main() {
     MockAndroidSdk mockAndroidSdk;
     MockArtifacts mockArtifacts;
     MockXcode mockXcode;
-    BufferLogger bufferLogger;
 
     setUp(() async {
       fs = MemoryFileSystem();
@@ -247,7 +242,6 @@ void main() {
       mockXcode = MockXcode();
       when(mockXcode.sdkLocation(any)).thenAnswer((_) => Future<String>.value(kSDKPath));
 
-      bufferLogger = BufferLogger();
       for (final BuildMode mode in BuildMode.values) {
         when(mockArtifacts.getArtifactPath(Artifact.snapshotDart,
             platform: anyNamed('platform'), mode: mode)).thenReturn(kSnapshotDart);
@@ -261,7 +255,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       GenSnapshot: () => genSnapshot,
       Xcode: () => mockXcode,
-      Logger: () => bufferLogger,
     };
 
     testUsingContext('iOS debug AOT snapshot is invalid', () async {
@@ -312,8 +305,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -335,17 +328,19 @@ void main() {
         '--assembly=$assembly',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
 
-      final VerificationResult toVerifyCC = verify(xcode.cc(captureAny));
+      final VerificationResult toVerifyCC = verify(mockXcode.cc(captureAny));
       expect(toVerifyCC.callCount, 1);
       final dynamic ccArgs = toVerifyCC.captured.first;
       expect(ccArgs, contains('-fembed-bitcode'));
       expect(ccArgs, contains('-isysroot'));
       expect(ccArgs, contains(kSDKPath));
 
-      final VerificationResult toVerifyClang = verify(xcode.clang(captureAny));
+      final VerificationResult toVerifyClang = verify(mockXcode.clang(captureAny));
       expect(toVerifyClang.callCount, 1);
       final dynamic clangArgs = toVerifyClang.captured.first;
       expect(clangArgs, contains('-fembed-bitcode'));
@@ -365,12 +360,12 @@ void main() {
 
       final String assembly = globals.fs.path.join(outputPath, 'snapshot_assembly.S');
       genSnapshot.outputs = <String, String>{
-        assembly: 'blah blah\n.section __DWARF\nblah blah\n',
+        assembly: 'blah blah\n',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -390,19 +385,22 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
 
-      final VerificationResult toVerifyCC = verify(xcode.cc(captureAny));
+      final VerificationResult toVerifyCC = verify(mockXcode.cc(captureAny));
       expect(toVerifyCC.callCount, 1);
       final dynamic ccArgs = toVerifyCC.captured.first;
       expect(ccArgs, contains('-fembed-bitcode'));
       expect(ccArgs, contains('-isysroot'));
       expect(ccArgs, contains(kSDKPath));
 
-      final VerificationResult toVerifyClang = verify(xcode.clang(captureAny));
+      final VerificationResult toVerifyClang = verify(mockXcode.clang(captureAny));
       expect(toVerifyClang.callCount, 1);
       final dynamic clangArgs = toVerifyClang.captured.first;
       expect(clangArgs, contains('-fembed-bitcode'));
@@ -410,11 +408,7 @@ void main() {
       expect(clangArgs, contains(kSDKPath));
 
       final File assemblyFile = globals.fs.file(assembly);
-      final File assemblyBitcodeFile = globals.fs.file('$assembly.stripped.S');
       expect(assemblyFile.existsSync(), true);
-      expect(assemblyBitcodeFile.existsSync(), true);
-      expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
-      expect(assemblyBitcodeFile.readAsStringSync().contains('.section __DWARF'), false);
     }, overrides: contextOverrides);
 
     testUsingContext('builds iOS armv7 profile AOT snapshot', () async {
@@ -429,8 +423,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -452,13 +446,15 @@ void main() {
         '--assembly=$assembly',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
-      verifyNever(xcode.cc(argThat(contains('-fembed-bitcode'))));
-      verifyNever(xcode.clang(argThat(contains('-fembed-bitcode'))));
+      verifyNever(mockXcode.cc(argThat(contains('-fembed-bitcode'))));
+      verifyNever(mockXcode.clang(argThat(contains('-fembed-bitcode'))));
 
-      verify(xcode.cc(argThat(contains('-isysroot')))).called(1);
-      verify(xcode.clang(argThat(contains('-isysroot')))).called(1);
+      verify(mockXcode.cc(argThat(contains('-isysroot')))).called(1);
+      verify(mockXcode.clang(argThat(contains('-isysroot')))).called(1);
 
       final File assemblyFile = globals.fs.file(assembly);
       expect(assemblyFile.existsSync(), true);
@@ -476,8 +472,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -497,6 +493,8 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -512,8 +510,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -535,6 +533,8 @@ void main() {
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -550,8 +550,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -571,6 +571,8 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -601,6 +603,8 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -629,6 +633,8 @@ void main() {
         '--snapshot_kind=app-aot-elf',
         '--elf=build/foo/app.so',
         '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -644,8 +650,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotterWithTimings.build(
         platform: TargetPlatform.android_arm,
@@ -658,7 +664,7 @@ void main() {
 
       expect(genSnapshotExitCode, 0);
       expect(genSnapshot.callCount, 1);
-      expect(bufferLogger.statusText, matches(RegExp(r'snapshot\(CompileTime\): \d+ ms.')));
+      expect(testLogger.statusText, matches(RegExp(r'snapshot\(CompileTime\): \d+ ms.')));
     }, overrides: contextOverrides);
   });
 }

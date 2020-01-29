@@ -26,7 +26,7 @@ import 'constants.dart';
 ///
 /// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
@@ -339,7 +339,7 @@ class DefaultTabController extends StatefulWidget {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// Typical usage is as follows:
   ///
   /// ```dart

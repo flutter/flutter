@@ -92,7 +92,7 @@ abstract class SearchDelegate<T> {
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
   /// [textInputAction].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///   CustomSearchHintDelegate({
@@ -510,7 +510,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           title: TextField(
             controller: widget.delegate._queryTextController,
             focusNode: focusNode,
-            style: theme.textTheme.title,
+            style: theme.textTheme.headline6,
             textInputAction: widget.delegate.textInputAction,
             keyboardType: widget.delegate.keyboardType,
             onSubmitted: (String _) {

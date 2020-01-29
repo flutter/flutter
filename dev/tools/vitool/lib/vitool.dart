@@ -87,8 +87,8 @@ class PathAnimation {
         final String currentCommandType = frame.paths[pathIdx].commands[commandIdx].type;
         if (commandType != currentCommandType)
           throw Exception(
-              'Paths must be built from the same commands in all frames'
-              'command $commandIdx at frame 0 was of type \'$commandType\''
+              'Paths must be built from the same commands in all frames '
+              'command $commandIdx at frame 0 was of type \'$commandType\' '
               'command $commandIdx at frame $i was of type \'$currentCommandType\''
           );
         for (int j = 0; j < numPointsInCommand; j += 1)
@@ -268,7 +268,7 @@ class FrameData {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is FrameData
         && other.size == size
@@ -320,7 +320,7 @@ class SvgPath {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is SvgPath
         && other.id == id
@@ -369,7 +369,7 @@ class SvgPathCommand {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is SvgPathCommand
         && other.type == type

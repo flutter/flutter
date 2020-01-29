@@ -6,6 +6,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 
@@ -49,7 +51,13 @@ void main() {
   });
 
   test('Config parse error', () {
-    final BufferLogger bufferLogger =BufferLogger();
+    final BufferLogger bufferLogger = BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: null,
+        platform: const LocalPlatform(),
+      ),
+      outputPreferences: OutputPreferences.test(),
+    );
     final File file = memoryFileSystem.file('example')
       ..writeAsStringSync('{"hello":"bar');
     config = Config(file, bufferLogger);

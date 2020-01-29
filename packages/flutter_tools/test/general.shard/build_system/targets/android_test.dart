@@ -22,10 +22,9 @@ void main() {
   });
 
   testbed.test('debug bundle contains expected resources', () async {
-    final Environment environment = Environment(
+    final Environment environment = Environment.test(
+      globals.fs.currentDirectory,
       outputDir: globals.fs.directory('out')..createSync(),
-      projectDir: globals.fs.currentDirectory,
-      buildDir: globals.fs.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'debug',
       }
@@ -50,10 +49,9 @@ void main() {
   });
 
   testbed.test('profile bundle contains expected resources', () async {
-    final Environment environment = Environment(
+    final Environment environment = Environment.test(
+      globals.fs.currentDirectory,
       outputDir: globals.fs.directory('out')..createSync(),
-      projectDir: globals.fs.currentDirectory,
-      buildDir: globals.fs.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'profile',
       }
@@ -70,10 +68,9 @@ void main() {
   });
 
   testbed.test('release bundle contains expected resources', () async {
-    final Environment environment = Environment(
+    final Environment environment = Environment.test(
+      globals.fs.currentDirectory,
       outputDir: globals.fs.directory('out')..createSync(),
-      projectDir: globals.fs.currentDirectory,
-      buildDir: globals.fs.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'release',
       }
@@ -90,10 +87,9 @@ void main() {
   });
 
   testbed.test('AndroidAot can build provided target platform', () async {
-    final Environment environment = Environment(
+    final Environment environment = Environment.test(
+      globals.fs.currentDirectory,
       outputDir: globals.fs.directory('out')..createSync(),
-      projectDir: globals.fs.currentDirectory,
-      buildDir: globals.fs.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'release',
       }
@@ -126,10 +122,9 @@ void main() {
   });
 
   testbed.test('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
-    final Environment environment = Environment(
+    final Environment environment = Environment.test(
+      globals.fs.currentDirectory,
       outputDir: globals.fs.directory('out')..createSync(),
-      projectDir: globals.fs.currentDirectory,
-      buildDir: globals.fs.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'release',
         kExtraGenSnapshotOptions: 'foo,bar,baz=2',
@@ -161,10 +156,9 @@ void main() {
   });
 
   testbed.test('android aot bundle copies so from abi directory', () async {
-    final Environment environment = Environment(
+    final Environment environment = Environment.test(
+      globals.fs.currentDirectory,
       outputDir: globals.fs.directory('out')..createSync(),
-      projectDir: globals.fs.currentDirectory,
-      buildDir: globals.fs.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'release',
       }

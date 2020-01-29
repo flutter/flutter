@@ -366,10 +366,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
     final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
-    final BoxConstraints effectiveConstraints = widget.constraints.copyWith(
-      minWidth: widget.constraints.minWidth != null ? (widget.constraints.minWidth + densityAdjustment.dx).clamp(0.0, double.infinity) as double : null,
-      minHeight: widget.constraints.minWidth != null ? (widget.constraints.minHeight + densityAdjustment.dy).clamp(0.0, double.infinity) as double : null,
-    );
+    final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
     final EdgeInsetsGeometry padding = widget.padding.add(
       EdgeInsets.only(
         left: densityAdjustment.dx,

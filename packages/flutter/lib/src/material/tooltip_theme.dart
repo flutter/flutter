@@ -189,7 +189,7 @@ class TooltipThemeData extends Diagnosticable {
 /// Values specified here are used for [Tooltip] properties that are not
 /// given an explicit non-null value.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here is an example of a tooltip theme that applies a blue foreground
 /// with non-rounded corners.

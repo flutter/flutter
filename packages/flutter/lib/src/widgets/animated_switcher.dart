@@ -87,7 +87,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 /// progress indicator and the image will be fading out while a new progress
 /// indicator is fading in.)
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// class ClickCounter extends StatefulWidget {
@@ -118,7 +118,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 ///                 // child each time the count changes, so that it will begin its animation
 ///                 // when the count changes.
 ///                 key: ValueKey<int>(_count),
-///                 style: Theme.of(context).textTheme.display1,
+///                 style: Theme.of(context).textTheme.headline4,
 ///               ),
 ///             ),
 ///             RaisedButton(

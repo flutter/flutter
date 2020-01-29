@@ -104,7 +104,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// In addition, a series of blacks and whites with common opacities are
 /// available. For example, [black54] is a pure black with 54% opacity.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// To select a specific color from one of the swatches, index into the swatch
 /// using an integer for the specific color desired, as follows:
@@ -113,7 +113,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// Color selection = Colors.green[400]; // Selects a mid-range green.
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Each [ColorSwatch] constant is a color and can used directly. For example:
 ///
@@ -428,7 +428,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -472,7 +472,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -510,7 +510,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purple.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purpleAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -554,7 +554,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purple.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.purpleAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -592,7 +592,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -636,7 +636,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pink.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.pinkAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -674,7 +674,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigo.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigoAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -718,7 +718,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigo.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.indigoAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -756,7 +756,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurple.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurpleAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -800,7 +800,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurple.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepPurpleAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -840,7 +840,7 @@ class Colors {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueGrey.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -884,7 +884,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlue.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lightBlueAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -922,7 +922,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -966,7 +966,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1006,7 +1006,7 @@ class Colors {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blueGrey.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1050,7 +1050,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.teal.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.tealAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1088,7 +1088,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1132,7 +1132,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyan.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.cyanAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1173,7 +1173,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1220,7 +1220,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1258,7 +1258,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1302,7 +1302,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.lime.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.limeAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1340,7 +1340,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellow.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellowAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1384,7 +1384,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellow.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.yellowAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1422,7 +1422,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amber.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amberAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1466,7 +1466,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amber.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.amberAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1504,7 +1504,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orangeAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1548,7 +1548,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orange.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.orangeAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1588,7 +1588,7 @@ class Colors {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.brown.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1632,7 +1632,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrange.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.deepOrangeAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1672,7 +1672,7 @@ class Colors {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.brown.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1716,7 +1716,7 @@ class Colors {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.red.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.redAccent.png)
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1753,7 +1753,7 @@ class Colors {
   ///
   /// This swatch has no corresponding accent color and swatch.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1800,7 +1800,7 @@ class Colors {
   /// used for raised button while pressed in light themes, and 850 is used for
   /// the background color of the dark theme. See [ThemeData.brightness].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(
@@ -1848,7 +1848,7 @@ class Colors {
   ///
   /// This swatch has no corresponding accent swatch.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Icon(

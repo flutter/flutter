@@ -13,6 +13,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/time.dart';
@@ -139,7 +140,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   FuchsiaDevices() : super('Fuchsia devices');
 
   @override
-  bool get supportsPlatform => globals.platform.isLinux || globals.platform.isMacOS;
+  bool get supportsPlatform => isFuchsiaSupportedPlatform();
 
   @override
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
@@ -153,7 +154,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
-    final List<FuchsiaDevice> devices = parseListDevices(text);
+    final List<FuchsiaDevice> devices = await parseListDevices(text);
     return devices;
   }
 
@@ -162,7 +163,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 }
 
 @visibleForTesting
-List<FuchsiaDevice> parseListDevices(String text) {
+Future<List<FuchsiaDevice>> parseListDevices(String text) async {
   final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
   for (final String rawLine in text.trim().split('\n')) {
     final String line = rawLine.trim();
@@ -172,8 +173,15 @@ List<FuchsiaDevice> parseListDevices(String text) {
       continue;
     }
     final String name = words[1];
-    final String id = words[0];
-    devices.add(FuchsiaDevice(id, name: name));
+    final String resolvedHost = await fuchsiaSdk.fuchsiaDevFinder.resolve(
+      name,
+      local: false,
+    );
+    if (resolvedHost == null) {
+      globals.printError('Failed to resolve host for Fuchsia device `$name`');
+      continue;
+    }
+    devices.add(FuchsiaDevice(resolvedHost, name: name));
   }
   return devices;
 }
@@ -240,7 +248,6 @@ class FuchsiaDevice extends Device {
     }
     // Stop the app if it's currently running.
     await stopApp(package);
-    // Find out who the device thinks we are.
     final String host = await fuchsiaSdk.fuchsiaDevFinder.resolve(
       name,
       local: true,
@@ -249,6 +256,7 @@ class FuchsiaDevice extends Device {
       globals.printError('Failed to resolve host for Fuchsia device');
       return LaunchResult.failed();
     }
+    // Find out who the device thinks we are.
     final int port = await os.findFreePort();
     if (port == 0) {
       globals.printError('Failed to find a free port');
@@ -436,6 +444,39 @@ class FuchsiaDevice extends Device {
   }
 
   @override
+  bool get supportsScreenshot => isFuchsiaSupportedPlatform();
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    if (outputFile.basename.split('.').last != 'ppm') {
+      throw '${outputFile.path} must be a .ppm file';
+    }
+    final RunResult screencapResult = await shell('screencap > /tmp/screenshot.ppm');
+    if (screencapResult.exitCode != 0) {
+      throw 'Could not take a screenshot on device $name:\n$screencapResult';
+    }
+    try {
+      final RunResult scpResult =  await scp('/tmp/screenshot.ppm', outputFile.path);
+      if (scpResult.exitCode != 0) {
+        throw 'Failed to copy screenshot from device:\n$scpResult';
+      }
+    } finally {
+      try {
+        final RunResult deleteResult = await shell('rm /tmp/screenshot.ppm');
+        if (deleteResult.exitCode != 0) {
+          globals.printError(
+            'Failed to delete screenshot.ppm from the device:\n$deleteResult'
+          );
+        }
+      } catch (_) {
+        globals.printError(
+          'Failed to delete screenshot.ppm from the device'
+        );
+      }
+    }
+  }
+
+  @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform ??= await _queryTargetPlatform();
 
   @override
@@ -472,19 +513,10 @@ class FuchsiaDevice extends Device {
   @override
   void clearLogs() {}
 
-  @override
-  bool get supportsScreenshot => false;
+  bool _ipv6;
 
-  Future<bool> get ipv6 async {
-    // Workaround for https://github.com/dart-lang/sdk/issues/29456
-    final String fragment = (await _resolvedIp).split('%').first;
-    try {
-      Uri.parseIPv6Address(fragment);
-      return true;
-    } on FormatException {
-      return false;
-    }
-  }
+  /// [true] if the current host address is IPv6.
+  bool get ipv6 => _ipv6 ??= isIPv6Address(id);
 
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
@@ -525,15 +557,6 @@ class FuchsiaDevice extends Device {
     return ports;
   }
 
-  String _cachedResolvedIp;
-
-  Future<String> get _resolvedIp async {
-    return _cachedResolvedIp ??= await fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-      local: false,
-    );
-  }
-
   /// Run `command` on the Fuchsia device shell.
   Future<RunResult> shell(String command) async {
     if (fuchsiaArtifacts.sshConfig == null) {
@@ -544,8 +567,23 @@ class FuchsiaDevice extends Device {
       'ssh',
       '-F',
       fuchsiaArtifacts.sshConfig.absolute.path,
-      await _resolvedIp,
+      id, // Device's IP address.
       command,
+    ]);
+  }
+
+  /// Transfer the file [origin] from the device to [destination].
+  Future<RunResult> scp(String origin, String destination) async {
+    if (fuchsiaArtifacts.sshConfig == null) {
+      throwToolExit('Cannot interact with device. No ssh config.\n'
+                    'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
+    }
+    return await processUtils.run(<String>[
+      'scp',
+      '-F',
+      fuchsiaArtifacts.sshConfig.absolute.path,
+      '$id:$origin',
+      destination,
     ]);
   }
 
@@ -670,7 +708,7 @@ class FuchsiaIsolateDiscoveryProtocol {
         }
         final Uri address = flutterView.owner.vmService.httpAddress;
         if (flutterView.uiIsolate.name.contains(_isolateName)) {
-          _foundUri.complete(await _device.ipv6
+          _foundUri.complete(_device.ipv6
               ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
               : Uri.parse('http://$_ipv4Loopback:${address.port}/'));
           _status.stop();
@@ -711,7 +749,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-f',
       '-L',
       '$hostPort:$_ipv4Loopback:$devicePort',
-      await device._resolvedIp,
+      device.id, // Device's IP address.
       'true',
     ];
     final Process process = await globals.processManager.start(command);
@@ -743,7 +781,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-vvv',
       '-L',
       '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}',
-      await device._resolvedIp,
+      device.id, // Device's IP address.
     ];
     final ProcessResult result = await globals.processManager.run(command);
     if (result.exitCode != 0) {
@@ -753,7 +791,9 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    for (final ForwardedPort port in forwardedPorts) {
+    final List<ForwardedPort> forwardedPortsCopy =
+      List<ForwardedPort>.from(forwardedPorts);
+    for (final ForwardedPort port in forwardedPortsCopy) {
       await unforward(port);
     }
   }

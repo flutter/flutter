@@ -654,6 +654,8 @@ class MockConfig extends Mock implements Config {}
 Stream<String> mockTerminalStdInStream;
 
 class TestTerminal extends AnsiTerminal {
+  TestTerminal() : super(stdio: globals.stdio, platform: globals.platform);
+
   @override
   String bolden(String message) => '<bold>$message</bold>';
 

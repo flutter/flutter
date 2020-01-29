@@ -14,6 +14,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 import '../application_package.dart';
 import '../base/async_guard.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
@@ -21,11 +22,14 @@ import '../base/os.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../compile.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../platform_plugins.dart';
+import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -97,6 +101,10 @@ abstract class ResidentWebRunner extends ResidentRunner {
   final List<String> dartDefines;
   DateTime firstBuildTime;
 
+  // Used with the new compiler to generate a bootstrap file containing plugins
+  // and platform initialization.
+  Directory _generatedEntrypointDirectory;
+
   // Only the debug builds of the web support the service protocol.
   @override
   bool get supportsServiceProtocol => isRunningDebug && deviceIsDebuggable;
@@ -150,6 +158,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     await _stdOutSub?.cancel();
     await _webFs?.stop();
     await device.device.stopApp(null);
+    _generatedEntrypointDirectory?.deleteSync(recursive: true);
     if (ChromeLauncher.hasChromeInstance) {
       final Chrome chrome = await ChromeLauncher.connectedInstance;
       await chrome.close();
@@ -388,7 +397,10 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       return 1;
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
-    globals.printStatus('Launching ${getDisplayPath(target)} on ${device.device.name} in $modeName mode...');
+    globals.printStatus(
+      'Launching ${fsUtils.getDisplayPath(target)} '
+      'on ${device.device.name} in $modeName mode...',
+    );
     final String effectiveHostname = debuggingOptions.hostname ?? 'localhost';
     final int hostPort = debuggingOptions.port == null
         ? await os.findFreePort()
@@ -398,7 +410,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       hostPort,
       packagesFilePath,
     );
-    await device.devFS.create();
+    final Uri url = await device.devFS.create();
     await _updateDevFS(fullRestart: true);
     device.generator.accept();
     await device.device.startApp(
@@ -406,7 +418,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       mainPath: target,
       debuggingOptions: debuggingOptions,
       platformArgs: <String, Object>{
-        'uri': 'http://$effectiveHostname:$hostPort',
+        'uri': url.toString(),
       },
     );
     return attach(
@@ -474,6 +486,46 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     return OperationResult.ok;
   }
 
+  // Flutter web projects need to include a generated main entrypoint to call the
+  // appropriate bootstrap method and inject plugins.
+  // Keep this in sync with build_system/targets/web.dart.
+  Future<String> _generateEntrypoint(String main, String packagesPath) async {
+    File result = _generatedEntrypointDirectory?.childFile('web_entrypoint.dart');
+    if (_generatedEntrypointDirectory == null) {
+      _generatedEntrypointDirectory ??= globals.fs.systemTempDirectory.createTempSync('flutter_tools.')
+        ..createSync();
+      result = _generatedEntrypointDirectory.childFile('web_entrypoint.dart');
+
+      final bool hasWebPlugins = findPlugins(flutterProject)
+        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+      await injectPlugins(flutterProject, checkProjects: true);
+
+      final PackageUriMapper packageUriMapper = PackageUriMapper(main, packagesPath, null, null);
+      final String generatedPath = globals.fs.currentDirectory
+        .childDirectory('lib')
+        .childFile('generated_plugin_registrant.dart')
+        .absolute.path;
+      final Uri generatedImport = packageUriMapper.map(generatedPath);
+
+      final String entrypoint = <String>[
+        'import "${packageUriMapper.map(main)}" as entrypoint;',
+        'import "dart:ui" as ui;',
+        if (hasWebPlugins)
+          'import "package:flutter_web_plugins/flutter_web_plugins.dart";',
+        if (hasWebPlugins)
+          'import "$generatedImport";',
+        'Future<void> main() async {',
+        if (hasWebPlugins)
+          '  registerPlugins(webPluginRegistry);'
+        '  await ui.webOnlyInitializePlatform();',
+        '  entrypoint.main();',
+        '}',
+      ].join('\n');
+      result.writeAsStringSync(entrypoint);
+    }
+    return result.path;
+  }
+
   Future<UpdateFSReport> _updateDevFS({bool fullRestart = false}) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
@@ -495,7 +547,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       timeout: timeoutConfiguration.fastOperation,
     );
     final UpdateFSReport report = await device.devFS.update(
-      mainPath: mainPath,
+      mainPath: await _generateEntrypoint(mainPath, packagesFilePath),
       target: target,
       bundle: assetBundle,
       firstBuildTime: firstBuildTime,
@@ -521,8 +573,11 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     if (device.device is ChromeDevice) {
       final Chrome chrome = await ChromeLauncher.connectedInstance;
       final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-        return chromeTab.url.contains(debuggingOptions.hostname);
+        return !chromeTab.url.startsWith('chrome-extension');
       });
+      if (chromeTab == null) {
+        throwToolExit('Failed to connect to Chrome instance.');
+      }
       _wipConnection = await chromeTab.connect();
     }
     appStartedCompleter?.complete();
@@ -587,7 +642,9 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-        'Launching ${getDisplayPath(target)} on ${device.device.name} in $modeName mode...');
+      'Launching ${fsUtils.getDisplayPath(target)} '
+      'on ${device.device.name} in $modeName mode...',
+    );
     Status buildStatus;
     bool statusActive = false;
     try {

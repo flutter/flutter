@@ -83,6 +83,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

@@ -178,7 +178,7 @@ class _RenderMenuItem extends RenderShiftedBox {
 /// [PopupMenuItem] is kMinInteractiveDimension pixels high. If you use a widget
 /// with a different height, it must be specified in the [height] property.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here, a [Text] widget is used with a popup menu item. The `WhyFarther` type
 /// is an enum, not shown here.
@@ -239,7 +239,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The text style of the popup menu item.
   ///
   /// If this property is null, then [PopupMenuThemeData.textStyle] is used.
-  /// If [PopupMenuThemeData.textStyle] is also null, then [ThemeData.textTheme.subhead] is used.
+  /// If [PopupMenuThemeData.textStyle] is also null, then [ThemeData.textTheme.subtitle1] is used.
   final TextStyle textStyle;
 
   /// The widget below this widget in the tree.
@@ -297,7 +297,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subhead;
+    TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1;
 
     if (!widget.enabled)
       style = style.copyWith(color: theme.disabledColor);
@@ -339,7 +339,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 /// layout uses [ListTile]; the checkmark is an [Icons.done] icon, shown in the
 /// [ListTile.leading] position.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Suppose a `Commands` enum exists that lists the possible commands from a
 /// particular popup menu, including `Commands.heroAndScholar` and
@@ -885,7 +885,7 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a menu with four items, selecting between an enum's
 /// values and setting a `_selection` field based on the selection.

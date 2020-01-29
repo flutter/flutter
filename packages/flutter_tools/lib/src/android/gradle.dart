@@ -546,6 +546,19 @@ Future<void> buildGradleAar({
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
     command.add('-Plocal-engine-build-mode=${androidBuildInfo.buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+
+    // Copy the local engine repo in the output directory.
+    try {
+      fsUtils.copyDirectorySync(
+        localEngineRepo,
+        getRepoDirectory(outputDirectory),
+      );
+    } on FileSystemException catch(_) {
+      throwToolExit(
+        'Failed to copy the local engine ${localEngineRepo.path} repo '
+        'in ${outputDirectory.path}'
+      );
+    }
   }
 
   command.add(aarTask);
@@ -620,7 +633,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 
   for (final String buildMode in buildModes) {
     globals.printStatus('''
-      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber''');
+      ${buildMode}Implementation \'$androidPackage:flutter_$buildMode:$buildNumber\'''');
   }
 
   globals.printStatus('''
@@ -642,7 +655,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 ''');
   }
 
-  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar''');
+  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
 }
 
 String _hex(List<int> bytes) {
@@ -877,7 +890,7 @@ String _getLocalArtifactVersion(String pomPath) {
     );
   } on FileSystemException {
     throwToolExit(
-      'Error reading $pomPath. Please ensure that you have read permission to this'
+      'Error reading $pomPath. Please ensure that you have read permission to this '
       'file and try again.');
   }
   final Iterable<xml.XmlElement> project = document.findElements('project');
@@ -907,7 +920,7 @@ Directory _getLocalEngineRepo({
     .createTempSync('flutter_tool_local_engine_repo.');
 
   // Remove the local engine repo before the tool exits.
-  addShutdownHook(
+  shutdownHooks.addShutdownHook(
     () => localEngineRepo.deleteSync(recursive: true),
     ShutdownStage.CLEANUP,
   );

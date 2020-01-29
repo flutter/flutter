@@ -10,9 +10,12 @@ import 'base/config.dart';
 import 'base/context.dart';
 import 'base/error_handling_file_system.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'cache.dart';
+import 'macos/xcode.dart';
+import 'version.dart';
 
 Logger get logger => context.get<Logger>();
 Cache get cache => context.get<Cache>();
@@ -39,6 +42,8 @@ const Platform _kLocalPlatform = LocalPlatform();
 
 Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
+Xcode get xcode => context.get<Xcode>();
+FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
@@ -103,4 +108,10 @@ AnsiTerminal get terminal {
   return context?.get<AnsiTerminal>() ?? _defaultAnsiTerminal;
 }
 
-final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal();
+final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
+  stdio: stdio,
+  platform: platform,
+);
+
+/// The global Stdio wrapper.
+Stdio get stdio => context.get<Stdio>() ?? const Stdio();

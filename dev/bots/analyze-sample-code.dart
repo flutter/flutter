@@ -107,10 +107,10 @@ class SampleCheckerException implements Exception {
 /// error output from the analyzer is parsed for details, and the problem
 /// locations are translated back to the source location.
 ///
-/// For snippets, the snippets are generated using the snippets tool, and they
-/// are analyzed with the samples. If errors are found in snippets, then the
-/// line number of the start of the snippet is given instead of the actual error
-/// line, since snippets get reformatted when written, and the line numbers
+/// For samples, the samples are generated using the snippets tool, and they
+/// are analyzed with the snippets. If errors are found in samples, then the
+/// line number of the start of the sample is given instead of the actual error
+/// line, since samples get reformatted when written, and the line numbers
 /// don't necessarily match. It does, however, print the source of the
 /// problematic line.
 class SampleChecker {
@@ -209,7 +209,7 @@ class SampleChecker {
     Map<String, List<AnalysisError>> errors = <String, List<AnalysisError>>{};
     try {
       final Map<String, Section> sections = <String, Section>{};
-      final Map<String, Snippet> snippets = <String, Snippet>{};
+      final Map<String, Sample> snippets = <String, Sample>{};
       _extractSamples(sections, snippets);
       errors = _analyze(_tempDirectory, sections, snippets);
     } finally {
@@ -242,10 +242,10 @@ class SampleChecker {
   /// Creates a name for the snippets tool to use for the snippet ID from a
   /// filename and starting line number.
   String _createNameFromSource(String prefix, String filename, int start) {
-    String snippetId = path.split(filename).join('.');
-    snippetId = path.basenameWithoutExtension(snippetId);
-    snippetId = '$prefix.$snippetId.$start';
-    return snippetId;
+    String sampleId = path.split(filename).join('.');
+    sampleId = path.basenameWithoutExtension(sampleId);
+    sampleId = '$prefix.$sampleId.$start';
+    return sampleId;
   }
 
   // Precompiles the snippets tool if _snippetsSnapshotPath isn't set yet, and
@@ -273,42 +273,42 @@ class SampleChecker {
     }
   }
 
-  /// Writes out the given [snippet] to an output file in the [_tempDirectory] and
+  /// Writes out the given sample to an output file in the [_tempDirectory] and
   /// returns the output file.
-  File _writeSnippet(Snippet snippet) {
+  File _writeSample(Sample sample) {
     // Generate the snippet.
-    final String snippetId = _createNameFromSource('snippet', snippet.start.filename, snippet.start.line);
-    final String inputName = '$snippetId.input';
+    final String sampleId = _createNameFromSource('sample', sample.start.filename, sample.start.line);
+    final String inputName = '$sampleId.input';
     // Now we have a filename like 'lib.src.material.foo_widget.123.dart' for each snippet.
     final File inputFile = File(path.join(_tempDirectory.path, inputName))..createSync(recursive: true);
-    inputFile.writeAsStringSync(snippet.input.join('\n'));
-    final File outputFile = File(path.join(_tempDirectory.path, '$snippetId.dart'));
+    inputFile.writeAsStringSync(sample.input.join('\n'));
+    final File outputFile = File(path.join(_tempDirectory.path, '$sampleId.dart'));
     final List<String> args = <String>[
       '--output=${outputFile.absolute.path}',
       '--input=${inputFile.absolute.path}',
-      ...snippet.args,
+      ...sample.args,
     ];
     if (verbose)
-      print('Generating snippet for ${snippet.start?.filename}:${snippet.start?.line}');
+      print('Generating sample for ${sample.start?.filename}:${sample.start?.line}');
     final ProcessResult process = _runSnippetsScript(args);
     if (verbose)
       stderr.write('${process.stderr}');
     if (process.exitCode != 0) {
       throw SampleCheckerException(
-        'Unable to create snippet for ${snippet.start.filename}:${snippet.start.line} '
+        'Unable to create sample for ${sample.start.filename}:${sample.start.line} '
             '(using input from ${inputFile.path}):\n${process.stdout}\n${process.stderr}',
-        file: snippet.start.filename,
-        line: snippet.start.line,
+        file: sample.start.filename,
+        line: sample.start.line,
       );
     }
     return outputFile;
   }
 
   /// Extracts the samples from the Dart files in [_flutterPackage], writes them
-  /// to disk, and adds them to the appropriate [sectionMap] or [snippetMap].
-  void _extractSamples(Map<String, Section> sectionMap, Map<String, Snippet> snippetMap) {
+  /// to disk, and adds them to the appropriate [sectionMap] or [sampleMap].
+  void _extractSamples(Map<String, Section> sectionMap, Map<String, Sample> sampleMap) {
     final List<Section> sections = <Section>[];
-    final List<Snippet> snippets = <Snippet>[];
+    final List<Sample> samples = <Sample>[];
 
     for (final File file in _listDartFiles(_flutterPackage, recursive: true)) {
       final String relativeFilePath = path.relative(file.path, from: _flutterPackage.path);
@@ -334,12 +334,12 @@ class SampleChecker {
             throw SampleCheckerException('Snippet section unterminated.', file: relativeFilePath, line: lineNumber);
           }
           if (_dartDocSampleEndRegex.hasMatch(trimmedLine)) {
-            snippets.add(
-              Snippet(
+            samples.add(
+              Sample(
                 start: startLine,
                 input: block,
                 args: snippetArgs,
-                serial: snippets.length,
+                serial: samples.length,
               ),
             );
             snippetArgs = <String>[];
@@ -407,7 +407,7 @@ class SampleChecker {
             startLine = Line('', filename: relativeFilePath, line: lineNumber + 1, indent: 3);
             inPreamble = true;
           } else if (sampleMatch != null) {
-            inSnippet = sampleMatch != null && (sampleMatch[1] == 'snippet' || sampleMatch[1] == 'dartpad');
+            inSnippet = sampleMatch != null && (sampleMatch[1] == 'sample' || sampleMatch[1] == 'dartpad');
             if (inSnippet) {
               startLine = Line(
                 '',
@@ -425,7 +425,7 @@ class SampleChecker {
             inSampleSection = !inSnippet;
           } else if (RegExp(r'///\s*#+\s+[Ss]ample\s+[Cc]ode:?$').hasMatch(trimmedLine)) {
             throw SampleCheckerException(
-              "Found deprecated '## Sample code' section: use {@tool sample}...{@end-tool} instead.",
+              "Found deprecated '## Sample code' section: use {@tool snippet}...{@end-tool} instead.",
               file: relativeFilePath,
               line: lineNumber,
             );
@@ -437,10 +437,10 @@ class SampleChecker {
     for (final Section section in sections) {
       sectionMap[_writeSection(section).path] = section;
     }
-    for (final Snippet snippet in snippets) {
-      final File snippetFile = _writeSnippet(snippet);
-      snippet.contents = snippetFile.readAsLinesSync();
-      snippetMap[snippetFile.absolute.path] = snippet;
+    for (final Sample sample in samples) {
+      final File snippetFile = _writeSample(sample);
+      sample.contents = snippetFile.readAsLinesSync();
+      sampleMap[snippetFile.absolute.path] = sample;
     }
   }
 
@@ -506,7 +506,7 @@ linter:
 
   /// Writes out a sample section to the disk and returns the file.
   File _writeSection(Section section) {
-    final String sectionId = _createNameFromSource('sample', section.start.filename, section.start.line);
+    final String sectionId = _createNameFromSource('snippet', section.start.filename, section.start.line);
     final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
     final List<Line> mainContents = <Line>[
       ...headers,
@@ -520,7 +520,7 @@ linter:
 
   /// Invokes the analyzer on the given [directory] and returns the stdout.
   List<String> _runAnalyzer(Directory directory) {
-    print('Starting analysis of samples.');
+    print('Starting analysis of code samples.');
     _createConfigurationFiles(directory);
     final ProcessResult result = Process.runSync(
       _flutter,
@@ -556,7 +556,7 @@ linter:
   Map<String, List<AnalysisError>> _analyze(
     Directory directory,
     Map<String, Section> sections,
-    Map<String, Snippet> snippets,
+    Map<String, Sample> samples,
   ) {
     final List<String> errors = _runAnalyzer(directory);
     final Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
@@ -587,7 +587,7 @@ linter:
         final String line = parts[4];
         final String column = parts[5];
         final String errorCode = parts[6];
-        final int lineNumber = int.parse(line, radix: 10) - (isSample ? headerLength : 0);
+        final int lineNumber = int.parse(line, radix: 10) - (isSnippet ? headerLength : 0);
         final int columnNumber = int.parse(column, radix: 10);
         if (lineNumber < 0 && errorCode == 'unused_import') {
           // We don't care about unused imports.
@@ -621,7 +621,7 @@ linter:
           // We don't really care if sample code isn't used!
           continue;
         }
-        if (isSnippet) {
+        if (isSample) {
           addAnalysisError(
             file,
             AnalysisError(
@@ -630,7 +630,7 @@ linter:
               message,
               errorCode,
               null,
-              snippet: snippets[file.path],
+              sample: samples[file.path],
             ),
           );
         } else {
@@ -794,7 +794,7 @@ class Line {
   String toString() => '$filename:$line: $code';
 }
 
-/// A class to represent a section of sample code, marked by "{@tool sample}...{@end-tool}".
+/// A class to represent a section of sample code, marked by "{@tool snippet}...{@end-tool}".
 class Section {
   const Section(this.code);
   factory Section.combine(List<Section> sections) {
@@ -841,12 +841,12 @@ class Section {
   final List<Line> code;
 }
 
-/// A class to represent a snippet in the dartdoc comments, marked by
-/// "{@tool snippet ...}...{@end-tool}". Snippets are processed separately from
-/// regular samples, because they must be injected into templates in order to be
+/// A class to represent a sample in the dartdoc comments, marked by
+/// "{@tool sample ...}...{@end-tool}". Samples are processed separately from
+/// regular snippets, because they must be injected into templates in order to be
 /// analyzed.
-class Snippet {
-  Snippet({this.start, List<String> input, List<String> args, this.serial}) {
+class Sample {
+  Sample({this.start, List<String> input, List<String> args, this.serial}) {
     this.input = input.toList();
     this.args = args.toList();
   }
@@ -858,7 +858,7 @@ class Snippet {
 
   @override
   String toString() {
-    final StringBuffer buf = StringBuffer('snippet ${args.join(' ')}\n');
+    final StringBuffer buf = StringBuffer('sample ${args.join(' ')}\n');
     int count = start.line;
     for (final String line in input) {
       buf.writeln(' ${count.toString().padLeft(4, ' ')}: $line');
@@ -878,7 +878,7 @@ class AnalysisError {
     this.message,
     this.errorCode,
     this.source, {
-    this.snippet,
+    this.sample,
   });
 
   final int line;
@@ -886,15 +886,15 @@ class AnalysisError {
   final String message;
   final String errorCode;
   final Line source;
-  final Snippet snippet;
+  final Sample sample;
 
   @override
   String toString() {
     if (source != null) {
       return '${source.toStringWithColumn(column)}\n>>> $message ($errorCode)';
-    } else if (snippet != null) {
-      return 'In snippet starting at '
-          '${snippet.start.filename}:${snippet.start.line}:${snippet.contents[line - 1]}\n'
+    } else if (sample != null) {
+      return 'In sample starting at '
+          '${sample.start.filename}:${sample.start.line}:${sample.contents[line - 1]}\n'
           '>>> $message ($errorCode)';
     } else {
       return '<source unknown>:$line:$column\n>>> $message ($errorCode)';

@@ -8,7 +8,6 @@ import 'package:platform/platform.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -55,12 +54,17 @@ void main() {
     when(notLinuxPlatform.isWindows).thenReturn(false);
   });
 
-  // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild() {
-    globals.fs.file('linux/build.sh').createSync(recursive: true);
+  // Creates the mock files necessary to look like a Flutter project.
+  void setUpMockCoreProjectFiles() {
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+  }
+
+  // Creates the mock files necessary to run a build.
+  void setUpMockProjectFilesForBuild() {
+    globals.fs.file(globals.fs.path.join('linux', 'Makefile')).createSync(recursive: true);
+    setUpMockCoreProjectFiles();
   }
 
   // Sets up mock expectation for running 'make'.
@@ -78,9 +82,10 @@ void main() {
   testUsingContext('Linux build fails when there is no linux project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
+    setUpMockCoreProjectFiles();
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit(message: 'No Linux desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -95,7 +100,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -214,7 +219,7 @@ BINARY_NAME=fizz_bar
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'linux']),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });

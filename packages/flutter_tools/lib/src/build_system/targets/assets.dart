@@ -124,8 +124,8 @@ class FlutterPlugins extends Target {
     final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
     final List<Plugin> plugins = findPlugins(project);
     final String pluginManifest = plugins
-        .map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}')
-        .join('\n');
+      .map<String>((Plugin p) => '${p.name}=${fsUtils.escapePath(p.path)}')
+      .join('\n');
     final File flutterPluginsFile = environment.projectDir.childFile('.flutter-plugins');
     if (!flutterPluginsFile.existsSync() || flutterPluginsFile.readAsStringSync() != pluginManifest) {
       flutterPluginsFile.writeAsStringSync(pluginManifest);

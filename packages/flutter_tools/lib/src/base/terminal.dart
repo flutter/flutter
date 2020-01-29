@@ -4,10 +4,14 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'context.dart';
 import 'io.dart' as io;
+import 'logger.dart';
 
 enum TerminalColor {
   red,
@@ -41,12 +45,13 @@ class OutputPreferences {
     bool wrapText,
     int wrapColumn,
     bool showColor,
-  }) : wrapText = wrapText ?? io.stdio.hasTerminal,
+  }) : wrapText = wrapText ?? globals.stdio.hasTerminal,
        _overrideWrapColumn = wrapColumn,
        showColor = showColor ?? globals.platform.stdoutSupportsAnsi ?? false;
 
   /// A version of this class for use in tests.
-  OutputPreferences.test() : wrapText = false, _overrideWrapColumn = null, showColor = false;
+  OutputPreferences.test({this.wrapText = false, int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
+    : _overrideWrapColumn = wrapColumn;
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
@@ -66,7 +71,7 @@ class OutputPreferences {
   /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
   final int _overrideWrapColumn;
   int get wrapColumn {
-    return _overrideWrapColumn ?? io.stdio.terminalColumns ?? kDefaultTerminalColumns;
+    return _overrideWrapColumn ?? globals.stdio.terminalColumns ?? kDefaultTerminalColumns;
   }
 
   /// Whether or not to output ANSI color codes when writing to the output
@@ -81,6 +86,13 @@ class OutputPreferences {
 }
 
 class AnsiTerminal {
+  AnsiTerminal({@required io.Stdio stdio, @required Platform platform})
+    : _stdio = stdio,
+      _platform = platform;
+
+  final io.Stdio _stdio;
+  final Platform _platform;
+
   static const String bold = '\u001B[1m';
   static const String resetAll = '\u001B[0m';
   static const String resetColor = '\u001B[39m';
@@ -107,7 +119,8 @@ class AnsiTerminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color];
 
-  bool get supportsColor => globals.platform.stdoutSupportsAnsi ?? false;
+  bool get supportsColor => _platform.stdoutSupportsAnsi ?? false;
+
   final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   /// Whether we are interacting with the flutter tool via the terminal.
@@ -159,10 +172,10 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? clear : '\n\n';
 
   set singleCharMode(bool value) {
-    if (!io.stdinHasTerminal) {
+    if (!_stdio.stdinHasTerminal) {
       return;
     }
-    final io.Stdin stdin = io.stdin as io.Stdin;
+    final io.Stdin stdin = _stdio.stdin as io.Stdin;
     // The order of setting lineMode and echoMode is important on Windows.
     if (value) {
       stdin.echoMode = false;
@@ -179,7 +192,7 @@ class AnsiTerminal {
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes {
-    _broadcastStdInString ??= io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
+    _broadcastStdInString ??= _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
     return _broadcastStdInString;
   }
 
@@ -198,6 +211,7 @@ class AnsiTerminal {
   /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
+    @required Logger logger,
     String prompt,
     int defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
@@ -220,14 +234,14 @@ class AnsiTerminal {
     singleCharMode = true;
     while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
-        globals.printStatus(prompt, emphasis: true, newline: false);
+        logger.printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters) {
-          globals.printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
+          logger.printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         }
-        globals.printStatus(': ', emphasis: true, newline: false);
+        logger.printStatus(': ', emphasis: true, newline: false);
       }
       choice = await keystrokes.first;
-      globals.printStatus(choice);
+      logger.printStatus(choice);
     }
     singleCharMode = false;
     if (defaultChoiceIndex != null && choice == '\n') {

@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'object.dart';
 
 // Examples can assume:
 // int rows, columns;
@@ -1630,6 +1631,7 @@ abstract class DiagnosticsNode {
       return toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
 
     final String description = toDescription(parentConfiguration: parentConfiguration);
+    assert(description != null);
 
     if (name == null || name.isEmpty || !showName)
       return description;
@@ -1715,7 +1717,7 @@ abstract class DiagnosticsNode {
 
 /// Debugging message displayed like a property.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following two properties are better expressed using this
 /// [MessageProperty] class, rather than [StringProperty], as the intent is to
@@ -1727,7 +1729,7 @@ abstract class DiagnosticsNode {
 /// var usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// On the other hand, [StringProperty] is better suited when the property has a
 /// concrete value that is a string:
@@ -2054,7 +2056,7 @@ class PercentProperty extends DoubleProperty {
 /// when `visible` is false and nothing when visible is true, in contrast to
 /// `visible: true` or `visible: false`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// FlagProperty(
@@ -2064,7 +2066,7 @@ class PercentProperty extends DoubleProperty {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// [FlagProperty] should also be used instead of [DiagnosticsProperty<bool>]
 /// if showing the bool value would not clearly indicate the meaning of the
@@ -2961,14 +2963,14 @@ String shortHash(Object object) {
 ///    distinguish instances of the same class (hash collisions are
 ///    possible, but rare enough that its use in debug output is useful).
 ///  * [Object.runtimeType], the [Type] of an object.
-String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(object)}';
+String describeIdentity(Object object) => '${objectRuntimeType(object, '<optimized out>')}#${shortHash(object)}';
 
 // This method exists as a workaround for https://github.com/dart-lang/sdk/issues/30021
 /// Returns a short description of an enum value.
 ///
 /// Strips off the enum class name from the `enumEntry.toString()`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// enum Day {
@@ -3188,7 +3190,7 @@ mixin DiagnosticableMixin {
   /// `toString` method implementation works fine using [DiagnosticsProperty]
   /// directly.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shows best practices for implementing [debugFillProperties]
   /// illustrating use of all common [DiagnosticsProperty] subclasses and all

@@ -66,7 +66,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// unless they start with the same number of spaces as the previous line, in
 /// which case it's assumed they are a continuation of an indented paragraph.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// For example, the BSD license in this format could be encoded as follows:
 ///

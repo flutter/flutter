@@ -27,7 +27,7 @@ import 'material_localizations.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];

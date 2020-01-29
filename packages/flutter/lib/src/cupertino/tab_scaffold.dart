@@ -15,7 +15,7 @@ import 'theme.dart';
 /// [CupertinoTabController] controls, as well as the currently selected tab item of
 /// its [CupertinoTabBar].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// [CupertinoTabController] can be used to switch tabs:
 ///
@@ -135,7 +135,7 @@ class CupertinoTabController extends ChangeNotifier {
 /// (via [State.setState], for instance) from its descendant rather than from
 /// its ancestor.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// A sample code implementing a typical iOS information architecture with tabs.
 ///

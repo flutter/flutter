@@ -204,7 +204,7 @@ class DefaultTextStyle extends InheritedTheme {
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how to display text using the [Text] widget with the
 /// [overflow] set to [TextOverflow.ellipsis].
@@ -228,7 +228,7 @@ class DefaultTextStyle extends InheritedTheme {
 /// that follows displays "Hello beautiful world" with different styles
 /// for each word.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ![The word "Hello" is shown with the default text styles. The word "beautiful" is italicized. The word "world" is bold.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_rich.png)
 ///

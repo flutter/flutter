@@ -7,7 +7,6 @@ import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -77,7 +76,6 @@ void main() {
       verify(mockFile.deleteSync(recursive: true)).called(1);
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
-      Logger: () => BufferLogger(),
       Xcode: () => mockXcode,
     });
 
@@ -94,7 +92,6 @@ void main() {
       verifyNever(mockFile.deleteSync(recursive: true));
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
-      Logger: () => BufferLogger(),
       Xcode: () => mockXcode,
     });
   }

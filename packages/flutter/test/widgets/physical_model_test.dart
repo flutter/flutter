@@ -105,7 +105,7 @@ void main() {
     );
 
     final dynamic exception = tester.takeException();
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(

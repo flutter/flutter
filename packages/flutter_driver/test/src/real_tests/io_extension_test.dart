@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_driver/src/extension/_io_extension.dart';
+import 'package:flutter_driver/src/extension/_extension_io.dart';
 
 import '../../common.dart';
 
@@ -18,7 +18,7 @@ void main() {
 
     test('io_extension should throw exception', () {
       expect(() => registerWebServiceExtension(call),
-          throwsA(isInstanceOf<UnsupportedError>()));
+          throwsA(isA<UnsupportedError>()));
     });
   });
 }

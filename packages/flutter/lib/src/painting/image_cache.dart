@@ -29,10 +29,10 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// A shared instance of this cache is retained by [PaintingBinding] and can be
 /// obtained via the [imageCache] top-level property in the [painting] library.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows how to supply your own caching logic and replace the
-/// global [imageCache] varible.
+/// global [imageCache] variable.
 ///
 /// ```dart
 /// /// This is the custom implementation of [ImageCache] where we can override
@@ -64,7 +64,6 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// }
 /// ```
 /// {@end-tool}
-
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
@@ -141,12 +140,13 @@ class ImageCache {
   }
 
   /// Evicts a single entry from the cache, returning true if successful.
-  /// Pending images waiting for completion are removed as well, returning true if successful.
+  /// Pending images waiting for completion are removed as well, returning true
+  /// if successful.
   ///
-  /// When a pending image is removed the listener on it is removed as well to prevent
-  /// it from adding itself to the cache if it eventually completes.
+  /// When a pending image is removed the listener on it is removed as well to
+  /// prevent it from adding itself to the cache if it eventually completes.
   ///
-  /// The [key] must be equal to an object used to cache an image in
+  /// The `key` must be equal to an object used to cache an image in
   /// [ImageCache.putIfAbsent].
   ///
   /// If the key is not immediately available, as is common, consider using
@@ -207,20 +207,16 @@ class ImageCache {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
       final _CachedImage image = _CachedImage(result, imageSize);
-      // If the image is bigger than the maximum cache size, and the cache size
-      // is not zero, then increase the cache size to the size of the image plus
-      // some change.
-      if (maximumSizeBytes > 0 && imageSize > maximumSizeBytes) {
-        _maximumSizeBytes = imageSize + 1000;
-      }
-      _currentSizeBytes += imageSize;
       final _PendingImage pendingImage = _pendingImages.remove(key);
       if (pendingImage != null) {
         pendingImage.removeListener();
       }
 
-      _cache[key] = image;
-      _checkCacheSize();
+      if (imageSize <= maximumSizeBytes) {
+        _currentSizeBytes += imageSize;
+        _cache[key] = image;
+        _checkCacheSize();
+      }
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
       final ImageStreamListener streamListener = ImageStreamListener(listener);

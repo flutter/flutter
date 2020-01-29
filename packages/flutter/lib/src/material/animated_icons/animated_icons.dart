@@ -18,7 +18,7 @@ part of material_animated_icons;
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=pJcbh8pbvJs}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// AnimatedIcon(

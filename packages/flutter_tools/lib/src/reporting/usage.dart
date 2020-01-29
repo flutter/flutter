@@ -162,7 +162,7 @@ class _DefaultUsage implements Usage {
     String configDirOverride,
     String logFile,
   }) {
-    final FlutterVersion flutterVersion = FlutterVersion.instance;
+    final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
     final bool suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     final String logFilePath = logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
@@ -176,7 +176,7 @@ class _DefaultUsage implements Usage {
         // Many CI systems don't do a full git checkout.
         version.endsWith('/unknown') ||
         // Ignore bots.
-        isRunningOnBot ||
+        isRunningOnBot(globals.platform) ||
         // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
         suppressEnvFlag
       )) {
@@ -349,10 +349,10 @@ class _DefaultUsage implements Usage {
   ║ crash reports to Google.                                                   ║
   ║                                                                            ║
   ║ Read about data we send with crash reports:                                ║
-  ║ https://github.com/flutter/flutter/wiki/Flutter-CLI-crash-reporting        ║
+  ║ https://flutter.dev/docs/reference/crash-reporting                         ║
   ║                                                                            ║
   ║ See Google's privacy policy:                                               ║
-  ║ https://www.google.com/intl/en/policies/privacy/                           ║
+  ║ https://policies.google.com/privacy                                        ║
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
   }
@@ -367,7 +367,7 @@ class _DefaultUsage implements Usage {
         isFirstRun ||
         // Display the welcome message if we are not on master, and if the
         // persistent tool state instructs that we should.
-        (!FlutterVersion.instance.isMaster &&
+        (!globals.flutterVersion.isMaster &&
         (persistentToolState.redisplayWelcomeMessage ?? true))) {
       _printWelcome();
       _printedWelcome = true;

@@ -285,7 +285,7 @@ Future<void> main() async {
           || !objectiveCAnalyticsOutput.contains('cd25: true')
           || !objectiveCAnalyticsOutput.contains('viewName: build/bundle')) {
         return TaskResult.failure(
-          'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput"'
+          'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput" '
           'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
         );
       }
@@ -374,7 +374,7 @@ Future<void> main() async {
           || !swiftAnalyticsOutput.contains('cd25: true')
           || !swiftAnalyticsOutput.contains('viewName: build/bundle')) {
         return TaskResult.failure(
-          'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput"'
+          'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput" '
           'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
         );
       }

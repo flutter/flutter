@@ -15,6 +15,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/dart.dart';
+import 'cache.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart' as globals;
@@ -113,6 +114,8 @@ Future<void> buildWithAssemble({
     projectDir: flutterProject.directory,
     outputDir: globals.fs.directory(outputDir),
     buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
+    cacheDir: globals.cache.getRoot(),
+    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     defines: <String, String>{
       kTargetFile: mainPath,
       kBuildMode: getNameForBuildMode(buildMode),

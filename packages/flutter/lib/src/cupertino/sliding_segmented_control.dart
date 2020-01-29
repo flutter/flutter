@@ -118,6 +118,8 @@ class _FontWeightTween extends Tween<FontWeight> {
 ///
 /// See also:
 ///
+///  * [CupertinoSlidingSegmentedControl], a segmented control widget in the
+///    style introduced in iOS 13.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
 class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
@@ -178,7 +180,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// the parent [StatefulWidget] using the [State.setState] method, so that
   /// the parent gets rebuilt; for example:
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {

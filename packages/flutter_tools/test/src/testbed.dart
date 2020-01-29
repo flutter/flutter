@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -38,7 +39,10 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
   FileSystem: () => MemoryFileSystem(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
   ProcessManager: () => FakeProcessManager.any(),
-  Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
+  Logger: () => BufferLogger(
+    terminal: AnsiTerminal(stdio: globals.stdio, platform: globals.platform),  // Danger, using real stdio.
+    outputPreferences: OutputPreferences.test(),
+  ), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
@@ -110,6 +114,9 @@ class Testbed {
       // Add the test-specific overrides
       ...?overrides,
     };
+    if (testOverrides.containsKey(ProcessUtils)) {
+      throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
+    }
     // Cache the original flutter root to restore after the test case.
     final String originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
@@ -914,5 +921,14 @@ class FakeCache implements Cache {
 
   @override
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+  }
+
+  @override
+  Future<void> downloadFile(Uri url, File location) async {
+  }
+
+  @override
+  Future<bool> doesRemoteExist(String message, Uri url) async {
+    return true;
   }
 }

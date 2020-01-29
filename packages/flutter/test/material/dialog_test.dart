@@ -531,6 +531,41 @@ void main() {
     ); // right
   });
 
+  testWidgets('Dialogs can set the vertical direction of actions', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        RaisedButton(
+          key: key1,
+          onPressed: () {},
+          child: const Text('Looooooooooooooong button 1'),
+        ),
+        RaisedButton(
+          key: key2,
+          onPressed: () {},
+          child: const Text('Looooooooooooooong button 2'),
+        ),
+      ],
+      actionsOverflowDirection: VerticalDirection.up,
+    );
+
+    await tester.pumpWidget(
+      _appWithAlertDialog(tester, dialog),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Rect buttonOneRect = tester.getRect(find.byKey(key1));
+    final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
+    // Second [RaisedButton] should appear above the first.
+    expect(buttonTwoRect.bottom, buttonOneRect.top);
+  });
+
   testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
     BuildContext outerContext;
     BuildContext routeContext;

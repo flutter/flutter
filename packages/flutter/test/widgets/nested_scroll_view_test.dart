@@ -113,7 +113,6 @@ Widget buildTest({ ScrollController controller, String title = 'TTTTTTTT' }) {
 
 void main() {
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
@@ -128,10 +127,8 @@ void main() {
     // TODO(ianh): Once we improve how we handle scrolling down from overscroll,
     // the following expectation should switch to 200.0.
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 120.0);
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
@@ -149,10 +146,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text('aaa2'), findsNothing);
     await tester.pump(const Duration(milliseconds: 1000));
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   testWidgets('NestedScrollView overscroll and release', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 500));
@@ -164,8 +159,10 @@ void main() {
     await gesture1.up();
     await tester.pumpAndSettle();
     expect(find.text('aaa2'), findsOneWidget);
-    debugDefaultTargetPlatformOverride = null;
-  }, skip: true); // https://github.com/flutter/flutter/issues/9040
+  },
+  skip: true,  // https://github.com/flutter/flutter/issues/9040
+  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
   testWidgets('NestedScrollView', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
@@ -610,12 +607,11 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('NestedScrollView and iOS bouncing', (WidgetTester tester) async {
+  testWidgets('NestedScrollView and bouncing', (WidgetTester tester) async {
     // This verifies that overscroll bouncing works correctly on iOS. For
     // example, this checks that if you pull to overscroll, friction is applied;
     // it also makes sure that if you scroll back the other way, the scroll
     // positions of the inner and outer list don't have a discontinuity.
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     const Key key1 = ValueKey<int>(1);
     const Key key2 = ValueKey<int>(2);
     await tester.pumpWidget(
@@ -675,6 +671,12 @@ void main() {
     expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  // Regression test for https://github.com/flutter/flutter/issues/39963.
+  testWidgets('NestedScrollView with SliverOverlapAbsorber in or out of the first screen', (WidgetTester tester) async {
+    await tester.pumpWidget(const _TestLayoutExtentIsNegative(1));
+    await tester.pumpWidget(const _TestLayoutExtentIsNegative(10));
   });
 }
 
@@ -691,4 +693,61 @@ class TestHeader extends SliverPersistentHeaderDelegate {
   }
   @override
   bool shouldRebuild(TestHeader oldDelegate) => false;
+}
+
+class _TestLayoutExtentIsNegative extends StatelessWidget {
+  const _TestLayoutExtentIsNegative(this.widgetCountBeforeSliverOverlapAbsorber);
+  final int widgetCountBeforeSliverOverlapAbsorber;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Test'),
+        ),
+        body: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              ...List<Widget>.generate(widgetCountBeforeSliverOverlapAbsorber, (_) {
+                return SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.red,
+                    height: 200,
+                    margin:const EdgeInsets.all(20),
+                  ),
+                );
+              },),
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverAppBar(
+                  pinned: true,
+                  forceElevated: innerBoxIsScrolled,
+                  backgroundColor: Colors.blue[300],
+                  title: Container(
+                    height: 50,
+                    child: const Center(
+                      child: Text('Sticky Header'),
+                    ),
+                  ),
+                ),
+              )
+            ];
+          },
+          body: Container(
+            height: 2000,
+            margin: const EdgeInsets.only(top: 50),
+            child: ListView(
+              children: List<Widget>.generate(3, (_) {
+                return Container(
+                  color: Colors.green[200],
+                  height: 200,
+                  margin: const EdgeInsets.all(20),
+                );
+              },),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

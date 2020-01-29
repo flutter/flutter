@@ -133,7 +133,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// [controller]. For example, to set the initial value of the text field, use
 /// a [controller] that already contains some text such as:
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// class MyPrefilledText extends StatefulWidget {
@@ -847,7 +847,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
     final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
 
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context);
     final Color cursorColor = CupertinoDynamicColor.resolve(widget.cursorColor, context) ?? themeData.primaryColor;
     final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
 
@@ -929,7 +929,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
 
     return Semantics(
-      onTap: () {
+      enabled: enabled,
+      onTap: !enabled ? null : () {
         if (!controller.selection.isValid) {
           controller.selection = TextSelection.collapsed(offset: controller.text.length);
         }

@@ -64,6 +64,10 @@ void main() {
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+    final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
+    expect(argVerification.captured.single, containsAll(<String>[
+      '-Ddart.developer.causal_async_stacks=true',
+    ]));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
@@ -94,6 +98,7 @@ void main() {
       '-Ddart.vm.profile=true',
       '-Ddart.vm.product=false',
       '--bytecode-options=source-positions',
+      '-Ddart.developer.causal_async_stacks=false',
     ]));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -126,6 +131,7 @@ void main() {
       '-Ddart.vm.profile=false',
       '-Ddart.vm.product=true',
       '--bytecode-options=source-positions',
+      '-Ddart.developer.causal_async_stacks=false',
     ]));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,

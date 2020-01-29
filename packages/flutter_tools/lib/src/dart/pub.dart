@@ -6,13 +6,13 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
@@ -232,7 +232,7 @@ class _DefaultPub implements Pub {
     @required bool retry,
     bool showTraceForErrors,
   }) async {
-    showTraceForErrors ??= isRunningOnBot;
+    showTraceForErrors ??= isRunningOnBot(globals.platform);
 
     String lastPubMessage = 'no message';
     bool versionSolvingFailed = false;
@@ -308,13 +308,25 @@ class _DefaultPub implements Pub {
     );
 
     // Pipe the Flutter tool stdin to the pub stdin.
-    unawaited(process.stdin.addStream(io.stdin));
+    unawaited(process.stdin.addStream(globals.stdio.stdin)
+      // If pub exits unexpectedly with an error, that will be reported below
+      // by the tool exit after the exit code check.
+      .catchError((dynamic err, StackTrace stack) {
+        globals.printTrace('Echoing stdin to the pub subprocess failed:');
+        globals.printTrace('$err\n$stack');
+      }
+    ));
 
-    // Pipe the put stdout and stderr to the tool stdout and stderr.
-    await Future.wait<dynamic>(<Future<dynamic>>[
-      io.stdout.addStream(process.stdout),
-      io.stderr.addStream(process.stderr),
-    ]);
+    // Pipe the pub stdout and stderr to the tool stdout and stderr.
+    try {
+      await Future.wait<dynamic>(<Future<dynamic>>[
+        globals.stdio.addStdoutStream(process.stdout),
+        globals.stdio.addStderrStream(process.stderr),
+      ]);
+    } catch (err, stack) {
+      globals.printTrace('Echoing stdout or stderr from the pub subprocess failed:');
+      globals.printTrace('$err\n$stack');
+    }
 
     // Wait for pub to exit.
     final int code = await process.exitCode;
@@ -368,7 +380,7 @@ String _getPubEnvironmentValue(PubContext pubContext) {
   final String existing = globals.platform.environment[_pubEnvironmentKey];
   final List<String> values = <String>[
     if (existing != null && existing.isNotEmpty) existing,
-    if (isRunningOnBot) 'flutter_bot',
+    if (isRunningOnBot(globals.platform)) 'flutter_bot',
     'flutter_cli',
     ...pubContext._values,
   ];

@@ -342,7 +342,7 @@ class _CrashCommand extends FlutterCommand {
 
     fn3();
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 

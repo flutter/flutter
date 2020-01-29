@@ -48,7 +48,7 @@ class SnippetGenerator {
   static DartFormatter formatter = DartFormatter(pageWidth: 80, fixes: StyleFix.all);
 
   /// This returns the output file for a given snippet ID. Only used for
-  /// [SnippetType.application] snippets.
+  /// [SnippetType.sample] snippets.
   File getOutputFile(String id) => File(path.join(configuration.outputDirectory.path, '$id.dart'));
 
   /// Gets the path to the template file requested.
@@ -60,7 +60,7 @@ class SnippetGenerator {
 
   /// Injects the [injections] into the [template], and turning the
   /// "description" injection into a comment. Only used for
-  /// [SnippetType.application] snippets.
+  /// [SnippetType.sample] snippets.
   String interpolateTemplate(List<_ComponentTuple> injections, String template, Map<String, Object> metadata) {
     final RegExp moustacheRegExp = RegExp('{{([^}]+)}}');
     return template.replaceAllMapped(moustacheRegExp, (Match match) {
@@ -99,7 +99,7 @@ class SnippetGenerator {
   /// components, and we care about the order of the injections.
   ///
   /// Takes into account the [type] and doesn't substitute in the id and the app
-  /// if not a [SnippetType.application] snippet.
+  /// if not a [SnippetType.sample] snippet.
   String interpolateSkeleton(SnippetType type, List<_ComponentTuple> injections, String skeleton, Map<String, Object> metadata) {
     final List<String> result = <String>[];
     const HtmlEscape htmlEscape = HtmlEscape();
@@ -133,7 +133,7 @@ class SnippetGenerator {
       'element': metadata['element'] as String ?? '',
       'app': '',
     };
-    if (type == SnippetType.application) {
+    if (type == SnippetType.sample) {
       substitutions
         ..['serial'] = metadata['serial']?.toString() ?? '0'
         ..['app'] = htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent);
@@ -201,20 +201,20 @@ class SnippetGenerator {
   /// comment markers).
   ///
   /// The [type] is the type of snippet to create: either a
-  /// [SnippetType.application] or a [SnippetType.sample].
+  /// [SnippetType.sample] or a [SnippetType.snippet].
   ///
   /// [showDartPad] indicates whether DartPad should be shown where possible.
   /// Currently, this value only has an effect if [type] is
-  /// [SnippetType.application], in which case an alternate skeleton file is
+  /// [SnippetType.sample], in which case an alternate skeleton file is
   /// used to create the final HTML output.
   ///
   /// The [template] must not be null if the [type] is
-  /// [SnippetType.application], and specifies the name of the template to use
+  /// [SnippetType.sample], and specifies the name of the template to use
   /// for the application code.
   ///
   /// The [id] is a string ID to use for the output file, and to tell the user
   /// about in the `flutter create` hint. It must not be null if the [type] is
-  /// [SnippetType.application].
+  /// [SnippetType.sample].
   String generate(
     File input,
     SnippetType type, {
@@ -223,14 +223,14 @@ class SnippetGenerator {
     File output,
     @required Map<String, Object> metadata,
   }) {
-    assert(template != null || type != SnippetType.application);
+    assert(template != null || type != SnippetType.sample);
     assert(metadata != null && metadata['id'] != null);
     assert(input != null);
-    assert(!showDartPad || type == SnippetType.application,
+    assert(!showDartPad || type == SnippetType.sample,
         'Only application snippets work with dartpad.');
     final List<_ComponentTuple> snippetData = parseInput(_loadFileAsUtf8(input));
     switch (type) {
-      case SnippetType.application:
+      case SnippetType.sample:
         final Directory templatesDir = configuration.templatesDirectory;
         if (templatesDir == null) {
           stderr.writeln('Unable to find the templates directory.');
@@ -272,7 +272,7 @@ class SnippetGenerator {
         });
         metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         break;
-      case SnippetType.sample:
+      case SnippetType.snippet:
         break;
     }
     final String skeleton =

@@ -180,7 +180,7 @@ class Slider extends StatefulWidget {
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Slider(
@@ -215,7 +215,7 @@ class Slider extends StatefulWidget {
   /// The value passed will be the last [value] that the slider had before the
   /// change began.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Slider(
@@ -248,7 +248,7 @@ class Slider extends StatefulWidget {
   /// [onChanged] for that), but rather to know when the user has completed
   /// selecting a new [value] by ending a drag or a click.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// Slider(
@@ -302,7 +302,7 @@ class Slider extends StatefulWidget {
   /// as part of the value indicator shape.
   ///
   /// The label is rendered using the active [ThemeData]'s
-  /// [ThemeData.textTheme.body2] text style, with the
+  /// [ThemeData.textTheme.bodyText1] text style, with the
   /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text style
   /// can be overridden with [SliderThemeData.valueIndicatorTextStyle].
   ///
@@ -348,7 +348,7 @@ class Slider extends StatefulWidget {
   /// This is used by accessibility frameworks like TalkBack on Android to
   /// inform users what the currently selected value is with more context.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// In the example below, a slider for currency values is configured to
   /// announce a value with a currency label.
@@ -543,7 +543,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
       valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2.copyWith(
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
     );

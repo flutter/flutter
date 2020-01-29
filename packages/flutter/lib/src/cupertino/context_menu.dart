@@ -172,7 +172,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// child parameter provides access to the child displayed when the
   /// CupertinoContextMenu is closed.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Below is an example of using `previewBuilder` to show an image tile that's
   /// similar to each tile in the iOS iPhoto app's context menu. Several of

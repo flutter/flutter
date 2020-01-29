@@ -240,7 +240,7 @@ void main() {
         });
         testDeviceManager.addDevice(device);
         expect(createTestCommandRunner(AttachCommand()).run(<String>['attach']),
-               throwsA(isA<ToolExit>()));
+               throwsToolExit());
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -619,7 +619,7 @@ void main() {
       final AttachCommand command = AttachCommand();
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsA(isInstanceOf<ToolExit>()),
+        throwsToolExit(),
       );
       expect(testLogger.statusText, contains('No supported devices connected'));
     }, overrides: <Type, Generator>{
@@ -642,7 +642,7 @@ void main() {
       testDeviceManager.addDevice(aDeviceWithId('yy2'));
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsA(isInstanceOf<ToolExit>()),
+        throwsToolExit(),
       );
       expect(testLogger.statusText, contains('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
@@ -704,7 +704,11 @@ class StreamLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
-    return SilentStatus(timeout: timeout)..start();
+    return SilentStatus(
+      timeout: timeout,
+      timeoutConfiguration: timeoutConfiguration,
+      stopwatch: Stopwatch(),
+    )..start();
   }
 
   bool _interrupt = false;
@@ -727,6 +731,12 @@ class StreamLogger extends Logger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+
+  @override
+  bool get supportsColor => throw UnimplementedError();
+
+  @override
+  bool get hasTerminal => false;
 }
 
 class LoggerInterrupted implements Exception {

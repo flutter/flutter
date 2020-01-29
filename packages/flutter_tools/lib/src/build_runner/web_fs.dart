@@ -333,13 +333,14 @@ class WebFs {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(assetServer.handle);
-    final HttpServer server = await httpMultiServerFactory(effectiveHostname, hostPort);
+    final InternetAddress internetAddress = (await InternetAddress.lookup(effectiveHostname)).first;
+    final HttpServer server = await httpMultiServerFactory(internetAddress, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     final WebFs webFS = WebFs(
       client,
       server,
       dwds,
-      'http://$effectiveHostname:$hostPort/',
+      'http://$effectiveHostname:$hostPort',
       assetServer,
       buildInfo.isDebug,
       flutterProject,
@@ -643,7 +644,6 @@ class BuildDaemonCreator {
         if (testTargets.hasBuildFilters) {
           b.buildFilters.addAll(testTargets.buildFilters);
         }
-        return b;
       }));
     }
   }

@@ -419,7 +419,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// [expectLater] call to test that a widget throws an exception. Instead, use
   /// [TestWidgetsFlutterBinding.takeException].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// testWidgets('MyWidget asserts invalid bounds', (WidgetTester tester) async {
   ///   await tester.pumpWidget(MyWidget(-1));

@@ -31,7 +31,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// handlers must be implemented (and the analyzer will list those that have
 /// been omitted).
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This [StatefulWidget] implements the parts of the [State] and
 /// [WidgetsBindingObserver] protocols necessary to react to application
@@ -109,7 +109,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onMetricsChanged].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This [StatefulWidget] implements the parts of the [State] and
   /// [WidgetsBindingObserver] protocols necessary to react when the device is
@@ -170,7 +170,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onTextScaleFactorChanged].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
@@ -702,7 +702,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Pump the build and rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
-  /// automatically by the engine when when it is time to lay out and paint a
+  /// automatically by the engine when it is time to lay out and paint a
   /// frame.
   ///
   /// Each frame consists of the following phases:
