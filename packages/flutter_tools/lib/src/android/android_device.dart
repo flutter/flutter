@@ -802,7 +802,7 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 @visibleForTesting
 AndroidMemoryInfo parseMeminfoDump(String input) {
   final AndroidMemoryInfo androidMemoryInfo = AndroidMemoryInfo();
-  
+
   final List<String> lines = input.split('\n');
 
   final String timelineData = lines.firstWhere((String line) =>
