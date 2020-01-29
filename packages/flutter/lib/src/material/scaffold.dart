@@ -513,8 +513,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     Rect floatingActionButtonRect;
-    if (hasChild(_ScaffoldSlot.floatingActionButton)) {
-      final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
+    if (hasChild(_primaryFABKey)) {
+      final Size fabSize = layoutChild(_primaryFABKey, looseConstraints);
 
       // To account for the FAB position being changed, we'll animate between
       // the old and new positions.
@@ -535,7 +535,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         end: currentFabOffset,
         progress: floatingActionButtonMoveAnimationProgress,
       );
-      positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
+      positionChild(_primaryFABKey, fabOffset);
       floatingActionButtonRect = fabOffset & fabSize;
     }
 
@@ -2433,7 +2433,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         geometryNotifier: _geometryNotifier,
         currentController: _floatingActionButtonVisibilityController,
       ),
-      _ScaffoldSlot.floatingActionButton,
+      _primaryFABKey,
       removeLeftPadding: true,
       removeTopPadding: true,
       removeRightPadding: true,
