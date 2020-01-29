@@ -234,6 +234,17 @@ class EngineParagraph implements ui.Paragraph {
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
+    // When constraint width has a decimal place, we floor it to avoid getting
+    // a layout width that's higher than the constraint width.
+    //
+    // For example, if constraint width is `30.8` and the text has a width of
+    // `30.5` then the TextPainter in the framework will ceil the `30.5` width
+    // which will result in a width of `40.0` that's higher than the constraint
+    // width.
+    constraints = ui.ParagraphConstraints(
+      width: constraints.width.floorToDouble(),
+    );
+
     if (constraints == _lastUsedConstraints) {
       return;
     }
