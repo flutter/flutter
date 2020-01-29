@@ -23,7 +23,6 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
-import '../version.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
 
@@ -187,9 +186,12 @@ class RunCommand extends RunCommandBase {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
+      // TODO(jonahwilliams): Off by default with investigating whether this
+      // is slower for certain use cases.
+      // See: https://github.com/flutter/flutter/issues/49499
       ..addFlag('fast-start',
         negatable: true,
-        defaultsTo: true,
+        defaultsTo: false,
         help: 'Whether to quickly bootstrap applications with a minimal app. '
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
@@ -419,7 +421,7 @@ class RunCommand extends RunCommandBase {
     }
     globals.terminal.usesTerminalUi = true;
 
-    if (argResults['dart-flags'] != null && !FlutterVersion.instance.isMaster) {
+    if (argResults['dart-flags'] != null && !globals.flutterVersion.isMaster) {
       throw UsageException('--dart-flags is not available on the stable '
                            'channel.', null);
     }

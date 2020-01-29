@@ -202,7 +202,7 @@ void generate(String commit) {
       outputFile('${className}_index.md'),
       inputFile('bin', 'class_index.md.template').readAsStringSync(),
       <String, String>{
-        'class': className,
+        'class': '$className',
         'entries': entries.join('\n'),
         'link': '${className}_index',
       },

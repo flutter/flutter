@@ -247,36 +247,50 @@ void main() {
     expect(() {
       const OrdinalSortKey(0.0).compareTo(const CustomSortKey(0.0));
     }, throwsAssertionError);
-
-    // Different names.
-    expect(() {
-      const OrdinalSortKey(0.0, name: 'a').compareTo(const OrdinalSortKey(0.0, name: 'b'));
-    }, throwsAssertionError);
   });
 
-  test('OrdinalSortKey compares correctly', () {
+  test('OrdinalSortKey compares correctly when names are the same', () {
     const List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
       <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(0.0)],
       <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(1.0)],
       <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(0.0)],
       <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[OrdinalSortKey(0.0, name: 'a'), OrdinalSortKey(0.0, name: 'a')],
+      <SemanticsSortKey>[OrdinalSortKey(0.0, name: 'a'), OrdinalSortKey(1.0, name: 'a')],
+      <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'a'), OrdinalSortKey(0.0, name: 'a')],
+      <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'a'), OrdinalSortKey(1.0, name: 'a')],
     ];
-    final List<int> expectedResults = <int>[0, -1, 1, 0];
+    final List<int> expectedResults = <int>[0, -1, 1, 0, 0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
     final List<int> results = <int>[
       for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
     ];
     expect(results, orderedEquals(expectedResults));
+
+    // Differing types should throw an assertion.
+    expect(() => const OrdinalSortKey(0.0).compareTo(const CustomSortKey(0.0)), throwsAssertionError);
   });
 
-  test('OrdinalSortKey compares correctly', () {
+  test('OrdinalSortKey compares correctly when the names are different', () {
     const List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
-      <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(0.0)],
-      <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(1.0)],
-      <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(0.0)],
-      <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(0.0, name: 'bar')],
+      <SemanticsSortKey>[OrdinalSortKey(0.0), OrdinalSortKey(1.0, name: 'bar')],
+      <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(0.0, name: 'bar')],
+      <SemanticsSortKey>[OrdinalSortKey(1.0), OrdinalSortKey(1.0, name: 'bar')],
+      <SemanticsSortKey>[OrdinalSortKey(0.0, name: 'foo'), OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[OrdinalSortKey(0.0, name: 'foo'), OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'foo'), OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'foo'), OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[OrdinalSortKey(0.0, name: 'foo'), OrdinalSortKey(0.0, name: 'bar')],
+      <SemanticsSortKey>[OrdinalSortKey(0.0, name: 'foo'), OrdinalSortKey(1.0, name: 'bar')],
+      <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'foo'), OrdinalSortKey(0.0, name: 'bar')],
+      <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'foo'), OrdinalSortKey(1.0, name: 'bar')],
+      <SemanticsSortKey>[OrdinalSortKey(0.0, name: 'bar'), OrdinalSortKey(0.0, name: 'foo')],
+      <SemanticsSortKey>[OrdinalSortKey(0.0, name: 'bar'), OrdinalSortKey(1.0, name: 'foo')],
+      <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'bar'), OrdinalSortKey(0.0, name: 'foo')],
+      <SemanticsSortKey>[OrdinalSortKey(1.0, name: 'bar'), OrdinalSortKey(1.0, name: 'foo')],
     ];
-    final List<int> expectedResults = <int>[0, -1, 1, 0];
+    final List<int> expectedResults = <int>[ -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1];
     assert(tests.length == expectedResults.length);
     final List<int> results = <int>[
       for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),

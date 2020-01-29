@@ -133,7 +133,7 @@ void main() {
 
     test('Returns null if an error is caught resolving an image', () {
       final ErrorImageProvider errorImage = ErrorImageProvider();
-      expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, null)), throwsA(isInstanceOf<Error>()));
+      expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, null)), throwsA(isA<Error>()));
       bool caughtError = false;
       final ImageStreamCompleter result = imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, null), onError: (dynamic error, StackTrace stackTrace) {
         caughtError = true;

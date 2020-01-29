@@ -391,7 +391,7 @@ void _printBanner(String message) {
   final String banner = '*** $message ***';
   print('\n');
   print('*' * banner.length);
-  print(banner);
+  print('$banner');
   print('*' * banner.length);
   print('\n');
 }

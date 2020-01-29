@@ -179,7 +179,7 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
       ];
     }
 
-    return await xcode.clang(<String>[
+    return await globals.xcode.clang(<String>[
       '-x',
       'c',
       ...archFlags,
@@ -189,7 +189,7 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      '-isysroot', await xcode.sdkLocation(sdk),
+      '-isysroot', await globals.xcode.sdkLocation(sdk),
       '-o', outputFile.path,
     ]);
   } finally {
