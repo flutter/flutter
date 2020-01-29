@@ -51,8 +51,9 @@ void main() {
 
   test('generated l10n classes produce expected localized strings', () async {
     // Get the intl packages before running gen_l10n.
-    final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    await runCommand(<String>[flutterBin, 'pub', 'get']);
+    final String flutterBin = globals.platform.isWindows ? 'flutter.bat' : 'flutter';
+    final String flutterPath = globals.fs.path.join(getFlutterRoot(), 'bin', flutterBin);
+    await runCommand(<String>[flutterPath, 'pub', 'get']);
 
     // Generate lib/l10n/app_localizations.dart
     final String genL10nPath = globals.fs.path.join(getFlutterRoot(), 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart');
