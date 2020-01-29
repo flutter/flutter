@@ -50,16 +50,17 @@ static const std::string gDartFlagsWhitelist[] = {
 
 // clang-format off
 static const std::string gDartFlagsWhitelist[] = {
+    "--enable_mirrors",
+    "--enable-service-port-fallback",
+    "--lazy_async_stacks",
     "--max_profile_depth",
+    "--no-causal_async_stacks",
     "--profile_period",
     "--random_seed",
-    "--enable_mirrors",
-    "--write-service-info",
     "--sample-buffer-duration",
-    "--no-causal_async_stacks",
-    "--lazy_async_stacks",
     "--trace-reload",
     "--trace-reload-verbose",
+    "--write-service-info",
 };
 // clang-format on
 
