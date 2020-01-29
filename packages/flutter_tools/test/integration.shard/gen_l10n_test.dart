@@ -49,25 +49,16 @@ void main() {
     }
   }
 
-  /// On windows, applying Process.run to a pathname that contains a space
-  /// generates a "ProcessException: %1 is not a valid Win32 application"
-  /// error. Wrapping the path in double-quotes avoids the problem.
-  String windowsSafePath(String path) {
-    return path;
-    assert(path != null);
-    return globals.platform.isWindows && path.contains(' ') && !path.startsWith('"') ? '"$path"' : path;
-  }
-
   test('generated l10n classes produce expected localized strings', () async {
     // Get the intl packages before running gen_l10n.
     final String flutterBin = globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    await runCommand(<String>[windowsSafePath(flutterBin), 'pub', 'get']);
+    await runCommand(<String>[flutterBin, 'pub', 'get']);
 
     // Generate lib/l10n/app_localizations.dart
     final String genL10nPath = globals.fs.path.join(getFlutterRoot(), 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart');
     final String dartBin = globals.platform.isWindows ? 'dart.exe' : 'dart';
     final String dartPath = globals.fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk', 'bin', dartBin);
-    await runCommand(<String>[windowsSafePath(dartPath), windowsSafePath(genL10nPath)]);
+    await runCommand(<String>[dartPath, genL10nPath]);
 
     // Run the app defined in GenL10nProject.main and wait for it to
     // send '#l10n END' to its stdout.
