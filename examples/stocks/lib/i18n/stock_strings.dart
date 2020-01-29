@@ -58,6 +58,9 @@ import 'messages_all.dart';
 /// you wish to add from the pop-up menu in the Value field. This list should
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
+
+// ignore_for_file: unnecessary_brace_in_string_interps
+
 class StockStrings {
   StockStrings(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
@@ -80,6 +83,10 @@ class StockStrings {
   /// Returns a list of localizations delegates containing this delegate along with
   /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
   /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
@@ -95,7 +102,7 @@ class StockStrings {
 
   String get market {
     return Intl.message(
-      r'MARKET',
+      'MARKET',
       locale: _localeName,
       name: 'market',
       desc: r'Label for the Market tab'
@@ -104,7 +111,7 @@ class StockStrings {
 
   String get portfolio {
     return Intl.message(
-      r'PORTFOLIO',
+      'PORTFOLIO',
       locale: _localeName,
       name: 'portfolio',
       desc: r'Label for the Portfolio tab'
@@ -113,7 +120,7 @@ class StockStrings {
 
   String get title {
     return Intl.message(
-      r'Stocks',
+      'Stocks',
       locale: _localeName,
       name: 'title',
       desc: r'Title for the Stocks application'
