@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import '../aot.dart';
-import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -159,16 +158,15 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('--output is required.');
     }
 
-    final BuildableIOSApp iosProject = await applicationPackages.getPackageForPlatform(TargetPlatform.ios) as BuildableIOSApp;
-
-    if (iosProject == null) {
-      throwToolExit("Module's iOS folder missing");
+    if (!_project.ios.existsSync()) {
+      throwToolExit('Module does not support iOS');
     }
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
+    final String productBundleIdentifier = await _project.ios.productBundleIdentifier;
     for (final BuildMode mode in buildModes) {
-      globals.printStatus('Building frameworks for $iosProject in ${getNameForBuildMode(mode)} mode...');
+      globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
