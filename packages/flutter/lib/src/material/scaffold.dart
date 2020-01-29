@@ -2116,7 +2116,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _fabStatuses[_primaryFABKey].animator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
     }
     if (widget.floatingActionButtonLocation != oldWidget.floatingActionButtonLocation) {
-      _moveFloatingActionButton(widget.floatingActionButtonLocation ?? _kDefaultFloatingActionButtonLocation);
+      _moveFloatingActionButton(_primaryFABKey, widget.floatingActionButtonLocation ?? _kDefaultFloatingActionButtonLocation);
     }
     if (widget.bottomSheet != oldWidget.bottomSheet) {
       assert(() {
