@@ -113,8 +113,11 @@ import 'messages_all.dart';
 /// Select and expand the newly-created Localizations item then, for each
 /// locale your application supports, add a new item and select the locale
 /// you wish to add from the pop-up menu in the Value field. This list should
-/// be consistent with the languages listed in the @className.supportedLocales
+/// be consistent with the languages listed in the @(className).supportedLocales
 /// property.
+
+// ignore_for_file: unnecessary_brace_in_string_interps
+
 class @(className) {
   @(className)(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
@@ -129,7 +132,7 @@ class @(className) {
     return Localizations.of<@(className)>(context, @(className));
   }
 
-  static const LocalizationsDelegate<@(className)> delegate = _@(classNameDelegate)();
+  static const LocalizationsDelegate<@(className)> delegate = _@(className)Delegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
