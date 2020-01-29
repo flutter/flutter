@@ -3018,7 +3018,7 @@ class DiagnosticPropertiesBuilder {
 }
 
 // Examples can assume:
-// class ExampleSuperclass with DiagnosticableMixin { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
+// class ExampleSuperclass extends Diagnosticable { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
 
 /// A base class for providing string and [DiagnosticsNode] debug
 /// representations describing the properties of an object.
@@ -3047,20 +3047,14 @@ class DiagnosticPropertiesBuilder {
 ///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
 ///    nodes without properties or children. There are many
 ///    [DiagnosticsProperty] subclasses to handle common use cases.
-@Deprecated(
-  'Use "with DiagnosticableMixin" instead of "extends Diagnosticable". '
-  'This feature was deprecated after v1.14.6.'
-)
 abstract class Diagnosticable with DiagnosticableMixin {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Diagnosticable();
 }
 
-/// A mixin class that provides the implementation for [DiagnosticableMixin].
-///
-/// This mixin can be used to add diagnostics to a class which already has an
-/// base class.
+/// A mixin class for providing string and [DiagnosticsNode] debug
+/// representations describing the properties of an object.
 ///
 /// The string debug representation is generated from the intermediate
 /// [DiagnosticsNode] representation. The [DiagnosticsNode] representation is
@@ -3344,7 +3338,7 @@ mixin DiagnosticableMixin {
 ///  * [DiagnosticableTreeMixin], a mixin that implements this class.
 ///  * [DiagnosticableMixin], which should be used instead of this class to
 ///    provide diagnostics for objects without children.
-abstract class DiagnosticableTree with DiagnosticableMixin {
+abstract class DiagnosticableTree extends Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const DiagnosticableTree();
