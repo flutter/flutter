@@ -304,12 +304,11 @@ class WidgetsApp extends StatefulWidget {
 
   /// {@template flutter.widgets.widgetsApp.onGenerateInitialRoutes}
   /// The routes generator callback used for generating initial routes if
-  /// [initialRoute] is provided
+  /// [initialRoute] is provided.
   ///
   /// If this property is not set, the underlying
   /// [Navigator.onGenerateInitialRoutes] will default to
   /// [Navigator.defaultGenerateInitialRoutes].
-  ///
   /// {@endtemplate}
   final InitialRouteListFactory onGenerateInitialRoutes;
 
