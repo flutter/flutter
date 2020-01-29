@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
@@ -24,6 +25,7 @@ import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
 import '../vmservice.dart';
 import 'code_signing.dart';
+import 'fallback_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 
@@ -321,11 +323,20 @@ class IOSDevice extends Device {
       return LaunchResult.failed();
     }
 
+    // Step 2.5: Generate a potential open port using the provided argument,
+    // or randomly with the package name as a seed.
+    final int assumedObservatoryPort = debuggingOptions?.deviceVmServicePort
+      ?? math.Random(packageId.hashCode).nextInt(1000) + 6000;
+
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = <String>[
       '--enable-dart-profiling',
+      // These arguments are required to support the fallback connection strategy
+      // described in fallback_discovery.dart.
+      '--enable-service-port-fallback',
+      '--disable-service-auth-codes',
+      '--observatory-port=$assumedObservatoryPort',
       if (debuggingOptions.startPaused) '--start-paused',
-      if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
       if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
       if (debuggingOptions.useTestFonts) '--use-test-fonts',
       // "--enable-checked-mode" and "--verify-entry-points" should always be
@@ -344,8 +355,6 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
-      if (debuggingOptions.deviceVmServicePort != null)
-        '--observatory-port=${debuggingOptions.deviceVmServicePort}',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
@@ -384,41 +393,24 @@ class IOSDevice extends Device {
       if (!debuggingOptions.debuggingEnabled) {
         return LaunchResult.succeeded();
       }
-
-      Uri localUri;
-      try {
-        globals.printTrace('Application launched on the device. Waiting for observatory port.');
-        localUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
-          packageId,
-          this,
-          usesIpv6: ipv6,
-          hostVmservicePort: debuggingOptions.hostVmServicePort,
-        );
-        if (localUri != null) {
-          UsageEvent('ios-mdns', 'success').send();
-          return LaunchResult.succeeded(observatoryUri: localUri);
-        }
-      } catch (error) {
-        globals.printError('Failed to establish a debug connection with $id using mdns: $error');
+      globals.printTrace('Application launched on the device. Waiting for observatory port.');
+      final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
+        logger: globals.logger,
+        mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
+        portForwarder: portForwarder,
+        protocolDiscovery: observatoryDiscovery
+      );
+      final Uri localUri = await fallbackDiscovery.discover(
+        assumedDevicePort: assumedObservatoryPort,
+        deivce: this,
+        usesIpv6: ipv6,
+        hostVmservicePort: debuggingOptions.hostVmServicePort,
+        packageId: packageId,
+      );
+      if (localUri == null) {
+        return LaunchResult.failed();
       }
-
-      // Fallback to manual protocol discovery.
-      UsageEvent('ios-mdns', 'failure').send();
-      globals.printTrace('mDNS lookup failed, attempting fallback to reading device log.');
-      try {
-        globals.printTrace('Waiting for observatory port.');
-        localUri = await observatoryDiscovery.uri;
-        if (localUri != null) {
-          UsageEvent('ios-mdns', 'fallback-success').send();
-          return LaunchResult.succeeded(observatoryUri: localUri);
-        }
-      } catch (error) {
-        globals.printError('Failed to establish a debug connection with $id using logs: $error');
-      } finally {
-        await observatoryDiscovery?.cancel();
-      }
-      UsageEvent('ios-mdns', 'fallback-failure').send();
-      return LaunchResult.failed();
+      return LaunchResult.succeeded(observatoryUri: localUri);
     } finally {
       installStatus.stop();
     }
