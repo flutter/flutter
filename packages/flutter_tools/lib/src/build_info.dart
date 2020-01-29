@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 import 'base/utils.dart';
 import 'globals.dart' as globals;
@@ -18,9 +21,13 @@ class BuildInfo {
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
+    @required this.fontSubset,
   });
 
   final BuildMode mode;
+
+  /// Whether the build should subdset icon fonts.
+  final bool fontSubset;
 
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
@@ -55,10 +62,10 @@ class BuildInfo {
   /// On Xcode builds it is used as CFBundleShortVersionString,
   final String buildName;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null);
+  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, fontSubset: false);
+  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, fontSubset: kFontSubsetEnabledDefault);
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, fontSubset: kFontSubsetEnabledDefault);
+  static const BuildInfo release = BuildInfo(BuildMode.release, null, fontSubset: kFontSubsetEnabledDefault);
 
   /// Returns whether a debug build is requested.
   ///

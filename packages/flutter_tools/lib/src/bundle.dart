@@ -14,6 +14,7 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
+import 'build_system/targets/assets.dart';
 import 'build_system/targets/dart.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
@@ -68,6 +69,7 @@ class BundleBuilder {
     List<String> extraGenSnapshotOptions = const <String>[],
     List<String> fileSystemRoots,
     String fileSystemScheme,
+    @required bool fontSubset,
   }) async {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
@@ -83,6 +85,7 @@ class BundleBuilder {
       depfilePath: depfilePath,
       precompiled: precompiledSnapshot,
       trackWidgetCreation: trackWidgetCreation,
+      fontSubset: fontSubset,
     );
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -107,6 +110,7 @@ Future<void> buildWithAssemble({
   @required String depfilePath,
   @required bool precompiled,
   bool trackWidgetCreation,
+  @required bool fontSubset,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
   buildMode = precompiled ? buildMode : BuildMode.debug;
@@ -121,6 +125,7 @@ Future<void> buildWithAssemble({
       kBuildMode: getNameForBuildMode(buildMode),
       kTargetPlatform: getNameForTargetPlatform(targetPlatform),
       kTrackWidgetCreation: trackWidgetCreation?.toString(),
+      kFontSubsetFlag: fontSubset ? 'true' : null,
     },
   );
   final Target target = buildMode == BuildMode.debug

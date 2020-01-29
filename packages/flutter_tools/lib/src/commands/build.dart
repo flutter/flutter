@@ -23,23 +23,28 @@ import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({bool verboseHelp = false}) {
-    addSubcommand(BuildAarCommand());
-    addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildAotCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildIOSCommand());
-    addSubcommand(BuildIOSFrameworkCommand(
+    addSubcommandWithFontSubsetFlag(BuildAarCommand());
+    addSubcommandWithFontSubsetFlag(BuildApkCommand(verboseHelp: verboseHelp));
+    addSubcommandWithFontSubsetFlag(BuildAppBundleCommand(verboseHelp: verboseHelp));
+    addSubcommandWithFontSubsetFlag(BuildAotCommand(verboseHelp: verboseHelp));
+    addSubcommandWithFontSubsetFlag(BuildIOSCommand());
+    addSubcommandWithFontSubsetFlag(BuildIOSFrameworkCommand(
       aotBuilder: AotBuilder(),
       bundleBuilder: BundleBuilder(),
       cache: globals.cache,
       platform: globals.platform,
     ));
-    addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildWebCommand());
-    addSubcommand(BuildMacosCommand());
-    addSubcommand(BuildLinuxCommand());
-    addSubcommand(BuildWindowsCommand());
-    addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
+    addSubcommandWithFontSubsetFlag(BuildBundleCommand(verboseHelp: verboseHelp));
+    addSubcommandWithFontSubsetFlag(BuildWebCommand());
+    addSubcommandWithFontSubsetFlag(BuildMacosCommand());
+    addSubcommandWithFontSubsetFlag(BuildLinuxCommand());
+    addSubcommandWithFontSubsetFlag(BuildWindowsCommand());
+    addSubcommandWithFontSubsetFlag(BuildFuchsiaCommand(verboseHelp: verboseHelp));
+  }
+
+  void addSubcommandWithFontSubsetFlag(BuildSubCommand command) {
+    command.addFontSubsetFlag();
+    addSubcommand(command);
   }
 
   @override

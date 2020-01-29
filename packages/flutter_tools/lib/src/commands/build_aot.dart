@@ -88,6 +88,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
       extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       dartDefines: dartDefines,
+      fontSubset: boolArg('font-subset'),
     );
     return FlutterCommandResult.success();
   }

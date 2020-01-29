@@ -164,6 +164,8 @@ BuildApp() {
     track_widget_creation_flag="--track-widget-creation"
   fi
 
+  # TODO(dnfield): Use $FONT_SUBSET to pass flag to tooling
+  # https://github.com/flutter/flutter/issues/49730
   if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
     # Transform ARCHS to comma-separated list of target architectures.

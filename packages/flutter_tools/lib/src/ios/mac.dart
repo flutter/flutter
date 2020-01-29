@@ -265,7 +265,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   DarwinArch activeArch,
   bool codesign = true,
-
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project)) {
     return XcodeBuildResult(success: false);
@@ -359,6 +358,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     'xcrun',
     'xcodebuild',
     '-configuration', configuration,
+    if (buildInfo.fontSubset)
+      'FONT_SUBSET=YES'
   ];
 
   if (globals.logger.isVerbose) {

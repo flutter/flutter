@@ -13,6 +13,7 @@ import 'base/logger.dart';
 import 'base/process.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
+import 'build_system/targets/assets.dart';
 import 'build_system/targets/dart.dart';
 import 'build_system/targets/ios.dart';
 import 'cache.dart';
@@ -36,6 +37,7 @@ class AotBuilder {
     List<String> extraFrontEndOptions,
     List<String> extraGenSnapshotOptions,
     @required List<String> dartDefines,
+    @required bool fontSubset,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
@@ -52,6 +54,7 @@ class AotBuilder {
         quiet: quiet,
         iosArchs: iosBuildArchs ?? defaultIOSArchs,
         bitcode: bitcode ?? kBitcodeEnabledDefault,
+        fontSubset: fontSubset ?? kFontSubsetEnabledDefault,
       );
       return;
     }
@@ -202,6 +205,7 @@ class AotBuilder {
     bool quiet,
     Iterable<DarwinArch> iosArchs,
     bool bitcode,
+    @required bool fontSubset,
   }) async {
     Status status;
     if (!quiet) {
@@ -229,7 +233,8 @@ class AotBuilder {
         kTargetPlatform: getNameForTargetPlatform(targetPlatform),
         kTargetFile: targetFile,
         kIosArchs: iosArchs.map(getNameForDarwinArch).join(','),
-        kBitcodeFlag: bitcode.toString()
+        kBitcodeFlag: bitcode.toString(),
+        kFontSubsetFlag: fontSubset.toString(),
       }
     ));
     status?.stop();

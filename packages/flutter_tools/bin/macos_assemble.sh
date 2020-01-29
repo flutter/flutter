@@ -62,6 +62,11 @@ ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
 build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
 build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
 
+font_subset_define=""
+if [[ -n "$FONT_SUBSET" ]]; then
+  font_subset_define="-dFontSubset=true"
+fi
+
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
@@ -70,6 +75,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
     -dBuildMode="${build_mode}"                                             \
+    $font_subset_define                                                     \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \
