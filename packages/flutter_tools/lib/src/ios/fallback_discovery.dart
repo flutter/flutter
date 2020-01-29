@@ -13,7 +13,7 @@ import '../protocol_discovery.dart';
 /// A protocol for discovery of a vmservice on an attached iOS device with
 /// multiple fallbacks.
 ///
-/// On versions of iOS 13 and greater, libimobile device can no longer listen to
+/// On versions of iOS 13 and greater, libimobiledevice can no longer listen to
 /// logs directly. The only way to discover an active observatory is through the
 /// mDNS protocol. However, there are a number of circumstances where this breaks
 /// down, such as when the device is connected to certain wifi networks or with
@@ -28,7 +28,7 @@ import '../protocol_discovery.dart';
 /// Finally, if neither of the above approaches works, we can still attempt
 /// to parse logs.
 ///
-/// To improve the overall resillence of the process, this class combines the
+/// To improve the overall resilience of the process, this class combines the
 /// three discovery strategies. First it assigns a port and attempts to connect.
 /// Then if this fails it falls back to mDNS, then finally attempting to scan
 /// logs.
