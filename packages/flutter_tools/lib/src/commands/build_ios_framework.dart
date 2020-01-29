@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 
 import '../aot.dart';
 import '../application_package.dart';
@@ -33,7 +34,17 @@ import 'build.dart';
 /// be integrated into plain Xcode projects without using or other package
 /// managers.
 class BuildIOSFrameworkCommand extends BuildSubCommand {
-  BuildIOSFrameworkCommand({this.aotBuilder, this.bundleBuilder, this.flutterVersion, this.cache}) {
+  BuildIOSFrameworkCommand({
+    FlutterVersion flutterVersion, // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
+    @required AotBuilder aotBuilder,
+    @required BundleBuilder bundleBuilder,
+    @required Cache cache,
+    @required Platform platform
+  }) : _flutterVersion = flutterVersion,
+       _aotBuilder = aotBuilder,
+       _bundleBuilder = bundleBuilder,
+       _cache = cache,
+       _platform = platform {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -76,10 +87,12 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       );
   }
 
-  AotBuilder aotBuilder;
-  BundleBuilder bundleBuilder;
-  FlutterVersion flutterVersion;
-  Cache cache;
+  final AotBuilder _aotBuilder;
+  final BundleBuilder _bundleBuilder;
+  final Cache _cache;
+  final Platform _platform;
+
+  FlutterVersion _flutterVersion;
 
   @override
   final String name = 'ios-framework';
@@ -120,14 +133,14 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('Building frameworks for iOS is only supported from a module.');
     }
 
-    if (!globals.platform.isMacOS) {
+    if (!_platform.isMacOS) {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
     if (!boolArg('universal') && !boolArg('xcframework')) {
       throwToolExit('--universal or --xcframework is required.');
     }
-    if (boolArg('xcframework') && xcode.majorVersion < 11) {
+    if (boolArg('xcframework') && globals.xcode.majorVersion < 11) {
       throwToolExit('--xcframework requires Xcode 11.');
     }
     if (buildModes.isEmpty) {
@@ -154,12 +167,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
-    aotBuilder ??= AotBuilder();
-    bundleBuilder ??= BundleBuilder();
-    cache ??= globals.cache;
-
     for (final BuildMode mode in buildModes) {
-      globals.printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
+      globals.printStatus('Building frameworks for $iosProject in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
@@ -171,11 +180,11 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
       if (boolArg('cocoapods')) {
         // FlutterVersion.instance kicks off git processing which can sometimes fail, so don't try it until needed.
-        flutterVersion ??= FlutterVersion.instance;
+        _flutterVersion ??= globals.flutterVersion;
         produceFlutterPodspec(mode, modeDirectory);
       } else {
         // Copy Flutter.framework.
-        await _produceFlutterFramework(outputDirectory, mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
+        await _produceFlutterFramework(mode, modeDirectory);
       }
 
       // Build aot, create module.framework and copy.
@@ -213,10 +222,10 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   void produceFlutterPodspec(BuildMode mode, Directory modeDirectory) {
     final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...', timeout: timeoutConfiguration.fastOperation);
     try {
-      final GitTagVersion gitTagVersion = flutterVersion.gitTagVersion;
+      final GitTagVersion gitTagVersion = _flutterVersion.gitTagVersion;
       if (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0) {
         throwToolExit(
-            '--cocoapods is only supported on the dev, beta, or stable channels. Detected version is ${flutterVersion.frameworkVersion}');
+            '--cocoapods is only supported on the dev, beta, or stable channels. Detected version is ${_flutterVersion.frameworkVersion}');
       }
 
       // Podspecs use semantic versioning, which don't support hotfixes.
@@ -225,7 +234,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       // new artifacts when the source URL changes.
       final int minorHotfixVersion = gitTagVersion.z * 100 + (gitTagVersion.hotfix ?? 0);
 
-      final File license = cache.getLicenseFile();
+      final File license = _cache.getLicenseFile();
       if (!license.existsSync()) {
         throwToolExit('Could not find license at ${license.path}');
       }
@@ -235,7 +244,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       final String podspecContents = '''
 Pod::Spec.new do |s|
   s.name                  = 'Flutter'
-  s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
+  s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${_flutterVersion.frameworkVersion}
   s.summary               = 'Flutter Engine Framework'
   s.description           = <<-DESC
 Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.
@@ -248,7 +257,7 @@ $licenseSource
 LICENSE
   }
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
+  s.source                = { :http => '${_cache.storageBaseUrl}/flutter_infra/flutter/${_cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://flutter.dev/docs'
   s.platform              = :ios, '8.0'
   s.vendored_frameworks   = 'Flutter.framework'
@@ -266,10 +275,7 @@ end
   }
 
   Future<void> _produceFlutterFramework(
-    Directory outputDirectory,
     BuildMode mode,
-    Directory iPhoneBuildOutput,
-    Directory simulatorBuildOutput,
     Directory modeDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
@@ -329,17 +335,17 @@ end
   Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
     const String appFrameworkName = 'App.framework';
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
-    destinationAppFrameworkDirectory.createSync(recursive: true);
 
     if (mode == BuildMode.debug) {
       final Status status = globals.logger.startProgress(' ├─Adding placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
       try {
+        destinationAppFrameworkDirectory.createSync(recursive: true);
         await _produceStubAppFrameworkIfNeeded(mode, iPhoneBuildOutput, simulatorBuildOutput, destinationAppFrameworkDirectory);
       } finally {
         status.stop();
       }
     } else {
-      await _produceAotAppFrameworkIfNeeded(mode, iPhoneBuildOutput, destinationAppFrameworkDirectory);
+      await _produceAotAppFrameworkIfNeeded(mode, modeDirectory);
     }
 
     final File sourceInfoPlist = _project.ios.hostAppRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
@@ -350,7 +356,7 @@ end
     final Status status = globals.logger.startProgress(
       ' ├─Assembling Flutter resources for App.framework...', timeout: timeoutConfiguration.slowOperation);
     try {
-      await bundleBuilder.build(
+      await _bundleBuilder.build(
         platform: TargetPlatform.ios,
         buildMode: mode,
         // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
@@ -401,8 +407,7 @@ end
 
   Future<void> _produceAotAppFrameworkIfNeeded(
     BuildMode mode,
-    Directory iPhoneBuildOutput,
-    Directory destinationAppFrameworkDirectory,
+    Directory destinationDirectory,
   ) async {
     if (mode == BuildMode.debug) {
       return;
@@ -412,9 +417,9 @@ end
       timeout: timeoutConfiguration.slowOperation,
     );
     try {
-      await aotBuilder.build(
+      await _aotBuilder.build(
         platform: TargetPlatform.ios,
-        outputPath: iPhoneBuildOutput.path,
+        outputPath: destinationDirectory.path,
         buildMode: mode,
         // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
         mainDartFile: globals.fs.path.absolute(targetFile),
@@ -423,12 +428,6 @@ end
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
         dartDefines: dartDefines,
-      );
-
-      const String appFrameworkName = 'App.framework';
-      fsUtils.copyDirectorySync(
-        iPhoneBuildOutput.childDirectory(appFrameworkName),
-        destinationAppFrameworkDirectory,
       );
     } finally {
       status.stop();
@@ -446,6 +445,15 @@ end
     final Status status = globals.logger.startProgress(
       ' ├─Building plugins...', timeout: timeoutConfiguration.slowOperation);
     try {
+      // Regardless of the last "flutter build" build mode,
+      // copy the corresponding engine.
+      // A plugin framework built with bitcode must link against the bitcode version
+      // of Flutter.framework (Release).
+      _project.ios.copyEngineArtifactToProject(mode);
+
+      final String bitcodeGenerationMode = mode == BuildMode.release ?
+          'bitcode' : 'marker'; // In release, force bitcode embedding without archiving.
+
       List<String> pluginsBuildCommand = <String>[
         'xcrun',
         'xcodebuild',
@@ -455,6 +463,7 @@ end
         '-configuration',
         xcodeBuildConfiguration,
         'SYMROOT=${iPhoneBuildOutput.path}',
+        'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
         'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
       ];
 
@@ -592,7 +601,7 @@ end
 
       final Status status = globals.logger.startProgress(
         ' ├─Creating $frameworkBinaryName.xcframework...',
-        timeout: timeoutConfiguration.fastOperation,
+        timeout: timeoutConfiguration.slowOperation,
       );
       try {
         if (mode == BuildMode.debug) {

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
@@ -229,7 +230,7 @@ abstract class FlutterCommand extends Command<void> {
   /// Adds options for connecting to the Dart VM observatory port.
   void usesPortOptions() {
     argParser.addOption(observatoryPortOption,
-        help: '(deprecated use host-vmservice-port instead)'
+        help: '(deprecated use host-vmservice-port instead) '
               'Listen to the given port for an observatory debugger connection.\n'
               'Specifying port 0 (the default) will find a random free port.',
     );
@@ -368,11 +369,11 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('shrink',
       negatable: true,
       defaultsTo: true,
-      help: 'Whether to enable code shrinking on release mode.'
+      help: 'Whether to enable code shrinking on release mode. '
             'When enabling shrinking, you also benefit from obfuscation, '
             'which shortens the names of your app’s classes and members, '
             'and optimization, which applies more aggressive strategies to '
-            'further reduce the size of your app.'
+            'further reduce the size of your app. '
             'To learn more, see: https://developer.android.com/studio/build/shrink-code',
       );
   }
@@ -629,7 +630,8 @@ abstract class FlutterCommand extends Command<void> {
       final Map<CustomDimensions, String> additionalUsageValues =
         <CustomDimensions, String>{
           ...?await usageValues,
-          CustomDimensions.commandHasTerminal: io.stdout.hasTerminal ? 'true' : 'false',
+          CustomDimensions.commandHasTerminal:
+            globals.stdio.hasTerminal ? 'true' : 'false',
         };
       Usage.command(commandPath, parameters: additionalUsageValues);
     }
@@ -707,8 +709,20 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> validateCommand() async {
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
-      if (!globals.fs.isFileSync('pubspec.yaml')) {
-        throw ToolExit(userMessages.flutterNoPubspec);
+
+      // If there is no pubspec in the current directory, look in the parent
+      // until one can be found.
+      bool changedDirectory = false;
+      while (!globals.fs.isFileSync('pubspec.yaml')) {
+        final Directory nextCurrent = globals.fs.currentDirectory.parent;
+        if (nextCurrent == null || nextCurrent.path == globals.fs.currentDirectory.path) {
+          throw ToolExit(userMessages.flutterNoPubspec);
+        }
+        globals.fs.currentDirectory = nextCurrent;
+        changedDirectory = true;
+      }
+      if (changedDirectory) {
+        globals.printStatus('Changing current working directory to: ${globals.fs.currentDirectory.path}');
       }
 
       // Validate the current package map only if we will not be running "pub get" later.

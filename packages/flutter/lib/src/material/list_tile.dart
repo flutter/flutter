@@ -17,8 +17,8 @@ import 'theme.dart';
 
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
-/// List tiles that appear in a [Drawer] use the theme's [TextTheme.body2]
-/// text style, which is a little smaller than the theme's [TextTheme.subhead]
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
+/// text style, which is a little smaller than the theme's [TextTheme.subtitle1]
 /// text style, which is used by default.
 enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
@@ -806,14 +806,14 @@ class ListTile extends StatelessWidget {
     if (tileTheme != null) {
       switch (tileTheme.style) {
         case ListTileStyle.drawer:
-          style = theme.textTheme.body2;
+          style = theme.textTheme.bodyText1;
           break;
         case ListTileStyle.list:
-          style = theme.textTheme.subhead;
+          style = theme.textTheme.subtitle1;
           break;
       }
     } else {
-      style = theme.textTheme.subhead;
+      style = theme.textTheme.subtitle1;
     }
     final Color color = _textColor(theme, tileTheme, style.color);
     return _isDenseLayout(tileTheme)
@@ -822,7 +822,7 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
-    final TextStyle style = theme.textTheme.body1;
+    final TextStyle style = theme.textTheme.bodyText2;
     final Color color = _textColor(theme, tileTheme, theme.textTheme.caption.color);
     return _isDenseLayout(tileTheme)
       ? style.copyWith(color: color, fontSize: 12.0)

@@ -136,7 +136,7 @@ abstract class Route<T> {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      navigator.focusScopeNode.requestFocus();
+      navigator?.focusScopeNode?.requestFocus();
     });
   }
 
@@ -663,7 +663,7 @@ class NavigatorObserver {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.display1,
+///       style: Theme.of(context).textTheme.headline4,
 ///       child: Container(
 ///         color: Colors.white,
 ///         alignment: Alignment.center,
@@ -677,7 +677,7 @@ class NavigatorObserver {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.display1,
+///       style: Theme.of(context).textTheme.headline4,
 ///       child: GestureDetector(
 ///         onTap: () {
 ///           // This moves from the personal info page to the credentials page,
@@ -707,7 +707,7 @@ class NavigatorObserver {
 ///     return GestureDetector(
 ///       onTap: onSignupComplete,
 ///       child: DefaultTextStyle(
-///         style: Theme.of(context).textTheme.display1,
+///         style: Theme.of(context).textTheme.headline4,
 ///         child: Container(
 ///           color: Colors.pinkAccent,
 ///           alignment: Alignment.center,
@@ -1892,6 +1892,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       }
     });
     newRoute.didChangeNext(null);
+    oldRoute.didChangeNext(newRoute);
     if (index > 0) {
       _history[index - 1].didChangeNext(newRoute);
       newRoute.didChangePrevious(_history[index - 1]);
@@ -1961,14 +1962,18 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
             observer.didRemove(removedRoute, newPrecedingRoute);
           removedRoute.dispose();
         }
-
-        if (newPrecedingRoute != null)
-          newPrecedingRoute.didChangeNext(newRoute);
       }
     });
 
     // Notify for newRoute
     newRoute.didChangeNext(null);
+    if (precedingRoute != null) {
+      precedingRoute.didChangeNext(newRoute);
+    }
+    if (newPrecedingRoute != null) {
+      newPrecedingRoute.didChangeNext(newRoute);
+      newRoute.didChangePrevious(newPrecedingRoute);
+    }
     for (final NavigatorObserver observer in widget.observers)
       observer.didPush(newRoute, precedingRoute);
 

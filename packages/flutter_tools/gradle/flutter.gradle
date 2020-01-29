@@ -745,7 +745,9 @@ abstract class BaseFlutterTask extends DefaultTask {
     File flutterRoot
     File flutterExecutable
     String buildMode
+    @Optional @Input
     String localEngine
+    @Optional @Input
     String localEngineSrcPath
     @Input
     Boolean fastStart

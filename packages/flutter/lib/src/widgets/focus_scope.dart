@@ -83,7 +83,7 @@ import 'inherited_notifier.dart';
 ///     debugLabel: 'Scope',
 ///     autofocus: true,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: Focus(
 ///         onKey: _handleKeyPress,
 ///         debugLabel: 'Button',

@@ -9,7 +9,6 @@ import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals;
-import '../../macos/xcode.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -155,7 +154,7 @@ class DebugMacOSFramework extends Target {
         ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
-    final RunResult result = await xcode.clang(<String>[
+    final RunResult result = await globals.xcode.clang(<String>[
       '-x',
       'c',
       debugApp.path,

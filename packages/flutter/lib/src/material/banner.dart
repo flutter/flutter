@@ -57,7 +57,7 @@ class MaterialBanner extends StatelessWidget {
   /// Style for the text in the [content] of the [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
-  /// also `null`, [ThemeData.textTheme.body1] is used.
+  /// also `null`, [ThemeData.textTheme.bodyText2] is used.
   final TextStyle contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
@@ -128,7 +128,7 @@ class MaterialBanner extends StatelessWidget {
         ?? theme.colorScheme.surface;
     final TextStyle textStyle = contentTextStyle
         ?? bannerTheme.contentTextStyle
-        ?? theme.textTheme.body1;
+        ?? theme.textTheme.bodyText2;
 
     return Container(
       color: backgroundColor,

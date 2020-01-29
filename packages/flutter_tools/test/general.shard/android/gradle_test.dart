@@ -1055,10 +1055,12 @@ plugin1=${plugin1.path}
     MockProcessManager mockProcessManager;
     FakePlatform android;
     FileSystem fileSystem;
+    FileSystemUtils fileSystemUtils;
     Cache cache;
 
     setUp(() {
       fileSystem = MemoryFileSystem();
+      fileSystemUtils = MockFileSystemUtils();
       mockAndroidSdk = MockAndroidSdk();
       mockAndroidStudio = MockAndroidStudio();
       mockArtifacts = MockLocalEngineArtifacts();
@@ -1356,7 +1358,7 @@ plugin1=${plugin1.path}
           localGradleErrors: const <GradleHandledError>[],
         );
       },
-      throwsA(isInstanceOf<ProcessException>()));
+      throwsA(isA<ProcessException>()));
 
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
@@ -1773,6 +1775,12 @@ plugin1=${plugin1.path}
         '''
       );
 
+      fileSystem.directory('.android/gradle')
+        .createSync(recursive: true);
+
+      fileSystem.directory('.android/gradle/wrapper')
+        .createSync(recursive: true);
+
       fileSystem.file('.android/gradlew').createSync(recursive: true);
 
       fileSystem.file('.android/gradle.properties')
@@ -1789,6 +1797,8 @@ plugin1=${plugin1.path}
       )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
 
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
+
+      when(fileSystemUtils.copyDirectorySync(any, any)).thenReturn(null);
 
       await buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
@@ -1812,6 +1822,15 @@ plugin1=${plugin1.path}
       expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
       expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
 
+      // Verify the local engine repo is copied into the generated Maven repo.
+      final List<dynamic> copyDirectoryArguments = verify(
+        fileSystemUtils.copyDirectorySync(captureAny, captureAny)
+      ).captured;
+
+      expect(copyDirectoryArguments.length, 2);
+      expect((copyDirectoryArguments.first as Directory).path, '/.tmp_rand0/flutter_tool_local_engine_repo.rand0');
+      expect((copyDirectoryArguments.last as Directory).path, 'build/outputs/repo');
+
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       AndroidStudio: () => mockAndroidStudio,
@@ -1819,6 +1838,7 @@ plugin1=${plugin1.path}
       Cache: () => cache,
       Platform: () => android,
       FileSystem: () => fileSystem,
+      FileSystemUtils: () => fileSystemUtils,
       ProcessManager: () => mockProcessManager,
     });
   });
@@ -1852,9 +1872,9 @@ plugin1=${plugin1.path}
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      releaseImplementation \'com.mycompany:flutter_release:2.2\n'
-          '      debugImplementation \'com.mycompany:flutter_debug:2.2\n'
-          '      profileImplementation \'com.mycompany:flutter_profile:2.2\n'
+          '      releaseImplementation \'com.mycompany:flutter_release:2.2\'\n'
+          '      debugImplementation \'com.mycompany:flutter_debug:2.2\'\n'
+          '      profileImplementation \'com.mycompany:flutter_profile:2.2\'\n'
           '    }\n'
           '\n'
           '\n'
@@ -1904,7 +1924,7 @@ plugin1=${plugin1.path}
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      releaseImplementation \'com.mycompany:flutter_release:1.0\n'
+          '      releaseImplementation \'com.mycompany:flutter_release:1.0\'\n'
           '    }\n'
           '\n'
           'To learn more, visit https://flutter.dev/go/build-aar\n'
@@ -1943,7 +1963,7 @@ plugin1=${plugin1.path}
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      debugImplementation \'com.mycompany:flutter_debug:1.0\n'
+          '      debugImplementation \'com.mycompany:flutter_debug:1.0\'\n'
           '    }\n'
           '\n'
           'To learn more, visit https://flutter.dev/go/build-aar\n'
@@ -1983,7 +2003,7 @@ plugin1=${plugin1.path}
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      profileImplementation \'com.mycompany:flutter_profile:1.0\n'
+          '      profileImplementation \'com.mycompany:flutter_profile:1.0\'\n'
           '    }\n'
           '\n'
           '\n'
@@ -2047,6 +2067,7 @@ class MockAndroidProject extends Mock implements AndroidProject {}
 class MockAndroidStudio extends Mock implements AndroidStudio {}
 class MockDirectory extends Mock implements Directory {}
 class MockFile extends Mock implements File {}
+class MockFileSystemUtils extends Mock implements FileSystemUtils {}
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}

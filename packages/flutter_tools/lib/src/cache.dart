@@ -103,6 +103,9 @@ class Cache {
        _fileSystem = fileSystem ?? globals.fs,
        _platform = platform ?? globals.platform ,
        _osUtils = osUtils ?? os {
+    // TODO(zra): Move to initializer list once logger and platform parameters
+    // are required.
+    _net = Net(logger: _logger, platform: _platform);
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
 
@@ -124,6 +127,7 @@ class Cache {
       for (final String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
+      _artifacts.add(FontSubsetArtifacts(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -133,6 +137,8 @@ class Cache {
   final Platform _platform;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
+
+  Net _net;
 
   static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
@@ -385,7 +391,7 @@ class Cache {
     final File cachedFile = _fileSystem.file(_fileSystem.path.join(serviceDir.path, url.pathSegments.last));
     if (!cachedFile.existsSync()) {
       try {
-        await _downloadFile(url, cachedFile);
+        await downloadFile(url, cachedFile);
       } catch (e) {
         throwToolExit('Failed to fetch third-party artifact $url: $e');
       }
@@ -437,6 +443,26 @@ class Cache {
     }
     this.includeAllPlatforms = includeAllPlatformsState;
     return allAvailible;
+  }
+
+  /// Download a file from the given [url] and write it to [location].
+  Future<void> downloadFile(Uri url, File location) async {
+    _ensureExists(location.parent);
+    await _net.fetchUrl(url, destFile: location);
+  }
+
+  Future<bool> doesRemoteExist(String message, Uri url) async {
+    final Status status = globals.logger.startProgress(
+      message,
+      timeout: timeoutConfiguration.slowOperation,
+    );
+    bool exists;
+    try {
+      exists = await _net.doesRemoteFileExist(url);
+    } finally {
+      status.stop();
+    }
+    return exists;
   }
 }
 
@@ -558,7 +584,7 @@ abstract class CachedArtifact extends ArtifactSet {
       if (!verifier(tempFile)) {
         final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
         try {
-          await _downloadFile(url, tempFile);
+          await cache.downloadFile(url, tempFile);
           status.stop();
         } catch (exception) {
           status.cancel();
@@ -709,7 +735,10 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = globals.fs.directory(globals.fs.path.join(location.path, cacheDir));
-      await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
+
+      // Avoid printing things like 'Downloading linux-x64 tools...' multiple times.
+      final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
+      await _downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 
@@ -737,7 +766,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     bool exists = false;
     for (final String pkgName in getPackageDirs()) {
-      exists = await _doesRemoteExist('Checking package $pkgName is available...',
+      exists = await cache.doesRemoteExist('Checking package $pkgName is available...',
           Uri.parse(url + pkgName + '.zip'));
       if (!exists) {
         return false;
@@ -747,7 +776,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     for (final List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
-      exists = await _doesRemoteExist('Checking $cacheDir tools are available...',
+      exists = await cache.doesRemoteExist('Checking $cacheDir tools are available...',
           Uri.parse(url + urlPath));
       if (!exists) {
         return false;
@@ -1176,6 +1205,33 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   }
 }
 
+/// Cached artifacts for font subsetting.
+class FontSubsetArtifacts extends EngineCachedArtifact {
+  FontSubsetArtifacts(Cache cache) : super(artifactName, cache, DevelopmentArtifact.universal);
+
+  static const String artifactName = 'font-subset';
+
+  @override
+  List<List<String>> getBinaryDirs() {
+    const Map<String, List<String>> artifacts = <String, List<String>> {
+      'macos': <String>['darwin-x64', 'darwin-x64/$artifactName.zip'],
+      'linux': <String>['linux-x64', 'linux-x64/$artifactName.zip'],
+      'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
+    };
+    final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
+    if (binaryDirs == null) {
+      throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+    }
+    return <List<String>>[binaryDirs];
+  }
+
+  @override
+  List<String> getLicenseDirs() => const <String>[];
+
+  @override
+  List<String> getPackageDirs() => const <String>[];
+}
+
 /// Cached iOS/USB binary artifacts.
 class IosUsbArtifacts extends CachedArtifact {
   IosUsbArtifacts(String name, Cache cache) : super(
@@ -1272,19 +1328,6 @@ String flattenNameSubdirs(Uri url) {
   final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return globals.fs.path.joinAll(convertedPieces);
-}
-
-/// Download a file from the given [url] and write it to [location].
-Future<void> _downloadFile(Uri url, File location) async {
-  _ensureExists(location.parent);
-  await fetchUrl(url, destFile: location);
-}
-
-Future<bool> _doesRemoteExist(String message, Uri url) async {
-  final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
-  final bool exists = await doesRemoteFileExist(url);
-  status.stop();
-  return exists;
 }
 
 /// Create the given [directory] and parents, as necessary.

@@ -12,7 +12,6 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'package:flutter_tools/src/android/gradle_utils.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -72,7 +71,7 @@ void main() {
     testUsingContext('throws tool exit when lockfile open fails', () async {
       when(mockFileSystem.file(argThat(endsWith('lockfile')))).thenReturn(mockFile);
       when(mockFile.openSync(mode: anyNamed('mode'))).thenThrow(const FileSystemException());
-      expect(() async => await Cache.lock(), throwsA(isA<ToolExit>()));
+      expect(() async => await Cache.lock(), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -248,7 +247,7 @@ void main() {
         'FLUTTER_STORAGE_BASE_URL': ' http://foo',
       });
       final Cache cache = Cache();
-      expect(() => cache.storageBaseUrl, throwsA(isInstanceOf<ToolExit>()));
+      expect(() => cache.storageBaseUrl, throwsToolExit());
     }, overrides: <Type, Generator>{
       Platform: () => MockPlatform(),
     });
@@ -278,17 +277,19 @@ void main() {
     MemoryFileSystem memoryFileSystem;
     MockCache mockCache;
     MockOperatingSystemUtils mockOperatingSystemUtils;
+    MockHttpClient mockHttpClient;
 
     setUp(() {
       fakeHttpClient = FakeHttpClient();
+      mockHttpClient = MockHttpClient();
       fakePlatform = FakePlatform()..environment = const <String, String>{};
       memoryFileSystem = MemoryFileSystem();
       mockCache = MockCache();
       mockOperatingSystemUtils = MockOperatingSystemUtils();
-      when(mockOperatingSystemUtils.verifyZip(any)).thenReturn(true);
     });
 
     testUsingContext('makes binary dirs readable and executable by all', () async {
+      when(mockOperatingSystemUtils.verifyZip(any)).thenReturn(true);
       final Directory artifactDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
       final Directory downloadDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_download.');
       when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
@@ -313,6 +314,47 @@ void main() {
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       HttpClientFactory: () => () => fakeHttpClient,
+      OperatingSystemUtils: () => mockOperatingSystemUtils,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('prints a friendly name when downloading', () async {
+      when(mockOperatingSystemUtils.verifyZip(any)).thenReturn(false);
+      final MockHttpClientRequest httpClientRequest = MockHttpClientRequest();
+      final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
+      when(httpClientResponse.statusCode).thenReturn(200);
+
+      when(httpClientRequest.close()).thenAnswer((_) async => httpClientResponse);
+      when(mockHttpClient.getUrl(any)).thenAnswer((_) async => httpClientRequest);
+
+      final Directory artifactDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+      final Directory downloadDir = globals.fs.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
+      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
+      final FakeCachedArtifact artifact = FakeCachedArtifact(
+        cache: mockCache,
+        binaryDirs: <List<String>>[
+          <String>['bin_dir', 'darwin-x64/artifacts.zip'],
+          <String>['font-subset', 'darwin-x64/font-subset.zip'],
+        ],
+        requiredArtifacts: DevelopmentArtifact.universal,
+      );
+      await artifact.updateInner();
+      expect(testLogger.statusText, isNotNull);
+      expect(testLogger.statusText, isNotEmpty);
+      expect(
+        testLogger.statusText.split('\n'),
+        <String>[
+          'Downloading darwin-x64 tools...',
+          'Downloading darwin-x64/font-subset tools...',
+          '',
+        ],
+      );
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      HttpClientFactory: () => () => mockHttpClient,
       OperatingSystemUtils: () => mockOperatingSystemUtils,
       Platform: () => fakePlatform,
     });
@@ -446,6 +488,45 @@ void main() {
       ]);
     });
   }, skip: !globals.platform.isLinux);
+
+
+  testUsingContext('FontSubset in univeral artifacts', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(artifacts.developmentArtifact, DevelopmentArtifact.universal);
+  });
+
+  testUsingContext('FontSubset artifacts on linux', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-x64', 'linux-x64/font-subset.zip']]);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'linux',
+  });
+
+  testUsingContext('FontSubset artifacts on windows', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(artifacts.getBinaryDirs(), <List<String>>[<String>['windows-x64', 'windows-x64/font-subset.zip']]);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'windows',
+  });
+
+  testUsingContext('FontSubset artifacts on macos', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(artifacts.getBinaryDirs(), <List<String>>[<String>['darwin-x64', 'darwin-x64/font-subset.zip']]);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'macos',
+  });
+
+  testUsingContext('FontSubset artifacts on fuchsia', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    expect(() => artifacts.getBinaryDirs(), throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'fuchsia',
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {
@@ -513,3 +594,6 @@ class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockPlatform extends Mock implements Platform {}
 class MockVersionedPackageResolver extends Mock implements VersionedPackageResolver {}
+
+class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+class MockHttpClientResponse extends Mock implements HttpClientResponse {}

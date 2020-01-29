@@ -19,7 +19,6 @@ import 'globals.dart' as globals;
 import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
-import 'version.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
@@ -187,8 +186,8 @@ class Plugin {
 
     if (usesOldPluginFormat && usesNewPluginFormat) {
       const String errorMessage =
-          'The flutter.plugin.platforms key cannot be used in combination with the old'
-          'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys.'
+          'The flutter.plugin.platforms key cannot be used in combination with the old '
+          'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys. '
           'See: https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin';
       return <String>[errorMessage];
     }
@@ -202,15 +201,22 @@ class Plugin {
 
   static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
     bool isInvalid(String key, bool Function(YamlMap) validate) {
+      if (!yaml.containsKey(key)) {
+        return false;
+      }
       final dynamic value = yaml[key];
       if (value is! YamlMap) {
-        return false;
+        return true;
       }
       final YamlMap yamlValue = value as YamlMap;
       if (yamlValue.containsKey('default_package')) {
         return false;
       }
       return !validate(yamlValue);
+    }
+
+    if (yaml == null) {
+      return <String>['Invalid "platforms" specification.'];
     }
     final List<String> errors = <String>[];
     if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {
@@ -411,7 +417,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   /// https://github.com/flutter/flutter/issues/48918
   result['dependencyGraph'] = _createPluginLegacyDependencyGraph(plugins);
   result['date_created'] = systemClock.now().toString();
-  result['version'] = flutterVersion.frameworkVersion;
+  result['version'] = globals.flutterVersion.frameworkVersion;
 
   // Only notify if the plugins list has changed. [date_created] will always be different,
   // [version] is not relevant for this check.

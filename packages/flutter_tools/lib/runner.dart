@@ -24,7 +24,6 @@ import 'src/reporting/github_template.dart';
 import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
-import 'src/version.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
 Future<int> run(
@@ -57,7 +56,7 @@ Future<int> run(
       onFailure: (String _) => 'en_US',
     );
 
-    String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString(redactUnknownBranches: true);
+    String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
     Object firstError;
     StackTrace firstStackTrace;
     return await runZoned<Future<int>>(() async {
@@ -112,12 +111,12 @@ Future<int> _handleToolError(
     }
   } else {
     // We've crashed; emit a log report.
-    stderr.writeln();
+    globals.stdio.stderrWrite('\n');
 
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
-      stderr.writeln('$error');
-      stderr.writeln(stackTrace.toString());
+      globals.stdio.stderrWrite('$error\n');
+      globals.stdio.stderrWrite('$stackTrace\n');
       return _exit(1);
     }
 
@@ -138,9 +137,9 @@ Future<int> _handleToolError(
 
       return _exit(1);
     } catch (error) {
-      stderr.writeln(
+      globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n'
-            'please let us know at https://github.com/flutter/flutter/issues.',
+        'please let us know at https://github.com/flutter/flutter/issues.\n',
       );
       // Any exception throw here (including one thrown by `_exit()`) will
       // get caught by our zone's `onError` handler. In order to avoid an
