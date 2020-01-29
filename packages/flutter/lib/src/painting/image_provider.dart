@@ -182,7 +182,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheW
 ///
 /// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
-/// ## Image resolving
+/// ## Lifecycle of resolving an image
 ///
 /// The [ImageProvider] goes through the following lifecycle to resolve an
 /// image, once the [resolve] method is called:
@@ -191,11 +191,12 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheW
 ///      This stream will be used to communicate back to the caller when the
 ///      image is decoded and ready to display, or when an error occurs.
 ///   2. Obtain the key for the image using [obtainKey].
-///      Since this method is asynchronous, but also can return synchronously,
-///      it sets up error handlers that would catch both synchronous and
-///      asynchronous errors, and ensures that errors thrown both into the
-///      [Zone] and the current stack are caught and handled once. The error
-///      handler is passed on to [resolveStreamForKey] and the [ImageCache].
+///      Calling this method can throw exceptions into the zone asynchronously
+///      or into the callstack synchronously. To handle that, an error handler
+///      is created that catches both synchronous and asynchronous errors, to
+///      make sure errors can be routed to the correct consumers.
+///      The error handler is passed on to [resolveStreamForKey] and the
+///      [ImageCache].
 ///   3. If the key is successfully obtained, schedule resolution of the image
 ///      using that key. This is handled by [resolveStreamForKey]. That method
 ///      may fizzle if it determines the image is no longer necessary, use the
@@ -309,6 +310,8 @@ abstract class ImageProvider<T> {
   /// method. If they need to change the implementation of [ImageStream] used,
   /// they should override [createStream]. If they need to manage the actual
   /// resolution of the image, they should override [resolveStreamForKey].
+  ///
+  /// See the Lifecycle documentation on [ImageProvider] for more information.
   @nonVirtual
   ImageStream resolve(ImageConfiguration configuration) {
     assert(configuration != null);
@@ -322,7 +325,8 @@ abstract class ImageProvider<T> {
   /// Called by [resolve] to create the [ImageStream] it returns.
   ///
   /// Subclasses should override this instead of [resolve] if they need to
-  /// return some subclass of [ImageStream].
+  /// return some subclass of [ImageStream]. The stream created here will be
+  /// passed to [resolveStreamForKey].
   @protected
   ImageStream createStream(ImageConfiguration configuration) {
     return ImageStream();
@@ -388,7 +392,7 @@ abstract class ImageProvider<T> {
     });
   }
 
-  /// Called when [resolve] has finished calling [obtainKey].
+  /// Called by [resolve] with the key returned by [obtainKey].
   ///
   /// Subclasses should override this method rather than calling [obtainKey] if
   /// they need to use a key directly. The [resolve] method installs appropriate

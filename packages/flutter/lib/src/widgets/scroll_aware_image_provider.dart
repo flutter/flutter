@@ -57,7 +57,7 @@ class ScrollAwareImageProvider<T> extends ImageProvider<T> {
   }) : assert(context != null),
        assert(imageProvider != null);
 
-  /// The context that may or may not be enclosed by a scrollable.
+  /// The context that may or may not be enclosed by a [Scrollable].
   ///
   /// Once [DisposableBuildContext.dispose] is called on this context,
   /// the provider will stop trying to resolve the image if it has not already

@@ -39,7 +39,7 @@ class DisposableBuildContext<T extends State> {
   ///
   /// Otherwise, asserts the [_state] is still mounted and returns its context.
   BuildContext get context {
-    assert(debugValidate());
+    assert(_debugValidate());
     if (_state == null) {
       return null;
     }
@@ -51,8 +51,7 @@ class DisposableBuildContext<T extends State> {
   ///
   /// Always returns true, but will assert if [dispose] has not been called
   /// but the state this is tracking is unmounted.
-  @visibleForTesting
-  bool debugValidate() {
+  bool _debugValidate() {
     assert(
       _state == null || _state.mounted,
       'A DisposableBuildContext tried to access the BuildContext of a disposed '
@@ -65,7 +64,7 @@ class DisposableBuildContext<T extends State> {
 
   /// Marks the [BuildContext] as disposed.
   ///
-  /// Creators of this object should call [dispose] when their [Element] is
+  /// Creators of this object must call [dispose] when their [Element] is
   /// unmounted, i.e. when [State.dispose] is called.
   void dispose() {
     _state = null;

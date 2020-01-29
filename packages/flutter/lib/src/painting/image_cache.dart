@@ -227,7 +227,7 @@ class ImageCache {
     return result;
   }
 
-  /// Returns whether this [key] has been previously added by [putIfAbsent].
+  /// Returns whether this `key` has been previously added by [putIfAbsent].
   bool containsKey(Object key) {
     return _pendingImages[key] != null || _cache[key] != null;
   }

@@ -21,28 +21,6 @@ void main() {
     return Scrollable.of(find.byType(TestWidget).evaluate().first).position;
   }
 
-  testWidgets('DisposableBuildContext asserts on disposed state', (WidgetTester tester) async {
-    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
-    await tester.pumpWidget(TestWidget(key));
-
-    final TestWidgetState state = key.currentState;
-    expect(state.mounted, true);
-
-    final DisposableBuildContext context = DisposableBuildContext(state);
-    expect(context.debugValidate(), true);
-
-    await tester.pumpWidget(const TestWidget(null));
-
-    expect(state.mounted, false);
-
-    expect(() => context.debugValidate(), throwsAssertionError);
-
-    context.dispose();
-    expect(context.debugValidate(), true);
-
-    expect(() => DisposableBuildContext(state), throwsAssertionError);
-  });
-
   testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable', (WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
