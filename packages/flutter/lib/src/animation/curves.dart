@@ -46,7 +46,7 @@ abstract class ParametricCurve<T> {
   }
 
   @override
-  String toString() => objectRuntimeType(this, 'ParametricCurve');
+  String toString() => '${objectRuntimeType(this, 'ParametricCurve')}';
 }
 
 /// An parametric animation easing curve, i.e. a mapping of the unit interval to
@@ -413,7 +413,7 @@ class Cubic extends Curve {
 ///         child: CircleAvatar(
 ///           backgroundColor: Colors.yellow,
 ///           child: DefaultTextStyle(
-///             style: Theme.of(context).textTheme.title,
+///             style: Theme.of(context).textTheme.headline6,
 ///             child: Text("B"), // Buzz, buzz!
 ///           ),
 ///         ),

@@ -2099,9 +2099,9 @@ class SizedBox extends SingleChildRenderObjectWidget {
     } else if (width == 0.0 && height == 0.0) {
       type = '${objectRuntimeType(this, 'SizedBox')}.shrink';
     } else {
-      type = objectRuntimeType(this, 'SizedBox');
+      type = '${objectRuntimeType(this, 'SizedBox')}';
     }
-    return key == null ? type : '$type-$key';
+    return key == null ? '$type' : '$type-$key';
   }
 
   @override
@@ -5585,7 +5585,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///             Text('You have pressed or released in this area this many times:'),
 ///             Text(
 ///               '$_downCounter presses\n$_upCounter releases',
-///               style: Theme.of(context).textTheme.display1,
+///               style: Theme.of(context).textTheme.headline4,
 ///             ),
 ///             Text(
 ///               'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
@@ -5836,7 +5836,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///             Text('You have entered or exited this box this many times:'),
 ///             Text(
 ///               '$_enterCounter Entries\n$_exitCounter Exits',
-///               style: Theme.of(context).textTheme.display1,
+///               style: Theme.of(context).textTheme.headline4,
 ///             ),
 ///             Text(
 ///               'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',

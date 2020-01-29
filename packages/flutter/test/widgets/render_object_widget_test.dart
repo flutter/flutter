@@ -52,7 +52,7 @@ void main() {
     SingleChildRenderObjectElement element =
         tester.element(find.byElementType(SingleChildRenderObjectElement));
     expect(element, isNotNull);
-    expect(element.renderObject is RenderDecoratedBox, isTrue);
+    expect(element.renderObject, isA<RenderDecoratedBox>());
     RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
     expect(renderObject.decoration, equals(kBoxDecorationA));
     expect(renderObject.position, equals(DecorationPosition.background));
@@ -60,7 +60,7 @@ void main() {
     await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationB));
     element = tester.element(find.byElementType(SingleChildRenderObjectElement));
     expect(element, isNotNull);
-    expect(element.renderObject is RenderDecoratedBox, isTrue);
+    expect(element.renderObject, isA<RenderDecoratedBox>());
     renderObject = element.renderObject as RenderDecoratedBox;
     expect(renderObject.decoration, equals(kBoxDecorationB));
     expect(renderObject.position, equals(DecorationPosition.background));
@@ -72,12 +72,12 @@ void main() {
       final SingleChildRenderObjectElement element =
           tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
       expect(element, isNotNull);
-      expect(element.renderObject is RenderDecoratedBox, isTrue);
+      expect(element.renderObject, isA<RenderDecoratedBox>());
       final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(kBoxDecorationA));
       expect(renderObject.position, equals(DecorationPosition.background));
       expect(renderObject.child, isNotNull);
-      expect(renderObject.child is RenderDecoratedBox, isTrue);
+      expect(renderObject.child, isA<RenderDecoratedBox>());
       final RenderDecoratedBox child = renderObject.child as RenderDecoratedBox;
       expect(child.decoration, equals(kBoxDecorationB));
       expect(child.position, equals(DecorationPosition.background));
@@ -88,7 +88,7 @@ void main() {
       final SingleChildRenderObjectElement element =
           tester.element(find.byElementType(SingleChildRenderObjectElement));
       expect(element, isNotNull);
-      expect(element.renderObject is RenderDecoratedBox, isTrue);
+      expect(element.renderObject, isA<RenderDecoratedBox>());
       final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(kBoxDecorationA));
       expect(renderObject.position, equals(DecorationPosition.background));
@@ -164,12 +164,12 @@ void main() {
 
     SingleChildRenderObjectElement element =
         tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
-    expect(element.renderObject is RenderDecoratedBox, isTrue);
+    expect(element.renderObject, isA<RenderDecoratedBox>());
     final RenderDecoratedBox parent = element.renderObject as RenderDecoratedBox;
-    expect(parent.child is RenderDecoratedBox, isTrue);
+    expect(parent.child, isA<RenderDecoratedBox>());
     final RenderDecoratedBox child = parent.child as RenderDecoratedBox;
     expect(child.decoration, equals(kBoxDecorationB));
-    expect(child.child is RenderDecoratedBox, isTrue);
+    expect(child.child, isA<RenderDecoratedBox>());
     final RenderDecoratedBox grandChild = child.child as RenderDecoratedBox;
     expect(grandChild.decoration, equals(kBoxDecorationC));
     expect(grandChild.child, isNull);
@@ -180,7 +180,7 @@ void main() {
 
     element =
         tester.element(find.byElementType(SingleChildRenderObjectElement));
-    expect(element.renderObject is RenderDecoratedBox, isTrue);
+    expect(element.renderObject, isA<RenderDecoratedBox>());
     expect(element.renderObject, equals(parent));
     expect(parent.child, isNull);
 

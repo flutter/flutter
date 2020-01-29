@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'globals.dart' as globals;
-import 'version.dart';
 
 /// The current [FeatureFlags] implementation.
 ///
@@ -45,7 +44,7 @@ class FeatureFlags {
   ///
   /// Prefer using one of the specific getters above instead of this API.
   bool isEnabled(Feature feature) {
-    final String currentChannel = FlutterVersion.instance.channel;
+    final String currentChannel = globals.flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
       return false;

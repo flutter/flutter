@@ -476,7 +476,7 @@ class _DraggableScrollableSheetScrollPosition
     );
 
     final AnimationController ballisticController = AnimationController.unbounded(
-      debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
+      debugLabel: '${objectRuntimeType(this, '_DraggableScrollableSheetPosition')}',
       vsync: context.vsync,
     );
     double lastDelta = 0;
