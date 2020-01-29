@@ -130,7 +130,11 @@ class PageStorageBucket {
 }
 
 /// A widget that establishes a page storage bucket for this widget subtree.
-/// 
+///
+/// {@tool sample}
+///
+/// This sample creates a page storage for MyHomePage
+///
 /// ```dart
 ///  final PageStorageBucket _bucket = new PageStorageBucket();
 ///  PageStorageKey mykey = new PageStorageKey("testkey");
@@ -141,7 +145,9 @@ class PageStorageBucket {
 ///         key: mykey,
 ///       ),
 ///     );
+///
 /// ```
+/// {@end-tool}
 class PageStorage extends StatelessWidget {
   /// Creates a widget that provides a storage bucket for its descendants.
   ///
