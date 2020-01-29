@@ -501,7 +501,7 @@ void main() {
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
-      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', fontSubset: false);
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 

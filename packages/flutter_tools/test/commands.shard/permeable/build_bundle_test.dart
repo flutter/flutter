@@ -47,6 +47,7 @@ void main() {
         extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),
         fileSystemRoots: anyNamed('fileSystemRoots'),
         fileSystemScheme: anyNamed('fileSystemScheme'),
+        fontSubset: anyNamed('fontSubset'),
       ),
     ).thenAnswer((_) => Future<void>.value());
   });
