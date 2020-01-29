@@ -274,6 +274,22 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel', 'beta']);
 
+      verify(mockProcessManager.start(
+        <String>['git', 'fetch'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
+      verify(mockProcessManager.start(
+        <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
+      verify(mockProcessManager.start(
+        <String>['git', 'checkout', 'beta', '--'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
+
       expect(testLogger.statusText, contains("Successfully switched to flutter channel 'beta'."));
       expect(testLogger.statusText, contains("To ensure that you're on the latest build from this channel, run 'flutter upgrade'"));
       expect(testLogger.errorText, hasLength(0));
