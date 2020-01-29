@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/commands/dart.dart';
+
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
 // The build_runner code generation is provided here to make it easier to
@@ -72,6 +74,7 @@ Future<void> main(List<String> args) async {
     ConfigCommand(verboseHelp: verboseHelp),
     CreateCommand(),
     DaemonCommand(hidden: !verboseHelp),
+    DartCommand(),
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
     DriveCommand(),
