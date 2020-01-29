@@ -2435,20 +2435,24 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
-    _addIfNonNull(
-      children,
-      _FloatingActionButtonTransition(
-        child: widget.floatingActionButton,
-        fabMoveAnimation: _floatingActionButtonMoveController,
-        fabMotionAnimator: _fabStatuses[_primaryFABKey].animator,
-        geometryNotifier: _geometryNotifier,
-        currentController: _floatingActionButtonVisibilityController,
-      ),
-      _primaryFABKey,
-      removeLeftPadding: true,
-      removeTopPadding: true,
-      removeRightPadding: true,
-      removeBottomPadding: true,
+    _fabStatuses.forEach(
+      (Key key, _FABStatus status) {
+        _addIfNonNull(
+          children,
+          _FloatingActionButtonTransition(
+            child: status.button,
+            fabMoveAnimation: _floatingActionButtonMoveController,
+            fabMotionAnimator: status.animator,
+            geometryNotifier: _geometryNotifier,
+            currentController: _floatingActionButtonVisibilityController,
+          ),
+          key,
+          removeLeftPadding: true,
+          removeTopPadding: true,
+          removeRightPadding: true,
+          removeBottomPadding: true,
+        );
+      },
     );
 
     switch (themeData.platform) {
