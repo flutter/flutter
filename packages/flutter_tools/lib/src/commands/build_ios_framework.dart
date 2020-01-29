@@ -158,7 +158,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('--output is required.');
     }
 
-    if (_project.ios.existsSync() == null) {
+    if (!_project.ios.existsSync()) {
       throwToolExit('Module does not support iOS');
     }
 
