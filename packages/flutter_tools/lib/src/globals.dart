@@ -14,6 +14,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'cache.dart';
+import 'ios/mac.dart';
 import 'macos/xcode.dart';
 import 'version.dart';
 
@@ -44,6 +45,7 @@ Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
 Xcode get xcode => context.get<Xcode>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
+IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
