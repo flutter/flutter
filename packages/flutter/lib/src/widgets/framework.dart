@@ -4437,7 +4437,13 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  Widget build() => state.build(this);
+  Widget build() {
+    if (_didChangeDependencies) {
+      _state.didChangeDependencies();
+      _didChangeDependencies = false;
+    }
+    return state.build(this);
+  }
 
   /// The [State] instance associated with this location in the tree.
   ///
@@ -4617,10 +4623,21 @@ class StatefulElement extends ComponentElement {
     return super.dependOnInheritedElement(ancestor as InheritedElement, aspect: aspect);
   }
 
+  /// This controls whether we should call [State.didChangeDependencies] from
+  /// the start of [build], to avoid calls when the [State] will not get built.
+  /// This can happen when the widget has dropped out of the tree, but depends
+  /// on an [InheritedWidget] that is still in the tree.
+  ///
+  /// It is set initially to false, since [_firstBuild] makes the initial call
+  /// on the [state]. When it is true, [build] will call
+  /// `state.didChangeDependencies` and then sets it to false. Subsequent calls
+  /// to [didChangeDependencies] set it to true.
+  bool _didChangeDependencies = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _state.didChangeDependencies();
+    _didChangeDependencies = true;
   }
 
   @override

@@ -340,10 +340,7 @@ class WebFs {
       client,
       server,
       dwds,
-      // Format ipv6 hosts according to RFC 5952.
-      internetAddress.type == InternetAddressType.IPv4
-        ? 'http://${internetAddress.address}:$hostPort'
-        : 'http://[${internetAddress.address}]:$hostPort',
+      'http://$effectiveHostname:$hostPort',
       assetServer,
       buildInfo.isDebug,
       flutterProject,

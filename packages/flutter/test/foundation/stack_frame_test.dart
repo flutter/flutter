@@ -47,6 +47,28 @@ void main() {
       webStackTraceFrames,
     );
   });
+
+  test('Parses ...',  () {
+    expect(
+      StackFrame.fromStackTraceLine('...'),
+      StackFrame.stackOverFlowElision,
+    );
+  });
+
+  test('Live handling of Stack Overflows', () {
+    void overflow(int seed) {
+      overflow(seed + 1);
+    }
+    bool overflowed = false;
+    try {
+      overflow(1);
+    } on StackOverflowError catch (e, stack) {
+      overflowed = true;
+      final List<StackFrame> frames = StackFrame.fromStackTrace(stack);
+      expect(frames.contains(StackFrame.stackOverFlowElision), true);
+    }
+    expect(overflowed, true);
+  }, skip: isBrowser);
 }
 
 const String stackString = '''#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)

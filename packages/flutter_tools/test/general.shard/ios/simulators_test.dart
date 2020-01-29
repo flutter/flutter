@@ -44,6 +44,24 @@ void main() {
     osx.operatingSystem = 'macos';
   });
 
+  group('_IOSSimulatorDevicePortForwarder', () {
+    testUsingContext('dispose() does not throw an exception', () async {
+      final IOSSimulator simulator = IOSSimulator('123');
+      final DevicePortForwarder portForwarder = simulator.portForwarder;
+      await portForwarder.forward(123);
+      await portForwarder.forward(124);
+      expect(portForwarder.forwardedPorts.length, 2);
+      try {
+        await portForwarder.dispose();
+      } catch (e) {
+        fail('Encountered exception: $e');
+      }
+      expect(portForwarder.forwardedPorts.length, 0);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
+    }, testOn: 'posix');
+  });
+
   group('logFilePath', () {
     testUsingContext('defaults to rooted from HOME', () {
       osx.environment['HOME'] = '/foo/bar';

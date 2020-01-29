@@ -148,7 +148,7 @@ void _testPaintingContextLayerReuse<L extends Layer>(_LayerTestPaintCallback pai
   box.markNeedsPaint();
   pumpFrame(phase: EnginePhase.paint);
   expect(box.paintedLayers, hasLength(2));
-  expect(box.paintedLayers[0], isInstanceOf<L>());
+  expect(box.paintedLayers[0], isA<L>());
   expect(box.paintedLayers[0], same(box.paintedLayers[1]));
 }
 

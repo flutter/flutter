@@ -77,7 +77,7 @@ void main() {
         ]);
         fail('Expect exception');
       } catch (e) {
-        expect(e.toString(), contains('--fast-start is not supported with --use-application-binary'));
+        expect(e.toString(), isNot(contains('--fast-start is not supported with --use-application-binary')));
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
@@ -111,18 +111,70 @@ void main() {
         ]);
         fail('Expect exception');
       } catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
       }
 
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
-      expect(bufferLogger.statusText, contains(
+      expect(bufferLogger.statusText, isNot(contains(
         'Using --fast-start option with device mockdevice, but this device '
         'does not support it. Overriding the setting to false.'
-      ));
+      )));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => MockDeviceManager(),
+    });
+
+    testUsingContext('Walks upward looking for a pubspec.yaml and succeeds if found', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages')
+        ..createSync()
+        ..writeAsStringSync('Not a valid package');
+
+      globals.fs.currentDirectory = globals.fs.directory(globals.fs.path.join('a', 'b', 'c'))
+        ..createSync(recursive: true);
+
+      final RunCommand command = RunCommand();
+      applyMocksToCommand(command);
+      try {
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '--fast-start',
+          '--no-pub',
+        ]);
+        fail('Expect exception');
+      } catch (e) {
+        expect(e, isInstanceOf<ToolExit>());
+      }
+      final BufferLogger bufferLogger = globals.logger as BufferLogger;
+      expect(bufferLogger.statusText, contains(
+        'Changing current working directory to:'
+      ));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
+      globals.fs.currentDirectory = globals.fs.directory(globals.fs.path.join('a', 'b', 'c'))
+        ..createSync(recursive: true);
+
+      final RunCommand command = RunCommand();
+      applyMocksToCommand(command);
+      try {
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '--fast-start',
+          '--no-pub',
+        ]);
+        fail('Expect exception');
+      } catch (e) {
+        expect(e, isInstanceOf<ToolExit>());
+        expect(e.toString(), contains('No pubspec.yaml file found'));
+      }
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
 

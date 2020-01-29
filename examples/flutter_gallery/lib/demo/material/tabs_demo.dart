@@ -127,7 +127,7 @@ class _CardDataItem extends StatelessWidget {
             Center(
               child: Text(
                 data.title,
-                style: Theme.of(context).textTheme.title,
+                style: Theme.of(context).textTheme.headline6,
               ),
             ),
           ],

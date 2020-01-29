@@ -32,17 +32,15 @@ abstract class OverlayRoute<T> extends Route<T> {
   /// Subclasses should override this getter to return the builders for the overlay.
   Iterable<OverlayEntry> createOverlayEntries();
 
-  /// The entries this route has placed in the overlay.
   @override
   List<OverlayEntry> get overlayEntries => _overlayEntries;
   final List<OverlayEntry> _overlayEntries = <OverlayEntry>[];
 
   @override
-  void install(OverlayEntry insertionPoint) {
+  void install() {
     assert(_overlayEntries.isEmpty);
     _overlayEntries.addAll(createOverlayEntries());
-    navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint);
-    super.install(insertionPoint);
+    super.install();
   }
 
   /// Controls whether [didPop] calls [NavigatorState.finalizeRoute].
@@ -68,8 +66,6 @@ abstract class OverlayRoute<T> extends Route<T> {
 
   @override
   void dispose() {
-    for (final OverlayEntry entry in _overlayEntries)
-      entry.remove();
     _overlayEntries.clear();
     super.dispose();
   }
@@ -111,6 +107,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// the opaque route will not be built to save resources.
   bool get opaque;
 
+  // This ensures that if we got to the dismissed state while still current,
+  // we will still be disposed when we are eventually popped.
+  //
+  // This situation arises when dealing with the Cupertino dismiss gesture.
   @override
   bool get finishedWhenPopped => _controller.status == AnimationStatus.dismissed;
 
@@ -185,13 +185,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   @override
-  void install(OverlayEntry insertionPoint) {
+  void install() {
     assert(!_transitionCompleter.isCompleted, 'Cannot install a $runtimeType after disposing it.');
     _controller = createAnimationController();
     assert(_controller != null, '$runtimeType.createAnimationController() returned null.');
     _animation = createAnimation();
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
-    super.install(insertionPoint);
+    super.install();
   }
 
   @override
@@ -201,6 +201,15 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     _didPushOrReplace();
     super.didPush();
     return _controller.forward();
+  }
+
+  @override
+  void didAdd() {
+    assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
+    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    _didPushOrReplace();
+    super.didAdd();
+    _controller.value = _controller.upperBound;
   }
 
   @override
@@ -548,7 +557,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   Future<RoutePopDisposition> willPop() async {
     if (willHandlePopInternally)
       return RoutePopDisposition.pop;
-    return await super.willPop();
+    return super.willPop();
   }
 
   @override
@@ -968,8 +977,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void install(OverlayEntry insertionPoint) {
-    super.install(insertionPoint);
+  void install() {
+    super.install();
     _animationProxy = ProxyAnimation(super.animation);
     _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation);
   }
@@ -980,6 +989,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       navigator.focusScopeNode.setFirstFocus(_scopeKey.currentState.focusScopeNode);
     }
     return super.didPush();
+  }
+
+  @override
+  void didAdd() {
+    if (_scopeKey.currentState != null) {
+      navigator.focusScopeNode.setFirstFocus(_scopeKey.currentState.focusScopeNode);
+    }
+    super.didAdd();
   }
 
   // The API for subclasses to override - used by this class

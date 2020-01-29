@@ -55,7 +55,7 @@ class UpgradeCommand extends FlutterCommand {
       boolArg('force'),
       boolArg('continue'),
       GitTagVersion.determine(),
-      FlutterVersion.instance,
+      globals.flutterVersion,
     );
   }
 }

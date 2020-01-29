@@ -413,7 +413,7 @@ class Cubic extends Curve {
 ///         child: CircleAvatar(
 ///           backgroundColor: Colors.yellow,
 ///           child: DefaultTextStyle(
-///             style: Theme.of(context).textTheme.title,
+///             style: Theme.of(context).textTheme.headline6,
 ///             child: Text("B"), // Buzz, buzz!
 ///           ),
 ///         ),

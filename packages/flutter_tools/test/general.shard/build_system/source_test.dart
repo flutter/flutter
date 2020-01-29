@@ -141,14 +141,14 @@ void main() {
 
     globals.fs.file('abcd.bar').createSync();
 
-    expect(() => fizzSource.accept(visitor), throwsA(isInstanceOf<InvalidPatternException>()));
+    expect(() => fizzSource.accept(visitor), throwsA(isA<InvalidPatternException>()));
   }));
 
 
   test('can\'t substitute foo', () => testbed.run(() {
     const Source invalidBase = Source.pattern('foo');
 
-    expect(() => invalidBase.accept(visitor), throwsA(isInstanceOf<InvalidPatternException>()));
+    expect(() => invalidBase.accept(visitor), throwsA(isA<InvalidPatternException>()));
   }));
 
   test('can substitute optional files', () => testbed.run(() {
