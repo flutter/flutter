@@ -375,14 +375,14 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _keepAliveBucket.values)
+    for (final RenderBox child in _keepAliveBucket.values)
       child.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    for (RenderBox child in _keepAliveBucket.values)
+    for (final RenderBox child in _keepAliveBucket.values)
       child.detach();
   }
 
@@ -683,7 +683,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     }
     if (_keepAliveBucket.isNotEmpty) {
       final List<int> indices = _keepAliveBucket.keys.toList()..sort();
-      for (int index in indices) {
+      for (final int index in indices) {
         children.add(_keepAliveBucket[index].toDiagnosticsNode(
           name: 'child with index $index (kept alive but not laid out)',
           style: DiagnosticsTreeStyle.offstage,

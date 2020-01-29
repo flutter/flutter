@@ -530,12 +530,12 @@ void main() {
     element.visitChildren((Element e) {
       childElement = e;
     });
-    element.removeChild(childElement.renderObject);
+    element.removeChild(childElement.renderObject as RenderBox);
     element.createChild(0, after: null);
     element.visitChildren((Element e) {
       childElement = e;
     });
-    element.removeChild(childElement.renderObject);
+    element.removeChild(childElement.renderObject as RenderBox);
     element.createChild(0, after: null);
   });
 
@@ -597,7 +597,7 @@ void main() {
         Container(),
       ],
     ));
-    final MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext as MultiChildRenderObjectElement;
     expect(
       element.children.map((Element element) => element.widget.key),
       <Key>[null, key1, null, key2, null],
@@ -616,7 +616,7 @@ void main() {
         Container(),
       ],
     ));
-    final MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext as MultiChildRenderObjectElement;
 
     expect(element, hasAGoodToStringDeep);
     expect(
@@ -644,7 +644,7 @@ void main() {
   });
 
   testWidgets('Element diagnostics with null child', (WidgetTester tester) async {
-    await tester.pumpWidget(NullChildTest());
+    await tester.pumpWidget(const NullChildTest());
     final NullChildElement test = tester.element<NullChildElement>(find.byType(NullChildTest));
     test.includeChild = true;
     expect(
@@ -710,9 +710,39 @@ void main() {
       );
     }
   });
+
+  testWidgets('didUpdateDependencies is not called on a State that never rebuilds', (WidgetTester tester) async {
+    final GlobalKey<DependentState> key = GlobalKey<DependentState>();
+
+    /// Initial build - should call didChangeDependencies, not deactivate
+    await tester.pumpWidget(Inherited(1, child: DependentStatefulWidget(key: key)));
+    final DependentState state = key.currentState;
+    expect(key.currentState, isNotNull);
+    expect(state.didChangeDependenciesCount, 1);
+    expect(state.deactivatedCount, 0);
+
+    /// Rebuild with updated value - should call didChangeDependencies
+    await tester.pumpWidget(Inherited(2, child: DependentStatefulWidget(key: key)));
+    expect(key.currentState, isNotNull);
+    expect(state.didChangeDependenciesCount, 2);
+    expect(state.deactivatedCount, 0);
+
+    // reparent it - should call deactivate and didChangeDependencies
+    await tester.pumpWidget(Inherited(3, child: SizedBox(child: DependentStatefulWidget(key: key))));
+    expect(key.currentState, isNotNull);
+    expect(state.didChangeDependenciesCount, 3);
+    expect(state.deactivatedCount, 1);
+
+    // Remove it - should call deactivate, but not didChangeDependencies
+    await tester.pumpWidget(const Inherited(4, child: SizedBox()));
+    expect(key.currentState, isNull);
+    expect(state.didChangeDependenciesCount, 3);
+    expect(state.deactivatedCount, 2);
+  });
 }
 
 class NullChildTest extends Widget {
+  const NullChildTest({ Key key }) : super(key: key);
   @override
   Element createElement() => NullChildElement(this);
 }
@@ -753,4 +783,43 @@ class DirtyElementWithCustomBuildOwner extends Element {
 
   @override
   bool get dirty => true;
+}
+
+class Inherited extends InheritedWidget {
+  const Inherited(this.value, {Widget child, Key key}) : super(key: key, child: child);
+
+  final int value;
+
+  @override
+  bool updateShouldNotify(Inherited oldWidget) => oldWidget.value != value;
+}
+
+class DependentStatefulWidget extends StatefulWidget {
+  const DependentStatefulWidget({Key key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => DependentState();
+}
+
+class DependentState extends State<DependentStatefulWidget> {
+  int didChangeDependenciesCount = 0;
+  int deactivatedCount = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    didChangeDependenciesCount += 1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    context.dependOnInheritedWidgetOfExactType<Inherited>();
+    return const SizedBox();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    deactivatedCount += 1;
+  }
 }

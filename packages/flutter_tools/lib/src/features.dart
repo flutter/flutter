@@ -4,10 +4,8 @@
 
 import 'package:meta/meta.dart';
 
-import 'base/config.dart';
 import 'base/context.dart';
-import 'base/platform.dart';
-import 'version.dart';
+import 'globals.dart' as globals;
 
 /// The current [FeatureFlags] implementation.
 ///
@@ -46,20 +44,20 @@ class FeatureFlags {
   ///
   /// Prefer using one of the specific getters above instead of this API.
   bool isEnabled(Feature feature) {
-    final String currentChannel = FlutterVersion.instance.channel;
+    final String currentChannel = globals.flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
       return false;
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = Config.instance.getValue(feature.configSetting) as bool;
+      final bool configOverride = globals.config.getValue(feature.configSetting) as bool;
       if (configOverride != null) {
         isEnabled = configOverride;
       }
     }
     if (feature.environmentOverride != null) {
-      if (platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
+      if (globals.platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
         isEnabled = true;
       }
     }

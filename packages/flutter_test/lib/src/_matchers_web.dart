@@ -69,7 +69,7 @@ class MatchesGoldenFile extends AsyncMatcher {
       } on TestFailure catch (ex) {
         return ex.message;
       }
-    }, additionalTime: const Duration(seconds: 11));
+    }, additionalTime: const Duration(seconds: 22));
     _renderElement(binding.window, _findRepaintBoundary(e));
     return result;
   }

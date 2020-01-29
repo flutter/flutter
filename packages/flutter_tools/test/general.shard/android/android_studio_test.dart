@@ -5,9 +5,11 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -55,12 +57,12 @@ void main() {
       const String installPath = '/opt/android-studio-with-cheese-5.0';
       const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
       const String homeFile = '$studioHome/system/.home';
-      fs.directory(installPath).createSync(recursive: true);
-      fs.file(homeFile).createSync(recursive: true);
-      fs.file(homeFile).writeAsStringSync(installPath);
+      globals.fs.directory(installPath).createSync(recursive: true);
+      globals.fs.file(homeFile).createSync(recursive: true);
+      globals.fs.file(homeFile).writeAsStringSync(installPath);
 
       final AndroidStudio studio =
-      AndroidStudio.fromHomeDot(fs.directory(studioHome));
+      AndroidStudio.fromHomeDot(globals.fs.directory(studioHome));
       expect(studio, isNotNull);
       expect(studio.pluginsPath,
           equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
@@ -75,15 +77,15 @@ void main() {
 
   group('pluginsPath on Mac', () {
     testUsingContext('extracts custom paths for directly downloaded Android Studio on Mac', () {
-      final String studioInApplicationPlistFolder = fs.path.join('/', 'Application', 'Android Studio.app', 'Contents');
-      fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      final String studioInApplicationPlistFolder = globals.fs.path.join('/', 'Application', 'Android Studio.app', 'Contents');
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String plistFilePath = fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       when(plistUtils.parseFile(plistFilePath)).thenReturn(macStudioInfoPlist);
-      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(fs.directory(studioInApplicationPlistFolder)?.parent?.path);
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(globals.fs.directory(studioInApplicationPlistFolder)?.parent?.path);
       expect(studio, isNotNull);
       expect(studio.pluginsPath,
-          equals(fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
+          equals(globals.fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -94,26 +96,26 @@ void main() {
     });
 
     testUsingContext('extracts custom paths for Android Studio downloaded by JetBrainsToolbox on Mac', () {
-      final String jetbrainsStudioInApplicationPlistFolder = fs.path.join(homeMac, 'Application', 'JetBrains Toolbox', 'Android Studio.app', 'Contents');
-      fs.directory(jetbrainsStudioInApplicationPlistFolder).createSync(recursive: true);
+      final String jetbrainsStudioInApplicationPlistFolder = globals.fs.path.join(homeMac, 'Application', 'JetBrains Toolbox', 'Android Studio.app', 'Contents');
+      globals.fs.directory(jetbrainsStudioInApplicationPlistFolder).createSync(recursive: true);
       const Map<String, dynamic> jetbrainsInfoPlist = <String, dynamic>{
         'CFBundleLongVersionString': '3.3',
         'CFBundleShortVersionString': '3.3',
         'CFBundleVersion': '3.3',
         'JetBrainsToolboxApp': '$homeMac/Library/Application Support/JetBrains/Toolbox/apps/AndroidStudio/ch-0/183.5256920/Android Studio 3.3.app',
       };
-      final String jetbrainsPlistFilePath = fs.path.join(jetbrainsStudioInApplicationPlistFolder, 'Info.plist');
+      final String jetbrainsPlistFilePath = globals.fs.path.join(jetbrainsStudioInApplicationPlistFolder, 'Info.plist');
       when(plistUtils.parseFile(jetbrainsPlistFilePath)).thenReturn(jetbrainsInfoPlist);
 
-      final String studioInApplicationPlistFolder = fs.path.join(fs.path.join(homeMac, 'Library', 'Application Support'), 'JetBrains', 'Toolbox', 'apps', 'AndroidStudio', 'ch-0', '183.5256920', fs.path.join('Android Studio 3.3.app', 'Contents'));
-      fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
-      final String studioPlistFilePath = fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final String studioInApplicationPlistFolder = globals.fs.path.join(globals.fs.path.join(homeMac, 'Library', 'Application Support'), 'JetBrains', 'Toolbox', 'apps', 'AndroidStudio', 'ch-0', '183.5256920', globals.fs.path.join('Android Studio 3.3.app', 'Contents'));
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      final String studioPlistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       when(plistUtils.parseFile(studioPlistFilePath)).thenReturn(macStudioInfoPlist);
 
-      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(fs.directory(jetbrainsStudioInApplicationPlistFolder)?.parent?.path);
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(globals.fs.directory(jetbrainsStudioInApplicationPlistFolder)?.parent?.path);
       expect(studio, isNotNull);
       expect(studio.pluginsPath,
-          equals(fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
+          equals(globals.fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),

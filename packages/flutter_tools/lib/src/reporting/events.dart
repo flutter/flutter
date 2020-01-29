@@ -171,7 +171,9 @@ class BuildEvent extends UsageEvent {
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
   CommandResultEvent(String commandPath, FlutterCommandResult result)
-      : super(commandPath, result?.toString() ?? 'unspecified');
+      : assert(commandPath != null),
+        assert(result != null),
+        super(commandPath, result.toString());
 
   @override
   void send() {
@@ -195,7 +197,7 @@ class CommandResultEvent extends UsageEvent {
       );
     } catch (error) {
       // If grabbing the maxRss fails for some reason, just don't send an event.
-      printTrace('Querying maxRss failed with error: $error');
+      globals.printTrace('Querying maxRss failed with error: $error');
     }
   }
 }

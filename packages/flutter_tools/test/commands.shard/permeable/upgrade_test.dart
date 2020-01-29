@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -38,7 +38,7 @@ void main() {
       processManager = MockProcessManager();
       when(processManager.start(
         <String>[
-          fs.path.join('bin', 'flutter'),
+          globals.fs.path.join('bin', 'flutter'),
           'upgrade',
           '--continue',
           '--no-version-check',
@@ -62,7 +62,7 @@ void main() {
         const GitTagVersion.unknown(),
         flutterVersion,
       );
-      expect(result, throwsA(isInstanceOf<ToolExit>()));
+      expect(result, throwsToolExit());
     }, overrides: <Type, Generator>{
       Platform: () => fakePlatform,
     });
@@ -74,7 +74,7 @@ void main() {
         const GitTagVersion.unknown(),
         flutterVersion,
       );
-      expect(await result, null);
+      expect(await result, FlutterCommandResult.success());
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -88,7 +88,7 @@ void main() {
         gitTagVersion,
         flutterVersion,
       );
-      expect(result, throwsA(isA<ToolExit>()));
+      expect(result, throwsToolExit());
     }, overrides: <Type, Generator>{
       Platform: () => fakePlatform,
     });
@@ -102,7 +102,7 @@ void main() {
         gitTagVersion,
         flutterVersion,
       );
-      expect(await result, null);
+      expect(await result, FlutterCommandResult.success());
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -115,7 +115,7 @@ void main() {
         gitTagVersion,
         flutterVersion,
       );
-      expect(await result, null);
+      expect(await result, FlutterCommandResult.success());
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -129,10 +129,10 @@ void main() {
         gitTagVersion,
         flutterVersion,
       );
-      expect(await result, null);
-      verifyNever(processManager.start(
+      expect(await result, FlutterCommandResult.success());
+      verifyNever(globals.processManager.start(
         <String>[
-          fs.path.join('bin', 'flutter'),
+          globals.fs.path.join('bin', 'flutter'),
           'upgrade',
           '--continue',
           '--no-version-check',
@@ -147,7 +147,7 @@ void main() {
     });
 
     testUsingContext('verifyUpstreamConfigured', () async {
-      when(processManager.run(
+      when(globals.processManager.run(
         <String>['git', 'rev-parse', '@{u}'],
         environment:anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory')),
@@ -164,9 +164,9 @@ void main() {
     testUsingContext('flutterUpgradeContinue passes env variables to child process', () async {
       await realCommandRunner.flutterUpgradeContinue();
 
-      final VerificationResult result = verify(processManager.start(
+      final VerificationResult result = verify(globals.processManager.start(
         <String>[
-          fs.path.join('bin', 'flutter'),
+          globals.fs.path.join('bin', 'flutter'),
           'upgrade',
           '--continue',
           '--no-version-check',
@@ -184,13 +184,13 @@ void main() {
 
     testUsingContext('precacheArtifacts passes env variables to child process', () async {
       final List<String> precacheCommand = <String>[
-        fs.path.join('bin', 'flutter'),
+        globals.fs.path.join('bin', 'flutter'),
         '--no-color',
         '--no-version-check',
         'precache',
       ];
 
-      when(processManager.start(
+      when(globals.processManager.start(
         precacheCommand,
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
@@ -200,7 +200,7 @@ void main() {
 
       await realCommandRunner.precacheArtifacts();
 
-      final VerificationResult result = verify(processManager.start(
+      final VerificationResult result = verify(globals.processManager.start(
         precacheCommand,
         environment: captureAnyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
@@ -230,7 +230,7 @@ void main() {
             stdout: 'v1.12.16-19-gb45b676af',
           ),
         ]);
-        tempDir = fs.systemTempDirectory.createTempSync('flutter_upgrade_test.');
+        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_upgrade_test.');
         flutterToolState = tempDir.childFile('.flutter_tool_state');
         mockFlutterVersion = MockFlutterVersion(isStable: true);
       });
@@ -288,7 +288,7 @@ void main() {
       Directory tempDir;
 
       setUp(() async {
-        tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_upgrade_test.');
+        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_upgrade_test.');
       });
 
       tearDown(() {
@@ -298,16 +298,16 @@ void main() {
       testUsingContext('in project', () async {
         final String projectPath = await createProject(tempDir);
         expect(findProjectRoot(projectPath), projectPath);
-        expect(findProjectRoot(fs.path.join(projectPath, 'lib')), projectPath);
+        expect(findProjectRoot(globals.fs.path.join(projectPath, 'lib')), projectPath);
 
-        final String hello = fs.path.join(Cache.flutterRoot, 'examples', 'hello_world');
+        final String hello = globals.fs.path.join(Cache.flutterRoot, 'examples', 'hello_world');
         expect(findProjectRoot(hello), hello);
-        expect(findProjectRoot(fs.path.join(hello, 'lib')), hello);
+        expect(findProjectRoot(globals.fs.path.join(hello, 'lib')), hello);
       });
 
       testUsingContext('outside project', () async {
         final String projectPath = await createProject(tempDir);
-        expect(findProjectRoot(fs.directory(projectPath).parent.path), null);
+        expect(findProjectRoot(globals.fs.directory(projectPath).parent.path), null);
         expect(findProjectRoot(Cache.flutterRoot), null);
       });
     });

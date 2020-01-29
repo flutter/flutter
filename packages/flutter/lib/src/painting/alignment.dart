@@ -126,7 +126,7 @@ abstract class AlignmentGeometry {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is AlignmentGeometry
         && other._x == _x
         && other._start == _start
@@ -669,6 +669,6 @@ class TextAlignVertical {
 
   @override
   String toString() {
-    return '$runtimeType(y: $y)';
+    return '${objectRuntimeType(this, 'TextAlignVertical')}(y: $y)';
   }
 }

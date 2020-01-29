@@ -123,7 +123,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       await channel.invokeMethod<void>('pipeFlutterViewEvents');
       await viewChannel.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
-      for (Map<String, dynamic> event in recordedEvents.reversed) {
+      for (final Map<String, dynamic> event in recordedEvents.reversed) {
         await channel.invokeMethod<void>('synthesizeEvent', event);
       }
 

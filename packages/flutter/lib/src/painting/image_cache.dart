@@ -7,9 +7,6 @@ import 'image_stream.dart';
 const int _kDefaultSize = 1000;
 const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 
-/// Function used by [ImageCache.largeImageHandler].
-typedef LargeImageHandler = void Function(ImageCache, int);
-
 /// Class for caching images.
 ///
 /// Implements a least-recently-used cache of up to 1000 images, and up to 100
@@ -31,6 +28,42 @@ typedef LargeImageHandler = void Function(ImageCache, int);
 ///
 /// A shared instance of this cache is retained by [PaintingBinding] and can be
 /// obtained via the [imageCache] top-level property in the [painting] library.
+///
+/// {@tool snippet}
+///
+/// This sample shows how to supply your own caching logic and replace the
+/// global [imageCache] variable.
+///
+/// ```dart
+/// /// This is the custom implementation of [ImageCache] where we can override
+/// /// the logic.
+/// class MyImageCache extends ImageCache {
+///   @override
+///   void clear() {
+///     print("Clearing cache!");
+///     super.clear();
+///   }
+/// }
+///
+/// class MyWidgetsBinding extends WidgetsFlutterBinding {
+///   @override
+///   ImageCache createImageCache() => MyImageCache();
+/// }
+///
+/// void main() {
+///   // The constructor sets global variables.
+///   MyWidgetsBinding();
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Container();
+///   }
+/// }
+/// ```
+/// {@end-tool}
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
@@ -93,28 +126,6 @@ class ImageCache {
   int get currentSizeBytes => _currentSizeBytes;
   int _currentSizeBytes = 0;
 
-  /// Callback that is executed when inserting an image whose byte size is
-  /// larger than the [maximumByteSize].  Editing the [maximumByteSize] in the
-  /// callback can accomodate for the image.  Set to `null` for the default
-  /// behavior, which is to increase the [maximumByteSize] to accomodate the
-  /// large image.
-  ///
-  /// {@tool sample}
-  ///
-  /// Here is an example implementation that increases the cache size in
-  /// response to a large image:
-  /// ```dart
-  /// void handler(ImageCache imageCache, int imageSize) {
-  ///   final int newSize = imageSize + 1000;
-  ///   imageCache.maximumSizeBytes = newSize;
-  ///   print("Increase image cache size: $newSize");
-  /// }
-  /// ```
-  set largeImageHandler(LargeImageHandler handler) {
-    _largeImageHandler = handler;
-  }
-  LargeImageHandler _largeImageHandler;
-
   /// Evicts all entries from the cache.
   ///
   /// This is useful if, for instance, the root asset bundle has been updated
@@ -129,12 +140,13 @@ class ImageCache {
   }
 
   /// Evicts a single entry from the cache, returning true if successful.
-  /// Pending images waiting for completion are removed as well, returning true if successful.
+  /// Pending images waiting for completion are removed as well, returning true
+  /// if successful.
   ///
-  /// When a pending image is removed the listener on it is removed as well to prevent
-  /// it from adding itself to the cache if it eventually completes.
+  /// When a pending image is removed the listener on it is removed as well to
+  /// prevent it from adding itself to the cache if it eventually completes.
   ///
-  /// The [key] must be equal to an object used to cache an image in
+  /// The `key` must be equal to an object used to cache an image in
   /// [ImageCache.putIfAbsent].
   ///
   /// If the key is not immediately available, as is common, consider using
@@ -195,24 +207,16 @@ class ImageCache {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
       final _CachedImage image = _CachedImage(result, imageSize);
-
-      if (_isImageTooLarge(imageSize)) {
-        final LargeImageHandler handler = _largeImageHandler ?? _bumpUpMaximumSizeLargeImageHandler;
-        handler(this, imageSize);
-        if (_isImageTooLarge(imageSize)) {
-          // Abort insertion of image, it doesn't fit.
-          return;
-        }
-      }
-
-      _currentSizeBytes += imageSize;
       final _PendingImage pendingImage = _pendingImages.remove(key);
       if (pendingImage != null) {
         pendingImage.removeListener();
       }
 
-      _cache[key] = image;
-      _checkCacheSize();
+      if (imageSize <= maximumSizeBytes) {
+        _currentSizeBytes += imageSize;
+        _cache[key] = image;
+        _checkCacheSize();
+      }
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
       final ImageStreamListener streamListener = ImageStreamListener(listener);
@@ -221,14 +225,6 @@ class ImageCache {
       result.addListener(streamListener);
     }
     return result;
-  }
-
-  bool _isImageTooLarge(int imageSize) {
-    return maximumSizeBytes > 0 && imageSize > maximumSizeBytes;
-  }
-
-  static void _bumpUpMaximumSizeLargeImageHandler(ImageCache imageCache, int imageSize) {
-    imageCache.maximumSizeBytes = imageSize + 1000;
   }
 
   // Remove images from the cache until both the length and bytes are below

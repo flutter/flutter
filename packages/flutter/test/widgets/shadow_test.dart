@@ -6,6 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  tearDown(() {
+    debugDisableShadows = true;
+  });
+
   testWidgets('Shadows on BoxDecoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
@@ -52,7 +56,7 @@ void main() {
         ),
       );
     }
-    for (int elevation in kElevationToShadow.keys) {
+    for (final int elevation in kElevationToShadow.keys) {
       await tester.pumpWidget(build(elevation));
       await expectLater(
         find.byType(Container),
@@ -116,7 +120,7 @@ void main() {
         ),
       );
     }
-    for (int elevation in kElevationToShadow.keys) {
+    for (final int elevation in kElevationToShadow.keys) {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),

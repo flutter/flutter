@@ -4,8 +4,7 @@
 
 import 'package:flutter_tools/src/features.dart';
 import 'package:mockito/mockito.dart';
-
-import 'package:flutter_tools/src/base/platform.dart';
+import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 
 import '../../src/common.dart';

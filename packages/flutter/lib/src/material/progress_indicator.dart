@@ -181,7 +181,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     }
 
     if (value != null) {
-      drawBar(0.0, value.clamp(0.0, 1.0) * size.width);
+      drawBar(0.0, value.clamp(0.0, 1.0) * size.width as double);
     } else {
       final double x1 = size.width * line1Tail.transform(animationValue);
       final double width1 = size.width * line1Head.transform(animationValue) - x1;
@@ -331,7 +331,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
          ? _startAngle
          : _startAngle + tailValue * 3 / 2 * math.pi + rotationValue * math.pi * 1.7 - stepValue * 0.8 * math.pi,
        arcSweep = value != null
-         ? value.clamp(0.0, 1.0) * _sweep
+         ? (value.clamp(0.0, 1.0) as double) * _sweep
          : math.max(headValue * 3 / 2 * math.pi - tailValue * 3 / 2 * math.pi, _epsilon);
 
   final Color backgroundColor;
@@ -646,7 +646,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
   @override
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
-    final double arrowheadScale = widget.value == null ? 0.0 : (widget.value * 2.0).clamp(0.0, 1.0);
+    final double arrowheadScale = widget.value == null ? 0.0 : ((widget.value * 2.0).clamp(0.0, 1.0) as double);
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(

@@ -83,7 +83,6 @@ void main() {
 
   testWidgets('PageView does not squish when overscrolled', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(platform: TargetPlatform.iOS),
       home: PageView(
         children: List<Widget>.generate(10, (int i) {
           return Container(
@@ -113,7 +112,7 @@ void main() {
 
     expect(leftOf(0), lessThan(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('PageController control test', (WidgetTester tester) async {
     final PageController controller = PageController(initialPage: 4);
@@ -663,7 +662,7 @@ void main() {
       await tester.pumpWidget(build());
 
       // The first 3 items should be visible and tappable.
-      for (int index in visiblePages) {
+      for (final int index in visiblePages) {
         expect(find.text(index.toString()), findsOneWidget);
         // The center of page 2's x-coordinate is 800, so we have to manually
         // offset it a bit to make sure the tap lands within the screen.
@@ -676,7 +675,7 @@ void main() {
       await tester.pump();
       // The last 3 items should be visible and tappable.
       visiblePages = const <int> [17, 18, 19];
-      for (int index in visiblePages) {
+      for (final int index in visiblePages) {
         expect(find.text('$index'), findsOneWidget);
         await tester.tap(find.text('$index'));
         expect(tappedIndex, index);

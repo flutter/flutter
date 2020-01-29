@@ -163,6 +163,25 @@ void main() {
       expect(child2.hasFocus, isTrue);
       expect(child2.hasPrimaryFocus, isTrue);
     });
+    testWidgets('Requesting focus before adding to tree results in a request after adding', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode();
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode child = FocusNode();
+      child.requestFocus();
+      expect(child.hasPrimaryFocus, isFalse); // not attached yet.
+
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      await tester.pump();
+      expect(scope.focusedChild, isNull);
+      expect(child.hasPrimaryFocus, isFalse); // not attached yet.
+
+      final FocusAttachment childAttachment = child.attach(context);
+      expect(child.hasPrimaryFocus, isFalse); // not parented yet.
+      childAttachment.reparent(parent: scope);
+      await tester.pump();
+      expect(child.hasPrimaryFocus, isTrue); // now attached and parented, so focus finally happened.
+    });
     testWidgets('Autofocus works.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');

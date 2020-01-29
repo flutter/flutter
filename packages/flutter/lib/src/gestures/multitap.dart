@@ -505,7 +505,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   @override
   void dispose() {
     final List<_TapGesture> localGestures = List<_TapGesture>.from(_gestureMap.values);
-    for (_TapGesture gesture in localGestures)
+    for (final _TapGesture gesture in localGestures)
       gesture.cancel();
     // Rejection of each gesture should cause it to be removed from our map
     assert(_gestureMap.isEmpty);

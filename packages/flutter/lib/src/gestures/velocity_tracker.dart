@@ -62,7 +62,7 @@ class Velocity {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is Velocity
         && other.pixelsPerSecond == pixelsPerSecond;
   }

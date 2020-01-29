@@ -404,7 +404,7 @@ class ClipCachePainter extends CustomPainter {
       final RenderObject renderObject = e.findRenderObject();
       if (renderObject.runtimeType == RenderPhysicalShape) {
         assert(result == null);
-        result = renderObject;
+        result = renderObject as RenderPhysicalShape;
       } else {
         result = findPhysicalShapeChild(e);
       }
@@ -419,7 +419,7 @@ class ClipCachePainter extends CustomPainter {
 }
 
 class ShapeListener extends StatefulWidget {
-  const ShapeListener(this.child);
+  const ShapeListener(this.child, { Key key }) : super(key: key);
 
   final Widget child;
 
@@ -466,4 +466,3 @@ class RectangularNotch extends NotchedShape {
       ..close();
   }
 }
-

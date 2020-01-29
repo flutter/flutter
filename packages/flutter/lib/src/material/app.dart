@@ -77,7 +77,7 @@ enum ThemeMode {
 /// If [home], [routes], [onGenerateRoute], and [onUnknownRoute] are all null,
 /// and [builder] is not null, then no [Navigator] is created.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example shows how to create a [MaterialApp] that disables the "debug"
 /// banner with a [home] route that will be displayed when the app is launched.
 ///
@@ -95,7 +95,7 @@ enum ThemeMode {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example shows how to create a [MaterialApp] that uses the [routes]
 /// `Map` to define the "home" route and an "about" route.
 ///
@@ -121,7 +121,7 @@ enum ThemeMode {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example shows how to create a [MaterialApp] that defines a [theme] that
 /// will be used for material widgets in the app.
 ///
@@ -169,6 +169,7 @@ class MaterialApp extends StatefulWidget {
     this.routes = const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
+    this.onGenerateInitialRoutes,
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.builder,
@@ -223,6 +224,9 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateRoute}
   final RouteFactory onGenerateRoute;
+
+  /// {@macro flutter.widgets.widgetsApp.onGenerateInitialRoutes}
+  final InitialRouteListFactory onGenerateInitialRoutes;
 
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
   final RouteFactory onUnknownRoute;
@@ -458,7 +462,7 @@ class MaterialApp extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   /// {@macro flutter.widgets.widgetsApp.shortcuts}
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single shortcut for
   /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
   /// add your own [Shortcuts] widget.
@@ -486,7 +490,7 @@ class MaterialApp extends StatefulWidget {
   final Map<LogicalKeySet, Intent> shortcuts;
 
   /// {@macro flutter.widgets.widgetsApp.actions}
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single action handling an
   /// [ActivateAction] to the default actions without needing to
   /// add your own [Actions] widget.
@@ -624,6 +628,7 @@ class _MaterialAppState extends State<MaterialApp> {
       routes: widget.routes,
       initialRoute: widget.initialRoute,
       onGenerateRoute: widget.onGenerateRoute,
+      onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       onUnknownRoute: widget.onUnknownRoute,
       builder: (BuildContext context, Widget child) {
         // Use a light theme, dark theme, or fallback theme.

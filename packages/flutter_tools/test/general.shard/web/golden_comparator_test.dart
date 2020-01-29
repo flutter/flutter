@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -175,7 +175,7 @@ void main() {
       expect(result, null);
 
       await comparator.close();
-      expect(fs.systemTempDirectory.listSync(recursive: true), isEmpty);
+      expect(globals.fs.systemTempDirectory.listSync(recursive: true), isEmpty);
     }));
   });
 }

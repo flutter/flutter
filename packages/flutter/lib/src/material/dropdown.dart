@@ -62,12 +62,12 @@ class _DropdownMenuPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double selectedItemOffset = getSelectedItemOffset();
     final Tween<double> top = Tween<double>(
-      begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight),
+      begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight) as double,
       end: 0.0,
     );
 
     final Tween<double> bottom = Tween<double>(
-      begin: (top.begin + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height),
+      begin: (top.begin + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height) as double,
       end: size.height,
     );
 
@@ -162,8 +162,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     if (widget.itemIndex == widget.route.selectedIndex) {
       opacity = CurvedAnimation(parent: widget.route.animation, curve: const Threshold(0.0));
     } else {
-      final double start = (0.5 + (widget.itemIndex + 1) * unit).clamp(0.0, 1.0);
-      final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      final double start = (0.5 + (widget.itemIndex + 1) * unit).clamp(0.0, 1.0) as double;
+      final double end = (start + 1.5 * unit).clamp(0.0, 1.0) as double;
       opacity = CurvedAnimation(parent: widget.route.animation, curve: Interval(start, end));
     }
     Widget child = FadeTransition(
@@ -341,10 +341,10 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     double left;
     switch (textDirection) {
       case TextDirection.rtl:
-        left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
+        left = (buttonRect.right.clamp(0.0, size.width) as double) - childSize.width;
         break;
       case TextDirection.ltr:
-        left = buttonRect.left.clamp(0.0, size.width - childSize.width);
+        left = buttonRect.left.clamp(0.0, size.width - childSize.width) as double;
         break;
     }
 
@@ -366,11 +366,9 @@ class _DropdownRouteResult<T> {
   final T result;
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! _DropdownRouteResult<T>)
-      return false;
-    final _DropdownRouteResult<T> typedOther = other;
-    return result == typedOther.result;
+  bool operator ==(Object other) {
+    return other is _DropdownRouteResult<T>
+        && other.result == result;
   }
 
   @override
@@ -709,7 +707,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center}
+/// {@tool sample --template=stateful_widget_scaffold_center}
 ///
 /// This sample shows a `DropdownButton` with a large arrow icon,
 /// purple text style, and bold purple underline, whose value is one of "One",
@@ -867,7 +865,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// from the list corresponds to the [DropdownMenuItem] of the same index
   /// in [items].
   ///
-  /// {@tool snippet --template=stateful_widget_scaffold}
+  /// {@tool sample --template=stateful_widget_scaffold}
   ///
   /// This sample shows a `DropdownButton` with a button with [Text] that
   /// corresponds to but is unique from [DropdownMenuItem].
@@ -918,7 +916,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// To use a separate text style for selected item when it's displayed within
   /// the dropdown button,, consider using [selectedItemBuilder].
   ///
-  /// {@tool snippet --template=stateful_widget_scaffold}
+  /// {@tool sample --template=stateful_widget_scaffold}
   ///
   /// This sample shows a `DropdownButton` with a dropdown button text style
   /// that is different than its menu items.
@@ -960,7 +958,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// Defaults to the [TextTheme.subhead] value of the current
+  /// Defaults to the [TextTheme.subtitle1] value of the current
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
 
@@ -1130,10 +1128,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
   }
 
-  TextStyle get _textStyle => widget.style ?? Theme.of(context).textTheme.subhead;
+  TextStyle get _textStyle => widget.style ?? Theme.of(context).textTheme.subtitle1;
 
   void _handleTap() {
-    final RenderBox itemBox = context.findRenderObject();
+    final RenderBox itemBox = context.findRenderObject() as RenderBox;
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     final TextDirection textDirection = Directionality.of(context);
     final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
@@ -1186,7 +1184,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double fontSize = _textStyle.fontSize ?? Theme.of(context).textTheme.subhead.fontSize;
+    final double fontSize = _textStyle.fontSize ?? Theme.of(context).textTheme.subtitle1.fontSize;
     return math.max(fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
@@ -1404,7 +1402,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     Color iconDisabledColor,
     Color iconEnabledColor,
     double iconSize = 24.0,
-    bool isDense = false,
+    bool isDense = true,
     bool isExpanded = false,
     double itemHeight,
   }) : assert(items == null || items.isEmpty || value == null ||
@@ -1476,7 +1474,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
 
 class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   @override
-  DropdownButtonFormField<T> get widget => super.widget;
+  DropdownButtonFormField<T> get widget => super.widget as DropdownButtonFormField<T>;
 
   @override
   void didChange(T value) {

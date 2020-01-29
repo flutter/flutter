@@ -354,7 +354,7 @@ class ArchiveCreator {
     // Create each of the templates, since they will call 'pub get' on
     // themselves when created, and this will warm the cache with their
     // dependencies too.
-    for (String template in <String>['app', 'package', 'plugin']) {
+    for (final String template in <String>['app', 'package', 'plugin']) {
       final String createName = path.join(tempDir.path, 'create_$template');
       await _runFlutter(
         <String>['create', '--template=$template', createName],
@@ -528,7 +528,7 @@ class ArchivePublisher {
     // Search for any entries with the same hash and channel and remove them.
     final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
     jsonData['releases'] = <Map<String, dynamic>>[
-      for (Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
+      for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
         if (entry['hash'] != newEntry['hash'] || entry['channel'] != newEntry['channel'])
           entry,
       newEntry,

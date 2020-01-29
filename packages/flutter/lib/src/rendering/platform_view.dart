@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -351,7 +350,7 @@ class RenderUiKitView extends RenderBox {
     if (event is! PointerDownEvent) {
       return;
     }
-    if (!(Offset.zero & size).contains(event.localPosition)) {
+    if (!(Offset.zero & size).contains(globalToLocal(event.position))) {
       return;
     }
     if ((event.original ?? event) != _lastPointerDownEvent) {
@@ -417,7 +416,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+    for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
   }
@@ -493,7 +492,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+    for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
   }
@@ -687,8 +686,7 @@ class _MotionEventsDispatcher {
     return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }
 
-  bool isSinglePointerAction(PointerEvent event) =>
-      !(event is PointerDownEvent) && !(event is PointerUpEvent);
+  bool isSinglePointerAction(PointerEvent event) => event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
 /// A render object for embedding a platform view.
@@ -839,13 +837,11 @@ mixin _PlatformViewGestureMixin on RenderBox {
       if (_handlePointerEvent != null)
         _handlePointerEvent(event);
     });
-    RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
   }
 
   @override
   void detach() {
     _gestureRecognizer.reset();
-    RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     _hoverAnnotation = null;
     super.detach();
   }

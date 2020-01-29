@@ -60,7 +60,7 @@ void main() {
       child: repaintBoundary,
     );
     layout(opacity, phase: EnginePhase.flushSemantics);
-    expect(repaintBoundary.debugLayer, isInstanceOf<OffsetLayer>());
+    expect(repaintBoundary.debugLayer, isA<OffsetLayer>());
   });
 
   test('Framework does not create an OffsetLayer for a non-repaint boundary', () {
@@ -80,7 +80,7 @@ void main() {
       child: compositedBox,
     );
     layout(opacity, phase: EnginePhase.flushSemantics);
-    expect(compositedBox.debugLayer, isInstanceOf<OpacityLayer>());
+    expect(compositedBox.debugLayer, isA<OpacityLayer>());
   });
 
   test('Framework ensures repaint boundary layer is not overwritten', () {

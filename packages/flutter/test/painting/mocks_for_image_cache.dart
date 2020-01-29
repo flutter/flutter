@@ -122,7 +122,7 @@ class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
 class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterImageProvider> {
   @override
   ImageStreamCompleter load(LoadErrorCompleterImageProvider key, DecoderCallback decode) {
-    final Completer<void> completer = Completer<void>.sync();
+    final Completer<ImageInfo> completer = Completer<ImageInfo>.sync();
     completer.completeError(Error());
     return OneFrameImageStreamCompleter(completer.future);
   }
