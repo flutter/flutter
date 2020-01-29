@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 
 #include "flutter/fml/make_copyable.h"
+#include "flutter/fml/paths.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
@@ -13,40 +14,12 @@
 namespace flutter {
 namespace testing {
 
+static constexpr const char* kAppAOTELFFileName = "app_elf_snapshot.so";
+
 EmbedderTestContext::EmbedderTestContext(std::string assets_path)
     : assets_path_(std::move(assets_path)),
       native_resolver_(std::make_shared<TestDartNativeResolver>()) {
-  auto assets_dir = fml::OpenDirectory(assets_path_.c_str(), false,
-                                       fml::FilePermission::kRead);
-
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
-    std::string filename(assets_path_);
-    filename += "/app_elf_snapshot.so";
-
-    const uint8_t *vm_snapshot_data = nullptr,
-                  *vm_snapshot_instructions = nullptr,
-                  *isolate_snapshot_data = nullptr,
-                  *isolate_snapshot_instructions = nullptr;
-    const char* error = nullptr;
-
-    elf_library_handle_ =
-        Dart_LoadELF(filename.c_str(), /*file_offset=*/0, &error,
-                     &vm_snapshot_data, &vm_snapshot_instructions,
-                     &isolate_snapshot_data, &isolate_snapshot_instructions);
-
-    if (elf_library_handle_ != nullptr) {
-      vm_snapshot_data_.reset(new fml::NonOwnedMapping(vm_snapshot_data, 0));
-      vm_snapshot_instructions_.reset(
-          new fml::NonOwnedMapping(vm_snapshot_instructions, 0));
-      isolate_snapshot_data_.reset(
-          new fml::NonOwnedMapping(isolate_snapshot_data, 0));
-      isolate_snapshot_instructions_.reset(
-          new fml::NonOwnedMapping(isolate_snapshot_instructions, 0));
-    } else {
-      FML_LOG(WARNING) << "Could not load snapshot: " << error;
-    }
-  }
-
+  SetupAOTMappingsIfNecessary();
   isolate_create_callbacks_.push_back(
       [weak_resolver =
            std::weak_ptr<TestDartNativeResolver>{native_resolver_}]() {
@@ -57,9 +30,62 @@ EmbedderTestContext::EmbedderTestContext(std::string assets_path)
 }
 
 EmbedderTestContext::~EmbedderTestContext() {
+  vm_snapshot_data_.reset();
+  vm_snapshot_instructions_.reset();
+  isolate_snapshot_data_.reset();
+  isolate_snapshot_instructions_.reset();
   if (elf_library_handle_ != nullptr) {
     Dart_UnloadELF(elf_library_handle_);
   }
+}
+
+void EmbedderTestContext::SetupAOTMappingsIfNecessary() {
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    // Not in AOT mode. Nothing to do.
+    return;
+  }
+
+  auto elf_path = fml::paths::JoinPaths({assets_path_, kAppAOTELFFileName});
+
+  if (!fml::IsFile(elf_path.c_str())) {
+    FML_LOG(ERROR) << "Could not find the applications AOT ELF file in an "
+                      "AOT environment. Engine launches attempted with this "
+                      "context will fail. File not found: "
+                   << elf_path;
+    return;
+  }
+
+  const uint8_t* vm_snapshot_data = nullptr;
+  const uint8_t* vm_snapshot_instructions = nullptr;
+  const uint8_t* isolate_snapshot_data = nullptr;
+  const uint8_t* isolate_snapshot_instructions = nullptr;
+
+  const char* error = nullptr;
+
+  elf_library_handle_ =
+      Dart_LoadELF(elf_path.c_str(),               // filename
+                   0u,                             // file offset
+                   &error,                         // error (must not be freed)
+                   &vm_snapshot_data,              // VM snapshot data
+                   &vm_snapshot_instructions,      // VM snapshot instructions
+                   &isolate_snapshot_data,         // VM isolate data
+                   &isolate_snapshot_instructions  // VM isolate instructions
+      );
+
+  if (elf_library_handle_ == nullptr) {
+    FML_LOG(ERROR) << "Could not load snapshot in an AOT environment. Engine "
+                      "launches attempted with this context will fail. Error: "
+                   << error;
+    return;
+  }
+
+  vm_snapshot_data_.reset(new fml::NonOwnedMapping(vm_snapshot_data, 0));
+  vm_snapshot_instructions_.reset(
+      new fml::NonOwnedMapping(vm_snapshot_instructions, 0));
+  isolate_snapshot_data_.reset(
+      new fml::NonOwnedMapping(isolate_snapshot_data, 0));
+  isolate_snapshot_instructions_.reset(
+      new fml::NonOwnedMapping(isolate_snapshot_instructions, 0));
 }
 
 const std::string& EmbedderTestContext::GetAssetsPath() const {

@@ -81,7 +81,6 @@ class EmbedderTestContext {
   std::unique_ptr<fml::Mapping> vm_snapshot_instructions_;
   std::unique_ptr<fml::Mapping> isolate_snapshot_data_;
   std::unique_ptr<fml::Mapping> isolate_snapshot_instructions_;
-
   std::vector<fml::closure> isolate_create_callbacks_;
   std::shared_ptr<TestDartNativeResolver> native_resolver_;
   SemanticsNodeCallback update_semantics_node_callback_;
@@ -101,6 +100,8 @@ class EmbedderTestContext {
 
   static FlutterUpdateSemanticsCustomActionCallback
   GetUpdateSemanticsCustomActionCallbackHook();
+
+  void SetupAOTMappingsIfNecessary();
 
   void SetupCompositor();
 
