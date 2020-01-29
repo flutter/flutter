@@ -1,4 +1,4 @@
-Signature: f3a249baaa5edd8c55bea9e6a36c8836
+Signature: 1ec037488511721f0589c3b1da312165
 
 UNUSED LICENSES:
 
@@ -3362,7 +3362,6 @@ FILE: ../../../third_party/skia/include/utils/SkTextUtils.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
 FILE: ../../../third_party/skia/modules/skottie/gm/3dgm.cpp
 FILE: ../../../third_party/skia/modules/skottie/include/SkottieProperty.h
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottiePriv.h
