@@ -180,6 +180,11 @@ void main() {
       expect(find.text('SELECT ALL'), findsOneWidget);
       expect(find.byType(IconButton), findsOneWidget);
 
+      // The back button is at the bottom of the overflow menu.
+      final Offset selectAllOffset = tester.getTopLeft(find.text('SELECT ALL'));
+      final Offset moreOffset = tester.getTopLeft(find.byType(IconButton));
+      expect(moreOffset.dy, greaterThan(selectAllOffset.dy));
+
       // Tapping the back button shows the selection menu again.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
@@ -253,5 +258,75 @@ void main() {
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     });
+
+    testWidgets('When the menu renders below the text, the overflow menu back button is at the top.', (WidgetTester tester) async {
+      // Set the screen size to more narrow, so that SELECT ALL can't fit.
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                child: TextField(
+                  controller: controller,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      // Initially, the menu isn't shown at all.
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+
+      // Long press to show the menu.
+      final Offset textOffset = textOffsetToPosition(tester, 1);
+      await tester.longPressAt(textOffset);
+      // Selection menu renders one frame offstage, so pump twice.
+      await tester.pump();
+      await tester.pump();
+
+      // The last button is missing, and a more button is shown.
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget);
+
+      // Tapping the button shows the overflow menu.
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget);
+
+      // The back button is at the top of the overflow menu.
+      final Offset selectAllOffset = tester.getTopLeft(find.text('SELECT ALL'));
+      final Offset moreOffset = tester.getTopLeft(find.byType(IconButton));
+      expect(moreOffset.dy, lessThan(selectAllOffset.dy));
+
+      // Tapping the back button shows the selection menu again.
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget);
+      // TODO(justinmc): Unskip when you fix rendering below the text.
+    }, skip: true);
   });
 }
