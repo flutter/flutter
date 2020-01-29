@@ -1,4 +1,4 @@
-Signature: 3ac440c0fc3f2afb7d087b75db619099
+Signature: 206a684bcf5ebd3a4b62589e089ddc55
 
 UNUSED LICENSES:
 
@@ -5606,6 +5606,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/3d.cpp
 FILE: ../../../third_party/skia/gm/bicubic.cpp
 FILE: ../../../third_party/skia/gm/compressed_textures.cpp
+FILE: ../../../third_party/skia/gm/skbug_9819.cpp
 FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
 FILE: ../../../third_party/skia/include/private/SkM44.h
 FILE: ../../../third_party/skia/modules/skottie/src/Adapter.h
