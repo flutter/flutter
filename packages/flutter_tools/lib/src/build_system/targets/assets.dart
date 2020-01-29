@@ -118,7 +118,6 @@ Future<Map<String, FontSubsetData>> _getIconData(Environment environment, DevFSS
       codePoints: iconData[entry.key],
     );
   }
-  globals.printTrace('Found iconData: $result');
   return result;
 }
 
@@ -137,10 +136,9 @@ Future<void> _subsetFont({
     outputPath,
     inputPath,
   ];
-  globals.printTrace('Starting font-subset: ${cmd.join(' ')}...');
-  final Process fontSubsetProcess = await globals.processManager.start(cmd);
   final String codePoints = fontSubsetData.codePoints.join(' ');
-  globals.printTrace('Started, writing $codePoints...');
+  globals.printTrace('Running font-subset: ${cmd.join(' ')}, using codepoints $codePoints');
+  final Process fontSubsetProcess = await globals.processManager.start(cmd);
   fontSubsetProcess.stdin.writeln(codePoints);
   await fontSubsetProcess.stdin.flush();
   await fontSubsetProcess.stdin.close();
@@ -151,7 +149,6 @@ Future<void> _subsetFont({
     globals.printError(await utf8.decodeStream(fontSubsetProcess.stderr));
     throwToolExit('Font subsetting failed with exit code $code.');
   }
-  globals.printTrace('Finished font-subset.');
 }
 
 List<Map<String, dynamic>> _getList(dynamic object) {
