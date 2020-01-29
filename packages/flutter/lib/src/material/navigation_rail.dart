@@ -282,20 +282,17 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 class _RailItem extends StatelessWidget {
   _RailItem({
     this.animation,
-    this.labelKind,
+    this.labelKind = NavigationRailLabelType.all,
     this.selected,
     this.icon,
     this.title,
     this.onTap,
-  }) : assert(labelKind != null) {
-    _positionAnimation = CurvedAnimation(
-      parent: ReverseAnimation(animation),
-      curve: Curves.easeInOut,
-      reverseCurve: Curves.easeInOut.flipped,
-    );
-  }
-
-  Animation<double> _positionAnimation;
+  }) : assert(labelKind != null),
+       _positionAnimation = CurvedAnimation(
+          parent: ReverseAnimation(animation),
+          curve: Curves.easeInOut,
+          reverseCurve: Curves.easeInOut.flipped,
+       );
 
   final Animation<double> animation;
   final NavigationRailLabelType labelKind;
@@ -303,6 +300,8 @@ class _RailItem extends StatelessWidget {
   final Widget icon;
   final Widget title;
   final VoidCallback onTap;
+
+  final Animation<double> _positionAnimation;
 
   double _fadeInValue() {
     if (animation.value < 0.25) {
