@@ -2414,10 +2414,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     _fabStatuses.forEach(
       (Key key, _FABStatus status) {
+        final Widget newButton = key == _primaryFABKey
+            ? widget.floatingActionButton
+            : widget.additionalFloatingActionButtonConfigurations[key].button;
+
         _addIfNonNull(
           children,
           _FloatingActionButtonTransition(
-            child: status.button,
+            child: newButton,
             fabMoveAnimation: _floatingActionButtonMoveController,
             fabMotionAnimator: status.animator,
             geometryNotifier: _geometryNotifier,
