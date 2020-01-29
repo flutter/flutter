@@ -302,8 +302,6 @@ class NestedScrollView extends StatefulWidget {
 /// If you want to access the inner or outer scroll controller of a
 /// [NestedScrollView], you can get its [NestedScrollViewState] by supplying a
 /// `GlobalKey<NestedScrollViewState>` to the [NestedScrollView.key] parameter).
-/// The outer scroll position can also be obtained directly using
-/// [NestedScrollView.controller].
 ///
 /// {@tool sample --template=stateless_widget_material}
 /// [NestedScrollViewState] can be obtained using a [GlobalKey].
@@ -650,10 +648,12 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   void goBallistic(double velocity) {
     beginActivity(
       createOuterBallisticScrollActivity(velocity),
-      (_NestedScrollPosition position) => createInnerBallisticScrollActivity(
-        position,
-        velocity,
-      ),
+      (_NestedScrollPosition position) {
+        return createInnerBallisticScrollActivity(
+          position,
+          velocity,
+        );
+      },
     );
   }
 
