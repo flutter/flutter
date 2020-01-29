@@ -329,7 +329,7 @@ end
       status.stop();
     }
 
-    _produceXCFramework(mode, fatFlutterFrameworkCopy);
+    await _produceXCFramework(mode, fatFlutterFrameworkCopy);
   }
 
   Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
@@ -367,7 +367,7 @@ end
     } finally {
       status.stop();
     }
-    _produceXCFramework(mode, destinationAppFrameworkDirectory);
+    await _produceXCFramework(mode, destinationAppFrameworkDirectory);
   }
 
   Future<void> _produceStubAppFrameworkIfNeeded(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory destinationAppFrameworkDirectory) async {
@@ -594,7 +594,7 @@ end
     }
   }
 
-  void _produceXCFramework(BuildMode mode, Directory fatFramework) {
+  Future<void> _produceXCFramework(BuildMode mode, Directory fatFramework) async {
     if (boolArg('xcframework')) {
       final String frameworkBinaryName = globals.fs.path.basenameWithoutExtension(
           fatFramework.basename);
@@ -605,9 +605,9 @@ end
       );
       try {
         if (mode == BuildMode.debug) {
-          _produceDebugXCFramework(fatFramework, frameworkBinaryName);
+          await _produceDebugXCFramework(fatFramework, frameworkBinaryName);
         } else {
-          _produceNonDebugXCFramework(mode, fatFramework, frameworkBinaryName);
+          await _produceNonDebugXCFramework(mode, fatFramework, frameworkBinaryName);
         }
       } finally {
         status.stop();
