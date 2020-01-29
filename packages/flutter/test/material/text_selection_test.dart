@@ -62,4 +62,25 @@ void main() {
       expect(materialTextSelectionControls.canSelectAll(key.currentState), false);
     });
   });
+
+  group('Overflow', () {
+    // TODO(justinmc): Platform should only be Android.
+    testWidgets('Overflowing menu items are shown in a submenu', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
+          controller: TextEditingController(),
+          focusNode: FocusNode(),
+          style: const TextStyle(),
+          cursorColor: Colors.black,
+          backgroundCursorColor: Colors.black,
+        ),
+      ));
+
+
+      // TODO(justinmc): How do I set the locale to Russian? Or another way to
+      // make it overflow?
+
+      expect(true, true);
+    });
+  });
 }
