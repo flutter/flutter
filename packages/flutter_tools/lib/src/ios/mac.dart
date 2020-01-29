@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -25,8 +24,6 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
-
-IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 
 /// Specialized exception for expected situations where the ideviceinfo
 /// tool responds with exit code 255 / 'No device found' message
@@ -473,7 +470,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus = null;
   globals.printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
-        + getElapsedAsSeconds(sw.elapsed).padLeft(5),
+        + '${getElapsedAsSeconds(sw.elapsed).padLeft(5)}',
   );
   flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
@@ -717,7 +714,7 @@ bool _checkXcodeVersion() {
     globals.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
-  if (!xcode.isVersionSatisfactory) {
+  if (!globals.xcode.isVersionSatisfactory) {
     globals.printError('Found "${xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
     return false;
   }

@@ -9,7 +9,6 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -18,8 +17,6 @@ import '../ios/xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 10;
 const int kXcodeRequiredVersionMinor = 2;
-
-Xcode get xcode => context.get<Xcode>();
 
 enum SdkType {
   iPhone,

@@ -1145,10 +1145,8 @@ void main() {
     );
   });
 
-  testWidgets('Handles infinite constraints when TargetPlatform is iOS', (WidgetTester tester) async {
+  testWidgets('Handles infinite constraints when TargetPlatform is iOS or macOS', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/45866
-    final TargetPlatform oldTargetPlatform = debugDefaultTargetPlatformOverride;
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1177,6 +1175,5 @@ void main() {
     expect(find.text('b'), findsOneWidget);
     await tester.drag(find.text('b'), const Offset(0, 200));
     await tester.pumpAndSettle();
-    debugDefaultTargetPlatformOverride = oldTargetPlatform;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 }

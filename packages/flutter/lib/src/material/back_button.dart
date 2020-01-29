@@ -128,13 +128,20 @@ class BackButton extends StatelessWidget {
 ///  * [IconButton], to create other material design icon buttons.
 class CloseButton extends StatelessWidget {
   /// Creates a Material Design close button.
-  const CloseButton({ Key key }) : super(key: key);
+  const CloseButton({ Key key, this.color }) : super(key: key);
+
+  /// The color to use for the icon.
+  ///
+  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
+  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
       icon: const Icon(Icons.close),
+      color: color,
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {
         Navigator.maybePop(context);

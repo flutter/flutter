@@ -323,19 +323,34 @@ class AndroidLicenseValidator extends DoctorValidator {
 
       // The real stdin will never finish streaming. Pipe until the child process
       // finishes.
-      unawaited(process.stdin.addStream(stdin));
+      unawaited(process.stdin.addStream(globals.stdio.stdin)
+        // If the process exits unexpectedly with an error, that will be
+        // handled by the caller.
+        .catchError((dynamic err, StackTrace stack) {
+          globals.printTrace('Echoing stdin to the licenses subprocess failed:');
+          globals.printTrace('$err\n$stack');
+        }
+      ));
+
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
-      await waitGroup<void>(<Future<void>>[
-        stdout.addStream(process.stdout),
-        stderr.addStream(process.stderr),
-      ]);
+      try {
+        await waitGroup<void>(<Future<void>>[
+          globals.stdio.addStdoutStream(process.stdout),
+          globals.stdio.addStderrStream(process.stderr),
+        ]);
+      } catch (err, stack) {
+        globals.printTrace('Echoing stdout or stderr from the license subprocess failed:');
+        globals.printTrace('$err\n$stack');
+      }
 
       final int exitCode = await process.exitCode;
       return exitCode == 0;
     } on ProcessException catch (e) {
       throwToolExit(userMessages.androidCannotRunSdkManager(
-          androidSdk.sdkManagerPath, e.toString()));
+        androidSdk.sdkManagerPath,
+        e.toString(),
+      ));
       return false;
     }
   }

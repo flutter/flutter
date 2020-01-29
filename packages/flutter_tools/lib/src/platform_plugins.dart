@@ -85,33 +85,47 @@ class AndroidPlugin extends PluginPlatform {
       'src',
       'main',
     );
-    File mainPluginClass = globals.fs.file(
+
+    final List<String> mainClassCandidates = <String>[
       globals.fs.path.join(
         baseMainPath,
         'java',
         package.replaceAll('.', globals.fs.path.separator),
         '$pluginClass.java',
+      ),
+      globals.fs.path.join(
+        baseMainPath,
+        'kotlin',
+        package.replaceAll('.', globals.fs.path.separator),
+        '$pluginClass.kt',
       )
-    );
-    // Check if the plugin is implemented in Kotlin since the plugin's pubspec.yaml
-    // doesn't include this information.
-    if (!mainPluginClass.existsSync()) {
-      mainPluginClass = globals.fs.file(
-        globals.fs.path.join(
-          baseMainPath,
-          'kotlin',
-          package.replaceAll('.', globals.fs.path.separator),
-          '$pluginClass.kt',
-        )
+    ];
+
+    File mainPluginClass;
+    bool mainClassFound = false;
+    for (final String mainClassCandidate in mainClassCandidates) {
+      mainPluginClass = globals.fs.file(mainClassCandidate);
+      if (mainPluginClass.existsSync()) {
+        mainClassFound = true;
+        break;
+      }
+    }
+    if (!mainClassFound) {
+      assert(mainClassCandidates.length <= 2);
+      throwToolExit(
+        'The plugin `$name` doesn\'t have a main class defined in ${mainClassCandidates.join(' or ')}. '
+        'This is likely to due to an incorrect `androidPackage: $package` or `mainClass` entry in the plugin\'s pubspec.yaml.\n'
+        'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
+        'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile. '
       );
     }
-    assert(mainPluginClass.existsSync());
+
     String mainClassContent;
     try {
       mainClassContent = mainPluginClass.readAsStringSync();
     } on FileSystemException {
       throwToolExit(
-        'Couldn\'t read file $mainPluginClass even though it exists. '
+        'Couldn\'t read file ${mainPluginClass.path} even though it exists. '
         'Please verify that this file has read permission and try again.'
       );
     }

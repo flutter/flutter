@@ -91,7 +91,7 @@ abstract class KeyboardKey extends Diagnosticable {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
@@ -2000,7 +2000,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,

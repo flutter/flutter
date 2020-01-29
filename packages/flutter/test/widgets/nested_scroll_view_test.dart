@@ -119,7 +119,6 @@ Widget buildTest({
 
 void main() {
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
@@ -136,15 +135,10 @@ void main() {
     expect(point2.dy, greaterThan(point1.dy));
     // TODO(ianh): Once we improve how we handle scrolling down from overscroll,
     // the following expectation should switch to 200.0.
-    expect(
-      tester.renderObject<RenderBox>(find.byType(AppBar)).size.height,
-      120.0,
-    );
-    debugDefaultTargetPlatformOverride = null;
-  });
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 120.0);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
@@ -162,11 +156,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text('aaa2'), findsNothing);
     await tester.pump(const Duration(milliseconds: 1000));
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('NestedScrollView overscroll and release', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 500));
@@ -180,8 +172,9 @@ void main() {
     await gesture1.up();
     await tester.pumpAndSettle();
     expect(find.text('aaa2'), findsOneWidget);
-    debugDefaultTargetPlatformOverride = null;
-  }, skip: true); // https://github.com/flutter/flutter/issues/9040
+  },
+  skip: true,  // https://github.com/flutter/flutter/issues/9040
+  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('NestedScrollView', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
@@ -709,12 +702,11 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('NestedScrollView and iOS bouncing', (WidgetTester tester) async {
+  testWidgets('NestedScrollView and bouncing', (WidgetTester tester) async {
     // This verifies that overscroll bouncing works correctly on iOS. For
     // example, this checks that if you pull to overscroll, friction is applied;
     // it also makes sure that if you scroll back the other way, the scroll
     // positions of the inner and outer list don't have a discontinuity.
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     const Key key1 = ValueKey<int>(1);
     const Key key2 = ValueKey<int>(2);
     await tester.pumpWidget(
@@ -806,7 +798,7 @@ void main() {
     );
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   group('NestedScrollViewState exposes inner and outer controllers', () {
     testWidgets('Scrolling by less than the outer extent does not scroll the inner body', (WidgetTester tester) async {

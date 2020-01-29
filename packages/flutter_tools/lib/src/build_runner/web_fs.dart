@@ -340,10 +340,7 @@ class WebFs {
       client,
       server,
       dwds,
-      // Format ipv6 hosts according to RFC 5952.
-      internetAddress.type == InternetAddressType.IPv4
-        ? 'http://${internetAddress.address}:$hostPort'
-        : 'http://[${internetAddress.address}]:$hostPort',
+      'http://$effectiveHostname:$hostPort',
       assetServer,
       buildInfo.isDebug,
       flutterProject,
@@ -455,7 +452,7 @@ class DebugAssetServer extends AssetServer {
           flutterProject.dartTool.path,
           'build',
           'flutter_web',
-          flutterProject.manifest.appName,
+          '${flutterProject.manifest.appName}',
           'lib',
           '${targetBaseName}_web_entrypoint.dart.js.tar.gz',
         ));
