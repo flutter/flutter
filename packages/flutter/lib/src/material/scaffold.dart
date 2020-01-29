@@ -2089,11 +2089,23 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void didUpdateWidget(Scaffold oldWidget) {
     // Update the Floating Action Button Animator, and then schedule the Floating Action Button for repositioning.
     // TODO: Generalize. Update not only for FABs but for additionalFABs as well.
+    // TODO: Implement rigorously!
     if (widget.floatingActionButtonAnimator != oldWidget.floatingActionButtonAnimator) {
       _fabStatuses[_primaryFABKey].animator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
     }
     if (widget.floatingActionButtonLocation != oldWidget.floatingActionButtonLocation) {
       _moveFloatingActionButton(_primaryFABKey, widget.floatingActionButtonLocation ?? _kDefaultFloatingActionButtonLocation);
+    }
+    final Set<Key> possiblyChangedFABKeys = Set<Key>.of(oldWidget.additionalFloatingActionButtonConfigurations.keys).union(
+      Set<Key>.of(widget.additionalFloatingActionButtonConfigurations.keys)
+    );
+    for (final Key key in possiblyChangedFABKeys) {
+      if (widget.additionalFloatingActionButtonConfigurations[key].animator != _fabStatuses[key].animator)
+        _fabStatuses[key].animator = widget.additionalFloatingActionButtonConfigurations[key].animator
+            ?? _kDefaultFloatingActionButtonAnimator;
+      if (widget.additionalFloatingActionButtonConfigurations[key].location != _fabStatuses[key].location)
+        _moveFloatingActionButton(key, widget.additionalFloatingActionButtonConfigurations[key].location
+            ?? _kDefaultFloatingActionButtonLocation);
     }
     if (widget.bottomSheet != oldWidget.bottomSheet) {
       assert(() {
