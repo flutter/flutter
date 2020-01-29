@@ -1288,7 +1288,7 @@ class FocusTraversalOrder extends InheritedWidget {
   static FocusOrder of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
     assert(nullOk != null);
-    final FocusTraversalOrder marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>().widget as FocusTraversalOrder;
+    final FocusTraversalOrder marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>()?.widget as FocusTraversalOrder;
     final FocusOrder order = marker?.order;
     if (order == null) {
       if (!nullOk) {
@@ -1481,7 +1481,7 @@ class DefaultFocusTraversal extends InheritedWidget {
   ///
   /// The [context] argument must not be null.
   static FocusTraversalPolicy of(BuildContext context, {bool nullOk = false}) {
-    final DefaultFocusTraversal inherited = context.getElementForInheritedWidgetOfExactType<DefaultFocusTraversal>().widget as DefaultFocusTraversal;
+    final DefaultFocusTraversal inherited = context.getElementForInheritedWidgetOfExactType<DefaultFocusTraversal>()?.widget as DefaultFocusTraversal;
     assert(() {
       if (nullOk) {
         return true;
