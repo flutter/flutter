@@ -13,7 +13,11 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../build_info.dart';
+import '../convert.dart';
+import '../ios/devices.dart';
 import '../ios/xcodeproj.dart';
+import '../reporting/reporting.dart';
 
 const int kXcodeRequiredVersionMajor = 10;
 const int kXcodeRequiredVersionMinor = 2;
@@ -183,5 +187,282 @@ class Xcode {
       (String p) => _fileSystem.directory(p).existsSync(),
       orElse: () => null,
     );
+  }
+}
+
+/// A utility class for interacting with Xcode xcdevice command line tools.
+class XCDevice {
+  XCDevice({
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required Xcode xcode,
+  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+       _logger = logger,
+       _xcode = xcode;
+
+  final ProcessUtils _processUtils;
+  final Logger _logger;
+  final Xcode _xcode;
+
+  bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
+
+  String _xcdevicePath;
+  String get xcdevicePath {
+    if (_xcdevicePath == null) {
+      try {
+        _xcdevicePath = _processUtils.runSync(
+          <String>[
+            'xcrun',
+            '--find',
+            'xcdevice'
+          ],
+        ).stdout.trim();
+      } on ProcessException {
+        // Ignored, return null below.
+      } on ArgumentError {
+        // Ignored, return null below.
+      }
+    }
+    return _xcdevicePath;
+  }
+
+  Future<List<dynamic>> _getAllDevices() async {
+    if (!isInstalled) {
+      return null;
+    }
+    try {
+      // USB-tethered devices should be found quickly. 1 second timeout is faster than the default.
+      final RunResult result = await _processUtils.run(
+        <String>[
+          xcdevicePath,
+          'list',
+          '--timeout',
+          '1',
+        ],
+      );
+      if (result.exitCode == 0) {
+        return json.decode(result.stdout) as List<dynamic>;
+      }
+      _logger.printTrace('xcdevice returned an error:\n${result.stderr}');
+    } on ProcessException {
+      _logger.printTrace('Failed to invoke xcdevice');
+    }
+
+    return null;
+  }
+
+  /// List of devices available over USB.
+  Future<List<IOSDevice>> getAvailableTetheredIOSDevices() async {
+    final List<dynamic> allAvailableDevices = await _getAllDevices();
+
+    if (allAvailableDevices == null) {
+      return const <IOSDevice>[];
+    }
+
+    // [
+    //  {
+    //    "simulator" : true,
+    //    "operatingSystemVersion" : "13.3 (17K446)",
+    //    "available" : true,
+    //    "platform" : "com.apple.platform.appletvsimulator",
+    //    "modelCode" : "AppleTV5,3",
+    //    "identifier" : "CBB5E1ED-2172-446E-B4E7-F2B5823DBBA6",
+    //    "architecture" : "x86_64",
+    //    "modelName" : "Apple TV",
+    //    "name" : "Apple TV"
+    //  },
+    //  {
+    //    "simulator" : false,
+    //    "operatingSystemVersion" : "13.3 (17C54)",
+    //    "interface" : "usb",
+    //    "available" : true,
+    //    "platform" : "com.apple.platform.iphoneos",
+    //    "modelCode" : "iPhone8,1",
+    //    "identifier" : "d83d5bc53967baa0ee18626ba87b6254b2ab5418",
+    //    "architecture" : "arm64",
+    //    "modelName" : "iPhone 6s",
+    //    "name" : "iPhone"
+    //  },
+    //  {
+    //    "simulator" : true,
+    //    "operatingSystemVersion" : "6.1.1 (17S445)",
+    //    "available" : true,
+    //    "platform" : "com.apple.platform.watchsimulator",
+    //    "modelCode" : "Watch5,4",
+    //    "identifier" : "2D74FB11-88A0-44D0-B81E-C0C142B1C94A",
+    //    "architecture" : "i386",
+    //    "modelName" : "Apple Watch Series 5 - 44mm",
+    //    "name" : "Apple Watch Series 5 - 44mm"
+    //  },
+    // ...
+
+    final List<IOSDevice> devices = <IOSDevice>[];
+    for (final dynamic device in allAvailableDevices) {
+      if (device is! Map) {
+        continue;
+      }
+      final Map<String, dynamic> deviceProperties = device as Map<String, dynamic>;
+
+      if (deviceProperties.containsKey('platform')) {
+        final String platform = deviceProperties['platform'] as String;
+
+        // Despite the name, com.apple.platform.iphoneos includes iPads and all iOS devices.
+        // Excludes simulators.
+        if (platform != 'com.apple.platform.iphoneos') {
+          continue;
+        }
+      }
+
+      final String errorMessage = _parseErrorMessage(deviceProperties);
+      if (errorMessage != null) {
+        if (errorMessage.contains('not paired')) {
+          UsageEvent('device', 'ios-trust-failure').send();
+        }
+        _logger.printTrace(errorMessage);
+
+        continue;
+      }
+
+      // In case unavailable without an error (may not be possible...)
+      if (deviceProperties.containsKey('available') && !(deviceProperties['available'] as bool)) {
+        continue;
+      }
+
+      // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
+      if (deviceProperties.containsKey('interface') && (deviceProperties['interface'] as String) != 'usb') {
+        continue;
+      }
+
+      String sdkVersion;
+      if (deviceProperties.containsKey('operatingSystemVersion')) {
+        final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
+        final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
+        sdkVersion = operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+      }
+
+      DarwinArch cpuArchitecture;
+      if (deviceProperties.containsKey('architecture')) {
+        final String architecture = deviceProperties['architecture'] as String;
+        try {
+          cpuArchitecture = getIOSArchForName(architecture);
+        } catch (error) {
+          // Fallback to default iOS architecture. Future-proof against a theoretical version
+          // of Xcode that changes this string to something slightly different like "ARM64".
+          cpuArchitecture ??= defaultIOSArchs.first;
+          _logger.printError('Unknown architecture $architecture, defaulting to ${getNameForDarwinArch(cpuArchitecture)}');
+        }
+      }
+      devices.add(IOSDevice(
+        device['identifier'] as String,
+        name: device['name'] as String,
+        cpuArchitecture: cpuArchitecture,
+        sdkVersion: sdkVersion,
+      ));
+    }
+    return devices;
+  }
+
+  /// Error message parsed from xcdevice. null if no error.
+  static String _parseErrorMessage(Map<String, dynamic> deviceProperties) {
+    //  {
+    //    "simulator" : false,
+    //    "operatingSystemVersion" : "13.3 (17C54)",
+    //    "interface" : "usb",
+    //    "available" : false,
+    //    "platform" : "com.apple.platform.iphoneos",
+    //    "modelCode" : "iPhone8,1",
+    //    "identifier" : "98206e7a4afd4aedaff06e687594e089dede3c44",
+    //    "architecture" : "arm64",
+    //    "modelName" : "iPhone 6s",
+    //    "name" : "iPhone",
+    //    "error" : {
+    //      "code" : -9,
+    //      "failureReason" : "",
+    //      "underlyingErrors" : [
+    //        {
+    //          "code" : 5,
+    //          "failureReason" : "allowsSecureServices: 1. isConnected: 0. Platform: <DVTPlatform:0x7f804ce32880:'com.apple.platform.iphoneos':<DVTFilePath:0x7f804ce32800:'\/Users\/magder\/Applications\/Xcode_11-3-1.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform'>>. DTDKDeviceIdentifierIsIDID: 0",
+    //          "description" : "📱<DVTiOSDevice (0x7f801f190450), iPhone, iPhone, 13.3 (17C54), d83d5bc53967baa0ee18626ba87b6254b2ab5418> -- Failed _shouldMakeReadyForDevelopment check even though device is not locked by passcode.",
+    //          "recoverySuggestion" : "",
+    //          "domain" : "com.apple.platform.iphoneos"
+    //        }
+    //      ],
+    //      "description" : "iPhone is not paired with your computer.",
+    //      "recoverySuggestion" : "To use iPhone with Xcode, unlock it and choose to trust this computer when prompted.",
+    //      "domain" : "com.apple.platform.iphoneos"
+    //    }
+    //  },
+    //  {
+    //    "simulator" : false,
+    //    "operatingSystemVersion" : "13.3 (17C54)",
+    //    "interface" : "usb",
+    //    "available" : false,
+    //    "platform" : "com.apple.platform.iphoneos",
+    //    "modelCode" : "iPhone8,1",
+    //    "identifier" : "d83d5bc53967baa0ee18626ba87b6254b2ab5418",
+    //    "architecture" : "arm64",
+    //    "modelName" : "iPhone 6s",
+    //    "name" : "iPhone",
+    //    "error" : {
+    //      "code" : -9,
+    //      "failureReason" : "",
+    //      "description" : "iPhone is not paired with your computer.",
+    //      "domain" : "com.apple.platform.iphoneos"
+    //    }
+    //  }
+    // ...
+
+    if (!deviceProperties.containsKey('error')) {
+      return null;
+    }
+
+    final Map<String, dynamic> error = deviceProperties['error'] as Map<String, dynamic>;
+
+    final StringBuffer errorMessage = StringBuffer();
+    if (deviceProperties.containsKey('name')) {
+      errorMessage.write('"${deviceProperties['name']}" error: ');
+    }
+
+    if (error.containsKey('description')) {
+      final String description = error['description'] as String;
+      errorMessage.write(description);
+    }
+
+    if (error.containsKey('recoverySuggestion')) {
+      final String recoverySuggestion = error['recoverySuggestion'] as String;
+      errorMessage.write(' $recoverySuggestion');
+    }
+    if (errorMessage.isEmpty) {
+      errorMessage.write('Xcode pairing error');
+    }
+
+    if (error.containsKey('code') && error['code'] is int) {
+      final int code = error['code'] as int;
+      errorMessage.write(' (code $code)');
+    }
+
+    return errorMessage.toString();
+  }
+
+  /// List of all devices reporting errors.
+  Future<List<String>> getDiagnostics() async {
+    final List<dynamic> allAvailableDevices = await _getAllDevices();
+
+    if (allAvailableDevices == null) {
+      return const <String>[];
+    }
+
+    final List<String> diagnostics = <String>[];
+    for (final dynamic device in allAvailableDevices) {
+      if (device is! Map) {
+        continue;
+      }
+      final Map<String, dynamic> deviceProperties = device as Map<String, dynamic>;
+      final String errorMessage = _parseErrorMessage(deviceProperties);
+      if (errorMessage != null) {
+        diagnostics.add(errorMessage);
+      }
+    }
+    return diagnostics;
   }
 }

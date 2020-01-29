@@ -166,6 +166,11 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         xcodeProjectInterpreter: xcodeProjectInterpreter,
       ),
+      XCDevice: () => XCDevice(
+        processManager: globals.processManager,
+        logger: globals.logger,
+        xcode: globals.xcode,
+      ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,
         processManager: globals.processManager,
