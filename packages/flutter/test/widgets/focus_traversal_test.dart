@@ -543,9 +543,9 @@ void main() {
       const int nodeCount = 10;
       final FocusScopeNode scopeNode = FocusScopeNode();
       final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.rtl,
+      Widget buildTest(TextDirection topDirection) {
+        return Directionality(
+          textDirection: topDirection,
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: FocusScope(
@@ -629,87 +629,87 @@ void main() {
               ),
             ),
           ),
-        ),
-      );
+        );
+      }
+      await tester.pumpWidget(buildTest(TextDirection.rtl));
 
       // The last four *are* correct: the Row is sensitive to the directionality
-      // too.
-      final List<int> expectedOrder = <int>[0, 1, 2, 4, 3, 5, 6, 7, 8, 9];
+      // too, so it swaps the positions of 7 and 8.
       final List<int> order = <int>[];
       for (int i = 0; i < nodeCount; ++i) {
         nodes.first.nextFocus();
         await tester.pump();
         order.add(nodes.indexOf(primaryFocus));
       }
-      expect(order, orderedEquals(expectedOrder));
+      expect(order, orderedEquals(<int>[0, 1, 2, 4, 3, 5, 6, 7, 8, 9]));
+
+      await tester.pumpWidget(buildTest(TextDirection.ltr));
+
+      order.clear();
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(<int>[0, 1, 2, 4, 3, 5, 6, 8, 7, 9]));
     });
 
     testWidgets('Focus order is reading order regardless of widget order, even when overlapping.', (WidgetTester tester) async {
       const int nodeCount = 10;
-      final FocusScopeNode scopeNode = FocusScopeNode();
       final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
-            child: FocusScope(
-              node: scopeNode,
-              child: Stack(
-                alignment: const Alignment(-1, -1),
-                children: List<Widget>.generate(nodeCount, (int index) {
-                  // Boxes that all have the same origin corner.
-                  return Focus(
-                    focusNode: nodes[index],
-                    child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
-                  );
-                }),
-              ),
+            child: Stack(
+              alignment: const Alignment(-1, -1),
+              children: List<Widget>.generate(nodeCount, (int index) {
+                // Boxes that all have the same upper left origin corner.
+                return Focus(
+                  focusNode: nodes[index],
+                  child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
+                );
+              }),
             ),
           ),
         ),
       );
 
-      List<int> expectedOrder = <int>[9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
-      List<int> order = <int>[];
+      final List<int> order = <int>[];
       for (int i = 0; i < nodeCount; ++i) {
         nodes.first.nextFocus();
         await tester.pump();
         order.add(nodes.indexOf(primaryFocus));
       }
-      expect(order, orderedEquals(expectedOrder));
+      expect(order, orderedEquals(<int>[9, 8, 7, 6, 5, 4, 3, 2, 1, 0]));
 
-      // Concentric widgets.
+      // Concentric boxes.
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
-            child: FocusScope(
-              node: scopeNode,
-              child: Stack(
-                alignment: const Alignment(0, 0),
-                children: List<Widget>.generate(nodeCount, (int index) {
-                  // Boxes that all have the same origin corner.
-                  return Focus(
-                    focusNode: nodes[index],
-                    child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
-                  );
-                }),
-              ),
+            child: Stack(
+              alignment: const Alignment(0, 0),
+              children: List<Widget>.generate(nodeCount, (int index) {
+                return Focus(
+                  focusNode: nodes[index],
+                  child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
+                );
+              }),
             ),
           ),
         ),
       );
 
-      expectedOrder = <int>[9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
-      order = <int>[];
+      order.clear();
       for (int i = 0; i < nodeCount; ++i) {
         nodes.first.nextFocus();
         await tester.pump();
         order.add(nodes.indexOf(primaryFocus));
       }
-      expect(order, orderedEquals(expectedOrder));
+      expect(order, orderedEquals(<int>[9, 8, 7, 6, 5, 4, 3, 2, 1, 0]));
 
       // Stacked (vertically) and centered (horizontally, on each other)
       // widgets, not overlapping.
@@ -718,39 +718,34 @@ void main() {
           textDirection: TextDirection.rtl,
           child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
-            child: FocusScope(
-              node: scopeNode,
-              child: Stack(
-                alignment: const Alignment(0, 0),
-                children: List<Widget>.generate(nodeCount, (int index) {
-                  // Boxes that all have the same origin corner.
-                  return Positioned(
-                    top: 5.0 * index * (index + 1),
-                    left: 5.0 * (10 - index),
-                    child: Focus(
-                      focusNode: nodes[index],
-                      child: Container(
-                        decoration: BoxDecoration(border: Border.all()),
-                        width: 10.0 * (index + 1),
-                        height: 10.0 * (index + 1),
-                      ),
+            child: Stack(
+              alignment: const Alignment(0, 0),
+              children: List<Widget>.generate(nodeCount, (int index) {
+                return Positioned(
+                  top: 5.0 * index * (index + 1),
+                  left: 5.0 * (9 - index),
+                  child: Focus(
+                    focusNode: nodes[index],
+                    child: Container(
+                      decoration: BoxDecoration(border: Border.all()),
+                      width: 10.0 * (index + 1),
+                      height: 10.0 * (index + 1),
                     ),
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
             ),
           ),
         ),
       );
 
-      expectedOrder = <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
-      order = <int>[];
+      order.clear();
       for (int i = 0; i < nodeCount; ++i) {
         nodes.first.nextFocus();
         await tester.pump();
         order.add(nodes.indexOf(primaryFocus));
       }
-      expect(order, orderedEquals(expectedOrder));
+      expect(order, orderedEquals(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]));
     });
   });
 

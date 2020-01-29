@@ -1255,6 +1255,11 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
       }
     }
     mergeSort<_OrderedFocusInfo>(ordered, compare:(_OrderedFocusInfo a, _OrderedFocusInfo b) {
+      assert(a.order.runtimeType == b.order.runtimeType,
+        'When sorting nodes for determining focus order, the order (${a.order}) of '
+        "node ${a.node}, isn't the same type as the order (${b.order}) of ${b.node}. "
+        "Incompatible order types can't be compared.  Use a FocusTraversalGroup to group "
+        'similar orders together.');
       return a.order.compareTo(b.order);
     });
     return ordered.map<FocusNode>((_OrderedFocusInfo info) => info.node).followedBy(unordered);
@@ -1283,7 +1288,7 @@ class FocusTraversalOrder extends InheritedWidget {
   static FocusOrder of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
     assert(nullOk != null);
-    final FocusTraversalOrder marker = context.findAncestorWidgetOfExactType<FocusTraversalOrder>();
+    final FocusTraversalOrder marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>().widget as FocusTraversalOrder;
     final FocusOrder order = marker?.order;
     if (order == null) {
       if (!nullOk) {
@@ -1476,7 +1481,7 @@ class DefaultFocusTraversal extends InheritedWidget {
   ///
   /// The [context] argument must not be null.
   static FocusTraversalPolicy of(BuildContext context, {bool nullOk = false}) {
-    final DefaultFocusTraversal inherited = context?.findAncestorWidgetOfExactType<DefaultFocusTraversal>();
+    final DefaultFocusTraversal inherited = context.getElementForInheritedWidgetOfExactType<DefaultFocusTraversal>().widget as DefaultFocusTraversal;
     assert(() {
       if (nullOk) {
         return true;
