@@ -657,7 +657,7 @@ void main() {
         generator.classMethods.first,
         '''  String itemNumber(Object value) {
     return Intl.message(
-      \'Item \$value\',
+      \'Item \${value}\',
       locale: _localeName,
       name: 'itemNumber',
       desc: r\'Item placement in list.\',
@@ -710,7 +710,7 @@ void main() {
 
     String springBegins(Object springStartDate) {
       return Intl.message(
-        \'Spring begins on \$springStartDate\',
+        \'Spring begins on \${springStartDate}\',
         locale: _localeName,
         name: \'springBegins\',
         desc: r\'The first day of spring\',
@@ -837,7 +837,7 @@ void main() {
 
     String springGreetings(Object springStartDate, Object helloWorld) {
       return Intl.message(
-        \'Since it\' "\'" r\'s \$springStartDate, it\' "\'" r\'s finally spring! \$helloWorld!\',
+        \'Since it\' "\'" r\'s \${springStartDate}, it\' "\'" r\'s finally spring! \${helloWorld}!\',
         locale: _localeName,
         name: \'springGreetings\',
         desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
@@ -897,7 +897,7 @@ void main() {
 
     String springRange(Object springStartDate, Object springEndDate) {
       return Intl.message(
-        \'Spring begins on \$springStartDate and ends on \$springEndDate\',
+        \'Spring begins on \${springStartDate} and ends on \${springEndDate}\',
         locale: _localeName,
         name: \'springRange\',
         desc: r\'The range of dates for spring in the year\',
@@ -954,10 +954,10 @@ void main() {
       locale: _localeName,
       name: \'helloWorlds\',
       args: <Object>[count, currentDate],
-      one: \'Hello World, today is \$currentDateString\',
-      two: \'Hello two worlds, today is \$currentDateString\',
-      many: \'Hello all \$count worlds, today is \$currentDateString\',
-      other: \'Hello other \$count worlds, today is \$currentDateString\'
+      one: \'Hello World, today is \${currentDateString}\',
+      two: \'Hello two worlds, today is \${currentDateString}\',
+      many: \'Hello all \${count} worlds, today is \${currentDateString}\',
+      other: \'Hello other \${count} worlds, today is \${currentDateString}\'
       );
     }
     return helloWorlds(count, currentDateString);
@@ -1009,7 +1009,7 @@ void main() {
 
     String courseCompletion(Object progress) {
       return Intl.message(
-        \'You have completed \$progress of the course.\',
+        \'You have completed \${progress} of the course.\',
         locale: _localeName,
         name: \'courseCompletion\',
         desc: r\'The amount of progress the student has made in their class.\',
@@ -1079,7 +1079,7 @@ void main() {
 
     String courseCompletion(Object progress) {
       return Intl.message(
-        \'You have completed \$progress of the course.\',
+        \'You have completed \${progress} of the course.\',
         locale: _localeName,
         name: \'courseCompletion\',
         desc: r\'The amount of progress the student has made in their class.\',
@@ -1139,7 +1139,7 @@ void main() {
 
     String courseCompletion(Object progress) {
       return Intl.message(
-        \'You have completed \$progress of the course.\',
+        \'You have completed \${progress} of the course.\',
         locale: _localeName,
         name: \'courseCompletion\',
         desc: r\'The amount of progress the student has made in their class.\',
@@ -1232,9 +1232,9 @@ void main() {
       zero: 'Hello',
       one: 'Hello World',
       two: 'Hello two worlds',
-      few: 'Hello \$count worlds',
-      many: 'Hello all \$count worlds',
-      other: 'Hello other \$count worlds'
+      few: 'Hello \${count} worlds',
+      many: 'Hello all \${count} worlds',
+      other: 'Hello other \${count} worlds'
     );
   }
 '''
@@ -1280,11 +1280,11 @@ void main() {
       name: 'helloWorlds',
       args: <Object>[count, adjective],
       zero: 'Hello',
-      one: 'Hello \$adjective World',
-      two: 'Hello two \$adjective worlds',
-      few: 'Hello \$count \$adjective worlds',
-      many: 'Hello all \$count \$adjective worlds',
-      other: 'Hello other \$count \$adjective worlds'
+      one: 'Hello \${adjective} World',
+      two: 'Hello two \${adjective} worlds',
+      few: 'Hello \${count} \${adjective} worlds',
+      many: 'Hello all \${count} \${adjective} worlds',
+      other: 'Hello other \${count} \${adjective} worlds'
     );
   }
 '''
@@ -1336,10 +1336,10 @@ void main() {
       locale: _localeName,
       name: \'helloWorlds\',
       args: <Object>[count, currentDate],
-      one: \'Hello World, today is \$currentDateString\',
-      two: \'Hello two worlds, today is \$currentDateString\',
-      many: \'Hello all \$count worlds, today is \$currentDateString\',
-      other: \'Hello other \$count worlds, today is \$currentDateString\'
+      one: \'Hello World, today is \${currentDateString}\',
+      two: \'Hello two worlds, today is \${currentDateString}\',
+      many: \'Hello all \${count} worlds, today is \${currentDateString}\',
+      other: \'Hello other \${count} worlds, today is \${currentDateString}\'
       );
     }
     return helloWorlds(count, currentDateString);
@@ -1395,10 +1395,10 @@ void main() {
       locale: _localeName,
       name: \'helloWorlds\',
       args: <Object>[count, population],
-      one: \'Hello World of \$populationString citizens\',
-      two: \'Hello two worlds with \$populationString total citizens\',
-      many: \'Hello all \$count worlds, with a total of \$populationString citizens\',
-      other: \'Hello other \$count worlds, with a total of \$populationString citizens\'
+      one: \'Hello World of \${populationString} citizens\',
+      two: \'Hello two worlds with \${populationString} total citizens\',
+      many: \'Hello all \${count} worlds, with a total of \${populationString} citizens\',
+      other: \'Hello other \${count} worlds, with a total of \${populationString} citizens\'
       );
     }
     return helloWorlds(count, populationString);

@@ -223,7 +223,7 @@ String genSimpleMethod(Message message) {
   String genSimpleMethodMessage() {
     String messageValue = message.value;
     for (final Placeholder placeholder in message.placeholders) {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}');
+        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
     }
     final String rawMessage = generateString(messageValue); // "r'...'"
     return rawMessage.substring(1);
@@ -300,9 +300,9 @@ String generatePluralMethod(Message message) {
       String argValue = match.group(2);
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}String');
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
         } else {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}');
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
         }
       }
       intlMethodArgs.add("${pluralIds[pluralKey]}: '$argValue'");
