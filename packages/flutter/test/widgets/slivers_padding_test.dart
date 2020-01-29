@@ -427,7 +427,7 @@ void main() {
 
   testWidgets('SliverPadding includes preceding padding in the precedingScrollExtent provided to child', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/49195
-    final GlobalKey key = GlobalKey();
+    final UniqueKey key = UniqueKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
@@ -447,6 +447,11 @@ void main() {
     ));
     await tester.pump();
 
+    // The value of 570 is expected since SliverFillRemaining will fill all of
+    // the space available to it. In this test, the extent of the viewport is
+    // 600 pixels. If the SliverPadding widget provides the right constraints
+    // to SliverFillRemaining, with 30 pixels preceding it, it should only have
+    // a height of 570.
     expect(
       tester.renderObject<RenderBox>(find.byKey(key)).size.height,
       equals(570),
