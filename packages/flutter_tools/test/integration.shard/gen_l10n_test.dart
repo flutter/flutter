@@ -42,7 +42,6 @@ void main() {
       command,
       workingDirectory: tempDir.path,
       environment: <String, String>{ 'FLUTTER_ROOT': getFlutterRoot() },
-      runInShell: true,
     );
     if (result.exitCode != 0) {
       throw Exception('FAILED [${result.exitCode}]: ${command.join(' ')}\n${result.stderr}\n${result.stdout}');
