@@ -97,6 +97,7 @@ void main() {
       '#l10n 18 (Hello World of 101 citizens)\n'
       '#l10n 19 (Hello two worlds with 102 total citizens)\n'
       '#l10n 20 ([Hello] #World#)\n'
+      '#l10n 21 ([Hello] -World- #123#)\n'
       '#l10n END\n'
     );
   });

@@ -67,6 +67,7 @@ class Home extends StatelessWidget {
         '${localizations.helloWorldPopulation(1, 101)}',
         '${localizations.helloWorldPopulation(2, 102)}',
         '${localizations.helloWorldInterpolation("Hello", "World")}',
+        '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
       ];
       int n = 0;
       for (final String result in results) {
@@ -229,6 +230,16 @@ void main() {
   "@helloWorldInterpolation": {
     "description": "A message with parameters that need string interpolation braces",
     "placeholders": {
+      "hello": {},
+      "world": {}
+    }
+  },
+
+  "helloWorldsInterpolation": "{count,plural, other {[{hello}] -{world}- #{count}#}}",
+  "@helloWorldsInterpolation": {
+    "description": "A plural message with parameters that need string interpolation braces",
+    "placeholders": {
+      "count": {},
       "hello": {},
       "world": {}
     }
