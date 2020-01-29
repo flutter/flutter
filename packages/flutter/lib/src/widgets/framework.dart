@@ -476,9 +476,9 @@ abstract class Widget extends DiagnosticableTree {
   }
 
   // Return a numeric encoding of the specific `Widget` concrete subtype.
-  // This is used to determine if a hot reload modified the type hierarchy of
-  // a mounted element. The encoding of each `Widget` must match the corresponding
-  // `Element` encoding in `Element._debugConcreteSubtype`.
+  // This is used in `Element.updateChild` to determine if a hot reload modified the
+  // superclass of a mounted element's configuration. The encoding of each `Widget`
+  // must match the corresponding `Element` encoding in `Element._debugConcreteSubtype`.
   static int _debugConcreteSubtype(Widget widget) {
     return widget is StatefulWidget ? 1 :
            widget is StatelessWidget ? 2 :
@@ -2858,9 +2858,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   // Return a numeric encoding of the specific `Element` concrete subtype.
-  // This is used to determine if a hot reload modified the type hierarchy of
-  // a mounted element. The encoding of each `Element` must match the corresponding
-  // `Widget`` encoding in `Widget._debugConcreteSubtype`.
+  // This is used in `Element.updateChild` to determine if a hot reload modified the
+  // superclass of a mounted element's configuration. The encoding of each `Element`
+  // must match the corresponding `Widget` encoding in `Widget._debugConcreteSubtype`.
   static int _debugConcreteSubtype(Element element) {
     return element is StatefulElement ? 1 :
            element is StatelessElement ? 2 :
