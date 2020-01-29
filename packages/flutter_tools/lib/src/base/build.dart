@@ -138,11 +138,7 @@ class AOTSnapshotter {
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
       genSnapshotArgs.add('--assembly=$assembly');
-      // TODO(jonahwilliams): determine the correct time to use strip
-      // since this is required for the future dwarf strack traces option.
-      if (bitcode && buildMode == BuildMode.release) {
-        genSnapshotArgs.add('--strip');
-      }
+      genSnapshotArgs.add('--strip');
     } else {
       final String aotSharedLibrary = globals.fs.path.join(outputDir.path, 'app.so');
       outputPaths.add(aotSharedLibrary);
