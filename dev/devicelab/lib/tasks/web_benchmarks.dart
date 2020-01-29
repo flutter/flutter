@@ -15,13 +15,6 @@ import 'package:shelf_static/shelf_static.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-/// List of benchmarks we want to run in the devicelab.
-const List<String> benchmarks = <String>[
-  'draw_rect',
-  'text_out_of_picture_bounds',
-  'bench_simple_lazy_text_scroll',
-];
-
 /// The port number used by the local benchmark server.
 const int benchmarkServerPort = 9999;
 
@@ -39,8 +32,9 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       'FLUTTER_WEB': 'true',
     });
     final Completer<List<Map<String, dynamic>>> profileData = Completer<List<Map<String, dynamic>>>();
-    final Iterator<String> benchmarkIterator = benchmarks.iterator;
     final List<Map<String, dynamic>> collectedProfiles = <Map<String, dynamic>>[];
+    List<String> benchmarks;
+    Iterator<String> benchmarkIterator;
 
     io.HttpServer server;
     Cascade cascade = Cascade();
@@ -59,6 +53,10 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
         collectedProfiles.add(profile);
         return Response.ok('Profile received');
       } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
+        if (benchmarks == null) {
+          benchmarks = (json.decode(await request.readAsString()) as List<dynamic>).cast<String>();
+          benchmarkIterator = benchmarks.iterator;
+        }
         if (benchmarkIterator.moveNext()) {
           final String nextBenchmark = benchmarkIterator.current;
           print('Launching benchmark "$nextBenchmark"');
@@ -136,9 +134,10 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       receivedProfileData = true;
       for (final Map<String, dynamic> profile in profiles) {
         final String benchmarkName = profile['name'] as String;
-        taskResult['$benchmarkName.$backend.averageDrawFrameDuration'] = profile['averageDrawFrameDuration'].toDouble(); // micros
+        final String benchmarkScoreKey = '$benchmarkName.$backend.averageDrawFrameDuration';
+        taskResult[benchmarkScoreKey] = profile['averageDrawFrameDuration'].toDouble(); // micros
         taskResult['$benchmarkName.$backend.drawFrameDurationNoise'] = profile['drawFrameDurationNoise'].toDouble(); // micros
-        benchmarkScoreKeys.add('$benchmarkName.$backend.averageDrawFrameDuration');
+        benchmarkScoreKeys.add(benchmarkScoreKey);
       }
       return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
     } finally {

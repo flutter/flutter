@@ -34,6 +34,7 @@ Future<void> main() async {
     '/next-benchmark',
     method: 'POST',
     mimeType: 'application/json',
+    sendData: json.encode(benchmarks.keys.toList()),
   );
 
   // 404 is expected in the following cases:
