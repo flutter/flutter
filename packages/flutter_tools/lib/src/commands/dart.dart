@@ -4,21 +4,21 @@
 
 import 'dart:async';
 
+import '../artifacts.dart' show Artifact;
+import '../base/process.dart' show RunResult, processUtils;
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-import '../base/process.dart' show RunResult, processUtils;
-import '../artifacts.dart' show Artifact;
 
 class DartCommand extends FlutterCommand {
   @override
   String get description => 'Run the Flutter Dart SDK for use.';
 
   @override
-  String get name => 'dart';
-
-  @override
   String get invocation =>
       '${runner.executableName} $name <dart file or snapshot dart file> [args]';
+
+  @override
+  String get name => 'dart';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
