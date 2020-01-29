@@ -128,7 +128,7 @@ void main() {
     });
 
     testWidgets('When menu items don\'t fit, an overflow menu is used.', (WidgetTester tester) async {
-      // Set the screen size to more narrow.
+      // Set the screen size to more narrow, so that SELECT ALL can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
@@ -186,6 +186,70 @@ void main() {
       expect(find.text('CUT'), findsOneWidget);
       expect(find.text('COPY'), findsOneWidget);
       expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget);
+    });
+
+    testWidgets('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
+      // Set the screen size so narrow that only CUT and COPY can fit.
+      tester.binding.window.physicalSizeTestValue = const Size(800, 800);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Center(
+              child: Material(
+                child: TextField(
+                  controller: controller,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      // Initially, the menu isn't shown at all.
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+
+      // Long press to show the menu.
+      final Offset textOffset = textOffsetToPosition(tester, 1);
+      await tester.longPressAt(textOffset);
+      // Selection menu renders one frame offstage, so pump twice.
+      await tester.pump();
+      await tester.pump();
+
+      // The last two buttons are missing, and a more button is shown.
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget);
+
+      // Tapping the button shows the overflow menu, which contains both buttons
+      // missing from the main menu, and a back button.
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget);
+
+      // Tapping the back button shows the selection menu again.
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsNothing);
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     });
