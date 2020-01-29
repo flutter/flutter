@@ -126,7 +126,7 @@ class ChannelCommand extends FlutterCommand {
     }
     await _checkout(branchName);
     globals.printStatus("Successfully switched to flutter channel '$branchName'.");
-    globals.printStatus("Now run \"flutter upgrade\" to ensure that you're on the latest build from this channel.");
+    globals.printStatus("To ensure that you're on the latest build from this channel, run 'flutter upgrade'");
   }
 
   static Future<void> upgradeChannel() async {
