@@ -256,4 +256,20 @@ void main() async {
     TextMeasurementService.clearCache();
     TextMeasurementService.enableExperimentalCanvasImplementation = false;
   });
+
+  testEachMeasurement('width should be a whole integer', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+      textDirection: TextDirection.ltr,
+    ));
+    builder.addText('abc');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 30.8));
+
+    expect(paragraph.width, 30);
+    expect(paragraph.height, 10);
+  });
 }
