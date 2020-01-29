@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+import 'text_field_test.dart' show findRenderEditable, globalize, textOffsetToPosition;
 
 void main() {
   group('canSelectAll', () {
@@ -63,24 +65,129 @@ void main() {
     });
   });
 
-  group('Overflow', () {
-    // TODO(justinmc): Platform should only be Android.
-    testWidgets('Overflowing menu items are shown in a submenu', (WidgetTester tester) async {
+  group('Text selection menu overflow (Android)', () {
+    testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(MaterialApp(
-        home: EditableText(
-          controller: TextEditingController(),
-          focusNode: FocusNode(),
-          style: const TextStyle(),
-          cursorColor: Colors.black,
-          backgroundCursorColor: Colors.black,
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(size: Size(800.0, 600.0)),
+              child: Center(
+                child: Material(
+                  child: TextField(
+                    controller: controller,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ));
+
+      // Initially, the menu isn't shown at all.
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+
+      // Tap to place the cursor in the field, then tap the handle to show the
+      // selection menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 1);
+      final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
+      await tester.tapAt(handlePos, pointer: 7);
+      // Selection menu renders one frame offstage, so pump twice.
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.byType(IconButton), findsNothing);
+
+      // Long press to select a word and show the full selection menu.
+      final Offset textOffset = textOffsetToPosition(tester, 1);
+      await tester.longPressAt(textOffset);
+      await tester.pump();
+      await tester.pump();
+
+      // The full menu is shown without the more button.
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.byType(IconButton), findsNothing);
+    });
+
+    testWidgets('When menu items don\'t fit, an overflow menu is used.', (WidgetTester tester) async {
+      // Set the screen size to more narrow.
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Center(
+              child: Material(
+                child: TextField(
+                  controller: controller,
+                ),
+              ),
+            ),
+          ),
         ),
       ));
 
+      // Initially, the menu isn't shown at all.
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
 
-      // TODO(justinmc): How do I set the locale to Russian? Or another way to
-      // make it overflow?
+      // Long press to show the menu.
+      final Offset textOffset = textOffsetToPosition(tester, 1);
+      await tester.longPressAt(textOffset);
+      // Selection menu renders one frame offstage, so pump twice.
+      await tester.pump();
+      await tester.pump();
 
-      expect(true, true);
+      // The last button is missing, and a more button is shown.
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget);
+
+      // Tapping the button shows the overflow menu.
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget);
+
+      // Tapping the back button shows the selection menu again.
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget);
     });
   });
 }

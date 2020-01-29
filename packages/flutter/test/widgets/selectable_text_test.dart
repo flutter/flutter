@@ -622,6 +622,8 @@ void main() {
     const int dIndex = 5;
     final Offset dPos = textOffsetToPosition(tester, dIndex);
     await tester.longPressAt(dPos);
+    // Selection menu renders one frame offstage, so pump twice.
+    await tester.pump();
     await tester.pump();
     // Context menu should not have copy.
     expect(find.text('COPY'), findsNothing);
@@ -919,6 +921,8 @@ void main() {
 
     // SELECT ALL should select all the text.
     await tester.tap(find.text('SELECT ALL'));
+    // Selection menu renders one frame offstage, so pump twice.
+    await tester.pump();
     await tester.pump();
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, testValue.length);
@@ -2497,6 +2501,8 @@ void main() {
         const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream),
       );
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
+      // Selection menu renders one frame offstage, so pump twice.
+      await tester.pump();
       await tester.pump();
 
       // Second tap selects the word around the cursor.
@@ -2548,6 +2554,8 @@ void main() {
 
       // Second tap selects the word around the cursor.
       await tester.tapAt(textOffsetToPosition(tester, index));
+      // Selection menu renders one frame offstage, so pump twice.
+      await tester.pump();
       await tester.pump();
       expect(
         controller.selection,
@@ -2703,6 +2711,8 @@ void main() {
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
       await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
+      // Selection menu renders one frame offstage, so pump twice.
+      await tester.pump();
       await tester.pump();
 
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);

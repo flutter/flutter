@@ -100,6 +100,11 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
   // to put in the overflow menu.
   void _measureItemsNextFrame() {
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      // If the menu is empty, no need to measure it.
+      if (_itemKeys.isEmpty) {
+        return;
+      }
+
       assert(_containerKey.currentContext != null);
       final RenderBox renderBoxContainer = _containerKey.currentContext.findRenderObject() as RenderBox;
       double remainingContainerWidth = renderBoxContainer.size.width;
