@@ -291,7 +291,6 @@ double _topOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset =
   return scaffoldGeometry.contentTop - fabHalfHeight;
 }
 
-// TODO: Unify _floatingOffsetY and _dockedOffsetY.
 // TODO: Use same documentation.
 
 double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
