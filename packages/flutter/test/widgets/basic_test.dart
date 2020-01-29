@@ -145,6 +145,69 @@ void main() {
       await tester.tap(find.byKey(key1));
       expect(_pointerDown, isTrue);
     });
+
+    testWidgets('semantics bounds are updated', (WidgetTester tester) async {
+      final GlobalKey fractionalTranslationKey = GlobalKey();
+      final GlobalKey textKey = GlobalKey();
+      Offset offset = const Offset(0.4, 0.4);
+
+      await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Semantics(
+                    explicitChildNodes: true,
+                    child: FractionalTranslation(
+                      key: fractionalTranslationKey,
+                      translation: offset,
+                      transformHitTests: true,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            offset = const Offset(0.8, 0.8);
+                          });
+                        },
+                        child: SizedBox(
+                          width: 100.0,
+                          height: 100.0,
+                          child: Text(
+                            'foo',
+                            key: textKey,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          )
+      );
+
+      expect(
+        tester.getSemantics(find.byKey(textKey)).transform,
+        Matrix4(
+          3.0, 0.0, 0.0, 0.0,
+          0.0, 3.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0,
+          1170.0, 870.0, 0.0, 1.0,
+        ),
+      );
+
+      await tester.tap(find.byKey(fractionalTranslationKey));
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(textKey)).transform,
+        Matrix4(
+          3.0, 0.0, 0.0, 0.0,
+          0.0, 3.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0,
+          1290.0, 990.0, 0.0, 1.0,
+        ),
+      );
+    });
   });
 
   group('Row', () {
