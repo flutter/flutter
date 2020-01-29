@@ -130,6 +130,106 @@ TEST_F(AccessibilityBridgeTest, DeletesChildrenTransitively) {
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
 }
 
+TEST_F(AccessibilityBridgeTest, PopulatesCheckedState) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  // HasCheckedState = true
+  // IsChecked = true
+  // IsSelected = false
+  // IsHidden = false
+  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kHasCheckedState);
+  node0.flags |= static_cast<int>(flutter::SemanticsFlags::kIsChecked);
+  node0.value = "value";
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}});
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(0, semantics_manager_.DeleteCount());
+  EXPECT_EQ(1, semantics_manager_.UpdateCount());
+  EXPECT_EQ(1, semantics_manager_.CommitCount());
+  EXPECT_EQ(1U, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.node_id(), static_cast<unsigned int>(node0.id));
+  EXPECT_TRUE(fuchsia_node.has_states());
+  const auto& states = fuchsia_node.states();
+  EXPECT_TRUE(states.has_checked_state());
+  EXPECT_EQ(states.checked_state(),
+            fuchsia::accessibility::semantics::CheckedState::CHECKED);
+  EXPECT_TRUE(states.has_selected());
+  EXPECT_FALSE(states.selected());
+  EXPECT_TRUE(states.has_hidden());
+  EXPECT_FALSE(states.hidden());
+  EXPECT_TRUE(states.has_value());
+  EXPECT_EQ(states.value(), node0.value);
+
+  EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
+  EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
+}
+
+TEST_F(AccessibilityBridgeTest, PopulatesSelectedState) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  // HasCheckedState = false
+  // IsChecked = false
+  // IsSelected = true
+  // IsHidden = false
+  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsSelected);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}});
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(0, semantics_manager_.DeleteCount());
+  EXPECT_EQ(1, semantics_manager_.UpdateCount());
+  EXPECT_EQ(1, semantics_manager_.CommitCount());
+  EXPECT_EQ(1U, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.node_id(), static_cast<unsigned int>(node0.id));
+  EXPECT_TRUE(fuchsia_node.has_states());
+  const auto& states = fuchsia_node.states();
+  EXPECT_TRUE(states.has_checked_state());
+  EXPECT_EQ(states.checked_state(),
+            fuchsia::accessibility::semantics::CheckedState::NONE);
+  EXPECT_TRUE(states.has_selected());
+  EXPECT_TRUE(states.selected());
+  EXPECT_TRUE(states.has_hidden());
+  EXPECT_FALSE(states.hidden());
+
+  EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
+  EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
+}
+
+TEST_F(AccessibilityBridgeTest, PopulatesHiddenState) {
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  // HasCheckedState = false
+  // IsChecked = false
+  // IsSelected = false
+  // IsHidden = true
+  node0.flags = static_cast<int>(flutter::SemanticsFlags::kIsHidden);
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({{0, node0}});
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(0, semantics_manager_.DeleteCount());
+  EXPECT_EQ(1, semantics_manager_.UpdateCount());
+  EXPECT_EQ(1, semantics_manager_.CommitCount());
+  EXPECT_EQ(1u, semantics_manager_.LastUpdatedNodes().size());
+  const auto& fuchsia_node = semantics_manager_.LastUpdatedNodes().at(0u);
+  EXPECT_EQ(fuchsia_node.node_id(), static_cast<unsigned int>(node0.id));
+  EXPECT_TRUE(fuchsia_node.has_states());
+  const auto& states = fuchsia_node.states();
+  EXPECT_TRUE(states.has_checked_state());
+  EXPECT_EQ(states.checked_state(),
+            fuchsia::accessibility::semantics::CheckedState::NONE);
+  EXPECT_TRUE(states.has_selected());
+  EXPECT_FALSE(states.selected());
+  EXPECT_TRUE(states.has_hidden());
+  EXPECT_TRUE(states.hidden());
+
+  EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
+  EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
+}
+
 TEST_F(AccessibilityBridgeTest, TruncatesLargeLabel) {
   // Test that labels which are too long are truncated.
   flutter::SemanticsNode node0;
@@ -174,6 +274,48 @@ TEST_F(AccessibilityBridgeTest, TruncatesLargeLabel) {
   EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
 }
 
+TEST_F(AccessibilityBridgeTest, TruncatesLargeValue) {
+  // Test that values which are too long are truncated.
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+
+  flutter::SemanticsNode node1;
+  node1.id = 1;
+
+  flutter::SemanticsNode bad_node;
+  bad_node.id = 2;
+  bad_node.value =
+      std::string(fuchsia::accessibility::semantics::MAX_VALUE_SIZE + 1, '2');
+
+  node0.childrenInTraversalOrder = {1, 2};
+
+  accessibility_bridge_->AddSemanticsNodeUpdate({
+      {0, node0},
+      {1, node1},
+      {2, bad_node},
+  });
+  RunLoopUntilIdle();
+
+  EXPECT_EQ(0, semantics_manager_.DeleteCount());
+  EXPECT_EQ(1, semantics_manager_.UpdateCount());
+  EXPECT_EQ(1, semantics_manager_.CommitCount());
+  EXPECT_EQ(3U, semantics_manager_.LastUpdatedNodes().size());
+  auto trimmed_node =
+      std::find_if(semantics_manager_.LastUpdatedNodes().begin(),
+                   semantics_manager_.LastUpdatedNodes().end(),
+                   [id = static_cast<uint32_t>(bad_node.id)](
+                       fuchsia::accessibility::semantics::Node const& node) {
+                     return node.node_id() == id;
+                   });
+  ASSERT_NE(trimmed_node, semantics_manager_.LastUpdatedNodes().end());
+  ASSERT_TRUE(trimmed_node->has_states());
+  EXPECT_EQ(
+      trimmed_node->states().value(),
+      std::string(fuchsia::accessibility::semantics::MAX_VALUE_SIZE, '2'));
+  EXPECT_FALSE(semantics_manager_.DeleteOverflowed());
+  EXPECT_FALSE(semantics_manager_.UpdateOverflowed());
+}
+
 TEST_F(AccessibilityBridgeTest, SplitsLargeUpdates) {
   // Test that labels which are too long are truncated.
   flutter::SemanticsNode node0;
@@ -194,8 +336,8 @@ TEST_F(AccessibilityBridgeTest, SplitsLargeUpdates) {
 
   flutter::SemanticsNode node4;
   node4.id = 4;
-  node4.label =
-      std::string(fuchsia::accessibility::semantics::MAX_LABEL_SIZE, '4');
+  node4.value =
+      std::string(fuchsia::accessibility::semantics::MAX_VALUE_SIZE, '4');
 
   node0.childrenInTraversalOrder = {1, 2};
   node0.childrenInHitTestOrder = {1, 2};

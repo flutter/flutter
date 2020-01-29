@@ -133,7 +133,8 @@ class AccessibilityBridge
   // Derives the states for a Fuchsia semantics node from a Flutter semantics
   // node.
   fuchsia::accessibility::semantics::States GetNodeStates(
-      const flutter::SemanticsNode& node) const;
+      const flutter::SemanticsNode& node,
+      size_t* additional_size) const;
 
   // Gets the set of reachable descendants from the given node id.
   std::unordered_set<int32_t> GetDescendants(int32_t node_id) const;
