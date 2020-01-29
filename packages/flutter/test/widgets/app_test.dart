@@ -163,4 +163,54 @@ void main() {
       );
     });
   });
+
+  testWidgets('WidgetsApp can customize initial routes', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      WidgetsApp(
+        navigatorKey: navigatorKey,
+        onGenerateInitialRoutes: (String initialRoute) {
+          expect(initialRoute, '/abc');
+          return <Route<void>>[
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page one');
+              }
+            ),
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page two');
+              }
+            ),
+          ];
+        },
+        initialRoute: '/abc',
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<void>(
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation) {
+              return const Text('regular page');
+            }
+          );
+        },
+        color: const Color(0xFF123456),
+      )
+    );
+    expect(find.text('non-regular page two'), findsOneWidget);
+    expect(find.text('non-regular page one'), findsNothing);
+    expect(find.text('regular page'), findsNothing);
+    navigatorKey.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('non-regular page two'), findsNothing);
+    expect(find.text('non-regular page one'), findsOneWidget);
+    expect(find.text('regular page'), findsNothing);
+  });
 }
