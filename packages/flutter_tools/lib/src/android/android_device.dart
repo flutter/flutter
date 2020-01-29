@@ -808,7 +808,7 @@ AndroidMemoryInfo parseMeminfoDump(String input) {
   final String timelineData = lines.firstWhere((String line) =>
     line.startsWith('${AndroidMemoryInfo._kUpTimeKey}: '));
   final List<String> times = timelineData.trim().split('${AndroidMemoryInfo._kRealTimeKey}:');
-  androidMemoryInfo.realTime = int.tryParse(times.last.trim()) ?? 0;;
+  androidMemoryInfo.realTime = int.tryParse(times.last.trim()) ?? 0;
 
   lines
     .skipWhile((String line) => !line.contains('App Summary'))
