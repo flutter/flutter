@@ -866,4 +866,62 @@ void main() {
       _customHorizontalMargin,
     );
   });
+
+  testWidgets('DataTable set border width test', (WidgetTester tester) async {
+    Widget buildTable({ double thickness}) {
+      return Theme(
+        data: ThemeData(
+            dividerTheme: DividerThemeData(thickness: thickness)
+        ),
+        child: DataTable(
+          columns: const <DataColumn>[
+            DataColumn(
+              label: Text('Name'),
+              tooltip: 'Name',
+            ),
+            DataColumn(
+              label: Text('Calories'),
+              tooltip: 'Calories',
+              numeric: true,
+            ),
+          ],
+          rows: kDesserts.map<DataRow>((Dessert dessert) {
+            return DataRow(
+              key: ValueKey<String>(dessert.name),
+              cells: <DataCell>[
+                DataCell(
+                  Text(dessert.name),
+                ),
+                DataCell(
+                  Text('${dessert.calories}'),
+                  showEditIcon: true,
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    // no thickness provided - border should be default: i.e "1" as it
+    // set in DataTable._defaultBorderThickness
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    Table table = tester.widget(find.byType(Table).first);
+    TableRow tableRow = table.children.first;
+    BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.border.bottom.width, 1.0);
+
+    const double thickness =  4.2;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(thickness: thickness)),
+    ));
+
+    table = tester.widget(find.byType(Table).first);
+    tableRow = table.children.first;
+    boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.border.bottom.width, thickness);
+  });
 }

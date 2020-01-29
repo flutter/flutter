@@ -466,6 +466,7 @@ class DataTable extends StatelessWidget {
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
   static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
   static const Color _grey300Opacity = Color(0x1E000000); // Dark theme variant is just a guess.
+  static const double _defaultBorderThickness = 1.0;
 
   Widget _buildCheckbox({
     Color color,
@@ -613,12 +614,12 @@ class DataTable extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final BoxDecoration _kSelectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width: 1.0)),
+      border: Border(bottom: Divider.createBorderSide(context, width: theme.dividerTheme.thickness ?? _defaultBorderThickness)),
       // The backgroundColor has to be transparent so you can see the ink on the material
       color: (Theme.of(context).brightness == Brightness.light) ? _grey100Opacity : _grey300Opacity,
     );
     final BoxDecoration _kUnselectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width: 1.0)),
+      border: Border(bottom: Divider.createBorderSide(context, width: theme.dividerTheme.thickness ?? _defaultBorderThickness)),
     );
 
     final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);
