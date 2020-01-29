@@ -13,7 +13,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -422,7 +421,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (globals.logger.hasTerminal) {
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_build_log_pipe.');
     scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
-    os.makePipe(scriptOutputPipeFile.path);
+    globals.os.makePipe(scriptOutputPipeFile.path);
 
     Future<void> listenToScriptOutputLine() async {
       final List<String> lines = await scriptOutputPipeFile.readAsLines();

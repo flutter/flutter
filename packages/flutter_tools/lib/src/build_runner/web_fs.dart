@@ -27,7 +27,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
-import '../base/os.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
@@ -225,7 +224,7 @@ class WebFs {
 
     // Initialize the dwds server.
     final String effectiveHostname = hostname ?? _kHostName;
-    final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
+    final int hostPort = port == null ? await globals.os.findFreePort() : int.tryParse(port);
 
     final Pipeline pipeline = const Pipeline().addMiddleware((Handler innerHandler) {
       return (Request request) async {

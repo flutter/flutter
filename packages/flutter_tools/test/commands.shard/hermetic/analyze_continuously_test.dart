@@ -46,7 +46,7 @@ void main() {
 
       expect(errorCount, 0);
     }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => os,
+      OperatingSystemUtils: () => globals.os,
       Pub: () => const Pub(),
     });
   });
@@ -69,7 +69,7 @@ void main() {
 
     expect(errorCount, greaterThan(0));
   }, overrides: <Type, Generator>{
-    OperatingSystemUtils: () => os,
+    OperatingSystemUtils: () => globals.os,
     Pub: () => const Pub(),
   });
 
@@ -87,7 +87,7 @@ void main() {
     await onDone;
     expect(errorCount, 0);
   }, overrides: <Type, Generator>{
-    OperatingSystemUtils: () => os,
+    OperatingSystemUtils: () => globals.os,
     Pub: () => const Pub(),
   });
 }

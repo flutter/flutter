@@ -9,7 +9,6 @@ import 'package:coverage/coverage.dart' as coverage;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../dart/package_map.dart';
@@ -139,7 +138,7 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      if (os.which('lcov') == null) {
+      if (globals.os.which('lcov') == null) {
         String installMessage = 'Please install lcov.';
         if (globals.platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
