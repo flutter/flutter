@@ -38,9 +38,6 @@ class MockIosProject extends Mock implements IosProject {}
 
 void main() {
   group('IMobileDevice', () {
-    final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
-      ..operatingSystem = 'macos';
-    MockProcessManager mockProcessManager;
     MockProcessUtils mockProcessUtils;
     final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
     final String ideviceIdPath = globals.fs.path.join(libimobiledevicePath, 'idevice_id');
@@ -51,7 +48,6 @@ void main() {
     IMobileDevice iMobileDevice;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
       mockProcessUtils = MockProcessUtils();
       mockCache = MockCache();
       mockArtifacts = MockArtifacts();
@@ -179,7 +175,6 @@ void main() {
       MockFile mockOutputFile;
 
       setUp(() {
-        //mockProcessManager = MockProcessManager();
         mockOutputFile = MockFile();
       });
 
