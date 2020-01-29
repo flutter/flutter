@@ -161,6 +161,14 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--no-use-integer-division');
     }
 
+    // The name of the debug file must contain additonal information about
+    // the architecture, since a single build command may produce
+    // multiple debug files.
+    final String archName = darwinArch == null
+      ? getNameForTargetPlatform(platform)
+      : getNameForDarwinArch(darwinArch);
+    final String debugFilename = 'app.$archName.debug';
+
     // Optimization arguments.
     genSnapshotArgs.addAll(<String>[
       // Faster async/await
@@ -168,7 +176,7 @@ class AOTSnapshotter {
       '--lazy-async-stacks',
       if (saveDebuggingInformation != null) ...<String>[
         '--dwarf-stack-traces',
-        '--save-debugging-info=${globals.fs.path.join(saveDebuggingInformation, 'app.debug')}'
+        '--save-debugging-info=${globals.fs.path.join(saveDebuggingInformation, debugFilename)}'
       ]
     ]);
 

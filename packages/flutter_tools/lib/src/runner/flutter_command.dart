@@ -106,6 +106,7 @@ class FlutterOptions {
   static const String kEnableExperiment = 'enable-experiment';
   static const String kFileSystemRoot = 'filesystem-root';
   static const String kFileSystemScheme = 'filesystem-scheme';
+  static const String kDebuggingInfoOption = 'save-debugging-info';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -363,12 +364,11 @@ abstract class FlutterCommand extends Command<void> {
       negatable: false,
       hide: !verboseHelp,
       help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
-    argParser.addOption('save-debugging-info',
+    argParser.addOption(FlutterOptions.kDebuggingInfoOption,
       help: 'Save a debug file used to symbolicate crashes from release mode applications. When provided '
         'Allows more information to be removed from the snapshot, reducing code size. Requires usage of '
         'the "flutter symbolicate" command to translate back into a readable stack trace.',
       valueHelp: '/some/where/safe/',
-      hide: true,
     );
   }
 
@@ -496,6 +496,9 @@ abstract class FlutterCommand extends Command<void> {
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
+          : null,
+      saveDebuggingInformation: argParser.options.containsKey(FlutterOptions.kDebuggingInfoOption)
+          ? stringArg(FlutterOptions.kDebuggingInfoOption)
           : null,
     );
   }

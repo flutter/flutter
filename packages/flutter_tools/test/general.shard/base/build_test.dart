@@ -477,7 +477,7 @@ void main() {
       genSnapshot.outputs = <String, String>{
         assembly: 'blah blah\n.section __DWARF\nblah blah\n',
       };
-      final String debugPath = globals.fs.path.join('foo', 'app.debug');
+      final String debugPath = globals.fs.path.join('foo', 'app.armv7.debug');
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
@@ -491,7 +491,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
-        saveDebuggingInformation: debugPath,
+        saveDebuggingInformation: 'foo',
       );
 
       expect(genSnapshotExitCode, 0);
@@ -677,7 +677,7 @@ void main() {
       globals.fs.file('main.dill').writeAsStringSync('binary magic');
 
       final String outputPath = globals.fs.path.join('build', 'foo');
-      final String debugPath = globals.fs.path.join('foo', 'app.debug');
+      final String debugPath = globals.fs.path.join('foo', 'app.android-arm.debug');
       globals.fs.directory(outputPath).createSync(recursive: true);
 
       final int genSnapshotExitCode = await snapshotter.build(
@@ -687,7 +687,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
-        saveDebuggingInformation: debugPath,
+        saveDebuggingInformation: 'foo',
       );
 
       expect(genSnapshotExitCode, 0);

@@ -338,6 +338,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.fastStart) {
     command.add('-Pfast-start=true');
   }
+  if (androidBuildInfo.buildInfo.saveDebuggingInformation != null) {
+    command.add('-Psave-debugging-info=${androidBuildInfo.buildInfo.saveDebuggingInformation}');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;

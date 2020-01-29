@@ -41,7 +41,7 @@ const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
 /// Whether to strip source code information out of release builds and where to save it.
-const String kSaveDebuggingInformation = 'SaveDebuggingInformation';
+const String kSaveDebuggingInformation = 'SaveDebuggingInfo';
 
 /// Alternative scheme for file URIs.
 ///
