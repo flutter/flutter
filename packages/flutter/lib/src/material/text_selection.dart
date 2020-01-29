@@ -15,6 +15,7 @@ import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'colors.dart';
 
 const double _kHandleSize = 22.0;
 
@@ -34,12 +35,16 @@ class _TextSelectionToolbar extends StatefulWidget {
     this.handleCopy,
     this.handlePaste,
     this.handleSelectAll,
+    this.isAbove,
+    this.onSizeChange,
   }) : super(key: key);
 
   final VoidCallback handleCut;
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
+  final Function(Size) onSizeChange;
+  final bool isAbove;
 
   // Returns true iff the menu items that this widget renders will produce a
   // different width than that of oldWidget. Width depends on the existence of
@@ -121,14 +126,33 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
         return false;
       });
 
+      double overflowingItemsHeight = 0.0;
+      if (_indexWhereOverflows > -1) {
+        for (int i = _indexWhereOverflows; i < _itemKeys.length; i++) {
+          final GlobalKey key = _itemKeys[i];
+          assert(key.currentContext != null);
+          final RenderBox renderBox = key.currentContext.findRenderObject() as RenderBox;
+          overflowingItemsHeight += renderBox.size.height;
+        }
+      }
+
       final RenderBox renderBoxMoreButton = _moreButtonKey.currentContext.findRenderObject() as RenderBox;
-      final double moreButtonWidth = renderBoxMoreButton.size.width;
       final double itemsWidth = renderBoxContainer.size.width - remainingContainerWidth;
+      final double toolbarHeightPadding = MediaQuery.of(context).padding.top
+        + _kToolbarScreenPadding
+        + _kToolbarContentDistance;
+      final Size menuContentSize = Size(
+        _shouldShowMoreButton
+          ? itemsWidth + renderBoxMoreButton.size.width
+          : itemsWidth,
+        _overflowOpen && _indexWhereOverflows == -1
+          ? toolbarHeightPadding + _kToolbarHeight
+          : toolbarHeightPadding + overflowingItemsHeight + renderBoxMoreButton.size.height
+      );
+      widget.onSizeChange(menuContentSize);
 
       setState(() {
-        _menuContentWidth = _shouldShowMoreButton
-          ? itemsWidth + moreButtonWidth
-          : itemsWidth;
+        _menuContentWidth = menuContentSize.width;
       });
     });
   }
@@ -182,7 +206,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       _itemKeys.add(GlobalKey());
       items.add(FlatButton(
         key: _itemKeys[_itemKeys.length - 1],
-        child: Text(localizations.selectAllButtonLabel),
+        child: Text('Select absolutely everything'),//localizations.selectAllButtonLabel),
         onPressed: () {
           setState(() {
             _overflowOpen = false;
@@ -212,6 +236,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       );
     }
 
+    assert(_indexWhereOverflows != null);
     final int itemsInFirstMenu = _indexWhereOverflows == -1
       ? _itemKeys.length
       : _indexWhereOverflows;
@@ -221,6 +246,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
         key: _containerKey,
         width: _menuContentWidth,
         child: _TextSelectionToolbarContentOverflow(
+          isAbove: widget.isAbove,
           items: items.sublist(itemsInFirstMenu, items.length),
           onBackPressed: () {
             setState(() {
@@ -267,8 +293,11 @@ class _TextSelectionToolbarContainerState extends State<_TextSelectionToolbarCon
   Widget build(BuildContext context) {
     return Container(
       width: widget.width,
+      //height: _kToolbarHeight,
+      //color: Colors.red,
+      //child: widget.child,
       child: Align(
-        alignment: Alignment.topRight,
+        alignment: Alignment.bottomRight,
         heightFactor: 1.0,
         widthFactor: 1.0,
         child: Material(
@@ -329,6 +358,7 @@ class _TextSelectionToolbarContentOverflow extends StatelessWidget {
     Key key,
     @required this.items,
     @required this.onBackPressed,
+    @required this.isAbove,
   }) : assert(items != null),
        assert(onBackPressed != null),
        super(key: key);
@@ -336,20 +366,29 @@ class _TextSelectionToolbarContentOverflow extends StatelessWidget {
   final List<Widget> items;
   final VoidCallback onBackPressed;
 
+  // Whether the menu appears above or below the anchor.
+  final bool isAbove;
+
   @override
   Widget build(BuildContext context) {
+    final IconButton moreButton = IconButton(
+      icon: Icon(Icons.arrow_back),
+      tooltip: 'Back',
+      onPressed: onBackPressed,
+    );
+    final List<Widget> children = <Widget>[...items];
+    //if ((materialTextSelectionControls as _MaterialTextSelectionControls).fitsAbove) {
+    if (isAbove) {
+      children.insert(children.length, moreButton);
+    } else {
+      children.insert(0, moreButton);
+    }
+
     return Container(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          ...items,
-          IconButton(
-            icon: Icon(Icons.arrow_back),
-            tooltip: 'Back',
-            onPressed: onBackPressed,
-          ),
-        ],
+        children: children,
       ),
     );
   }
@@ -358,7 +397,7 @@ class _TextSelectionToolbarContentOverflow extends StatelessWidget {
 /// Centers the toolbar around the given position, ensuring that it remains on
 /// screen.
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
-  _TextSelectionToolbarLayout(this.screenSize, this.globalEditableRegion, this.position);
+  _TextSelectionToolbarLayout(this.screenSize, this.globalEditableRegion, this.position, this.myPoint, this.toolbarSize, this.anchorTop, this.anchorBottom, this.paddingTop);
 
   /// The size of the screen at the time that the toolbar was last laid out.
   final Size screenSize;
@@ -371,6 +410,32 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
   /// [globalEditableRegion].
   final Offset position;
 
+  final Offset myPoint;
+
+  // The size of the toolbar that's being layed out.
+  final Size toolbarSize;
+
+  final Offset anchorTop;
+  final Offset anchorBottom;
+  final double paddingTop;
+
+  // Return the value that centers width as closely as possible to position
+  // while fitting inside of min and max.
+  static double _centerOn(double position, double width, double min, double max) {
+    // If it overflows on the left, put it as far left as possible.
+    if (position - width / 2.0 < min) {
+      return min;
+    }
+
+    // If it overflows on the right, put it as far right as possible.
+    if (position + width / 2.0 > max) {
+      return max - width;
+    }
+
+    // Otherwise it fits while perfectly centered.
+    return position - width / 2.0;
+  }
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     return constraints.loosen();
@@ -378,22 +443,23 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final Offset globalPosition = globalEditableRegion.topLeft + position;
+    // TODO(justinmc): This is duplicated and should be deduped.
+    final double toolbarHeightNeeded = _kToolbarScreenPadding
+      + _kToolbarHeight;
+    final double availableHeight = globalEditableRegion.top
+      + anchorTop.dy
+      - paddingTop;
+    final bool fitsAbove = toolbarHeightNeeded <= availableHeight;
 
-    double x = globalPosition.dx - childSize.width / 2.0;
-    double y = globalPosition.dy - childSize.height;
-
-    if (x < _kToolbarScreenPadding)
-      x = _kToolbarScreenPadding;
-    else if (x + childSize.width > screenSize.width - _kToolbarScreenPadding)
-      x = screenSize.width - childSize.width - _kToolbarScreenPadding;
-
-    if (y < _kToolbarScreenPadding)
-      y = _kToolbarScreenPadding;
-    else if (y + childSize.height > screenSize.height - _kToolbarScreenPadding)
-      y = screenSize.height - childSize.height - _kToolbarScreenPadding;
-
-    return Offset(x, y);
+    return Offset(
+      _centerOn(
+        anchorTop.dx,
+        childSize.width,
+        _kToolbarScreenPadding,
+        size.width - _kToolbarScreenPadding,
+      ),
+      fitsAbove ? anchorTop.dy - childSize.height : anchorBottom.dy,
+    );
   }
 
   @override
@@ -425,6 +491,9 @@ class _TextSelectionHandlePainter extends CustomPainter {
 }
 
 class _MaterialTextSelectionControls extends TextSelectionControls {
+  final GlobalKey _key = GlobalKey();
+  Size _toolbarSize;
+
   /// Returns the size of the Material handle.
   @override
   Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
@@ -442,33 +511,69 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
 
+    if (_toolbarSize == null) {
+      _toolbarSize = Size(MediaQuery.of(context).size.width, _kToolbarHeight);
+    }
+
     // The toolbar should appear below the TextField
     // when there is not enough space above the TextField to show it.
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final double toolbarHeightNeeded = MediaQuery.of(context).padding.top
-      + _kToolbarScreenPadding
+    final double toolbarHeightNeeded = _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance;
-    final double availableHeight = globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
+    final double availableHeight = globalEditableRegion.top
+      + startTextSelectionPoint.point.dy
+      - textLineHeight
+      - MediaQuery.of(context).padding.top;
+    // TODO(justinmc): Inside of _TextSelectionToolbarLayout, this fitsAbove is
+    // recalculated, and should be deduped.
     final bool fitsAbove = toolbarHeightNeeded <= availableHeight;
     final double y = fitsAbove
         ? startTextSelectionPoint.point.dy - _kToolbarContentDistance - textLineHeight
         : startTextSelectionPoint.point.dy + _kToolbarHeight + _kToolbarContentDistanceBelow;
     final Offset preciseMidpoint = Offset(position.dx, y);
 
+    final Offset anchorTop = Offset(
+      position.dx,
+      startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance,
+    );
+    final Offset anchorBottom = Offset(
+      position.dx,
+      startTextSelectionPoint.point.dy + _kToolbarHeight + _kToolbarContentDistance,
+    );
+
     return ConstrainedBox(
+      key: _key,
       constraints: BoxConstraints.tight(globalEditableRegion.size),
+      //constraints: BoxConstraints.tight(_toolbarSize),
       child: CustomSingleChildLayout(
+        // TODO(justinmc): Remove unused params.
         delegate: _TextSelectionToolbarLayout(
           MediaQuery.of(context).size,
           globalEditableRegion,
           preciseMidpoint,
+          Offset(position.dx, startTextSelectionPoint.point.dy),
+          _toolbarSize,
+          anchorTop,
+          anchorBottom,
+          MediaQuery.of(context).padding.top,
         ),
         child: _TextSelectionToolbar(
           handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
           handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
           handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+          onSizeChange: (Size toolbarSize) {
+            _toolbarSize = toolbarSize;
+          },
+          // TODO(justinmc): Desired behavior for reference:
+          // If the menu is above the anchor but the overflow menu can't fit
+          // above, then it grows downward and the arrow is on top. If the
+          // overflow menu does fit above, then it grows upward and the arrow is
+          // on the bottom. If the menu is below the anchor, then it grows down
+          // and the arrow is on top. It can't happen that the menu is below the
+          // anchor and the overflow menu grows upward.
+          isAbove: fitsAbove,
         ),
       ),
     );
