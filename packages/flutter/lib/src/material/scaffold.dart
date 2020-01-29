@@ -2083,6 +2083,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       previousLocation: widget.floatingActionButtonLocation ?? _kDefaultFloatingActionButtonLocation,
     );
 
+    widget.additionalFloatingActionButtonConfigurations.forEach(
+      (Key key, FloatingActionButtonConfiguration configuration) {
+        _fabStatuses[key] = _FABStatus(
+          button: configuration.button,
+          location: configuration.location ?? _kDefaultFloatingActionButtonLocation,
+          animator: configuration.animator ?? _kDefaultFloatingActionButtonAnimator,
+          previousLocation: configuration.location ?? _kDefaultFloatingActionButtonLocation,
+        );
+      },
+    );
+
     _floatingActionButtonMoveController = AnimationController(
       vsync: this,
       lowerBound: 0.0,
