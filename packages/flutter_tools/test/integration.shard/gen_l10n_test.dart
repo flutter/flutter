@@ -41,10 +41,7 @@ void main() {
     final ProcessResult result = await const LocalProcessManager().run(
       command,
       workingDirectory: tempDir.path,
-      environment: <String, String>{
-        'FLUTTER_ROOT': getFlutterRoot(),
-        'FLUTTER_TEST': 'true',
-      },
+      environment: <String, String>{ 'FLUTTER_ROOT': getFlutterRoot() },
       runInShell: true,
     );
     if (result.exitCode != 0) {
@@ -99,6 +96,7 @@ void main() {
       '#l10n 17 (Hello other 0 worlds, with a total of 100 citizens)\n'
       '#l10n 18 (Hello World of 101 citizens)\n'
       '#l10n 19 (Hello two worlds with 102 total citizens)\n'
+      '#l10n 20 ([Hello] #World#)\n'
       '#l10n END\n'
     );
   });

@@ -115,6 +115,9 @@ import 'messages_all.dart';
 /// you wish to add from the pop-up menu in the Value field. This list should
 /// be consistent with the languages listed in the @(className).supportedLocales
 /// property.
+
+// ignore_for_file: unnecessary_brace_in_string_interps
+
 class @(className) {
   @(className)(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
