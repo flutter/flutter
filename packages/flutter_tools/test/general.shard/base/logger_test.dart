@@ -20,8 +20,17 @@ final String bold = RegExp.escape(AnsiTerminal.bold);
 final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
 final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
-class MockStdio extends Mock implements Stdio {}
 class MockStdout extends Mock implements Stdout {}
+
+class ThrowingStdio extends Stdio {
+  ThrowingStdio(this.stdout, this.stderr);
+
+  @override
+  final Stdout stdout;
+
+  @override
+  final IOSink stderr;
+}
 
 void main() {
   group('AppContext', () {
@@ -82,13 +91,11 @@ void main() {
   });
 
   testWithoutContext('Logger does not throw when stdio write throws', () async {
-    final MockStdio stdio = MockStdio();
     final MockStdout stdout = MockStdout();
     final MockStdout stderr = MockStdout();
+    final ThrowingStdio stdio = ThrowingStdio(stdout, stderr);
     bool stdoutThrew = false;
     bool stderrThrew = false;
-    when(stdio.stdout).thenReturn(stdout);
-    when(stdio.stderr).thenReturn(stderr);
     when(stdout.write(any)).thenAnswer((_) {
       stdoutThrew = true;
       throw 'Error';
@@ -182,8 +189,8 @@ void main() {
           expect(lines.length, equals(1));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(ansiSpinner.stop, throwsA(isInstanceOf<AssertionError>()));
-          expect(ansiSpinner.cancel, throwsA(isInstanceOf<AssertionError>()));
+          expect(ansiSpinner.stop, throwsAssertionError);
+          expect(ansiSpinner.cancel, throwsAssertionError);
           done = true;
         });
         expect(done, isTrue);
@@ -361,8 +368,8 @@ void main() {
           expect(lines[1], equals(''));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-          expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+          expect(() { ansiStatus.cancel(); }, throwsAssertionError);
+          expect(() { ansiStatus.stop(); }, throwsAssertionError);
           done = true;
         });
         expect(done, isTrue);
@@ -405,8 +412,8 @@ void main() {
           expect(lines[1], equals(''));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(ansiStatus.stop, throwsA(isInstanceOf<AssertionError>()));
-          expect(ansiStatus.cancel, throwsA(isInstanceOf<AssertionError>()));
+          expect(ansiStatus.stop, throwsAssertionError);
+          expect(ansiStatus.cancel, throwsAssertionError);
           done = true;
         });
         expect(done, isTrue);
@@ -775,8 +782,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(summaryStatus.cancel, throwsA(isInstanceOf<AssertionError>()));
-      expect(summaryStatus.stop, throwsA(isInstanceOf<AssertionError>()));
+      expect(summaryStatus.cancel, throwsAssertionError);
+      expect(summaryStatus.stop, throwsAssertionError);
     });
 
     testWithoutContext('SummaryStatus works when stopped', () async {
@@ -798,8 +805,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(summaryStatus.stop, throwsA(isInstanceOf<AssertionError>()));
-      expect(summaryStatus.cancel, throwsA(isInstanceOf<AssertionError>()));
+      expect(summaryStatus.stop, throwsAssertionError);
+      expect(summaryStatus.cancel, throwsAssertionError);
     });
 
     testWithoutContext('sequential startProgress calls with StdoutLogger', () async {

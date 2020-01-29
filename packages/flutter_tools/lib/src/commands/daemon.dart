@@ -143,7 +143,7 @@ class Daemon {
     final dynamic id = request['id'];
 
     if (id == null) {
-      safeStdioWrite(stderr, 'no id for request: $request\n');
+      globals.stdio.stderrWrite('no id for request: $request\n');
       return;
     }
 
@@ -323,9 +323,11 @@ class DaemonDomain extends Domain {
           // capture the print output for testing.
           print(message.message);
         } else if (message.level == 'error') {
-          safeStdioWrite(stderr, '${message.message}\n');
+          globals.stdio.stderrWrite('${message.message}\n');
           if (message.stackTrace != null) {
-            safeStdioWrite(stderr, '${message.stackTrace.toString().trimRight()}\n');
+            globals.stdio.stderrWrite(
+              '${message.stackTrace.toString().trimRight()}\n',
+            );
           }
         }
       } else {
@@ -862,7 +864,7 @@ class DeviceDomain extends Domain {
   }
 }
 
-Stream<Map<String, dynamic>> get stdinCommandStream => stdin
+Stream<Map<String, dynamic>> get stdinCommandStream => globals.stdio.stdin
   .transform<String>(utf8.decoder)
   .transform<String>(const LineSplitter())
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
@@ -872,8 +874,7 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
-  safeStdioWrite(
-    stdout,
+  globals.stdio.stdoutWrite(
     '[${jsonEncodeObject(command)}]\n',
     fallback: (String message, dynamic error, StackTrace stack) {
       throwToolExit('Failed to write daemon command response to stdout: $error');

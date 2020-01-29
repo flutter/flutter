@@ -46,7 +46,7 @@ abstract class ParametricCurve<T> {
   }
 
   @override
-  String toString() => objectRuntimeType(this, 'ParametricCurve');
+  String toString() => '${objectRuntimeType(this, 'ParametricCurve')}';
 }
 
 /// An parametric animation easing curve, i.e. a mapping of the unit interval to
