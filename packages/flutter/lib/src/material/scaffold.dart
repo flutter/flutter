@@ -50,7 +50,6 @@ enum _ScaffoldSlot {
   snackBar,
   persistentFooter,
   bottomNavigationBar,
-  floatingActionButton,
   drawer,
   endDrawer,
   statusBar,
