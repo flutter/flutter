@@ -2020,19 +2020,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     return _floatingActionButtonVisibilityController.forward();
   }
 
-  // Moves the Floating Action Button to the new Floating Action Button Location.
-  void _moveFloatingActionButton(final FloatingActionButtonLocation newLocation) {
-    FloatingActionButtonLocation previousLocation = _fabStatuses[_primaryFABKey].location;
+  // Moves the Floating Action Button with key [key] to the new Floating Action Button Location.
+  void _moveFloatingActionButton(Key key, final FloatingActionButtonLocation newLocation) {
+    FloatingActionButtonLocation previousLocation = _fabStatuses[key].location;
     double restartAnimationFrom = 0.0;
     // If the Floating Action Button is moving right now, we need to start from a snapshot of the current transition.
     if (_floatingActionButtonMoveController.isAnimating) {
-      previousLocation = _TransitionSnapshotFabLocation(_fabStatuses[_primaryFABKey].previousLocation, _fabStatuses[_primaryFABKey].location, _fabStatuses[_primaryFABKey].animator, _floatingActionButtonMoveController.value);
-      restartAnimationFrom = _fabStatuses[_primaryFABKey].animator.getAnimationRestart(_floatingActionButtonMoveController.value);
+      previousLocation = _TransitionSnapshotFabLocation(_fabStatuses[key].previousLocation, _fabStatuses[key].location, _fabStatuses[key].animator, _floatingActionButtonMoveController.value);
+      restartAnimationFrom = _fabStatuses[key].animator.getAnimationRestart(_floatingActionButtonMoveController.value);
     }
 
     setState(() {
-      _fabStatuses[_primaryFABKey].previousLocation = previousLocation;
-      _fabStatuses[_primaryFABKey].location = newLocation;
+      _fabStatuses[key].previousLocation = previousLocation;
+      _fabStatuses[key].location = newLocation;
     });
 
     // Animate the motion even when the fab is null so that if the exit animation is running,
