@@ -785,12 +785,21 @@ class _ReadingOrderSortData extends Diagnosticable {
   Iterable<Directionality> get directionalAncestors {
     List<Directionality> getDirectionalityAncestors(BuildContext context) {
       final List<Directionality> result = <Directionality>[];
-      context.visitAncestorElements((Element element) {
-        if (element.widget is Directionality) {
-          result.add(element.widget as Directionality);
-        }
-        return true;
-      });
+      // BuildContext/Element doesn't have a parent accessor, but it can be
+      // simulated with visitAncestorElements. getParent is needed because
+      // context.getElementForInheritedWidgetOfExactType will return itself it
+      // happens to be of the correct type. getParent should be O(1), since we
+      // always return false at the first ancestor.
+      BuildContext getParent(BuildContext context) {
+        BuildContext parent;
+        context.visitAncestorElements((Element ancestor) { parent = ancestor; return false; });
+        return parent;
+      }
+      InheritedElement directionalityElement = context.getElementForInheritedWidgetOfExactType<Directionality>();
+      while (directionalityElement != null) {
+        result.add(directionalityElement.widget as Directionality);
+        directionalityElement = getParent(directionalityElement)?.getElementForInheritedWidgetOfExactType<Directionality>();
+      }
       return result;
     }
     _directionalAncestors ??= getDirectionalityAncestors(node.context);
