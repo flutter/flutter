@@ -13,6 +13,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 buildroot_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
 out_dir = os.path.join(buildroot_dir, 'out')
@@ -24,12 +25,34 @@ font_subset_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'font-subset')
 
 fml_unittests_filter = '--gtest_filter=-*TimeSensitiveTest*'
 
+def PrintDivider(char='='):
+  print '\n'
+  for _ in xrange(4):
+    print(''.join([char for _ in xrange(80)]))
+  print '\n'
+
 def RunCmd(cmd, **kwargs):
-  try:
-    print(subprocess.check_output(cmd, **kwargs))
-  except subprocess.CalledProcessError as cpe:
-    print(cpe.output)
-    raise cpe
+  command_string = ' '.join(cmd)
+
+  PrintDivider('>')
+  print 'Running command "%s"' % command_string
+
+  start_time = time.time()
+  process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kwargs)
+  (output, _) = process.communicate()
+  end_time = time.time()
+
+  # Print the result no matter what.
+  for line in output.splitlines():
+    print line
+
+  if process.returncode != 0:
+    PrintDivider('!')
+    raise Exception('Command "%s" exited with code %d' % (command_string, process.returncode))
+
+  PrintDivider('<')
+  print 'Command run successfully in %.2f seconds: %s' % (end_time - start_time, command_string)
+
 
 def IsMac():
   return sys.platform == 'darwin'
