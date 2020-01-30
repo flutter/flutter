@@ -858,6 +858,10 @@ enum _StateLifecycle {
   /// time.
   created,
 
+  /// The [Widget] associated to the [State] object was changed but [State.build]
+  /// hasn't been called yet.
+  updated,
+
   /// The [State.initState] method has been called but the [State] object is
   /// not yet ready to build. [State.didChangeDependencies] is called at this time.
   initialized,
@@ -1068,7 +1072,9 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// super.didUpdateWidget(oldWidget).
   @mustCallSuper
   @protected
-  void didUpdateWidget(covariant T oldWidget) { }
+  void didUpdateWidget(covariant T oldWidget) {
+    assert(_debugLifecycleState == _StateLifecycle.updated);
+  }
 
   /// {@macro flutter.widgets.reassemble}
   ///
@@ -4438,6 +4444,10 @@ class StatefulElement extends ComponentElement {
 
   @override
   Widget build() {
+    assert(() {
+      _state._debugLifecycleState = _StateLifecycle.ready;
+      return true;
+    }());
     if (_didChangeDependencies) {
       _state.didChangeDependencies();
       _didChangeDependencies = false;
@@ -4505,6 +4515,10 @@ class StatefulElement extends ComponentElement {
     _state._widget = widget as StatefulWidget;
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
+      assert(() {
+        _state._debugLifecycleState = _StateLifecycle.updated;
+        return true;
+      }());
       final dynamic debugCheckForReturnedFuture = _state.didUpdateWidget(oldWidget) as dynamic;
       assert(() {
         if (debugCheckForReturnedFuture is Future) {
@@ -4575,9 +4589,9 @@ class StatefulElement extends ComponentElement {
     assert(ancestor != null);
     assert(() {
       final Type targetType = ancestor.widget.runtimeType;
-      if (state._debugLifecycleState == _StateLifecycle.created) {
+      if (state._debugLifecycleState == _StateLifecycle.created || state._debugLifecycleState == _StateLifecycle.updated) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called before ${_state.runtimeType}.initState() completed.'),
+          ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called before ${_state.runtimeType}.initState() or ${_state.runtimeType}.didUpdateWidget() completed.'),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
             'its dependent widgets are rebuilt. If the dependent widget\'s reference to '

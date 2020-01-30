@@ -711,6 +711,33 @@ void main() {
     }
   });
 
+  testWidgets('cannot call dependOnInheritedWidgetOfExactType inside didUpdateWidget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Inherited(
+        0,
+        child: StatefulTest(
+          child: Text('child', textDirection: TextDirection.ltr)
+        ),
+      ),
+    );
+
+    expect(find.text('child'), findsOneWidget);
+
+    await tester.pumpWidget(
+      Inherited(
+        0,
+        child: StatefulTest(
+          didUpdateWidget: (BuildContext context) {
+            context.dependOnInheritedWidgetOfExactType<Inherited>();
+          },
+          child: const Text('child', textDirection: TextDirection.ltr)
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isFlutterError);
+  });
+
   testWidgets('didUpdateDependencies is not called on a State that never rebuilds', (WidgetTester tester) async {
     final GlobalKey<DependentState> key = GlobalKey<DependentState>();
 
@@ -739,6 +766,29 @@ void main() {
     expect(state.didChangeDependenciesCount, 3);
     expect(state.deactivatedCount, 2);
   });
+}
+
+class StatefulTest extends StatefulWidget {
+  const StatefulTest({Key key, this.didUpdateWidget, this.child}) : super(key: key);
+
+  final void Function(BuildContext context) didUpdateWidget;
+  final Widget child;
+
+  @override
+  _StatefulTestState createState() => _StatefulTestState();
+}
+
+class _StatefulTestState extends State<StatefulTest> {
+  @override
+  void didUpdateWidget(StatefulTest oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    widget.didUpdateWidget?.call(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }
 
 class NullChildTest extends Widget {
