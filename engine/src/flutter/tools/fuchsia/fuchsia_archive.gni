@@ -139,6 +139,10 @@ template("fuchsia_test_archive") {
     deps = invoker.deps
     binary = invoker.binary
 
+    if (defined(invoker.resources)) {
+      resources = invoker.resources
+    }
+
     meta_dir = "$flutter_root/testing/fuchsia/meta"
     cmx_file = "$meta_dir/fuchsia_test.cmx"
   }
