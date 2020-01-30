@@ -10,6 +10,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/unique_fd.h"
 
 static bool WriteStringToFile(const fml::UniqueFD& fd,
@@ -266,4 +267,32 @@ TEST(FileTest, EmptyMappingTest) {
   }
 
   ASSERT_TRUE(fml::UnlinkFile(dir.fd(), "my_contents"));
+}
+
+TEST(FileTest, FileTestsWork) {
+  fml::ScopedTemporaryDirectory dir;
+  ASSERT_TRUE(dir.fd().is_valid());
+  const char* filename = "some.txt";
+  auto fd =
+      fml::OpenFile(dir.fd(), filename, true, fml::FilePermission::kWrite);
+  ASSERT_TRUE(fd.is_valid());
+  fd.reset();
+  ASSERT_TRUE(fml::FileExists(dir.fd(), filename));
+  ASSERT_TRUE(
+      fml::IsFile(fml::paths::JoinPaths({dir.path(), filename}).c_str()));
+  ASSERT_TRUE(fml::UnlinkFile(dir.fd(), filename));
+}
+
+TEST(FileTest, FileTestsSupportsUnicode) {
+  fml::ScopedTemporaryDirectory dir;
+  ASSERT_TRUE(dir.fd().is_valid());
+  const char* filename = u8"äëïöüテスト☃";
+  auto fd =
+      fml::OpenFile(dir.fd(), filename, true, fml::FilePermission::kWrite);
+  ASSERT_TRUE(fd.is_valid());
+  fd.reset();
+  ASSERT_TRUE(fml::FileExists(dir.fd(), filename));
+  ASSERT_TRUE(
+      fml::IsFile(fml::paths::JoinPaths({dir.path(), filename}).c_str()));
+  ASSERT_TRUE(fml::UnlinkFile(dir.fd(), filename));
 }
