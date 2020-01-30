@@ -451,7 +451,7 @@ enum TextContentType {
   /// Accepts a phone number
   telephoneNumber,
 
-  /// Accepts and email address
+  /// Accepts an email address
   emailAddress,
 
   /// Accepts a url
