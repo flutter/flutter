@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
 import 'focus_manager.dart';
+import 'inherited_model.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
@@ -473,6 +474,24 @@ abstract class Widget extends DiagnosticableTree {
     return oldWidget.runtimeType == newWidget.runtimeType
         && oldWidget.key == newWidget.key;
   }
+
+  // Return a numeric encoding of the specific `Widget` concrete subtype.
+  // This is used in `Element.updateChild` to determine if a hot reload modified the
+  // superclass of a mounted element's configuration. The encoding of each `Widget`
+  // must match the corresponding `Element` encoding in `Element._debugConcreteSubtype`.
+  static int _debugConcreteSubtype(Widget widget) {
+    return widget is StatefulWidget ? 1 :
+           widget is StatelessWidget ? 2 :
+           widget is InheritedModel ? 3 :
+           widget is InheritedWidget ? 4 :
+           widget is ParentDataWidget ? 5 :
+           widget is ProxyWidget ? 6 :
+           widget is LeafRenderObjectWidget ? 7 :
+           widget is SingleChildRenderObjectWidget? 8 :
+           widget is MultiChildRenderObjectWidget ? 9 :
+           widget is RenderObjectWidget ? 10 :
+           0;
+    }
 }
 
 /// A widget that does not require mutable state.
@@ -2838,6 +2857,24 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return 0;
   }
 
+  // Return a numeric encoding of the specific `Element` concrete subtype.
+  // This is used in `Element.updateChild` to determine if a hot reload modified the
+  // superclass of a mounted element's configuration. The encoding of each `Element`
+  // must match the corresponding `Widget` encoding in `Widget._debugConcreteSubtype`.
+  static int _debugConcreteSubtype(Element element) {
+    return element is StatefulElement ? 1 :
+           element is StatelessElement ? 2 :
+           element is InheritedModelElement ? 3 :
+           element is InheritedElement ? 4 :
+           element is ParentDataElement ? 5 :
+           element is ProxyElement ? 6 :
+           element is LeafRenderObjectElement ? 7 :
+           element is SingleChildRenderObjectElement ? 8 :
+           element is MultiChildRenderObjectElement ? 9 :
+           element is RenderObjectElement ? 10 :
+           0;
+  }
+
   /// The configuration for this element.
   @override
   Widget get widget => _widget;
@@ -3069,21 +3106,45 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return null;
     }
     if (child != null) {
-      if (child.widget == newWidget) {
-        if (child.slot != newSlot)
-          updateSlotForChild(child, newSlot);
-        return child;
-      }
-      if (Widget.canUpdate(child.widget, newWidget)) {
-        if (child.slot != newSlot)
-          updateSlotForChild(child, newSlot);
-        child.update(newWidget);
-        assert(child.widget == newWidget);
-        assert(() {
-          child.owner._debugElementWasRebuilt(child);
-          return true;
-        }());
-        return child;
+      bool hasSameSuperclass = true;
+      // When the type of a widget is changed between Stateful and Stateless via
+      // hot reload, the element tree will end up in a partially invalid state.
+      // That is, if the widget was a StatefulWidget and is now a StatelessWidget,
+      // then the element tree currently contains a StatefulElement that is incorrectly
+      // referencing a StatelessWidget (and likewise with StatelessElement).
+      //
+      // To avoid crashing due to type errors, we need to gently guide the invalid
+      // element out of the tree. To do so, we ensure that the `hasSameSuperclass` condition
+      // returns false which prevents us from trying to update the existing element
+      // incorrectly.
+      //
+      // For the case where the widget becomes Stateful, we also need to avoid
+      // accessing `StatelessElement.widget` as the cast on the getter will
+      // cause a type error to be thrown. Here we avoid that by short-circuiting
+      // the `Widget.canUpdate` check once `hasSameSuperclass` is false.
+      assert(() {
+        final int oldElementClass = Element._debugConcreteSubtype(child);
+        final int newWidgetClass = Widget._debugConcreteSubtype(newWidget);
+        hasSameSuperclass = oldElementClass == newWidgetClass;
+        return true;
+      }());
+      if (hasSameSuperclass) {
+        if (child.widget == newWidget) {
+          if (child.slot != newSlot)
+            updateSlotForChild(child, newSlot);
+          return child;
+        }
+        if (Widget.canUpdate(child.widget, newWidget)) {
+          if (child.slot != newSlot)
+            updateSlotForChild(child, newSlot);
+          child.update(newWidget);
+          assert(child.widget == newWidget);
+          assert(() {
+            child.owner._debugElementWasRebuilt(child);
+            return true;
+          }());
+          return child;
+        }
       }
       deactivateChild(child);
       assert(child._parent == null);
@@ -3424,7 +3485,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   void deactivate() {
     assert(_debugLifecycleState == _ElementLifecycle.active);
-    assert(widget != null);
+    assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(depth != null);
     assert(_active);
     if (_dependencies != null && _dependencies.isNotEmpty) {
@@ -3467,10 +3528,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
-    assert(widget != null);
+    assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(depth != null);
     assert(!_active);
-    final Key key = widget.key;
+    // Use the private property to avoid a CastError during hot reload.
+    final Key key = _widget.key;
     if (key is GlobalKey) {
       key._unregister(this);
     }
