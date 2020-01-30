@@ -835,9 +835,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
-            print(fontSubset);
             if (fontSubset == true) {
-
                 args "-dFontSubset=true"
             }
             args ruleNames

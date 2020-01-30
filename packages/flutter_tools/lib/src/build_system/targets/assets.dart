@@ -51,11 +51,11 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
   final List<File> outputs = <File>[];
 
   final Map<String, FontSubsetData> iconData = useFontSubset
-      ? await _getIconData(
-          environment,
-          assetBundle.entries[kFontManifestJson] as DevFSStringContent,
-        )
-      : <String, FontSubsetData>{};
+    ? await _getIconData(
+        environment,
+        assetBundle.entries[kFontManifestJson] as DevFSStringContent,
+      )
+    : <String, FontSubsetData>{};
 
   await Future.wait<void>(
     assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
@@ -205,8 +205,8 @@ Map<String, List<int>> _parseConstFinderResult(ConstFinderResult consts) {
     final String package = iconDataMap['fontPackage'] as String;
     final String family = iconDataMap['fontFamily'] as String;
     final String key = package == null
-        ? family
-        : 'packages/$package/$family';
+      ? family
+      : 'packages/$package/$family';
     result[key] ??= <int>[];
     result[key].add(iconDataMap['codePoint'] as int);
   }
