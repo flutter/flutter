@@ -677,10 +677,15 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     super.dispose();
   }
 
+  bool get _shouldIgnoreFocusRequest {
+    return widget.route.animation?.status == AnimationStatus.reverse ||
+      (widget.route.navigator?.userGestureInProgress ?? false);
+  }
+
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
-    if (widget.route.isCurrent) {
+    if (widget.route.isCurrent && !_shouldIgnoreFocusRequest) {
       widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
     }
     setState(fn);
@@ -713,8 +718,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     AnimatedBuilder(
                       animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
                       builder: (BuildContext context, Widget child) {
-                        final bool ignoreEvents = widget.route.animation?.status == AnimationStatus.reverse ||
-                            (widget.route.navigator?.userGestureInProgress ?? false);
+                        final bool ignoreEvents = _shouldIgnoreFocusRequest;
                         focusScopeNode.canRequestFocus = !ignoreEvents;
                         return IgnorePointer(
                           ignoring: ignoreEvents,
