@@ -810,7 +810,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 class FloatingActionButtonConfiguration {
   FloatingActionButtonConfiguration({@required this.button, @required this.location, this.animator});
 
-  final FloatingActionButton button;
+  final Widget button;
   final FloatingActionButtonLocation location;
   final FloatingActionButtonAnimator animator;
 }
