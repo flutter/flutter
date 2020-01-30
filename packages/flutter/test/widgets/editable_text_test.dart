@@ -3738,6 +3738,51 @@ void main() {
       reason: 'on $platform',
     );
     expect(controller.text, isEmpty, reason: 'on $platform');
+
+    /// Paste and Select All
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyV,
+        LogicalKeyboardKey.keyA,
+      ],
+      shortcutModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: testText.length,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    // Backspace
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.delete,
+      ],
+      platform: platform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 72,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, isEmpty, reason: 'on $platform');
   }
 
   testWidgets('keyboard text selection works as expected on linux', (WidgetTester tester) async {
