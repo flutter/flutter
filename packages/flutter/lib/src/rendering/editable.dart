@@ -430,7 +430,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     LogicalKeyboardKey.keyC,
     LogicalKeyboardKey.keyV,
     LogicalKeyboardKey.keyX,
+    ..._deleteKeys,
+  };
+
+  static final Set<LogicalKeyboardKey> _deleteKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.delete,
+    LogicalKeyboardKey.backspace,
   };
 
   static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
@@ -485,7 +490,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
-    } else if (key == LogicalKeyboardKey.delete) {
+    } else if (_deleteKeys.contains(key)) {
       _handleDelete();
     }
   }
