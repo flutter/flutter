@@ -268,6 +268,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 
+  BinaryMessenger createOriginalBinaryMessenger() {
+    return super.createBinaryMessenger();
+  }
+
+
   /// Whether there is currently a test executing.
   bool get inTest;
 
@@ -1516,6 +1521,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   Offset localToGlobal(Offset point) {
     final Matrix4 transform = renderView.configuration.toHitTestMatrix();
     return MatrixUtils.transformPoint(transform, point);
+  }
+
+  // we need the real channels
+  @override
+  BinaryMessenger createBinaryMessenger() {
+    return super.createOriginalBinaryMessenger();
   }
 }
 
