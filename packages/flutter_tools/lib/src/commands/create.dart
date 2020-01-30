@@ -15,7 +15,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
-import '../base/os.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -667,7 +666,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
         if (modes != null && modes.contains('x')) {
-          os.makeExecutable(destinationFile);
+          globals.os.makeExecutable(destinationFile);
         }
       },
     );
