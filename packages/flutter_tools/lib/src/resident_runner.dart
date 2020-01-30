@@ -1060,6 +1060,7 @@ abstract class ResidentRunner {
   /// Called right before we exit.
   Future<void> cleanupAtFinish();
 
+  // Clears the terminal.
   void clearScreen() => globals.stdio.stdoutWrite(globals.terminal.clearScreen() + '\n');
 }
 
