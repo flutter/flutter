@@ -50,15 +50,20 @@ Future<void> main() async {
       final String pubspecString = pubspecFile.readAsStringSync();
 
       final StringBuffer iosOnlyPubspec = StringBuffer();
+      bool inAndroidSection = false;
+      const String pluginPlatformIndentation = '      ';
       for (final String line in pubspecString.split('\n')) {
-        if (line.startsWith('    androidPackage:')) {
+        // Skip everything in the Android section of the plugin platforms list.
+        if (line.startsWith('${pluginPlatformIndentation}android:')) {
+          inAndroidSection = true;
           continue;
         }
-        if (line.startsWith('    pluginClass:')) {
-          iosOnlyPubspec.write('    platforms:\n');
-          iosOnlyPubspec.write('      ios:\n');
-          iosOnlyPubspec.write('        pluginClass: IosOnlyPlugin\n');
-          continue;
+        if (inAndroidSection) {
+          if (line.startsWith('$pluginPlatformIndentation  ')) {
+            continue;
+          } else {
+            inAndroidSection = false;
+          }
         }
         iosOnlyPubspec.write('$line\n');
       }
