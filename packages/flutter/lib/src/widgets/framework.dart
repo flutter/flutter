@@ -4299,12 +4299,6 @@ abstract class ComponentElement extends Element {
 
   Element _child;
 
-  bool _debugIsInsideBuild = false;
-  /// Whether this [Element] is currently calling [build] or not.
-  ///
-  /// This does not include [ErrorWidget.builder] if [build] trew.
-  bool get debugIsInsideBuild => _debugIsInsideBuild;
-
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
@@ -4332,12 +4326,9 @@ abstract class ComponentElement extends Element {
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
     try {
-      _debugIsInsideBuild = true;
       built = build();
-      _debugIsInsideBuild = false;
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
-      _debugIsInsideBuild = false;
       built = ErrorWidget.builder(
         _debugReportException(
           ErrorDescription('building $this'),
@@ -4445,13 +4436,31 @@ class StatefulElement extends ComponentElement {
     assert(_state._debugLifecycleState == _StateLifecycle.created);
   }
 
+  bool _debugIsInsideBuild = false;
+  /// Whether this [Element] is currently calling [build] or not.
+  ///
+  /// This does not include [ErrorWidget.builder] if [build] trew.
+  bool get debugIsInsideBuild => _debugIsInsideBuild;
+
   @override
   Widget build() {
     if (_didChangeDependencies) {
       _state.didChangeDependencies();
       _didChangeDependencies = false;
     }
-    return state.build(this);
+    assert(() {
+      _debugIsInsideBuild = true;
+      return true;
+    }());
+    try {
+      final Widget result = state.build(this);
+      return result;
+    } finally {
+      assert(() {
+        _debugIsInsideBuild = false;
+        return true;
+      }());
+    }
   }
 
   /// The [State] instance associated with this location in the tree.

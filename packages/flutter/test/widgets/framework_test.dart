@@ -717,24 +717,24 @@ void main() {
 
       await tester.pumpWidget(
         StatefulTest(
-          didChangeDependencies: (ComponentElement element) {
+          didChangeDependencies: (StatefulElement element) {
             didChangeDependenciesIsInsideBuild = element.debugIsInsideBuild;
           },
-          build: (ComponentElement element) {
+          build: (StatefulElement element) {
             buildIsInsideBuild = element.debugIsInsideBuild;
           },
           child: Container(),
         ),
       );
 
-      final ComponentElement element = tester.element(find.byType(StatefulTest));
+      final StatefulElement element = tester.element(find.byType(StatefulTest));
       expect(element.debugIsInsideBuild, isFalse);
       expect(buildIsInsideBuild, isTrue);
       expect(didChangeDependenciesIsInsideBuild, isFalse);
     });
     testWidgets('is false inside ErrorWidget.builder', (WidgetTester tester) async {
       bool errorBuilderIsInsideBuild;
-      ComponentElement failingElement;
+      StatefulElement failingElement;
 
       final Widget Function(FlutterErrorDetails) previousBuilder = ErrorWidget.builder;
       ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -744,7 +744,7 @@ void main() {
 
       await tester.pumpWidget(
         StatefulTest(
-          build: (ComponentElement element) {
+          build: (StatefulElement element) {
             failingElement = element;
             throw Error();
           },
@@ -755,7 +755,7 @@ void main() {
       ErrorWidget.builder = previousBuilder;
 
       expect(tester.takeException(), isNotNull);
-      final ComponentElement element = tester.element(find.byType(StatefulTest));
+      final StatefulElement element = tester.element(find.byType(StatefulTest));
       expect(element.debugIsInsideBuild, isFalse);
       expect(errorBuilderIsInsideBuild, isFalse);
     });
@@ -794,8 +794,8 @@ void main() {
 class StatefulTest extends StatefulWidget {
   const StatefulTest({Key key, this.didChangeDependencies, this.build, this.child}) : super(key: key);
 
-  final void Function(ComponentElement element) didChangeDependencies;
-  final void Function(ComponentElement element) build;
+  final void Function(StatefulElement element) didChangeDependencies;
+  final void Function(StatefulElement element) build;
   final Widget child;
 
   @override
@@ -806,12 +806,12 @@ class _StatefulTestState extends State<StatefulTest> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    widget.didChangeDependencies?.call(context as ComponentElement);
+    widget.didChangeDependencies?.call(context as StatefulElement);
   }
 
   @override
   Widget build(BuildContext context) {
-    widget.build?.call(context as ComponentElement);
+    widget.build?.call(context as StatefulElement);
     return widget.child;
   }
 }
