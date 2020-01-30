@@ -102,13 +102,14 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       final bool isUncalibratedSmokeTest =
           io.Platform.environment['UNCALIBRATED_SMOKE_TEST'] == 'true';
       if (isUncalibratedSmokeTest) {
+        print('Running in headless mode because running on uncalibrated hardware.');
         args.add('--headless');
         // When running in headless mode Chrome exits immediately unless
         // a debug port is specified.
         args.add('--remote-debugging-port=${benchmarkServerPort + 1}');
       }
 
-      chromeProcess = await io.Process.start(
+      chromeProcess = await startProcess(
         _findSystemChromeExecutable(),
         args,
         workingDirectory: cwd,
