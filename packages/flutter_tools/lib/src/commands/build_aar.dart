@@ -104,7 +104,7 @@ class BuildAarCommand extends BuildSubCommand {
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(AndroidBuildInfo(
-          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor'), fontSubset: boolArg('font-subset')),
+          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor'), fontSubset: boolArg('tree-shake-icons')),
           targetArchs: targetArchitectures,
         ));
       }

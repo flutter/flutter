@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/logger.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals;
 import '../build_system.dart';
 import 'dart.dart';
 
@@ -24,8 +25,8 @@ const bool kFontSubsetEnabledDefault = false;
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   try {
     return (object as List<dynamic>).cast<Map<String, dynamic>>();
-  } on CastError catch (e, s) {
-    throwToolExit(errorMessage);
+  } on CastError catch (_) {
+    throw _FontSubsetException(errorMessage);
   }
 }
 
@@ -41,53 +42,90 @@ class FontSubset {
   ///
   /// The constructor will validate the environment and print a warning if
   /// font subsetting has been requested in a debug build mode.
-  FontSubset(this._environment, DevFSStringContent fontManifest) : assert(_environment != null) {
+  FontSubset(
+    this._environment,
+    DevFSStringContent fontManifest, {
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FileSystem fs,
+    @required Artifacts artifacts,
+  }) : assert(_environment != null),
+       assert(fontManifest != null),
+       assert(fontManifest.string != null),
+       assert(processManager != null),
+       assert(logger != null),
+       assert(fs != null),
+       assert(artifacts != null),
+       _processManager = processManager,
+       _logger = logger,
+       _fs = fs,
+       _artifacts = artifacts,
+       _fontManifest = fontManifest.string {
     if (_environment.defines[kFontSubsetFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
-      globals.printError('Font subetting is not supported in debug mode. The '
-                         '--font-subset flag will be ignored.');
+      logger.printError('Font subetting is not supported in debug mode. The '
+                         '--tree-shake-icons flag will be ignored.');
     }
-    _getIconData(_environment, fontManifest);
   }
 
   final Environment _environment;
-
+  final String _fontManifest;
   Map<String, _FontSubsetData> _iconData;
 
+  final ProcessManager _processManager;
+  final Logger _logger;
+  final FileSystem _fs;
+  final Artifacts _artifacts;
+
   /// Whether font subsetting should be used for this [Environment].
-  bool get enabled => _environment.defines[kFontSubsetFlag] == 'true' && _environment.defines[kBuildMode] != 'debug';
+  bool get enabled => _environment.defines[kFontSubsetFlag] == 'true'
+                   && _environment.defines[kBuildMode] != 'debug';
 
   /// Fills the [_iconData] map.
-  Future<void> _getIconData(Environment environment, DevFSStringContent fontManifest) async {
+  Future<void> _getIconData(Environment environment) async {
     if (!enabled) {
       return;
     }
 
     final File appDill = environment.buildDir.childFile('app.dill');
 
-    final File constFinder = globals.fs.file(globals.artifacts.getArtifactPath(Artifact.constFinder));
-    final File dart = globals.fs.file(globals.artifacts.getArtifactPath(Artifact.engineDartBinary));
+    final File constFinder = _fs.file(
+      _artifacts.getArtifactPath(Artifact.constFinder),
+    );
+    final File dart = _fs.file(
+      _artifacts.getArtifactPath(Artifact.engineDartBinary),
+    );
 
-    final Map<String, List<int>> iconData = await _findConstants(dart, constFinder, appDill);
+    final Map<String, List<int>> iconData = await _findConstants(
+      dart,
+      constFinder,
+      appDill,
+    );
     final Set<String> familyKeys = iconData.keys.toSet();
 
-    final Map<String, String> fonts = await _parseFontJson(fontManifest.string, familyKeys);
+    final Map<String, String> fonts = await _parseFontJson(
+      _fontManifest,
+      familyKeys,
+    );
 
     if (fonts.length != iconData.length) {
-      throwToolExit('Expected to find fonts for ${iconData.keys}, but found ${fonts.keys}.');
+      throwToolExit('Expected to find fonts for ${iconData.keys}, but found '
+                    '${fonts.keys}. This usually means you are refering to '
+                    'font families in an IconData class but not including them '
+                    'in the assets section of your pubspec.yaml, are missing '
+                    'the package that would include them, or are missing '
+                    '"uses-material-design: true".');
     }
 
-    final Map<String, _FontSubsetData> result = <String, _FontSubsetData>{};
+    _iconData = <String, _FontSubsetData>{};
     for (final MapEntry<String, String> entry in fonts.entries) {
-      result[entry.value] = _FontSubsetData(
+      _iconData[entry.value] = _FontSubsetData(
         family: entry.key,
         relativePath: entry.value,
         codePoints: iconData[entry.key],
       );
     }
-    return result;
   }
-
 
   /// Calls font-subset, which transforms the `inputPath` font file to a
   /// subsetted version at `outputPath`.
@@ -110,12 +148,21 @@ class FontSubset {
       return false;
     }
 
+    if (_iconData == null) {
+      await _getIconData(_environment);
+    }
+
     final _FontSubsetData fontSubsetData = _iconData[relativePath];
     if (fontSubsetData == null) {
       return false;
     }
 
-    final File fontSubset = globals.fs.file(globals.artifacts.getArtifactPath(Artifact.fontSubset));
+    final File fontSubset = _fs.file(
+      _artifacts.getArtifactPath(Artifact.fontSubset),
+    );
+    if (!fontSubset.existsSync()) {
+      throwToolExit('The font-subset utility is missing. Run "flutter doctor".');
+    }
 
     final List<String> cmd = <String>[
       fontSubset.path,
@@ -123,8 +170,9 @@ class FontSubset {
       inputPath,
     ];
     final String codePoints = fontSubsetData.codePoints.join(' ');
-    globals.printTrace('Running font-subset: ${cmd.join(' ')}, using codepoints $codePoints');
-    final Process fontSubsetProcess = await globals.processManager.start(cmd);
+    _logger.printTrace('Running font-subset: ${cmd.join(' ')}, '
+                       'using codepoints $codePoints');
+    final Process fontSubsetProcess = await _processManager.start(cmd);
     try {
       fontSubsetProcess.stdin.writeln(codePoints);
       await fontSubsetProcess.stdin.flush();
@@ -135,37 +183,58 @@ class FontSubset {
 
     final int code = await fontSubsetProcess.exitCode;
     if (code != 0) {
-      globals.printTrace(await utf8.decodeStream(fontSubsetProcess.stdout));
-      globals.printError(await utf8.decodeStream(fontSubsetProcess.stderr));
+      _logger.printTrace(await utf8.decodeStream(fontSubsetProcess.stdout));
+      _logger.printError(await utf8.decodeStream(fontSubsetProcess.stderr));
       throwToolExit('Font subsetting failed with exit code $code.');
     }
     return true;
   }
 
   /// Returns a map of { fontFamly: relativePath } pairs.
-  Future<Map<String, String>> _parseFontJson(String fontManifestData, Set<String> families) async {
+  Future<Map<String, String>> _parseFontJson(
+    String fontManifestData,
+    Set<String> families,
+  ) async {
     final Map<String, String> result = <String, String>{};
-    final List<Map<String, dynamic>> fontList = _getList(json.decode(fontManifestData), 'FontManifest.json invalid: expected top level to be a list of objects.');
+    final List<Map<String, dynamic>> fontList = _getList(
+      json.decode(fontManifestData),
+      'FontManifest.json invalid: expected top level to be a list of objects.',
+    );
+
     for (final Map<String, dynamic> map in fontList) {
       if (map['family'] is! String) {
-        throwToolExit('FontManifest.json invalid: expected the family value to be a string, got: ${map['family']}.');
+        throw _FontSubsetException(
+          'FontManifest.json invalid: expected the family value to be a string, '
+          'got: ${map['family']}.');
       }
       final String familyKey = map['family'] as String;
-      if (families.contains(familyKey)) {
-        final List<Map<String, dynamic>> fonts = _getList(map['fonts'], 'FontManifest.json invalid: expected "fonts" to be a list of objects.');
-        if (fonts.length != 1) {
-          throwToolExit('This tool cannot process icon fonts with multiple fonts in a single family.');
-        }
-        if (fonts.first['asset'] is! String) {
-          throwToolExit('FontManifest.json invalid: expected "asset" value to be a string, got: ${map['assets']}.');
-        }
-        result[familyKey] = fonts.first['asset'] as String;
+      if (!families.contains(familyKey)) {
+        continue;
       }
+      final List<Map<String, dynamic>> fonts = _getList(
+        map['fonts'],
+        'FontManifest.json invalid: expected "fonts" to be a list of objects.',
+      );
+      if (fonts.length != 1) {
+        throw _FontSubsetException(
+          'This tool cannot process icon fonts with multiple fonts in a '
+          'single family.');
+      }
+      if (fonts.first['asset'] is! String) {
+        throw _FontSubsetException(
+          'FontManifest.json invalid: expected "asset" value to be a string, '
+          'got: ${map['assets']}.');
+      }
+      result[familyKey] = fonts.first['asset'] as String;
     }
     return result;
   }
 
-  Future<Map<String, List<int>>> _findConstants(File dart, File constFinder, File appDill) async {
+  Future<Map<String, List<int>>> _findConstants(
+    File dart,
+    File constFinder,
+    File appDill,
+  ) async {
     final List<String> cmd = <String>[
       dart.path,
       constFinder.path,
@@ -173,24 +242,33 @@ class FontSubset {
       '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
       '--class-name', 'IconData',
     ];
-    globals.printTrace('Running command: ${cmd.join(' ')}');
-    final ProcessResult constFinderProcessResult = await globals.processManager.run(cmd);
+    _logger.printTrace('Running command: ${cmd.join(' ')}');
+    final ProcessResult constFinderProcessResult = await _processManager.run(cmd);
 
     if (constFinderProcessResult.exitCode != 0) {
       throwToolExit('ConstFinder failure: ${constFinderProcessResult.stderr}');
     }
     final dynamic jsonDecode = json.decode(constFinderProcessResult.stdout as String);
     if (jsonDecode is! Map<String, dynamic>) {
-      throwToolExit('Invalid ConstFinder output: expected a top level JavaScript object, got $jsonDecode.');
+      throw _FontSubsetException(
+        'Invalid ConstFinder output: expected a top level JavaScript object, '
+        'got $jsonDecode.');
     }
     final Map<String, dynamic> constFinderMap = jsonDecode as Map<String, dynamic>;
     final _ConstFinderResult constFinderResult = _ConstFinderResult(constFinderMap);
     if (constFinderResult.hasNonConstantLocations) {
-      globals.printError('This application cannot tree shake icons fonts. It has non-constant instances of IconData at the following locations:', emphasis: true);
+      _logger.printError('This application cannot tree shake icons fonts. '
+                         'It has non-constant instances of IconData at the '
+                         'following locations:', emphasis: true);
       for (final Map<String, dynamic> location in constFinderResult.nonConstantLocations) {
-        globals.printError('- ${location['file']}:${location['line']}:${location['column']}', indent: 2, hangingIndent: 4);
+        _logger.printError(
+          '- ${location['file']}:${location['line']}:${location['column']}',
+          indent: 2,
+          hangingIndent: 4,
+        );
       }
-      throwToolExit('Avoid non-constant invocations of IconData or try to build again without --shake-icon-fonts.');
+      throwToolExit('Avoid non-constant invocations of IconData or try to '
+                    'build again with --no-tree-shake-icons.');
     }
     return _parseConstFinderResult(constFinderResult);
   }
@@ -198,8 +276,13 @@ class FontSubset {
   Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult consts) {
     final Map<String, List<int>> result = <String, List<int>>{};
     for (final Map<String, dynamic> iconDataMap in consts.constantInstances) {
-      if (iconDataMap['fontPackage'] is! String || iconDataMap['fontFamily'] is! String || iconDataMap['codePoint'] is! int) {
-        throwToolExit('Invalid ConstFinder result. Expected "fontPackage" to be a String, "fontFamily" to be a String, and "codePoint" to be an int, got: $iconDataMap.');
+      if (iconDataMap['fontPackage'] is! String ||
+          iconDataMap['fontFamily'] is! String ||
+          iconDataMap['codePoint'] is! int) {
+        throwToolExit(
+          'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
+          '"fontFamily" to be a String, and "codePoint" to be an int, '
+          'got: $iconDataMap.');
       }
       final String package = iconDataMap['fontPackage'] as String;
       final String family = iconDataMap['fontFamily'] as String;
@@ -215,11 +298,27 @@ class FontSubset {
 }
 
 class _ConstFinderResult {
-  const _ConstFinderResult(this.result);
+  _ConstFinderResult(this.result);
 
   final Map<String, dynamic> result;
-  List<Map<String, dynamic>> get constantInstances => _getList(result['constantInstances'], 'Invalid ConstFinder output: Expected "constInstances" to be a list of objects.');
-  List<Map<String, dynamic>> get nonConstantLocations => _getList(result['nonConstantLocations'], 'Invalid ConstFinder output: Expected "nonConstLocations" to be a list ofobjects');
+
+  List<Map<String, dynamic>> _constantInstances;
+  List<Map<String, dynamic>> get constantInstances {
+    _constantInstances ??= _getList(
+      result['constantInstances'],
+      'Invalid ConstFinder output: Expected "constInstances" to be a list of objects.',
+    );
+    return _constantInstances;
+  }
+
+  List<Map<String, dynamic>> _nonConstantLocations;
+  List<Map<String, dynamic>> get nonConstantLocations {
+    _nonConstantLocations ??= _getList(
+      result['nonConstantLocations'],
+      'Invalid ConstFinder output: Expected "nonConstLocations" to be a list ofobjects',
+    );
+    return _nonConstantLocations;
+  }
 
   bool get hasNonConstantLocations => nonConstantLocations.isNotEmpty;
 }
@@ -247,4 +346,13 @@ class _FontSubsetData {
 
   @override
   String toString() => 'FontSubsetData($family, $relativePath, $codePoints)';
+}
+
+class _FontSubsetException implements Exception {
+  _FontSubsetException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'FontSubset error: $message';
 }

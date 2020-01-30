@@ -20,7 +20,6 @@ import 'font_subset.dart';
 ///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) async {
-
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   await assetBundle.build(
@@ -38,6 +37,10 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
   final FontSubset fontSubset = FontSubset(
     environment,
     assetBundle.entries[kFontManifestJson] as DevFSStringContent,
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fs: globals.fs,
+    artifacts: globals.artifacts,
   );
 
   await Future.wait<void>(

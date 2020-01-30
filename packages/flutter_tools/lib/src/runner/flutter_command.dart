@@ -499,8 +499,8 @@ abstract class FlutterCommand extends Command<void> {
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
           : null,
-      fontSubset: argParser.options.containsKey('font-subset')
-          ? boolArg('font-subset')
+      fontSubset: argParser.options.containsKey('tree-shake-icons')
+          ? boolArg('tree-shake-icons')
           : kFontSubsetEnabledDefault,
     );
   }
