@@ -1101,6 +1101,8 @@ class Scaffold extends StatefulWidget {
   // TODO: Document.
   final Map<Key, FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
+  Set<Key> get _fabKeys => additionalFloatingActionButtonConfigurations.keys.toSet()..add(_primaryFABKey);
+
   FloatingActionButtonConfiguration _fabConfiguration(Key key) {
     if (key == _primaryFABKey) {
       return FloatingActionButtonConfiguration(
@@ -2075,9 +2077,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     _fabStatuses = <Key, _FABStatus> {};
 
-    final Set<Key> keys = widget.additionalFloatingActionButtonConfigurations.keys.toSet()..add(_primaryFABKey);
-
-    keys.forEach(
+    // TODO: Remove forEach.
+    widget._fabKeys.forEach(
       (Key key) {
         final FloatingActionButtonConfiguration configuration = widget._fabConfiguration(key);
         _fabStatuses[key] = _FABStatus(
@@ -2109,9 +2110,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // TODO: Implement rigorously!
 
     final Set<Key> possiblyChangedFABKeys =
-      <Key>{_primaryFABKey}
-          .union(Set<Key>.of(oldWidget.additionalFloatingActionButtonConfigurations.keys))
-          .union(Set<Key>.of(widget.additionalFloatingActionButtonConfigurations.keys));
+        Set<Key>.of(oldWidget._fabKeys)
+        .union(Set<Key>.of(widget._fabKeys));
 
     for (final Key key in possiblyChangedFABKeys) {
       final FloatingActionButtonConfiguration newConfiguration = widget._fabConfiguration(key);
