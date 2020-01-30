@@ -378,17 +378,53 @@ class EngineParagraph implements ui.Paragraph {
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    if (_plainText == null) {
+    final List<EngineLineMetrics> lines = _measurementResult.lines;
+    if (lines == null) {
       return getPositionForMultiSpanOffset(offset);
     }
+
+    final int lineNumber = offset.dy ~/ _measurementResult.lineHeight;
+
+    // [offset] is below all the lines.
+    if (lineNumber >= lines.length) {
+      return ui.TextPosition(
+        offset: _plainText.length,
+        affinity: ui.TextAffinity.upstream,
+      );
+    }
+
+    final EngineLineMetrics lineMetrics = lines[lineNumber];
+    final double lineLeft = lineMetrics.left;
+    final double lineRight = lineLeft + lineMetrics.width;
+
+    // [offset] is to the left of the line.
+    if (offset.dx <= lineLeft) {
+      return ui.TextPosition(
+        offset: lineMetrics.startIndex,
+        affinity: ui.TextAffinity.downstream,
+      );
+    }
+
+    // [offset] is to the right of the line.
+    if (offset.dx >= lineRight) {
+      return ui.TextPosition(
+        offset: lineMetrics.endIndex,
+        affinity: ui.TextAffinity.upstream,
+      );
+    }
+
+    // If we reach here, it means the [offset] is somewhere within the line. The
+    // code below will do a binary search to find where exactly the [offset]
+    // falls within the line.
+
     final double dx = offset.dx - _alignOffset;
     final TextMeasurementService instance = _measurementService;
 
-    int low = 0;
-    int high = _plainText.length;
+    int low = lineMetrics.startIndex;
+    int high = lineMetrics.endIndex;
     do {
       final int current = (low + high) ~/ 2;
-      final double width = instance.measureSubstringWidth(this, 0, current);
+      final double width = instance.measureSubstringWidth(this, lineMetrics.startIndex, current);
       if (width < dx) {
         low = current;
       } else if (width > dx) {
@@ -403,8 +439,8 @@ class EngineParagraph implements ui.Paragraph {
       return ui.TextPosition(offset: high, affinity: ui.TextAffinity.upstream);
     }
 
-    final double lowWidth = instance.measureSubstringWidth(this, 0, low);
-    final double highWidth = instance.measureSubstringWidth(this, 0, high);
+    final double lowWidth = instance.measureSubstringWidth(this, lineMetrics.startIndex, low);
+    final double highWidth = instance.measureSubstringWidth(this, lineMetrics.startIndex, high);
 
     if (dx - lowWidth < highWidth - dx) {
       // The offset is closer to the low index.
