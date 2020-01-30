@@ -29,6 +29,7 @@ void main() {
   MemoryFileSystem fs;
   MockProcessManager processManager;
   MockStdio stdio;
+  UserMessages userMessages;
 
   setUp(() {
     sdk = MockAndroidSdk();
@@ -36,6 +37,7 @@ void main() {
     fs.directory('/home/me').createSync(recursive: true);
     processManager = MockProcessManager();
     stdio = MockStdio();
+    userMessages = UserMessages();
   });
 
   MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
@@ -311,19 +313,20 @@ void main() {
     Stdio: () => stdio,
   }));
 
-  testUsingContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
-    final ValidationResult validationResult = await AndroidValidator().validate();
+  testWithoutContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
+    final ValidationResult validationResult = await AndroidValidator(
+      androidSdk: null,
+      fs: fs,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      processManager: processManager,
+      stdio: stdio,
+      userMessages: userMessages,
+    ).validate();
     expect(
       validationResult.messages.any(
         (ValidationMessage message) => message.message.contains(kAndroidSdkRoot)
       ),
       true,
     );
-  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
-    AndroidSdk: () => null,
-    FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
-    ProcessManager: () => processManager,
-    Stdio: () => stdio,
-  }));
+  });
 }
