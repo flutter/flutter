@@ -161,6 +161,12 @@ class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
 
   const _TransitionSnapshotFabLocation(this.begin, this.end, this.animator, this.progress);
 
+  _TransitionSnapshotFabLocation.fromFABStatus(_FABStatus status):
+        begin = status.previousLocation,
+        end = status.location,
+        animator = status.animator,
+        progress = status.moveController.value;
+
   final FloatingActionButtonLocation begin;
   final FloatingActionButtonLocation end;
   final FloatingActionButtonAnimator animator;
@@ -2021,7 +2027,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     double restartAnimationFrom = 0.0;
     // If the Floating Action Button is moving right now, we need to start from a snapshot of the current transition.
     if (status.moveController.isAnimating) {
-      previousLocation = _TransitionSnapshotFabLocation(status.previousLocation, status.location, status.animator, status.moveController.value);
+      previousLocation = _TransitionSnapshotFabLocation.fromFABStatus(status);
       restartAnimationFrom = status.animator.getAnimationRestart(status.moveController.value);
     }
 
