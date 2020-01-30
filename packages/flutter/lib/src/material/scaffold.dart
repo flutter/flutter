@@ -2749,8 +2749,8 @@ class _FABStatus {
 }
 
 class _FABKey extends ValueKey<int> {
-  const _FABKey.primary() : super(0);
+  const _FABKey(int value): super(value);
 }
 
 // TODO: Generalize _FABKey.
-const _FABKey _primaryFABKey = _FABKey.primary();
+const _FABKey _primaryFABKey = _FABKey(0);
