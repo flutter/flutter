@@ -1,11 +1,13 @@
 package test.io.flutter.embedding.engine;
 
+import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -17,8 +19,11 @@ import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @Config(manifest=Config.NONE)
@@ -63,5 +68,38 @@ public class FlutterEngineTest {
     );
 
     assertTrue(GeneratedPluginRegistrant.getRegisteredEngines().isEmpty());
+  }
+
+  @Test
+  public void itNotifiesPlatformViewsControllerWhenDevHotRestart() {
+    // Setup test.
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    when(mockFlutterJNI.isAttached()).thenReturn(true);
+
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+
+    ArgumentCaptor<FlutterEngine.EngineLifecycleListener> engineLifecycleListenerArgumentCaptor = ArgumentCaptor.forClass(FlutterEngine.EngineLifecycleListener.class);
+
+    // Execute behavior under test.
+    new FlutterEngine(
+        RuntimeEnvironment.application,
+        mock(FlutterLoader.class),
+        mockFlutterJNI,
+        platformViewsController,
+        /*dartVmArgs=*/new String[] {},
+        /*automaticallyRegisterPlugins=*/false
+    );
+
+    // Obtain the EngineLifecycleListener within FlutterEngine that was given to FlutterJNI.
+    verify(mockFlutterJNI).addEngineLifecycleListener(engineLifecycleListenerArgumentCaptor.capture());
+    FlutterEngine.EngineLifecycleListener engineLifecycleListener = engineLifecycleListenerArgumentCaptor.getValue();
+    assertNotNull(engineLifecycleListener);
+
+    // Simulate a pre-engine restart, AKA hot restart.
+    engineLifecycleListener.onPreEngineRestart();
+
+    // Verify that FlutterEngine notified PlatformViewsController of the pre-engine restart,
+    // AKA hot restart.
+    verify(platformViewsController, times(1)).onPreEngineRestart();
   }
 }
