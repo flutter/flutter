@@ -10,10 +10,10 @@
 #include <third_party/tonic/dart_binding_macros.h>
 #include <third_party/tonic/logging/dart_invoke.h>
 
-#include "dart/runtime/include/dart_api.h"
 #include "flutter/flow/view_holder.h"
 #include "flutter/fml/thread_local.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 
 namespace {
 
