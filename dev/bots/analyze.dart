@@ -824,6 +824,10 @@ final Set<Hash256> _grandfatheredBinaries = <Hash256>{
   // examples/flutter_gallery/web/icons/Icon-512.png
   Hash256(0xBACCB205AE45f0B4, 0x21BE1657259B4943, 0xAC40C95094AB877F, 0x3BCBE12CD544DCBE),
 
+  // packages/flutter_tools/templates/app/web/favicon.png.copy.tmpl
+  // examples/flutter_gallery/web/favicon.png
+  Hash256(0x7AB2525F4B86B65D, 0x3E4C70358A17E5A1, 0xAAF6F437f99CBCC0, 0x46DAD73d59BB9015),
+
   // GALLERY ICONS
 
   // examples/flutter_gallery/android/app/src/main/res/mipmap-hdpi/ic_background.png
@@ -1056,7 +1060,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> grandfathe
   assert(
     _grandfatheredBinaries
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
-      .reduce((int value, int element) => value ^ element) == 0xBFC18DE113B5AE8E // Please do not modify this line.
+      .reduce((int value, int element) => value ^ element) == 0x17138C817203D1A7 // Please do not modify this line.
   );
   grandfatheredBinaries ??= _grandfatheredBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows

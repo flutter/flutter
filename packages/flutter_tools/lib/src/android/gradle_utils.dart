@@ -8,7 +8,6 @@ import '../android/android_sdk.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/os.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -172,7 +171,7 @@ bool _hasAnyExecutableFlagSet(File executable) {
 void _giveExecutePermissionIfNeeded(File executable) {
   if (!_hasAllExecutableFlagSet(executable)) {
     globals.printTrace('Trying to give execute permission to ${executable.path}.');
-    os.makeExecutable(executable);
+    globals.os.makeExecutable(executable);
   }
 }
 

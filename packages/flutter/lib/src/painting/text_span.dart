@@ -440,7 +440,7 @@ class TextSpan extends InlineSpan {
   );
 
   @override
-  String toStringShort() => objectRuntimeType(this, 'TextSpan');
+  String toStringShort() => '${objectRuntimeType(this, 'TextSpan')}';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

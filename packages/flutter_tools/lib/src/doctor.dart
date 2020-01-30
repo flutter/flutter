@@ -12,7 +12,6 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/os.dart';
 import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
@@ -603,7 +602,7 @@ class FlutterValidator extends DoctorValidator {
     String frameworkVersion;
 
     try {
-      final FlutterVersion version = FlutterVersion.instance;
+      final FlutterVersion version = globals.flutterVersion;
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
       messages.add(ValidationMessage(userMessages.flutterVersion(
@@ -636,9 +635,15 @@ class FlutterValidator extends DoctorValidator {
       valid = ValidationType.partial;
     }
 
-    return ValidationResult(valid, messages,
+    return ValidationResult(
+      valid,
+      messages,
       statusInfo: userMessages.flutterStatusInfo(
-        versionChannel, frameworkVersion, os.name, globals.platform.localeName),
+        versionChannel,
+        frameworkVersion,
+        globals.os.name,
+        globals.platform.localeName,
+      ),
     );
   }
 }

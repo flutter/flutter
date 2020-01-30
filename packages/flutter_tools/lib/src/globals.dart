@@ -12,14 +12,18 @@ import 'base/error_handling_file_system.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
 import 'base/terminal.dart';
 import 'cache.dart';
+import 'ios/mac.dart';
 import 'macos/xcode.dart';
+import 'version.dart';
 
-Logger get logger => context.get<Logger>();
+Artifacts get artifacts => context.get<Artifacts>();
 Cache get cache => context.get<Cache>();
 Config get config => context.get<Config>();
-Artifacts get artifacts => context.get<Artifacts>();
+Logger get logger => context.get<Logger>();
+OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 
 const FileSystem _kLocalFs = LocalFileSystem();
 
@@ -42,6 +46,8 @@ const Platform _kLocalPlatform = LocalPlatform();
 Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
 Xcode get xcode => context.get<Xcode>();
+FlutterVersion get flutterVersion => context.get<FlutterVersion>();
+IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.

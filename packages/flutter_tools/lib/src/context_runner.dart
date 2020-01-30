@@ -125,7 +125,12 @@ Future<T> runInContext<T>(
           ),
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
-      OperatingSystemUtils: () => OperatingSystemUtils(),
+      OperatingSystemUtils: () => OperatingSystemUtils(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
       PersistentToolState: () => PersistentToolState(),
       ProcessInfo: () => ProcessInfo(),
       ProcessUtils: () => ProcessUtils(

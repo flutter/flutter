@@ -115,7 +115,7 @@ void main() {
     });
     await const DebugUnpackMacOS().build(environment);
 
-    expect(globals.fs.directory(_kOutputPrefix).existsSync(), true);
+    expect(globals.fs.directory('$_kOutputPrefix').existsSync(), true);
     for (final File file in inputs) {
       expect(globals.fs.file(file.path.replaceFirst(_kInputPrefix, _kOutputPrefix)).existsSync(), true);
     }
@@ -128,7 +128,7 @@ void main() {
       ..writeAsStringSync('testing');
 
     expect(() async => await const DebugMacOSBundleFlutterAssets().build(environment),
-        throwsA(isInstanceOf<Exception>()));
+        throwsException);
   }));
 
   test('debug macOS application creates correctly structured framework', () => testbed.run(() async {

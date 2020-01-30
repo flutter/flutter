@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -56,7 +57,7 @@ void main() {
           expectSetStamp: true,
           channel: channel,
         );
-        await FlutterVersion.instance.checkFlutterVersionFreshness();
+        await globals.flutterVersion.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(_testClock),
@@ -78,7 +79,7 @@ void main() {
           expectServerPing: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
@@ -101,7 +102,7 @@ void main() {
           channel: channel,
         );
 
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
       }, overrides: <Type, Generator>{
@@ -123,7 +124,7 @@ void main() {
           channel: channel,
         );
 
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
         expect((await VersionCheckStamp.load()).lastTimeWarningWasPrinted, _testClock.now());
@@ -146,7 +147,7 @@ void main() {
           expectServerPing: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
@@ -181,7 +182,7 @@ void main() {
           expectServerPing: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
@@ -201,7 +202,7 @@ void main() {
           expectSetStamp: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
@@ -221,7 +222,7 @@ void main() {
           expectSetStamp: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())));
@@ -241,7 +242,7 @@ void main() {
           expectSetStamp: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         when(mockProcessManager.runSync(
           <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],

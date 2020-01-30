@@ -27,7 +27,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
-import '../base/os.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
@@ -225,7 +224,7 @@ class WebFs {
 
     // Initialize the dwds server.
     final String effectiveHostname = hostname ?? _kHostName;
-    final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
+    final int hostPort = port == null ? await globals.os.findFreePort() : int.tryParse(port);
 
     final Pipeline pipeline = const Pipeline().addMiddleware((Handler innerHandler) {
       return (Request request) async {
@@ -340,10 +339,7 @@ class WebFs {
       client,
       server,
       dwds,
-      // Format ipv6 hosts according to RFC 5952.
-      internetAddress.type == InternetAddressType.IPv4
-        ? 'http://${internetAddress.address}:$hostPort'
-        : 'http://[${internetAddress.address}]:$hostPort',
+      'http://$effectiveHostname:$hostPort',
       assetServer,
       buildInfo.isDebug,
       flutterProject,
@@ -455,7 +451,7 @@ class DebugAssetServer extends AssetServer {
           flutterProject.dartTool.path,
           'build',
           'flutter_web',
-          flutterProject.manifest.appName,
+          '${flutterProject.manifest.appName}',
           'lib',
           '${targetBaseName}_web_entrypoint.dart.js.tar.gz',
         ));

@@ -108,6 +108,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () async {
         await showCupertinoModalPopup<void>(
           context: context,
+          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoPicker(
@@ -144,6 +145,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
+          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoTimerPicker(
@@ -176,6 +178,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
+          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
@@ -207,6 +210,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
+          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
@@ -238,6 +242,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
+          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(

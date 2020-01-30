@@ -117,6 +117,18 @@ void main() {
     expect(generated, contains("import 'file:///other/lib/main.dart' as entrypoint;"));
   }));
 
+  test('WebEntrypointTarget generates a plugin registrant for a file outside of main', () => testbed.run(() async {
+    environment.defines[kTargetFile] = globals.fs.path.join('other', 'lib', 'main.dart');
+    environment.defines[kHasWebPlugins] = 'true';
+    await const WebEntrypointTarget().build(environment);
+
+    final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
+
+    // Import.
+    expect(generated, contains("import 'file:///other/lib/main.dart' as entrypoint;"));
+    expect(generated, contains("import 'file:///foo/lib/generated_plugin_registrant.dart';"));
+  }));
+
 
   test('WebEntrypointTarget generates an entrypoint with plugins and init platform on windows', () => testbed.run(() async {
     environment.defines[kHasWebPlugins] = 'true';

@@ -24,7 +24,7 @@ void main() {
     testUsingContext('makeExecutable', () async {
       final File file = globals.fs.file(globals.fs.path.join(tempDir.path, 'foo.script'));
       file.writeAsStringSync('hello world');
-      os.makeExecutable(file);
+      globals.os.makeExecutable(file);
 
       // Skip this test on windows.
       if (!globals.platform.isWindows) {
@@ -33,7 +33,12 @@ void main() {
         expect(mode.substring(0, 3), endsWith('x'));
       }
     }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => OperatingSystemUtils(),
+      OperatingSystemUtils: () => OperatingSystemUtils(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
     });
   });
 }
