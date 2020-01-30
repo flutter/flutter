@@ -1016,6 +1016,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   void forgetChild(Element child) {
     assert(child == _child);
     _child = null;
+    super.forgetChild(child);
   }
 
   @override
