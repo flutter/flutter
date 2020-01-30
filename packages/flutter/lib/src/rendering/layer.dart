@@ -537,6 +537,10 @@ class PictureLayer extends Layer {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
     properties.add(DiagnosticsProperty<String>('picture', describeIdentity(_picture)));
+    properties.add(DiagnosticsProperty<String>(
+      'raster cache hints',
+      'isComplex = $isComplexHint, willChange = $willChangeHint'),
+    );
   }
 
   @override
