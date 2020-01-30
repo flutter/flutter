@@ -1,4 +1,4 @@
-Signature: e936724fefea8314b39c29cf43df4d3c
+Signature: 377799f98dd9ab2046689800970632b1
 
 UNUSED LICENSES:
 
@@ -7621,8 +7621,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/type_propagator_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/typed_data_aot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/yield_position_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_fingerprints.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_fingerprints.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.cc
@@ -7755,7 +7753,24 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
+FILE: ../../../third_party/dart/benchmarks/TypedDataDuplicate/dart/TypedDataDuplicate.dart
 FILE: ../../../third_party/dart/runtime/observatory/bin/heap_snapshot.dart
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/call.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/call.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/callback.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/callback.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/frame_rebase.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/frame_rebase.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/marshaller.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/marshaller.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_calling_convention.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_calling_convention.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_representation.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_representation.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.h
 FILE: ../../../third_party/dart/runtime/vm/field_table.cc
 FILE: ../../../third_party/dart/runtime/vm/field_table.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
@@ -20455,36 +20470,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
-LIBRARY: node-source-map-support
-ORIGIN: ../../../third_party/dart/third_party/node-source-map-support/LICENSE.md
-TYPE: LicenseType.mit
-FILE: ../../../third_party/dart/third_party/node-source-map-support/browser-source-map-support.js
-FILE: ../../../third_party/dart/third_party/node-source-map-support/source-map-support.js
-----------------------------------------------------------------------------------------------------
-The MIT License (MIT)
-
-Copyright (c) 2014 Evan Wallace
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-====================================================================================================
-
-====================================================================================================
 LIBRARY: observatory_pub_packages
 LIBRARY: pkg
 ORIGIN: ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/lib/src/comparators.dart + ../../../third_party/dart/third_party/observatory_pub_packages/packages/collection/LICENSE
@@ -23324,4 +23309,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 365
+Total license count: 364
