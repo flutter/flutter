@@ -21,9 +21,12 @@ const String kFontSubsetFlag = 'FontSubset';
 /// Whether icon font subsetting is enabled by default.
 const bool kFontSubsetEnabledDefault = false;
 
-List<Map<String, dynamic>> _getList(dynamic object) {
-  assert(object is List<dynamic>);
-  return (object as List<dynamic>).cast<Map<String, dynamic>>();
+List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
+  try {
+    return (object as List<dynamic>).cast<Map<String, dynamic>>();
+  } on CastError catch (e, s) {
+    throwToolExit(errorMessage);
+  }
 }
 
 /// A class that wraps the functionality of the const finder package and the
@@ -142,13 +145,19 @@ class FontSubset {
   /// Returns a map of { fontFamly: relativePath } pairs.
   Future<Map<String, String>> _parseFontJson(String fontManifestData, Set<String> families) async {
     final Map<String, String> result = <String, String>{};
-    final List<Map<String, dynamic>> fontList = _getList(json.decode(fontManifestData));
+    final List<Map<String, dynamic>> fontList = _getList(json.decode(fontManifestData), 'FontManifest.json invalid: expected top level to be a list of objects.');
     for (final Map<String, dynamic> map in fontList) {
+      if (map['family'] is! String) {
+        throwToolExit('FontManifest.json invalid: expected the family value to be a string, got: ${map['family']}.');
+      }
       final String familyKey = map['family'] as String;
       if (families.contains(familyKey)) {
-        final List<Map<String, dynamic>> fonts = _getList(map['fonts']);
+        final List<Map<String, dynamic>> fonts = _getList(map['fonts'], 'FontManifest.json invalid: expected "fonts" to be a list of objects.');
         if (fonts.length != 1) {
           throwToolExit('This tool cannot process icon fonts with multiple fonts in a single family.');
+        }
+        if (fonts.first['asset'] is! String) {
+          throwToolExit('FontManifest.json invalid: expected "asset" value to be a string, got: ${map['assets']}.');
         }
         result[familyKey] = fonts.first['asset'] as String;
       }
@@ -170,7 +179,11 @@ class FontSubset {
     if (constFinderProcessResult.exitCode != 0) {
       throwToolExit('ConstFinder failure: ${constFinderProcessResult.stderr}');
     }
-    final Map<String, dynamic> constFinderMap = json.decode(constFinderProcessResult.stdout as String) as Map<String, dynamic>;
+    final dynamic jsonDecode = json.decode(constFinderProcessResult.stdout as String);
+    if (jsonDecode is! Map<String, dynamic>) {
+      throwToolExit('Invalid ConstFinder output: expected a top level JavaScript object, got $jsonDecode.');
+    }
+    final Map<String, dynamic> constFinderMap = jsonDecode as Map<String, dynamic>;
     final _ConstFinderResult constFinderResult = _ConstFinderResult(constFinderMap);
     if (constFinderResult.hasNonConstantLocations) {
       globals.printError('This application cannot tree shake icons fonts. It has non-constant instances of IconData at the following locations:', emphasis: true);
@@ -185,6 +198,9 @@ class FontSubset {
   Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult consts) {
     final Map<String, List<int>> result = <String, List<int>>{};
     for (final Map<String, dynamic> iconDataMap in consts.constantInstances) {
+      if (iconDataMap['fontPackage'] is! String || iconDataMap['fontFamily'] is! String || iconDataMap['codePoint'] is! int) {
+        throwToolExit('Invalid ConstFinder result. Expected "fontPackage" to be a String, "fontFamily" to be a String, and "codePoint" to be an int, got: $iconDataMap.');
+      }
       final String package = iconDataMap['fontPackage'] as String;
       final String family = iconDataMap['fontFamily'] as String;
       final String key = package == null
@@ -202,8 +218,8 @@ class _ConstFinderResult {
   const _ConstFinderResult(this.result);
 
   final Map<String, dynamic> result;
-  List<Map<String, dynamic>> get constantInstances => _getList(result['constantInstances']);
-  List<Map<String, dynamic>> get nonConstantLocations => _getList(result['nonConstantLocations']);
+  List<Map<String, dynamic>> get constantInstances => _getList(result['constantInstances'], 'Invalid ConstFinder output: Expected "constInstances" to be a list of objects.');
+  List<Map<String, dynamic>> get nonConstantLocations => _getList(result['nonConstantLocations'], 'Invalid ConstFinder output: Expected "nonConstLocations" to be a list ofobjects');
 
   bool get hasNonConstantLocations => nonConstantLocations.isNotEmpty;
 }
