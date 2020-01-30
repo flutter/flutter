@@ -479,6 +479,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   }) : assert(size != null),
        assert(isComplex != null),
        assert(willChange != null),
+       assert(painter != null || foregroundPainter != null || (!isComplex && !willChange)),
        super(key: key, child: child);
 
   /// The painter that paints before the children.
@@ -503,10 +504,16 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// frame. If this flag is not set, then the compositor will apply its own
   /// heuristics to decide whether the this layer is complex enough to benefit
   /// from caching.
+  ///
+  /// This flag can't be set to true if both [painter] and [foregroundPainter]
+  /// are null because this flag will be ignored in such case.
   final bool isComplex;
 
   /// Whether the raster cache should be told that this painting is likely
   /// to change in the next frame.
+  ///
+  /// This flag can't be set to true if both [painter] and [foregroundPainter]
+  /// are null because this flag will be ignored in such case.
   final bool willChange;
 
   @override
