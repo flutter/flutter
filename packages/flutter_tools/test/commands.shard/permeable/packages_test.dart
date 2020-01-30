@@ -5,9 +5,9 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -418,6 +418,27 @@ void main() {
       expect(stdout.sublist(0, 2), contains('y\n'));
       expect(stdout[2], 'hello\n');
       expect(stdout[3], 'world\n');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      Pub: () => const Pub(),
+    });
+
+    testUsingContext('pub publish input fails', () async {
+      final PromptingProcess process = PromptingProcess(stdinError: true);
+      mockProcessManager.processFactory = (List<String> commands) => process;
+      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
+      final Future<void> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
+      final Future<void> simulateUserInput = Future<void>(() {
+        mockStdio.simulateStdin('y');
+      });
+      await Future.wait<void>(<Future<void>>[runPackages, runPrompt, simulateUserInput]);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(2));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'publish');
+      // We get a trace message about the write to stdin failing.
+      expect(testLogger.traceText, contains('Echoing stdin to the pub subprocess failed'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,

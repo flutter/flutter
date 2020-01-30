@@ -1914,9 +1914,11 @@ void main() {
             '--- example property at max length --',
             style: propertyStyle,
           ),
-          DiagnosticsProperty<void>(null,
-              'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.',
-              allowWrap: false),
+          DiagnosticsProperty<String>(
+            null,
+            'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.',
+            allowWrap: false,
+          ),
           DiagnosticsNode.message(
             '--- example property at max length --',
             style: propertyStyle,

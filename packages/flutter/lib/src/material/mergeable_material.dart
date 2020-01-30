@@ -631,7 +631,7 @@ class _MergeableMaterialSliceKey extends GlobalKey {
   final LocalKey value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is _MergeableMaterialSliceKey
         && other.value == value;
   }

@@ -9,11 +9,13 @@ import 'package:meta/meta.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/command_help.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
+import 'base/terminal.dart' show outputPreferences;
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
@@ -403,7 +405,10 @@ class FlutterDevice {
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
-    globals.printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
+    globals.printStatus(
+      'Launching ${fsUtils.getDisplayPath(hotRunner.mainPath)} '
+      'on ${device.name} in $modeName mode...',
+    );
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
@@ -470,9 +475,15 @@ class FlutterDevice {
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     if (coldRunner.mainPath == null) {
       assert(prebuiltMode);
-      globals.printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
+      globals.printStatus(
+        'Launching ${package.displayName} '
+        'on ${device.name} in $modeName mode...',
+      );
     } else {
-      globals.printStatus('Launching ${getDisplayPath(coldRunner.mainPath)} on ${device.name} in $modeName mode...');
+      globals.printStatus(
+        'Launching ${fsUtils.getDisplayPath(coldRunner.mainPath)} '
+        'on ${device.name} in $modeName mode...',
+      );
     }
 
     if (package == null) {
@@ -606,7 +617,13 @@ abstract class ResidentRunner {
        artifactDirectory = dillOutputPath == null
           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
           : globals.fs.file(dillOutputPath).parent,
-       assetBundle = AssetBundleFactory.instance.createBundle() {
+       assetBundle = AssetBundleFactory.instance.createBundle(),
+       commandHelp = CommandHelp(
+         logger: globals.logger,
+         terminal: globals.terminal,
+         platform: globals.platform,
+         outputPreferences: outputPreferences,
+       ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
@@ -638,6 +655,8 @@ abstract class ResidentRunner {
   final String projectRootPath;
   final String mainPath;
   final AssetBundle assetBundle;
+
+  final CommandHelp commandHelp;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -839,8 +858,15 @@ abstract class ResidentRunner {
   Future<void> screenshot(FlutterDevice device) async {
     assert(device.device.supportsScreenshot);
 
-    final Status status = globals.logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
-    final File outputFile = getUniqueFile(globals.fs.currentDirectory, 'flutter', 'png');
+    final Status status = globals.logger.startProgress(
+      'Taking screenshot for ${device.device.name}...',
+      timeout: timeoutConfiguration.fastOperation,
+    );
+    final File outputFile = fsUtils.getUniqueFile(
+      globals.fs.currentDirectory,
+      'flutter',
+      'png',
+    );
     try {
       if (supportsServiceProtocol && isRunningDebug) {
         await device.refreshViews();
@@ -871,7 +897,9 @@ abstract class ResidentRunner {
       }
       final int sizeKB = outputFile.lengthSync() ~/ 1024;
       status.stop();
-      globals.printStatus('Screenshot written to ${globals.fs.path.relative(outputFile.path)} (${sizeKB}kB).');
+      globals.printStatus(
+        'Screenshot written to ${globals.fs.path.relative(outputFile.path)} (${sizeKB}kB).',
+      );
     } catch (error) {
       status.cancel();
       globals.printError('Error taking screenshot: $error');
@@ -946,9 +974,8 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> _serviceProtocolDone(dynamic object) {
+  Future<void> _serviceProtocolDone(dynamic object) async {
     globals.printTrace('Service protocol connection closed.');
-    return Future<void>.value(object);
   }
 
   Future<void> _serviceProtocolError(dynamic error, StackTrace stack) {
@@ -1003,23 +1030,30 @@ abstract class ResidentRunner {
   void printHelp({ @required bool details });
 
   void printHelpDetails() {
+    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
+      commandHelp.s.print();
+    }
     if (supportsServiceProtocol) {
-      globals.printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
-      globals.printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
+      commandHelp.w.print();
+      commandHelp.t.print();
       if (isRunningDebug) {
-        globals.printStatus('For layers (debugDumpLayerTree), use "L"; for accessibility (debugDumpSemantics), use "S" (for traversal order) or "U" (for inverse hit test order).');
-        globals.printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
-        globals.printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
-        globals.printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
-        globals.printStatus('To toggle the elevation checker, press "z".');
+        commandHelp.L.print();
+        commandHelp.S.print();
+        commandHelp.U.print();
+        commandHelp.i.print();
+        commandHelp.p.print();
+        commandHelp.o.print();
+        commandHelp.z.print();
       } else {
-        globals.printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "U" (for inverse hit test order).');
+        commandHelp.S.print();
+        commandHelp.U.print();
       }
-      globals.printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
-      globals.printStatus('To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
+      // `P` should precede `a`
+      commandHelp.P.print();
+      commandHelp.a.print();
     }
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
-      globals.printStatus('To save a screenshot to flutter.png, press "s".');
+      commandHelp.s.print();
     }
   }
 

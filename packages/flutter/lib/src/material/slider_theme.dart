@@ -2896,7 +2896,7 @@ class RangeValues {
 
   @override
   String toString() {
-    return '$runtimeType($start, $end)';
+    return '${objectRuntimeType(this, 'RangeValues')}($start, $end)';
   }
 }
 
@@ -2935,6 +2935,6 @@ class RangeLabels {
 
   @override
   String toString() {
-    return '$runtimeType($start, $end)';
+    return '${objectRuntimeType(this, 'RangeLabels')}($start, $end)';
   }
 }

@@ -29,10 +29,9 @@ void main() {
       globals.fs.directory('cache').createSync();
       final Directory outputs = globals.fs.directory('outputs')
           ..createSync();
-      environment = Environment(
+      environment = Environment.test(
+        globals.fs.currentDirectory,
         outputDir: outputs,
-        projectDir: globals.fs.currentDirectory,
-        buildDir: globals.fs.directory('build'),
       );
       visitor = SourceVisitor(environment);
       environment.buildDir.createSync(recursive: true);
@@ -142,14 +141,14 @@ void main() {
 
     globals.fs.file('abcd.bar').createSync();
 
-    expect(() => fizzSource.accept(visitor), throwsA(isInstanceOf<InvalidPatternException>()));
+    expect(() => fizzSource.accept(visitor), throwsA(isA<InvalidPatternException>()));
   }));
 
 
   test('can\'t substitute foo', () => testbed.run(() {
     const Source invalidBase = Source.pattern('foo');
 
-    expect(() => invalidBase.accept(visitor), throwsA(isInstanceOf<InvalidPatternException>()));
+    expect(() => invalidBase.accept(visitor), throwsA(isA<InvalidPatternException>()));
   }));
 
   test('can substitute optional files', () => testbed.run(() {

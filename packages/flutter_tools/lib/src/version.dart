@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
@@ -37,6 +36,7 @@ class FlutterVersion {
     return !<String>['dev', 'beta', 'stable'].contains(branchName);
   }
 
+  // Beware: Keep order in accordance with stability
   static const Set<String> officialChannels = <String>{
     'master',
     'dev',
@@ -211,8 +211,6 @@ class FlutterVersion {
       await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
     }
   }
-
-  static FlutterVersion get instance => context.get<FlutterVersion>();
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
   String getVersionString({ bool redactUnknownBranches = false }) {

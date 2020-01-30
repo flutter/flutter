@@ -182,7 +182,9 @@ class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
   }
 
   @override
-  String toString() => '$runtimeType(begin: $begin, end: $end, animator: $animator, progress: $progress)';
+  String toString() {
+    return '${objectRuntimeType(this, '_TransitionSnapshotFabLocation')}(begin: $begin, end: $end, animator: $animator, progress: $progress)';
+  }
 }
 
 /// Geometry information for [Scaffold] components after layout is finished.
@@ -264,7 +266,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
       if (renderObject == null || !renderObject.owner.debugDoingPaint)
         throw FlutterError(
             'Scaffold.geometryOf() must only be accessed during the paint phase.\n'
-            'The ScaffoldGeometry is only available during the paint phase, because\n'
+            'The ScaffoldGeometry is only available during the paint phase, because '
             'its value is computed during the animation and layout phases prior to painting.'
         );
       return true;
@@ -317,7 +319,7 @@ class _BodyBoxConstraints extends BoxConstraints {
   // If the height of the bottom widgets has changed, even though the constraints'
   // min and max values have not, we still want performLayout to happen.
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (super != other)
       return false;
     return other is _BodyBoxConstraints
@@ -1794,7 +1796,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
         throw FlutterError(
-          'Scaffold.bottomSheet cannot be specified while a bottom sheet'
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet '
           'displayed with showBottomSheet() is still visible.\n'
           'Rebuild the Scaffold with a null bottomSheet before calling showBottomSheet().'
         );
@@ -1974,7 +1976,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(() {
       if (widget.bottomSheet != null) {
         throw FlutterError(
-          'Scaffold.bottomSheet cannot be specified while a bottom sheet'
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet '
           'displayed with showBottomSheet() is still visible.\n'
           'Rebuild the Scaffold with a null bottomSheet before calling showBottomSheet().'
         );

@@ -248,7 +248,8 @@ class AnimationController extends Animation<double>
     _internalSetValue(value ?? lowerBound);
   }
 
-  /// Creates an animation controller with no upper or lower bound for its value.
+  /// Creates an animation controller with no upper or lower bound for its
+  /// value.
   ///
   /// * [value] is the initial value of the animation.
   ///

@@ -84,11 +84,11 @@ class Version implements Comparable<Version> {
   /// Two [Version]s are equal if their version numbers are. The version text
   /// is ignored.
   @override
-  bool operator ==(dynamic other) {
-    if (other is! Version) {
-      return false;
-    }
-    return major == other.major && minor == other.minor && patch == other.patch;
+  bool operator ==(Object other) {
+    return other is Version
+        && other.major == major
+        && other.minor == minor
+        && other.patch == patch;
   }
 
   @override

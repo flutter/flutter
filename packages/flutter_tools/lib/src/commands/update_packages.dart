@@ -8,7 +8,9 @@ import 'dart:collection';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../cache.dart';
@@ -23,6 +25,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
+  'dwds': '0.8.5', // Requires updates to web_fs due to breaking changes.
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -61,7 +64,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       )
       ..addFlag(
         'consumer-only',
-        help: 'Only prints the dependency graph that is the transitive closure'
+        help: 'Only prints the dependency graph that is the transitive closure '
               'that a consumer of the Flutter SDK will observe (When combined '
               'with transitive-closure)',
         defaultsTo: false,
@@ -87,14 +90,27 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final bool hidden;
 
+
+  // Lazy-initialize the net utilities with values from the context.
+  Net _cachedNet;
+  Net get _net => _cachedNet ??= Net(
+    httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+    logger: globals.logger,
+    platform: globals.platform,
+  );
+
   Future<void> _downloadCoverageData() async {
     final Status status = globals.logger.startProgress(
       'Downloading lcov data for package:flutter...',
       timeout: timeoutConfiguration.slowOperation,
     );
     final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
-    final List<int> data = await fetchUrl(Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info'));
-    final String coverageDir = globals.fs.path.join(Cache.flutterRoot, 'packages/flutter/coverage');
+    final Uri coverageUri = Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info');
+    final List<int> data = await _net.fetchUrl(coverageUri);
+    final String coverageDir = globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages/flutter/coverage',
+    );
     globals.fs.file(globals.fs.path.join(coverageDir, 'lcov.base.info'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(data, flush: true);
@@ -180,7 +196,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
       globals.printStatus('All pubspecs were up to date.');
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (upgrade || isPrintPaths || isPrintTransitiveClosure) {
@@ -289,12 +305,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         tree._dependencyTree.forEach((String from, Set<String> to) {
           globals.printStatus('$from -> $to');
         });
-        return null;
+        return FlutterCommandResult.success();
       }
 
       if (isPrintPaths) {
         showDependencyPaths(from: stringArg('from'), to: stringArg('to'), tree: tree);
-        return null;
+        return FlutterCommandResult.success();
       }
 
       // Now that we have collected all the data, we can apply our dependency
@@ -328,7 +344,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final double seconds = timer.elapsedMilliseconds / 1000.0;
     globals.printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   void showDependencyPaths({

@@ -76,6 +76,6 @@ class FormatCommand extends FlutterCommand {
       throwToolExit('Formatting failed: $result', exitCode: result);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

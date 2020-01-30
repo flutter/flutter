@@ -6,6 +6,8 @@ import 'dart:ui' show hashValues;
 
 import 'package:meta/meta.dart';
 
+import 'object.dart';
+
 /// A object representation of a frame from a stack trace.
 ///
 /// {@tool snippet}
@@ -57,6 +59,18 @@ class StackFrame {
     source: '<asynchronous suspension>',
   );
 
+  /// A stack frame representing a Dart elided stack overflow frame.
+  static const StackFrame stackOverFlowElision = StackFrame(
+    number: -1,
+    column: -1,
+    line: -1,
+    method: '...',
+    packageScheme: '',
+    package: '',
+    packagePath: '',
+    source: '...',
+  );
+
   /// Parses a list of [StackFrame]s from a [StackTrace] object.
   ///
   /// This is normally useful with [StackTrace.current].
@@ -81,7 +95,7 @@ class StackFrame {
         ? RegExp(r'^(package:.+) (\d+):(\d+)\s+(.+)$')
         : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
     final Match match = parser.firstMatch(line);
-    assert(match != null, 'Expecgted $line to match $parser.');
+    assert(match != null, 'Expected $line to match $parser.');
 
     String package = '<unknown>';
     String packageScheme = '<unknown>';
@@ -111,6 +125,8 @@ class StackFrame {
     assert(line != null);
     if (line == '<asynchronous suspension>') {
       return asynchronousSuspension;
+    } else if (line == '...') {
+      return stackOverFlowElision;
     }
 
     // Web frames.
@@ -213,18 +229,18 @@ class StackFrame {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    return other is StackFrame &&
-        number == other.number &&
-        package == other.package &&
-        line == other.line &&
-        column == other.column &&
-        className == other.className &&
-        method == other.method &&
-        source == other.source;
+    return other is StackFrame
+        && other.number == number
+        && other.package == package
+        && other.line == line
+        && other.column == column
+        && other.className == className
+        && other.method == method
+        && other.source == source;
   }
 
   @override
-  String toString() => '$runtimeType(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
+  String toString() => '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
 }

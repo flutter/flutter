@@ -30,7 +30,7 @@ void main() {
         'version',
         '--no-pub',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n' ''));
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });
@@ -107,7 +107,7 @@ void main() {
           '--no-pub',
           version,
         ]),
-        throwsA(isInstanceOf<ToolExit>()),
+        throwsToolExit(),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
@@ -119,7 +119,7 @@ void main() {
         await command.getTags();
         fail('ToolExit expected');
       } catch(e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
       }
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(failGitTag: true),

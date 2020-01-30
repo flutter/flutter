@@ -20,7 +20,7 @@ class _ContactCategory extends StatelessWidget {
         border: Border(bottom: BorderSide(color: themeData.dividerColor))
       ),
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.subhead,
+        style: Theme.of(context).textTheme.subtitle1,
         child: SafeArea(
           top: false,
           bottom: false,
@@ -169,9 +169,9 @@ class ContactsDemoState extends State<ContactsDemo> {
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment(0.0, -1.0),
-                          end: Alignment(0.0, -0.4),
-                          colors: <Color>[Color(0x60000000), Color(0x00000000)],
+                          begin: Alignment.topCenter,
+                          end: Alignment(0, .35),
+                          colors: <Color>[Color(0xC0000000), Color(0x00000000)],
                         ),
                       ),
                     ),

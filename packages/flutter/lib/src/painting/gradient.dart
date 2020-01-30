@@ -493,10 +493,10 @@ class LinearGradient extends Gradient {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is LinearGradient
         && other.begin == begin
@@ -511,7 +511,7 @@ class LinearGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($begin, $end, $colors, $stops, $tileMode)';
+    return '${objectRuntimeType(this, 'LinearGradient')}($begin, $end, $colors, $stops, $tileMode)';
   }
 }
 
@@ -753,10 +753,10 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is RadialGradient
         && other.center == center
@@ -773,7 +773,7 @@ class RadialGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
+    return '${objectRuntimeType(this, 'RadialGradient')}($center, $radius, $colors, $stops, $tileMode, $focal, $focalRadius)';
   }
 }
 
@@ -999,10 +999,10 @@ class SweepGradient extends Gradient {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is SweepGradient
         && other.center == center
@@ -1018,6 +1018,6 @@ class SweepGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
+    return '${objectRuntimeType(this, 'SweepGradient')}($center, $startAngle, $endAngle, $colors, $stops, $tileMode)';
   }
 }

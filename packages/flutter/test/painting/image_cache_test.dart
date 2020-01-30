@@ -121,19 +121,19 @@ void main() {
       expect(imageCache.currentSizeBytes, 256);
     });
 
-    test('Increases cache size if an image is loaded that is larger then the maximum size', () async {
+    test('Do not cache large images', () async {
       const TestImage testImage = TestImage(width: 8, height: 8);
 
       imageCache.maximumSizeBytes = 1;
       await extractOneFrame(const TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty));
-      expect(imageCache.currentSize, 1);
-      expect(imageCache.currentSizeBytes, 256);
-      expect(imageCache.maximumSizeBytes, 256 + 1000);
+      expect(imageCache.currentSize, 0);
+      expect(imageCache.currentSizeBytes, 0);
+      expect(imageCache.maximumSizeBytes, 1);
     });
 
     test('Returns null if an error is caught resolving an image', () {
       final ErrorImageProvider errorImage = ErrorImageProvider();
-      expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, null)), throwsA(isInstanceOf<Error>()));
+      expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, null)), throwsA(isA<Error>()));
       bool caughtError = false;
       final ImageStreamCompleter result = imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, null), onError: (dynamic error, StackTrace stackTrace) {
         caughtError = true;
@@ -211,6 +211,36 @@ void main() {
               expect(evicationResult, isTrue);
             },
           ));
+    });
+
+    test('containsKey - pending', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      }) as TestImageStreamCompleter;
+
+      expect(resultingCompleter1, completer1);
+      expect(imageCache.containsKey(testImage), true);
+    });
+
+    test('containsKey - completed', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      }) as TestImageStreamCompleter;
+
+      // Mark as complete
+      completer1.testSetImage(testImage);
+
+      expect(resultingCompleter1, completer1);
+      expect(imageCache.containsKey(testImage), true);
+
     });
   });
 }

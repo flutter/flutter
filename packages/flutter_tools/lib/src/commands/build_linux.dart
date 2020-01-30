@@ -47,6 +47,6 @@ class BuildLinuxCommand extends BuildSubCommand {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
     await buildLinux(flutterProject.linux, buildInfo, target: targetFile);
-    return null;
+    return FlutterCommandResult.success();
   }
 }

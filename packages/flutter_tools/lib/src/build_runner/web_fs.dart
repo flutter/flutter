@@ -27,7 +27,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
-import '../base/os.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
@@ -225,7 +224,7 @@ class WebFs {
 
     // Initialize the dwds server.
     final String effectiveHostname = hostname ?? _kHostName;
-    final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
+    final int hostPort = port == null ? await globals.os.findFreePort() : int.tryParse(port);
 
     final Pipeline pipeline = const Pipeline().addMiddleware((Handler innerHandler) {
       return (Request request) async {
@@ -333,13 +332,14 @@ class WebFs {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(assetServer.handle);
-    final HttpServer server = await httpMultiServerFactory(effectiveHostname, hostPort);
+    final InternetAddress internetAddress = (await InternetAddress.lookup(effectiveHostname)).first;
+    final HttpServer server = await httpMultiServerFactory(internetAddress, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     final WebFs webFS = WebFs(
       client,
       server,
       dwds,
-      'http://$effectiveHostname:$hostPort/',
+      'http://$effectiveHostname:$hostPort',
       assetServer,
       buildInfo.isDebug,
       flutterProject,
@@ -643,7 +643,6 @@ class BuildDaemonCreator {
         if (testTargets.hasBuildFilters) {
           b.buildFilters.addAll(testTargets.buildFilters);
         }
-        return b;
       }));
     }
   }

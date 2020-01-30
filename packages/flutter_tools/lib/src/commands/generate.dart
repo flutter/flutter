@@ -31,7 +31,7 @@ class GenerateCommand extends FlutterCommand {
         globals.printError('Code generation failed.');
         break;
       }
-      if (codegenStatus ==CodegenStatus.Succeeded) {
+      if (codegenStatus == CodegenStatus.Succeeded) {
         break;
       }
     }
@@ -41,7 +41,7 @@ class GenerateCommand extends FlutterCommand {
       return dir.childDirectory('error_cache').existsSync();
     }, orElse: () => null);
     if (errorCacheParent == null) {
-      return null;
+      return FlutterCommandResult.success();
     }
     final Directory errorCache = errorCacheParent.childDirectory('error_cache');
     for (final File errorFile in errorCache.listSync(recursive: true).whereType<File>()) {
@@ -56,6 +56,6 @@ class GenerateCommand extends FlutterCommand {
         globals.printError('Error reading error in ${errorFile.path}');
       }
     }
-    return const FlutterCommandResult(ExitStatus.fail);
+    return FlutterCommandResult.fail();
   }
 }

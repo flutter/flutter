@@ -199,4 +199,4 @@ linter:
     # - use_string_buffers # has false positives: https://github.com/dart-lang/sdk/issues/34182
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - valid_regexps
-    # - void_checks # not yet tested
+    - void_checks

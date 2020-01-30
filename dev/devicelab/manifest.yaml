@@ -340,7 +340,7 @@ tasks:
   #   required_agent_capabilities: ["linux/android"]
   #   flaky: true
 
-  flutter_attach_test:
+  flutter_attach_test_android:
     description: >
       Tests the `flutter attach` command.
     stage: devicelab
@@ -357,7 +357,6 @@ tasks:
       Run flutter web on the devicelab and hot restart.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   web_size__compile_test:
     description: >
@@ -595,7 +594,6 @@ tasks:
       Checks the functionality and performance of hot reload on a macOS target platform
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   # Tests running on Windows host
 

@@ -6,6 +6,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'scaffold.dart';
@@ -213,7 +214,7 @@ abstract class FloatingActionButtonLocation {
   // TODO: Add mini{Start,End}{Top,Float,Docked} ???
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => '${objectRuntimeType(this, 'FloatingActionButtonLocation')}';
 }
 
 typedef _OffsetXFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry, {double offset});
@@ -424,7 +425,7 @@ abstract class FloatingActionButtonAnimator {
   double getAnimationRestart(double previousValue) => 0.0;
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => '${objectRuntimeType(this, 'FloatingActionButtonAnimator')}';
 }
 
 class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {

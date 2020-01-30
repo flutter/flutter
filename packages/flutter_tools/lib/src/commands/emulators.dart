@@ -54,7 +54,7 @@ class EmulatorsCommand extends FlutterCommand {
       await _listEmulators(searchText);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> _launchEmulator(String id) async {
@@ -69,16 +69,7 @@ class EmulatorsCommand extends FlutterCommand {
         "More than one emulator matches '$id':",
       );
     } else {
-      try {
-        await emulators.first.launch();
-      }
-      catch (e) {
-        if (e is String) {
-          globals.printError(e);
-        } else {
-          rethrow;
-        }
-      }
+      await emulators.first.launch();
     }
   }
 

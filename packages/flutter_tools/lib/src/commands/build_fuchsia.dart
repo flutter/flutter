@@ -69,6 +69,6 @@ class BuildFuchsiaCommand extends BuildSubCommand {
       buildInfo: buildInfo,
       runnerPackageSource: stringArg('runner-source'),
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

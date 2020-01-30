@@ -440,14 +440,12 @@ abstract class Device {
   int get hashCode => id.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    if (other is! Device) {
-      return false;
-    }
-    return id == other.id;
+    return other is Device
+        && other.id == id;
   }
 
   @override

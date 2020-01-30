@@ -5,10 +5,11 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 
 import '../base/context.dart';
 import '../globals.dart' as globals;
-import 'io.dart' hide stderr, stdin, stdout;
+import 'io.dart';
 import 'terminal.dart' show AnsiTerminal, TerminalColor, OutputPreferences;
 import 'utils.dart';
 
@@ -20,6 +21,15 @@ const Duration _kSlowOperation = Duration(minutes: 2);
 ///
 /// If not provided via injection, a default instance is provided.
 TimeoutConfiguration get timeoutConfiguration => context.get<TimeoutConfiguration>() ?? const TimeoutConfiguration();
+
+/// A factory for generating [Stopwatch] instances for [Status] instances.
+class StopwatchFactory {
+  /// const constructor so that subclasses may be const.
+  const StopwatchFactory();
+
+  /// Create a new [Stopwatch] instance.
+  Stopwatch createStopwatch() => Stopwatch();
+}
 
 class TimeoutConfiguration {
   const TimeoutConfiguration();
@@ -166,11 +176,15 @@ class StdoutLogger extends Logger {
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
+    @required Platform platform,
+    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   })
     : _stdio = stdio,
       _terminal = terminal,
       _timeoutConfiguration = timeoutConfiguration,
-      _outputPreferences = outputPreferences;
+      _outputPreferences = outputPreferences,
+      _stopwatchFactory = stopwatchFactory,
+      _platform = platform;
 
   @override
   final AnsiTerminal _terminal;
@@ -179,6 +193,8 @@ class StdoutLogger extends Logger {
   @override
   final TimeoutConfiguration _timeoutConfiguration;
   final Stdio _stdio;
+  final StopwatchFactory _stopwatchFactory;
+  final Platform _platform;
 
   Status _status;
 
@@ -213,9 +229,9 @@ class StdoutLogger extends Logger {
       message = _terminal.bolden(message);
     }
     message = _terminal.color(message, color ?? TerminalColor.red);
-    _stdio.stderr.writeln(message);
+    writeToStdErr('$message\n');
     if (stackTrace != null) {
-      _stdio.stderr.writeln(stackTrace.toString());
+      writeToStdErr('$stackTrace\n');
     }
     _status?.resume();
   }
@@ -252,9 +268,10 @@ class StdoutLogger extends Logger {
   }
 
   @protected
-  void writeToStdOut(String message) {
-    _stdio.stdout.write(message);
-  }
+  void writeToStdOut(String message) => _stdio.stdoutWrite(message);
+
+  @protected
+  void writeToStdErr(String message) => _stdio.stderrWrite(message);
 
   @override
   void printTrace(String message) { }
@@ -273,7 +290,8 @@ class StdoutLogger extends Logger {
       return SilentStatus(
         timeout: timeout,
         onFinish: _clearStatus,
-        timeoutConfiguration: _timeoutConfiguration
+        timeoutConfiguration: _timeoutConfiguration,
+        stopwatch: _stopwatchFactory.createStopwatch(),
       )..start();
     }
     if (supportsColor) {
@@ -285,6 +303,8 @@ class StdoutLogger extends Logger {
         onFinish: _clearStatus,
         stdio: _stdio,
         timeoutConfiguration: _timeoutConfiguration,
+        platform: _platform,
+        stopwatch: _stopwatchFactory.createStopwatch(),
       )..start();
     } else {
       _status = SummaryStatus(
@@ -294,6 +314,7 @@ class StdoutLogger extends Logger {
         onFinish: _clearStatus,
         stdio: _stdio,
         timeoutConfiguration: _timeoutConfiguration,
+        stopwatch: _stopwatchFactory.createStopwatch(),
       )..start();
     }
     return _status;
@@ -321,20 +342,24 @@ class WindowsStdoutLogger extends StdoutLogger {
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
+    @required Platform platform,
+    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : super(
       terminal: terminal,
       stdio: stdio,
       outputPreferences: outputPreferences,
       timeoutConfiguration: timeoutConfiguration,
+      stopwatchFactory: stopwatchFactory,
+      platform: platform,
     );
 
   @override
   void writeToStdOut(String message) {
     // TODO(jcollins-g): wrong abstraction layer for this, move to [Stdio].
-    _stdio.stdout.write(message
-        .replaceAll('✗', 'X')
-        .replaceAll('✓', '√')
-    );
+    final String windowsMessage = message
+      .replaceAll('✗', 'X')
+      .replaceAll('✓', '√');
+    _stdio.stdoutWrite(windowsMessage);
   }
 }
 
@@ -342,10 +367,12 @@ class BufferLogger extends Logger {
   BufferLogger({
     @required AnsiTerminal terminal,
     @required OutputPreferences outputPreferences,
-    TimeoutConfiguration timeoutConfiguration = const TimeoutConfiguration()
+    TimeoutConfiguration timeoutConfiguration = const TimeoutConfiguration(),
+    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _outputPreferences = outputPreferences,
        _terminal = terminal,
-       _timeoutConfiguration = timeoutConfiguration;
+       _timeoutConfiguration = timeoutConfiguration,
+       _stopwatchFactory = stopwatchFactory;
 
   @override
   final OutputPreferences _outputPreferences;
@@ -355,6 +382,8 @@ class BufferLogger extends Logger {
 
   @override
   final TimeoutConfiguration _timeoutConfiguration;
+
+  final StopwatchFactory _stopwatchFactory;
 
   @override
   bool get isVerbose => false;
@@ -437,7 +466,7 @@ class BufferLogger extends Logger {
     return SilentStatus(
       timeout: timeout,
       timeoutConfiguration: _timeoutConfiguration,
-
+      stopwatch: _stopwatchFactory.createStopwatch(),
     )..start();
   }
 
@@ -453,8 +482,10 @@ class BufferLogger extends Logger {
 }
 
 class VerboseLogger extends Logger {
-  VerboseLogger(this.parent,  { @required Stopwatch stopwatch }) :
-    _stopwatch = stopwatch ?? context.get<Stopwatch>() ??  Stopwatch() {
+  VerboseLogger(this.parent,  {
+    StopwatchFactory stopwatchFactory = const StopwatchFactory()
+  }) : _stopwatch = stopwatchFactory.createStopwatch(),
+       _stopwatchFactory = stopwatchFactory {
     _stopwatch.start();
   }
 
@@ -470,6 +501,8 @@ class VerboseLogger extends Logger {
 
   @override
   TimeoutConfiguration get _timeoutConfiguration => parent._timeoutConfiguration;
+
+  final StopwatchFactory _stopwatchFactory;
 
   @override
   bool get isVerbose => true;
@@ -529,10 +562,12 @@ class VerboseLogger extends Logger {
   }) {
     assert(progressIndicatorPadding != null);
     printStatus(message);
-    final Stopwatch timer = Stopwatch()..start();
+    final Stopwatch timer = _stopwatchFactory.createStopwatch()..start();
     return SilentStatus(
       timeout: timeout,
       timeoutConfiguration: _timeoutConfiguration,
+      // This is intentionally a different stopwatch than above.
+      stopwatch: _stopwatchFactory.createStopwatch(),
       onFinish: () {
         String time;
         if (timeout == null || timeout > _timeoutConfiguration.fastOperation) {
@@ -623,28 +658,36 @@ abstract class Status {
     @required this.timeout,
     @required TimeoutConfiguration timeoutConfiguration,
     this.onFinish,
-  }) : _timeoutConfiguration = timeoutConfiguration;
+    @required Stopwatch stopwatch,
+  }) : _timeoutConfiguration = timeoutConfiguration,
+       _stopwatch = stopwatch;
 
   /// A [SilentStatus] or an [AnsiSpinner] (depending on whether the
   /// terminal is fancy enough), already started.
   factory Status.withSpinner({
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
+    @required Stopwatch stopwatch,
+    @required bool supportsColor,
+    @required Platform platform,
     VoidCallback onFinish,
     SlowWarningCallback slowWarningCallback,
   }) {
-    if (globals.terminal.supportsColor) {
+    if (supportsColor) {
       return AnsiSpinner(
         timeout: timeout,
         onFinish: onFinish,
         slowWarningCallback: slowWarningCallback,
         timeoutConfiguration: timeoutConfiguration,
+        stopwatch: stopwatch,
+        platform: platform,
       )..start();
     }
     return SilentStatus(
       timeout: timeout,
       onFinish: onFinish,
       timeoutConfiguration: timeoutConfiguration,
+      stopwatch: stopwatch,
     )..start();
   }
 
@@ -653,7 +696,7 @@ abstract class Status {
   final TimeoutConfiguration _timeoutConfiguration;
 
   @protected
-  final Stopwatch _stopwatch = context.get<Stopwatch>() ?? Stopwatch();
+  final Stopwatch _stopwatch;
 
   @protected
   @visibleForTesting
@@ -704,11 +747,13 @@ class SilentStatus extends Status {
   SilentStatus({
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
+    @required Stopwatch stopwatch,
     VoidCallback onFinish,
   }) : super(
     timeout: timeout,
     onFinish: onFinish,
     timeoutConfiguration: timeoutConfiguration,
+    stopwatch: stopwatch,
   );
 }
 
@@ -718,14 +763,20 @@ class SummaryStatus extends Status {
   SummaryStatus({
     this.message = '',
     @required Duration timeout,
+    @required TimeoutConfiguration timeoutConfiguration,
+    @required Stopwatch stopwatch,
     this.padding = kDefaultStatusPadding,
     VoidCallback onFinish,
     Stdio stdio,
-    @required TimeoutConfiguration timeoutConfiguration,
   }) : assert(message != null),
        assert(padding != null),
        _stdio = stdio ?? globals.stdio,
-       super(timeout: timeout, onFinish: onFinish, timeoutConfiguration: timeoutConfiguration);
+       super(
+         timeout: timeout,
+         onFinish: onFinish,
+         timeoutConfiguration: timeoutConfiguration,
+         stopwatch: stopwatch,
+        );
 
   final String message;
   final int padding;
@@ -739,9 +790,11 @@ class SummaryStatus extends Status {
     super.start();
   }
 
+  void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
+
   void _printMessage() {
     assert(!_messageShowingOnCurrentLine);
-    _stdio.stdout.write('${message.padRight(padding)}     ');
+    _writeToStdOut('${message.padRight(padding)}     ');
     _messageShowingOnCurrentLine = true;
   }
 
@@ -752,14 +805,14 @@ class SummaryStatus extends Status {
     }
     super.stop();
     writeSummaryInformation();
-    _stdio.stdout.write('\n');
+    _writeToStdOut('\n');
   }
 
   @override
   void cancel() {
     super.cancel();
     if (_messageShowingOnCurrentLine) {
-      _stdio.stdout.write('\n');
+      _writeToStdOut('\n');
     }
   }
 
@@ -772,16 +825,16 @@ class SummaryStatus extends Status {
   /// Examples: `    0.5s`, `   150ms`, ` 1,600ms`, `    3.1s (!)`
   void writeSummaryInformation() {
     assert(_messageShowingOnCurrentLine);
-    _stdio.stdout.write(elapsedTime.padLeft(_kTimePadding));
+    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
     if (seemsSlow) {
-      _stdio.stdout.write(' (!)');
+      _writeToStdOut(' (!)');
     }
   }
 
   @override
   void pause() {
     super.pause();
-    _stdio.stdout.write('\n');
+    _writeToStdOut('\n');
     _messageShowingOnCurrentLine = false;
   }
 }
@@ -794,16 +847,25 @@ class SummaryStatus extends Status {
 class AnsiSpinner extends Status {
   AnsiSpinner({
     @required Duration timeout,
+    @required TimeoutConfiguration timeoutConfiguration,
+    @required Stopwatch stopwatch,
+    @required Platform platform,
     VoidCallback onFinish,
     this.slowWarningCallback,
     Stdio stdio,
-    @required TimeoutConfiguration timeoutConfiguration,
   }) : _stdio = stdio ?? globals.stdio,
-       super(timeout: timeout, onFinish: onFinish, timeoutConfiguration: timeoutConfiguration);
+       _isWindows = platform.isWindows,
+       super(
+         timeout: timeout,
+         onFinish: onFinish,
+         timeoutConfiguration: timeoutConfiguration,
+         stopwatch: stopwatch,
+        );
 
   final String _backspaceChar = '\b';
   final String _clearChar = ' ';
   final Stdio _stdio;
+  final bool _isWindows;
 
   bool timedOut = false;
 
@@ -811,9 +873,9 @@ class AnsiSpinner extends Status {
   Timer timer;
 
   // Windows console font has a limited set of Unicode characters.
-  List<String> get _animation => globals.platform.isWindows
-      ? <String>[r'-', r'\', r'|', r'/']
-      : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
+  List<String> get _animation => _isWindows
+      ? const <String>[r'-', r'\', r'|', r'/']
+      : const <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
   static const String _defaultSlowWarning = '(This is taking an unexpectedly long time.)';
   final SlowWarningCallback slowWarningCallback;
@@ -835,8 +897,10 @@ class AnsiSpinner extends Status {
     _startSpinner();
   }
 
+  void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
+
   void _startSpinner() {
-    _stdio.stdout.write(_clear); // for _callback to backspace over
+    _writeToStdOut(_clear); // for _callback to backspace over
     timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
     _callback(timer);
   }
@@ -845,21 +909,21 @@ class AnsiSpinner extends Status {
     assert(this.timer == timer);
     assert(timer != null);
     assert(timer.isActive);
-    _stdio.stdout.write(_backspace);
+    _writeToStdOut(_backspace);
     ticks += 1;
     if (seemsSlow) {
       if (!timedOut) {
         timedOut = true;
-        _stdio.stdout.write('$_clear\n');
+        _writeToStdOut('$_clear\n');
       }
       if (slowWarningCallback != null) {
         _slowWarning = slowWarningCallback();
       } else {
         _slowWarning = _defaultSlowWarning;
       }
-      _stdio.stdout.write(_slowWarning);
+      _writeToStdOut(_slowWarning);
     }
-    _stdio.stdout.write('${_clearChar * spinnerIndent}$_currentAnimationFrame');
+    _writeToStdOut('${_clearChar * spinnerIndent}$_currentAnimationFrame');
   }
 
   @override
@@ -873,7 +937,7 @@ class AnsiSpinner extends Status {
   }
 
   void _clearSpinner() {
-    _stdio.stdout.write('$_backspace$_clear$_backspace');
+    _writeToStdOut('$_backspace$_clear$_backspace');
   }
 
   @override
@@ -903,16 +967,25 @@ const int _kTimePadding = 8; // should fit "99,999ms"
 class AnsiStatus extends AnsiSpinner {
   AnsiStatus({
     this.message = '',
-    @required Duration timeout,
     this.multilineOutput = false,
     this.padding = kDefaultStatusPadding,
+    @required Duration timeout,
+    @required Stopwatch stopwatch,
+    @required Platform platform,
     VoidCallback onFinish,
     Stdio stdio,
     TimeoutConfiguration timeoutConfiguration,
   }) : assert(message != null),
        assert(multilineOutput != null),
        assert(padding != null),
-       super(timeout: timeout, onFinish: onFinish, stdio: stdio, timeoutConfiguration: timeoutConfiguration);
+       super(
+         timeout: timeout,
+         onFinish: onFinish,
+         stdio: stdio,
+         timeoutConfiguration: timeoutConfiguration,
+         stopwatch: stopwatch,
+         platform: platform,
+        );
 
   final String message;
   final bool multilineOutput;
@@ -934,20 +1007,20 @@ class AnsiStatus extends AnsiSpinner {
   void _startStatus() {
     final String line = '${message.padRight(padding)}$_margin';
     _totalMessageLength = line.length;
-    _stdio.stdout.write(line);
+    _writeToStdOut(line);
   }
 
   @override
   void stop() {
     super.stop();
     writeSummaryInformation();
-    _stdio.stdout.write('\n');
+    _writeToStdOut('\n');
   }
 
   @override
   void cancel() {
     super.cancel();
-    _stdio.stdout.write('\n');
+    _writeToStdOut('\n');
   }
 
   /// Print summary information when a task is done.
@@ -958,16 +1031,20 @@ class AnsiStatus extends AnsiSpinner {
   /// line before writing the elapsed time.
   void writeSummaryInformation() {
     if (multilineOutput) {
-      _stdio.stdout.write('\n${'$message Done'.padRight(padding)}$_margin');
+      _writeToStdOut('\n${'$message Done'.padRight(padding)}$_margin');
     }
-    _stdio.stdout.write(elapsedTime.padLeft(_kTimePadding));
+    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
     if (seemsSlow) {
-      _stdio.stdout.write(' (!)');
+      _writeToStdOut(' (!)');
     }
   }
 
   void _clearStatus() {
-    _stdio.stdout.write('${_backspaceChar * _totalMessageLength}${_clearChar * _totalMessageLength}${_backspaceChar * _totalMessageLength}');
+    _writeToStdOut(
+      '${_backspaceChar * _totalMessageLength}'
+      '${_clearChar * _totalMessageLength}'
+      '${_backspaceChar * _totalMessageLength}',
+    );
   }
 
   @override

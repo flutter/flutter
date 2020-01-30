@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
 import '../../localization/gen_l10n.dart';
+import '../../localization/gen_l10n_types.dart';
 import '../../localization/localizations_utils.dart';
 
 import '../common.dart';
@@ -192,7 +193,7 @@ void main() {
         try {
           generator.className = 'String with spaces';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
@@ -205,12 +206,12 @@ void main() {
         try {
           generator.className = 'TestClass@123';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
 
@@ -218,12 +219,12 @@ void main() {
         try {
           generator.className = 'camelCaseClassName';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
 
@@ -231,12 +232,12 @@ void main() {
         try {
           generator.className = '123ClassName';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
     });
@@ -611,7 +612,7 @@ void main() {
         generator.classMethods.first,
         '''  String get title {
     return Intl.message(
-      r'Title',
+      'Title',
       locale: _localeName,
       name: 'title',
       desc: r'Title for the application'
@@ -656,7 +657,7 @@ void main() {
         generator.classMethods.first,
         '''  String itemNumber(Object value) {
     return Intl.message(
-      r\'Item \$value\',
+      \'Item \${value}\',
       locale: _localeName,
       name: 'itemNumber',
       desc: r\'Item placement in list.\',
@@ -665,6 +666,7 @@ void main() {
   }
 ''');
     });
+  });
 
     group('DateTime tests', () {
       test('correctly generates simple message with dates', () {
@@ -702,17 +704,20 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springBegins(Object springStartDate) {
+          '''  String springBegins(DateTime springStartDate) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
-    return Intl.message(
-      r'Spring begins on \$springStartDateString',
-      locale: _localeName,
-      name: 'springBegins',
-      desc: r'The first day of spring',
-      args: <Object>[springStartDateString]
-    );
+    String springBegins(Object springStartDate) {
+      return Intl.message(
+        \'Spring begins on \${springStartDate}\',
+        locale: _localeName,
+        name: \'springBegins\',
+        desc: r\'The first day of spring\',
+        args: <Object>[springStartDate]
+      );
+    }
+    return springBegins(springStartDateString);
   }
 ''');
       });
@@ -826,17 +831,20 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springGreetings(Object springStartDate, Object helloWorld) {
+          '''  String springGreetings(DateTime springStartDate, Object helloWorld) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
-    return Intl.message(
-      r\'Since it\' "\'" r\'s \$springStartDateString, it\' "\'" r\'s finally spring! \$helloWorld!\',
-      locale: _localeName,
-      name: 'springGreetings',
-      desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
-      args: <Object>[springStartDateString, helloWorld]
-    );
+    String springGreetings(Object springStartDate, Object helloWorld) {
+      return Intl.message(
+        \'Since it\' "\'" r\'s \${springStartDate}, it\' "\'" r\'s finally spring! \${helloWorld}!\',
+        locale: _localeName,
+        name: \'springGreetings\',
+        desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
+        args: <Object>[springStartDate, helloWorld]
+      );
+    }
+    return springGreetings(springStartDateString, helloWorld);
   }
 ''');
       });
@@ -880,20 +888,23 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springRange(Object springStartDate, Object springEndDate) {
+          '''  String springRange(DateTime springStartDate, DateTime springEndDate) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
     final DateFormat springEndDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springEndDateString = springEndDateDateFormat.format(springEndDate);
 
-    return Intl.message(
-      r\'Spring begins on \$springStartDateString and ends on \$springEndDateString\',
-      locale: _localeName,
-      name: 'springRange',
-      desc: r\'The range of dates for spring in the year\',
-      args: <Object>[springStartDateString, springEndDateString]
-    );
+    String springRange(Object springStartDate, Object springEndDate) {
+      return Intl.message(
+        \'Spring begins on \${springStartDate} and ends on \${springEndDate}\',
+        locale: _localeName,
+        name: \'springRange\',
+        desc: r\'The range of dates for spring in the year\',
+        args: <Object>[springStartDate, springEndDate]
+      );
+    }
+    return springRange(springStartDateString, springEndDateString);
   }
 ''');
       });
@@ -933,24 +944,25 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count, Object currentDate) {
+          '''  String helloWorlds(int count, DateTime currentDate) {
     final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String currentDateString = currentDateDateFormat.format(currentDate);
 
-    return Intl.plural(
-      count,
+    String helloWorlds(int count, Object currentDate) {
+      return Intl.plural(
+        count,
       locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, currentDateString],
-      one: 'Hello World, today is \$currentDateString',
-      two: 'Hello two worlds, today is \$currentDateString',
-      many: 'Hello all \$count worlds, today is \$currentDateString',
-      other: 'Hello other \$count worlds, today is \$currentDateString'
-    );
+      name: \'helloWorlds\',
+      args: <Object>[count, currentDate],
+      one: \'Hello World, today is \${currentDateString}\',
+      two: \'Hello two worlds, today is \${currentDateString}\',
+      many: \'Hello all \${count} worlds, today is \${currentDateString}\',
+      other: \'Hello other \${count} worlds, today is \${currentDateString}\'
+      );
+    }
+    return helloWorlds(count, currentDateString);
   }
-'''
-        );
-      });
+''');
     });
 
     group('Number tests', () {
@@ -961,8 +973,8 @@ void main() {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
-        "format": "percentPattern"
+        "type": "double",
+        "format": "compact"
       }
     }
   }
@@ -989,32 +1001,46 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String courseCompletion(Object progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.percentPattern(
+          '''  String courseCompletion(double progress) {
+    final NumberFormat progressNumberFormat = NumberFormat.compact(
       locale: _localeName,
     );
     final String progressString = progressNumberFormat.format(progress);
 
-    return Intl.message(
-      r'You have completed \$progressString of the course.',
-      locale: _localeName,
-      name: 'courseCompletion',
-      desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progressString]
-    );
+    String courseCompletion(Object progress) {
+      return Intl.message(
+        \'You have completed \${progress} of the course.\',
+        locale: _localeName,
+        name: \'courseCompletion\',
+        desc: r\'The amount of progress the student has made in their class.\',
+        args: <Object>[progress]
+      );
+    }
+    return courseCompletion(progressString);
   }
 ''');
       });
 
-      test('correctly adds optional parameters to numbers', () {
-        const String singleNumberMessage = '''{
+      test('correctly adds optional named parameters to numbers', () {
+        const Set<String> numberFormatsWithNamedParameters = <String>{
+          'compact',
+          'compactCurrency',
+          'compactSimpleCurrency',
+          'compactLong',
+          'currency',
+          'decimalPercentPattern',
+          'simpleCurrency',
+        };
+
+        for (final String numberFormat in numberFormatsWithNamedParameters) {
+          final String singleNumberMessage = '''{
   "courseCompletion": "You have completed {progress} of the course.",
   "@courseCompletion": {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
-        "format": "decimalPercentPattern",
+        "type": "double",
+        "format": "$numberFormat",
         "optionalParameters": {
           "decimalDigits": 2
         }
@@ -1022,44 +1048,108 @@ void main() {
     }
   }
 }''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(singleNumberMessage);
+          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+            ..createSync(recursive: true);
+          l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(singleNumberMessage);
 
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
+          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+          try {
+            generator.initialize(
+              l10nDirectoryPath: defaultArbPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            );
+            generator.parseArbFiles();
+            generator.generateClassMethods();
+          } on Exception catch (e) {
+            fail('Parsing template arb file should succeed: \n$e');
+          }
 
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          '''  String courseCompletion(Object progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.decimalPercentPattern(
+          expect(generator.classMethods, isNotEmpty);
+          expect(
+            generator.classMethods.first,
+            '''  String courseCompletion(double progress) {
+    final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(
       locale: _localeName,
       decimalDigits: 2,
     );
     final String progressString = progressNumberFormat.format(progress);
 
-    return Intl.message(
-      r'You have completed \$progressString of the course.',
-      locale: _localeName,
-      name: 'courseCompletion',
-      desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progressString]
-    );
+    String courseCompletion(Object progress) {
+      return Intl.message(
+        \'You have completed \${progress} of the course.\',
+        locale: _localeName,
+        name: \'courseCompletion\',
+        desc: r\'The amount of progress the student has made in their class.\',
+        args: <Object>[progress]
+      );
+    }
+    return courseCompletion(progressString);
+  }
+''');}
+      });
+
+      test('correctly adds optional positional parameters to numbers', () {
+        const Set<String> numberFormatsWithPositionalParameters = <String>{
+          'decimalPattern',
+          'percentPattern',
+          'scientificPattern',
+        };
+
+        for (final String numberFormat in numberFormatsWithPositionalParameters) {
+          final String singleNumberMessage = '''{
+  "courseCompletion": "You have completed {progress} of the course.",
+  "@courseCompletion": {
+    "description": "The amount of progress the student has made in their class.",
+    "placeholders": {
+      "progress": {
+        "type": "double",
+        "format": "$numberFormat"
+      }
+    }
+  }
+}''';
+          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+            ..createSync(recursive: true);
+          l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(singleNumberMessage);
+
+          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+          try {
+            generator.initialize(
+              l10nDirectoryPath: defaultArbPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            );
+            generator.parseArbFiles();
+            generator.generateClassMethods();
+          } on Exception catch (e) {
+            fail('Parsing template arb file should succeed: \n$e');
+          }
+
+          expect(generator.classMethods, isNotEmpty);
+          expect(
+            generator.classMethods.first,
+            '''  String courseCompletion(double progress) {
+    final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(_localeName);
+    final String progressString = progressNumberFormat.format(progress);
+
+    String courseCompletion(Object progress) {
+      return Intl.message(
+        \'You have completed \${progress} of the course.\',
+        locale: _localeName,
+        name: \'courseCompletion\',
+        desc: r\'The amount of progress the student has made in their class.\',
+        args: <Object>[progress]
+      );
+    }
+    return courseCompletion(progressString);
   }
 ''');
+        }
       });
 
       test('throws an exception when improperly formatted number is passed in', () {
@@ -1069,7 +1159,7 @@ void main() {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
+        "type": "double",
         "format": "asdf"
       }
     }
@@ -1142,9 +1232,9 @@ void main() {
       zero: 'Hello',
       one: 'Hello World',
       two: 'Hello two worlds',
-      few: 'Hello \$count worlds',
-      many: 'Hello all \$count worlds',
-      other: 'Hello other \$count worlds'
+      few: 'Hello \${count} worlds',
+      many: 'Hello all \${count} worlds',
+      other: 'Hello other \${count} worlds'
     );
   }
 '''
@@ -1190,11 +1280,11 @@ void main() {
       name: 'helloWorlds',
       args: <Object>[count, adjective],
       zero: 'Hello',
-      one: 'Hello \$adjective World',
-      two: 'Hello two \$adjective worlds',
-      few: 'Hello \$count \$adjective worlds',
-      many: 'Hello all \$count \$adjective worlds',
-      other: 'Hello other \$count \$adjective worlds'
+      one: 'Hello \${adjective} World',
+      two: 'Hello two \${adjective} worlds',
+      few: 'Hello \${count} \${adjective} worlds',
+      many: 'Hello all \${count} \${adjective} worlds',
+      other: 'Hello other \${count} \${adjective} worlds'
     );
   }
 '''
@@ -1236,20 +1326,23 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count, Object currentDate) {
+          '''  String helloWorlds(int count, DateTime currentDate) {
     final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String currentDateString = currentDateDateFormat.format(currentDate);
 
-    return Intl.plural(
-      count,
+    String helloWorlds(int count, Object currentDate) {
+      return Intl.plural(
+        count,
       locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, currentDateString],
-      one: 'Hello World, today is \$currentDateString',
-      two: 'Hello two worlds, today is \$currentDateString',
-      many: 'Hello all \$count worlds, today is \$currentDateString',
-      other: 'Hello other \$count worlds, today is \$currentDateString'
-    );
+      name: \'helloWorlds\',
+      args: <Object>[count, currentDate],
+      one: \'Hello World, today is \${currentDateString}\',
+      two: \'Hello two worlds, today is \${currentDateString}\',
+      many: \'Hello all \${count} worlds, today is \${currentDateString}\',
+      other: \'Hello other \${count} worlds, today is \${currentDateString}\'
+      );
+    }
+    return helloWorlds(count, currentDateString);
   }
 '''
         );
@@ -1262,7 +1355,7 @@ void main() {
     "placeholders": {
       "count": {},
       "population": {
-        "type": "Number",
+        "type": "int",
         "format": "compactLong"
       }
     }
@@ -1290,22 +1383,25 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count, Object population) {
+          '''  String helloWorlds(int count, int population) {
     final NumberFormat populationNumberFormat = NumberFormat.compactLong(
       locale: _localeName,
     );
     final String populationString = populationNumberFormat.format(population);
 
-    return Intl.plural(
-      count,
+    String helloWorlds(int count, Object population) {
+      return Intl.plural(
+        count,
       locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, populationString],
-      one: 'Hello World of \$populationString citizens',
-      two: 'Hello two worlds with \$populationString total citizens',
-      many: 'Hello all \$count worlds, with a total of \$populationString citizens',
-      other: 'Hello other \$count worlds, with a total of \$populationString citizens'
-    );
+      name: \'helloWorlds\',
+      args: <Object>[count, population],
+      one: \'Hello World of \${populationString} citizens\',
+      two: \'Hello two worlds with \${populationString} total citizens\',
+      many: \'Hello all \${count} worlds, with a total of \${populationString} citizens\',
+      other: \'Hello other \${count} worlds, with a total of \${populationString} citizens\'
+      );
+    }
+    return helloWorlds(count, populationString);
   }
 '''
         );
@@ -1393,8 +1489,7 @@ void main() {
           generator.parseArbFiles();
           generator.generateClassMethods();
         } on L10nException catch (e) {
-          expect(e.message, contains('Resource attribute'));
-          expect(e.message, contains('does not exist'));
+          expect(e.message, contains('Resource attribute "@helloWorlds" was not found'));
           return;
         }
         fail('Generating plural class method without resource attributes should not succeed');
@@ -1425,7 +1520,7 @@ void main() {
           generator.generateClassMethods();
         } on L10nException catch (e) {
           expect(e.message, contains('is not properly formatted'));
-          expect(e.message, contains('Ensure that it is a map with keys that are strings'));
+          expect(e.message, contains('Ensure that it is a map with string valued keys'));
           return;
         }
         fail('Generating class methods with incorrect placeholder format should not succeed');

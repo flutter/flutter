@@ -83,7 +83,7 @@ import 'inherited_notifier.dart';
 ///     debugLabel: 'Scope',
 ///     autofocus: true,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: Focus(
 ///         onKey: _handleKeyPress,
 ///         debugLabel: 'Button',
@@ -344,7 +344,6 @@ class _FocusState extends State<Focus> {
       // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
     }
-    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     if (widget.skipTraversal != null) {
       focusNode.skipTraversal = widget.skipTraversal;
     }
@@ -353,6 +352,7 @@ class _FocusState extends State<Focus> {
     }
     _canRequestFocus = focusNode.canRequestFocus;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
 
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should
@@ -398,6 +398,13 @@ class _FocusState extends State<Focus> {
   @override
   void deactivate() {
     super.deactivate();
+    // The focus node's location in the tree is no longer valid here. But
+    // we can't unfocus or remove the node from the tree because if the widget
+    // is moved to a different part of the tree (via global key) it should
+    // retain its focus state. That's why we temporarily park it on the root
+    // focus node (via reparent) until it either gets moved to a different part
+    // of the tree (via didChangeDependencies) or until it is disposed.
+    _focusAttachment?.reparent();
     _didAutofocus = false;
   }
 

@@ -2435,7 +2435,7 @@ class _TransformedRect {
   final Matrix4 transform;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is _TransformedRect
@@ -2467,7 +2467,7 @@ class _InspectorOverlayRenderState {
   final TextDirection textDirection;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is _InspectorOverlayRenderState

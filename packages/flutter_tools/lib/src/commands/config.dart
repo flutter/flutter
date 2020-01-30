@@ -12,7 +12,6 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import '../version.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
@@ -68,7 +67,7 @@ class ConfigCommand extends FlutterCommand {
     // List all config settings. for feature flags, include whether they
     // are available.
     final Map<String, Feature> featuresByName = <String, Feature>{};
-    final String channel = FlutterVersion.instance.channel;
+    final String channel = globals.flutterVersion.channel;
     for (final Feature feature in allFeatures) {
       if (feature.configSetting != null) {
         featuresByName[feature.configSetting] = feature;
@@ -101,7 +100,7 @@ class ConfigCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (boolArg('machine')) {
       await handleMachine();
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (boolArg('clear-features')) {
@@ -110,13 +109,15 @@ class ConfigCommand extends FlutterCommand {
           globals.config.removeValue(feature.configSetting);
         }
       }
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (argResults.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
-      flutterUsage.enabled = value;
+      // We send the analytics event *before* toggling the flag intentionally
+      // to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
+      flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
@@ -157,7 +158,7 @@ class ConfigCommand extends FlutterCommand {
       globals.printStatus('\nYou may need to restart any open editors for them to read new settings.');
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> handleMachine() async {

@@ -222,6 +222,7 @@ class AlertDialog extends StatelessWidget {
     this.contentTextStyle,
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
+    this.actionsOverflowDirection,
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
@@ -252,7 +253,7 @@ class AlertDialog extends StatelessWidget {
   /// Style for the text in the [title] of this [AlertDialog].
   ///
   /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
-  /// [ThemeData.textTheme.title].
+  /// [ThemeData.textTheme.headline6].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -275,7 +276,7 @@ class AlertDialog extends StatelessWidget {
   /// Style for the text in the [content] of this [AlertDialog].
   ///
   /// If null, [DialogTheme.contentTextStyle] is used, if that's null, defaults
-  /// to [ThemeData.textTheme.subhead].
+  /// to [ThemeData.textTheme.subtitle1].
   final TextStyle contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the
@@ -291,7 +292,7 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
-  /// Padding around the the set of [actions] at the bottom of the dialog.
+  /// Padding around the set of [actions] at the bottom of the dialog.
   ///
   /// Typically used to provide padding to the button bar between the button bar
   /// and the edges of the dialog.
@@ -315,7 +316,31 @@ class AlertDialog extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry actionsPadding;
+
+  /// The vertical direction of [actions] if the children overflow
+  /// horizontally.
+  ///
+  /// If the dialog's [actions] do not fit into a single row, then they
+  /// are arranged in a column. The first action is at the top of the
+  /// column if this property is set to [VerticalDirection.down], since it
+  /// "starts" at the top and "ends" at the bottom. On the other hand,
+  /// the first action will be at the bottom of the column if this
+  /// property is set to [VerticalDirection.up], since it "starts" at the
+  /// bottom and "ends" at the top.
+  ///
+  /// If null then it will use the surrounding
+  /// [ButtonBarTheme.overflowDirection]. If that is null, it will
+  /// default to [VerticalDirection.down].
+  ///
+  /// See also:
+  ///
+  /// * [ButtonBar], which [actions] configures to lay itself out.
+  final VerticalDirection actionsOverflowDirection;
 
   /// The padding that surrounds each button in [actions].
   ///
@@ -325,6 +350,10 @@ class AlertDialog extends StatelessWidget {
   /// If this property is null, then it will use the surrounding
   /// [ButtonBarTheme.buttonPadding]. If that is null, it will default to
   /// 8.0 logical pixels on the left and right.
+  ///
+  /// See also:
+  ///
+  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry buttonPadding;
 
   /// {@macro flutter.material.dialog.backgroundColor}
@@ -392,7 +421,7 @@ class AlertDialog extends StatelessWidget {
      titleWidget = Padding(
         padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: DefaultTextStyle(
-          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
+          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
             child: title,
             namesRoute: true,
@@ -405,7 +434,7 @@ class AlertDialog extends StatelessWidget {
       contentWidget = Padding(
         padding: contentPadding,
         child: DefaultTextStyle(
-          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
           child: content,
         ),
       );
@@ -415,6 +444,7 @@ class AlertDialog extends StatelessWidget {
         padding: actionsPadding,
         child: ButtonBar(
           buttonPadding: buttonPadding,
+          overflowDirection: actionsOverflowDirection,
           children: actions,
         ),
       );
@@ -717,7 +747,7 @@ class SimpleDialog extends StatelessWidget {
               Padding(
                 padding: titlePadding,
                 child: DefaultTextStyle(
-                  style: theme.textTheme.title,
+                  style: theme.textTheme.headline6,
                   child: Semantics(namesRoute: true, child: title),
                 ),
               ),
