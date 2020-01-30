@@ -4,8 +4,7 @@ This tests contains an app with a main page and sub pages.
 The main page contains a list of buttons; each button leads to a designated sub page when tapped on.
 Each sub page should displays some simple UIs to screenshot tested.
 
-The flutter driver test runs the app and opens each page to take a screenshot. Then it compares the screenshot against a golden image stored in `test_driver/goldens/<some_test_page_name>/<device_model>.png`.
-
+The flutter driver test runs the app and opens each page to take a screenshot. Then it compares the screenshot against a golden image stored on https://flutter-gold.skia.org.
 # Add a new page to test
 
 1. Create a new class which extends `Page` and implement the UI to be tested in the `build` method.

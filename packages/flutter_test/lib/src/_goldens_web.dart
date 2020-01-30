@@ -60,7 +60,10 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   Uri testUri;
 
   @override
-  Future<bool> compare(Element element, Size size, Uri golden) async {
+  Future<bool> compare(dynamic element, dynamic size, Uri golden) async {
+    assert(element is Element);
+    assert(size is Size);
+
     final String key = golden.toString();
 
     final html.HttpRequest request = await html.HttpRequest.request(
@@ -82,7 +85,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   }
 
   @override
-  Future<void> update(Uri golden, Element element, Size size) async {
+  Future<void> update(Uri golden, dynamic element, dynamic size) async {
     // Update is handled on the server side, just use the same logic here
     await compare(element, size, golden);
   }
