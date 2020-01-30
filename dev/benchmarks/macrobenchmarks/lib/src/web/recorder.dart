@@ -105,7 +105,7 @@ abstract class RawRecorder extends Recorder {
           });
         });
       });
-      _frames.add(FrameMetrics(
+      _frames.add(FrameMetrics._(
         drawFrameDuration: drawFrameDuration,
         sceneBuildDuration: sceneBuildDuration,
         windowRenderDuration: windowRenderDuration,
@@ -203,7 +203,7 @@ abstract class WidgetRecorder extends Recorder {
   }
 
   void _frameDidDraw() {
-    _frames.add(FrameMetrics(
+    _frames.add(FrameMetrics._(
       drawFrameDuration: _drawFrameStopwatch.elapsed,
       sceneBuildDuration: null,
       windowRenderDuration: null,
@@ -283,13 +283,13 @@ abstract class Recorder {
         measuredFrames.map<double>((FrameMetrics metric) =>
             metric.drawFrameDuration.inMicroseconds.toDouble());
     final double averageDrawFrameDurationMicros =
-        computeMean(noiseCheckDrawFrameTimes);
+        _computeMean(noiseCheckDrawFrameTimes);
     final double standardDeviation =
-        computeStandardDeviationForPopulation(noiseCheckDrawFrameTimes);
+        _computeStandardDeviationForPopulation(noiseCheckDrawFrameTimes);
     final double drawFrameDurationNoise =
         standardDeviation / averageDrawFrameDurationMicros;
 
-    return Profile(
+    return Profile._(
       name: name,
       averageDrawFrameDuration:
           Duration(microseconds: averageDrawFrameDurationMicros.toInt()),
@@ -302,7 +302,7 @@ abstract class Recorder {
 /// Contains metrics for a series of rendered frames.
 @immutable
 class Profile {
-  Profile({
+  Profile._({
     @required this.name,
     @required this.drawFrameDurationNoise,
     @required this.averageDrawFrameDuration,
@@ -347,7 +347,7 @@ class Profile {
 
 /// Contains metrics for a single frame.
 class FrameMetrics {
-  FrameMetrics({
+  FrameMetrics._({
     @required this.drawFrameDuration,
     @required this.sceneBuildDuration,
     @required this.windowRenderDuration,
@@ -392,7 +392,7 @@ String _formatToStringLines(List<String> lines) {
 }
 
 /// Computes the arithmetic mean (or average) of given [values].
-double computeMean(Iterable<double> values) {
+double _computeMean(Iterable<double> values) {
   final double sum = values.reduce((double a, double b) => a + b);
   return sum / values.length;
 }
@@ -404,8 +404,8 @@ double computeMean(Iterable<double> values) {
 /// See also:
 ///
 /// * https://en.wikipedia.org/wiki/Standard_deviation
-double computeStandardDeviationForPopulation(Iterable<double> population) {
-  final double mean = computeMean(population);
+double _computeStandardDeviationForPopulation(Iterable<double> population) {
+  final double mean = _computeMean(population);
   final double sumOfSquaredDeltas = population.fold<double>(
     0.0,
     (double previous, double value) => previous += math.pow(value - mean, 2),
