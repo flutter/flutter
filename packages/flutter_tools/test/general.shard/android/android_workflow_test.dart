@@ -311,4 +311,19 @@ void main() {
     Stdio: () => stdio,
   }));
 
+  testUsingContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
+    final ValidationResult validationResult = await AndroidValidator().validate();
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains(kAndroidSdkRoot)
+      ),
+      true,
+    );
+  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
+    AndroidSdk: () => null,
+    FileSystem: () => fs,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+    ProcessManager: () => processManager,
+    Stdio: () => stdio,
+  }));
 }

@@ -114,7 +114,9 @@ class AndroidValidator extends DoctorValidator {
         final String androidHomeDir = globals.platform.environment[kAndroidHome];
         messages.add(ValidationMessage.error(userMessages.androidBadSdkDir(kAndroidHome, androidHomeDir)));
       } else {
-        messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
+        // Instruct user to set [kAndroidSdkRoot] and not deprecated [kAndroidHome]
+        // See https://github.com/flutter/flutter/issues/39301
+        messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidSdkRoot)));
       }
       return ValidationResult(ValidationType.missing, messages);
     }
