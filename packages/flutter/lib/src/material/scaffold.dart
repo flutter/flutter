@@ -1101,6 +1101,18 @@ class Scaffold extends StatefulWidget {
   // TODO: Document.
   final Map<Key, FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
+  FloatingActionButtonConfiguration _fabConfiguration(Key key) {
+    if (key == _primaryFABKey) {
+      return FloatingActionButtonConfiguration(
+        button: floatingActionButton,
+        location: floatingActionButtonLocation,
+        animator: floatingActionButtonAnimator,
+      );
+    } else {
+      return additionalFloatingActionButtonConfigurations[key];
+    }
+  }
+
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
   /// Typically this is a list of [FlatButton] widgets. These buttons are
