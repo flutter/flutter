@@ -2711,15 +2711,20 @@ class _ScaffoldScope extends InheritedWidget {
   }
 }
 
+// TODO: Write basic documentation.
 class _FABStatus {
-  _FABStatus({this.button, this.location, this.animator, this.previousLocation, this.moveController});
+  _FABStatus({
+    this.button,
+    this.location,
+    this.animator,
+    this.previousLocation,
+    this.moveController,
+  });
 
   Widget button;
   FloatingActionButtonLocation location;
   FloatingActionButtonAnimator animator;
-
   FloatingActionButtonLocation previousLocation;
-
   AnimationController moveController;
 
   Offset getOffset(ScaffoldPrelayoutGeometry currentGeometry)
@@ -2732,10 +2737,11 @@ class _FABStatus {
   @override
   String toString() =>
       '_FABStatus('
-        'button: $button,'
-        'location: $location,'
-        'previousLocation: $previousLocation,'
-        'moveController: $moveController,'
+        'button: $button, '
+        'location: $location, '
+        'animator: $animator, '
+        'previousLocation: $previousLocation, '
+        'moveController: $moveController'
       ')';
 }
 
