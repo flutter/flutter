@@ -1316,4 +1316,47 @@ void main() {
       matchesGoldenFile('text_golden.TextInlineWidgetMiddle.1.png'),
     );
   });
+
+  testWidgets('Text TextHeightBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 700.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: Column(
+              children: const <Widget>[
+                Text('Hello\nLine 2\nLine 3',
+                  textDirection: TextDirection.ltr,
+                  style: TextStyle(height: 5,),
+                ),
+                Text('Hello\nLine 2\nLine 3',
+                  textDirection: TextDirection.ltr,
+                  style: TextStyle(height: 5,),
+                  textHeightBehavior: TextHeightBehavior(
+                    applyHeightToFirstAscent: false,
+                    applyHeightToLastDescent: false,
+                  ),
+                ),
+                Text('Hello',
+                  textDirection: TextDirection.ltr,
+                  style: TextStyle(height: 5,),
+                  textHeightBehavior: TextHeightBehavior(
+                    applyHeightToFirstAscent: false,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextHeightBehavior.1.png'),
+    );
+  });
 }
