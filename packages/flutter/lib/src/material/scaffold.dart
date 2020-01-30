@@ -387,6 +387,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.geometryNotifier,
     // for floating action button
     @required this.fabStatuses,
+    @required this.fabProgresses,
     @required this.isSnackBarFloating,
     @required this.extendBody,
     @required this.extendBodyBehindAppBar,
@@ -404,6 +405,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final _ScaffoldGeometryNotifier geometryNotifier;
 
   final Map<Key, _FABStatus> fabStatuses;
+
+  final Map<Key, double> fabProgresses;
 
   final bool isSnackBarFloating;
 
@@ -580,7 +583,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     return possiblyChangedKeys.any(
         (Key key) => fabStatuses[key]?.previousLocation != other.fabStatuses[key]?.previousLocation ||
             fabStatuses[key]?.location != other.fabStatuses[key]?.location ||
-            fabStatuses[key]?.moveController?.value != other.fabStatuses[key]?.moveController?.value
+            fabProgresses[key] != other.fabProgresses[key]
     );
   }
 
@@ -2526,6 +2529,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
                 minInsets: minInsets,
                 fabStatuses: _fabStatuses,
+                fabProgresses: _fabStatuses.map<Key, double>(
+                    (Key key, _FABStatus status) => MapEntry<Key, double>(key, status.moveController.value)
+                ),
                 geometryNotifier: _geometryNotifier,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
@@ -2734,6 +2740,8 @@ class _FABStatus {
   FloatingActionButtonLocation previousLocation;
 
   AnimationController moveController;
+
+  @override toString() => '_FABStatus(button: $button, location: $location, previousLocation: $previousLocation, moveController: $moveController)';
 }
 
 class _FABKey extends ValueKey<int> {
