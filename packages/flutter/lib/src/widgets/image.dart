@@ -13,9 +13,11 @@ import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'binding.dart';
+import 'disposable_build_context.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'scroll_aware_image_provider.dart';
 import 'ticker_provider.dart';
 
 export 'package:flutter/painting.dart' show
@@ -946,11 +948,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   bool _invertColors;
   int _frameNumber;
   bool _wasSynchronouslyLoaded;
+  DisposableBuildContext<State<Image>> _scrollAwareContext;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scrollAwareContext = DisposableBuildContext<State<Image>>(this);
   }
 
   @override
@@ -958,6 +962,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     assert(_imageStream != null);
     WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
+    _scrollAwareContext.dispose();
     super.dispose();
   }
 
@@ -1006,8 +1011,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _resolveImage() {
+    final ScrollAwareImageProvider provider = ScrollAwareImageProvider<dynamic>(
+      context: _scrollAwareContext,
+      imageProvider: widget.image,
+    );
     final ImageStream newStream =
-      widget.image.resolve(createLocalImageConfiguration(
+      provider.resolve(createLocalImageConfiguration(
         context,
         size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
       ));
