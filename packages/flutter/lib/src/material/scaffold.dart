@@ -2112,11 +2112,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     for (final Key key in possiblyChangedFABKeys) {
       final FloatingActionButtonConfiguration newConfiguration = widget._fabConfiguration(key);
+      final FloatingActionButtonConfiguration oldConfiguration = oldWidget._fabConfiguration(key);
 
-      if (newConfiguration.animator != _fabStatuses[key].animator)
+      if (newConfiguration.animator != oldConfiguration.animator)
         _fabStatuses[key].animator = newConfiguration.animator
             ?? _kDefaultFloatingActionButtonAnimator;
-      if (newConfiguration.location != _fabStatuses[key].location)
+      if (newConfiguration.location != oldConfiguration.location)
         _moveFloatingActionButton(
           _fabStatuses[key],
           newConfiguration.location ?? _kDefaultFloatingActionButtonLocation,
