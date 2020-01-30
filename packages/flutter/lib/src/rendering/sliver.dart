@@ -759,7 +759,7 @@ class SliverGeometry extends Diagnosticable {
   }
 
   @override
-  String toStringShort() => objectRuntimeType(this, 'SliverGeometry');
+  String toStringShort() => '${objectRuntimeType(this, 'SliverGeometry')}';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

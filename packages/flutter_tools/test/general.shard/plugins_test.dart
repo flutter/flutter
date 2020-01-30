@@ -146,6 +146,36 @@ flutter:
         );
     }
 
+    void createPluginWithInvalidAndroidPackage() {
+      final Directory pluginUsingJavaAndNewEmbeddingDir =
+              fs.systemTempDirectory.createTempSync('flutter_plugin_invalid_package.');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+flutter:
+  plugin:
+    androidPackage: plugin1.invalid
+    pluginClass: UseNewEmbedding
+              ''');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('plugin1')
+        .childDirectory('correct')
+        .childFile('UseNewEmbedding.java')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
+
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync(
+          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          mode: FileMode.append,
+        );
+    }
+
     void createNewKotlinPlugin2() {
       final Directory pluginUsingKotlinAndNewEmbeddingDir =
           fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
@@ -556,6 +586,33 @@ dependencies:
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
+      // Issue: https://github.com/flutter/flutter/issues/47803
+      testUsingContext('exits the tool if a plugin sets an invalid android package in pubspec.yaml', () async {
+        when(flutterProject.isModule).thenReturn(false);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
+
+        createPluginWithInvalidAndroidPackage();
+
+        await expectLater(
+          () async {
+            await injectPlugins(flutterProject);
+          },
+          throwsToolExit(
+            message: 'The plugin `plugin1` doesn\'t have a main class defined in '
+                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
+                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
+                     'This is likely to due to an incorrect `androidPackage: plugin1.invalid` or `mainClass` entry in the plugin\'s pubspec.yaml.\n'
+                     'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
+                     'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile.',
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
       testUsingContext('old embedding app uses a plugin that supports v1 and v2 embedding', () async {
         when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
@@ -776,6 +833,7 @@ class MockAndroidProject extends Mock implements AndroidProject {}
 class MockFeatureFlags extends Mock implements FeatureFlags {}
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockFile extends Mock implements File {}
+class MockFileSystem extends Mock implements FileSystem {}
 class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}

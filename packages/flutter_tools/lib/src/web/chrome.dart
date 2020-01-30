@@ -11,7 +11,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/os.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 
@@ -118,7 +117,7 @@ class ChromeLauncher {
       }
     }
 
-    final int port = await os.findFreePort();
+    final int port = await globals.os.findFreePort();
     final List<String> args = <String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches

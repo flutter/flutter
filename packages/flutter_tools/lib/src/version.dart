@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
@@ -15,8 +14,6 @@ import 'base/time.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
-
-FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 
 class FlutterVersion {
   FlutterVersion([this._clock = const SystemClock()]) {
@@ -214,8 +211,6 @@ class FlutterVersion {
       await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
     }
   }
-
-  static FlutterVersion get instance => context.get<FlutterVersion>();
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
   String getVersionString({ bool redactUnknownBranches = false }) {

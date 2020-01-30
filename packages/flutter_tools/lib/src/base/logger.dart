@@ -9,7 +9,7 @@ import 'package:platform/platform.dart';
 
 import '../base/context.dart';
 import '../globals.dart' as globals;
-import 'io.dart' hide stderr, stdin, stdout;
+import 'io.dart';
 import 'terminal.dart' show AnsiTerminal, TerminalColor, OutputPreferences;
 import 'utils.dart';
 
@@ -268,14 +268,10 @@ class StdoutLogger extends Logger {
   }
 
   @protected
-  void writeToStdOut(String message) {
-    safeStdioWrite(_stdio.stdout, message);
-  }
+  void writeToStdOut(String message) => _stdio.stdoutWrite(message);
 
   @protected
-  void writeToStdErr(String message) {
-    safeStdioWrite(_stdio.stderr, message);
-  }
+  void writeToStdErr(String message) => _stdio.stderrWrite(message);
 
   @override
   void printTrace(String message) { }
@@ -363,7 +359,7 @@ class WindowsStdoutLogger extends StdoutLogger {
     final String windowsMessage = message
       .replaceAll('✗', 'X')
       .replaceAll('✓', '√');
-    safeStdioWrite(_stdio.stdout, windowsMessage);
+    _stdio.stdoutWrite(windowsMessage);
   }
 }
 
@@ -794,9 +790,7 @@ class SummaryStatus extends Status {
     super.start();
   }
 
-  void _writeToStdOut(String message) {
-    safeStdioWrite(_stdio.stdout, message);
-  }
+  void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
 
   void _printMessage() {
     assert(!_messageShowingOnCurrentLine);
@@ -903,9 +897,7 @@ class AnsiSpinner extends Status {
     _startSpinner();
   }
 
-  void _writeToStdOut(String message) {
-    safeStdioWrite(_stdio.stdout, message);
-  }
+  void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
 
   void _startSpinner() {
     _writeToStdOut(_clear); // for _callback to backspace over
