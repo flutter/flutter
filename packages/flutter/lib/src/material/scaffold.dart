@@ -531,13 +531,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
             snackBarSize: snackBarSize,
             textDirection: textDirection,
           );
-          final Offset currentFabOffset = status.location.getOffset(currentGeometry);
-          final Offset previousFabOffset = status.previousLocation.getOffset(currentGeometry);
-          final Offset fabOffset = status.animator.getOffset(
-            begin: previousFabOffset,
-            end: currentFabOffset,
-            progress: status.moveController.value,
-          );
+          final Offset fabOffset = status.getOffset(currentGeometry);
           positionChild(key, fabOffset);
           floatingActionButtonRect = fabOffset & fabSize;
         }
