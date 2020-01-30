@@ -32,8 +32,10 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     final DebugPrintCallback oldDebugPrint = debugPrint;
     String printedMessage;
+    int calls = 0;
     debugPrint = (String message, {int wrapWidth}) {
       printedMessage = message;
+      calls += 1;
     };
     HttpClient();
     debugPrint = oldDebugPrint;
@@ -48,5 +50,8 @@ void main() {
       'implementation to the code under test, so that your test can '
       'consistently provide a testable response to the code under test.',
     );
+    expect(calls, 1);
+    HttpClient();
+    expect(calls, 1);
   }, skip: isBrowser); // We don't override this in the browser.
 }
