@@ -10,8 +10,8 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -57,24 +57,21 @@ class AndroidWorkflow implements Workflow {
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
     @required AndroidSdk androidSdk,
-    @required FileSystem fs,
+    @required Logger logger,
     @required Platform platform,
     @required ProcessManager processManager,
-    @required Stdio stdio,
     @required UserMessages userMessages,
   }) : _androidSdk = androidSdk,
-       _fs = fs,
+       _logger = logger,
        _platform = platform,
        _processManager = processManager,
-       _stdio = stdio,
        _userMessages = userMessages,
        super('Android toolchain - develop for Android devices');
 
   final AndroidSdk _androidSdk;
-  final FileSystem _fs;
+  final Logger _logger;
   final Platform _platform;
   final ProcessManager _processManager;
-  final Stdio _stdio;
   final UserMessages _userMessages;
 
   @override
@@ -97,32 +94,32 @@ class AndroidValidator extends DoctorValidator {
   Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
-      if (!globals.processManager.canRun(javaBinary)) {
-        messages.add(ValidationMessage.error(userMessages.androidCantRunJavaBinary(javaBinary)));
+      if (!_processManager.canRun(javaBinary)) {
+        messages.add(ValidationMessage.error(_userMessages.androidCantRunJavaBinary(javaBinary)));
         return false;
       }
       String javaVersionText;
       try {
-        globals.printTrace('java -version');
-        final ProcessResult result = await globals.processManager.run(<String>[javaBinary, '-version']);
+        _logger.printTrace('java -version');
+        final ProcessResult result = await _processManager.run(<String>[javaBinary, '-version']);
         if (result.exitCode == 0) {
           final List<String> versionLines = (result.stderr as String).split('\n');
           javaVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         }
       } catch (error) {
-        globals.printTrace(error.toString());
+        _logger.printTrace(error.toString());
       }
       if (javaVersionText == null || javaVersionText.isEmpty) {
         // Could not determine the java version.
-        messages.add(ValidationMessage.error(userMessages.androidUnknownJavaVersion));
+        messages.add(ValidationMessage.error(_userMessages.androidUnknownJavaVersion));
         return false;
       }
       final Version javaVersion = Version.parse(_extractJavaVersion(javaVersionText));
       if (javaVersion < kAndroidJavaMinVersion) {
-        messages.add(ValidationMessage.error(userMessages.androidJavaMinimumVersion(javaVersionText)));
+        messages.add(ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersionText)));
         return false;
       }
-      messages.add(ValidationMessage(userMessages.androidJavaVersion(javaVersionText)));
+      messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersionText)));
       return true;
     } finally {
       _task = null;

@@ -101,7 +101,7 @@ class Cache {
   }) : _rootOverride = rootOverride,
        _logger = logger ?? globals.logger,
        _fileSystem = fileSystem ?? globals.fs,
-       _platform = platform ?? globals.platform ,
+       _platform = platform ?? globals.platform,
        _osUtils = osUtils ?? globals.os {
     // TODO(zra): Move to initializer list once logger and platform parameters
     // are required.
