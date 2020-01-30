@@ -133,7 +133,7 @@ void testWidgets(
         return binding.runTest(
           () async {
             debugResetSemanticsIdCounter();
-            tester.resetTestTextInput();
+            //tester.resetTestTextInput();
             Object memento;
             try {
               memento = await variant.setUp(value);
@@ -804,22 +804,22 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     _lastRecordedSemanticsHandles = binding.pipelineOwner.debugOutstandingSemanticsHandles;
   }
 
-  /// Returns the TestTextInput singleton.
-  ///
-  /// Typical app tests will not need to use this value. To add text to widgets
-  /// like [TextField] or [TextFormField], call [enterText].
-  TestTextInput get testTextInput => binding.testTextInput;
+  // /// Returns the TestTextInput singleton.
+  // ///
+  // /// Typical app tests will not need to use this value. To add text to widgets
+  // /// like [TextField] or [TextFormField], call [enterText].
+  // TestTextInput get testTextInput => binding.testTextInput;
 
-  /// Ensures that [testTextInput] is registered and [TestTextInput.log] is
-  /// reset.
-  ///
-  /// This is called by the testing framework before test runs, so that if a
-  /// previous test has set its own handler on [SystemChannels.textInput], the
-  /// [testTextInput] regains control and the log is fresh for the new test.
-  /// It should not typically need to be called by tests.
-  void resetTestTextInput() {
-    testTextInput.resetAndRegister();
-  }
+  // /// Ensures that [testTextInput] is registered and [TestTextInput.log] is
+  // /// reset.
+  // ///
+  // /// This is called by the testing framework before test runs, so that if a
+  // /// previous test has set its own handler on [SystemChannels.textInput], the
+  // /// [testTextInput] regains control and the log is fresh for the new test.
+  // /// It should not typically need to be called by tests.
+  // void resetTestTextInput() {
+  //   testTextInput.resetAndRegister();
+  // }
 
   /// Give the text input widget specified by [finder] the focus, as if the
   /// onscreen keyboard had appeared.
@@ -858,7 +858,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   Future<void> enterText(Finder finder, String text) async {
     return TestAsyncUtils.guard<void>(() async {
       await showKeyboard(finder);
-      testTextInput.enterText(text);
+      //testTextInput.enterText(text);
       await idle();
     });
   }

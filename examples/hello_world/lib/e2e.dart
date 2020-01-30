@@ -103,4 +103,18 @@ class E2EWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
   void reportExceptionNoticed(FlutterErrorDetails exception) {
     print('exception $exception');
   }
+
+  /// For flutter web tests we want to use the real messages instead of
+  /// test messages.
+  /// See [TestDefaultBinaryMessenger].
+  /// See [BinaryMessenger].
+  @override
+  BinaryMessenger createBinaryMessenger() {
+    if (kIsWeb) {
+      print('****************** kisweb return real binary messenger');
+      return super.createOriginalBinaryMessenger();
+    } else {
+      return super.createBinaryMessenger();
+    }
+  }
 }

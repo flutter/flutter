@@ -237,6 +237,10 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   @override
   void setMockMessageHandler(String channel, MessageHandler handler) {
+    print('setMockMessageHandler $channel');
+    if(channel == 'flutter/textinput') {
+      print('trace: ${StackTrace.current}');
+    }
     if (handler == null)
       _mockHandlers.remove(channel);
     else

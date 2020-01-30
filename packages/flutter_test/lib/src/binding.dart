@@ -252,8 +252,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initInstances() {
     super.initInstances();
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
+    // TODO(nurhan): investigae if we should remove it e2e tests for flutter web.
     binding.setupHttpOverrides();
-    _testTextInput = TestTextInput(onCleared: _resetFocusedEditable)..register();
+    // Do not use TestTextInput for Flutter for Web integration tests.
+    // _testTextInput = TestTextInput(onCleared: _resetFocusedEditable)..register();
   }
 
   @override
@@ -436,10 +438,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     super.dispatchEvent(event, hitTestResult);
   }
 
-  /// A stub for the system's onscreen keyboard. Callers must set the
-  /// [focusedEditable] before using this value.
-  TestTextInput get testTextInput => _testTextInput;
-  TestTextInput _testTextInput;
+  // /// A stub for the system's onscreen keyboard. Callers must set the
+  // /// [focusedEditable] before using this value.
+  // TestTextInput get testTextInput => _testTextInput;
+  // TestTextInput _testTextInput;
 
   /// The current client of the onscreen keyboard. Callers must pump
   /// an additional frame after setting this property to complete the
@@ -1521,12 +1523,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   Offset localToGlobal(Offset point) {
     final Matrix4 transform = renderView.configuration.toHitTestMatrix();
     return MatrixUtils.transformPoint(transform, point);
-  }
-
-  // we need the real channels
-  @override
-  BinaryMessenger createBinaryMessenger() {
-    return super.createOriginalBinaryMessenger();
   }
 }
 
