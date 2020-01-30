@@ -26,6 +26,8 @@ Future<void> main() async {
     await driver.waitFor(find.byValueKey('red_square_image'));
     await driver.waitUntilNoTransientCallbacks();
 
+    // TODO(egarciad): This is currently a no-op on LUCI.
+    // https://github.com/flutter/flutter/issues/49837
     await expectLater(
       driver.screenshot(),
       bufferMatchesGoldenFile('red_square_driver_screenshot__$deviceModel.png'),
