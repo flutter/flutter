@@ -29,6 +29,16 @@ import 'xcodeproj.dart';
 
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 
+class LockdownError implements Exception {
+  const LockdownError(this.lockdownCode);
+
+  /// The associated `lockdownd` error code.
+  final LockdownReturnCode lockdownCode;
+
+  @override
+  String toString() => '${lockdownCode.userMessage} (lockdownd error code ${lockdownCode.code})';
+}
+
 /// Specialized exception for expected situations where the ideviceinfo
 /// tool responds with exit code 255 / 'No device found' message
 class IOSDeviceNotFoundError implements Exception {
@@ -58,7 +68,8 @@ class IOSDeviceNotTrustedError implements Exception {
 /// as we only care about a limited subset. These values should be kept in sync with
 /// https://github.com/libimobiledevice/libimobiledevice/blob/26373b3/include/libimobiledevice/lockdown.h#L37
 class LockdownReturnCode {
-  const LockdownReturnCode._(
+  @visibleForTesting
+  const LockdownReturnCode(
     this.code, {
       this.userMessage,
     }
@@ -86,6 +97,9 @@ class LockdownReturnCode {
   }
 
   static const Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
+    7: receiveTimeout,
+    17: passwordProtected,
+    18: userDeniedPairing,
     19: pairingDialogResponsePending,
     21: invalidHostId,
   };
@@ -96,7 +110,19 @@ class LockdownReturnCode {
   /// Message to show the user when this error occurs.
   final String userMessage;
 
-  static const LockdownReturnCode userDeniedPairing = LockdownReturnCode._(
+  static const LockdownReturnCode receiveTimeout = LockdownReturnCode(
+    7,
+    userMessage: 'Device info unavailable. Connection timed out requesting '
+      'device info.',
+  );
+
+  static const LockdownReturnCode passwordProtected = LockdownReturnCode(
+    17,
+    userMessage: 'Device info unavailable. Your device is password '
+      'protected, please unlock and retry.',
+  );
+
+  static const LockdownReturnCode userDeniedPairing = LockdownReturnCode(
     18,
     userMessage: 'Device info unavailable. You must accept the pairing dialog '
       'on the iOS device.',
@@ -104,7 +130,7 @@ class LockdownReturnCode {
 
   /// Error code (19) indicating that the pairing dialog has been shown to the
   /// user, and the user has not yet responded as to whether to trust the host.
-  static const LockdownReturnCode pairingDialogResponsePending = LockdownReturnCode._(
+  static const LockdownReturnCode pairingDialogResponsePending = LockdownReturnCode(
     19,
     userMessage: 'Device info unavailable. Is the device asking to "Trust This Computer?"',
   );
@@ -113,19 +139,30 @@ class LockdownReturnCode {
   ///
   /// This can happen if the user explicitly says "do not trust this computer"
   /// or if they revoke all trusted computers in the device settings.
-  static const LockdownReturnCode invalidHostId = LockdownReturnCode._(
+  static const LockdownReturnCode invalidHostId = LockdownReturnCode(
     21,
     userMessage: 'Device info unavailable. Device pairing "trust" may have been revoked.',
   );
 
   static void handleLockdownError(LockdownReturnCode lockdownReturnCode) {
     switch (lockdownReturnCode) {
+      case receiveTimeout:
+        throw IOSDeviceNotFoundError(receiveTimeout.userMessage);
+        break;
+      case passwordProtected:
+        throw IOSDeviceNotFoundError(passwordProtected.userMessage);
+        break;
+      case userDeniedPairing:
+        throw const IOSDeviceNotTrustedError(userDeniedPairing);
+        break;
       case pairingDialogResponsePending:
         throw const IOSDeviceNotTrustedError(pairingDialogResponsePending);
         break;
       case invalidHostId:
         throw const IOSDeviceNotTrustedError(invalidHostId);
         break;
+      default:
+        assert(false);
     }
   }
 }

@@ -215,6 +215,26 @@ void main() {
     });
   });
 
+  group('LockdownReturnCode', () {
+    testWithoutContext('each entry in knownCodes has matching key and value', () {
+      for (final MapEntry<int, LockdownReturnCode> entry in LockdownReturnCode.knownCodes.entries){
+        expect(entry.key, entry.value.code);
+      }
+    });
+
+    group('handleLockdownError', () {
+      testWithoutContext('throws an exception for each in knownCodes', () {
+        for (final LockdownReturnCode knownCode in LockdownReturnCode.knownCodes.values) {
+          expect(() => LockdownReturnCode.handleLockdownError(knownCode), throwsA(isA<Exception>()));
+        }
+      });
+
+      testWithoutContext('handles every code in `knownCodes`', () {
+        expect(() => LockdownReturnCode.handleLockdownError(const LockdownReturnCode(333)), throwsAssertionError);
+      });
+    });
+  });
+
   group('Diagnose Xcode build failure', () {
     Map<String, String> buildSettings;
     MockUsage mockUsage;
