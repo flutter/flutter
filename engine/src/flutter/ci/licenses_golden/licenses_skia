@@ -1,4 +1,4 @@
-Signature: e67d53f8b5b038f4ec9086043b583f75
+Signature: efbbc290c55be439f564c929317a335d
 
 UNUSED LICENSES:
 
@@ -5126,8 +5126,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.cp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpRedEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpRedEffect.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrCoverShader.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrCoverShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrGpuTessellationPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrGpuTessellationPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.cpp
@@ -5389,6 +5387,9 @@ FILE: ../../../third_party/skia/docs/examples/unexpected_setAlphaType.cpp
 FILE: ../../../third_party/skia/docs/examples/upscale_checkerboard.cpp
 FILE: ../../../third_party/skia/docs/examples/weird_RRect_bug.cpp
 FILE: ../../../third_party/skia/docs/examples/zero_off_dashing.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrFillPathShader.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrFillPathShader.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathShader.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC.
 
