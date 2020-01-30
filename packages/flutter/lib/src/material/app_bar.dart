@@ -265,15 +265,17 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// contents of the app.
   ///
   /// Becomes the middle component of the [NavigationToolBar] built by this widget.
-  /// The [title]'s width is constrained to fit within the toolbar's [leading]
-  /// and [actions] widgets. Its height is _not_ constrained. The [title]
-  /// is vertically centered and clipped to fit within the toolbar, whose
-  /// height is [kToolbarHeight]. Typically this isn't noticeable because
-  /// a simple [Text] [title] will fit within the toolbar by default.
-  /// On the other hand, it is noticeable when a title widget with an intrinsic
-  /// height that is greater than [kToolbarHeight] is used as the [title].
-  /// In cases like this the height of the [title] widget can be constrained.
-  /// For example:
+  /// The [title]'s width is constrained to fit within the remaining space
+  /// between the toolbar's [leading] and [actions] widgets. Its height is
+  /// _not_ constrained. The [title] is vertically centered and clipped to fit
+  /// within the toolbar, whose height is [kToolbarHeight]. Typically this
+  /// isn't noticeable because a simple [Text] [title] will fit within the
+  /// toolbar by default. On the other hand, it is noticeable when a
+  /// widget with an intrinsic height that is greater than [kToolbarHeight]
+  /// is used as the [title]. For example, when the height of an Image used
+  /// as the [title] exceeds [kToolbarHeight], it will be centered and
+  /// clipped (top and bottom), which may be undesirable. In cases like this
+  /// the height of the [title] widget can be constrained. For example:
   ///
   /// ```dart
   /// MaterialApp(
