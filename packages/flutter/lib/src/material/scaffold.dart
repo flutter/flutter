@@ -409,6 +409,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final _ScaffoldGeometryNotifier geometryNotifier;
 
   final Map<Key, _FABStatus> fabStatuses;
+  Set<Key> get fabKeys => Set<Key>.of(fabStatuses.keys);
 
   final Map<Key, double> fabProgresses;
 
@@ -574,9 +575,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }
 
   bool hasDifferentFabStatus(_ScaffoldLayout other) {
-    final Set<Key> possiblyChangedKeys = Set<Key>.of(fabStatuses.keys).union(
-        Set<Key>.of(other.fabStatuses.keys)
-    );
+    final Set<Key> possiblyChangedKeys = fabKeys.union(other.fabKeys);
 
     return possiblyChangedKeys.any(
         (Key key) => fabStatuses[key]?.previousLocation != other.fabStatuses[key]?.previousLocation ||
@@ -806,7 +805,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
 // TODO: Document.
 class FloatingActionButtonConfiguration {
-  FloatingActionButtonConfiguration({@required this.button, @required this.location, this.animator});
+  FloatingActionButtonConfiguration({
+    @required this.button,
+    @required this.location,
+    this.animator,
+  });
 
   final Widget button;
   final FloatingActionButtonLocation location;
