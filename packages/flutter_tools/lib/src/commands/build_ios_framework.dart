@@ -294,7 +294,7 @@ end
 
     try {
       // Copy universal engine cache framework to mode directory.
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         fatFlutterFrameworkCopy,
       );
@@ -523,7 +523,7 @@ end
           }
           final String binaryName = globals.fs.path.basenameWithoutExtension(podFrameworkName);
           if (boolArg('universal')) {
-            fsUtils.copyDirectorySync(
+            globals.fsUtils.copyDirectorySync(
               podProduct as Directory,
               modeDirectory.childDirectory(podFrameworkName),
             );
@@ -637,7 +637,7 @@ end
         .childDirectory(frameworkFileName);
       final File armFlutterFrameworkBinary = armFlutterFrameworkDirectory
         .childFile(frameworkBinaryName);
-      fsUtils.copyDirectorySync(fatFramework, armFlutterFrameworkDirectory);
+      globals.fsUtils.copyDirectorySync(fatFramework, armFlutterFrameworkDirectory);
 
       // Create iOS framework.
       List<String> lipoCommand = <String>[
@@ -664,7 +664,7 @@ end
         .childDirectory(frameworkFileName);
       final File simulatorFlutterFrameworkBinary = simulatorFlutterFrameworkDirectory
         .childFile(frameworkBinaryName);
-      fsUtils.copyDirectorySync(fatFramework, simulatorFlutterFrameworkDirectory);
+      globals.fsUtils.copyDirectorySync(fatFramework, simulatorFlutterFrameworkDirectory);
 
       lipoCommand = <String>[
         'xcrun',

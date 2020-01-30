@@ -82,7 +82,7 @@ void testUsingContext(
     final File settingsFile = globals.fs.file(
       globals.fs.path.join(configDir.path, '.flutter_settings')
     );
-    return Config(settingsFile);
+    return Config(file: settingsFile, logger: globals.logger);
   }
   PersistentToolState buildPersistentToolState(FileSystem fs) {
     configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
