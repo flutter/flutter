@@ -322,5 +322,29 @@ void main() {
       expect(description.length, equals(1));
       expect(description[0], equals('shortcuts: <Debug Label>'));
     });
+    test('Shortcuts diagnostics work when manager specified.', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+      Shortcuts(
+        manager: ShortcutManager(),
+        shortcuts: <LogicalKeySet, Intent>{
+          LogicalKeySet(
+            LogicalKeyboardKey.keyA,
+            LogicalKeyboardKey.keyB,
+          ): const Intent(ActivateAction.key)
+        },
+      ).debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+        return !node.isFiltered(DiagnosticLevel.info);
+      })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description.length, equals(2));
+      expect(description[0], equalsIgnoringHashCodes('manager: ShortcutManager#00000(shortcuts: {})'));
+      expect(description[1], equalsIgnoringHashCodes('shortcuts: {{Key A + Key B}: Intent#00000(key: [<ActivateAction>])}'));
+    });
   });
 }
