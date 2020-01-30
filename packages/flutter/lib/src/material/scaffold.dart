@@ -159,25 +159,17 @@ class ScaffoldPrelayoutGeometry {
 @immutable
 class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
 
-  const _TransitionSnapshotFabLocation(this.begin, this.end, this.animator, this.progress);
+  const _TransitionSnapshotFabLocation.fromFABStatus(this.status);
 
-  final FloatingActionButtonLocation begin;
-  final FloatingActionButtonLocation end;
-  final FloatingActionButtonAnimator animator;
-  final double progress;
+  final _FABStatus status;
 
   @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return animator.getOffset(
-      begin: begin.getOffset(scaffoldGeometry),
-      end: end.getOffset(scaffoldGeometry),
-      progress: progress,
-    );
-  }
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry)
+      => status.getOffset(scaffoldGeometry);
 
   @override
   String toString() {
-    return '$runtimeType(begin: $begin, end: $end, progress: $progress)';
+    return '$runtimeType(begin: ${status.previousLocation}, end: ${status.location}, progress: ${status.moveController.value})';
   }
 }
 
@@ -2021,7 +2013,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     double restartAnimationFrom = 0.0;
     // If the Floating Action Button is moving right now, we need to start from a snapshot of the current transition.
     if (status.moveController.isAnimating) {
-      previousLocation = _TransitionSnapshotFabLocation(status.previousLocation, status.location, status.animator, status.moveController.value);
+      previousLocation = _TransitionSnapshotFabLocation.fromFABStatus(status);
       restartAnimationFrom = status.animator.getAnimationRestart(status.moveController.value);
     }
 
