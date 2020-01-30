@@ -205,9 +205,9 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
   ///
   /// The default implementation returns the nodes in the order given.
   @protected
-  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants) => descendants;
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants);
 
-  // Sort all descendants, taking into account the FocusTraversalPolicyGroup
+  // Sort all descendants, taking into account the FocusTraversalGroup
   // that they are each in, and filtering out non-traversable/focusable nodes.
   List<FocusNode> _sortAllDescendants(FocusScopeNode scope) {
     final FocusTraversalGroup scopeGroup = scope.context == null ? null : FocusTraversalGroup.of(scope.context, nullOk: true);
@@ -217,6 +217,10 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
     for (final FocusNode node in scope.descendants) {
       final FocusTraversalGroup group = FocusTraversalGroup.of(node.context, nullOk: true);
       final FocusNode groupNode = group?._focusNode;
+      // Group nodes need to be added to their parent's node, or to the "null"
+      // node if no parent is found. This creates the hierarchy of group nodes
+      // and makes it so the entire group is sorted along with the other members
+      // of the parent group.
       if (node == groupNode) {
         final FocusTraversalGroup parent = FocusTraversalGroup.of(node.parent.context, nullOk: true);
         final FocusNode parentNode = parent?._focusNode;
@@ -225,7 +229,8 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
         groups[parentNode].members.add(groupNode);
         continue;
       }
-      // Skip non-focusable or traversable nodes.
+      // Skip non-focusable and non-traversable nodes in the same way that
+      // FocusScopeNode.traversalDescendants would.
       if (node.canRequestFocus && !node.skipTraversal) {
         groups[groupNode] ??= _FocusPolicyGroupInfo(group, members: <FocusNode>[], defaultPolicy: defaultPolicy);
         assert(!groups[groupNode].members.contains(node));
@@ -241,7 +246,8 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
       groups[key].members.addAll(sortedMembers);
     }
 
-    // Traverse the group tree, adding the children of members in the order they appear in the member lists.
+    // Traverse the group tree, adding the children of members in the order they
+    // appear in the member lists.
     final List<FocusNode> sortedDescendants =  <FocusNode>[];
     void visitGroups(_FocusPolicyGroupInfo info) {
       for (final FocusNode node in info.members) {
@@ -256,10 +262,14 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
     }
 
     visitGroups(groups[scopeGroup?._focusNode]);
-    assert(sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
-      'sorted descendants contains more nodes than it should: (${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())})');
-    assert(scope.traversalDescendants.toSet().difference(sortedDescendants.toSet()).isEmpty,
-      'sorted descendants are missing some nodes: (${scope.traversalDescendants.toSet().difference(sortedDescendants.toSet())})');
+    assert(
+      sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
+      'sorted descendants contains more nodes than it should: (${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())})'
+    );
+    assert(
+      scope.traversalDescendants.toSet().difference(sortedDescendants.toSet()).isEmpty,
+      'sorted descendants are missing some nodes: (${scope.traversalDescendants.toSet().difference(sortedDescendants.toSet())})'
+    );
     return sortedDescendants;
   }
 
@@ -741,7 +751,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
 ///    focus traversal in a direction.
 ///  * [OrderedTraversalPolicy], a policy that describes the order
 ///    explicitly using [FocusTraversalOrder] widgets.
-class WidgetOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {}
+class WidgetOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
+  @override
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants) => descendants;
+}
 
 // This class exists mainly for efficiency reasons: the rect is copied out of
 // the node, because it will be accessed many times in the reading order
@@ -778,6 +791,19 @@ class _ReadingOrderSortData extends Diagnosticable {
     // added in order from nearest to furthest, so we can still use that
     // to determine the closest one.
     return list.first.directionalAncestors.firstWhere(common.contains).textDirection;
+  }
+
+  static void sortWithDirectionality(List<_ReadingOrderSortData> list, TextDirection directionality) {
+    mergeSort<_ReadingOrderSortData>(list, compare: (_ReadingOrderSortData a,_ReadingOrderSortData b) {
+      switch(directionality) {
+        case TextDirection.ltr:
+          return a.rect.left.compareTo(b.rect.left);
+        case TextDirection.rtl:
+          return b.rect.right.compareTo(a.rect.right);
+      }
+      assert(false, 'Unhandled directionality $directionality');
+      return 0;
+    });
   }
 
   /// Returns the list of Directionality ancestors, in order from nearest to
@@ -842,6 +868,19 @@ class _ReadingOrderDirectionalGroupData extends Diagnosticable {
   }
   List<Directionality> _memberAncestors;
 
+  static void sortWithDirectionality(List<_ReadingOrderDirectionalGroupData> list, TextDirection directionality) {
+    mergeSort<_ReadingOrderDirectionalGroupData>(list, compare: (_ReadingOrderDirectionalGroupData a,_ReadingOrderDirectionalGroupData b) {
+      switch(directionality) {
+        case TextDirection.ltr:
+          return a.rect.left.compareTo(b.rect.left);
+        case TextDirection.rtl:
+          return b.rect.right.compareTo(a.rect.right);
+      }
+      assert(false, 'Unhandled directionality $directionality');
+      return 0;
+    });
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -864,8 +903,8 @@ class _ReadingOrderDirectionalGroupData extends Diagnosticable {
 /// 3. Pick the closest to the beginning of the reading order from among the
 ///    nodes discovered above.
 ///
-/// It uses the ambient directionality in the context for the enclosing scope to
-/// determine which direction is "reading order".
+/// It uses the ambient [Directionality] in the context for the enclosing scope
+/// to determine which direction is "reading order".
 ///
 /// See also:
 ///
@@ -879,6 +918,84 @@ class _ReadingOrderDirectionalGroupData extends Diagnosticable {
 ///  * [OrderedTraversalPolicy], a policy that describes the order
 ///    explicitly using [FocusTraversalOrder] widgets.
 class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
+  // Collects the given candidates into groups by directionality. The candidates
+  // have already been sorted as if they all had the directionality of the
+  // nearest Directionality ancestor.
+  List<_ReadingOrderDirectionalGroupData> _collectDirectionalityGroups(Iterable<_ReadingOrderSortData> candidates) {
+    TextDirection currentDirection = candidates.first.directionality;
+    List<_ReadingOrderSortData> currentGroup = <_ReadingOrderSortData>[];
+    final List<_ReadingOrderDirectionalGroupData> result = <_ReadingOrderDirectionalGroupData>[];
+    // Split candidates into runs of the same directionality.
+    for (final _ReadingOrderSortData candidate in candidates) {
+      if (candidate.directionality == currentDirection) {
+        currentGroup.add(candidate);
+        continue;
+      }
+      currentDirection = candidate.directionality;
+      result.add(_ReadingOrderDirectionalGroupData(currentGroup));
+      currentGroup = <_ReadingOrderSortData>[candidate];
+    }
+    if (currentGroup.isNotEmpty) {
+      result.add(_ReadingOrderDirectionalGroupData(currentGroup));
+    }
+    // Sort each group separately. Each group has the same directionality.
+    for (final _ReadingOrderDirectionalGroupData bandGroup in result) {
+      if (bandGroup.members.length == 1) {
+        continue; // No need to sort one node.
+      }
+      _ReadingOrderSortData.sortWithDirectionality(bandGroup.members, bandGroup.directionality);
+    }
+    return result;
+  }
+
+  _ReadingOrderSortData _pickNext(List<_ReadingOrderSortData> candidates) {
+    // Find the topmost node by sorting on the top of the rectangles.
+    mergeSort<_ReadingOrderSortData>(candidates, compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) => a.rect.top.compareTo(b.rect.top));
+    final _ReadingOrderSortData topmost = candidates.first;
+
+    // Find the candidates that are in the same horizontal band as the current one.
+    List<_ReadingOrderSortData> inBand(_ReadingOrderSortData current, Iterable<_ReadingOrderSortData> candidates) {
+      final Rect band = Rect.fromLTRB(double.negativeInfinity, current.rect.top, double.infinity, current.rect.bottom);
+      return candidates.where((_ReadingOrderSortData item) {
+        return !item.rect.intersect(band).isEmpty;
+      }).toList();
+    }
+    final List<_ReadingOrderSortData> inBandOfTop = inBand(topmost, candidates);
+    assert(topmost.rect.isEmpty || inBandOfTop.isNotEmpty); // It has to have at least topmost in it if the topmost is not degenerate.
+
+    // The topmost rect in is in a band by itself, so just return that one.
+    if (inBandOfTop.length <= 1) {
+      return topmost;
+    }
+
+    // Now that we know there are others in the same band as the topmost, then pick
+    // the one at the beginning, depending on the text direction in force.
+
+    // Find out the directionality of the nearest common Directionality
+    // ancestor for all nodes. This provides a base directionality to use for
+    // the ordering of the groups.
+    final TextDirection nearestCommonDirectionality = _ReadingOrderSortData.commonDirectionalityOf(inBandOfTop);
+
+    // Do an initial common-directionality-based sort to get consistent geometric
+    // ordering for grouping into directionality groups. It has to use the
+    // common directionality to be able to group into sane groups for the
+    // given directionality, since rectangles can overlap and give different
+    // results for different directionalities.
+    _ReadingOrderSortData.sortWithDirectionality(inBandOfTop, nearestCommonDirectionality);
+
+    // Collect the top band into internally sorted groups with shared directionality.
+    final List<_ReadingOrderDirectionalGroupData> bandGroups = _collectDirectionalityGroups(inBandOfTop);
+    if (bandGroups.length == 1) {
+      // There's only one directionality group, so just send back the first
+      // one in that group, since it's already sorted.
+      return bandGroups.first.members.first;
+    }
+
+    // Sort the groups based on the common directionality and bounding boxes.
+    _ReadingOrderDirectionalGroupData.sortWithDirectionality(bandGroups, nearestCommonDirectionality);
+    return bandGroups.first.members.first;
+  }
+
   // Sorts the list of nodes based on their geometry into the desired reading
   // order based on the directionality of the context for each node.
   @override
@@ -888,131 +1005,28 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       return descendants;
     }
 
-    // Collects the given candidates into groups by directionality. The candidates
-    // have already been sorted as if they all had the directionality of the
-    // nearest Directionality ancestor.
-    List<_ReadingOrderDirectionalGroupData> collectDirectionalityGroups(Iterable<_ReadingOrderSortData> candidates) {
-      TextDirection currentDirection = candidates.first.directionality;
-      List<_ReadingOrderSortData> currentGroup = <_ReadingOrderSortData>[];
-      final List<_ReadingOrderDirectionalGroupData> result = <_ReadingOrderDirectionalGroupData>[];
-      // Split candidates into runs of the same directionality.
-      for (final _ReadingOrderSortData candidate in candidates) {
-        if (candidate.directionality == currentDirection) {
-          currentGroup.add(candidate);
-          continue;
-        }
-        currentDirection = candidate.directionality;
-        result.add(_ReadingOrderDirectionalGroupData(currentGroup));
-        currentGroup = <_ReadingOrderSortData>[candidate];
-      }
-      if (currentGroup.isNotEmpty) {
-        result.add(_ReadingOrderDirectionalGroupData(currentGroup));
-      }
-      // Sort each group separately. Each group has the same directionality.
-      for (final _ReadingOrderDirectionalGroupData bandGroup in result) {
-        if (bandGroup.members.length == 1) {
-          continue; // No need to sort one node.
-        }
-        mergeSort<_ReadingOrderSortData>(bandGroup.members, compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) {
-          // Sort the group based on its directionality.
-          switch(bandGroup.directionality) {
-            case TextDirection.ltr:
-              return a.rect.left.compareTo(b.rect.left);
-            case TextDirection.rtl:
-              return b.rect.right.compareTo(a.rect.right);
-          }
-          assert(false, 'Unhandled directionality ${bandGroup.directionality}');
-          return 0;
-        });
-      }
-      return result;
-    }
-
-    _ReadingOrderSortData pickNext(List<_ReadingOrderSortData> candidates) {
-      // Find the topmost node by sorting on the top of the rectangles.
-      mergeSort<_ReadingOrderSortData>(candidates, compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) => a.rect.top.compareTo(b.rect.top));
-      final _ReadingOrderSortData topmost = candidates.first;
-
-      // Find the candidates that are in the same horizontal band as the current one.
-      List<_ReadingOrderSortData> inBand(_ReadingOrderSortData current, Iterable<_ReadingOrderSortData> candidates) {
-        final Rect band = Rect.fromLTRB(double.negativeInfinity, current.rect.top, double.infinity, current.rect.bottom);
-        return candidates.where((_ReadingOrderSortData item) {
-          return !item.rect.intersect(band).isEmpty;
-        }).toList();
-      }
-      final List<_ReadingOrderSortData> inBandOfTop = inBand(topmost, candidates);
-      assert(topmost.rect.isEmpty || inBandOfTop.isNotEmpty); // It has to have at least topmost in it if the topmost is not degenerate.
-
-      // The topmost rect in is in a band by itself, so just return that one.
-      if (inBandOfTop.length <= 1) {
-        return topmost;
-      }
-
-      // Now that we know there are others in the same band as the topmost, then pick
-      // the one at the beginning, depending on the text direction in force.
-
-      // Find out the directionality of the nearest common Directionality
-      // ancestor for all nodes. This provides a base directionality to use for
-      // the ordering of the groups.
-      final TextDirection nearestCommonDirectionality = _ReadingOrderSortData.commonDirectionalityOf(inBandOfTop);
-
-      // Do an initial common-directionality-based sort to get consistent geometric
-      // ordering for grouping into directionality groups. It has to use the
-      // common directionality to be able to group into sane groups for the
-      // given directionality, since rectangles can overlap and give different
-      // results for different directionalities.
-      mergeSort<_ReadingOrderSortData>(inBandOfTop, compare: (_ReadingOrderSortData a,_ReadingOrderSortData b) {
-        switch(nearestCommonDirectionality) {
-          case TextDirection.ltr:
-            return a.rect.left.compareTo(b.rect.left);
-          case TextDirection.rtl:
-            return b.rect.right.compareTo(a.rect.right);
-        }
-        assert(false, 'Unhandled directionality $nearestCommonDirectionality');
-        return 0;
-      });
-
-      // Collect the top band into internally sorted groups with shared directionality.
-      final List<_ReadingOrderDirectionalGroupData> bandGroups = collectDirectionalityGroups(inBandOfTop);
-      if (bandGroups.length == 1) {
-        // There's only one directionality group, so just send back the first
-        // one in that group, since it's already sorted.
-        return bandGroups.first.members.first;
-      }
-
-      // Sort the groups based on the common directionality and bounding boxes.
-      mergeSort<_ReadingOrderDirectionalGroupData>(bandGroups, compare: (_ReadingOrderDirectionalGroupData a, _ReadingOrderDirectionalGroupData b) {
-        switch(nearestCommonDirectionality) {
-          case TextDirection.ltr:
-            return a.rect.left.compareTo(b.rect.left);
-          case TextDirection.rtl:
-            return b.rect.right.compareTo(a.rect.right);
-        }
-        assert(false, 'Unhandled directionality $nearestCommonDirectionality');
-        return 0;
-      });
-      return bandGroups.first.members.first;
-    }
-
     final List<_ReadingOrderSortData> data = <_ReadingOrderSortData>[
       for (final FocusNode node in descendants) _ReadingOrderSortData(node),
     ];
 
-    // Pick the initial widget as the one that is leftmost in the band of the
-    // topmost, or the topmost, if there are no others in its band.
-    final List<_ReadingOrderSortData> sortedList = <_ReadingOrderSortData>[];
-    final List<_ReadingOrderSortData> unplaced = data.toList();
-    _ReadingOrderSortData current = pickNext(unplaced);
-    sortedList.add(current);
+    final List<FocusNode> sortedList = <FocusNode>[];
+    final List<_ReadingOrderSortData> unplaced = data;
+
+    // Pick the initial widget as the one that is at the beginning of the band
+    // of the topmost, or the topmost, if there are no others in its band.
+    _ReadingOrderSortData current = _pickNext(unplaced);
+    sortedList.add(current.node);
     unplaced.remove(current);
 
+    // Go through each node, picking the next one after eliminating the previous
+    // one, since that will expose a new band in which to choose candidates.
     while (unplaced.isNotEmpty) {
-      final _ReadingOrderSortData next = pickNext(unplaced);
+      final _ReadingOrderSortData next = _pickNext(unplaced);
       current = next;
-      sortedList.add(current);
+      sortedList.add(current.node);
       unplaced.remove(current);
     }
-    return sortedList.map<FocusNode>((_ReadingOrderSortData item) => item.node);
+    return sortedList;
   }
 }
 
@@ -1264,11 +1278,13 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
       }
     }
     mergeSort<_OrderedFocusInfo>(ordered, compare:(_OrderedFocusInfo a, _OrderedFocusInfo b) {
-      assert(a.order.runtimeType == b.order.runtimeType,
+      assert(
+        a.order.runtimeType == b.order.runtimeType,
         'When sorting nodes for determining focus order, the order (${a.order}) of '
         "node ${a.node}, isn't the same type as the order (${b.order}) of ${b.node}. "
         "Incompatible order types can't be compared.  Use a FocusTraversalGroup to group "
-        'similar orders together.');
+        'similar orders together.',
+      );
       return a.order.compareTo(b.order);
     });
     return ordered.map<FocusNode>((_OrderedFocusInfo info) => info.node).followedBy(unordered);
@@ -1289,7 +1305,7 @@ class FocusTraversalOrder extends InheritedWidget {
   /// The order for the widget descendants of this [FocusTraversalOrder].
   final FocusOrder order;
 
-  /// Finds the nearest TraversalOrder widget.
+  /// Finds the [FocusOrder] in the nearest ancestor [FocusTraversalOrder] widget.
   ///
   /// It does not create a rebuild dependency because changing the traversal
   /// order doesn't change the widget tree, so nothing needs to be rebuilt as a
@@ -1299,15 +1315,13 @@ class FocusTraversalOrder extends InheritedWidget {
     assert(nullOk != null);
     final FocusTraversalOrder marker = context.getElementForInheritedWidgetOfExactType<FocusTraversalOrder>()?.widget as FocusTraversalOrder;
     final FocusOrder order = marker?.order;
-    if (order == null) {
-      if (!nullOk) {
-        throw FlutterError('FocusTraversalOrder.of() was called with a context that does not contain '
-            'a TraversalOrder widget. No TraversalOrder widget ancestor could be found starting '
-            'from the context that was passed to FocusTraversalOrder.of().\n'
-            'The context used was:\n'
-            '  $context');
-      }
-      return null;
+    if (order == null && !nullOk) {
+      throw FlutterError('FocusTraversalOrder.of() was called with a context that '
+          'does not contain a TraversalOrder widget. No TraversalOrder widget '
+          'ancestor could be found starting from the context that was passed to '
+          'FocusTraversalOrder.of().\n'
+          'The context used was:\n'
+          '  $context');
     }
     return order;
   }
@@ -1355,7 +1369,7 @@ class FocusTraversalGroup extends StatelessWidget {
   })  : _focusNode = FocusNode(
           canRequestFocus: false,
           skipTraversal: true,
-          debugLabel: debugLabel ?? 'FocusTraversalPolicyGroup',
+          debugLabel: debugLabel ?? 'FocusTraversalGroup',
         ),
         policy = policy ?? ReadingOrderTraversalPolicy(),
         super(key: key);
@@ -1390,11 +1404,16 @@ class FocusTraversalGroup extends StatelessWidget {
   /// Returns the focus policy group widget used by the [FocusTraversalPolicy]
   /// that most tightly encloses the given [BuildContext].
   ///
-  /// The [context] argument must not be null.
-  ///
   /// It does not create a rebuild dependency because changing the traversal
   /// order doesn't change the widget tree, so nothing needs to be rebuilt as a
   /// result of an order change.
+  ///
+  /// The `context` argument may only be null if `nullOk` is true.
+  ///
+  /// Will assert if no [FocusTraversalGroup] ancestor is found, and `nullOk` is false.
+  ///
+  /// If `nullOk` is true, then either having a null `context`, or not finding
+  /// an ancestor will return null.
   static FocusTraversalGroup of(BuildContext context, {bool nullOk = false}) {
     final FocusTraversalGroup inherited = context?.findAncestorWidgetOfExactType<FocusTraversalGroup>();
     assert(() {
@@ -1402,19 +1421,23 @@ class FocusTraversalGroup extends StatelessWidget {
         return true;
       }
       if (context == null) {
-        throw FlutterError('The context given to FocusTraversalPolicyGroup.of was null, so '
-            'consequently no FocusTraversalPolicyGroup ancestor can be found.');
+        throw FlutterError(
+          'The context given to FocusTraversalGroup.of was null, so '
+          'consequently no FocusTraversalGroup ancestor can be found.',
+        );
       }
       if (inherited == null) {
-        throw FlutterError('Unable to find a FocusTraversalPolicyGroup widget in the context.\n'
-            'FocusTraversalPolicyGroup.of() was called with a context that does not contain a '
-            'FocusTraversalPolicyGroup.\n'
-            'No FocusTraversalPolicyGroup ancestor could be found starting from the context that was '
-            'passed to FocusTraversalPolicyGroup.of(). This can happen because there is not a '
-            'WidgetsApp or MaterialApp widget (those widgets introduce a FocusTraversalPolicyGroup), '
-            'or it can happen if the context comes from a widget above those widgets.\n'
-            'The context used was:\n'
-            '  $context');
+        throw FlutterError(
+          'Unable to find a FocusTraversalGroup widget in the context.\n'
+          'FocusTraversalGroup.of() was called with a context that does not contain a '
+          'FocusTraversalGroup.\n'
+          'No FocusTraversalGroup ancestor could be found starting from the context that was '
+          'passed to FocusTraversalGroup.of(). This can happen because there is not a '
+          'WidgetsApp or MaterialApp widget (those widgets introduce a FocusTraversalGroup), '
+          'or it can happen if the context comes from a widget above those widgets.\n'
+          'The context used was:\n'
+          '  $context',
+        );
       }
       return true;
     }());
@@ -1496,19 +1519,23 @@ class DefaultFocusTraversal extends InheritedWidget {
         return true;
       }
       if (context == null) {
-        throw FlutterError('The context given to DefaultFocusTraversal.of was null, so '
-            'consequently no FocusTraversalPolicyGroup ancestor can be found.');
+        throw FlutterError(
+          'The context given to DefaultFocusTraversal.of was null, so '
+          'consequently no FocusTraversalGroup ancestor can be found.',
+        );
       }
       if (inherited == null) {
-        throw FlutterError('Unable to find a DefaultFocusTraversal widget in the context.\n'
-            'DefaultFocusTraversal.of() was called with a context that does not contain a '
-            'DefaultFocusTraversal.\n'
-            'No DefaultFocusTraversal ancestor could be found starting from the context that was '
-            'passed to DefaultFocusTraversal.of(). This can happen because there is not a '
-            'WidgetsApp or MaterialApp widget (those widgets introduce a DefaultFocusTraversal), '
-            'or it can happen if the context comes from a widget above those widgets.\n'
-            'The context used was:\n'
-            '  $context');
+        throw FlutterError(
+          'Unable to find a DefaultFocusTraversal widget in the context.\n'
+          'DefaultFocusTraversal.of() was called with a context that does not contain a '
+          'DefaultFocusTraversal.\n'
+          'No DefaultFocusTraversal ancestor could be found starting from the context that was '
+          'passed to DefaultFocusTraversal.of(). This can happen because there is not a '
+          'WidgetsApp or MaterialApp widget (those widgets introduce a DefaultFocusTraversal), '
+          'or it can happen if the context comes from a widget above those widgets.\n'
+          'The context used was:\n'
+          '  $context',
+        );
       }
       return true;
     }());
