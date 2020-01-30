@@ -134,7 +134,7 @@ BuildApp() {
 
   local bitcode_flag=""
   if [[ $ENABLE_BITCODE == "YES" ]]; then
-    bitcode_flag="--bitcode"
+    bitcode_flag="true"
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
@@ -178,47 +178,13 @@ BuildApp() {
       EchoError "========================================================================"
       exit -1
     fi
-
-    RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
-      ${verbose_flag}                                                       \
-      build aot                                                             \
-      --output-dir="${build_dir}/aot"                                       \
-      --target-platform=ios                                                 \
-      --target="${target_path}"                                             \
-      --${build_mode}                                                       \
-      --ios-arch="${archs}"                                                 \
-      ${flutter_engine_flag}                                                \
-      ${local_engine_flag}                                                  \
-      ${bitcode_flag}
-
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to build ${project_path}."
-      exit -1
-    fi
-    StreamOutput "done"
-
-    local app_framework="${build_dir}/aot/App.framework"
-
-    RunCommand cp -r -- "${app_framework}" "${derived_dir}"
-
   else
-    RunCommand mkdir -p -- "${derived_dir}/App.framework"
-
     # Build stub for all requested architectures.
     local arch_flags=""
     read -r -a archs <<< "$ARCHS"
     for arch in "${archs[@]}"; do
       arch_flags="${arch_flags}-arch $arch "
     done
-
-    RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
-        ${arch_flags} \
-        -fembed-bitcode-marker \
-        -dynamiclib \
-        -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
-        -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
-        -install_name '@rpath/App.framework/App' \
-        -o "${derived_dir}/App.framework/App" -)"
   fi
 
   local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
@@ -228,24 +194,18 @@ BuildApp() {
 
   RunCommand cp -- "$plistPath" "${derived_dir}/App.framework/Info.plist"
 
-  local precompilation_flag=""
-  if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
-    precompilation_flag="--precompiled"
-  fi
-
-  StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter"     \
-    ${verbose_flag}                                                         \
-    build bundle                                                            \
-    --target-platform=ios                                                   \
-    --target="${target_path}"                                               \
-    --${build_mode}                                                         \
-    --depfile="${build_dir}/snapshot_blob.bin.d"                            \
-    --asset-dir="${derived_dir}/App.framework/${assets_path}"               \
-    ${precompilation_flag}                                                  \
-    ${flutter_engine_flag}                                                  \
-    ${local_engine_flag}                                                    \
-    ${track_widget_creation_flag}
+  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
+    ${verbose_flag}                                                       \
+    ${flutter_engine_flag}                                                \
+    ${local_engine_flag}                                                  \
+    assemble                                                              \
+    --output="${derived_dir}/"                                            \
+    -dTargetPlatform=ios                                                  \
+    -dTargetFile="${target_path}"                                         \
+    -dBuildMode=${build_mode}                                             \
+    -dIosArchs="${archs}"                                                 \
+    -dEnableBitcode="${bitcode_flag}"                                     \
+    "${build_mode}_ios_bundle_flutter_assets"
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
