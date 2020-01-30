@@ -304,7 +304,20 @@ Future<int> exec(
   String workingDirectory,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
+  await forwardStandardStreams(process);
+  final int exitCode = await process.exitCode;
 
+  if (exitCode != 0 && !canFail)
+    fail('Executable "$executable" failed with exit code $exitCode.');
+
+  return exitCode;
+}
+
+/// Forwards standard out and standard error from [process] to this process'
+/// respective outputs.
+///
+/// Returns a future that completes when both out and error streams a closed.
+Future<void> forwardStandardStreams(Process process) {
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
   process.stdout
@@ -320,13 +333,7 @@ Future<int> exec(
         print('stderr: $line');
       }, onDone: () { stderrDone.complete(); });
 
-  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
-  final int exitCode = await process.exitCode;
-
-  if (exitCode != 0 && !canFail)
-    fail('Executable "$executable" failed with exit code $exitCode.');
-
-  return exitCode;
+  return Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
 }
 
 /// Executes a command and returns its standard output as a String.

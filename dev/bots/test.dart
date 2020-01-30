@@ -785,6 +785,15 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   // TODO(ianh): Move the tests that are not running on devicelab any more out
   // of the device lab directory.
 
+  const Map<String, String> kChromeVariables = <String, String>{
+    // This is required to be able to run Chrome on Cirrus and LUCI.
+    'CHROME_NO_SANDBOX': 'true',
+    // Causes Chrome to run in headless mode in environments without displays,
+    // such as Cirrus and LUCI. Do not use this variable when recording actual
+    // benchmark numbers.
+    'UNCALIBRATED_SMOKE_TEST': 'true',
+  };
+
   // List the tests to run.
   // We split these into subshards. The tests are randomly distributed into
   // those subshards so as to get a uniform distribution of costs, but the
@@ -812,6 +821,8 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
+    if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_html', environment: kChromeVariables),
+    if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_canvaskit', environment: kChromeVariables),
   ]..shuffle(math.Random(0));
 
   final int testsPerShard = tests.length ~/ kDeviceLabShardCount;
