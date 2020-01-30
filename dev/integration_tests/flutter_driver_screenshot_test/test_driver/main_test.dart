@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
-import 'package:flutter_test/src/buffer_golden_matcher.dart';
+import 'package:flutter_test/src/buffer_matcher.dart';
 
 Future<void> main() async {
   FlutterDriver driver;
