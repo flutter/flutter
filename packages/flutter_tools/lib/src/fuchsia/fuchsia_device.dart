@@ -14,7 +14,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/time.dart';
 import '../build_info.dart';
@@ -257,7 +256,7 @@ class FuchsiaDevice extends Device {
       return LaunchResult.failed();
     }
     // Find out who the device thinks we are.
-    final int port = await os.findFreePort();
+    final int port = await globals.os.findFreePort();
     if (port == 0) {
       globals.printError('Failed to find a free port');
       return LaunchResult.failed();
@@ -733,7 +732,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
 
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
-    hostPort ??= await os.findFreePort();
+    hostPort ??= await globals.os.findFreePort();
     if (hostPort == 0) {
       throwToolExit('Failed to forward port $devicePort. No free host-side ports');
     }

@@ -14,7 +14,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -118,7 +117,7 @@ void _updateGeneratedEnvironmentVariablesScript({
     : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
   generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
-  os.chmod(generatedModuleBuildPhaseScript, '755');
+  globals.os.chmod(generatedModuleBuildPhaseScript, '755');
 }
 
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.

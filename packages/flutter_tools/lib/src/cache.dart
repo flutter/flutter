@@ -13,7 +13,7 @@ import 'base/file_system.dart';
 import 'base/io.dart' show SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
-import 'base/os.dart';
+import 'base/os.dart' show OperatingSystemUtils;
 import 'base/process.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
@@ -102,7 +102,7 @@ class Cache {
        _logger = logger ?? globals.logger,
        _fileSystem = fileSystem ?? globals.fs,
        _platform = platform ?? globals.platform ,
-       _osUtils = osUtils ?? os {
+       _osUtils = osUtils ?? globals.os {
     // TODO(zra): Move to initializer list once logger and platform parameters
     // are required.
     _net = Net(logger: _logger, platform: _platform);
@@ -600,12 +600,12 @@ abstract class CachedArtifact extends ArtifactSet {
 
   /// Download a zip archive from the given [url] and unzip it to [location].
   Future<void> _downloadZipArchive(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, os.verifyZip, os.unzip);
+    return _downloadArchive(message, url, location, globals.os.verifyZip, globals.os.unzip);
   }
 
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
   Future<void> _downloadZippedTarball(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, os.verifyGzip, os.unpack);
+    return _downloadArchive(message, url, location, globals.os.verifyGzip, globals.os.unpack);
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
@@ -748,7 +748,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
         if (frameworkZip.existsSync()) {
           final Directory framework = globals.fs.directory(globals.fs.path.join(dir.path, '$frameworkName.framework'));
           framework.createSync();
-          os.unzip(frameworkZip, framework);
+          globals.os.unzip(frameworkZip, framework);
         }
       }
     }
@@ -786,14 +786,14 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   }
 
   void _makeFilesExecutable(Directory dir) {
-    os.chmod(dir, 'a+r,a+x');
+    globals.os.chmod(dir, 'a+r,a+x');
     for (final FileSystemEntity entity in dir.listSync(recursive: true)) {
       if (entity is File) {
         final FileStat stat = entity.statSync();
         final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
         if (entity.basename == 'flutter_tester' || isUserExecutable) {
           // Make the file readable and executable by all users.
-          os.chmod(entity, 'a+r,a+x');
+          globals.os.chmod(entity, 'a+r,a+x');
         }
       }
     }

@@ -18,7 +18,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/os.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -403,7 +402,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     );
     final String effectiveHostname = debuggingOptions.hostname ?? 'localhost';
     final int hostPort = debuggingOptions.port == null
-        ? await os.findFreePort()
+        ? await globals.os.findFreePort()
         : int.tryParse(debuggingOptions.port);
     device.devFS = WebDevFS(
       effectiveHostname,
