@@ -2739,6 +2739,13 @@ class _FABStatus {
 
   AnimationController moveController;
 
+  Offset getOffset(ScaffoldPrelayoutGeometry currentGeometry)
+      => animator.getOffset(
+        begin: previousLocation.getOffset(currentGeometry),
+        end: location.getOffset(currentGeometry),
+        progress: moveController.value,
+      );
+
   @override
   String toString() =>
       '_FABStatus('
