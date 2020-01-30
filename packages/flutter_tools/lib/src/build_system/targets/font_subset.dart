@@ -88,7 +88,9 @@ class FontSubset {
     }
 
     final File appDill = environment.buildDir.childFile('app.dill');
-
+    if (!appDill.existsSync()) {
+      throw _FontSubsetException('Expected to find kernel file at ${appDill.path}, but no file found.');
+    }
     final File constFinder = _fs.file(
       _artifacts.getArtifactPath(Artifact.constFinder),
     );
@@ -139,7 +141,6 @@ class FontSubset {
   /// If the font-subset subprocess fails, it will [throwToolExit].
   /// Otherwise, it will return true.
   Future<bool> subsetFont({
-    @required Environment environment,
     @required String inputPath,
     @required String outputPath,
     @required String relativePath,

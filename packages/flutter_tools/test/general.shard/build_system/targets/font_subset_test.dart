@@ -29,6 +29,10 @@ void main() {
   MockProcessManager mockProcessManager;
   MockArtifacts mockArtifacts;
 
+  const String inputPath = '/input/font.ttf';
+  const String outputPath = '/output/font.ttf';
+  const String relativePath = 'font.ttf';
+
   setUp(() {
     mockProcessManager = MockProcessManager();
     fs = MemoryFileSystem();
@@ -60,7 +64,7 @@ void main() {
       kBuildMode: 'debug',
     });
 
-    FontSubset(
+    final FontSubset fontSubset = FontSubset(
       environment,
       DevFSStringContent(''),
       logger: logger,
@@ -73,8 +77,67 @@ void main() {
       logger.errorText,
       'Font subetting is not supported in debug mode. The --tree-shake-icons flag will be ignored.\n',
     );
+    expect(fontSubset.enabled, false);
+
+    final bool subsets = await fontSubset.subsetFont(
+      inputPath: inputPath,
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+    expect(subsets, false);
+
     verifyNever(mockProcessManager.run(any));
     verifyNever(mockProcessManager.start(any));
+  });
+
+  test('Gets enabled', () {
+    final Environment environment = _createEnvironment(<String, String>{
+      kFontSubsetFlag: 'true',
+      kBuildMode: 'release',
+    });
+
+    final FontSubset fontSubset = FontSubset(
+      environment,
+      DevFSStringContent(''),
+      logger: logger,
+      processManager: mockProcessManager,
+      fs: fs,
+      artifacts: mockArtifacts,
+    );
+
+    expect(
+      logger.errorText,
+      isEmpty,
+    );
+    expect(fontSubset.enabled, true);
+    verifyNever(mockProcessManager.run(any));
+    verifyNever(mockProcessManager.start(any));
+  });
+
+  test('Runs const finder on first call to subsetFont, but not subsequent calls', () async {
+    final Environment environment = _createEnvironment(<String, String>{
+      kFontSubsetFlag: 'true',
+      kBuildMode: 'release',
+    });
+
+    fs.file(inputPath).createSync(recursive: true);
+
+    final FontSubset fontSubset = FontSubset(
+      environment,
+      DevFSStringContent(''),
+      logger: logger,
+      processManager: mockProcessManager,
+      fs: fs,
+      artifacts: mockArtifacts,
+    );
+
+    final bool subsetted = await fontSubset.subsetFont(
+      inputPath: inputPath,
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+
+    expect(subsetted, true);
   });
 }
 

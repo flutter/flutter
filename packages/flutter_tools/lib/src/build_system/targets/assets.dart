@@ -59,7 +59,6 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
         if (content is DevFSFileContent && content.file is File) {
           inputs.add(globals.fs.file(content.file.path));
           if (!await fontSubset.subsetFont(
-            environment: environment,
             inputPath: content.file.path,
             outputPath: file.path,
             relativePath: entry.key,
