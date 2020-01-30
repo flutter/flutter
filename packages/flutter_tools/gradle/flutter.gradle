@@ -603,7 +603,7 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
-        Boolean fontSubsetOptionsValue = null
+        Boolean fontSubsetOptionsValue = false
         if (project.hasProperty('font-subset')) {
             fontSubsetOptionsValue = project.property('font-subset').toBoolean()
         }

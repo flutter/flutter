@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/utils.dart';
-import 'build_system/targets/assets.dart';
+import 'build_system/targets/font_subset.dart';
 import 'globals.dart' as globals;
 
 /// Information about a build to be performed or used.
