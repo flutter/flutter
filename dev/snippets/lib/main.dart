@@ -22,6 +22,16 @@ const String _kTemplateOption = 'template';
 const String _kTypeOption = 'type';
 const String _kShowDartPad = 'dartpad';
 
+String getChannelName() {
+  final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
+  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
+  if (gitResult.exitCode != 0)
+    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
+  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
+      (gitResult.stdout as String).trim().split('\n').first);
+  return gitBranchMatch == null ? '<unknown>' : gitBranchMatch.group(1).split('...').first;
+}
+
 /// Generates snippet dartdoc output for a given input, and creates any sample
 /// applications needed by the snippet.
 void main(List<String> argList) {
@@ -176,6 +186,7 @@ void main(List<String> argList) {
           ? int.tryParse(environment['SOURCE_LINE'])
           : null,
       'id': id.join('.'),
+      'channel': getChannelName(),
       'serial': serial,
       'package': packageName,
       'library': libraryName,
