@@ -57,6 +57,7 @@ class SceneHost : public RefCountedDartWrappable<SceneHost> {
   tonic::DartPersistentValue view_connected_callback_;
   tonic::DartPersistentValue view_disconnected_callback_;
   tonic::DartPersistentValue view_state_changed_callback_;
+  std::string isolate_service_id_;
   zx_koid_t koid_ = ZX_KOID_INVALID;
 };
 
