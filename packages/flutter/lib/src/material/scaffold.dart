@@ -2741,7 +2741,14 @@ class _FABStatus {
 
   AnimationController moveController;
 
-  @override toString() => '_FABStatus(button: $button, location: $location, previousLocation: $previousLocation, moveController: $moveController)';
+  @override
+  String toString() =>
+      '_FABStatus('
+        'button: $button,'
+        'location: $location,'
+        'previousLocation: $previousLocation,'
+        'moveController: $moveController,'
+      ')';
 }
 
 class _FABKey extends ValueKey<int> {
