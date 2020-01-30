@@ -168,7 +168,9 @@ class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
       => status.getOffset(scaffoldGeometry);
 
   @override
-  String toString() => '$runtimeType.fromFABStatus($status)';
+  String toString() {
+    return '$runtimeType(begin: ${status.previousLocation}, end: ${status.location}, progress: ${status.moveController.value})';
+  }
 }
 
 /// Geometry information for [Scaffold] components after layout is finished.
