@@ -2077,25 +2077,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     _fabStatuses = <Key, _FABStatus> {};
 
-    // TODO: Remove forEach.
-    widget._fabKeys.forEach(
-      (Key key) {
-        final FloatingActionButtonConfiguration configuration = widget._fabConfiguration(key);
-        _fabStatuses[key] = _FABStatus(
-          button: configuration.button,
-          location: configuration.location ?? _kDefaultFloatingActionButtonLocation,
-          animator: configuration.animator ?? _kDefaultFloatingActionButtonAnimator,
-          previousLocation: configuration.location ?? _kDefaultFloatingActionButtonLocation,
-          moveController: AnimationController(
-            vsync: this,
-            lowerBound: 0.0,
-            upperBound: 1.0,
-            value: 1.0,
-            duration: kFloatingActionButtonSegue * 2,
-          ),
-        );
-      },
-    );
+    for (final Key key in widget._fabKeys) {
+      final FloatingActionButtonConfiguration configuration = widget._fabConfiguration(key);
+      _fabStatuses[key] = _FABStatus(
+        button: configuration.button,
+        location: configuration.location ?? _kDefaultFloatingActionButtonLocation,
+        animator: configuration.animator ?? _kDefaultFloatingActionButtonAnimator,
+        previousLocation: configuration.location ?? _kDefaultFloatingActionButtonLocation,
+        moveController: AnimationController(
+          vsync: this,
+          lowerBound: 0.0,
+          upperBound: 1.0,
+          value: 1.0,
+          duration: kFloatingActionButtonSegue * 2,
+        ),
+      );
+    }
 
     _floatingActionButtonVisibilityController = AnimationController(
       duration: kFloatingActionButtonSegue,
