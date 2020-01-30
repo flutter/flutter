@@ -4006,40 +4006,5 @@ TEST_F(EmbedderTest, CanPostTaskToAllNativeThreads) {
   ASSERT_FALSE(engine.is_valid());
 }
 
-TEST_F(EmbedderTest, CanPostTaskToAllNativeThreadsRecursively) {
-  EmbedderConfigBuilder builder(GetEmbedderContext());
-
-  builder.SetSoftwareRendererConfig();
-
-  static std::mutex engine_mutex;
-  static UniqueEngine engine;
-  static fml::AutoResetWaitableEvent event;
-
-  std::unique_lock engine_lock(engine_mutex);
-  engine.reset();
-  engine = builder.LaunchEngine();
-  ASSERT_TRUE(engine.is_valid());
-  ASSERT_EQ(FlutterEnginePostCallbackOnAllNativeThreads(
-                engine.get(),
-                [](FlutterNativeThreadType type, void* baton) {
-                  // This should deadlock if the task mutex acquisition is
-                  // busted.
-                  std::scoped_lock engine_lock_inner(engine_mutex);
-                  if (engine.is_valid()) {
-                    ASSERT_EQ(FlutterEnginePostCallbackOnAllNativeThreads(
-                                  engine.get(),
-                                  [](FlutterNativeThreadType type,
-                                     void* baton) { event.Signal(); },
-                                  nullptr),
-                              kSuccess);
-                  }
-                },
-                &engine),
-            kSuccess);
-  engine_lock.unlock();
-  event.Wait();
-  engine.reset();
-}
-
 }  // namespace testing
 }  // namespace flutter
