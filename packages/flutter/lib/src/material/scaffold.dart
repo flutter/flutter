@@ -182,9 +182,7 @@ class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
   }
 
   @override
-  String toString() {
-    return '$runtimeType(begin: $begin, end: $end, progress: $progress)';
-  }
+  String toString() => '$runtimeType(begin: $begin, end: $end, animator: $animator, progress: $progress)';
 }
 
 /// Geometry information for [Scaffold] components after layout is finished.
