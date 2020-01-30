@@ -2075,22 +2075,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     _fabStatuses = <Key, _FABStatus> {};
 
-    _fabStatuses[_primaryFABKey] = _FABStatus(
-      button: widget.floatingActionButton,
-      location: widget.floatingActionButtonLocation ?? _kDefaultFloatingActionButtonLocation,
-      animator: widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator,
-      previousLocation: widget.floatingActionButtonLocation ?? _kDefaultFloatingActionButtonLocation,
-      moveController: AnimationController(
-        vsync: this,
-        lowerBound: 0.0,
-        upperBound: 1.0,
-        value: 1.0,
-        duration: kFloatingActionButtonSegue * 2,
-      ),
-    );
+    final Set<Key> keys = widget.additionalFloatingActionButtonConfigurations.keys.toSet()..add(_primaryFABKey);
 
-    widget.additionalFloatingActionButtonConfigurations.forEach(
-      (Key key, FloatingActionButtonConfiguration configuration) {
+    keys.forEach(
+      (Key key) {
+        final FloatingActionButtonConfiguration configuration = widget._fabConfiguration(key);
         _fabStatuses[key] = _FABStatus(
           button: configuration.button,
           location: configuration.location ?? _kDefaultFloatingActionButtonLocation,
@@ -2118,30 +2107,25 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // Update the Floating Action Button Animator, and then schedule the Floating Action Button for repositioning.
     // TODO: Generalize. Update not only for FABs but for additionalFABs as well.
     // TODO: Implement rigorously!
-    if (widget.floatingActionButtonAnimator != oldWidget.floatingActionButtonAnimator) {
-      _fabStatuses[_primaryFABKey].animator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
-    }
-    if (widget.floatingActionButtonLocation != oldWidget.floatingActionButtonLocation) {
-      _moveFloatingActionButton(
-        _fabStatuses[_primaryFABKey],
-        widget.floatingActionButtonLocation
-            ?? _kDefaultFloatingActionButtonLocation,
-      );
-    }
-    final Set<Key> possiblyChangedFABKeys = Set<Key>.of(oldWidget.additionalFloatingActionButtonConfigurations.keys).union(
-      Set<Key>.of(widget.additionalFloatingActionButtonConfigurations.keys)
-    );
+
+    final Set<Key> possiblyChangedFABKeys =
+      <Key>{_primaryFABKey}
+          .union(Set<Key>.of(oldWidget.additionalFloatingActionButtonConfigurations.keys))
+          .union(Set<Key>.of(widget.additionalFloatingActionButtonConfigurations.keys));
+
     for (final Key key in possiblyChangedFABKeys) {
-      if (widget.additionalFloatingActionButtonConfigurations[key].animator != _fabStatuses[key].animator)
-        _fabStatuses[key].animator = widget.additionalFloatingActionButtonConfigurations[key].animator
+      final FloatingActionButtonConfiguration newConfiguration = widget._fabConfiguration(key);
+
+      if (newConfiguration.animator != _fabStatuses[key].animator)
+        _fabStatuses[key].animator = newConfiguration.animator
             ?? _kDefaultFloatingActionButtonAnimator;
-      if (widget.additionalFloatingActionButtonConfigurations[key].location != _fabStatuses[key].location)
+      if (newConfiguration.location != _fabStatuses[key].location)
         _moveFloatingActionButton(
           _fabStatuses[key],
-          widget.additionalFloatingActionButtonConfigurations[key].location
-              ?? _kDefaultFloatingActionButtonLocation,
+          newConfiguration.location ?? _kDefaultFloatingActionButtonLocation,
         );
     }
+
     if (widget.bottomSheet != oldWidget.bottomSheet) {
       assert(() {
         if (widget.bottomSheet != null && _currentBottomSheet?._isLocalHistoryEntry == true) {
@@ -2465,9 +2449,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     _fabStatuses.forEach(
       (Key key, _FABStatus status) {
-        final Widget newButton = key == _primaryFABKey
-            ? widget.floatingActionButton
-            : widget.additionalFloatingActionButtonConfigurations[key].button;
+        final Widget newButton = widget._fabConfiguration(key).button;
 
         _addIfNonNull(
           children,
