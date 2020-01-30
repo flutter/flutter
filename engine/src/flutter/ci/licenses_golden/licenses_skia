@@ -1,4 +1,4 @@
-Signature: 8ef2261b432ea06cecc617240a127f6a
+Signature: a98ae7da54355ac2155c82b34b07f9ad
 
 UNUSED LICENSES:
 
@@ -5226,8 +5226,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/docs/examples/BlendModes.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/docs/examples/50_percent_gray.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/docs/examples/50_percent_gray.cpp
+FILE: ../../../third_party/skia/docs/examples/50_percent_srgb.cpp
 FILE: ../../../third_party/skia/docs/examples/BlendModes.cpp
 FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTab.cpp
 FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTabs.cpp
@@ -5270,6 +5272,7 @@ FILE: ../../../third_party/skia/docs/examples/bug5252.cpp
 FILE: ../../../third_party/skia/docs/examples/bug583299.cpp
 FILE: ../../../third_party/skia/docs/examples/bug6495.cpp
 FILE: ../../../third_party/skia/docs/examples/bug7573.cpp
+FILE: ../../../third_party/skia/docs/examples/bug7573_1.cpp
 FILE: ../../../third_party/skia/docs/examples/bug767834.cpp
 FILE: ../../../third_party/skia/docs/examples/bugoftheday.cpp
 FILE: ../../../third_party/skia/docs/examples/checker_board.cpp
@@ -5296,6 +5299,7 @@ FILE: ../../../third_party/skia/docs/examples/draw_text_fails.cpp
 FILE: ../../../third_party/skia/docs/examples/draw_vertices.cpp
 FILE: ../../../third_party/skia/docs/examples/drawarcs.cpp
 FILE: ../../../third_party/skia/docs/examples/example3ps.cpp
+FILE: ../../../third_party/skia/docs/examples/f16.cpp
 FILE: ../../../third_party/skia/docs/examples/f16to8888busted.cpp
 FILE: ../../../third_party/skia/docs/examples/f16to8888drawImageBug.cpp
 FILE: ../../../third_party/skia/docs/examples/failing_example.cpp
@@ -5306,6 +5310,7 @@ FILE: ../../../third_party/skia/docs/examples/fluttershadow.cpp
 FILE: ../../../third_party/skia/docs/examples/gamma_mask_filter.cpp
 FILE: ../../../third_party/skia/docs/examples/getLocalBounds_broken.cpp
 FILE: ../../../third_party/skia/docs/examples/getLocalBounds_working.cpp
+FILE: ../../../third_party/skia/docs/examples/gpu4444diff.cpp
 FILE: ../../../third_party/skia/docs/examples/gpu8888diff.cpp
 FILE: ../../../third_party/skia/docs/examples/gpuconicbug.cpp
 FILE: ../../../third_party/skia/docs/examples/homogeneous.cpp
@@ -5336,6 +5341,7 @@ FILE: ../../../third_party/skia/docs/examples/rotations.cpp
 FILE: ../../../third_party/skia/docs/examples/setimagefilter.cpp
 FILE: ../../../third_party/skia/docs/examples/shader.cpp
 FILE: ../../../third_party/skia/docs/examples/shader_alphaimage.cpp
+FILE: ../../../third_party/skia/docs/examples/shapes.cpp
 FILE: ../../../third_party/skia/docs/examples/shapes_with_motion.cpp
 FILE: ../../../third_party/skia/docs/examples/skbug6031.cpp
 FILE: ../../../third_party/skia/docs/examples/skbug_237_drawImageRect.cpp
@@ -5379,6 +5385,7 @@ FILE: ../../../third_party/skia/docs/examples/subset_example.cpp
 FILE: ../../../third_party/skia/docs/examples/sum_path_effect.cpp
 FILE: ../../../third_party/skia/docs/examples/sweep_gradient_talk_1.cpp
 FILE: ../../../third_party/skia/docs/examples/sweep_gradient_talk_2.cpp
+FILE: ../../../third_party/skia/docs/examples/sweep_gradient_talk_4.cpp
 FILE: ../../../third_party/skia/docs/examples/sweep_gradient_talk_lots.cpp
 FILE: ../../../third_party/skia/docs/examples/text_only.cpp
 FILE: ../../../third_party/skia/docs/examples/text_rendering.cpp
