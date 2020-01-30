@@ -2091,8 +2091,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // TODO: Implement rigorously!
 
     final Set<Key> possiblyChangedFABKeys =
-        Set<Key>.of(oldWidget._fabKeys)
-        .union(Set<Key>.of(widget._fabKeys));
+        oldWidget._fabKeys.union(widget._fabKeys);
 
     for (final Key key in possiblyChangedFABKeys) {
       final FloatingActionButtonConfiguration newConfiguration = widget._fabConfiguration(key);
