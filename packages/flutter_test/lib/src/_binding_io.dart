@@ -73,8 +73,21 @@ void mockFlutterAssets() {
 /// If another [HttpClient] is provided using [HttpOverrides.runZoned], that will
 /// take precedence over this provider.
 class _MockHttpOverrides extends HttpOverrides {
+  bool warningPrinted = false;
   @override
   HttpClient createHttpClient(SecurityContext _) {
+    if (!warningPrinted) {
+      debugPrint(
+        'Warning: At least one test in this suite creates an HttpClient. When '
+        'running a test suite that uses TestWidgetsFlutterBinding, all HTTP '
+        'requests will return status code 400, and no network request will '
+        'actually be made. Any test expecting an real network connection and '
+        'status code will fail.\n'
+        'To test code that needs an HttpClient, provide your own HttpClient '
+        'implementation to the code under test, so that your test can '
+        'consistently provide a testable response to the code under test.');
+      warningPrinted = true;
+    }
     return _MockHttpClient();
   }
 }
