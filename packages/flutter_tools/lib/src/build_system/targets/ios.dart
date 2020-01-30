@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/project.dart';
-
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/common.dart';
@@ -13,6 +11,7 @@ import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals;
 import '../../macos/xcode.dart';
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
