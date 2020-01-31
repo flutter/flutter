@@ -75,6 +75,7 @@ void main() {
     @required mocks.CompleterIOSink stdinSink,
   }) {
     assert(stdinSink != null);
+    stdinSink.writes.clear();
     when(fontSubsetProcess.exitCode).thenAnswer((_) async => exitCode);
     when(fontSubsetProcess.stdout).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stdout)]));
     when(fontSubsetProcess.stderr).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stderr)]));
@@ -147,6 +148,30 @@ void main() {
     );
     expect(subsets, false);
 
+    verifyNever(mockProcessManager.run(any));
+    verifyNever(mockProcessManager.start(any));
+  });
+
+  testWithoutContext('Does not get enabled without font manifest', () {
+    final Environment environment = _createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
+      environment,
+      null,
+      logger: logger,
+      processManager: mockProcessManager,
+      fs: fs,
+      artifacts: mockArtifacts,
+    );
+
+    expect(
+      logger.errorText,
+      isEmpty,
+    );
+    expect(iconTreeShaker.enabled, false);
     verifyNever(mockProcessManager.run(any));
     verifyNever(mockProcessManager.start(any));
   });
@@ -226,7 +251,7 @@ void main() {
       outputPath: outputPath,
       relativePath: relativePath,
     );
-    expect(stdinSink.writes, <List<int>>[utf8.encode('59470'), <int>[13]]);
+    expect(stdinSink.writes, <List<int>>[utf8.encode('59470\n')]);
     _resetFontSubsetInvocation(stdinSink: stdinSink);
 
     expect(subsetted, true);
@@ -236,7 +261,7 @@ void main() {
       relativePath: relativePath,
     );
     expect(subsetted, true);
-    expect(stdinSink.writes, <List<int>>[utf8.encode('59470'), <int>[13]]);
+    expect(stdinSink.writes, <List<int>>[utf8.encode('59470\n')]);
 
     verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
     verify(mockProcessManager.start(fontSubsetArgs)).called(2);

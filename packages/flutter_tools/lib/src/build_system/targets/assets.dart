@@ -4,7 +4,6 @@
 
 import 'package:pool/pool.dart';
 
-import '../../artifacts.dart';
 import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../devfs.dart';
@@ -91,8 +90,7 @@ class CopyAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
-    Source.artifact(Artifact.constFinder),
-    Source.artifact(Artifact.fontSubset),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
