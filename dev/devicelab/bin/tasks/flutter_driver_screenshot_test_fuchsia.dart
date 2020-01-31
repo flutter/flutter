@@ -10,5 +10,5 @@ import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.fuchsia;
-  await task(createFlutterDriverScreenshotTest());
+  await task(createFlutterDriverScreenshotTest(useFlutterGold: true));
 }
