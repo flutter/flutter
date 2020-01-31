@@ -187,7 +187,7 @@ abstract class FloatingActionButtonLocation {
         'centerFloat',
       );
 
-  /// Start-aligned [FloatingActionButton], floating at the bottom of the screen.
+  /// Centered [FloatingActionButton], floating at the bottom of the screen.
   ///
   /// This is intended to be used with [FloatingActionButton.mini] set to true,
   /// so that the floating action button appears to align horizontally with other mini floating
