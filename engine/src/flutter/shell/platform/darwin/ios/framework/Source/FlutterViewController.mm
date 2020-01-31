@@ -27,6 +27,62 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
 
 NSNotificationName const FlutterViewControllerWillDealloc = @"FlutterViewControllerWillDealloc";
 
+/// Class to coalesce calls for a period of time.
+///
+/// This is used to filter out the conflicting notifications that can get sent
+/// in rapid succession when the app gets foregrounded.
+@interface FlutterCoalescer : NSObject
+@property(nonatomic, assign) BOOL isTriggered;
+@property(nonatomic, assign) BOOL isCoalescing;
+@property(nonatomic, copy) dispatch_block_t block;
+@end
+
+@implementation FlutterCoalescer
+- (instancetype)initWithBlock:(dispatch_block_t)block {
+  self = [super init];
+  if (self) {
+    self.block = block;
+  }
+  return self;
+}
+
+- (void)dealloc {
+  [_block release];
+  [super dealloc];
+}
+
+- (void)trigger {
+  if (_isCoalescing) {
+    _isTriggered = YES;
+  } else {
+    _isTriggered = NO;
+    if (_block) {
+      _block();
+    }
+  }
+}
+
+- (void)coalesceForSeconds:(double)seconds {
+  if (self.isCoalescing || !self.block) {
+    return;
+  }
+  self.isCoalescing = YES;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, seconds * NSEC_PER_SEC),
+                 dispatch_get_main_queue(), ^{
+                   if (self.isTriggered && self.block) {
+                     self.block();
+                   }
+                   self.isTriggered = NO;
+                   self.isCoalescing = NO;
+                 });
+}
+
+- (void)invalidate {
+  self.block = nil;
+}
+
+@end  // FlutterCoalescer
+
 // This is left a FlutterBinaryMessenger privately for now to give people a chance to notice the
 // change. Unfortunately unless you have Werror turned on, incompatible pointers as arguments are
 // just a warning.
@@ -64,6 +120,9 @@ typedef enum UIAccessibilityContrast : NSInteger {
   BOOL _viewOpaque;
   BOOL _engineNeedsLaunch;
   NSMutableSet<NSNumber*>* _ongoingTouches;
+  // Coalescer that filters out superfluous keyboard notifications when the app
+  // is being foregrounded.
+  fml::scoped_nsobject<FlutterCoalescer> _updateViewportMetrics;
 }
 
 @synthesize displayingFlutterUI = _displayingFlutterUI;
@@ -147,6 +206,11 @@ typedef enum UIAccessibilityContrast : NSInteger {
   _statusBarStyle = UIStatusBarStyleDefault;
 
   [self setupNotificationCenterObservers];
+
+  __block FlutterViewController* blockSelf = self;
+  _updateViewportMetrics.reset([[FlutterCoalescer alloc] initWithBlock:^{
+    [blockSelf updateViewportMetricsImplementation];
+  }]);
 }
 
 - (FlutterEngine*)engine {
@@ -531,6 +595,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
                                                     userInfo:nil];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [_ongoingTouches release];
+  [_updateViewportMetrics invalidate];
   [super dealloc];
 }
 
@@ -557,6 +622,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
 - (void)applicationWillEnterForeground:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationWillEnterForeground");
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
+  [_updateViewportMetrics coalesceForSeconds:0.5];
 }
 
 // Make this transition only while this current view controller is visible.
@@ -741,6 +807,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 #pragma mark - Handle view resizing
 
 - (void)updateViewportMetrics {
+  [_updateViewportMetrics trigger];
+}
+
+/// The direct implementation of updateViewportMetrics, it doesn't conform to
+/// the coalescing logic when foregrounding the app.  Most calls should be
+/// directed to [updateViewportMetrics].
+- (void)updateViewportMetricsImplementation {
   [_engine.get() updateViewportMetrics:_viewportMetrics];
 }
 
@@ -764,7 +837,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   _viewportMetrics.physical_height = viewSize.height * scale;
 
   [self updateViewportPadding];
-  [self updateViewportMetrics];
+  [self updateViewportMetricsImplementation];
 
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
