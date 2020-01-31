@@ -113,6 +113,9 @@ public class FlutterLoader {
           throw new IllegalStateException("startInitialization must be called on the main thread");
         }
 
+        // Ensure that the context is actually the application context.
+        applicationContext = applicationContext.getApplicationContext();
+
         this.settings = settings;
 
         long initStartTimestampMillis = SystemClock.uptimeMillis();
