@@ -61,8 +61,6 @@ Future<T> runInContext<T>(
   FutureOr<T> runner(), {
   Map<Type, Generator> overrides,
 }) async {
-  final UserMessages userMessages = UserMessages();
-
   return await context.run<T>(
     name: 'global fallbacks',
     body: runner,
@@ -72,11 +70,14 @@ Future<T> runInContext<T>(
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
       AndroidValidator: () => AndroidValidator(
-        androidSdk: AndroidSdk.locateAndroidSdk(),
+        androidStudio: globals.androidStudio,
+        androidSdk: globals.androidSdk,
+        fs: globals.fs,
         logger: globals.logger,
+        os: globals.os,
         platform: globals.platform,
         processManager: globals.processManager,
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
       ),
       AndroidWorkflow: () => AndroidWorkflow(),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
@@ -153,7 +154,7 @@ Future<T> runInContext<T>(
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(),
-      UserMessages: () => userMessages,
+      UserMessages: () => UserMessages(),
       VisualStudio: () => VisualStudio(),
       VisualStudioValidator: () => const VisualStudioValidator(),
       WebWorkflow: () => const WebWorkflow(),
