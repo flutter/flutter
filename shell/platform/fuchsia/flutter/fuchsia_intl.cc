@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "loop.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
