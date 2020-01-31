@@ -92,33 +92,41 @@ class SkiaGoldClient {
   String get _serviceAccount => platform.environment[_kServiceAccountKey];
 
   /// Prepares the local work space for golden file testing and calls the
-  /// goldctl `auth` command using a service account.
+  /// goldctl `auth` command.
   ///
   /// This ensures that the goldctl tool is authorized and ready for testing. It
   /// will only be called once for each instance of
   /// [FlutterSkiaGoldFileComparator].
+  ///
+  /// Based on the current environment, the goldctl tool may be authorized by
+  /// with a service account for Cirrus testing, or through the context provided
+  /// by a luci environment.
   Future<void> auth() async {
     if (_clientIsAuthorized())
       return;
 
-    if (_serviceAccount.isEmpty) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('The Gold service account is unavailable.')
-        ..writeln('Without a service account, Gold can not be authorized.')
-        ..writeln('Please check your user permissions and current comparator.');
-      throw Exception(buf.toString());
+    List<String> authArguments;
+
+    if (platform.environment.containsKey('SWARMING_TASK_ID')) {
+      authArguments = <String>[
+        'auth',
+        '--work-dir', workDirectory
+          .childDirectory('temp')
+          .path,
+        '--luci',
+      ];
+    } else {
+      final File authorization = workDirectory.childFile('serviceAccount.json');
+      await authorization.writeAsString(_serviceAccount);
+
+      authArguments = <String>[
+        'auth',
+        '--service-account', authorization.path,
+        '--work-dir', workDirectory
+          .childDirectory('temp')
+          .path,
+      ];
     }
-
-    final File authorization = workDirectory.childFile('serviceAccount.json');
-    await authorization.writeAsString(_serviceAccount);
-
-    final List<String> authArguments = <String>[
-      'auth',
-      '--service-account', authorization.path,
-      '--work-dir', workDirectory
-        .childDirectory('temp')
-        .path,
-    ];
 
     final io.ProcessResult result = await io.Process.run(
       _goldctl,
@@ -128,43 +136,11 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold authorization failed.')
-        ..writeln('This could be caused by incorrect user permissions, if the ')
-        ..writeln('debug information below contains ENCRYPTED, the wrong ')
+        ..writeln('This could be caused by incorrect user permissions on Cirrus, ')
+        ..writeln('if the debug information below contains ENCRYPTED, the wrong ')
         ..writeln('comparator was chosen for the test case.')
-        ..writeln()
-        ..writeln('Debug information for Gold:')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}');
-      throw Exception(buf.toString());
-    }
-  }
-
-  /// Prepares the local work space for golden file testing and calls the
-  /// goldctl `auth` command using the luci environment.
-  ///
-  /// This ensures that the goldctl tool is authorized and ready for testing. It
-  /// will only be called once for each instance of
-  /// [FlutterSkiaGoldFileComparator].
-  Future<void> luciAuth() async {
-    if (_clientIsAuthorized())
-      return;
-
-    final List<String> authArguments = <String>[
-      'auth',
-      '--work-dir', workDirectory
-        .childDirectory('temp')
-        .path,
-      '--luci',
-    ];
-
-    final io.ProcessResult result = await io.Process.run(
-      _goldctl,
-      authArguments,
-    );
-
-    if (result.exitCode != 0) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold luci authorization failed.')
+        ..writeln('Luci environments authenticate without a service account, so ')
+        ..writeln('if this is a Luci inatsance, there may be an error with Gold.')
         ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')

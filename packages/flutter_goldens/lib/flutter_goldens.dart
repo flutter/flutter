@@ -34,7 +34,7 @@ Future<void> main(FutureOr<void> testMain()) async {
     goldenFileComparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(platform);
   } else if (FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingGoldenFileComparator.fromDefaultComparator(
-      'Golden file testing is unavailable on LUCI and  some Cirrus shards.'
+      'Golden file testing is not executed on some Luci and Cirrus environments.'
     );
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
@@ -244,10 +244,17 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
   static bool isAvailableForEnvironment(Platform platform) {
     final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
     final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
-    return platform.environment.containsKey('CIRRUS_CI')
+    final bool cirrusPostSubmit = platform.environment.containsKey('CIRRUS_CI')
       && cirrusPR.isEmpty
       && cirrusBranch == 'master'
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
+
+    // TODO(PIINKS): Is this actually empty on post-submit?
+    final String luciPR = platform.environment['github_link'] ?? '';
+    final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
+      && luciPR.isEmpty;
+
+    return cirrusPostSubmit || luciPostSubmit;
   }
 }
 
@@ -346,9 +353,15 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// performed as pre-submit tests with Skia Gold.
   static bool isAvailableForEnvironment(Platform platform) {
     final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
-    return platform.environment.containsKey('CIRRUS_CI')
+    final bool cirrusPreSubmit = platform.environment.containsKey('CIRRUS_CI')
       && cirrusPR.isNotEmpty
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
+
+    final String luciPR = platform.environment['github_link'] ?? '';
+    final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
+      && luciPR.isNotEmpty;
+
+    return cirrusPreSubmit || luciPreSubmit;
   }
 }
 
@@ -485,6 +498,9 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
 
   /// Decides based on the current environment whether this comparator should be
   /// used.
+  ///
+  /// If we are in a CI environment, luci or Cirrus, but are not using the other
+  /// comparators, we skip.
   static bool isAvailableForEnvironment(Platform platform) {
     return platform.environment.containsKey('SWARMING_TASK_ID')
       || platform.environment.containsKey('CIRRUS_CI');

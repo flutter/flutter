@@ -81,20 +81,6 @@ void main() {
       ));
     });
 
-    test('luciAuth performs minimal work if already authorized', () async {
-      fs.file('/workDirectory/temp/auth_opt.json')
-        ..createSync(recursive: true);
-      when(process.run(any))
-        .thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(123, 0, '', '')));
-      await skiaClient.luciAuth();
-
-      verifyNever(process.run(
-        captureAny,
-        workingDirectory: captureAnyNamed('workingDirectory'),
-      ));
-    });
-
     test('throws for error state from auth', () async {
       platform = FakePlatform(
         environment: <String, String>{
@@ -117,34 +103,6 @@ void main() {
         .thenAnswer((_) => Future<ProcessResult>
         .value(ProcessResult(123, 1, 'fail', 'fail')));
       final Future<void> test = skiaClient.auth();
-
-      expect(
-        test,
-        throwsException,
-      );
-    });
-
-    test('throws for error state from luci auth', () async {
-      platform = FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ROOT': _kFlutterRoot,
-          'GOLDCTL' : 'goldctl',
-        },
-        operatingSystem: 'macos'
-      );
-
-      skiaClient = SkiaGoldClient(
-        workDirectory,
-        fs: fs,
-        process: process,
-        platform: platform,
-        httpClient: mockHttpClient,
-      );
-
-      when(process.run(any))
-        .thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(123, 1, 'fail', 'fail')));
-      final Future<void> test = skiaClient.luciAuth();
 
       expect(
         test,
@@ -536,7 +494,21 @@ void main() {
       });
 
       group('correctly determines testing environment', () {
-        test('returns true', () {
+        test('returns true for Luci', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : '12345678990'
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns true for Cirrus', () {
           platform = FakePlatform(
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
@@ -672,7 +644,7 @@ void main() {
           );
         });
 
-        test('returns false - not on Cirrus', () {
+        test('returns false - not on Cirrus or Luci', () {
           platform = FakePlatform(
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
@@ -795,21 +767,7 @@ void main() {
 
     group('Skipping', () {
       group('correctly determines testing environment', () {
-        test('returns true on LUCI', () {
-          platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : '1234567890',
-            },
-            operatingSystem: 'macos'
-          );
-          expect(
-            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns true on Cirrus', () {
+        test('returns true on Cirrus shards that don\'t run golden tests', () {
           platform = FakePlatform(
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
@@ -822,6 +780,7 @@ void main() {
             isTrue,
           );
         });
+
         test('returns false - no CI', () {
           platform = FakePlatform(
             environment: <String, String>{
