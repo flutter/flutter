@@ -110,7 +110,7 @@ class KeySet<T extends KeyboardKey> {
 /// This is a thin wrapper around a [Set], but changes the equality comparison
 /// from an identity comparison to a contents comparison so that non-identical
 /// sets with the same keys in them will compare as equal.
-class LogicalKeySet extends KeySet<LogicalKeyboardKey> with DiagnosticableMixin {
+class LogicalKeySet extends KeySet<LogicalKeyboardKey> with DiagnosticableMixin implements Diagnosticable {
   /// A constructor for making a [LogicalKeySet] of up to four keys.
   ///
   /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
@@ -201,7 +201,7 @@ class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>
 ///
 /// A [ShortcutManager] is obtained by calling [Shortcuts.of] on the context of
 /// the widget that you want to find a manager for.
-class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
+class ShortcutManager extends ChangeNotifier with DiagnosticableMixin implements Diagnosticable {
   /// Constructs a [ShortcutManager].
   ///
   /// The [shortcuts] argument must not  be null.

@@ -351,7 +351,7 @@ class FlutterErrorDetails extends Diagnosticable {
     return longMessage;
   }
 
-  Diagnosticable _exceptionToDiagnosticable() {
+  DiagnosticableMixin _exceptionToDiagnosticable() {
     if (exception is FlutterError) {
       return exception as FlutterError;
     }
@@ -374,7 +374,7 @@ class FlutterErrorDetails extends Diagnosticable {
     if (kReleaseMode) {
       return DiagnosticsNode.message(formatException());
     }
-    final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
+    final DiagnosticableMixin diagnosticable = _exceptionToDiagnosticable();
     DiagnosticsNode summary;
     if (diagnosticable != null) {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -388,7 +388,7 @@ class FlutterErrorDetails extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final DiagnosticsNode verb = ErrorDescription('thrown${ context != null ? ErrorDescription(" $context") : ""}');
-    final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
+    final DiagnosticableMixin diagnosticable = _exceptionToDiagnosticable();
     if (exception is NullThrownError) {
       properties.add(ErrorDescription('The null value was $verb.'));
     } else if (exception is num) {

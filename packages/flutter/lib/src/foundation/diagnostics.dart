@@ -2640,7 +2640,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final T v = value;
     List<Map<String, Object>> properties;
-    if (delegate.expandPropertyValues && delegate.includeProperties && v is Diagnosticable && getProperties().isEmpty) {
+    if (delegate.expandPropertyValues && delegate.includeProperties && v is DiagnosticableMixin && getProperties().isEmpty) {
       // Exclude children for expanded nodes to avoid cycles.
       delegate = delegate.copyWith(subtreeDepth: 0, includeProperties: false);
       properties = DiagnosticsNode.toJsonList(
@@ -2666,7 +2666,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       json['exception'] = exception.toString();
     json['propertyType'] = propertyType.toString();
     json['defaultLevel'] = describeEnum(_defaultLevel);
-    if (value is Diagnosticable || value is DiagnosticsNode)
+    if (value is DiagnosticableMixin || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     if (v is num)
       // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
@@ -2846,7 +2846,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       if (object is DiagnosticsNode) {
         return object.getProperties();
       }
-      if (object is Diagnosticable) {
+      if (object is DiagnosticableMixin) {
         return object.toDiagnosticsNode(style: style).getProperties();
       }
     }
@@ -2860,7 +2860,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       if (object is DiagnosticsNode) {
         return object.getChildren();
       }
-      if (object is Diagnosticable) {
+      if (object is DiagnosticableMixin) {
         return object.toDiagnosticsNode(style: style).getChildren();
       }
     }
@@ -2870,8 +2870,8 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 
 /// [DiagnosticsNode] that lazily calls the associated [Diagnosticable] [value]
 /// to implement [getChildren] and [getProperties].
-class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
-  /// Create a diagnostics describing a [Diagnosticable] value.
+class DiagnosticableNode<T extends DiagnosticableMixin> extends DiagnosticsNode {
+  /// Create a diagnostics describing a [DiagnosticableMixin] value.
   ///
   /// The [value] argument must not be null.
   DiagnosticableNode({
@@ -2991,7 +2991,7 @@ String describeEnum(Object enumEntry) {
 }
 
 /// Builder to accumulate properties and configuration used to assemble a
-/// [DiagnosticsNode] from a [Diagnosticable] object.
+/// [DiagnosticsNode] from a [DiagnosticableMixin] object.
 class DiagnosticPropertiesBuilder {
   /// Creates a [DiagnosticPropertiesBuilder] with [properties] initialize to
   /// an empty array.
@@ -3053,10 +3053,8 @@ abstract class Diagnosticable with DiagnosticableMixin {
   const Diagnosticable();
 }
 
-/// A mixin class that provides the implementation for [Diagnosticable].
-///
-/// This mixin can be used to add diagnostics to a class which already has an
-/// base class.
+/// A mixin class for providing string and [DiagnosticsNode] debug
+/// representations describing the properties of an object.
 ///
 /// The string debug representation is generated from the intermediate
 /// [DiagnosticsNode] representation. The [DiagnosticsNode] representation is
@@ -3108,9 +3106,9 @@ mixin DiagnosticableMixin {
   /// relationship between the parent and the node. For example, pass
   /// [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return DiagnosticableNode<Diagnosticable>(
+    return DiagnosticableNode<DiagnosticableMixin>(
       name: name,
-      value: this as Diagnosticable,
+      value: this,
       style: style,
     );
   }
@@ -3338,8 +3336,8 @@ mixin DiagnosticableMixin {
 /// See also:
 ///
 ///  * [DiagnosticableTreeMixin], a mixin that implements this class.
-///  * [Diagnosticable], which should be used instead of this class to provide
-///    diagnostics for objects without children.
+///  * [DiagnosticableMixin], which should be used instead of this class to
+///    provide diagnostics for objects without children.
 abstract class DiagnosticableTree extends Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -3643,7 +3641,7 @@ abstract class DiagnosticsSerializationDelegate {
   ///    will be included.
   bool get includeProperties;
 
-  /// Whether properties that have a [Diagnosticable] as value should be
+  /// Whether properties that have a [DiagnosticableMixin] as value should be
   /// expanded.
   bool get expandPropertyValues;
 

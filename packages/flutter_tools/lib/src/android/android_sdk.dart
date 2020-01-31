@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
@@ -51,7 +50,7 @@ String getAdbPath([ AndroidSdk existingSdk ]) {
   final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
   if (sdk?.latestVersion == null) {
-    return os.which('adb')?.path;
+    return globals.os.which('adb')?.path;
   } else {
     return sdk?.adbPath;
   }
@@ -331,7 +330,7 @@ class AndroidSdk {
       }
 
       // in build-tools/$version/aapt
-      final List<File> aaptBins = os.whichAll('aapt');
+      final List<File> aaptBins = globals.os.whichAll('aapt');
       for (File aaptBin in aaptBins) {
         // Make sure we're using the aapt from the SDK.
         aaptBin = globals.fs.file(aaptBin.resolveSymbolicLinksSync());
@@ -342,7 +341,7 @@ class AndroidSdk {
       }
 
       // in platform-tools/adb
-      final List<File> adbBins = os.whichAll('adb');
+      final List<File> adbBins = globals.os.whichAll('adb');
       for (File adbBin in adbBins) {
         // Make sure we're using the adb from the SDK.
         adbBin = globals.fs.file(adbBin.resolveSymbolicLinksSync());
@@ -566,7 +565,7 @@ class AndroidSdk {
     }
 
     // Fallback to PATH based lookup.
-    return os.which(_javaExecutable)?.path;
+    return globals.os.which(_javaExecutable)?.path;
   }
 
   Map<String, String> _sdkManagerEnv;
@@ -578,8 +577,9 @@ class AndroidSdk {
       _sdkManagerEnv = <String, String>{};
       final String javaBinary = findJavaBinary();
       if (javaBinary != null) {
-        _sdkManagerEnv['PATH'] =
-            globals.fs.path.dirname(javaBinary) + os.pathVarSeparator + globals.platform.environment['PATH'];
+        _sdkManagerEnv['PATH'] = globals.fs.path.dirname(javaBinary) +
+                                 globals.os.pathVarSeparator +
+                                 globals.platform.environment['PATH'];
       }
     }
     return _sdkManagerEnv;

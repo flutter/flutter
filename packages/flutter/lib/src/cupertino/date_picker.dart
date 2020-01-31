@@ -180,8 +180,8 @@ enum _PickerColumnType {
 ///
 /// Example of the picker in date mode:
 ///
-///  * US-English: ` July | 13 | 2012 `
-///  * Vietnamese: ` 13 | Tháng 7 | 2012 `
+///  * US-English: `| July | 13 | 2012 |`
+///  * Vietnamese: `| 13 | Tháng 7 | 2012 |`
 ///
 /// Can be used with [showCupertinoModalPopup] to display the picker modally at
 /// the bottom of the screen.
@@ -202,7 +202,9 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// [onDateTimeChanged] is the callback called when the selected date or time
   /// changes and must not be null. When in [CupertinoDatePickerMode.time] mode,
-  /// the year, month and day will be the same as [initialDateTime].
+  /// the year, month and day will be the same as [initialDateTime]. When in
+  /// [CupertinoDatePickerMode.date] mode, this callback will always report the
+  /// start time of the currently selected day.
   ///
   /// [initialDateTime] is the initial date time of the picker. Defaults to the
   /// present date and time and must not be null. The present must conform to
@@ -317,8 +319,11 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Whether to use 24 hour format. Defaults to false.
   final bool use24hFormat;
 
-  /// Callback called when the selected date and/or time changes. Must not be
-  /// null.
+  /// Callback called when the selected date and/or time changes. If the new selected
+  /// [DateTime] is not valid, or is not in the [minimumDate] through [maximumDate]
+  /// range, this callback will not be called.
+  ///
+  /// Must not be null.
   final ValueChanged<DateTime> onDateTimeChanged;
 
   /// Background color of date picker.
@@ -1215,12 +1220,14 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   }
 
   bool get _isCurrentDateValid {
-    final DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+    // The current date selection represents a range [minSelectedData, maxSelectDate].
+    final DateTime minSelectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+    final DateTime maxSelectedDate = DateTime(selectedYear, selectedMonth, selectedDay + 1);
 
-    final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
-    final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
+    final bool minCheck = widget.minimumDate?.isBefore(maxSelectedDate) ?? true;
+    final bool maxCheck = widget.maximumDate?.isBefore(minSelectedDate) ?? false;
 
-    return !minCheck && !maxCheck && selectedDate.day == selectedDay;
+    return minCheck && !maxCheck && minSelectedDate.day == selectedDay;
   }
 
   // One or more pickers have just stopped scrolling.
@@ -1235,21 +1242,22 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
     // Whenever scrolling lands on an invalid entry, the picker
     // automatically scrolls to a valid one.
-    final DateTime selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+    final DateTime minSelectDate = DateTime(selectedYear, selectedMonth, selectedDay);
+    final DateTime maxSelectDate = DateTime(selectedYear, selectedMonth, selectedDay + 1);
 
-    final bool minCheck = widget.minimumDate?.isAfter(selectedDate) ?? false;
-    final bool maxCheck = widget.maximumDate?.isBefore(selectedDate) ?? false;
+    final bool minCheck = widget.minimumDate?.isBefore(maxSelectDate) ?? true;
+    final bool maxCheck = widget.maximumDate?.isBefore(minSelectDate) ?? false;
 
-    if (minCheck || maxCheck) {
+    if (!minCheck || maxCheck) {
       // We have minCheck === !maxCheck.
-      final DateTime targetDate = minCheck ? widget.minimumDate : widget.maximumDate;
+      final DateTime targetDate = minCheck ? widget.maximumDate : widget.minimumDate;
       _scrollToDate(targetDate);
       return;
     }
 
     // Some months have less days (e.g. February). Go to the last day of that month
     // if the selectedDay exceeds the maximum.
-    if (selectedDate.day != selectedDay) {
+    if (minSelectDate.day != selectedDay) {
       final DateTime lastDay = _lastDayInMonth(selectedYear, selectedMonth);
       _scrollToDate(lastDay);
     }
