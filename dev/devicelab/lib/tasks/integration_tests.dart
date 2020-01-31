@@ -118,7 +118,7 @@ TaskFunction createFlutterDriverScreenshotTest({
     'lib/main.dart',
     extraOptions: useFlutterGold ? const <String>[
       '--driver', 'test_driver/flutter_gold_main_test.dart'
-    ] : null
+    ] : const <String>[]
   );
 }
 
