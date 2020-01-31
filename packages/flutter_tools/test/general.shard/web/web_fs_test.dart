@@ -5,7 +5,6 @@
 import 'package:build_daemon/client.dart';
 import 'package:build_daemon/data/build_status.dart';
 import 'package:built_collection/built_collection.dart';
-import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -97,7 +96,7 @@ void main() {
           return mockHttpMultiServer;
         },
         DwdsFactory: () => ({
-          @required AssetHandler assetHandler,
+          @required AssetReader assetReader,
           @required Stream<BuildResult> buildResults,
           @required ConnectionProvider chromeConnection,
           String hostname,

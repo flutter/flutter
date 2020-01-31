@@ -8,10 +8,10 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:build_daemon/client.dart';
 import 'package:build_daemon/constants.dart' as daemon;
-import 'package:build_daemon/data/build_status.dart';
-import 'package:build_daemon/data/build_target.dart';
-import 'package:build_daemon/data/server_log.dart';
-import 'package:dwds/asset_handler.dart';
+import 'package:dwds/data/build_result.dart';
+import 'package:build_daemon/data/build_status.dart' as daemon;
+// import 'package:build_daemon/data/build_target.dart';
+// import 'package:build_daemon/data/server_log.dart';
 import 'package:dwds/dwds.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
@@ -59,7 +59,7 @@ typedef HttpMultiServerFactory = Future<HttpServer> Function(dynamic address, in
 
 /// A function with the same signature as [Dwds.start].
 typedef DwdsFactory = Future<Dwds> Function({
-  @required AssetHandler assetHandler,
+  @required AssetReader assetReader,
   @required Stream<BuildResult> buildResults,
   @required ConnectionProvider chromeConnection,
   String hostname,
@@ -160,8 +160,8 @@ class WebFs {
       return true;
     }
     _client.startBuild();
-    await for (final BuildResults results in _client.buildResults) {
-      final BuildResult result = results.results.firstWhere((BuildResult result) {
+    await for (final daemon.BuildResults results in _client.buildResults) {
+      final daemon.BuildResult result = results.results.firstWhere((daemon.BuildResult result) {
         return result.target == kBuildTargetName;
       });
       if (result.status == BuildStatus.failed) {
@@ -264,26 +264,27 @@ class WebFs {
         );
       client.startBuild();
       // Only provide relevant build results
-      final Stream<BuildResult> filteredBuildResults = client.buildResults
-        .asyncMap<BuildResult>((BuildResults results) {
-          return results.results
-            .firstWhere((BuildResult result) => result.target == kBuildTargetName);
-        });
-      // Start the build daemon and run an initial build.
-      firstBuild = client.buildResults.listen((BuildResults buildResults) {
-        if (firstBuildCompleter.isCompleted) {
-          return;
-        }
-        final BuildResult result = buildResults.results.firstWhere((BuildResult result) {
-          return result.target == kBuildTargetName;
-        });
-        if (result.status == BuildStatus.failed) {
-          firstBuildCompleter.complete(false);
-        }
-        if (result.status == BuildStatus.succeeded) {
-          firstBuildCompleter.complete(true);
-        }
-      });
+      // final Stream<BuildResult> filteredBuildResults = client.buildResults
+      //   .asyncMap<BuildResult>((daemon.BuildResults results) {
+      //     return results.results
+      //       .firstWhere((daemon.BuildResult result) => result.target == kBuildTargetName)
+      //       .map((daemon.BuildResult result) => BuildResult((b) => b.status = result.status == daemon.BuildStatus.succeeded ?));
+      //   });
+      // // Start the build daemon and run an initial build.
+      // firstBuild = client.buildResults.listen((BuildResults buildResults) {
+      //   if (firstBuildCompleter.isCompleted) {
+      //     return;
+      //   }
+      //   final BuildResult result = buildResults.results.firstWhere((BuildResult result) {
+      //     return result.target == kBuildTargetName;
+      //   });
+      //   if (result.status == BuildStatus.failed) {
+      //     firstBuildCompleter.complete(false);
+      //   }
+      //   if (result.status == BuildStatus.succeeded) {
+      //     firstBuildCompleter.complete(true);
+      //   }
+      // });
       final int daemonAssetPort = buildDaemonCreator.assetServerPort(globals.fs.currentDirectory);
 
       // Initialize the asset bundle.
@@ -291,25 +292,25 @@ class WebFs {
       await assetBundle.build();
       await writeBundle(globals.fs.directory(getAssetBuildDirectory()), assetBundle.entries);
       if (!skipDwds) {
-        final BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
-          daemonAssetPort,
-          kBuildTargetName,
-          effectiveHostname,
-          hostPort);
-        dwds = await dwdsFactory(
-          hostname: effectiveHostname,
-          assetHandler: assetHandler,
-          buildResults: filteredBuildResults,
-          chromeConnection: () async {
-            return (await ChromeLauncher.connectedInstance).chromeConnection;
-          },
-          reloadConfiguration: ReloadConfiguration.none,
-          serveDevTools: false,
-          verbose: false,
-          enableDebugExtension: true,
-          urlEncoder: urlTunneller,
-          logWriter: (dynamic level, String message) => globals.printTrace(message),
-        );
+        // final BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
+        //   daemonAssetPort,
+        //   kBuildTargetName,
+        //   effectiveHostname,
+        //   hostPort);
+        // dwds = await dwdsFactory(
+        //   hostname: effectiveHostname,
+        //   assetHandler: assetHandler,
+        //   buildResults: filteredBuildResults,
+        //   chromeConnection: () async {
+        //     return (await ChromeLauncher.connectedInstance).chromeConnection;
+        //   },
+        //   reloadConfiguration: ReloadConfiguration.none,
+        //   serveDevTools: false,
+        //   verbose: false,
+        //   enableDebugExtension: true,
+        //   urlEncoder: urlTunneller,
+        //   logWriter: (dynamic level, String message) => globals.printTrace(message),
+        // );
         handler = pipeline.addHandler(dwds.handler);
       } else {
         handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
@@ -614,7 +615,7 @@ class BuildDaemonCreator {
         initializePlatform: initializePlatform,
         testTargets: testTargets,
       );
-      _registerBuildTargets(client, testTargets);
+      // _registerBuildTargets(client, testTargets);
       return client;
     } on OptionsSkew {
       throwToolExit(
@@ -625,27 +626,27 @@ class BuildDaemonCreator {
     return null;
   }
 
-  void _registerBuildTargets(
-    BuildDaemonClient client,
-    WebTestTargetManifest testTargets,
-  ) {
-    final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
-      ..output = ''
-      ..useSymlinks = true
-      ..hoist = false);
-    client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-      ..target = 'web'
-      ..outputLocation = outputLocation?.toBuilder()));
-    if (testTargets != null) {
-      client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) {
-        b.target = 'test';
-        b.outputLocation = outputLocation?.toBuilder();
-        if (testTargets.hasBuildFilters) {
-          b.buildFilters.addAll(testTargets.buildFilters);
-        }
-      }));
-    }
-  }
+  // void _registerBuildTargets(
+  //   BuildDaemonClient client,
+  //   WebTestTargetManifest testTargets,
+  // ) {
+  //   final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
+  //     ..output = ''
+  //     ..useSymlinks = true
+  //     ..hoist = false);
+  //   client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
+  //     ..target = 'web'
+  //     ..outputLocation = outputLocation?.toBuilder()));
+  //   if (testTargets != null) {
+  //     client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) {
+  //       b.target = 'test';
+  //       b.outputLocation = outputLocation?.toBuilder();
+  //       if (testTargets.hasBuildFilters) {
+  //         b.buildFilters.addAll(testTargets.buildFilters);
+  //       }
+  //     }));
+  //   }
+  // }
 
   Future<BuildDaemonClient> _connectClient(
     String workingDirectory, {
@@ -684,32 +685,32 @@ class BuildDaemonCreator {
     return BuildDaemonClient.connect(
       workingDirectory,
       args,
-      logHandler: (ServerLog serverLog) {
-        switch (serverLog.level) {
-          case Level.SEVERE:
-          case Level.SHOUT:
-            // Ignore certain non-actionable messages on startup.
-            if (serverLog.message.contains(_ignoredLine1) ||
-                serverLog.message.contains(_ignoredLine2) ||
-                serverLog.message.contains(_ignoredLine3)) {
-              return;
-            }
-            globals.printError(serverLog.message);
-            if (serverLog.error != null) {
-              globals.printError(serverLog.error);
-            }
-            if (serverLog.stackTrace != null) {
-              globals.printTrace(serverLog.stackTrace);
-            }
-            break;
-          default:
-            if (serverLog.message.contains('Skipping compiling')) {
-              globals.printError(serverLog.message);
-            } else {
-              globals.printTrace(serverLog.message);
-            }
-        }
-      },
+      // logHandler: (ServerLog serverLog) {
+      //   switch (serverLog.level) {
+      //     case Level.SEVERE:
+      //     case Level.SHOUT:
+      //       // Ignore certain non-actionable messages on startup.
+      //       if (serverLog.message.contains(_ignoredLine1) ||
+      //           serverLog.message.contains(_ignoredLine2) ||
+      //           serverLog.message.contains(_ignoredLine3)) {
+      //         return;
+      //       }
+      //       globals.printError(serverLog.message);
+      //       if (serverLog.error != null) {
+      //         globals.printError(serverLog.error);
+      //       }
+      //       if (serverLog.stackTrace != null) {
+      //         globals.printTrace(serverLog.stackTrace);
+      //       }
+      //       break;
+      //     default:
+      //       if (serverLog.message.contains('Skipping compiling')) {
+      //         globals.printError(serverLog.message);
+      //       } else {
+      //         globals.printTrace(serverLog.message);
+      //       }
+      //   }
+      // },
       buildMode: daemon.BuildMode.Manual,
     );
   }
