@@ -377,6 +377,7 @@ void main() {
           commandHelp.r,
           commandHelp.R,
           commandHelp.h,
+          commandHelp.c,
           commandHelp.q,
           commandHelp.s,
           commandHelp.w,
@@ -390,7 +391,6 @@ void main() {
           commandHelp.z,
           commandHelp.P,
           commandHelp.a,
-          commandHelp.s,
           'An Observatory debugger and profiler on null is available at: null',
           ''
         ].join('\n')
@@ -421,6 +421,11 @@ void main() {
     await residentRunner.screenshot(mockFlutterDevice);
 
     expect(testLogger.errorText, contains('Error'));
+  }));
+
+  test('ResidentTunner clears the screen when it should', () => testbed.run(() async {
+    residentRunner.clearScreen();
+    expect(testLogger.statusText, equals(''));
   }));
 
   test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws post', () => testbed.run(() async {
