@@ -136,16 +136,15 @@ class PageStorageBucket {
 /// This sample creates a page storage for MyHomePage
 ///
 /// ```dart
-///  final PageStorageBucket _bucket = new PageStorageBucket();
-///  PageStorageKey mykey = new PageStorageKey("testkey");
-///  new MaterialApp(
+///  final PageStorageBucket _bucket = PageStorageBucket();
+///  final PageStorageKey mykey = PageStorageKey('testkey');
+///  MaterialApp(
 ///       home: PageStorage(
-///         child: new MyHomePage(),
+///         child: MyHomePage(),
 ///         bucket: _bucket,
 ///         key: mykey,
 ///       ),
 ///     );
-///
 /// ```
 /// {@end-tool}
 class PageStorage extends StatelessWidget {
