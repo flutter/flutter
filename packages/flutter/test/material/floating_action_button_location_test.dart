@@ -373,6 +373,27 @@ void main() {
     );
     expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
   }, skip: isBrowser);
+
+  group('New Floating Action Button Locations', () {
+    testWidgets('startFloat', (WidgetTester tester) async {
+      Widget build() {
+        return MaterialApp(
+          home: Scaffold(
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              child: Icon(Icons.beach_access),
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build());
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(44.0, 556.0));
+    });
+  });
+
 }
 
 
