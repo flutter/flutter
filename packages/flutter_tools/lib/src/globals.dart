@@ -38,7 +38,6 @@ FileSystem get fs => ErrorHandlingFileSystem(
   context.get<FileSystem>() ?? _kLocalFs,
 );
 
-
 const ProcessManager _kLocalProcessManager = LocalProcessManager();
 
 /// The active process manager.

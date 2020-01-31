@@ -265,6 +265,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   Future<bool> _checkJavaVersionNoOutput() async {
     final String javaBinary = AndroidSdk.findJavaBinary(
+      androidStudio: globals.androidStudio,
       fs: globals.fs,
       os: globals.os,
       platform: globals.platform,

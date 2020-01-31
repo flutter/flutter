@@ -583,6 +583,7 @@ class AndroidSdk {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
       _sdkManagerEnv = <String, String>{};
       final String javaBinary = findJavaBinary(
+        androidStudio: globals.androidStudio,
         fs: globals.fs,
         os: globals.os,
         platform: globals.platform,
