@@ -228,7 +228,7 @@ class AlertDialog extends StatelessWidget {
     this.elevation,
     this.semanticLabel,
     this.shape,
-    this.scrollable = false,
+    this.scrollable = true,
   }) : assert(contentPadding != null),
        super(key: key);
 
