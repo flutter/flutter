@@ -147,7 +147,6 @@ source_set("runtime_unittests_common") {
     "$flutter_root/shell/common",
     "$flutter_root/testing:dart",
     "$flutter_root/third_party/tonic",
-    "//third_party/dart/runtime/bin:elf_loader",
     "//third_party/skia",
   ]
 }

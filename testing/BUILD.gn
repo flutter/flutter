@@ -9,11 +9,11 @@ source_set("testing_lib") {
   testonly = true
 
   sources = [
-    "$flutter_root/testing/assertions.h",
-    "$flutter_root/testing/testing.cc",
-    "$flutter_root/testing/testing.h",
-    "$flutter_root/testing/thread_test.cc",
-    "$flutter_root/testing/thread_test.h",
+    "assertions.h",
+    "testing.cc",
+    "testing.h",
+    "thread_test.cc",
+    "thread_test.h",
   ]
 
   public_deps = [
@@ -27,7 +27,7 @@ source_set("testing") {
   testonly = true
 
   sources = [
-    "$flutter_root/testing/run_all_unittests.cc",
+    "run_all_unittests.cc",
   ]
 
   public_deps = [
@@ -39,14 +39,21 @@ source_set("dart") {
   testonly = true
 
   sources = [
-    "$flutter_root/testing/test_dart_native_resolver.cc",
-    "$flutter_root/testing/test_dart_native_resolver.h",
+    "elf_loader.cc",
+    "elf_loader.h",
+    "test_dart_native_resolver.cc",
+    "test_dart_native_resolver.h",
   ]
 
   public_deps = [
     ":testing",
+    "$flutter_root/common",
+    "$flutter_root/fml",
+    "$flutter_root/runtime",
     "$flutter_root/runtime:libdart",
     "$flutter_root/third_party/tonic",
+    "//third_party/dart/runtime/bin:elf_loader",
+    "//third_party/skia",
   ]
 }
 
@@ -54,11 +61,11 @@ source_set("skia") {
   testonly = true
 
   sources = [
-    "$flutter_root/testing/assertions_skia.cc",
-    "$flutter_root/testing/assertions_skia.h",
-    "$flutter_root/testing/canvas_test.h",
-    "$flutter_root/testing/mock_canvas.cc",
-    "$flutter_root/testing/mock_canvas.h",
+    "assertions_skia.cc",
+    "assertions_skia.h",
+    "canvas_test.h",
+    "mock_canvas.cc",
+    "mock_canvas.h",
   ]
 
   public_deps = [
@@ -74,8 +81,8 @@ if (current_toolchain == host_toolchain) {
     configs += [ "//third_party/swiftshader_flutter:swiftshader_config" ]
 
     sources = [
-      "$flutter_root/testing/test_gl_surface.cc",
-      "$flutter_root/testing/test_gl_surface.h",
+      "test_gl_surface.cc",
+      "test_gl_surface.h",
     ]
 
     deps = [
@@ -95,14 +102,14 @@ if (current_toolchain == host_toolchain) {
     testonly = true
 
     sources = [
-      "$flutter_root/testing/test_metal_surface.cc",
-      "$flutter_root/testing/test_metal_surface.h",
+      "test_metal_surface.cc",
+      "test_metal_surface.h",
     ]
 
     defines = []
 
     if (shell_enable_metal) {
-      sources += [ "$flutter_root/testing/test_metal_surface_impl.mm" ]
+      sources += [ "test_metal_surface_impl.mm" ]
       defines += [ "TESTING_ENABLE_METAL" ]
     }
 

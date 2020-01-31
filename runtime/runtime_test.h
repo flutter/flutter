@@ -9,26 +9,12 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
+#include "flutter/testing/elf_loader.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/thread_test.h"
-#include "third_party/dart/runtime/bin/elf_loader.h"
 
 namespace flutter {
 namespace testing {
-
-struct LoadedELFDeleter {
-  void operator()(Dart_LoadedElf* elf) { Dart_UnloadELF(elf); }
-};
-
-using UniqueLoadedELF = std::unique_ptr<Dart_LoadedElf, LoadedELFDeleter>;
-
-struct ELFAOTSymbols {
-  UniqueLoadedELF loaded_elf;
-  const uint8_t* vm_snapshot_data = nullptr;
-  const uint8_t* vm_snapshot_instrs = nullptr;
-  const uint8_t* vm_isolate_data = nullptr;
-  const uint8_t* vm_isolate_instrs = nullptr;
-};
 
 class RuntimeTest : public ThreadTest {
  public:
