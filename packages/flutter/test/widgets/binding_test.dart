@@ -204,6 +204,6 @@ void main() {
     ));
     // We don't elide the root or the last element.
     FlutterError.onError = oldHandler;
-    expect(filteredStack, contains('...     Normal element mounting (42 frames)'));
+    expect(filteredStack, contains('...     Normal element mounting (49 frames)'));
   });
 }

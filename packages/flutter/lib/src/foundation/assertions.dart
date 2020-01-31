@@ -24,7 +24,7 @@ typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 ///
 /// See also:
 ///
-///  * [SubStackFilter], which uses this class to compare against [StackFrame]s.
+///  * [RepetitiveStackFrameFilter], which uses this class to compare against [StackFrame]s.
 @immutable
 class PartialStackFrame {
   /// Creates a new [PartialStackFrame] instance. All arguments are required and
@@ -101,7 +101,7 @@ abstract class StackFilter {
 ///   * [PartialStackFrame], a class that helps match partial method information
 ///     to a stack frame.
 class RepetitiveStackFrameFilter extends StackFilter {
-  /// Creates a new SubStackFilter. All parameters are required and must not be
+  /// Creates a new RepetitiveStackFrameFilter. All parameters are required and must not be
   /// null.
   const RepetitiveStackFrameFilter({
     @required this.frames,
@@ -129,7 +129,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
     for (int index = 0; index < stackFrames.length; index += 1) {
       if (_matchesFrames(stackFrames.skip(index).take(numFrames).toList())) {
         reasons.setRange(index, index + numFrames, _replacements);
-        index += numFrames;
+        index += numFrames - 1;
       }
     }
   }
