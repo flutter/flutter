@@ -161,7 +161,8 @@ abstract class FloatingActionButtonLocation {
         'startFloat',
       );
 
-  /// Start-aligned [FloatingActionButton], floating at the bottom of the screen.
+  /// Start-aligned [FloatingActionButton], floating at the bottom of the screen,
+  /// optimized for mini floating action buttons.
   ///
   /// This is intended to be used with [FloatingActionButton.mini] set to true,
   /// so that the floating action button appears to align with [CircleAvatar]s
@@ -187,7 +188,8 @@ abstract class FloatingActionButtonLocation {
         'centerFloat',
       );
 
-  /// Centered [FloatingActionButton], floating at the bottom of the screen.
+  /// Centered [FloatingActionButton], floating at the bottom of the screen,
+  /// optimized for mini floating action buttons.
   ///
   /// This is intended to be used with [FloatingActionButton.mini] set to true,
   /// so that the floating action button appears to align horizontally with other mini floating
@@ -215,7 +217,8 @@ abstract class FloatingActionButtonLocation {
         'endFloat',
       );
 
-  /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
+  /// End-aligned [FloatingActionButton], floating at the bottom of the screen,
+  /// optimized for mini floating action buttons.
   ///
   /// This is intended to be used with [FloatingActionButton.mini] set to true,
   /// so that the floating action button appears to align with [CircleAvatar]s
@@ -252,7 +255,8 @@ abstract class FloatingActionButtonLocation {
 
   /// Start-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
-  /// action button lines up with the top of the bottom navigation bar.
+  /// action button lines up with the top of the bottom navigation bar,
+  /// optimized for mini floating action buttons.
   ///
   /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
   /// the bottom app bar can include a "notch" in its shape that accommodates
@@ -309,7 +313,8 @@ abstract class FloatingActionButtonLocation {
 
   /// End-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
-  /// action button lines up with the top of the bottom navigation bar.
+  /// action button lines up with the top of the bottom navigation bar,
+  /// optimized for mini floating action buttons.
   ///
   /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
   /// the bottom app bar can include a "notch" in its shape that accommodates
