@@ -94,7 +94,7 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary),
-        matchesGoldenFile('transparent_handle.png'),
+        matchesGoldenFile('text_selection.handle.transparent.png'),
       );
     });
   });
