@@ -6,10 +6,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-// This test checks that we output something on test failure.
+// This test checks that we output something on test failure where the test
+// creates an HttpClient.
 // It should not be run as part of a normal test suite, as it is expected to
-// fail.  See dev/bots/test.dart, which runs this test and checks that it fails
-// and prints the expected warning about HttpClient usage in a failing test.
+// fail. See dev/bots/test.dart, which runs this test, checks that it fails,
+// and prints the expected warning about HttpClient usage.
+// We don't run this for browser tests, since we don't override the behavior
+// in browser tests.
 
 void main() {
   test('Http Warning Message', () {
@@ -19,5 +22,5 @@ void main() {
     HttpClient();
     HttpClient();
     fail('Intentional');
-  }); // We don't override this in the browser.
+  });
 }
