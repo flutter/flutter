@@ -307,16 +307,31 @@ class AndroidSdk {
       } else if (globals.platform.environment.containsKey(kAndroidSdkRoot)) {
         androidHomeDir = globals.platform.environment[kAndroidSdkRoot];
       } else if (globals.platform.isLinux) {
-        if (homeDirPath != null) {
-          androidHomeDir = globals.fs.path.join(homeDirPath, 'Android', 'Sdk');
+        if (globals.fsUtils.homeDirPath != null) {
+          androidHomeDir = globals.fs.path.join(
+            globals.fsUtils.homeDirPath,
+            'Android',
+            'Sdk',
+          );
         }
       } else if (globals.platform.isMacOS) {
-        if (homeDirPath != null) {
-          androidHomeDir = globals.fs.path.join(homeDirPath, 'Library', 'Android', 'sdk');
+        if (globals.fsUtils.homeDirPath != null) {
+          androidHomeDir = globals.fs.path.join(
+            globals.fsUtils.homeDirPath,
+            'Library',
+            'Android',
+            'sdk',
+          );
         }
       } else if (globals.platform.isWindows) {
-        if (homeDirPath != null) {
-          androidHomeDir = globals.fs.path.join(homeDirPath, 'AppData', 'Local', 'Android', 'sdk');
+        if (globals.fsUtils.homeDirPath != null) {
+          androidHomeDir = globals.fs.path.join(
+            globals.fsUtils.homeDirPath,
+            'AppData',
+            'Local',
+            'Android',
+            'sdk',
+          );
         }
       }
 
