@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -139,12 +137,6 @@ void main() {
     tester.binding.scheduleWarmUpFrame(); // this actually tests flutter_test's implementation
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(frameCount, 1);
-
-    // Get the tester back to a resumed state for subsequent tests.
-    message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(tester.binding.hasScheduledFrame, isTrue);
-    await tester.pump();
   });
 
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
@@ -177,35 +169,5 @@ void main() {
       '   callback is asynchronous, then do not use the "rescheduling"\n'
       '   argument.\n'
     );
-  });
-
-  testWidgets('defaultStackFilter elides framework Element mounting stacks', (WidgetTester tester) async {
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
-    String filteredStack;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      expect(details.exception, isAssertionError);
-      expect(filteredStack, isNull);
-      filteredStack = details.toString();
-    };
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: FocusableActionDetector(
-        child: Builder(
-          builder: (BuildContext context) {
-            return Opacity(
-              opacity: .5,
-              child: Builder(
-                builder: (BuildContext context) => Text(null),
-              ),
-            );
-          },
-        ),
-      ),
-    ));
-    // We don't elide the root or the last element.
-    FlutterError.onError = oldHandler;
-    expect(tester.allElements.length, 10);
-    print(filteredStack);
-    expect(filteredStack, contains('...     Normal element mounting (42 frames)'));
   });
 }

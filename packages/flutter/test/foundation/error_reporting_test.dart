@@ -81,7 +81,7 @@ Future<void> main() async {
       '#2      getSampleStack \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '#3      main \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
-      '\\(elided [0-9]+ frames from class _RawReceivePortImpl and dart:async\\)\n'
+      '\\(elided [0-9]+ frames from package dart:async\\)\n'
       '\n'
       'line 1 of extra information\n'
       'line 2 of extra information\n'
@@ -153,7 +153,7 @@ Future<void> main() async {
       '#2      getSampleStack \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '#3      main \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
-      '\\(elided [0-9]+ frames from class _RawReceivePortImpl and dart:async\\)\n'
+      '\\(elided [0-9]+ frames from package dart:async\\)\n'
       '\n'
       'line 1 of extra information\n'
       'line 2 of extra information\n'
