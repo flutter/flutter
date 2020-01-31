@@ -14,7 +14,6 @@ import '../base/bot_detector.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/os.dart';
 import '../base/time.dart';
 import '../doctor.dart';
 import '../features.dart';

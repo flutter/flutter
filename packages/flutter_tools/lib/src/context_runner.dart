@@ -87,7 +87,13 @@ Future<T> runInContext<T>(
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
-      Config: () => Config(),
+      Config: () => Config(
+        file: globals.fs.file(globals.fs.path.join(
+          globals.fsUtils.userHomePath,
+          Config.kFlutterSettings,
+        )),
+        logger: globals.logger,
+      ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
@@ -125,7 +131,12 @@ Future<T> runInContext<T>(
           ),
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
-      OperatingSystemUtils: () => OperatingSystemUtils(),
+      OperatingSystemUtils: () => OperatingSystemUtils(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
       PersistentToolState: () => PersistentToolState(),
       ProcessInfo: () => ProcessInfo(),
       ProcessUtils: () => ProcessUtils(

@@ -200,20 +200,28 @@ class _DefaultUsage implements Usage {
     assert(_analytics != null);
 
     // Report a more detailed OS version string than package:usage does by default.
-    _analytics.setSessionValue(cdKey(CustomDimensions.sessionHostOsDetails), os.name);
+    _analytics.setSessionValue(
+      cdKey(CustomDimensions.sessionHostOsDetails),
+      globals.os.name,
+    );
     // Send the branch name as the "channel".
-    _analytics.setSessionValue(cdKey(CustomDimensions.sessionChannelName),
-                               flutterVersion.getBranchName(redactUnknownBranches: true));
+    _analytics.setSessionValue(
+      cdKey(CustomDimensions.sessionChannelName),
+      flutterVersion.getBranchName(redactUnknownBranches: true),
+    );
     // For each flutter experimental feature, record a session value in a comma
     // separated list.
     final String enabledFeatures = allFeatures
-        .where((Feature feature) {
-          return feature.configSetting != null &&
-                 globals.config.getValue(feature.configSetting) == true;
-        })
-        .map((Feature feature) => feature.configSetting)
-        .join(',');
-    _analytics.setSessionValue(cdKey(CustomDimensions.enabledFlutterFeatures), enabledFeatures);
+      .where((Feature feature) {
+        return feature.configSetting != null &&
+               globals.config.getValue(feature.configSetting) == true;
+      })
+      .map((Feature feature) => feature.configSetting)
+      .join(',');
+    _analytics.setSessionValue(
+      cdKey(CustomDimensions.enabledFlutterFeatures),
+      enabledFeatures,
+    );
 
     // Record the host as the application installer ID - the context that flutter_tools is running in.
     if (globals.platform.environment.containsKey('FLUTTER_HOST')) {

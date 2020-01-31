@@ -908,57 +908,57 @@ final Set<Hash256> _grandfatheredBinaries = <Hash256>{
 
   // STOCKS ICONS
 
-  // examples/stocks/android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+  // dev/benchmarks/test_apps/stocks/android/app/src/main/res/mipmap-hdpi/ic_launcher.png
   Hash256(0x74052AB5241D4418, 0x7085180608BC3114, 0xD12493C50CD8BBC7, 0x56DED186C37ACE84),
 
-  // examples/stocks/android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+  // dev/benchmarks/test_apps/stocks/android/app/src/main/res/mipmap-mdpi/ic_launcher.png
   Hash256(0xE37947332E3491CB, 0x82920EE86A086FEA, 0xE1E0A70B3700A7DA, 0xDCAFBDD8F40E2E19),
 
-  // examples/stocks/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+  // dev/benchmarks/test_apps/stocks/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
   Hash256(0xE608CDFC0C8579FB, 0xE38873BAAF7BC944, 0x9C9D2EE3685A4FAE, 0x671EF0C8BC41D17C),
 
-  // examples/stocks/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+  // dev/benchmarks/test_apps/stocks/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
   Hash256(0xBD53D86977DF9C54, 0xF605743C5ABA114C, 0x9D51D1A8BB917E1A, 0x14CAA26C335CAEBD),
 
-  // examples/stocks/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+  // dev/benchmarks/test_apps/stocks/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
   Hash256(0x64E4D02262C4F3D0, 0xBB4FDC21CD0A816C, 0x4CD2A0194E00FB0F, 0x1C3AE4142FAC0D15),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-60@2x.png
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-40@3x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-60@2x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-40@3x.png
   Hash256(0x5BA3283A76918FC0, 0xEE127D0F22D7A0B6, 0xDF03DAED61669427, 0x93D89DDD87A08117),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-60@3x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-60@3x.png
   Hash256(0xCD7F26ED31DEA42A, 0x535D155EC6261499, 0x34E6738255FDB2C4, 0xBD8D4BDDE9A99B05),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-76.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-76.png
   Hash256(0x3FA1225FC9A96A7E, 0xCD071BC42881AB0E, 0x7747EB72FFB72459, 0xA37971BBAD27EE24),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-76@2x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-76@2x.png
   Hash256(0xCD867001ACD7BBDB, 0x25CDFD452AE89FA2, 0x8C2DC980CAF55F48, 0x0B16C246CFB389BC),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-83.5@2x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-83.5@2x.png
   Hash256(0x848E9736E5C4915A, 0x7945BCF6B32FD56B, 0x1F1E7CDDD914352E, 0xC9681D38EF2A70DA),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Notification.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Notification.png
   Hash256(0x654BA7D6C4E05CA0, 0x7799878884EF8F11, 0xA383E1F24CEF5568, 0x3C47604A966983C8),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Notification@2x.png
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-40.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Notification@2x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-40.png
   Hash256(0x743056FE7D83FE42, 0xA2990825B6AD0415, 0x1AF73D0D43B227AA, 0x07EBEA9B767381D9),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Notification@3x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Notification@3x.png
   Hash256(0xA7E1570812D119CF, 0xEF4B602EF28DD0A4, 0x100D066E66F5B9B9, 0x881765DC9303343B),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-40@2x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small-40@2x.png
   Hash256(0xB4102839A1E41671, 0x62DACBDEFA471953, 0xB1EE89A0AB7594BE, 0x1D9AC1E67DC2B2CE),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small.png
   Hash256(0x70AC6571B593A967, 0xF1CBAEC9BC02D02D, 0x93AD766D8290ADE6, 0x840139BF9F219019),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small@2x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small@2x.png
   Hash256(0x5D87A78386DA2C43, 0xDDA8FEF2CA51438C, 0xE5A276FE28C6CF0A, 0xEBE89085B56665B6),
 
-  // examples/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small@3x.png
+  // dev/benchmarks/test_apps/stocks/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-Small@3x.png
   Hash256(0x4D9F5E81F668DA44, 0xB20A77F8BF7BA2E1, 0xF384533B5AD58F07, 0xB3A2F93F8635CD96),
 
 

@@ -230,6 +230,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   void forgetChild(Element child) {
     assert(child == this.child);
     this.child = null;
+    super.forgetChild(child);
   }
 
   @override

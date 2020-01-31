@@ -992,6 +992,7 @@ class _ListTileElement extends RenderObjectElement {
     final _ListTileSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
+    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _ListTileSlot slot) {
