@@ -603,9 +603,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
-        String saveDebuggingInfoValue = null
-        if (project.hasProperty('save-debugging-info')) {
-            saveDebuggingInfoValue = project.property('save-debugging-info')
+        String splitDebugInfoValue = null
+        if (project.hasProperty('split-debug-info')) {
+            splitDebugInfoValue = project.property('split-debug-info')
         }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
@@ -641,7 +641,7 @@ class FlutterPlugin implements Plugin<Project> {
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
-                saveDebuggingInfo saveDebuggingInfoValue
+                splitDebugInfo splitDebugInfoValue
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -775,7 +775,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     String extraGenSnapshotOptions
     @Optional @Input
-    String saveDebuggingInfo
+    String splitDebugInfo
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -832,8 +832,8 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
-            if (saveDebuggingInfo != null) {
-                args "-dSaveDebuggingInfo=${saveDebuggingInfo}"
+            if (splitDebugInfo != null) {
+                args "-dSplitDebugInfo=${splitDebugInfo}"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"

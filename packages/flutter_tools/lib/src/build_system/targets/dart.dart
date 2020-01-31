@@ -41,7 +41,7 @@ const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
 /// Whether to strip source code information out of release builds and where to save it.
-const String kSaveDebuggingInformation = 'SaveDebuggingInfo';
+const String kSplitDebugInfo = 'SplitDebugInfo';
 
 /// Alternative scheme for file URIs.
 ///
@@ -260,7 +260,7 @@ abstract class AotElfBase extends Target {
       ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-    final String saveDebuggingInformation = environment.defines[kSaveDebuggingInformation];
+    final String saveDebuggingInformation = environment.defines[kSplitDebugInfo];
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
@@ -269,7 +269,7 @@ abstract class AotElfBase extends Target {
       outputPath: outputPath,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
-      saveDebuggingInformation: saveDebuggingInformation
+      splitDebugInfo: saveDebuggingInformation
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

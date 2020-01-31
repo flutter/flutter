@@ -199,7 +199,7 @@ class CompileMacOSFramework extends Target {
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
-    final String saveDebuggingInformation = environment.defines[kSaveDebuggingInformation];
+    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
       buildMode: buildMode,
@@ -208,7 +208,7 @@ class CompileMacOSFramework extends Target {
       platform: TargetPlatform.darwin_x64,
       darwinArch: DarwinArch.x86_64,
       packagesPath: environment.projectDir.childFile('.packages').path,
-      saveDebuggingInformation: saveDebuggingInformation,
+      splitDebugInfo: splitDebugInfo,
     );
     if (result != 0) {
       throw Exception('gen shapshot failed.');

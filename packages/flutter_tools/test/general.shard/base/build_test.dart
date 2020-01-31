@@ -266,7 +266,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -279,7 +279,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -292,7 +292,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -319,7 +319,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: true,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -379,7 +379,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: true,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -439,7 +439,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -491,7 +491,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
-        saveDebuggingInformation: 'foo',
+        splitDebugInfo: 'foo',
       );
 
       expect(genSnapshotExitCode, 0);
@@ -543,7 +543,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -582,7 +582,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -623,7 +623,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -653,7 +653,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -687,7 +687,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
-        saveDebuggingInformation: 'foo',
+        splitDebugInfo: 'foo',
       );
 
       expect(genSnapshotExitCode, 0);
@@ -722,7 +722,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -761,7 +761,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
-        saveDebuggingInformation: null,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);

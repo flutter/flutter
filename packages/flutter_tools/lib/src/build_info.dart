@@ -18,7 +18,7 @@ class BuildInfo {
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
-    this.saveDebuggingInformation,
+    this.splitDebugInfoPath,
   });
 
   final BuildMode mode;
@@ -56,10 +56,10 @@ class BuildInfo {
   /// On Xcode builds it is used as CFBundleShortVersionString,
   final String buildName;
 
-  /// If provided, a file path to save debugging information from dwarf stack
+  /// A optional directory path to save debugging information from dwarf stack
   /// traces. If null, stack trace information is not stripped from the
   /// executable.
-  final String saveDebuggingInformation;
+  final String splitDebugInfoPath;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);

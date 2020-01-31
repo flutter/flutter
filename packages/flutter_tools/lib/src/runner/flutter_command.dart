@@ -106,7 +106,7 @@ class FlutterOptions {
   static const String kEnableExperiment = 'enable-experiment';
   static const String kFileSystemRoot = 'filesystem-root';
   static const String kFileSystemScheme = 'filesystem-scheme';
-  static const String kDebuggingInfoOption = 'save-debugging-info';
+  static const String kSplitDebugInfoOption = 'split-debug-info';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -364,11 +364,14 @@ abstract class FlutterCommand extends Command<void> {
       negatable: false,
       hide: !verboseHelp,
       help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
-    argParser.addOption(FlutterOptions.kDebuggingInfoOption,
-      help: 'Save a debug file used to symbolicate crashes from release mode applications. When provided '
-        'Allows more information to be removed from the snapshot, reducing code size. Requires usage of '
-        'the "flutter symbolicate" command to translate back into a readable stack trace.',
-      valueHelp: '/some/where/safe/',
+    argParser.addOption(FlutterOptions.kSplitDebugInfoOption,
+      help: 'A directory where a debug files for symbolication can be safely stored. '
+        'These files contain additional information to symbolicate stack traces from '
+        'release mode applications. When this argument is provided, more information '
+        'can be removed from the application, reducing code size. Requires usage of '
+        'the "flutter symbolize" command to translate back into a human-readable '
+        'stack trace.',
+      valueHelp: '/project-name/v1.2.3/',
     );
   }
 
@@ -497,8 +500,8 @@ abstract class FlutterCommand extends Command<void> {
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
           : null,
-      saveDebuggingInformation: argParser.options.containsKey(FlutterOptions.kDebuggingInfoOption)
-          ? stringArg(FlutterOptions.kDebuggingInfoOption)
+      splitDebugInfoPath: argParser.options.containsKey(FlutterOptions.kSplitDebugInfoOption)
+          ? stringArg(FlutterOptions.kSplitDebugInfoOption)
           : null,
     );
   }
