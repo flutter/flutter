@@ -443,7 +443,8 @@ abstract class Widget extends DiagnosticableTree {
   /// A short, textual description of this widget.
   @override
   String toStringShort() {
-    return key == null ? '${objectRuntimeType(this, 'Widget')}' : '${objectRuntimeType(this, 'Widget')}-$key';
+    final String type = objectRuntimeType(this, 'Widget');
+    return key == null ? type : '$type-$key';
   }
 
   @override
@@ -3958,7 +3959,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// A short, textual description of this element.
   @override
   String toStringShort() {
-    return widget != null ? '${widget.toStringShort()}' : '[${objectRuntimeType(this, 'Element')}]';
+    return widget != null ? widget.toStringShort() : '[${objectRuntimeType(this, 'Element')}]';
   }
 
   @override

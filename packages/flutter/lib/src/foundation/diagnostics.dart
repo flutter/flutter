@@ -1277,7 +1277,7 @@ class TextTreeRenderer {
         // with cases where a single line properties output may not have single
         // linebreak.
         final String propertyRender = render(property,
-          prefixLineOne: '${propertyStyle.prefixLineOne}',
+          prefixLineOne: propertyStyle.prefixLineOne,
           prefixOtherLines: '${propertyStyle.childLinkSpace}${propertyStyle.prefixOtherLines}',
           parentConfiguration: config,
         );
@@ -1306,7 +1306,7 @@ class TextTreeRenderer {
     if (!config.lineBreakProperties)
       builder.write(config.lineBreak);
 
-    final String prefixChildren = '${config.bodyIndent}';
+    final String prefixChildren = config.bodyIndent;
     final String prefixChildrenRaw = '$prefixOtherLines$prefixChildren';
     if (children.isEmpty &&
         config.addBlankLineIfNoChildren &&
