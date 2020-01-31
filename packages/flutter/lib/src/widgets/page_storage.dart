@@ -131,7 +131,7 @@ class PageStorageBucket {
 
 /// A widget that establishes a page storage bucket for this widget subtree.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample creates a page storage for MyHomePage
 ///
