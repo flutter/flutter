@@ -1,5 +1,6 @@
 package test.io.flutter.embedding.engine;
 
+import android.content.Context;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 import java.util.List;
@@ -21,6 +22,7 @@ import io.flutter.embedding.engine.loader.FlutterLoader;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -101,5 +103,20 @@ public class FlutterEngineTest {
     // Verify that FlutterEngine notified PlatformViewsController of the pre-engine restart,
     // AKA hot restart.
     verify(platformViewsController, times(1)).onPreEngineRestart();
+  }
+
+  @Test
+  public void itUsesApplicationContext() {
+    Context context = mock(Context.class);
+
+    new FlutterEngine(
+        context,
+        mock(FlutterLoader.class),
+        flutterJNI,
+        /*dartVmArgs=*/new String[] {},
+        /*automaticallyRegisterPlugins=*/false
+    );
+
+    verify(context, atLeast(1)).getApplicationContext();
   }
 }
