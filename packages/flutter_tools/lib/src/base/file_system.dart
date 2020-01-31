@@ -6,9 +6,7 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
-import '../globals.dart' as globals;
 import 'common.dart' show throwToolExit;
-import 'context.dart';
 
 export 'package:file/file.dart';
 export 'package:file/local.dart';
@@ -22,13 +20,6 @@ class FileNotFoundException implements IOException {
   @override
   String toString() => 'File not found: $path';
 }
-
-final FileSystemUtils _defaultFileSystemUtils = FileSystemUtils(
-  fileSystem: globals.fs,
-  platform: globals.platform,
-);
-
-FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? _defaultFileSystemUtils;
 
 /// Various convenience file system methods.
 class FileSystemUtils {

@@ -13,7 +13,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
+import '../base/net.dart';
 import '../base/process.dart';
 import '../base/time.dart';
 import '../build_info.dart';
@@ -256,7 +256,7 @@ class FuchsiaDevice extends Device {
       return LaunchResult.failed();
     }
     // Find out who the device thinks we are.
-    final int port = await os.findFreePort();
+    final int port = await globals.os.findFreePort();
     if (port == 0) {
       globals.printError('Failed to find a free port');
       return LaunchResult.failed();
@@ -512,14 +512,10 @@ class FuchsiaDevice extends Device {
   @override
   void clearLogs() {}
 
-  bool get ipv6 {
-    try {
-      Uri.parseIPv6Address(id);
-      return true;
-    } on FormatException {
-      return false;
-    }
-  }
+  bool _ipv6;
+
+  /// [true] if the current host address is IPv6.
+  bool get ipv6 => _ipv6 ??= isIPv6Address(id);
 
   /// List the ports currently running a dart observatory.
   Future<List<int>> servicePorts() async {
@@ -736,7 +732,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
 
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
-    hostPort ??= await os.findFreePort();
+    hostPort ??= await globals.os.findFreePort();
     if (hostPort == 0) {
       throwToolExit('Failed to forward port $devicePort. No free host-side ports');
     }

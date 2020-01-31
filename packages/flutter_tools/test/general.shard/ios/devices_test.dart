@@ -770,8 +770,8 @@ void main() {
     });
 
     testUsingContext('returns no devices if none are attached', () async {
-      when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs())
+      when(globals.iMobileDevice.isInstalled).thenReturn(true);
+      when(globals.iMobileDevice.getAvailableDeviceIDs())
           .thenAnswer((Invocation invocation) => Future<String>.value(''));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, isEmpty);
@@ -783,8 +783,8 @@ void main() {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final Platform platform in unsupportedPlatforms) {
       testUsingContext('throws Unsupported Operation exception on ${platform.operatingSystem}', () async {
-        when(iMobileDevice.isInstalled).thenReturn(false);
-        when(iMobileDevice.getAvailableDeviceIDs())
+        when(globals.iMobileDevice.isInstalled).thenReturn(false);
+        when(globals.iMobileDevice.getAvailableDeviceIDs())
             .thenAnswer((Invocation invocation) => Future<String>.value(''));
         expect(
             () async { await IOSDevice.getAttachedDevices(); },
@@ -797,19 +797,19 @@ void main() {
     }
 
     testUsingContext('returns attached devices', () async {
-      when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs())
+      when(globals.iMobileDevice.isInstalled).thenReturn(true);
+      when(globals.iMobileDevice.getAvailableDeviceIDs())
           .thenAnswer((Invocation invocation) => Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
-      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
+      when(globals.iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('La tele me regarde'));
-      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
+      when(globals.iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
           .thenAnswer((_) => Future<String>.value('10.3.2'));
-      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
+      when(globals.iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('Puits sans fond'));
-      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
+      when(globals.iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
           .thenAnswer((_) => Future<String>.value('11.0'));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(2));
@@ -823,15 +823,15 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     });
 
     testUsingContext('returns attached devices and ignores devices that cannot be found by ideviceinfo', () async {
-      when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs())
+      when(globals.iMobileDevice.isInstalled).thenReturn(true);
+      when(globals.iMobileDevice.getAvailableDeviceIDs())
           .thenAnswer((Invocation invocation) => Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
-      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
+      when(globals.iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('La tele me regarde'));
-      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
+      when(globals.iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
           .thenThrow(const IOSDeviceNotFoundError('Device not found'));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(1));

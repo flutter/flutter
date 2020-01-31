@@ -460,6 +460,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
     properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer)));
   }
 }
 
@@ -535,6 +536,11 @@ class PictureLayer extends Layer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
+    properties.add(DiagnosticsProperty<String>('picture', describeIdentity(_picture)));
+    properties.add(DiagnosticsProperty<String>(
+      'raster cache hints',
+      'isComplex = $isComplexHint, willChange = $willChangeHint'),
+    );
   }
 
   @override

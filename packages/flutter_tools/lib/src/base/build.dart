@@ -65,7 +65,8 @@ class GenSnapshot {
       // Filter out gen_snapshot's warning message about stripping debug symbols
       // from ELF library snapshots.
       const String kStripWarning = 'Warning: Generating ELF library without DWARF debugging information.';
-      outputFilter = (String line) => line != kStripWarning ? line : null;
+      const String kAssemblyStripWarning = 'Warning: Generating assembly code without DWARF debugging information';
+      outputFilter = (String line) => line != kStripWarning && line != kAssemblyStripWarning ? line : null;
     }
 
     return processUtils.stream(
@@ -138,11 +139,7 @@ class AOTSnapshotter {
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
       genSnapshotArgs.add('--assembly=$assembly');
-      // TODO(jonahwilliams): determine the correct time to use strip
-      // since this is required for the future dwarf strack traces option.
-      if (bitcode && buildMode == BuildMode.release) {
-        genSnapshotArgs.add('--strip');
-      }
+      genSnapshotArgs.add('--strip');
     } else {
       final String aotSharedLibrary = globals.fs.path.join(outputDir.path, 'app.so');
       outputPaths.add(aotSharedLibrary);

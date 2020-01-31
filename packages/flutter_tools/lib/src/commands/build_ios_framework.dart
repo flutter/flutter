@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import '../aot.dart';
-import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -159,16 +158,15 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('--output is required.');
     }
 
-    final BuildableIOSApp iosProject = await applicationPackages.getPackageForPlatform(TargetPlatform.ios) as BuildableIOSApp;
-
-    if (iosProject == null) {
-      throwToolExit("Module's iOS folder missing");
+    if (!_project.ios.existsSync()) {
+      throwToolExit('Module does not support iOS');
     }
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
+    final String productBundleIdentifier = await _project.ios.productBundleIdentifier;
     for (final BuildMode mode in buildModes) {
-      globals.printStatus('Building frameworks for $iosProject in ${getNameForBuildMode(mode)} mode...');
+      globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
@@ -296,7 +294,7 @@ end
 
     try {
       // Copy universal engine cache framework to mode directory.
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         fatFlutterFrameworkCopy,
       );
@@ -525,7 +523,7 @@ end
           }
           final String binaryName = globals.fs.path.basenameWithoutExtension(podFrameworkName);
           if (boolArg('universal')) {
-            fsUtils.copyDirectorySync(
+            globals.fsUtils.copyDirectorySync(
               podProduct as Directory,
               modeDirectory.childDirectory(podFrameworkName),
             );
@@ -639,7 +637,7 @@ end
         .childDirectory(frameworkFileName);
       final File armFlutterFrameworkBinary = armFlutterFrameworkDirectory
         .childFile(frameworkBinaryName);
-      fsUtils.copyDirectorySync(fatFramework, armFlutterFrameworkDirectory);
+      globals.fsUtils.copyDirectorySync(fatFramework, armFlutterFrameworkDirectory);
 
       // Create iOS framework.
       List<String> lipoCommand = <String>[
@@ -666,7 +664,7 @@ end
         .childDirectory(frameworkFileName);
       final File simulatorFlutterFrameworkBinary = simulatorFlutterFrameworkDirectory
         .childFile(frameworkBinaryName);
-      fsUtils.copyDirectorySync(fatFramework, simulatorFlutterFrameworkDirectory);
+      globals.fsUtils.copyDirectorySync(fatFramework, simulatorFlutterFrameworkDirectory);
 
       lipoCommand = <String>[
         'xcrun',

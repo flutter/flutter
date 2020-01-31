@@ -818,6 +818,7 @@ Uptime: 441088659 Realtime: 521464097
     final AndroidMemoryInfo result = parseMeminfoDump(exampleOutput);
 
     // Parses correctly
+    expect(result.realTime, 521464097);
     expect(result.javaHeap, 4296);
     expect(result.nativeHeap, 8620);
     expect(result.code, 11288);
@@ -829,6 +830,7 @@ Uptime: 441088659 Realtime: 521464097
     // toJson works correctly
     final Map<String, Object> json = result.toJson();
 
+    expect(json, containsPair('Realtime', 521464097));
     expect(json, containsPair('Java Heap', 4296));
     expect(json, containsPair('Native Heap', 8620));
     expect(json, containsPair('Code', 11288));

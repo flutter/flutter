@@ -197,7 +197,7 @@ void main() {
               height: 300.0,
               child: Navigator(
                 onGenerateRoute: (RouteSettings settings) {
-                  if (settings.isInitialRoute) {
+                  if (settings.name == '/') {
                     return MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return RaisedButton(
@@ -453,7 +453,7 @@ void main() {
     expect(isPopped, isFalse);
   });
 
-  testWidgets('replaceNamed', (WidgetTester tester) async {
+  testWidgets('replaceNamed replaces', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushReplacementNamed(context, '/B'); }),
@@ -1332,10 +1332,10 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   If a Navigator has no onUnknownRoute, then its onGenerateRoute\n'
-          '   must never return null.\n'
-          '   When trying to build the route "/", onGenerateRoute returned\n'
-          '   null, but there was no onUnknownRoute callback specified.\n'
+          '   Navigator.onGenerateRoute returned null when requested to build\n'
+          '   route "/".\n'
+          '   The onGenerateRoute callback must never return null, unless an\n'
+          '   onUnknownRoute callback is provided as well.\n'
           '   The Navigator was:\n'
           '     NavigatorState#4d6bf(lifecycle state: created)\n',
         ),
@@ -1359,10 +1359,9 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   A Navigator\'s onUnknownRoute returned null.\n'
-          '   When trying to build the route "/", both onGenerateRoute and\n'
-          '   onUnknownRoute returned null. The onUnknownRoute callback should\n'
-          '   never return null.\n'
+          '   Navigator.onUnknownRoute returned null when requested to build\n'
+          '   route "/".\n'
+          '   The onUnknownRoute callback must never return null.\n'
           '   The Navigator was:\n'
           '     NavigatorState#38036(lifecycle state: created)\n',
         ),
@@ -1491,6 +1490,165 @@ void main() {
     expect(tester.state<StatefulTestState>(find.byKey(bottomRoute, skipOffstage: false)).rebuildCount, 1);
 
     expect(tester.state<StatefulTestState>(find.byKey(topRoute)).rebuildCount, 1);
+  });
+
+  testWidgets('initial routes below opaque route are offstage', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: g,
+          initialRoute: '/a/b',
+          onGenerateRoute: (RouteSettings s) {
+            return MaterialPageRoute<void>(
+              builder: (BuildContext c) {
+                return Text('+${s.name}+');
+              },
+              settings: s,
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('+/+'), findsNothing);
+    expect(find.text('+/+', skipOffstage: false), findsOneWidget);
+    expect(find.text('+/a+'), findsNothing);
+    expect(find.text('+/a+', skipOffstage: false), findsOneWidget);
+    expect(find.text('+/a/b+'), findsOneWidget);
+
+    g.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('+/+'), findsNothing);
+    expect(find.text('+/+', skipOffstage: false), findsOneWidget);
+    expect(find.text('+/a+'), findsOneWidget);
+    expect(find.text('+/a/b+'), findsNothing);
+
+    g.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('+/+'), findsOneWidget);
+    expect(find.text('+/a+'), findsNothing);
+    expect(find.text('+/a/b+'), findsNothing);
+  });
+
+  testWidgets('Can provide custom onGenerateInitialRoutes', (WidgetTester tester) async {
+    bool onGenerateInitialRoutesCalled = false;
+    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: g,
+          initialRoute: 'Hello World',
+          onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
+            onGenerateInitialRoutesCalled = true;
+            final List<Route<void>> result = <Route<void>>[];
+            for (final String route in initialRoute.split(' ')) {
+              result.add(MaterialPageRoute<void>(builder: (BuildContext context) {
+                return Text(route);
+              }));
+            }
+            return result;
+          },
+        ),
+      ),
+    );
+
+    expect(onGenerateInitialRoutesCalled, true);
+    expect(find.text('Hello'), findsNothing);
+    expect(find.text('World'), findsOneWidget);
+
+    g.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hello'), findsOneWidget);
+    expect(find.text('World'), findsNothing);
+  });
+
+  testWidgets('pushAndRemove until animates the push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/25080.
+
+    const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 120);
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final Map<String, MaterialPageRoute<dynamic>> routeNameToContext = <String, MaterialPageRoute<dynamic>>{};
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: navigator,
+          initialRoute: 'root',
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) {
+                routeNameToContext[settings.name] = ModalRoute.of(context) as MaterialPageRoute<dynamic>;
+                return Text('Route: ${settings.name}');
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Route: root'), findsOneWidget);
+
+    navigator.currentState.pushNamed('1');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: 1'), findsOneWidget);
+
+    navigator.currentState.pushNamed('2');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: 2'), findsOneWidget);
+
+    navigator.currentState.pushNamed('3');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 2', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
+
+    navigator.currentState.pushNamedAndRemoveUntil('4', (Route<dynamic> route) => route.isFirst);
+    await tester.pump();
+
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 4'), findsOneWidget);
+    final Animation<double> route4Entry = routeNameToContext['4'].animation;
+    expect(route4Entry.value, 0.0); // Entry animation has not started.
+
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 4'), findsOneWidget);
+    expect(route4Entry.value, 0.4);
+
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 4'), findsOneWidget);
+    expect(route4Entry.value, 0.8);
+    expect(find.text('Route: 2', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
+
+    // When we hit 1.0 all but root and current have been removed.
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
+    expect(find.text('Route: 3', skipOffstage: false), findsNothing);
+    expect(find.text('Route: 4'), findsOneWidget);
+    expect(route4Entry.value, 1.0);
+    expect(find.text('Route: 2', skipOffstage: false), findsNothing);
+    expect(find.text('Route: 1', skipOffstage: false), findsNothing);
+    expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: root'), findsOneWidget);
+    expect(find.text('Route: 4', skipOffstage: false), findsNothing);
   });
 }
 

@@ -378,7 +378,7 @@ void main() {
                     data: sliderTheme,
                     child: Slider(
                       value: sliderValue,
-                      label: '$value',
+                      label: value,
                       divisions: 3,
                       onChanged: (double d) { },
                     ),

@@ -659,9 +659,10 @@ class AndroidDevice extends Device {
       'shell',
       'dumpsys',
       'meminfo',
-      _package.launchActivity,
+      _package.id,
       '-d',
     ]));
+
     if (runResult.exitCode != 0) {
       return const MemoryInfo.empty();
     }
@@ -801,8 +802,15 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 @visibleForTesting
 AndroidMemoryInfo parseMeminfoDump(String input) {
   final AndroidMemoryInfo androidMemoryInfo = AndroidMemoryInfo();
-  input
-    .split('\n')
+
+  final List<String> lines = input.split('\n');
+
+  final String timelineData = lines.firstWhere((String line) =>
+    line.startsWith('${AndroidMemoryInfo._kUpTimeKey}: '));
+  final List<String> times = timelineData.trim().split('${AndroidMemoryInfo._kRealTimeKey}:');
+  androidMemoryInfo.realTime = int.tryParse(times.last.trim()) ?? 0;
+
+  lines
     .skipWhile((String line) => !line.contains('App Summary'))
     .takeWhile((String line) => !line.contains('TOTAL'))
     .where((String line) => line.contains(':'))
@@ -863,6 +871,8 @@ List<AndroidDevice> getAdbDevices() {
 
 /// Android specific implementation of memory info.
 class AndroidMemoryInfo extends MemoryInfo {
+  static const String _kUpTimeKey = 'Uptime';
+  static const String _kRealTimeKey = 'Realtime';
   static const String _kJavaHeapKey = 'Java Heap';
   static const String _kNativeHeapKey = 'Native Heap';
   static const String _kCodeKey = 'Code';
@@ -871,6 +881,10 @@ class AndroidMemoryInfo extends MemoryInfo {
   static const String _kPrivateOtherKey = 'Private Other';
   static const String _kSystemKey = 'System';
   static const String _kTotalKey = 'Total';
+
+  // Realtime is time since the system was booted includes deep sleep. Clock
+  // is monotonic, and ticks even when the CPU is in power saving modes.
+  int realTime = 0;
 
   // Each measurement has KB as a unit.
   int javaHeap = 0;
@@ -885,6 +899,7 @@ class AndroidMemoryInfo extends MemoryInfo {
   Map<String, Object> toJson() {
     return <String, Object>{
       'platform': 'Android',
+      _kRealTimeKey: realTime,
       _kJavaHeapKey: javaHeap,
       _kNativeHeapKey: nativeHeap,
       _kCodeKey: code,

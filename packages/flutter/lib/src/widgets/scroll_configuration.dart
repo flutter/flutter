@@ -77,7 +77,7 @@ class ScrollBehavior {
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ScrollBehavior')}';
+  String toString() => objectRuntimeType(this, 'ScrollBehavior');
 }
 
 /// Controls how [Scrollable] widgets behave in a subtree.

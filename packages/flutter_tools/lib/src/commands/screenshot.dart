@@ -109,7 +109,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<void> runScreenshot(File outputFile) async {
-    outputFile ??= fsUtils.getUniqueFile(
+    outputFile ??= globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
       'png',
@@ -124,7 +124,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<void> runSkia(File outputFile) async {
     final Map<String, dynamic> skp = await _invokeVmServiceRpc('_flutter.screenshotSkp');
-    outputFile ??= fsUtils.getUniqueFile(
+    outputFile ??= globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
       'skp',
@@ -138,7 +138,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<void> runRasterizer(File outputFile) async {
     final Map<String, dynamic> response = await _invokeVmServiceRpc('_flutter.screenshot');
-    outputFile ??= fsUtils.getUniqueFile(
+    outputFile ??= globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
       'png',
