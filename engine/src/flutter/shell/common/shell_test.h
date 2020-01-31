@@ -16,6 +16,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiters_test.h"
+#include "flutter/testing/elf_loader.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/thread_test.h"
 
@@ -84,6 +85,7 @@ class ShellTest : public ThreadTest {
   std::shared_ptr<TestDartNativeResolver> native_resolver_;
   ThreadHost thread_host_;
   fml::UniqueFD assets_dir_;
+  ELFAOTSymbols aot_symbols_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTest);
 };

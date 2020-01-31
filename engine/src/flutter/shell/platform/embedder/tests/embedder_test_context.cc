@@ -14,10 +14,9 @@
 namespace flutter {
 namespace testing {
 
-static constexpr const char* kAppAOTELFFileName = "app_elf_snapshot.so";
-
 EmbedderTestContext::EmbedderTestContext(std::string assets_path)
     : assets_path_(std::move(assets_path)),
+      aot_symbols_(LoadELFSymbolFromFixturesIfNeccessary()),
       native_resolver_(std::make_shared<TestDartNativeResolver>()) {
   SetupAOTMappingsIfNecessary();
   isolate_create_callbacks_.push_back(
@@ -29,63 +28,20 @@ EmbedderTestContext::EmbedderTestContext(std::string assets_path)
       });
 }
 
-EmbedderTestContext::~EmbedderTestContext() {
-  vm_snapshot_data_.reset();
-  vm_snapshot_instructions_.reset();
-  isolate_snapshot_data_.reset();
-  isolate_snapshot_instructions_.reset();
-  if (elf_library_handle_ != nullptr) {
-    Dart_UnloadELF(elf_library_handle_);
-  }
-}
+EmbedderTestContext::~EmbedderTestContext() = default;
 
 void EmbedderTestContext::SetupAOTMappingsIfNecessary() {
   if (!DartVM::IsRunningPrecompiledCode()) {
-    // Not in AOT mode. Nothing to do.
     return;
   }
-
-  auto elf_path = fml::paths::JoinPaths({assets_path_, kAppAOTELFFileName});
-
-  if (!fml::IsFile(elf_path.c_str())) {
-    FML_LOG(ERROR) << "Could not find the applications AOT ELF file in an "
-                      "AOT environment. Engine launches attempted with this "
-                      "context will fail. File not found: "
-                   << elf_path;
-    return;
-  }
-
-  const uint8_t* vm_snapshot_data = nullptr;
-  const uint8_t* vm_snapshot_instructions = nullptr;
-  const uint8_t* isolate_snapshot_data = nullptr;
-  const uint8_t* isolate_snapshot_instructions = nullptr;
-
-  const char* error = nullptr;
-
-  elf_library_handle_ =
-      Dart_LoadELF(elf_path.c_str(),               // filename
-                   0u,                             // file offset
-                   &error,                         // error (must not be freed)
-                   &vm_snapshot_data,              // VM snapshot data
-                   &vm_snapshot_instructions,      // VM snapshot instructions
-                   &isolate_snapshot_data,         // VM isolate data
-                   &isolate_snapshot_instructions  // VM isolate instructions
-      );
-
-  if (elf_library_handle_ == nullptr) {
-    FML_LOG(ERROR) << "Could not load snapshot in an AOT environment. Engine "
-                      "launches attempted with this context will fail. Error: "
-                   << error;
-    return;
-  }
-
-  vm_snapshot_data_.reset(new fml::NonOwnedMapping(vm_snapshot_data, 0));
-  vm_snapshot_instructions_.reset(
-      new fml::NonOwnedMapping(vm_snapshot_instructions, 0));
-  isolate_snapshot_data_.reset(
-      new fml::NonOwnedMapping(isolate_snapshot_data, 0));
-  isolate_snapshot_instructions_.reset(
-      new fml::NonOwnedMapping(isolate_snapshot_instructions, 0));
+  vm_snapshot_data_ =
+      std::make_unique<fml::NonOwnedMapping>(aot_symbols_.vm_snapshot_data, 0u);
+  vm_snapshot_instructions_ = std::make_unique<fml::NonOwnedMapping>(
+      aot_symbols_.vm_snapshot_instrs, 0u);
+  isolate_snapshot_data_ =
+      std::make_unique<fml::NonOwnedMapping>(aot_symbols_.vm_isolate_data, 0u);
+  isolate_snapshot_instructions_ = std::make_unique<fml::NonOwnedMapping>(
+      aot_symbols_.vm_isolate_instrs, 0u);
 }
 
 const std::string& EmbedderTestContext::GetAssetsPath() const {
