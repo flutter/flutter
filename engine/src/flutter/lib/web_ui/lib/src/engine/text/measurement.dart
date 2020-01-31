@@ -373,10 +373,7 @@ class DomTextMeasurementService extends TextMeasurementService {
   @override
   ui.TextPosition getTextPositionForOffset(EngineParagraph paragraph,
       ui.ParagraphConstraints constraints, ui.Offset offset) {
-    assert(
-      paragraph._measurementResult.lines == null,
-      'should only be called when the faster lines-based approach is not possible',
-    );
+    assert(paragraph._plainText == null, 'should only be called for multispan');
 
     final ParagraphGeometricStyle style = paragraph._geometricStyle;
     final ParagraphRuler ruler =
