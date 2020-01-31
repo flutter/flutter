@@ -362,31 +362,29 @@ class AboutDialog extends StatelessWidget {
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget icon = applicationIcon ?? _defaultApplicationIcon(context);
     return AlertDialog(
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: ListBody(
-                      children: <Widget>[
-                        Text(name, style: Theme.of(context).textTheme.headline5),
-                        Text(version, style: Theme.of(context).textTheme.bodyText2),
-                        Container(height: 18.0),
-                        Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
-                      ],
-                    ),
+      content: ListBody(
+        children: <Widget>[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: ListBody(
+                    children: <Widget>[
+                      Text(name, style: Theme.of(context).textTheme.headline5),
+                      Text(version, style: Theme.of(context).textTheme.bodyText2),
+                      Container(height: 18.0),
+                      Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            ...?children,
-          ],
-        ),
+              ),
+            ],
+          ),
+          ...?children,
+        ],
       ),
       actions: <Widget>[
         FlatButton(
@@ -408,6 +406,7 @@ class AboutDialog extends StatelessWidget {
           },
         ),
       ],
+      scrollable: true,
     );
   }
 }
