@@ -1,4 +1,4 @@
-Signature: 377799f98dd9ab2046689800970632b1
+Signature: 6fbed89fb487168b67a54f4bf80d6ac7
 
 UNUSED LICENSES:
 
@@ -7774,6 +7774,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.h
 FILE: ../../../third_party/dart/runtime/vm/field_table.cc
 FILE: ../../../third_party/dart/runtime/vm/field_table.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
+FILE: ../../../third_party/dart/runtime/vm/visitor.cc
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/js_patch.dart
