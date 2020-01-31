@@ -125,12 +125,30 @@ abstract class FloatingActionButtonLocation {
         'endTop',
       );
 
+  // TODO: Document.
+  static const FloatingActionButtonLocation miniEndTop =
+      _StandardFloatingActionButtonLocation(
+        _endOffsetX,
+        _topOffsetY,
+        'miniEndTop',
+        adjustment: kMiniButtonOffsetAdjustment,
+      );
+
   /// Start-aligned [FloatingActionButton], floating at the bottom of the screen.
   static const FloatingActionButtonLocation startFloat =
       _StandardFloatingActionButtonLocation(
         _startOffsetX,
         _floatingOffsetY,
         'startFloat',
+      );
+
+  // TODO: Document.
+  static const FloatingActionButtonLocation miniStartFloat =
+      _StandardFloatingActionButtonLocation(
+        _startOffsetX,
+        _floatingOffsetY,
+        'miniStartFloat',
+        adjustment: kMiniButtonOffsetAdjustment,
       );
 
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
@@ -141,6 +159,15 @@ abstract class FloatingActionButtonLocation {
         'centerFloat',
       );
 
+  // TODO: Document.
+  static const FloatingActionButtonLocation miniCenterFloat =
+      _StandardFloatingActionButtonLocation(
+        _centerOffsetX,
+        _floatingOffsetY,
+        'miniCenterFloat',
+        adjustment: kMiniButtonOffsetAdjustment,
+      );
+
   /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
   ///
   /// This is the default alignment of [FloatingActionButton]s in Material applications.
@@ -149,6 +176,15 @@ abstract class FloatingActionButtonLocation {
         _endOffsetX,
         _floatingOffsetY,
         'endFloat',
+      );
+
+  // TODO: Document.
+  static const FloatingActionButtonLocation miniEndFloat =
+      _StandardFloatingActionButtonLocation(
+        _endOffsetX,
+        _floatingOffsetY,
+        'miniEndFloat',
+        adjustment: kMiniButtonOffsetAdjustment,
       );
 
   /// Start-aligned [FloatingActionButton], floating over the
@@ -167,6 +203,16 @@ abstract class FloatingActionButtonLocation {
         _dockedOffsetY,
         'startDocked',
       );
+
+  // TODO: Document.
+  static const FloatingActionButtonLocation miniStartDocked =
+      _StandardFloatingActionButtonLocation(
+        _startOffsetX,
+        _dockedOffsetY,
+        'miniStartDocked',
+        adjustment: kMiniButtonOffsetAdjustment,
+      );
+
 
   /// Center-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
@@ -200,6 +246,15 @@ abstract class FloatingActionButtonLocation {
         _endOffsetX,
         _dockedOffsetY,
         'endDocked',
+      );
+
+  // TODO: Document.
+  static const FloatingActionButtonLocation miniEndDocked =
+      _StandardFloatingActionButtonLocation(
+        _endOffsetX,
+        _dockedOffsetY,
+        'miniEndDocked',
+        adjustment: kMiniButtonOffsetAdjustment,
       );
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
