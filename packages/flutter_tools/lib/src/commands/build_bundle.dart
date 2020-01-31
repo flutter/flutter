@@ -138,7 +138,7 @@ class BuildBundleCommand extends BuildSubCommand {
       extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       fileSystemScheme: stringArg('filesystem-scheme'),
       fileSystemRoots: stringsArg('filesystem-root'),
-      fontSubset: boolArg('tree-shake-icons'),
+      treeShakeIcons: boolArg('tree-shake-icons'),
     );
     return FlutterCommandResult.success();
   }

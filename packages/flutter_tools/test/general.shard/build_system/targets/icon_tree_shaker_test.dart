@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
-import 'package:flutter_tools/src/build_system/targets/font_subset.dart';
+import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -123,11 +123,11 @@ void main() {
 
   test('Prints error in debug mode environment', () async {
     final Environment environment = _createEnvironment(<String, String>{
-      kFontSubsetFlag: 'true',
+      kIconTreeShakerFlag: 'true',
       kBuildMode: 'debug',
     });
 
-    final FontSubset fontSubset = FontSubset(
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
       environment,
       fontManifestContent,
       logger: logger,
@@ -140,9 +140,9 @@ void main() {
       logger.errorText,
       'Font subetting is not supported in debug mode. The --tree-shake-icons flag will be ignored.\n',
     );
-    expect(fontSubset.enabled, false);
+    expect(iconTreeShaker.enabled, false);
 
-    final bool subsets = await fontSubset.subsetFont(
+    final bool subsets = await iconTreeShaker.subsetFont(
       inputPath: inputPath,
       outputPath: outputPath,
       relativePath: relativePath,
@@ -155,11 +155,11 @@ void main() {
 
   test('Gets enabled', () {
     final Environment environment = _createEnvironment(<String, String>{
-      kFontSubsetFlag: 'true',
+      kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
 
-    final FontSubset fontSubset = FontSubset(
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
       environment,
       fontManifestContent,
       logger: logger,
@@ -172,18 +172,18 @@ void main() {
       logger.errorText,
       isEmpty,
     );
-    expect(fontSubset.enabled, true);
+    expect(iconTreeShaker.enabled, true);
     verifyNever(mockProcessManager.run(any));
     verifyNever(mockProcessManager.start(any));
   });
 
   test('No app.dill throws exception', () async {
     final Environment environment = _createEnvironment(<String, String>{
-      kFontSubsetFlag: 'true',
+      kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
 
-    final FontSubset fontSubset = FontSubset(
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
       environment,
       fontManifestContent,
       logger: logger,
@@ -193,24 +193,24 @@ void main() {
     );
 
     expect(
-      () => fontSubset.subsetFont(
+      () => iconTreeShaker.subsetFont(
         inputPath: inputPath,
         outputPath: outputPath,
         relativePath: relativePath,
       ),
-      throwsA(isA<FontSubsetException>()),
+      throwsA(isA<IconTreeShakerException>()),
     );
   });
 
   test('The happy path', () async {
     final Environment environment = _createEnvironment(<String, String>{
-      kFontSubsetFlag: 'true',
+      kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
     final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
     fs.file(inputPath).createSync(recursive: true);
 
-    final FontSubset fontSubset = FontSubset(
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
       environment,
       fontManifestContent,
       logger: logger,
@@ -223,7 +223,7 @@ void main() {
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
     _resetFontSubsetInvocation(stdinResults: stdinResults);
 
-    bool subsetted = await fontSubset.subsetFont(
+    bool subsetted = await iconTreeShaker.subsetFont(
       inputPath: inputPath,
       outputPath: outputPath,
       relativePath: relativePath,
@@ -232,7 +232,7 @@ void main() {
     _resetFontSubsetInvocation(stdinResults: stdinResults);
 
     expect(subsetted, true);
-    subsetted = await fontSubset.subsetFont(
+    subsetted = await iconTreeShaker.subsetFont(
       inputPath: inputPath,
       outputPath: outputPath,
       relativePath: relativePath,
@@ -246,13 +246,13 @@ void main() {
 
   test('Non-constant instances', () async {
     final Environment environment = _createEnvironment(<String, String>{
-      kFontSubsetFlag: 'true',
+      kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
     final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
     fs.file(inputPath).createSync(recursive: true);
 
-    final FontSubset fontSubset = FontSubset(
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
       environment,
       fontManifestContent,
       logger: logger,
@@ -264,7 +264,7 @@ void main() {
     _addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
 
     expect(
-      fontSubset.subsetFont(
+      iconTreeShaker.subsetFont(
         inputPath: inputPath,
         outputPath: outputPath,
         relativePath: relativePath,
@@ -280,7 +280,7 @@ void main() {
 
   test('Invalid font manifest', () async {
     final Environment environment = _createEnvironment(<String, String>{
-      kFontSubsetFlag: 'true',
+      kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
     });
     final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
@@ -288,7 +288,7 @@ void main() {
 
     fontManifestContent = DevFSStringContent(invalidFontManifestJson);
 
-    final FontSubset fontSubset = FontSubset(
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
       environment,
       fontManifestContent,
       logger: logger,
@@ -300,12 +300,12 @@ void main() {
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
 
     expect(
-      fontSubset.subsetFont(
+      iconTreeShaker.subsetFont(
         inputPath: inputPath,
         outputPath: outputPath,
         relativePath: relativePath,
       ),
-      throwsA(isA<FontSubsetException>()),
+      throwsA(isA<IconTreeShakerException>()),
     );
 
     verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);

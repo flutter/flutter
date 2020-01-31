@@ -603,9 +603,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
-        Boolean fontSubsetOptionsValue = false
-        if (project.hasProperty('font-subset')) {
-            fontSubsetOptionsValue = project.property('font-subset').toBoolean()
+        Boolean treeShakeIconsOptionsValue = false
+        if (project.hasProperty('tree-shake-icons')) {
+            treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
         }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
@@ -641,7 +641,7 @@ class FlutterPlugin implements Plugin<Project> {
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
-                fontSubset fontSubsetOptionsValue
+                treeShakeIcons treeShakeIconsOptionsValue
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -775,7 +775,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     String extraGenSnapshotOptions
     @Optional @Input
-    Boolean fontSubset
+    Boolean treeShakeIcons
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -835,8 +835,8 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
-            if (fontSubset == true) {
-                args "-dFontSubset=true"
+            if (treeShakeIcons == true) {
+                args "-dTreeShakeIcons=true"
             }
             args ruleNames
         }

@@ -354,7 +354,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     'xcrun',
     'xcodebuild',
     '-configuration', configuration,
-    if (buildInfo.fontSubset)
+    if (buildInfo.treeShakeIcons)
       'FONT_SUBSET=YES'
   ];
 

@@ -429,7 +429,7 @@ class IOSSimulator extends Device {
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-        fontSubset: buildInfo.fontSubset);
+        treeShakeIcons: buildInfo.treeShakeIcons);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,
@@ -461,7 +461,7 @@ class IOSSimulator extends Device {
       precompiledSnapshot: false,
       buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
-      fontSubset: false,
+      treeShakeIcons: false,
     );
   }
 

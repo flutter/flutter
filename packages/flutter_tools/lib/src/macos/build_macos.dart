@@ -85,7 +85,7 @@ Future<void> buildMacOS({
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      if (buildInfo.fontSubset)
+      if (buildInfo.treeShakeIcons)
         'FONT_SUBSET=YES',
       ...environmentVariablesAsXcodeBuildSettings(globals.platform)
     ], trace: true);

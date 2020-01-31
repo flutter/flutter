@@ -88,7 +88,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
       extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       dartDefines: dartDefines,
-      fontSubset: boolArg('tree-shake-icons'),
+      treeShakeIcons: boolArg('tree-shake-icons'),
     );
     return FlutterCommandResult.success();
   }

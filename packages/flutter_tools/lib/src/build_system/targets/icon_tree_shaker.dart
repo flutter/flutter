@@ -17,22 +17,22 @@ import 'dart.dart';
 
 /// The build define controlling whether icon fonts should be stripped down to
 /// only the glyphs used by the application.
-const String kFontSubsetFlag = 'FontSubset';
+const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// Whether icon font subsetting is enabled by default.
-const bool kFontSubsetEnabledDefault = false;
+const bool kIconTreeShakerEnabledDefault = false;
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   try {
     return (object as List<dynamic>).cast<Map<String, dynamic>>();
   } on CastError catch (_) {
-    throw FontSubsetException._(errorMessage);
+    throw IconTreeShakerException._(errorMessage);
   }
 }
 
 /// A class that wraps the functionality of the const finder package and the
 /// font subset utility to tree shake unused icons from fonts.
-class FontSubset {
+class IconTreeShaker {
   /// Creates a wrapper for icon font subsetting.
   ///
   /// The environment parameter must not be null.
@@ -42,7 +42,7 @@ class FontSubset {
   ///
   /// The constructor will validate the environment and print a warning if
   /// font subsetting has been requested in a debug build mode.
-  FontSubset(
+  IconTreeShaker(
     this._environment,
     DevFSStringContent fontManifest, {
     @required ProcessManager processManager,
@@ -61,7 +61,7 @@ class FontSubset {
        _fs = fs,
        _artifacts = artifacts,
        _fontManifest = fontManifest.string {
-    if (_environment.defines[kFontSubsetFlag] == 'true' &&
+    if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
       logger.printError('Font subetting is not supported in debug mode. The '
                          '--tree-shake-icons flag will be ignored.');
@@ -70,7 +70,7 @@ class FontSubset {
 
   final Environment _environment;
   final String _fontManifest;
-  Map<String, _FontSubsetData> _iconData;
+  Map<String, _IconTreeShakerData> _iconData;
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -78,18 +78,18 @@ class FontSubset {
   final Artifacts _artifacts;
 
   /// Whether font subsetting should be used for this [Environment].
-  bool get enabled => _environment.defines[kFontSubsetFlag] == 'true'
+  bool get enabled => _environment.defines[kIconTreeShakerFlag] == 'true'
                    && _environment.defines[kBuildMode] != 'debug';
 
   /// Fills the [_iconData] map.
-  Future<void> _getIconData(Environment environment) async {
+  Future<Map<String, _IconTreeShakerData>> _getIconData(Environment environment) async {
     if (!enabled) {
-      return;
+      return null;
     }
 
     final File appDill = environment.buildDir.childFile('app.dill');
     if (!appDill.existsSync()) {
-      throw FontSubsetException._('Expected to find kernel file at ${appDill.path}, but no file found.');
+      throw IconTreeShakerException._('Expected to find kernel file at ${appDill.path}, but no file found.');
     }
     final File constFinder = _fs.file(
       _artifacts.getArtifactPath(Artifact.constFinder),
@@ -119,14 +119,15 @@ class FontSubset {
                     '"uses-material-design: true".');
     }
 
-    _iconData = <String, _FontSubsetData>{};
+    final Map<String, _IconTreeShakerData> result = <String, _IconTreeShakerData>{};
     for (final MapEntry<String, String> entry in fonts.entries) {
-      _iconData[entry.value] = _FontSubsetData(
+      result[entry.value] = _IconTreeShakerData(
         family: entry.key,
         relativePath: entry.value,
         codePoints: iconData[entry.key],
       );
     }
+    return result;
   }
 
   /// Calls font-subset, which transforms the `inputPath` font file to a
@@ -149,12 +150,11 @@ class FontSubset {
       return false;
     }
 
-    if (_iconData == null) {
-      await _getIconData(_environment);
-    }
+    _iconData ??= await _getIconData(_environment);
     assert(_iconData != null);
-    final _FontSubsetData fontSubsetData = _iconData[relativePath];
-    if (fontSubsetData == null) {
+
+    final _IconTreeShakerData iconTreeShakerData = _iconData[relativePath];
+    if (iconTreeShakerData == null) {
       return false;
     }
 
@@ -170,7 +170,7 @@ class FontSubset {
       outputPath,
       inputPath,
     ];
-    final String codePoints = fontSubsetData.codePoints.join(' ');
+    final String codePoints = iconTreeShakerData.codePoints.join(' ');
     _logger.printTrace('Running font-subset: ${cmd.join(' ')}, '
                        'using codepoints $codePoints');
     final Process fontSubsetProcess = await _processManager.start(cmd);
@@ -204,7 +204,7 @@ class FontSubset {
 
     for (final Map<String, dynamic> map in fontList) {
       if (map['family'] is! String) {
-        throw FontSubsetException._(
+        throw IconTreeShakerException._(
           'FontManifest.json invalid: expected the family value to be a string, '
           'got: ${map['family']}.');
       }
@@ -217,12 +217,12 @@ class FontSubset {
         'FontManifest.json invalid: expected "fonts" to be a list of objects.',
       );
       if (fonts.length != 1) {
-        throw FontSubsetException._(
+        throw IconTreeShakerException._(
           'This tool cannot process icon fonts with multiple fonts in a '
           'single family.');
       }
       if (fonts.first['asset'] is! String) {
-        throw FontSubsetException._(
+        throw IconTreeShakerException._(
           'FontManifest.json invalid: expected "asset" value to be a string, '
           'got: ${map['assets']}.');
       }
@@ -251,7 +251,7 @@ class FontSubset {
     }
     final dynamic jsonDecode = json.decode(constFinderProcessResult.stdout as String);
     if (jsonDecode is! Map<String, dynamic>) {
-      throw FontSubsetException._(
+      throw IconTreeShakerException._(
         'Invalid ConstFinder output: expected a top level JavaScript object, '
         'got $jsonDecode.');
     }
@@ -280,7 +280,7 @@ class FontSubset {
       if ((iconDataMap['fontPackage'] ?? '') is! String || // Null is ok here.
            iconDataMap['fontFamily'] is! String ||
            iconDataMap['codePoint'] is! int) {
-        throwToolExit(
+        throw IconTreeShakerException._(
           'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
           '"fontFamily" to be a String, and "codePoint" to be an int, '
           'got: $iconDataMap.');
@@ -326,9 +326,9 @@ class _ConstFinderResult {
 
 /// The font family name, relative path to font file, and list of code points
 /// the application is using.
-class _FontSubsetData {
+class _IconTreeShakerData {
   /// All parameters are required.
-  const _FontSubsetData({
+  const _IconTreeShakerData({
     @required this.family,
     @required this.relativePath,
     @required this.codePoints,
@@ -349,8 +349,8 @@ class _FontSubsetData {
   String toString() => 'FontSubsetData($family, $relativePath, $codePoints)';
 }
 
-class FontSubsetException implements Exception {
-  FontSubsetException._(this.message);
+class IconTreeShakerException implements Exception {
+  IconTreeShakerException._(this.message);
 
   final String message;
 

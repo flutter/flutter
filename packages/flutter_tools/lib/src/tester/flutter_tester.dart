@@ -151,7 +151,7 @@ class FlutterTesterDevice extends Device {
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
-      fontSubset: buildInfo.fontSubset,
+      treeShakeIcons: buildInfo.treeShakeIcons,
     );
     command.add('--flutter-assets-dir=$assetDirPath');
 

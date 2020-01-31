@@ -20,7 +20,7 @@ import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/targets/font_subset.dart' show kFontSubsetEnabledDefault;
+import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabledDefault;
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/package_map.dart';
@@ -369,7 +369,7 @@ abstract class FlutterCommand extends Command<void> {
   void addFontSubsetFlag() {
     argParser.addFlag('tree-shake-icons',
       negatable: true,
-      defaultsTo: kFontSubsetEnabledDefault,
+      defaultsTo: kIconTreeShakerEnabledDefault,
       help: 'Tree shake icon fonts so that only glyphs used by the application remain.',
     );
   }
@@ -499,9 +499,9 @@ abstract class FlutterCommand extends Command<void> {
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
           : null,
-      fontSubset: argParser.options.containsKey('tree-shake-icons')
+      treeShakeIcons: argParser.options.containsKey('tree-shake-icons')
           ? boolArg('tree-shake-icons')
-          : kFontSubsetEnabledDefault,
+          : kIconTreeShakerEnabledDefault,
     );
   }
 

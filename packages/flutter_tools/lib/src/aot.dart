@@ -14,7 +14,7 @@ import 'base/process.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/dart.dart';
-import 'build_system/targets/font_subset.dart';
+import 'build_system/targets/icon_tree_shaker.dart';
 import 'build_system/targets/ios.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
@@ -37,7 +37,7 @@ class AotBuilder {
     List<String> extraFrontEndOptions,
     List<String> extraGenSnapshotOptions,
     @required List<String> dartDefines,
-    @required bool fontSubset,
+    @required bool treeShakeIcons,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
@@ -54,7 +54,7 @@ class AotBuilder {
         quiet: quiet,
         iosArchs: iosBuildArchs ?? defaultIOSArchs,
         bitcode: bitcode ?? kBitcodeEnabledDefault,
-        fontSubset: fontSubset ?? kFontSubsetEnabledDefault,
+        treeShakeIcons: treeShakeIcons ?? kIconTreeShakerEnabledDefault,
       );
       return;
     }
@@ -205,7 +205,7 @@ class AotBuilder {
     bool quiet,
     Iterable<DarwinArch> iosArchs,
     bool bitcode,
-    @required bool fontSubset,
+    @required bool treeShakeIcons,
   }) async {
     Status status;
     if (!quiet) {
@@ -234,7 +234,7 @@ class AotBuilder {
         kTargetFile: targetFile,
         kIosArchs: iosArchs.map(getNameForDarwinArch).join(','),
         kBitcodeFlag: bitcode.toString(),
-        kFontSubsetFlag: fontSubset.toString(),
+        kIconTreeShakerFlag: treeShakeIcons.toString(),
       }
     ));
     status?.stop();

@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/utils.dart';
-import 'build_system/targets/font_subset.dart';
+import 'build_system/targets/icon_tree_shaker.dart';
 import 'globals.dart' as globals;
 
 /// Information about a build to be performed or used.
@@ -21,13 +21,13 @@ class BuildInfo {
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
-    @required this.fontSubset,
+    @required this.treeShakeIcons,
   });
 
   final BuildMode mode;
 
   /// Whether the build should subdset icon fonts.
-  final bool fontSubset;
+  final bool treeShakeIcons;
 
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
@@ -62,10 +62,10 @@ class BuildInfo {
   /// On Xcode builds it is used as CFBundleShortVersionString,
   final String buildName;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, fontSubset: false);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, fontSubset: kFontSubsetEnabledDefault);
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, fontSubset: kFontSubsetEnabledDefault);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null, fontSubset: kFontSubsetEnabledDefault);
+  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
 
   /// Returns whether a debug build is requested.
   ///

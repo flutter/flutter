@@ -4584,6 +4584,7 @@ class StatefulElement extends ComponentElement {
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
+    rebuild();
   }
 
   @override

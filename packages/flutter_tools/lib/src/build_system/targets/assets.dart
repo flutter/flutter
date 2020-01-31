@@ -13,7 +13,7 @@ import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'dart.dart';
-import 'font_subset.dart';
+import 'icon_tree_shaker.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
@@ -34,7 +34,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
   ];
   final List<File> outputs = <File>[];
 
-  final FontSubset fontSubset = FontSubset(
+  final IconTreeShaker iconTreeShaker = IconTreeShaker(
     environment,
     assetBundle.entries[kFontManifestJson] as DevFSStringContent,
     processManager: globals.processManager,
@@ -58,7 +58,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
           inputs.add(globals.fs.file(content.file.path));
-          if (!await fontSubset.subsetFont(
+          if (!await iconTreeShaker.subsetFont(
             inputPath: content.file.path,
             outputPath: file.path,
             relativePath: entry.key,

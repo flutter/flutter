@@ -338,8 +338,8 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.fastStart) {
     command.add('-Pfast-start=true');
   }
-  if (androidBuildInfo.buildInfo.fontSubset) {
-    command.add('-Pfont-subset=true');
+  if (androidBuildInfo.buildInfo.treeShakeIcons) {
+    command.add('-Ptree-shake-icons=true');
   }
   command.add(assembleTask);
 
@@ -549,7 +549,7 @@ Future<void> buildGradleAar({
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
     command.add('-Plocal-engine-build-mode=${androidBuildInfo.buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
-    if (androidBuildInfo.buildInfo.fontSubset) {
+    if (androidBuildInfo.buildInfo.treeShakeIcons) {
       command.add('-Pfont-subset=true');
     }
 
@@ -748,7 +748,7 @@ Future<void> buildPluginsAsAar(
           BuildInfo(
             BuildMode.release, // Plugins are built as release.
             null, // Plugins don't define flavors.
-            fontSubset: androidBuildInfo.buildInfo.fontSubset,
+            treeShakeIcons: androidBuildInfo.buildInfo.treeShakeIcons,
           ),
         ),
         target: '',

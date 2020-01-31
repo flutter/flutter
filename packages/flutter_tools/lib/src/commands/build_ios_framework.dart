@@ -361,7 +361,7 @@ end
         mainPath: globals.fs.path.absolute(targetFile),
         assetDirPath: destinationAppFrameworkDirectory.childDirectory('flutter_assets').path,
         precompiledSnapshot: mode != BuildMode.debug,
-        fontSubset: boolArg('tree-shake-icons')
+        treeShakeIcons: boolArg('tree-shake-icons')
       );
     } finally {
       status.stop();
@@ -427,7 +427,7 @@ end
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
         dartDefines: dartDefines,
-        fontSubset: boolArg('tree-shake-icons'),
+        treeShakeIcons: boolArg('tree-shake-icons'),
       );
     } finally {
       status.stop();
