@@ -87,7 +87,13 @@ Future<T> runInContext<T>(
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
-      Config: () => Config(),
+      Config: () => Config(
+        file: globals.fs.file(globals.fs.path.join(
+          globals.fsUtils.userHomePath,
+          Config.kFlutterSettings,
+        )),
+        logger: globals.logger,
+      ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
