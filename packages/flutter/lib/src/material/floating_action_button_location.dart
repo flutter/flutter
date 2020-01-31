@@ -371,12 +371,14 @@ class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation
   String toString() => 'FloatingActionButtonLocation.$name';
 }
 
+/// Calculates x-offset for left-aligned [FloatingActionButtonLocation]s.
 double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   return kFloatingActionButtonMargin
        + scaffoldGeometry.minInsets.left
        - offset;
 }
 
+/// Calculates x-offset for right-aligned [FloatingActionButtonLocation]s.
 double _rightOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   return scaffoldGeometry.scaffoldSize.width
        - kFloatingActionButtonMargin
@@ -385,6 +387,7 @@ double _rightOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset
        + offset;
 }
 
+/// Calculates x-offset for start-aligned [FloatingActionButtonLocation]s.
 double _startOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   assert(scaffoldGeometry.textDirection != null);
   switch (scaffoldGeometry.textDirection) {
@@ -396,10 +399,12 @@ double _startOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset
   return null;
 }
 
+/// Calculates x-offset for center-aligned [FloatingActionButtonLocation]s.
 double _centerOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
 }
 
+/// Calculates x-offset for end-aligned [FloatingActionButtonLocation]s.
 double _endOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   assert(scaffoldGeometry.textDirection != null);
   switch (scaffoldGeometry.textDirection) {
@@ -411,13 +416,15 @@ double _endOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset =
   return null;
 }
 
+/// Calculates y-offset for [FloatingActionButtonLocation]s floating over
+/// the transition between the [Scaffold.appBar] and the [Scaffold.body].
 double _topOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
   return scaffoldGeometry.contentTop - fabHalfHeight;
 }
 
-// TODO: Use same documentation.
-
+/// Calculates y-offset for [FloatingActionButtonLocation]s floating at
+/// the bottom of the screen.
 double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
@@ -433,8 +440,9 @@ double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double off
   return fabY + offset;
 }
 
-// Provider of common logic for [FloatingActionButtonLocation]s that
-// dock to the [BottomAppBar].
+/// Calculates y-offset for [FloatingActionButtonLocation]s floating over the
+/// [Scaffold.bottomNavigationBar] so that the center of the floating
+/// action button lines up with the top of the bottom navigation bar.
 double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
