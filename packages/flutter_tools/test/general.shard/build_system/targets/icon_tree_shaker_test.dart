@@ -72,15 +72,13 @@ void main() {
     int exitCode = 0,
     String stdout = '',
     String stderr = '',
-    @required List<String> stdinResults,
+    @required mocks.CompleterIOSink stdinSink,
   }) {
-    assert(stdinResults != null);
-    stdinResults.clear();
-    final IOSink sink = IOSink(StringStreamConsumer(stdinResults));
+    assert(stdinSink != null);
     when(fontSubsetProcess.exitCode).thenAnswer((_) async => exitCode);
     when(fontSubsetProcess.stdout).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stdout)]));
     when(fontSubsetProcess.stderr).thenAnswer((_) => Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(stderr)]));
-    when(fontSubsetProcess.stdin).thenReturn(sink);
+    when(fontSubsetProcess.stdin).thenReturn(stdinSink);
     when(mockProcessManager.start(fontSubsetArgs)).thenAnswer((_) async {
       return fontSubsetProcess;
     });
@@ -121,7 +119,7 @@ void main() {
     );
   }
 
-  test('Prints error in debug mode environment', () async {
+  testWithoutContext('Prints error in debug mode environment', () async {
     final Environment environment = _createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'debug',
@@ -153,7 +151,7 @@ void main() {
     verifyNever(mockProcessManager.start(any));
   });
 
-  test('Gets enabled', () {
+  testWithoutContext('Gets enabled', () {
     final Environment environment = _createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -202,7 +200,7 @@ void main() {
     );
   });
 
-  test('The happy path', () async {
+  testWithoutContext('The happy path', () async {
     final Environment environment = _createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -219,17 +217,17 @@ void main() {
       artifacts: mockArtifacts,
     );
 
-    final List<String> stdinResults = <String>[];
+    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
     _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
-    _resetFontSubsetInvocation(stdinResults: stdinResults);
+    _resetFontSubsetInvocation(stdinSink: stdinSink);
 
     bool subsetted = await iconTreeShaker.subsetFont(
       inputPath: inputPath,
       outputPath: outputPath,
       relativePath: relativePath,
     );
-    expect(stdinResults, <String>['59470', '\n']);
-    _resetFontSubsetInvocation(stdinResults: stdinResults);
+    expect(stdinSink.writes, <List<int>>[utf8.encode('59470'), <int>[13]]);
+    _resetFontSubsetInvocation(stdinSink: stdinSink);
 
     expect(subsetted, true);
     subsetted = await iconTreeShaker.subsetFont(
@@ -238,13 +236,13 @@ void main() {
       relativePath: relativePath,
     );
     expect(subsetted, true);
-    expect(stdinResults, <String>['59470', '\n']);
+    expect(stdinSink.writes, <List<int>>[utf8.encode('59470'), <int>[13]]);
 
     verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
     verify(mockProcessManager.start(fontSubsetArgs)).called(2);
   });
 
-  test('Non-constant instances', () async {
+  testWithoutContext('Non-constant instances', () async {
     final Environment environment = _createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -278,7 +276,75 @@ void main() {
     verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 
-  test('Invalid font manifest', () async {
+  testWithoutContext('Non-zero font-subset exit code', () async {
+    final Environment environment = _createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+    fs.file(inputPath).createSync(recursive: true);
+
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: mockProcessManager,
+      fs: fs,
+      artifacts: mockArtifacts,
+    );
+
+    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
+    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
+
+    expect(
+      iconTreeShaker.subsetFont(
+        inputPath: inputPath,
+        outputPath: outputPath,
+        relativePath: relativePath,
+      ),
+      throwsA(isA<IconTreeShakerException>()),
+    );
+
+    verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
+  });
+
+  testWithoutContext('font-subset throws on write to sdtin', () async {
+    final Environment environment = _createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+    fs.file(inputPath).createSync(recursive: true);
+
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: mockProcessManager,
+      fs: fs,
+      artifacts: mockArtifacts,
+    );
+
+    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink(throwOnAdd: true);
+    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    _resetFontSubsetInvocation(exitCode: -1, stdinSink: stdinSink);
+
+    expect(
+      iconTreeShaker.subsetFont(
+        inputPath: inputPath,
+        outputPath: outputPath,
+        relativePath: relativePath,
+      ),
+      throwsA(isA<IconTreeShakerException>()),
+    );
+
+    verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
+  });
+
+  testWithoutContext('Invalid font manifest', () async {
     final Environment environment = _createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -312,6 +378,39 @@ void main() {
     verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 
+  testWithoutContext('ConstFinder non-zero exit', () async {
+    final Environment environment = _createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+    fs.file(inputPath).createSync(recursive: true);
+
+    fontManifestContent = DevFSStringContent(invalidFontManifestJson);
+
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: mockProcessManager,
+      fs: fs,
+      artifacts: mockArtifacts,
+    );
+
+    _addConstFinderInvocation(appDill.path, exitCode: -1);
+
+    expect(
+      iconTreeShaker.subsetFont(
+        inputPath: inputPath,
+        outputPath: outputPath,
+        relativePath: relativePath,
+      ),
+      throwsA(isA<IconTreeShakerException>()),
+    );
+
+    verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
+  });
 }
 
 const String validConstFinderResult = '''
@@ -391,38 +490,3 @@ const String invalidFontManifestJson = '''
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockArtifacts extends Mock implements Artifacts {}
-
-/// A stream consumer class that consumes UTF8 strings as lists of ints.
-class StringStreamConsumer implements StreamConsumer<List<int>> {
-  StringStreamConsumer(this.strings) : assert(strings != null);
-
-  List<Stream<List<int>>> streams = <Stream<List<int>>>[];
-  List<StreamSubscription<List<int>>> subscriptions = <StreamSubscription<List<int>>>[];
-  List<Completer<dynamic>> completers = <Completer<dynamic>>[];
-
-  List<String> strings;
-
-  @override
-  Future<dynamic> addStream(Stream<List<int>> value) {
-    streams.add(value);
-    completers.add(Completer<dynamic>());
-    subscriptions.add(
-      value.listen((List<int> data) {
-        strings.add(utf8.decode(data));
-      }),
-    );
-    subscriptions.last.onDone(() => completers.last.complete(null));
-    return Future<dynamic>.value(null);
-  }
-
-  @override
-  Future<dynamic> close() async {
-    for (final Completer<dynamic> completer in completers) {
-      await completer.future;
-    }
-    completers.clear();
-    streams.clear();
-    subscriptions.clear();
-    return Future<dynamic>.value(null);
-  }
-}

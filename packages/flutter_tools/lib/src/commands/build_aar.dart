@@ -34,6 +34,7 @@ class BuildAarCommand extends BuildSubCommand {
         defaultsTo: true,
         help: 'Build a release version of the current project.',
       );
+    addTreeShakeIconsFlag();
     usesFlavorOption();
     usesBuildNumberOption();
     usesPubOption();

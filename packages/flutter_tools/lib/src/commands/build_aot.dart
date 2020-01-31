@@ -15,6 +15,7 @@ import 'build.dart';
 /// Builds AOT snapshots into platform specific library containers.
 class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
   BuildAotCommand({bool verboseHelp = false, this.aotBuilder}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();

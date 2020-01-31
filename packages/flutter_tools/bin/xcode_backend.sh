@@ -164,7 +164,7 @@ BuildApp() {
     track_widget_creation_flag="--track-widget-creation"
   fi
 
-  # TODO(dnfield): Use $FONT_SUBSET to pass flag to tooling
+  # TODO(dnfield): Use $TREE_SHAKE_ICONS to pass flag to tooling
   # https://github.com/flutter/flutter/issues/49730
   if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."

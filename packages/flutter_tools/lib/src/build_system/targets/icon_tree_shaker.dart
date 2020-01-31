@@ -68,6 +68,7 @@ class IconTreeShaker {
     }
   }
 
+
   final Environment _environment;
   final String _fontManifest;
   Map<String, _IconTreeShakerData> _iconData;
@@ -186,7 +187,7 @@ class IconTreeShaker {
     if (code != 0) {
       _logger.printTrace(await utf8.decodeStream(fontSubsetProcess.stdout));
       _logger.printError(await utf8.decodeStream(fontSubsetProcess.stderr));
-      throwToolExit('Font subsetting failed with exit code $code.');
+      throw IconTreeShakerException._('Font subsetting failed with exit code $code.');
     }
     return true;
   }
@@ -247,12 +248,12 @@ class IconTreeShaker {
     final ProcessResult constFinderProcessResult = await _processManager.run(cmd);
 
     if (constFinderProcessResult.exitCode != 0) {
-      throwToolExit('ConstFinder failure: ${constFinderProcessResult.stderr}');
+      throw IconTreeShakerException._('ConstFinder failure: ${constFinderProcessResult.stderr}');
     }
     final dynamic jsonDecode = json.decode(constFinderProcessResult.stdout as String);
     if (jsonDecode is! Map<String, dynamic>) {
       throw IconTreeShakerException._(
-        'Invalid ConstFinder output: expected a top level JavaScript object, '
+        'Invalid ConstFinder output: expected a top level JSON object, '
         'got $jsonDecode.');
     }
     final Map<String, dynamic> constFinderMap = jsonDecode as Map<String, dynamic>;
@@ -295,7 +296,6 @@ class IconTreeShaker {
     }
     return result;
   }
-
 }
 
 class _ConstFinderResult {

@@ -355,7 +355,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     'xcodebuild',
     '-configuration', configuration,
     if (buildInfo.treeShakeIcons)
-      'FONT_SUBSET=YES'
+      'TREE_SHAKE_ICONS=true'
   ];
 
   if (globals.logger.isVerbose) {

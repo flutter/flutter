@@ -44,6 +44,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
        _bundleBuilder = bundleBuilder,
        _cache = cache,
        _platform = platform {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();

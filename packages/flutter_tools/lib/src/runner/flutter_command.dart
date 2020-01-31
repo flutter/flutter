@@ -366,7 +366,7 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
-  void addFontSubsetFlag() {
+  void addTreeShakeIconsFlag() {
     argParser.addFlag('tree-shake-icons',
       negatable: true,
       defaultsTo: kIconTreeShakerEnabledDefault,
