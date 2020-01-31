@@ -111,7 +111,6 @@ class AutoIsolateShutdown {
     fml::AutoResetWaitableEvent latch;
     fml::TaskRunner::RunNowOrPostTask(
         runner_, [isolate = std::move(isolate_), &latch]() {
-          FML_LOG(INFO) << "Shutting down isolate.";
           if (!isolate->Shutdown()) {
             FML_LOG(ERROR) << "Could not shutdown isolate.";
             FML_CHECK(false);

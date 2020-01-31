@@ -282,9 +282,6 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   FML_DCHECK(isolate_name_server_);
   FML_DCHECK(service_protocol_);
 
-  FML_DLOG(INFO) << "Attempting Dart VM launch for mode: "
-                 << (IsRunningPrecompiledCode() ? "AOT" : "Interpreter");
-
   {
     TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");
     dart::bin::BootstrapDartIo();
@@ -456,9 +453,6 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     Dart_SetDartLibrarySourcesKernel(dart_library_sources->GetMapping(),
                                      dart_library_sources->GetSize());
   }
-
-  FML_DLOG(INFO) << "New Dart VM instance created. Instance count: "
-                 << gVMLaunchCount;
 }
 
 DartVM::~DartVM() {
@@ -478,9 +472,6 @@ DartVM::~DartVM() {
       << "Could not cleanly shut down the Dart VM. Error: \"" << result
       << "\".";
   free(result);
-
-  FML_DLOG(INFO) << "Dart VM instance destroyed. Instance count: "
-                 << gVMLaunchCount;
 }
 
 std::shared_ptr<const DartVMData> DartVM::GetVMData() const {
