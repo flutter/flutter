@@ -372,8 +372,8 @@ abstract class FloatingActionButtonLocation {
   String toString() => '${objectRuntimeType(this, 'FloatingActionButtonLocation')}';
 }
 
-typedef _OffsetXFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry, {double offset});
-typedef _OffsetYFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry, {double offset});
+typedef _OffsetXFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry, {double adjustment});
+typedef _OffsetYFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry, {double adjustment});
 
 class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation {
   const _StandardFloatingActionButtonLocation(
@@ -391,8 +391,8 @@ class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      offsetXFunction(scaffoldGeometry, offset: adjustment),
-      offsetYFunction(scaffoldGeometry, offset: adjustment),
+      offsetXFunction(scaffoldGeometry, adjustment: adjustment),
+      offsetYFunction(scaffoldGeometry, adjustment: adjustment),
     );
   }
 
@@ -401,60 +401,60 @@ class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation
 }
 
 /// Calculates x-offset for left-aligned [FloatingActionButtonLocation]s.
-double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double adjustment = 0.0 }) {
   return kFloatingActionButtonMargin
        + scaffoldGeometry.minInsets.left
-       - offset;
+       - adjustment;
 }
 
 /// Calculates x-offset for right-aligned [FloatingActionButtonLocation]s.
-double _rightOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _rightOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double adjustment = 0.0 }) {
   return scaffoldGeometry.scaffoldSize.width
        - kFloatingActionButtonMargin
        - scaffoldGeometry.minInsets.right
        - scaffoldGeometry.floatingActionButtonSize.width
-       + offset;
+       + adjustment;
 }
 
 /// Calculates x-offset for start-aligned [FloatingActionButtonLocation]s.
-double _startOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _startOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double adjustment = 0.0 }) {
   assert(scaffoldGeometry.textDirection != null);
   switch (scaffoldGeometry.textDirection) {
     case TextDirection.rtl:
-      return _rightOffsetX(scaffoldGeometry, offset: offset);
+      return _rightOffsetX(scaffoldGeometry, adjustment: adjustment);
     case TextDirection.ltr:
-      return _leftOffsetX(scaffoldGeometry, offset: offset);
+      return _leftOffsetX(scaffoldGeometry, adjustment: adjustment);
   }
   return null;
 }
 
 /// Calculates x-offset for center-aligned [FloatingActionButtonLocation]s.
-double _centerOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _centerOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double adjustment = 0.0 }) {
   return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
 }
 
 /// Calculates x-offset for end-aligned [FloatingActionButtonLocation]s.
-double _endOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _endOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double adjustment = 0.0 }) {
   assert(scaffoldGeometry.textDirection != null);
   switch (scaffoldGeometry.textDirection) {
     case TextDirection.rtl:
-      return _leftOffsetX(scaffoldGeometry, offset: offset);
+      return _leftOffsetX(scaffoldGeometry, adjustment: adjustment);
     case TextDirection.ltr:
-      return _rightOffsetX(scaffoldGeometry, offset: offset);
+      return _rightOffsetX(scaffoldGeometry, adjustment: adjustment);
   }
   return null;
 }
 
 /// Calculates y-offset for [FloatingActionButtonLocation]s floating over
 /// the transition between the [Scaffold.appBar] and the [Scaffold.body].
-double _topOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _topOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double adjustment = 0.0 }) {
   final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
   return scaffoldGeometry.contentTop - fabHalfHeight;
 }
 
 /// Calculates y-offset for [FloatingActionButtonLocation]s floating at
 /// the bottom of the screen.
-double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double adjustment = 0.0 }) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
   final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
@@ -466,13 +466,13 @@ double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double off
   if (bottomSheetHeight > 0.0)
     fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
-  return fabY + offset;
+  return fabY + adjustment;
 }
 
 /// Calculates y-offset for [FloatingActionButtonLocation]s floating over the
 /// [Scaffold.bottomNavigationBar] so that the center of the floating
 /// action button lines up with the top of the bottom navigation bar.
-double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double adjustment = 0.0 }) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
   final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
