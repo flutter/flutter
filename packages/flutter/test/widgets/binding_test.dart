@@ -189,7 +189,7 @@ void main() {
     };
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: FocusableActionDetector(
+      child: TestStatefulWidget(
         child: Builder(
           builder: (BuildContext context) {
             return Opacity(
@@ -202,8 +202,23 @@ void main() {
         ),
       ),
     ));
-    // We don't elide the root or the last element.
     FlutterError.onError = oldHandler;
-    expect(filteredStack, contains('...     Normal element mounting (49 frames)'));
+    expect(filteredStack, contains('...     Normal element mounting (23 frames)'));
   });
+}
+
+class TestStatefulWidget extends StatefulWidget {
+  const TestStatefulWidget({this.child, Key key}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => TestStatefulWidgetState();
+}
+
+class TestStatefulWidgetState extends State<TestStatefulWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }
