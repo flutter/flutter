@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,31 +24,4 @@ void main() {
       expect(binding.defaultTestTimeout.duration, const Duration(minutes: 5));
     });
   });
-
-  test('Http Warning Message',  () {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    final DebugPrintCallback oldDebugPrint = debugPrint;
-    String printedMessage;
-    int calls = 0;
-    debugPrint = (String message, {int wrapWidth}) {
-      printedMessage = message;
-      calls += 1;
-    };
-    HttpClient();
-    debugPrint = oldDebugPrint;
-    expect(
-      printedMessage,
-      'Warning: At least one test in this suite creates an HttpClient. When '
-      'running a test suite that uses TestWidgetsFlutterBinding, all HTTP '
-      'requests will return status code 400, and no network request will '
-      'actually be made. Any test expecting an real network connection and '
-      'status code will fail.\n'
-      'To test code that needs an HttpClient, provide your own HttpClient '
-      'implementation to the code under test, so that your test can '
-      'consistently provide a testable response to the code under test.',
-    );
-    expect(calls, 1);
-    HttpClient();
-    expect(calls, 1);
-  }, skip: isBrowser); // We don't override this in the browser.
 }

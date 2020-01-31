@@ -11,6 +11,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+// ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' as test_package;
+
 
 import 'binding.dart';
 
@@ -77,14 +80,14 @@ class _MockHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext _) {
     if (!warningPrinted) {
-      debugPrint(
-        'Warning: At least one test in this suite creates an HttpClient. When '
-        'running a test suite that uses TestWidgetsFlutterBinding, all HTTP '
-        'requests will return status code 400, and no network request will '
-        'actually be made. Any test expecting an real network connection and '
+      test_package.printOnFailure(
+        'Warning: At least one test in this suite creates an HttpClient. When\n'
+        'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
+        'requests will return status code 400, and no network request will\n'
+        'actually be made. Any test expecting an real network connection and\n'
         'status code will fail.\n'
-        'To test code that needs an HttpClient, provide your own HttpClient '
-        'implementation to the code under test, so that your test can '
+        'To test code that needs an HttpClient, provide your own HttpClient\n'
+        'implementation to the code under test, so that your test can\n'
         'consistently provide a testable response to the code under test.');
       warningPrinted = true;
     }
