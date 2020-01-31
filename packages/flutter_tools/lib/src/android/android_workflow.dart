@@ -10,8 +10,10 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -20,6 +22,7 @@ import '../convert.dart';
 import '../doctor.dart';
 import '../globals.dart' as globals;
 import 'android_sdk.dart';
+import 'android_studio.dart';
 
 const int kAndroidSdkMinVersion = 28;
 final Version kAndroidJavaMinVersion = Version(1, 8, 0);
@@ -57,19 +60,28 @@ class AndroidWorkflow implements Workflow {
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
     @required AndroidSdk androidSdk,
+    @required AndroidStudio androidStudio,
+    @required FileSystem fs,
     @required Logger logger,
+    @required OperatingSystemUtils os,
     @required Platform platform,
     @required ProcessManager processManager,
     @required UserMessages userMessages,
   }) : _androidSdk = androidSdk,
+       _androidStudio = androidStudio,
+       _fs = fs,
        _logger = logger,
+       _os = os,
        _platform = platform,
        _processManager = processManager,
        _userMessages = userMessages,
        super('Android toolchain - develop for Android devices');
 
   final AndroidSdk _androidSdk;
+  final AndroidStudio _androidStudio;
+  final FileSystem _fs;
   final Logger _logger;
+  final OperatingSystemUtils _os;
   final Platform _platform;
   final ProcessManager _processManager;
   final UserMessages _userMessages;
@@ -192,7 +204,12 @@ class AndroidValidator extends DoctorValidator {
     }
 
     // Now check for the JDK.
-    final String javaBinary = AndroidSdk.findJavaBinary();
+    final String javaBinary = AndroidSdk.findJavaBinary(
+      androidStudio: _androidStudio,
+      fs: _fs,
+      os: _os,
+      platform: _platform,
+    );
     if (javaBinary == null) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
@@ -247,7 +264,11 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
-    final String javaBinary = AndroidSdk.findJavaBinary();
+    final String javaBinary = AndroidSdk.findJavaBinary(
+      fs: globals.fs,
+      os: globals.os,
+      platform: globals.platform,
+    );
     if (javaBinary == null) {
       return false;
     }

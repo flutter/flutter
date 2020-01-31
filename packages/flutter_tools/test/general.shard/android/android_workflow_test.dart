@@ -5,9 +5,9 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -25,6 +25,7 @@ import '../../src/context.dart';
 import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 void main() {
   AndroidSdk sdk;
@@ -32,6 +33,7 @@ void main() {
   MemoryFileSystem fs;
   MockProcessManager processManager;
   MockStdio stdio;
+  OperatingSystemUtils os;
   UserMessages userMessages;
 
   setUp(() {
@@ -45,6 +47,7 @@ void main() {
       ),
       outputPreferences: OutputPreferences.test(),
     );
+    os = MockOperatingSystemUtils();
     processManager = MockProcessManager();
     stdio = MockStdio();
     userMessages = UserMessages();
@@ -220,12 +223,15 @@ void main() {
     Stdio: () => stdio,
   }));
 
-  testUsingContext('detects license-only SDK installation', () async {
+  testWithoutContext('detects license-only SDK installation', () async {
     when(sdk.licensesAvailable).thenReturn(true);
     when(sdk.platformToolsAvailable).thenReturn(false);
     final ValidationResult validationResult = await AndroidValidator(
+      androidStudio: null,
       androidSdk: sdk,
+      fs: fs,
       logger: logger,
+      os: os,
       processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: userMessages,
@@ -237,7 +243,7 @@ void main() {
     );
   });
 
-  testUsingContext('detects minimum required SDK and buildtools', () async {
+  testWithoutContext('detects minimum required SDK and buildtools', () async {
     final AndroidSdkVersion mockSdkVersion = MockAndroidSdkVersion();
     when(sdk.licensesAvailable).thenReturn(true);
     when(sdk.platformToolsAvailable).thenReturn(true);
@@ -255,8 +261,11 @@ void main() {
     );
 
     final AndroidValidator androidValidator = AndroidValidator(
+      androidStudio: null,
       androidSdk: sdk,
+      fs: fs,
       logger: logger,
+      os: os,
       processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: userMessages,
@@ -293,9 +302,7 @@ void main() {
     );
   });
 
-  // using context for now because static AndroidStudio.findJavaBinary()
-  // accesses context
-  testUsingContext('detects minimum required java version', () async {
+  testWithoutContext('detects minimum required java version', () async {
     final AndroidSdkVersion mockSdkVersion = MockAndroidSdkVersion();
 
     // Mock a pass through scenario to reach _checkJavaVersion()
@@ -315,7 +322,10 @@ void main() {
 
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: sdk,
+      androidStudio: null,
+      fs: fs,
       logger: logger,
+      os: os,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,
       userMessages: userMessages,
@@ -325,14 +335,15 @@ void main() {
       validationResult.messages.last.message,
       errorMessage,
     );
-  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
-    Config: () => Config(),
-  }));
+  });
 
   testWithoutContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: null,
+      androidStudio: null,
+      fs: fs,
       logger: logger,
+      os: os,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,
       userMessages: userMessages,
