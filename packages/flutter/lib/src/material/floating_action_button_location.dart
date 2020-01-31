@@ -167,6 +167,10 @@ abstract class FloatingActionButtonLocation {
   /// so that the floating action button appears to align with [CircleAvatar]s
   /// in the [ListTile.leading] slot of a [ListTile] in a [ListView] in the
   /// [Scaffold.body].
+  ///
+  /// Compared to [FloatingActionButtonLocation.startFloat], floating action
+  /// buttons using this location will move horizontally _and_ vertically
+  /// closer to the edges, by [kMiniButtonOffsetAdjustment] each.
   static const FloatingActionButtonLocation miniStartFloat =
       _StandardFloatingActionButtonLocation(
         _startOffsetX,
@@ -183,7 +187,16 @@ abstract class FloatingActionButtonLocation {
         'centerFloat',
       );
 
-  // TODO: Document.
+  /// Start-aligned [FloatingActionButton], floating at the bottom of the screen.
+  ///
+  /// This is intended to be used with [FloatingActionButton.mini] set to true,
+  /// so that the floating action button appears to align horizontally with other mini floating
+  /// action buttons using the locations [FloatingActionButtonLocation.miniStartFloat]
+  /// and [FloatingActionButtonLocation.miniEndFloat].
+  ///
+  /// Compared to [FloatingActionButtonLocation.centerFloat], floating action
+  /// buttons using this location will move vertically down
+  /// by [kMiniButtonOffsetAdjustment].
   static const FloatingActionButtonLocation miniCenterFloat =
       _StandardFloatingActionButtonLocation(
         _centerOffsetX,
@@ -208,6 +221,10 @@ abstract class FloatingActionButtonLocation {
   /// so that the floating action button appears to align with [CircleAvatar]s
   /// in the [ListTile.trailing] slot of a [ListTile] in a [ListView] in the
   /// [Scaffold.body].
+  ///
+  /// Compared to [FloatingActionButtonLocation.endFloat], floating action
+  /// buttons using this location will move horizontally _and_ vertically
+  /// closer to the edges, by [kMiniButtonOffsetAdjustment] each.
   static const FloatingActionButtonLocation miniEndFloat =
       _StandardFloatingActionButtonLocation(
         _endOffsetX,
