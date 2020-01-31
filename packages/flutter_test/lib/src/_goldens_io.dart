@@ -4,8 +4,11 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:flutter/widgets.dart' show Element;
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
@@ -161,5 +164,94 @@ class LocalComparisonOutput {
       path.fromUri(basedir),
       path.fromUri(Uri.parse('failures/$testName')),
     ));
+  }
+}
+
+/// Returns a [ComparisonResult] to describe the pixel differential of the
+/// [test] and [master] image bytes provided.
+ComparisonResult compareLists(List<int> test, List<int> master) {
+  if (identical(test, master))
+    return ComparisonResult(passed: true);
+
+  if (test == null || master == null || test.isEmpty || master.isEmpty) {
+    return ComparisonResult(
+      passed: false,
+      error: 'Pixel test failed, null image provided.',
+    );
+  }
+
+  final Image testImage = decodePng(test);
+  final Image masterImage = decodePng(master);
+
+  assert(testImage != null);
+  assert(masterImage != null);
+
+  final int width = testImage.width;
+  final int height = testImage.height;
+
+  if (width != masterImage.width || height != masterImage.height) {
+    return ComparisonResult(
+      passed: false,
+      error: 'Pixel test failed, image sizes do not match.\n'
+        'Master Image: ${masterImage.width} X ${masterImage.height}\n'
+        'Test Image: ${testImage.width} X ${testImage.height}',
+    );
+  }
+
+  int pixelDiffCount = 0;
+  final int totalPixels = width * height;
+  final Image invertedMaster = invert(Image.from(masterImage));
+  final Image invertedTest = invert(Image.from(testImage));
+
+  final Map<String, Image> diffs = <String, Image>{
+    'masterImage' : masterImage,
+    'testImage' : testImage,
+    'maskedDiff' : Image.from(testImage),
+    'isolatedDiff' : Image(width, height),
+  };
+
+  for (int x = 0; x < width; x++) {
+    for (int y =0; y < height; y++) {
+      final int testPixel = testImage.getPixel(x, y);
+      final int masterPixel = masterImage.getPixel(x, y);
+
+      final int diffPixel = (getRed(testPixel) - getRed(masterPixel)).abs()
+        + (getGreen(testPixel) - getGreen(masterPixel)).abs()
+        + (getBlue(testPixel) - getBlue(masterPixel)).abs()
+        + (getAlpha(testPixel) - getAlpha(masterPixel)).abs();
+
+      if (diffPixel != 0 ) {
+        final int invertedMasterPixel = invertedMaster.getPixel(x, y);
+        final int invertedTestPixel = invertedTest.getPixel(x, y);
+        final int maskPixel = math.max(invertedMasterPixel, invertedTestPixel);
+        diffs['maskedDiff'].setPixel(x, y, maskPixel);
+        diffs['isolatedDiff'].setPixel(x, y, maskPixel);
+        pixelDiffCount++;
+      }
+    }
+  }
+
+  if (pixelDiffCount > 0) {
+    return ComparisonResult(
+      passed: false,
+      error: 'Pixel test failed, '
+        '${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% '
+        'diff detected.',
+      diffs: diffs,
+    );
+  }
+  return ComparisonResult(passed: true);
+}
+
+/// An unsupported [WebGoldenComparator] that exists for API compatibility.
+class DefaultWebGoldenComparator extends WebGoldenComparator {
+  @override
+  Future<bool> compare(Element element, Size size, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<void> update(Uri golden, Element element, Size size) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 }
