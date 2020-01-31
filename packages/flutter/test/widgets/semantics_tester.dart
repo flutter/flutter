@@ -259,7 +259,7 @@ class TestSemantics {
     DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
   }) {
     bool fail(String message) {
-      matchState[TestSemantics] = '$message';
+      matchState[TestSemantics] = message;
       return false;
     }
 

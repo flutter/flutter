@@ -505,7 +505,7 @@ class FlutterErrorDetails extends Diagnosticable {
       debugFillProperties(builder);
       summary = builder.properties.firstWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.summary, orElse: () => null);
     }
-    return summary ?? ErrorSummary('${formatException()}');
+    return summary ?? ErrorSummary(formatException());
   }
 
   @override
@@ -539,7 +539,7 @@ class FlutterErrorDetails extends Diagnosticable {
         String message = exceptionAsString();
         if (message.startsWith(prefix))
           message = message.substring(prefix.length);
-        properties.add(ErrorSummary('$message'));
+        properties.add(ErrorSummary(message));
       }
     }
 
