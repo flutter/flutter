@@ -225,8 +225,8 @@ String genSimpleMethod(Message message) {
     for (final Placeholder placeholder in message.placeholders) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
     }
-    final String rawMessage = generateString(messageValue); // "r'...'"
-    return rawMessage.substring(1);
+    final String generatedMessage = generateString(messageValue); // "r'...'"
+    return generatedMessage.startsWith('r') ? generatedMessage.substring(1) : generatedMessage;
   }
 
   List<String> genMethodParameters([String type]) {
