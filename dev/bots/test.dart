@@ -466,6 +466,30 @@ Future<void> _runFrameworkTests() async {
         'FLUTTER_EXPERIMENTAL_BUILD': 'true',
       },
     );
+    const String httpClientWarning =
+      'Warning: At least one test in this suite creates an HttpClient. When\n'
+      'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
+      'requests will return status code 400, and no network request will\n'
+      'actually be made. Any test expecting an real network connection and\n'
+      'status code will fail.\n'
+      'To test code that needs an HttpClient, provide your own HttpClient\n'
+      'implementation to the code under test, so that your test can\n'
+      'consistently provide a testable response to the code under test.';
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter_test'),
+      script: path.join('test', 'bindings_test_failure.dart'),
+      expectFailure: true,
+      printOutput: false,
+      outputChecker: (CapturedOutput output) {
+        final Iterable<Match> matches = httpClientWarning.allMatches(output.stdout);
+        if (matches == null || matches.isEmpty || matches.length > 1) {
+          return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n'
+                 'stdout:\n${output.stdout}';
+        }
+        return null;
+      },
+      tableData: bigqueryApi?.tabledata,
+    );
   }
 
   await selectSubshard(<String, ShardRunner>{

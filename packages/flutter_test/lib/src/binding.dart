@@ -147,6 +147,13 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
 ///
 /// When using these bindings, certain features are disabled. For
 /// example, [timeDilation] is reset to 1.0 on initialization.
+///
+/// In non-browser tests, the binding overrides `HttpClient` creation with a
+/// fake client that always returns a status code of 400. This is to prevent
+/// tests from making network calls, which could introduce flakiness. A test
+/// that actually needs to make a network call should provide its own
+/// `HttpClient` to the code making the call, so that it can appropriately mock
+/// or fake responses.
 abstract class TestWidgetsFlutterBinding extends BindingBase
   with ServicesBinding,
        SchedulerBinding,
