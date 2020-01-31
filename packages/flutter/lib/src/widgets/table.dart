@@ -344,7 +344,6 @@ class _TableElement extends RenderObjectElement {
   @override
   bool forgetChild(Element child) {
     _forgottenChildren.add(child);
-    super.forgetChild(child);
     return true;
   }
 }
