@@ -203,7 +203,8 @@ void main() {
       ),
     ));
     FlutterError.onError = oldHandler;
-    expect(filteredStack, contains('...     Normal element mounting (23 frames)'));
+    const String toMatch = '...     Normal element mounting (';
+    expect(toMatch.allMatches(filteredStack)?.length, 1);
   });
 }
 
