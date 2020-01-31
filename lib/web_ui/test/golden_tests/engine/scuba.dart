@@ -132,7 +132,7 @@ void testEachCanvas(String description, CanvasTest body,
 
 final ui.TextStyle _defaultTextStyle = ui.TextStyle(
   color: const ui.Color(0xFF000000),
-  fontFamily: 'Arial',
+  fontFamily: 'Roboto',
   fontSize: 14,
 );
 
@@ -148,4 +148,14 @@ ui.Paragraph paragraph(
   builder.addText(text);
   builder.pop();
   return builder.build()..layout(ui.ParagraphConstraints(width: maxWidth));
+}
+
+/// Configures the test to use bundled Roboto and Ahem fonts to avoid golden
+/// screenshot differences due to differences in the preinstalled system fonts.
+void setUpStableTestFonts() {
+  setUp(() async {
+    await ui.webOnlyInitializePlatform();
+    ui.webOnlyFontCollection.debugRegisterTestFonts();
+    await ui.webOnlyFontCollection.ensureFontsLoaded();
+  });
 }

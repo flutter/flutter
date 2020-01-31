@@ -17,6 +17,8 @@ void main() async {
     viewportSize: const Size(600, 600),
   );
 
+  setUpStableTestFonts();
+
   void paintTest(EngineCanvas canvas, PaintTest painter) {
     final RecordingCanvas recordingCanvas =
         RecordingCanvas(const Rect.fromLTWH(0, 0, 600, 600));
@@ -116,7 +118,7 @@ void drawQuickBrownFox(RecordingCanvas canvas) {
         textStyle: TextStyle(
           color: const Color(0xFF000000),
           decoration: TextDecoration.none,
-          fontFamily: 'Arial',
+          fontFamily: 'Roboto',
           fontSize: 30,
           background: Paint()..color = const Color.fromRGBO(50, 255, 50, 1.0),
         ),

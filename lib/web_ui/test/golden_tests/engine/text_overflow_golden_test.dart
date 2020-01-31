@@ -27,9 +27,11 @@ void main() async {
 
   final TextStyle warningStyle = TextStyle(
     color: const Color(0xFFFF0000),
-    fontFamily: 'Arial',
+    fontFamily: 'Roboto',
     fontSize: 10,
   );
+
+  setUpStableTestFonts();
 
   Paragraph warning(String text) {
     return paragraph(text, textStyle: warningStyle);
