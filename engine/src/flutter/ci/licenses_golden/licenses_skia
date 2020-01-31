@@ -1,4 +1,4 @@
-Signature: a98ae7da54355ac2155c82b34b07f9ad
+Signature: 25e40a8ae9da4311553a55d4a0a5fe28
 
 UNUSED LICENSES:
 
@@ -1261,6 +1261,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac10.13-Clang-MacBook10.1-GPU-IntelHD615-x86_64-Debug-All-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac10.13-Clang-MacBook10.1-GPU-IntelHD615-x86_64-Release-All-Metal.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac10.13-Clang-MacBook10.1-GPU-IntelHD615-x86_64-Release-All-NativeFonts.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac10.13-Clang-MacBookPro11.5-CPU-AVX2-x86_64-Debug-All-PDF.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac10.13-Clang-MacBookPro11.5-CPU-AVX2-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac10.13-Clang-MacBookPro11.5-GPU-RadeonHD8870M-x86_64-Debug-All-Metal.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac10.13-Clang-MacMini7.1-GPU-IntelIris5100-x86_64-Debug-All-CommandBuffer.json
