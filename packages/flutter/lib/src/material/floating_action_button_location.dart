@@ -78,9 +78,9 @@ abstract class FloatingActionButtonLocation {
   /// Start-aligned [FloatingActionButton], floating over the transition between
   /// the [Scaffold.appBar] and the [Scaffold.body].
   ///
-  /// To align a floating action button with [FloatingActionButton.mini] set to
-  /// true with [CircleAvatar]s in the [ListTile.leading] slots of [ListTile]s
-  /// in a [ListView] in the [Scaffold.body], consider using [miniStartTop].
+  /// To align a floating action button with [CircleAvatar]s in the
+  /// [ListTile.leading] slots of [ListTile]s in a [ListView] in the [Scaffold.body],
+  /// use [miniStartTop] and set [FloatingActionButton.mini] to true.
   ///
   /// This is unlikely to be a useful location for apps that lack a top [AppBar]
   /// or that use a [SliverAppBar] in the scaffold body itself.
