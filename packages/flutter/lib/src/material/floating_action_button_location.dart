@@ -273,7 +273,7 @@ abstract class FloatingActionButtonLocation {
         adjustment: kMiniButtonOffsetAdjustment,
       );
 
-  /// Center-aligned [FloatingActionButton], floating over the
+  /// Centered [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
   /// action button lines up with the top of the bottom navigation bar.
   ///
