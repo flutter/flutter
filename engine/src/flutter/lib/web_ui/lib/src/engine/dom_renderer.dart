@@ -343,7 +343,7 @@ flt-glass-pane * {
     setElementStyle(bodyElement, 'touch-action', 'none');
 
     // These are intentionally outrageous font parameters to make sure that the
-    // apps fully specifies their text styles.
+    // apps fully specify their text styles.
     setElementStyle(bodyElement, 'font', defaultCssFont);
     setElementStyle(bodyElement, 'color', 'red');
 
