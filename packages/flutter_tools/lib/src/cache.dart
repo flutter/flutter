@@ -106,6 +106,7 @@ class Cache {
     // TODO(zra): Move to initializer list once logger and platform parameters
     // are required.
     _net = Net(logger: _logger, platform: _platform);
+    _fsUtils = FileSystemUtils(fileSystem: _fileSystem, platform: _platform);
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
 
@@ -139,6 +140,7 @@ class Cache {
   final OperatingSystemUtils _osUtils;
 
   Net _net;
+  FileSystemUtils _fsUtils;
 
   static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
@@ -347,9 +349,12 @@ class Cache {
   }
 
   String getVersionFor(String artifactName) {
-    final File versionFile = _fileSystem.file(globals.fs.path.join(
-        _rootOverride?.path ?? flutterRoot, 'bin', 'internal',
-        '$artifactName.version'));
+    final File versionFile = _fileSystem.file(_fileSystem.path.join(
+      _rootOverride?.path ?? flutterRoot,
+      'bin',
+      'internal',
+      '$artifactName.version',
+    ));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
@@ -370,7 +375,7 @@ class Cache {
   /// [entity] doesn't exist.
   bool isOlderThanToolsStamp(FileSystemEntity entity) {
     final File flutterToolsStamp = getStampFileFor('flutter_tools');
-    return fsUtils.isOlderThanReference(
+    return _fsUtils.isOlderThanReference(
       entity: entity,
       referenceFile: flutterToolsStamp,
     );
@@ -382,13 +387,19 @@ class Cache {
     final Uri url = Uri.parse(urlStr);
     final Directory thirdPartyDir = getArtifactDirectory('third_party');
 
-    final Directory serviceDir = _fileSystem.directory(_fileSystem.path.join(thirdPartyDir.path, serviceName));
+    final Directory serviceDir = _fileSystem.directory(_fileSystem.path.join(
+      thirdPartyDir.path,
+      serviceName,
+    ));
     if (!serviceDir.existsSync()) {
       serviceDir.createSync(recursive: true);
       _osUtils.chmod(serviceDir, '755');
     }
 
-    final File cachedFile = _fileSystem.file(_fileSystem.path.join(serviceDir.path, url.pathSegments.last));
+    final File cachedFile = _fileSystem.file(_fileSystem.path.join(
+      serviceDir.path,
+      url.pathSegments.last,
+    ));
     if (!cachedFile.existsSync()) {
       try {
         await downloadFile(url, cachedFile);
@@ -452,7 +463,7 @@ class Cache {
   }
 
   Future<bool> doesRemoteExist(String message, Uri url) async {
-    final Status status = globals.logger.startProgress(
+    final Status status = _logger.startProgress(
       message,
       timeout: timeoutConfiguration.slowOperation,
     );
@@ -971,7 +982,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
       );
     try {
       final String gradleExecutable = gradle.absolute.path;
-      final String flutterSdk = fsUtils.escapePath(Cache.flutterRoot);
+      final String flutterSdk = globals.fsUtils.escapePath(Cache.flutterRoot);
       final RunResult processResult = await processUtils.run(
         <String>[
           gradleExecutable,
