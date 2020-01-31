@@ -371,8 +371,6 @@ class _StandardFloatingActionButtonLocation extends FloatingActionButtonLocation
   String toString() => 'FloatingActionButtonLocation.$name';
 }
 
-// TODO: Adjust order.
-
 double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   return kFloatingActionButtonMargin
        + scaffoldGeometry.minInsets.left
@@ -398,6 +396,10 @@ double _startOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset
   return null;
 }
 
+double _centerOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+  return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
+}
+
 double _endOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   assert(scaffoldGeometry.textDirection != null);
   switch (scaffoldGeometry.textDirection) {
@@ -407,10 +409,6 @@ double _endOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset =
       return _rightOffsetX(scaffoldGeometry, offset: offset);
   }
   return null;
-}
-
-double _centerOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
-  return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
 }
 
 double _topOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
