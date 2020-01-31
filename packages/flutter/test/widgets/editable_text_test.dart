@@ -4178,6 +4178,114 @@ void main() {
     }
     expect(tester.testTextInput.editingState['text'], 'flutter is the best!...');
   });
+
+  testWidgets('updateEditingValue filters multiple calls from formatter', (WidgetTester tester) async {
+    final MockTextFormatter formatter = MockTextFormatter();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+              inputFormatters: <TextInputFormatter>[formatter],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    state.updateEditingValue(const TextEditingValue(text: ''));
+    state.updateEditingValue(const TextEditingValue(text: 'a'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaaaaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa')); // Skipped
+
+    const List<String> referenceLog = <String>[
+      '[1]: , a',
+      '[1]: normal aa',
+      '[2]: aa, aaa',
+      '[2]: normal aaaa',
+      '[3]: aaaa, aa',
+      '[3]: deleting a',
+      '[4]: a, aaa',
+      '[4]: normal aaaaaaaa',
+      '[5]: aaaaaaaa, aaaa',
+      '[5]: deleting aaa',
+      '[6]: aaa, aa',
+      '[6]: deleting aaaa',
+      '[7]: aaaa, aaaaaaa',
+      '[7]: normal aaaaaaaaaaaaaa',
+      '[8]: aaaaaaaaaaaaaa, aa',
+      '[8]: deleting aaaaaa',
+      '[9]: aaaaaa, aaaaaaaaa',
+      '[9]: normal aaaaaaaaaaaaaaaaaa',
+    ];
+
+    expect(formatter.log, referenceLog);
+  });
+}
+
+class MockTextFormatter extends TextInputFormatter {
+  MockTextFormatter() : _counter = 0, log = <String>[];
+
+  int _counter;
+  List<String> log;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    _counter++;
+    log.add('[$_counter]: ${oldValue.text}, ${newValue.text}');
+    TextEditingValue finalValue;
+    if (newValue.text.length < oldValue.text.length) {
+      finalValue = _handleTextDeletion(oldValue, newValue);
+    } else {
+      finalValue = _formatText(newValue);
+    }
+    return finalValue;
+  }
+
+
+  TextEditingValue _handleTextDeletion(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final String result = 'a' * (_counter - 2);
+    log.add('[$_counter]: deleting $result');
+    return TextEditingValue(text: result);
+  }
+
+  TextEditingValue _formatText(TextEditingValue value) {
+    final String result = 'a' * _counter * 2;
+    log.add('[$_counter]: normal $result');
+    return TextEditingValue(text: result);
+  }
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {

@@ -156,7 +156,7 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with DiagnosticableMixin 
           return a.debugName.compareTo(b.debugName);
         }
     );
-    return sortedKeys.map<String>((LogicalKeyboardKey key) => '${key.debugName}').join(' + ');
+    return sortedKeys.map<String>((LogicalKeyboardKey key) => key.debugName.toString()).join(' + ');
   }
 
   @override
