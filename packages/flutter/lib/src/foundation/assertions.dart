@@ -20,6 +20,130 @@ typedef DiagnosticPropertiesTransformer = Iterable<DiagnosticsNode> Function(Ite
 /// and other callbacks that collect information describing an error.
 typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 
+/// Partial information from a stack frame for stack filtering purposes.
+///
+/// See also:
+///
+///  * [SubStackFilter], which uses this class to compare against [StackFrame]s.
+@immutable
+class PartialStackFrame {
+  /// Creates a new [PartialStackFrame] instance. All arguments are required and
+  /// must not be null.
+  const PartialStackFrame({
+    @required this.package,
+    @required this.className,
+    @required this.method,
+  }) : assert(className != null),
+       assert(method != null),
+       assert(package != null);
+
+  /// An `<asynchronous suspension>` line in a stack trace.
+  static const PartialStackFrame asynchronousSuspension = PartialStackFrame(
+    package: '',
+    className: '',
+    method: 'asynchronous suspension',
+  );
+
+  /// The package to match, e.g. `package:flutter/src/foundation/assertions.dart`,
+  /// or `dart:ui/window.dart`.
+  final Pattern package;
+
+  /// The class name for the method.
+  ///
+  /// On web, this is ignored, since class names are not available.
+  ///
+  /// On all platforms, top level methods should use the empty string.
+  final String className;
+
+  /// The method name for this frame line.
+  ///
+  /// On web, private methods are wrapped with `[]`.
+  final String method;
+
+  /// Tests whether the [StackFrame] matches the information in this
+  /// [PartialStackFrame].
+  bool matches(StackFrame stackFrame) {
+    final String stackFramePackage = '${stackFrame.packageScheme}:${stackFrame.package}/${stackFrame.packagePath}';
+    // Ideally this wouldn't be necessary.
+    // TODO(dnfield): https://github.com/dart-lang/sdk/issues/40117
+    if (kIsWeb) {
+      return package.allMatches(stackFramePackage).isNotEmpty
+          && stackFrame.method == (method.startsWith('_') ? '[$method]' : method);
+    }
+    return package.allMatches(stackFramePackage).isNotEmpty
+        && stackFrame.method == method
+        && stackFrame.className == className;
+  }
+}
+
+/// A class that filters stack frames for additional filtering on
+/// [FlutterError.defaultStackFilter].
+abstract class StackFilter {
+  /// A const constructor to allow subclasses to be const.
+  const StackFilter();
+
+  /// Filters the list of [StackFrame]s by updating corrresponding indices in
+  /// `reasons`.
+  ///
+  /// To elide a frame or number of frames, set the string
+  void filter(List<StackFrame> stackFrames, List<String> reasons);
+}
+
+
+/// A [StackFilter] that filters based on repeating lists of
+/// [PartialStackFrame]s.
+///
+/// See also:
+///
+///   * [FlutterError.addDefaultStackFilter], a method to register additional
+///     stack filters for [FlutterError.defaultStackFilter].
+///   * [StackFrame], a class that can help with parsing stack frames.
+///   * [PartialStackFrame], a class that helps match partial method information
+///     to a stack frame.
+class RepetitiveStackFrameFilter extends StackFilter {
+  /// Creates a new SubStackFilter. All parameters are required and must not be
+  /// null.
+  const RepetitiveStackFrameFilter({
+    @required this.frames,
+    @required this.replacement,
+  }) : assert(frames != null),
+       assert(replacement != null);
+
+  /// The shape of this repetative stack pattern.
+  final List<PartialStackFrame> frames;
+
+  /// The number of frames in this pattern.
+  int get numFrames => frames.length;
+
+  /// The string to replace the frames with.
+  ///
+  /// If the same replacement string is used multiple times in a row, the
+  /// [FlutterError.defaultStackFilter] will simply update a counter after this
+  /// line rather than repeating it.
+  final String replacement;
+
+  List<String> get _replacements => List<String>.filled(numFrames, replacement);
+
+  @override
+  void filter(List<StackFrame> stackFrames, List<String> reasons) {
+    for (int index = 0; index < stackFrames.length; index += 1) {
+      if (_matchesFrames(stackFrames.skip(index).take(numFrames).toList())) {
+        reasons.setRange(index, index + numFrames, _replacements);
+        index += numFrames;
+      }
+    }
+  }
+
+  bool _matchesFrames(List<StackFrame> stackFrames) {
+    for (int index = 0; index < stackFrames.length; index++) {
+      if (!frames[index].matches(stackFrames[index])) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
 abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// This constructor provides a reliable hook for a kernel transformer to find
   /// error messages that need to be rewritten to include object references for
@@ -653,6 +777,19 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     _errorCount += 1;
   }
 
+  static final List<StackFilter> _stackFilters = <StackFilter>[];
+
+  /// Adds a stack filtering function to [defaultStackFilter].
+  ///
+  /// For example, the framework adds common patterns of element building to
+  /// elide tree-walking patterns in the stacktrace.
+  ///
+  /// Added filters are checked in order of addition. The first matching filter
+  /// wins, and subsequent filters will not be checked.
+  static void addDefaultStackFilter(StackFilter filter) {
+    _stackFilters.add(filter);
+  }
+
   /// Converts a stack to a string that is more readable by omitting stack
   /// frames that correspond to Dart internals.
   ///
@@ -665,38 +802,76 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// format but the frame numbers will not be consecutive (frames are elided)
   /// and the final line may be prose rather than a stack frame.
   static Iterable<String> defaultStackFilter(Iterable<String> frames) {
-    const Set<String> filteredPackages = <String>{
-      'dart:async-patch',
-      'dart:async',
-      'package:stack_trace',
+    final Map<String, int> removedPackagesAndClasses = <String, int>{
+      'dart:async-patch': 0,
+      'dart:async': 0,
+      'package:stack_trace': 0,
+      'class _AssertionError': 0,
+      'class _FakeAsync': 0,
+      'class _FrameCallbackEntry': 0,
+      'class _Timer': 0,
+      'class _RawReceivePortImpl': 0,
     };
-    const Set<String> filteredClasses = <String>{
-      '_AssertionError',
-      '_FakeAsync',
-      '_FrameCallbackEntry',
-    };
-    final List<String> result = <String>[];
-    final List<String> skipped = <String>[];
-    for (final String line in frames) {
-      final StackFrame frameLine = StackFrame.fromStackTraceLine(line);
-      if (filteredClasses.contains(frameLine.className)) {
-        skipped.add('class ${frameLine.className}');
-      } else if (filteredPackages.contains(frameLine.packageScheme + ':' + frameLine.package)) {
-        skipped.add('package ${frameLine.packageScheme == 'dart' ? 'dart:' : ''}${frameLine.package}');
-      } else {
-        result.add(line);
+    int skipped = 0;
+
+    final List<StackFrame> parsedFrames = StackFrame.fromStackString(frames.join('\n'));
+
+    for (int index = 0; index < parsedFrames.length; index += 1) {
+      final StackFrame frame = parsedFrames[index];
+      final String className = 'class ${frame.className}';
+      final String package = '${frame.packageScheme}:${frame.package}';
+      if (removedPackagesAndClasses.containsKey(className)) {
+        skipped += 1;
+        removedPackagesAndClasses[className] += 1;
+        parsedFrames.removeAt(index);
+        index -= 1;
+      } else if (removedPackagesAndClasses.containsKey(package)) {
+        skipped += 1;
+        removedPackagesAndClasses[package] += 1;
+        parsedFrames.removeAt(index);
+        index -= 1;
       }
     }
-    if (skipped.length == 1) {
-      result.add('(elided one frame from ${skipped.single})');
-    } else if (skipped.length > 1) {
-      final List<String> where = Set<String>.from(skipped).toList()..sort();
+    final List<String> reasons = List<String>(parsedFrames.length);
+    for (final StackFilter filter in _stackFilters) {
+      filter.filter(parsedFrames, reasons);
+    }
+
+    final List<String> result = <String>[];
+
+    // Collapse duplicated reasons.
+    for (int index = 0; index < parsedFrames.length; index += 1) {
+      final int start = index;
+      while (index < reasons.length - 1 && reasons[index] != null && reasons[index + 1] == reasons[index]) {
+        index++;
+      }
+      String suffix = '';
+      if (reasons[index] != null) {
+        if (index != start) {
+          suffix = ' (${index - start + 2} frames)';
+        } else {
+          suffix = ' (1 frame)';
+        }
+      }
+      final String resultLine = '${reasons[index] ?? parsedFrames[index].source}$suffix';
+      result.add(resultLine);
+    }
+
+    // Only include packages we actually elided from.
+    final List<String> where = <String>[
+      for (MapEntry<String, int> entry in removedPackagesAndClasses.entries)
+        if (entry.value > 0)
+          entry.key
+    ]..sort();
+    if (skipped == 1) {
+      result.add('(elided one frame from ${where.single})');
+    } else if (skipped > 1) {
       if (where.length > 1)
         where[where.length - 1] = 'and ${where.last}';
       if (where.length > 2) {
-        result.add('(elided ${skipped.length} frames from ${where.join(", ")})');
+        result.add('(elided $skipped frames from ${where.join(", ")})');
       } else {
-        result.add('(elided ${skipped.length} frames from ${where.join(" ")})');
+        result.add('(elided $skipped frames from ${where.join(" ")})');
       }
     }
     return result;
