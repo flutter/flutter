@@ -4,17 +4,65 @@
 
 #include "flutter/runtime/runtime_test.h"
 
+#include "flutter/fml/file.h"
+#include "flutter/fml/native_library.h"
+#include "flutter/fml/paths.h"
+#include "flutter/runtime/dart_snapshot.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/testing/testing.h"
 
 namespace flutter {
 namespace testing {
 
+static constexpr const char* kAOTAppELFFileName = "app_elf_snapshot.so";
+
+static ELFAOTSymbols LoadELFIfNecessary() {
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    return {};
+  }
+
+  const auto elf_path =
+      fml::paths::JoinPaths({GetFixturesPath(), kAOTAppELFFileName});
+
+  if (!fml::IsFile(elf_path)) {
+    FML_LOG(ERROR) << "App AOT file does not exist for this fixture. Attempts "
+                      "to launch the Dart VM will fail.";
+    return {};
+  }
+
+  ELFAOTSymbols symbols;
+
+  // Must not be freed.
+  const char* error = nullptr;
+
+  auto loaded_elf =
+      Dart_LoadELF(elf_path.c_str(),             // file path
+                   0,                            // file offset
+                   &error,                       // error (out)
+                   &symbols.vm_snapshot_data,    // vm snapshot data (out)
+                   &symbols.vm_snapshot_instrs,  // vm snapshot instrs (out)
+                   &symbols.vm_isolate_data,     // vm isolate data (out)
+                   &symbols.vm_isolate_instrs    // vm isolate instr (out)
+      );
+
+  if (loaded_elf == nullptr) {
+    FML_LOG(ERROR) << "Could not fetch AOT symbols from loaded ELF. Attempts "
+                      "to launch the Dart VM will fail. Error: "
+                   << error;
+    return {};
+  }
+
+  symbols.loaded_elf.reset(loaded_elf);
+
+  return symbols;
+}
+
 RuntimeTest::RuntimeTest()
     : native_resolver_(std::make_shared<TestDartNativeResolver>()),
       assets_dir_(fml::OpenDirectory(GetFixturesPath(),
                                      false,
-                                     fml::FilePermission::kRead)) {}
+                                     fml::FilePermission::kRead)),
+      aot_symbols_(LoadELFIfNecessary()) {}
 
 void RuntimeTest::SetSnapshotsAndAssets(Settings& settings) {
   if (!assets_dir_.is_valid()) {
@@ -24,28 +72,25 @@ void RuntimeTest::SetSnapshotsAndAssets(Settings& settings) {
   settings.assets_dir = assets_dir_.get();
 
   // In JIT execution, all snapshots are present within the binary itself and
-  // don't need to be explicitly suppiled by the embedder.
+  // don't need to be explicitly supplied by the embedder. In AOT, these
+  // snapshots will be present in the application AOT dylib.
   if (DartVM::IsRunningPrecompiledCode()) {
-    settings.vm_snapshot_data = [this]() {
-      return fml::FileMapping::CreateReadOnly(assets_dir_, "vm_snapshot_data");
+    settings.vm_snapshot_data = [&]() {
+      return std::make_unique<fml::NonOwnedMapping>(
+          aot_symbols_.vm_snapshot_data, 0u);
     };
-
-    settings.isolate_snapshot_data = [this]() {
-      return fml::FileMapping::CreateReadOnly(assets_dir_,
-                                              "isolate_snapshot_data");
+    settings.isolate_snapshot_data = [&]() {
+      return std::make_unique<fml::NonOwnedMapping>(
+          aot_symbols_.vm_isolate_data, 0u);
     };
-
-    if (DartVM::IsRunningPrecompiledCode()) {
-      settings.vm_snapshot_instr = [this]() {
-        return fml::FileMapping::CreateReadExecute(assets_dir_,
-                                                   "vm_snapshot_instr");
-      };
-
-      settings.isolate_snapshot_instr = [this]() {
-        return fml::FileMapping::CreateReadExecute(assets_dir_,
-                                                   "isolate_snapshot_instr");
-      };
-    }
+    settings.vm_snapshot_instr = [&]() {
+      return std::make_unique<fml::NonOwnedMapping>(
+          aot_symbols_.vm_snapshot_instrs, 0u);
+    };
+    settings.isolate_snapshot_instr = [&]() {
+      return std::make_unique<fml::NonOwnedMapping>(
+          aot_symbols_.vm_isolate_instrs, 0u);
+    };
   } else {
     settings.application_kernels = [this]() {
       std::vector<std::unique_ptr<const fml::Mapping>> kernel_mappings;
