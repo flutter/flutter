@@ -237,6 +237,63 @@ void main() {
     expect(initialPoint, finalPoint);
   });
 
+  group('Multiple Floating Action Buttons', () {
+    testWidgets('All render correctly', (WidgetTester tester) async {
+      Widget build() {
+        return MaterialApp(
+          home: Scaffold(
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              child: Icon(Icons.beach_access),
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            additionalFloatingActionButtonConfigurations: {
+              ValueKey('fab2') : FloatingActionButtonConfiguration(
+                button: FloatingActionButton(
+                  onPressed: () {},
+                  child: Icon(Icons.golf_course),
+                ),
+                location: FloatingActionButtonLocation.endTop,
+              ),
+              ValueKey('fab3') : FloatingActionButtonConfiguration(
+                button: FloatingActionButton(
+                  onPressed: () {},
+                  child: Icon(Icons.android),
+                ),
+                location: FloatingActionButtonLocation.centerTop,
+              ),
+              ValueKey('fab4') : FloatingActionButtonConfiguration(
+                button: FloatingActionButton(
+                  onPressed: () {},
+                  child: Icon(Icons.book),
+                ),
+                location: FloatingActionButtonLocation.startTop,
+              ),
+              ValueKey('fab5') : FloatingActionButtonConfiguration(
+                button: FloatingActionButton(
+                  onPressed: () {},
+                  child: Icon(Icons.add_location),
+                ),
+                location: FloatingActionButtonLocation.startFloat,
+              ),
+              ValueKey('fab6') : FloatingActionButtonConfiguration(
+                button: FloatingActionButton(
+                  onPressed: () {},
+                  child: Icon(Icons.cake),
+                ),
+                location: FloatingActionButtonLocation.centerFloat,
+              ),
+            },
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build());
+
+      expect(find.byType(FloatingActionButton), findsNWidgets(6));
+    });
+  });
+
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
     final Key drawerKey = UniqueKey();
     const double appBarHeight = 256.0;
