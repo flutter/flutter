@@ -469,7 +469,7 @@ void main() {
       expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
     }, overrides: contextOverrides);
 
-    testUsingContext('builds iOS armv7 profile AOT snapshot with dwarfStackTraces', () async {
+    testUsingContext('builds iOS armv7 profile AOT snapshot with dwarf stack traces', () async {
       globals.fs.file('main.dill').writeAsStringSync('binary magic');
 
       final String outputPath = globals.fs.path.join('build', 'foo');
@@ -479,7 +479,7 @@ void main() {
       genSnapshot.outputs = <String, String>{
         assembly: 'blah blah\n.section __DWARF\nblah blah\n',
       };
-      final String debugPath = globals.fs.path.join('foo', 'app.armv7.debug');
+      final String debugPath = globals.fs.path.join('foo', 'app.ios-armv7.symbols');
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
@@ -504,6 +504,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         '--no-causal-async-stacks',
@@ -678,11 +679,11 @@ void main() {
       ]);
     }, overrides: contextOverrides);
 
-    testUsingContext('builds shared library for android-arm with dwarfStackTraces', () async {
+    testUsingContext('builds shared library for android-arm with dwarf stack traces', () async {
       globals.fs.file('main.dill').writeAsStringSync('binary magic');
 
       final String outputPath = globals.fs.path.join('build', 'foo');
-      final String debugPath = globals.fs.path.join('foo', 'app.android-arm.debug');
+      final String debugPath = globals.fs.path.join('foo', 'app.android-arm.symbols');
       globals.fs.directory(outputPath).createSync(recursive: true);
 
       final int genSnapshotExitCode = await snapshotter.build(

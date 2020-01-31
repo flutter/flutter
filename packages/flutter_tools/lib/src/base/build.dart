@@ -164,7 +164,7 @@ class AOTSnapshotter {
     final String archName = darwinArch == null || platform == TargetPlatform.darwin_x64
       ? getNameForTargetPlatform(platform)
       : 'ios-${getNameForDarwinArch(darwinArch)}';
-    final String debugFilename = 'app.$archName.debug';
+    final String debugFilename = 'app.$archName.symbols';
     if (splitDebugInfo != null) {
       globals.fs.directory(splitDebugInfo)
         .createSync(recursive: true);
