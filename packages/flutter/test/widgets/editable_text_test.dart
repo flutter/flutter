@@ -4226,25 +4226,26 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa'));
     state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa')); // Skipped
 
-    final List<String> referenceLog = <String>[];
-    referenceLog.add('[1]: , a');
-    referenceLog.add('[1]: normal aa');
-    referenceLog.add('[2]: aa, aaa');
-    referenceLog.add('[2]: normal aaaa');
-    referenceLog.add('[3]: aaaa, aa');
-    referenceLog.add('[3]: deleting a');
-    referenceLog.add('[4]: a, aaa');
-    referenceLog.add('[4]: normal aaaaaaaa');
-    referenceLog.add('[5]: aaaaaaaa, aaaa');
-    referenceLog.add('[5]: deleting aaa');
-    referenceLog.add('[6]: aaa, aa');
-    referenceLog.add('[6]: deleting aaaa');
-    referenceLog.add('[7]: aaaa, aaaaaaa');
-    referenceLog.add('[7]: normal aaaaaaaaaaaaaa');
-    referenceLog.add('[8]: aaaaaaaaaaaaaa, aa');
-    referenceLog.add('[8]: deleting aaaaaa');
-    referenceLog.add('[9]: aaaaaa, aaaaaaaaa');
-    referenceLog.add('[9]: normal aaaaaaaaaaaaaaaaaa');
+    const List<String> referenceLog = <String>[
+      '[1]: , a',
+      '[1]: normal aa',
+      '[2]: aa, aaa',
+      '[2]: normal aaaa',
+      '[3]: aaaa, aa',
+      '[3]: deleting a',
+      '[4]: a, aaa',
+      '[4]: normal aaaaaaaa',
+      '[5]: aaaaaaaa, aaaa',
+      '[5]: deleting aaa',
+      '[6]: aaa, aa',
+      '[6]: deleting aaaa',
+      '[7]: aaaa, aaaaaaa',
+      '[7]: normal aaaaaaaaaaaaaa',
+      '[8]: aaaaaaaaaaaaaa, aa',
+      '[8]: deleting aaaaaa',
+      '[9]: aaaaaa, aaaaaaaaa',
+      '[9]: normal aaaaaaaaaaaaaaaaaa',
+    ];
 
     expect(formatter.log, referenceLog);
   });
