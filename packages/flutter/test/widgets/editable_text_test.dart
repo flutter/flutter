@@ -4205,12 +4205,12 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
-    controller.text = 'test';
+    controller.text = '';
     await tester.idle();
 
     final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
-    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.editingState['text'], equals(''));
     expect(state.wantKeepAlive, true);
 
     state.updateEditingValue(const TextEditingValue(text: ''));
