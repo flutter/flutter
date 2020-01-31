@@ -3174,11 +3174,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         hasSameSuperclass = oldElementClass == newWidgetClass;
         return true;
       }());
-      if (child.widget == newWidget && hasSameSuperclass) {
+      if (hasSameSuperclass && child.widget == newWidget) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         newChild = child;
-      } else if (Widget.canUpdate(child.widget, newWidget) && hasSameSuperclass) {
+      } else if (hasSameSuperclass && Widget.canUpdate(child.widget, newWidget)) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         child.update(newWidget);
