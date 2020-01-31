@@ -26,7 +26,7 @@ List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   try {
     return (object as List<dynamic>).cast<Map<String, dynamic>>();
   } on CastError catch (_) {
-    throw _FontSubsetException(errorMessage);
+    throw FontSubsetException._(errorMessage);
   }
 }
 
@@ -89,7 +89,7 @@ class FontSubset {
 
     final File appDill = environment.buildDir.childFile('app.dill');
     if (!appDill.existsSync()) {
-      throw _FontSubsetException('Expected to find kernel file at ${appDill.path}, but no file found.');
+      throw FontSubsetException._('Expected to find kernel file at ${appDill.path}, but no file found.');
     }
     final File constFinder = _fs.file(
       _artifacts.getArtifactPath(Artifact.constFinder),
@@ -152,7 +152,7 @@ class FontSubset {
     if (_iconData == null) {
       await _getIconData(_environment);
     }
-
+    assert(_iconData != null);
     final _FontSubsetData fontSubsetData = _iconData[relativePath];
     if (fontSubsetData == null) {
       return false;
@@ -204,7 +204,7 @@ class FontSubset {
 
     for (final Map<String, dynamic> map in fontList) {
       if (map['family'] is! String) {
-        throw _FontSubsetException(
+        throw FontSubsetException._(
           'FontManifest.json invalid: expected the family value to be a string, '
           'got: ${map['family']}.');
       }
@@ -217,12 +217,12 @@ class FontSubset {
         'FontManifest.json invalid: expected "fonts" to be a list of objects.',
       );
       if (fonts.length != 1) {
-        throw _FontSubsetException(
+        throw FontSubsetException._(
           'This tool cannot process icon fonts with multiple fonts in a '
           'single family.');
       }
       if (fonts.first['asset'] is! String) {
-        throw _FontSubsetException(
+        throw FontSubsetException._(
           'FontManifest.json invalid: expected "asset" value to be a string, '
           'got: ${map['assets']}.');
       }
@@ -251,7 +251,7 @@ class FontSubset {
     }
     final dynamic jsonDecode = json.decode(constFinderProcessResult.stdout as String);
     if (jsonDecode is! Map<String, dynamic>) {
-      throw _FontSubsetException(
+      throw FontSubsetException._(
         'Invalid ConstFinder output: expected a top level JavaScript object, '
         'got $jsonDecode.');
     }
@@ -277,9 +277,9 @@ class FontSubset {
   Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult consts) {
     final Map<String, List<int>> result = <String, List<int>>{};
     for (final Map<String, dynamic> iconDataMap in consts.constantInstances) {
-      if (iconDataMap['fontPackage'] is! String ||
-          iconDataMap['fontFamily'] is! String ||
-          iconDataMap['codePoint'] is! int) {
+      if ((iconDataMap['fontPackage'] ?? '') is! String || // Null is ok here.
+           iconDataMap['fontFamily'] is! String ||
+           iconDataMap['codePoint'] is! int) {
         throwToolExit(
           'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
           '"fontFamily" to be a String, and "codePoint" to be an int, '
@@ -349,8 +349,8 @@ class _FontSubsetData {
   String toString() => 'FontSubsetData($family, $relativePath, $codePoints)';
 }
 
-class _FontSubsetException implements Exception {
-  _FontSubsetException(this.message);
+class FontSubsetException implements Exception {
+  FontSubsetException._(this.message);
 
   final String message;
 
