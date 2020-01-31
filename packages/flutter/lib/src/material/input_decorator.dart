@@ -1511,7 +1511,6 @@ class _RenderDecorationElement extends RenderObjectElement {
     final _DecorationSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
-    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _DecorationSlot slot) {

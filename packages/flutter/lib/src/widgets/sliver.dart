@@ -1160,7 +1160,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(child.slot != null);
     assert(_childElements.containsKey(child.slot));
     _childElements.remove(child.slot);
-    super.forgetChild(child);
   }
 
   @override
