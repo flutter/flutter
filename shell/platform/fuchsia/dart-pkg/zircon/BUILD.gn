@@ -23,11 +23,11 @@ source_set("zircon") {
   ]
 
   deps = [
-    "$flutter_root/third_party/tonic",
     "$fuchsia_sdk_root/pkg:async-cpp",
     "$fuchsia_sdk_root/pkg:async-loop-cpp",
     "$fuchsia_sdk_root/pkg:fdio",
     "$fuchsia_sdk_root/pkg:zx",
     "//flutter/fml",
+    "//flutter/third_party/tonic",
   ]
 }

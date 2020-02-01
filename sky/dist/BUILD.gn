@@ -6,9 +6,9 @@ import("//flutter/build/zip_bundle.gni")
 
 if (is_android) {
   action("flutter_services") {
-    script = "$flutter_root/sky/tools/dist_dart_pkg.py"
+    script = "//flutter/sky/tools/dist_dart_pkg.py"
 
-    source = "$flutter_root/sky/packages/flutter_services"
+    source = "//flutter/sky/packages/flutter_services"
     dest = "$root_build_dir/dist/packages/flutter_services"
 
     inputs = [
@@ -26,11 +26,11 @@ if (is_android) {
     ]
 
     deps = [
-      "$flutter_root/sky/packages/flutter_services",
+      "//flutter/sky/packages/flutter_services",
     ]
   }
   action("sky_engine") {
-    script = "$flutter_root/sky/tools/dist_dart_pkg.py"
+    script = "//flutter/sky/tools/dist_dart_pkg.py"
 
     source = "$root_gen_dir/dart-pkg/sky_engine"
     dest = "$root_build_dir/dist/packages/sky_engine"
@@ -50,13 +50,13 @@ if (is_android) {
     ]
 
     deps = [
-      "$flutter_root/sky/packages/sky_engine",
-      "$flutter_root/sky/packages/sky_engine:sky_engine_pkg_helper",
+      "//flutter/sky/packages/sky_engine",
+      "//flutter/sky/packages/sky_engine:sky_engine_pkg_helper",
     ]
   }
 
   action("sky_services") {
-    script = "$flutter_root/sky/tools/dist_dart_pkg.py"
+    script = "//flutter/sky/tools/dist_dart_pkg.py"
 
     source = "$root_gen_dir/dart-pkg/sky_services"
     dest = "$root_build_dir/dist/packages/sky_services"
@@ -76,8 +76,8 @@ if (is_android) {
     ]
 
     deps = [
-      "$flutter_root/sky/packages/sky_services",
-      "$flutter_root/sky/packages/sky_services:sky_services_pkg_helper",
+      "//flutter/sky/packages/sky_services",
+      "//flutter/sky/packages/sky_services:sky_services_pkg_helper",
     ]
   }
 

@@ -4,8 +4,8 @@
 
 assert(is_win)
 
-import("$flutter_root/shell/platform/glfw/config.gni")
-import("$flutter_root/testing/testing.gni")
+import("//flutter/shell/platform/glfw/config.gni")
+import("//flutter/testing/testing.gni")
 
 _public_headers = [ "public/flutter_windows.h" ]
 
@@ -27,16 +27,14 @@ source_set("flutter_windows_headers") {
   public = _public_headers
 
   public_deps = [
-    "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
+    "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
   ]
 
-  configs += [
-    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
-  ]
+  configs +=
+      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
 
-  public_configs = [
-    "$flutter_root/shell/platform/common/cpp:relative_flutter_library_headers",
-  ]
+  public_configs =
+      [ "//flutter/shell/platform/common/cpp:relative_flutter_library_headers" ]
 }
 
 source_set("flutter_windows_source") {
@@ -65,7 +63,7 @@ source_set("flutter_windows_source") {
   defines = [ "USE_RAPID_JSON" ]
 
   configs += [
-    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
+    "//flutter/shell/platform/common/cpp:desktop_library_implementation",
     "//third_party/angle:gl_prototypes",
   ]
 
@@ -73,10 +71,10 @@ source_set("flutter_windows_source") {
 
   deps = [
     ":flutter_windows_headers",
-    "$flutter_root/shell/platform/common/cpp:common_cpp",
-    "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper",
-    "$flutter_root/shell/platform/embedder:embedder_with_symbol_prefix",
-    "$flutter_root/shell/platform/windows/client_wrapper:client_wrapper_windows",
+    "//flutter/shell/platform/common/cpp:common_cpp",
+    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
+    "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows",
     "//third_party/angle:libEGL_static",  # the order of libEGL_static and libGLESv2_static is important.. if reversed, will cause a linker error DllMain already defined in LIBCMTD.lib
     "//third_party/angle:libGLESv2_static",
     "//third_party/rapidjson",
@@ -91,7 +89,7 @@ copy("publish_headers_windows") {
 
   # The Windows header assumes the presence of the common headers.
   deps = [
-    "$flutter_root/shell/platform/common/cpp:publish_headers",
+    "//flutter/shell/platform/common/cpp:publish_headers",
   ]
 }
 
@@ -100,7 +98,7 @@ shared_library("flutter_windows") {
     ":flutter_windows_source",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }
 
 test_fixtures("flutter_windows_fixtures") {
@@ -116,13 +114,13 @@ executable("flutter_windows_unittests") {
     "win32_window_unittests.cc",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 
   deps = [
     ":flutter_windows_fixtures",
     ":flutter_windows_headers",
     ":flutter_windows_source",
-    "$flutter_root/testing",
+    "//flutter/testing",
 
     # TODO(chunhtai): Consider refactoring flutter_root/testing so that there's a testing
     # target that doesn't require a Dart runtime to be linked in.
@@ -134,18 +132,18 @@ executable("flutter_windows_unittests") {
 
 shared_library("flutter_windows_glfw") {
   deps = [
-    "$flutter_root/shell/platform/glfw:flutter_glfw",
+    "//flutter/shell/platform/glfw:flutter_glfw",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }
 
 group("windows_glfw") {
   deps = [
     ":flutter_windows",
     ":flutter_windows_glfw",
-    "$flutter_root/shell/platform/glfw:publish_headers_glfw",
-    "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
+    "//flutter/shell/platform/glfw:publish_headers_glfw",
+    "//flutter/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
   ]
 }
 
@@ -153,7 +151,7 @@ group("windows") {
   deps = [
     ":flutter_windows",
     ":publish_headers_windows",
-    "$flutter_root/shell/platform/windows/client_wrapper:publish_wrapper_windows",
+    "//flutter/shell/platform/windows/client_wrapper:publish_wrapper_windows",
   ]
   if (build_glfw_shell) {
     deps += [ ":windows_glfw" ]

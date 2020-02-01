@@ -4,14 +4,14 @@
 
 assert(is_linux)
 
-import("$flutter_root/shell/platform/glfw/config.gni")
+import("//flutter/shell/platform/glfw/config.gni")
 
 group("linux") {
   if (build_glfw_shell) {
     deps = [
       ":flutter_linux_glfw",
-      "$flutter_root/shell/platform/glfw:publish_headers_glfw",
-      "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
+      "//flutter/shell/platform/glfw:publish_headers_glfw",
+      "//flutter/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
     ]
   }
 }
@@ -29,11 +29,11 @@ config("disable_fatal_link_warnings") {
 if (build_glfw_shell) {
   shared_library("flutter_linux_glfw") {
     deps = [
-      "$flutter_root/shell/platform/glfw:flutter_glfw",
+      "//flutter/shell/platform/glfw:flutter_glfw",
     ]
 
     configs += [ ":disable_fatal_link_warnings" ]
 
-    public_configs = [ "$flutter_root:config" ]
+    public_configs = [ "//flutter:config" ]
   }
 }

@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/tools/fuchsia/fuchsia_debug_symbols.gni")
-import("$flutter_root/tools/fuchsia/fuchsia_libs.gni")
+import("//flutter/tools/fuchsia/fuchsia_debug_symbols.gni")
+import("//flutter/tools/fuchsia/fuchsia_libs.gni")
 
 # Creates a Fuchsia archive (.far) file using PM from the Fuchsia SDK.
 template("fuchsia_archive") {
@@ -89,7 +89,7 @@ template("fuchsia_archive") {
   pkg_dir_deps = pkg.deps + [ ":$cmx_target" ]
 
   action("${target_name}_dir") {
-    script = "$flutter_root/tools/fuchsia/copy_path.py"
+    script = "//flutter/tools/fuchsia/copy_path.py"
     sources = copy_sources
     response_file_contents = rebase_path(copy_sources + copy_outputs)
     deps = pkg_dir_deps
@@ -99,7 +99,7 @@ template("fuchsia_archive") {
   }
 
   action(target_name) {
-    script = "$flutter_root/tools/fuchsia/gen_package.py"
+    script = "//flutter/tools/fuchsia/gen_package.py"
     deps = pkg_dir_deps + [
              ":${target_name}_dir",
              ":${_dbg_symbols_target}",
@@ -143,7 +143,7 @@ template("fuchsia_test_archive") {
       resources = invoker.resources
     }
 
-    meta_dir = "$flutter_root/testing/fuchsia/meta"
+    meta_dir = "//flutter/testing/fuchsia/meta"
     cmx_file = "$meta_dir/fuchsia_test.cmx"
   }
 }

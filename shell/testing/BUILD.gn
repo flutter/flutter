@@ -8,8 +8,8 @@ executable("testing") {
   output_name = "flutter_tester"
 
   public_configs = [
-    "$flutter_root:config",
-    "$flutter_root:export_dynamic_symbols",
+    "//flutter:config",
+    "//flutter:export_dynamic_symbols",
   ]
 
   sources = [
@@ -17,12 +17,12 @@ executable("testing") {
   ]
 
   deps = [
-    "$flutter_root/assets",
-    "$flutter_root/common",
-    "$flutter_root/fml",
-    "$flutter_root/lib/snapshot",
-    "$flutter_root/shell/common",
-    "$flutter_root/third_party/tonic",
+    "//flutter/assets",
+    "//flutter/common",
+    "//flutter/fml",
+    "//flutter/lib/snapshot",
+    "//flutter/shell/common",
+    "//flutter/third_party/tonic",
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/skia",

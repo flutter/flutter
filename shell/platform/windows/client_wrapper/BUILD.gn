@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/shell/platform/common/cpp/client_wrapper/publish.gni")
-import("$flutter_root/testing/testing.gni")
+import("//flutter/shell/platform/common/cpp/client_wrapper/publish.gni")
+import("//flutter/testing/testing.gni")
 
 _wrapper_includes = [
   "include/flutter/flutter_view_controller.h",
@@ -17,9 +17,8 @@ _wrapper_sources = [ "flutter_view_controller.cc" ]
 # so uses header paths that assume the merged state. Include the header
 # header directory of the core wrapper files so these includes will work.
 config("relative_core_wrapper_headers") {
-  include_dirs = [
-    "$flutter_root/shell/platform/common/cpp/client_wrapper/include/flutter",
-  ]
+  include_dirs =
+      [ "//flutter/shell/platform/common/cpp/client_wrapper/include/flutter" ]
 }
 
 # Windows client wrapper build for internal use by the shell implementation.
@@ -28,19 +27,18 @@ source_set("client_wrapper_windows") {
   public = _wrapper_includes
 
   deps = [
-    "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
-    "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper",
-    "$flutter_root/shell/platform/windows:flutter_windows_headers",
+    "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
+    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/windows:flutter_windows_headers",
   ]
 
-  configs += [
-    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
-  ]
+  configs +=
+      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
 
   public_configs = [
     ":relative_core_wrapper_headers",
-    "$flutter_root/shell/platform/common/cpp:relative_flutter_library_headers",
-    "$flutter_root/shell/platform/windows:relative_flutter_windows_headers",
+    "//flutter/shell/platform/common/cpp:relative_flutter_library_headers",
+    "//flutter/shell/platform/windows:relative_flutter_windows_headers",
   ]
 }
 
@@ -59,7 +57,7 @@ source_set("client_wrapper_library_stubs_windows") {
   defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
 
   public_deps = [
-    "$flutter_root/shell/platform/windows:flutter_windows_headers",
+    "//flutter/shell/platform/windows:flutter_windows_headers",
   ]
 }
 
@@ -80,8 +78,8 @@ executable("client_wrapper_windows_unittests") {
     ":client_wrapper_library_stubs_windows",
     ":client_wrapper_windows",
     ":client_wrapper_windows_fixtures",
-    "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
-    "$flutter_root/testing",
+    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
+    "//flutter/testing",
 
     # TODO(chunhtai): Consider refactoring flutter_root/testing so that there's a testing
     # target that doesn't require a Dart runtime to be linked in.

@@ -4,9 +4,9 @@
 
 import("//build/compiled_action.gni")
 import("//build/fuchsia/sdk.gni")
+import("//flutter/common/config.gni")
+import("//flutter/lib/ui/dart_ui.gni")
 import("//third_party/dart/utils/compile_platform.gni")
-import("$flutter_root/common/config.gni")
-import("$flutter_root/lib/ui/dart_ui.gni")
 
 bindings_output_dir = "$root_gen_dir/sky/bindings"
 

@@ -3,9 +3,9 @@
 # found in the LICENSE file.
 
 import("//build/compiled_action.gni")
+import("//flutter/common/fuchsia_config.gni")
+import("//flutter/tools/fuchsia/dart_kernel.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
-import("$flutter_root/common/fuchsia_config.gni")
-import("$flutter_root/tools/fuchsia/dart_kernel.gni")
 
 dart_kernel("shim_kernel") {
   main_dart = "shim.dart"

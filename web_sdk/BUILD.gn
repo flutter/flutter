@@ -7,25 +7,24 @@ import("//third_party/dart/utils/compile_platform.gni")
 
 sdk_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
 
-web_ui_sources =
-    exec_script("//third_party/dart/tools/list_dart_files.py",
-                [
-                  "absolute",
-                  rebase_path("$flutter_root/lib/web_ui/lib/src/ui"),
-                ],
-                "list lines")
+web_ui_sources = exec_script("//third_party/dart/tools/list_dart_files.py",
+                             [
+                               "absolute",
+                               rebase_path("//flutter/lib/web_ui/lib/src/ui"),
+                             ],
+                             "list lines")
 
-web_ui_sources += [ "$flutter_root/lib/web_ui/lib/ui.dart" ]
+web_ui_sources += [ "//flutter/lib/web_ui/lib/ui.dart" ]
 
 web_engine_sources =
     exec_script("//third_party/dart/tools/list_dart_files.py",
                 [
                   "absolute",
-                  rebase_path("$flutter_root/lib/web_ui/lib/src/engine"),
+                  rebase_path("//flutter/lib/web_ui/lib/src/engine"),
                 ],
                 "list lines")
 
-web_engine_sources += [ "$flutter_root/lib/web_ui/lib/src/engine.dart" ]
+web_engine_sources += [ "//flutter/lib/web_ui/lib/src/engine.dart" ]
 
 group("web_sdk") {
   deps = [
@@ -43,7 +42,7 @@ prebuilt_dart_action("web_ui_sources") {
   packages = "//third_party/dart/.packages"
   script = "sdk_rewriter.dart"
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/ui/")
-  input_dir = rebase_path("$flutter_root/lib/web_ui/lib/")
+  input_dir = rebase_path("//flutter/lib/web_ui/lib/")
 
   args = [
     "--output-dir=$output_dir",
@@ -67,7 +66,7 @@ prebuilt_dart_action("web_engine_sources") {
   packages = "//third_party/dart/.packages"
   script = "sdk_rewriter.dart"
   output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/_engine/")
-  input_dir = rebase_path("$flutter_root/lib/web_ui/lib/src/")
+  input_dir = rebase_path("//flutter/lib/web_ui/lib/src/")
 
   args = [
     "--output-dir=$output_dir",
@@ -87,7 +86,7 @@ prebuilt_dart_action("web_engine_sources") {
 
 copy("web_ui_library") {
   sources = [
-    "$flutter_root/web_sdk/libraries.json",
+    "//flutter/web_sdk/libraries.json",
   ]
 
   outputs = [

@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 import("//build/compiled_action.gni")
+import("//flutter/common/config.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
-import("$flutter_root/common/config.gni")
 
 is_aot_test =
     flutter_runtime_mode == "profile" || flutter_runtime_mode == "release"
@@ -60,7 +60,7 @@ template("dart_snapshot_kernel") {
     ]
 
     if (is_aot_test) {
-      deps += [ "$flutter_root/lib/snapshot:strong_platform" ]
+      deps += [ "//flutter/lib/snapshot:strong_platform" ]
     }
 
     script = "$root_out_dir/frontend_server.dart.snapshot"

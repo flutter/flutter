@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/tools/fuchsia/clang.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
-import("$flutter_root/tools/fuchsia/clang.gni")
 
 template("generate_dart_profiler_symbols") {
   assert(defined(invoker.library_label), "Must define 'library_label'")
@@ -38,26 +38,26 @@ template("generate_dart_profiler_symbols") {
 
 generate_dart_profiler_symbols("dart_jit_runner") {
   library_label =
-      "$flutter_root/shell/platform/fuchsia/dart_runner:dart_jit_runner_bin"
+      "//flutter/shell/platform/fuchsia/dart_runner:dart_jit_runner_bin"
   library_path = "${root_out_dir}/exe.unstripped/dart_jit_runner"
   output = "${target_gen_dir}/dart_jit_runner.dartprofilersymbols"
 }
 
 generate_dart_profiler_symbols("dart_aot_runner") {
   library_label =
-      "$flutter_root/shell/platform/fuchsia/dart_runner:dart_aot_runner_bin"
+      "//flutter/shell/platform/fuchsia/dart_runner:dart_aot_runner_bin"
   library_path = "${root_out_dir}/exe.unstripped/dart_aot_runner"
   output = "${target_gen_dir}/dart_aot_runner.dartprofilersymbols"
 }
 
 generate_dart_profiler_symbols("flutter_jit_runner") {
-  library_label = "$flutter_root/shell/platform/fuchsia/flutter:jit"
+  library_label = "//flutter/shell/platform/fuchsia/flutter:jit"
   library_path = "${root_out_dir}/exe.unstripped/flutter_jit_runner"
   output = "${target_gen_dir}/flutter_jit_runner.dartprofilersymbols"
 }
 
 generate_dart_profiler_symbols("flutter_aot_runner") {
-  library_label = "$flutter_root/shell/platform/fuchsia/flutter:aot"
+  library_label = "//flutter/shell/platform/fuchsia/flutter:aot"
   library_path = "${root_out_dir}/exe.unstripped/flutter_aot_runner"
   output = "${target_gen_dir}/flutter_aot_runner.dartprofilersymbols"
 }

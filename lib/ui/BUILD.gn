@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
-import("$flutter_root/common/config.gni")
-import("$flutter_root/testing/testing.gni")
+import("//flutter/common/config.gni")
+import("//flutter/testing/testing.gni")
 
 source_set("ui") {
   sources = [
@@ -109,22 +109,22 @@ source_set("ui") {
     "window/window.h",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 
   deps = [
-    "$flutter_root/assets",
-    "$flutter_root/common",
-    "$flutter_root/flow",
-    "$flutter_root/fml",
-    "$flutter_root/runtime:test_font",
-    "$flutter_root/third_party/tonic",
+    "//flutter/assets",
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/runtime:test_font",
+    "//flutter/third_party/tonic",
     "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/rapidjson",
     "//third_party/skia",
   ]
 
   public_deps = [
-    "$flutter_root/third_party/txt",
+    "//flutter/third_party/txt",
   ]
 
   if (flutter_enable_skshaper) {
@@ -139,9 +139,9 @@ source_set("ui") {
 
     if (using_fuchsia_sdk) {
       deps += [
-        "$flutter_root/shell/platform/fuchsia/dart-pkg/fuchsia",
-        "$flutter_root/shell/platform/fuchsia/dart-pkg/zircon",
         "$fuchsia_sdk_root/pkg:async-cpp",
+        "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
+        "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
       ]
     } else {
       deps += [ "//topaz/public/dart-pkg/zircon" ]
@@ -172,9 +172,9 @@ if (current_toolchain == host_toolchain) {
     deps = [
       ":ui",
       ":ui_unittests_fixtures",
-      "$flutter_root/common",
-      "$flutter_root/testing:dart",
-      "$flutter_root/testing:opengl",
+      "//flutter/common",
+      "//flutter/testing:dart",
+      "//flutter/testing:opengl",
     ]
   }
 }
