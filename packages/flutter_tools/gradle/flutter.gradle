@@ -674,6 +674,7 @@ class FlutterPlugin implements Plugin<Project> {
                     dependsOn packageAssets
                     dependsOn cleanPackageAssets
                     into packageAssets.outputDir
+                    fileMode 0644
                     return
                 }
                 // `variant.mergeAssets` will be removed at the end of 2019.
@@ -683,6 +684,7 @@ class FlutterPlugin implements Plugin<Project> {
                 dependsOn "clean${mergeAssets.name.capitalize()}"
                 mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
                 into mergeAssets.outputDir
+                fileMode 0644
             }
             if (!isUsedAsSubproject) {
                 def variantOutput = variant.outputs.first()
