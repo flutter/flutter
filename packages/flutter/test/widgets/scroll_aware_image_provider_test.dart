@@ -315,9 +315,13 @@ void main() {
     expect(imageCache.containsKey(testImageProvider), false);
     expect(imageCache.currentSize, 0);
 
+    // Simulate a case where somone else has managed to complete this stream -
+    // so it can land in the cache right before we stop scrolling fast.
+    // If we miss the early return, we will fail.
     testImageProvider.complete();
 
     imageCache.putIfAbsent(testImageProvider, () => testImageProvider.load(testImageProvider, PaintingBinding.instance.instantiateImageCodec));
+    // We've stopped scrolling fast.
     physics.recommendDeferredLoadingValue = false;
     await tester.idle();
 
