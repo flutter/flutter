@@ -296,6 +296,8 @@ class XCDevice {
     //  },
     // ...
 
+    final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
+
     final List<IOSDevice> devices = <IOSDevice>[];
     for (final dynamic device in allAvailableDevices) {
       if (device is! Map) {
@@ -335,7 +337,6 @@ class XCDevice {
 
       String sdkVersion;
       if (deviceProperties.containsKey('operatingSystemVersion')) {
-        final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
         final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
         sdkVersion = operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
       }
@@ -418,22 +419,18 @@ class XCDevice {
 
     final Map<String, dynamic> error = deviceProperties['error'] as Map<String, dynamic>;
 
-    final StringBuffer errorMessage = StringBuffer();
-    if (deviceProperties.containsKey('name')) {
-      errorMessage.write('"${deviceProperties['name']}" error: ');
-    }
+    final StringBuffer errorMessage = StringBuffer('Error: ');
 
     if (error.containsKey('description')) {
       final String description = error['description'] as String;
       errorMessage.write(description);
+    } else {
+      errorMessage.write('Xcode pairing error.');
     }
 
     if (error.containsKey('recoverySuggestion')) {
       final String recoverySuggestion = error['recoverySuggestion'] as String;
       errorMessage.write(' $recoverySuggestion');
-    }
-    if (errorMessage.isEmpty) {
-      errorMessage.write('Xcode pairing error');
     }
 
     if (error.containsKey('code') && error['code'] is int) {
