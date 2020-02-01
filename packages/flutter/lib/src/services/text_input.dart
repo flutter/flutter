@@ -422,6 +422,9 @@ class TextContentType {
   final String rawValue;
 
   /// The descriptor to use when generating a new password for auto-fill
+  /// Only iOS applications respect this descriptor.
+  ///
+  /// See: https://developer.apple.com/documentation/security/password_autofill/customizing_password_autofill_rules
   final String newPasswordRulesDescriptor;
 
   /// Accepts full name
