@@ -9,6 +9,9 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
+import 'package:meta/meta.dart';
+import 'package:package_config/discovery.dart';
+import 'package:package_config/packages.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:pool/pool.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -50,14 +53,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     String shellPath,
     this.updateGoldens,
   }) {
-    // Look up the location of the testing resources.
-    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.join(
-      Cache.flutterRoot,
-      'packages',
-      'flutter_tools',
-      '.packages',
-    )).map;
-    testUri = packageMap['test'];
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(packagesDirHandler())
@@ -66,11 +61,18 @@ class FlutterWebPlatform extends PlatformPlugin {
           globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
           serveFilesOutsidePath: true,
         ))
-        .add(createStaticHandler(_config.suiteDefaults.precompiledPath,
-            serveFilesOutsidePath: true))
+        .add(createStaticHandler(
+          _config.suiteDefaults.precompiledPath,
+          serveFilesOutsidePath: true,
+        ))
         .add(_handleStaticArtifact)
         .add(_goldenFileHandler)
-        .add(_wrapperHandler);
+        .add(_wrapperHandler)
+        .add(createStaticHandler(
+          p.join(p.current, 'test'),
+          serveFilesOutsidePath: true,
+        ))
+        .add(_packageFilesHandler);
     _server.mount(cascade.handler);
 
     _testGoldenComparator = TestGoldenComparator(
@@ -97,13 +99,29 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  Uri testUri;
+  final Future<Packages> _packagesFuture = loadPackagesFile(Uri.base.resolve('.packages'));
+
+  final PackageMap _flutterToolsPackageMap = PackageMap(p.join(
+    Cache.flutterRoot,
+    'packages',
+    'flutter_tools',
+    '.packages',
+  ));
+
+  /// Uri of the test package.
+  Uri get testUri => _flutterToolsPackageMap.map['test'];
 
   /// The test runner configuration.
   final Configuration _config;
 
+  @visibleForTesting
+  Configuration get config => _config;
+
   /// The underlying server.
   final shelf.Server _server;
+
+  @visibleForTesting
+  shelf.Server get server => _server;
 
   /// The URL for this server.
   Uri get url => _server.url;
@@ -191,6 +209,31 @@ class FlutterWebPlatform extends PlatformPlugin {
     } else {
       return shelf.Response.notFound('Not Found');
     }
+  }
+
+  FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) async {
+    if (request.requestedUri.pathSegments.first == 'packages') {
+      final Packages packages = await _packagesFuture;
+      final Uri fileUri = packages.resolve(Uri(
+        scheme: 'package',
+        pathSegments: request.requestedUri.pathSegments.skip(1),
+      ));
+      final String dirname = p.dirname(fileUri.toFilePath());
+      final String basename = p.basename(fileUri.toFilePath());
+      final shelf.Handler handler = createStaticHandler(dirname);
+      final shelf.Request modifiedRequest = shelf.Request(
+        request.method,
+        request.requestedUri.replace(path: basename),
+        protocolVersion: request.protocolVersion,
+        headers: request.headers,
+        handlerPath: request.handlerPath,
+        url: request.url.replace(path: basename),
+        encoding: request.encoding,
+        context: request.context,
+      );
+      return handler(modifiedRequest);
+    }
+    return shelf.Response.notFound('Not Found');
   }
 
   final bool updateGoldens;
