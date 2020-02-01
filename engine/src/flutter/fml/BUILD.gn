@@ -4,9 +4,9 @@
 
 if (is_fuchsia) {
   import("//build/fuchsia/sdk.gni")
-  import("$flutter_root/tools/fuchsia/fuchsia_archive.gni")
+  import("//flutter/tools/fuchsia/fuchsia_archive.gni")
 }
-import("$flutter_root/testing/testing.gni")
+import("//flutter/testing/testing.gni")
 
 source_set("fml") {
   sources = [
@@ -96,8 +96,8 @@ source_set("fml") {
   configs += [ "//third_party/icu:icu_config" ]
 
   public_configs = [
-    "$flutter_root:config",
-    "$flutter_root/common:flutter_config",
+    "//flutter:config",
+    "//flutter/common:flutter_config",
   ]
 
   libs = []
@@ -249,10 +249,10 @@ executable("fml_unittests") {
 
   deps = [
     ":fml_fixtures",
-    "$flutter_root/fml",
-    "$flutter_root/fml/dart",
-    "$flutter_root/runtime:libdart",
-    "$flutter_root/testing",
+    "//flutter/fml",
+    "//flutter/fml/dart",
+    "//flutter/runtime:libdart",
+    "//flutter/testing",
   ]
 
   if (is_fuchsia && using_fuchsia_sdk) {
@@ -278,8 +278,8 @@ executable("fml_benchmarks") {
   ]
 
   deps = [
-    "$flutter_root/benchmarking",
-    "$flutter_root/fml",
-    "$flutter_root/runtime:libdart",
+    "//flutter/benchmarking",
+    "//flutter/fml",
+    "//flutter/runtime:libdart",
   ]
 }

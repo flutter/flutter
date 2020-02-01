@@ -4,10 +4,10 @@
 
 import("//build/compiled_action.gni")
 import("//build/fuchsia/sdk.gni")
+import("//flutter/common/config.gni")
+import("//flutter/tools/fuchsia/dart.gni")
+import("//flutter/tools/fuchsia/dart_kernel.gni")
 import("//third_party/dart/utils/compile_platform.gni")
-import("$flutter_root/common/config.gni")
-import("$flutter_root/tools/fuchsia/dart.gni")
-import("$flutter_root/tools/fuchsia/dart_kernel.gni")
 
 dart_kernel("vmservice_product_aot_kernel") {
   kernel_platform_files = "../kernel:kernel_platform_files"

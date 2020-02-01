@@ -2,10 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/common/config.gni")
-import("$flutter_root/shell/gpu/gpu.gni")
-import("$flutter_root/shell/platform/embedder/embedder.gni")
-import("$flutter_root/testing/testing.gni")
+import("//flutter/common/config.gni")
+import("//flutter/shell/gpu/gpu.gni")
+import("//flutter/shell/platform/embedder/embedder.gni")
+import("//flutter/testing/testing.gni")
 
 shell_gpu_configuration("embedder_gpu_configuration") {
   enable_software = true
@@ -57,19 +57,19 @@ template("embedder_source_set") {
 
     deps = [
       ":embedder_gpu_configuration",
-      "$flutter_root/assets",
-      "$flutter_root/common",
-      "$flutter_root/flow",
-      "$flutter_root/fml",
-      "$flutter_root/lib/ui",
-      "$flutter_root/runtime:libdart",
-      "$flutter_root/shell/common",
-      "$flutter_root/third_party/tonic",
+      "//flutter/assets",
+      "//flutter/common",
+      "//flutter/flow",
+      "//flutter/fml",
+      "//flutter/lib/ui",
+      "//flutter/runtime:libdart",
+      "//flutter/shell/common",
+      "//flutter/third_party/tonic",
       "//third_party/dart/runtime/bin:dart_io_api",
       "//third_party/skia",
     ]
 
-    public_configs += [ "$flutter_root:config" ]
+    public_configs += [ "//flutter:config" ]
   }
 }
 
@@ -109,7 +109,7 @@ if (current_toolchain == host_toolchain) {
   executable("embedder_unittests") {
     testonly = true
 
-    configs += [ "$flutter_root:export_dynamic_symbols" ]
+    configs += [ "//flutter:export_dynamic_symbols" ]
 
     include_dirs = [ "." ]
 
@@ -129,13 +129,14 @@ if (current_toolchain == host_toolchain) {
     deps = [
       ":embedder",
       ":fixtures",
-      "$flutter_root/flow",
-      "$flutter_root/lib/ui",
-      "$flutter_root/runtime",
-      "$flutter_root/testing:dart",
-      "$flutter_root/testing:opengl",
-      "$flutter_root/testing:skia",
-      "$flutter_root/third_party/tonic",
+      "//flutter/flow",
+      "//flutter/lib/ui",
+      "//flutter/runtime",
+      "//flutter/testing:dart",
+      "//flutter/testing:opengl",
+      "//flutter/testing:skia",
+      "//flutter/third_party/tonic",
+      "//third_party/dart/runtime/bin:elf_loader",
       "//third_party/skia",
     ]
   }
@@ -154,7 +155,7 @@ shared_library("flutter_engine_library") {
     ":embedder",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }
 
 copy("copy_headers") {
@@ -191,7 +192,7 @@ if (is_mac && !embedder_for_target) {
   }
 
   action("copy_info_plist") {
-    script = "$flutter_root/build/copy_info_plist.py"
+    script = "//flutter/build/copy_info_plist.py"
     visibility = [ ":*" ]
     sources = [
       "assets/EmbedderInfo.plist",

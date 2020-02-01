@@ -18,16 +18,14 @@ source_set("flutter_glfw_headers") {
   public = _public_headers
 
   public_deps = [
-    "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
+    "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
   ]
 
-  configs += [
-    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
-  ]
+  configs +=
+      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
 
-  public_configs = [
-    "$flutter_root/shell/platform/common/cpp:relative_flutter_library_headers",
-  ]
+  public_configs =
+      [ "//flutter/shell/platform/common/cpp:relative_flutter_library_headers" ]
 }
 
 source_set("flutter_glfw") {
@@ -46,24 +44,23 @@ source_set("flutter_glfw") {
 
   defines = [ "USE_RAPID_JSON" ]
 
-  configs += [
-    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
-  ]
+  configs +=
+      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
 
   deps = [
     ":flutter_glfw_headers",
-    "$flutter_root/shell/platform/common/cpp:common_cpp",
-    "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper",
-    "$flutter_root/shell/platform/embedder:embedder_with_symbol_prefix",
-    "$flutter_root/shell/platform/glfw/client_wrapper:client_wrapper_glfw",
     "//build/secondary/third_party/glfw",
+    "//flutter/shell/platform/common/cpp:common_cpp",
+    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
+    "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
+    "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw",
     "//third_party/rapidjson",
   ]
 
   if (is_linux) {
     libs = [ "GL" ]
 
-    configs += [ "$flutter_root/shell/platform/linux/config:x11" ]
+    configs += [ "//flutter/shell/platform/linux/config:x11" ]
   } else if (is_mac) {
     libs = [
       "CoreVideo.framework",
@@ -80,6 +77,6 @@ copy("publish_headers_glfw") {
 
   # The GLFW header assumes the presence of the common headers.
   deps = [
-    "$flutter_root/shell/platform/common/cpp:publish_headers",
+    "//flutter/shell/platform/common/cpp:publish_headers",
   ]
 }

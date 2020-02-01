@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/shell/config.gni")
+import("//flutter/shell/config.gni")
 
 template("shell_gpu_configuration") {
   assert(defined(invoker.enable_software),
@@ -18,19 +18,19 @@ template("shell_gpu_configuration") {
     public_deps = []
 
     if (invoker.enable_software) {
-      public_deps += [ "$flutter_root/shell/gpu:gpu_surface_software" ]
+      public_deps += [ "//flutter/shell/gpu:gpu_surface_software" ]
     }
 
     if (invoker.enable_gl) {
-      public_deps += [ "$flutter_root/shell/gpu:gpu_surface_gl" ]
+      public_deps += [ "//flutter/shell/gpu:gpu_surface_gl" ]
     }
 
     if (invoker.enable_vulkan) {
-      public_deps += [ "$flutter_root/shell/gpu:gpu_surface_vulkan" ]
+      public_deps += [ "//flutter/shell/gpu:gpu_surface_vulkan" ]
     }
 
     if (invoker.enable_metal) {
-      public_deps += [ "$flutter_root/shell/gpu:gpu_surface_metal" ]
+      public_deps += [ "//flutter/shell/gpu:gpu_surface_metal" ]
     }
   }
 }

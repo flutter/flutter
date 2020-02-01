@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/testing/testing.gni")
+import("//flutter/testing/testing.gni")
 import("core_wrapper_files.gni")
 
 # Client library build for internal use by the shell implementation.
@@ -11,19 +11,17 @@ source_set("client_wrapper") {
   public = core_cpp_client_wrapper_includes
 
   deps = [
-    "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
+    "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
     "//third_party/rapidjson",
   ]
 
   defines = [ "USE_RAPID_JSON" ]
 
-  configs += [
-    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
-  ]
+  configs +=
+      [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
 
-  public_configs = [
-    "$flutter_root/shell/platform/common/cpp:relative_flutter_library_headers",
-  ]
+  public_configs =
+      [ "//flutter/shell/platform/common/cpp:relative_flutter_library_headers" ]
 }
 
 source_set("client_wrapper_library_stubs") {
@@ -35,7 +33,7 @@ source_set("client_wrapper_library_stubs") {
   defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
 
   public_deps = [
-    "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
+    "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
   ]
 }
 
@@ -61,7 +59,7 @@ executable("client_wrapper_unittests") {
     ":client_wrapper",
     ":client_wrapper_fixtures",
     ":client_wrapper_library_stubs",
-    "$flutter_root/testing",
+    "//flutter/testing",
 
     # TODO(chunhtai): Consider refactoring flutter_root/testing so that there's a testing
     # target that doesn't require a Dart runtime to be linked in.

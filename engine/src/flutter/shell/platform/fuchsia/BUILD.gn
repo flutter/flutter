@@ -3,9 +3,9 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
-import("$flutter_root/common/config.gni")
-import("$flutter_root/tools/fuchsia/dart.gni")
-import("$flutter_root/tools/fuchsia/fuchsia_host_bundle.gni")
+import("//flutter/common/config.gni")
+import("//flutter/tools/fuchsia/dart.gni")
+import("//flutter/tools/fuchsia/fuchsia_host_bundle.gni")
 
 if (using_fuchsia_sdk) {
   testonly = true
@@ -46,7 +46,7 @@ if (using_fuchsia_sdk) {
 
     _kernel_compiler_label = "dart:kernel_compiler($host_toolchain)"
     _frontend_server_label =
-        "$flutter_root/flutter_frontend_server:frontend_server($host_toolchain)"
+        "//flutter/flutter_frontend_server:frontend_server($host_toolchain)"
 
     deps = [
       _frontend_server_label,

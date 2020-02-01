@@ -44,8 +44,7 @@ template("dart_pkg_helper") {
       sdk_ext_mappings += invoker.sdk_ext_mappings
     }
 
-    script =
-        rebase_path("$flutter_root/build/dart/tools/dart_pkg.py", ".", "//")
+    script = rebase_path("//flutter/build/dart/tools/dart_pkg.py", ".", "//")
 
     entrypoints = []
     if (defined(invoker.apps)) {
@@ -62,8 +61,7 @@ template("dart_pkg_helper") {
     if (defined(invoker.sources)) {
       sources += invoker.sources
     } else if (defined(invoker.pkg_dir)) {
-      list_script =
-          rebase_path("$flutter_root/build/dart/tools/ls.py", ".", "//")
+      list_script = rebase_path("//flutter/build/dart/tools/ls.py", ".", "//")
       extra_flags += [ "--read_only" ]
       ls_sources = exec_script(list_script,
                                [
@@ -115,9 +113,7 @@ template("dart_pkg") {
     pubspec_yaml_path = rebase_path("pubspec.yaml")
   }
   dart_package_name_script =
-      rebase_path("$flutter_root/build/dart/tools/dart_package_name.py",
-                  ".",
-                  "//")
+      rebase_path("//flutter/build/dart/tools/dart_package_name.py", ".", "//")
   dart_package_name = exec_script(dart_package_name_script,
                                   [
                                     "--pubspec",

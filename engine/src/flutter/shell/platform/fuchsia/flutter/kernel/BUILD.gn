@@ -4,9 +4,9 @@
 
 import("//build/compiled_action.gni")
 import("//build/fuchsia/sdk.gni")
+import("//flutter/common/config.gni")
+import("//flutter/tools/fuchsia/dart.gni")
 import("//third_party/dart/utils/compile_platform.gni")
-import("$flutter_root/common/config.gni")
-import("$flutter_root/tools/fuchsia/dart.gni")
 
 compile_platform("kernel_platform_files") {
   single_root_scheme = "org-dartlang-sdk"
@@ -46,7 +46,7 @@ template("core_snapshot") {
     platform_dill =
         "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
     compilation_trace =
-        "$flutter_root/shell/platform/fuchsia/flutter/compilation_trace.txt"
+        "//flutter/shell/platform/fuchsia/flutter/compilation_trace.txt"
     inputs = [
       platform_dill,
       compilation_trace,

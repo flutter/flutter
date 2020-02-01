@@ -5,11 +5,11 @@
 assert(is_ios)
 
 import("//build/config/ios/ios_sdk.gni")
-import("$flutter_root/build/darwin/ios_app.gni")
-import("$flutter_root/common/config.gni")
-import("$flutter_root/shell/gpu/gpu.gni")
-import("$flutter_root/shell/platform/darwin/common/framework_shared.gni")
-import("$flutter_root/testing/testing.gni")
+import("//flutter/build/darwin/ios_app.gni")
+import("//flutter/common/config.gni")
+import("//flutter/shell/gpu/gpu.gni")
+import("//flutter/shell/platform/darwin/common/framework_shared.gni")
+import("//flutter/testing/testing.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
 
@@ -109,19 +109,19 @@ shared_library("create_flutter_framework_dylib") {
 
   deps = [
     ":ios_gpu_configuration",
-    "$flutter_root/common",
-    "$flutter_root/flow",
-    "$flutter_root/fml",
-    "$flutter_root/lib/ui",
-    "$flutter_root/runtime",
-    "$flutter_root/runtime:libdart",
-    "$flutter_root/shell/common",
-    "$flutter_root/shell/platform/darwin/common",
-    "$flutter_root/shell/platform/darwin/common:framework_shared",
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/lib/ui",
+    "//flutter/runtime",
+    "//flutter/runtime:libdart",
+    "//flutter/shell/common",
+    "//flutter/shell/platform/darwin/common",
+    "//flutter/shell/platform/darwin/common:framework_shared",
     "//third_party/skia",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 
   defines = [ "FLUTTER_FRAMEWORK=1" ]
 
@@ -155,7 +155,7 @@ copy("copy_dylib") {
 }
 
 action("copy_framework_info_plist") {
-  script = "$flutter_root/build/copy_info_plist.py"
+  script = "//flutter/build/copy_info_plist.py"
   visibility = [ ":*" ]
   sources = [
     "framework/Info.plist",
@@ -181,7 +181,7 @@ copy("copy_framework_module_map") {
 }
 
 action("copy_framework_headers") {
-  script = "$flutter_root/sky/tools/install_framework_headers.py"
+  script = "//flutter/sky/tools/install_framework_headers.py"
   visibility = [ ":*" ]
   sources = get_path_info(_flutter_framework_headers, "abspath") +
             framework_shared_headers

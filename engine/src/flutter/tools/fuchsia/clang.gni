@@ -27,7 +27,6 @@ if (is_fuchsia) {
 }
 
 clang_manifest = rebase_path("$clang_base/${clang_target}.manifest")
-clang_manifest_json =
-    exec_script("$flutter_root/tools/fuchsia/parse_manifest.py",
-                [ "--input=${clang_manifest}" ],
-                "json")
+clang_manifest_json = exec_script("//flutter/tools/fuchsia/parse_manifest.py",
+                                  [ "--input=${clang_manifest}" ],
+                                  "json")

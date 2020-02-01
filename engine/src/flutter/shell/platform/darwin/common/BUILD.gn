@@ -13,16 +13,16 @@ source_set("common") {
   ]
 
   deps = [
-    "$flutter_root/common",
-    "$flutter_root/flow",
-    "$flutter_root/fml",
-    "$flutter_root/runtime",
-    "$flutter_root/shell/common",
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/runtime",
+    "//flutter/shell/common",
     "//third_party/dart/runtime:dart_api",
     "//third_party/skia",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }
 
 # Shared framework headers end up in the same folder as platform-specific
@@ -46,7 +46,7 @@ source_set("framework_shared") {
   defines = [ "FLUTTER_FRAMEWORK" ]
 
   public_configs = [
-    "$flutter_root:config",
+    "//flutter:config",
     ":framework_relative_headers",
   ]
 }

@@ -16,5 +16,5 @@ source_set("version") {
     "DART_VERSION=\"$dart_version\"",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }

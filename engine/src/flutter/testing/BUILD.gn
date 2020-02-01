@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/shell/config.gni")
-import("//flutter/testing/testing.gni")
+import("testing.gni")
 
 source_set("testing_lib") {
   testonly = true
@@ -17,10 +17,10 @@ source_set("testing_lib") {
   ]
 
   public_deps = [
-    "$flutter_root/fml",
+    "//flutter/fml",
     "//third_party/googletest:gtest",
   ]
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }
 
 source_set("testing") {
@@ -47,11 +47,10 @@ source_set("dart") {
 
   public_deps = [
     ":testing",
-    "$flutter_root/common",
-    "$flutter_root/fml",
-    "$flutter_root/runtime",
-    "$flutter_root/runtime:libdart",
-    "$flutter_root/third_party/tonic",
+    "//flutter/common",
+    "//flutter/runtime",
+    "//flutter/runtime:libdart",
+    "//flutter/third_party/tonic",
     "//third_party/dart/runtime/bin:elf_loader",
     "//third_party/skia",
   ]
@@ -87,7 +86,7 @@ if (current_toolchain == host_toolchain) {
 
     deps = [
       ":skia",
-      "$flutter_root/fml",
+      "//flutter/fml",
       "//third_party/swiftshader_flutter:swiftshader",
     ]
   }
@@ -115,7 +114,7 @@ if (current_toolchain == host_toolchain) {
 
     deps = [
       ":skia",
-      "$flutter_root/fml",
+      "//flutter/fml",
     ]
   }
 

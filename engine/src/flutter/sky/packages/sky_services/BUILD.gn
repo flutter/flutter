@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/build/dart/rules.gni")
+import("//flutter/build/dart/rules.gni")
 
 if (!is_fuchsia) {
   copy("copy_sky_services_license") {

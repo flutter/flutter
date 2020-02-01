@@ -5,10 +5,10 @@
 assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
-import("$flutter_root/common/fuchsia_config.gni")
-import("$flutter_root/tools/fuchsia/dart.gni")
-import("$flutter_root/tools/fuchsia/fuchsia_archive.gni")
-import("$flutter_root/tools/fuchsia/fuchsia_libs.gni")
+import("//flutter/common/fuchsia_config.gni")
+import("//flutter/tools/fuchsia/dart.gni")
+import("//flutter/tools/fuchsia/fuchsia_archive.gni")
+import("//flutter/tools/fuchsia/fuchsia_libs.gni")
 
 template("runner") {
   assert(defined(invoker.product), "The parameter 'product' must be defined")
@@ -41,20 +41,20 @@ template("runner") {
     if (!invoker.product) {
       dart_deps += [
         "//third_party/dart/runtime/bin:dart_io_api",
-        "$flutter_root/shell/platform/fuchsia/runtime/dart/utils:utils",
+        "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils",
       ]
     } else {
       dart_deps += [
         "//third_party/dart/runtime/bin:dart_io_api_product",
-        "$flutter_root/shell/platform/fuchsia/runtime/dart/utils:utils_product",
+        "//flutter/shell/platform/fuchsia/runtime/dart/utils:utils_product",
       ]
     }
 
     deps = [
-             "$flutter_root/common",
-             "$flutter_root/fml",
-             "$flutter_root/shell/platform/fuchsia/dart-pkg/fuchsia",
-             "$flutter_root/shell/platform/fuchsia/dart-pkg/zircon",
+             "//flutter/common",
+             "//flutter/fml",
+             "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
+             "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
              "$fuchsia_sdk_root/pkg:async",
              "$fuchsia_sdk_root/pkg:async-cpp",
              "$fuchsia_sdk_root/pkg:async-default",
@@ -67,7 +67,7 @@ template("runner") {
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:trace-provider-so",
              "$fuchsia_sdk_root/pkg:vfs_cpp",
-             "$flutter_root/third_party/tonic",
+             "//flutter/third_party/tonic",
            ] + dart_deps + extra_deps
   }
 }
@@ -135,8 +135,8 @@ template("aot_runner_package") {
     ]
     if (!invoker.product) {
       deps += [
-        "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
         "vmservice:vmservice_snapshot",
+        "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
 
         # TODO(kaushikiska): Figure out how to get the profiler symbols for `libdart_precompiled_runtime`
         # "//topaz/runtime/dart/profiler_symbols:libdart_precompiled_runtime",
@@ -146,7 +146,7 @@ template("aot_runner_package") {
 
     binary = "dart_aot${product_suffix}_runner"
 
-    meta_dir = "$flutter_root/shell/platform/fuchsia/dart_runner/meta"
+    meta_dir = "//flutter/shell/platform/fuchsia/dart_runner/meta"
 
     meta = [
       {
@@ -164,7 +164,7 @@ template("aot_runner_package") {
               "/vmservice_snapshot.so")
       dart_profiler_symbols = rebase_path(
               get_label_info(
-                  "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
+                  "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
                   "target_gen_dir") + "/dart_aot_runner.dartprofilersymbols")
 
       inputs = [
@@ -206,14 +206,14 @@ template("jit_runner_package") {
 
     if (!invoker.product) {
       deps += [
-        "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_jit_runner",
+        "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_jit_runner",
         observatory_target,
       ]
     }
 
     binary = "dart_jit${product_suffix}_runner"
 
-    meta_dir = "$flutter_root/shell/platform/fuchsia/dart_runner/meta"
+    meta_dir = "//flutter/shell/platform/fuchsia/dart_runner/meta"
 
     libraries = common_libs
 
@@ -249,7 +249,7 @@ template("jit_runner_package") {
         {
           path = rebase_path(
                   get_label_info(
-                      "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_jit_runner",
+                      "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_jit_runner",
                       "target_gen_dir") + "/dart_jit_runner.dartprofilersymbols")
           dest = "dart_jit_runner.dartprofilersymbols"
         },

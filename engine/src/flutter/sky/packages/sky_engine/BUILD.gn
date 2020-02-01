@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
+import("//flutter/build/dart/rules.gni")
+import("//flutter/lib/ui/dart_ui.gni")
 import("//third_party/dart/sdk/lib/_http/http_sources.gni")
 import(
     "//third_party/dart/sdk/lib/_internal/js_runtime/interceptors_sources.gni")
@@ -21,8 +23,6 @@ import("//third_party/dart/sdk/lib/js_util/js_util_sources.gni")
 import("//third_party/dart/sdk/lib/math/math_sources.gni")
 import("//third_party/dart/sdk/lib/typed_data/typed_data_sources.gni")
 import("//third_party/dart/sdk/lib/wasm/wasm_sources.gni")
-import("$flutter_root/build/dart/rules.gni")
-import("$flutter_root/lib/ui/dart_ui.gni")
 
 if (!is_fuchsia) {
   copy("copy_sky_engine_authors") {

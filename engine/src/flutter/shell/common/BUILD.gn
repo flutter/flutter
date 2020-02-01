@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/shell/gpu/gpu.gni")
-import("$flutter_root/testing/testing.gni")
+import("//flutter/shell/gpu/gpu.gni")
+import("//flutter/testing/testing.gni")
 
 # Template to generate a dart embedder resource.cc file.
 # Required invoker inputs:
@@ -99,24 +99,24 @@ source_set("common") {
   ]
 
   deps = [
-    "$flutter_root/assets",
-    "$flutter_root/common",
-    "$flutter_root/flow",
-    "$flutter_root/fml",
-    "$flutter_root/lib/ui",
-    "$flutter_root/runtime",
+    "//flutter/assets",
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/lib/ui",
+    "//flutter/runtime",
     "//third_party/dart/runtime:dart_api",
     "//third_party/skia",
   ]
 
   public_deps = [
-    "$flutter_root/shell/version",
-    "$flutter_root/third_party/tonic",
-    "$flutter_root/third_party/txt",
+    "//flutter/shell/version",
+    "//flutter/third_party/tonic",
+    "//flutter/third_party/txt",
     "//third_party/rapidjson",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }
 
 template("shell_host_executable") {
@@ -131,15 +131,15 @@ template("shell_host_executable") {
 
     deps += [
       ":common",
-      "$flutter_root/fml",
-      "$flutter_root/lib/snapshot",
-      "$flutter_root/runtime",
-      "$flutter_root/runtime:libdart",
-      "$flutter_root/third_party/tonic",
+      "//flutter/fml",
+      "//flutter/lib/snapshot",
+      "//flutter/runtime",
+      "//flutter/runtime:libdart",
+      "//flutter/third_party/tonic",
       "//third_party/skia",
     ]
 
-    public_configs = [ "$flutter_root:export_dynamic_symbols" ]
+    public_configs = [ "//flutter:export_dynamic_symbols" ]
   }
 }
 
@@ -178,13 +178,13 @@ if (current_toolchain == host_toolchain) {
     deps = [
       ":shell_unittests_fixtures",
       ":shell_unittests_gpu_configuration",
-      "$flutter_root/common",
-      "$flutter_root/flow",
-      "$flutter_root/fml/dart",
-      "$flutter_root/lib/ui:ui",
-      "$flutter_root/shell",
-      "$flutter_root/testing:dart",
-      "$flutter_root/testing:opengl",
+      "//flutter/common",
+      "//flutter/flow",
+      "//flutter/fml/dart",
+      "//flutter/lib/ui:ui",
+      "//flutter/shell",
+      "//flutter/testing:dart",
+      "//flutter/testing:opengl",
     ]
   }
 
@@ -195,8 +195,8 @@ if (current_toolchain == host_toolchain) {
 
     deps = [
       ":shell_unittests_fixtures",
-      "$flutter_root/benchmarking",
-      "$flutter_root/testing:testing_lib",
+      "//flutter/benchmarking",
+      "//flutter/testing:testing_lib",
     ]
   }
 }

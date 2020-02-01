@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/fuchsia_config.gni")
+import("//flutter/tools/fuchsia/dart.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
-import("$flutter_root/common/fuchsia_config.gni")
-import("$flutter_root/tools/fuchsia/dart.gni")
 
 template("dart_kernel") {
   prebuilt_dart_action(target_name) {

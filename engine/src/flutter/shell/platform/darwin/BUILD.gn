@@ -4,7 +4,7 @@
 
 assert(is_mac || is_ios)
 
-import("$flutter_root/testing/testing.gni")
+import("//flutter/testing/testing.gni")
 
 group("darwin") {
   if (is_ios) {
@@ -34,15 +34,15 @@ source_set("flutter_channels") {
   ]
 
   deps = [
-    "$flutter_root/common",
-    "$flutter_root/flow",
-    "$flutter_root/fml",
-    "$flutter_root/runtime",
-    "$flutter_root/shell/common",
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/runtime",
+    "//flutter/shell/common",
     "//third_party/skia",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }
 
 test_fixtures("flutter_channels_fixtures") {
@@ -60,9 +60,9 @@ executable("flutter_channels_unittests") {
   deps = [
     ":flutter_channels",
     ":flutter_channels_fixtures",
-    "$flutter_root/testing",
+    "//flutter/testing",
     "//third_party/dart/runtime:libdart_jit",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }

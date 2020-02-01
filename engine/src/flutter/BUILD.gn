@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/common/config.gni")
+import("//flutter/common/config.gni")
 
 if (is_fuchsia) {
   import("//build/fuchsia/sdk.gni")
@@ -21,41 +21,41 @@ group("flutter") {
 
   if (!(is_fuchsia && using_fuchsia_sdk)) {
     public_deps += [
-      "$flutter_root/lib/snapshot:generate_snapshot_bin",
-      "$flutter_root/lib/snapshot:kernel_platform_files",
+      "//flutter/lib/snapshot:generate_snapshot_bin",
+      "//flutter/lib/snapshot:kernel_platform_files",
     ]
   }
 
   public_deps += [
-    "$flutter_root/shell/platform/embedder:flutter_engine",
-    "$flutter_root/sky",
+    "//flutter/shell/platform/embedder:flutter_engine",
+    "//flutter/sky",
   ]
 
   if (current_toolchain == host_toolchain) {
-    public_deps += [ "$flutter_root/tools/font-subset" ]
+    public_deps += [ "//flutter/tools/font-subset" ]
   }
 
   if (current_toolchain == host_toolchain) {
-    public_deps += [ "$flutter_root/shell/testing" ]
+    public_deps += [ "//flutter/shell/testing" ]
     public_deps += [ "//flutter/tools/const_finder" ]
   }
 
   if (is_fuchsia && using_fuchsia_sdk) {
     public_deps += [
-      "$flutter_root/shell/platform/fuchsia",
-      "$flutter_root/shell/testing($host_toolchain)",
+      "//flutter/shell/platform/fuchsia",
+      "//flutter/shell/testing($host_toolchain)",
     ]
   }
 
   if (!is_fuchsia && !is_fuchsia_host) {
     if (current_toolchain == host_toolchain) {
       public_deps += [
-        "$flutter_root/flutter_frontend_server:frontend_server",
+        "//flutter/flutter_frontend_server:frontend_server",
         "//third_party/dart:create_sdk",
       ]
 
       if (full_dart_sdk) {
-        public_deps += [ "$flutter_root/web_sdk" ]
+        public_deps += [ "//flutter/web_sdk" ]
       }
     }
   }
@@ -64,36 +64,36 @@ group("flutter") {
   if (current_toolchain == host_toolchain) {
     if (is_mac) {
       public_deps += [
-        "$flutter_root/shell/platform/darwin:flutter_channels_unittests",
-        "$flutter_root/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
+        "//flutter/shell/platform/darwin:flutter_channels_unittests",
+        "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
       ]
     }
 
     public_deps += [
-      "$flutter_root/flow:flow_unittests",
-      "$flutter_root/fml:fml_unittests",
-      "$flutter_root/lib/ui:ui_unittests",
-      "$flutter_root/runtime:runtime_unittests",
-      "$flutter_root/shell/common:shell_unittests",
-      "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper_unittests",
-      "$flutter_root/shell/platform/embedder:embedder_unittests",
-      "$flutter_root/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
-      "$flutter_root/testing:testing_unittests",
-      "$flutter_root/third_party/txt:txt_unittests",
+      "//flutter/flow:flow_unittests",
+      "//flutter/fml:fml_unittests",
+      "//flutter/lib/ui:ui_unittests",
+      "//flutter/runtime:runtime_unittests",
+      "//flutter/shell/common:shell_unittests",
+      "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_unittests",
+      "//flutter/shell/platform/embedder:embedder_unittests",
+      "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+      "//flutter/testing:testing_unittests",
+      "//flutter/third_party/txt:txt_unittests",
     ]
 
     if (is_win) {
       public_deps += [
-        "$flutter_root/shell/platform/windows:flutter_windows_unittests",
-        "$flutter_root/shell/platform/windows/client_wrapper:client_wrapper_windows_unittests",
+        "//flutter/shell/platform/windows:flutter_windows_unittests",
+        "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows_unittests",
       ]
     }
 
     if (!is_win) {
       public_deps += [
-        "$flutter_root/fml:fml_benchmarks",
-        "$flutter_root/shell/common:shell_benchmarks",
-        "$flutter_root/third_party/txt:txt_benchmarks",
+        "//flutter/fml:fml_benchmarks",
+        "//flutter/shell/common:shell_benchmarks",
+        "//flutter/third_party/txt:txt_benchmarks",
       ]
     }
   }
@@ -111,7 +111,7 @@ config("config") {
 config("export_dynamic_symbols") {
   if (is_linux || is_fuchsia) {
     inputs = [
-      "$flutter_root/common/exported_symbols.sym",
+      "//flutter/common/exported_symbols.sym",
     ]
     ldflags = [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
   }
@@ -121,7 +121,7 @@ group("dist") {
   testonly = true
 
   deps = [
-    "$flutter_root/sky/dist",
+    "//flutter/sky/dist",
   ]
 }
 
@@ -133,9 +133,9 @@ if (is_fuchsia) {
     testonly = true
 
     deps = [
-      "$flutter_root/flow:flow_tests",
-      "$flutter_root/fml:fml_tests",
-      "$flutter_root/shell/platform/fuchsia/flutter:flutter_runner_tests",
+      "//flutter/flow:flow_tests",
+      "//flutter/fml:fml_tests",
+      "//flutter/shell/platform/fuchsia/flutter:flutter_runner_tests",
     ]
   }
 }

@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/tools/fuchsia/clang.gni")
+import("//flutter/tools/fuchsia/clang.gni")
 
 fuchsia_sdk_base = "//fuchsia/sdk/$host_os/arch/$target_cpu"
 fuchsia_sdk_dist = "$fuchsia_sdk_base/dist"

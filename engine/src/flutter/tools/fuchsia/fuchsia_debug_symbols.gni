@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/common/fuchsia_config.gni")
+import("//flutter/common/fuchsia_config.gni")
 
 # The inputs to this template are 'binary_path' and a boolean 'unstripped'.
 # If 'unstripped' is specified, we append '.debug' to the symbols name.
@@ -19,7 +19,7 @@ template("_copy_debug_symbols") {
                              "testonly",
                            ])
 
-    script = "$flutter_root/tools/fuchsia/copy_debug_symbols.py"
+    script = "//flutter/tools/fuchsia/copy_debug_symbols.py"
 
     sources = [
       binary_path,

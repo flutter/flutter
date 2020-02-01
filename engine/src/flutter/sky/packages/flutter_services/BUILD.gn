@@ -4,6 +4,6 @@
 
 group("flutter_services") {
   deps = [
-    "$flutter_root/sky/packages/sky_services",
+    "//flutter/sky/packages/sky_services",
   ]
 }

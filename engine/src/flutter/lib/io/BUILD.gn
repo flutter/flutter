@@ -9,12 +9,12 @@ source_set("io") {
   ]
 
   deps = [
-    "$flutter_root/third_party/tonic",
+    "//flutter/third_party/tonic",
     "//third_party/dart/runtime:dart_api",
     "//third_party/dart/runtime/bin:dart_io_api",
   ]
 
   configs += [ "//third_party/dart/runtime:dart_config" ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 }

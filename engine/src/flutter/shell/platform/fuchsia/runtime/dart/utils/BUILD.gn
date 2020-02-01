@@ -5,7 +5,7 @@
 assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
-import("$flutter_root/common/config.gni")
+import("//flutter/common/config.gni")
 
 config("utils_config") {
   include_dirs = [ "../../.." ]
@@ -43,7 +43,7 @@ template("make_utils") {
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:vfs_cpp",
              "$fuchsia_sdk_root/pkg:zx",
-             "$flutter_root/third_party/tonic",
+             "//flutter/third_party/tonic",
            ]
 
     public_configs = [ ":utils_config" ]

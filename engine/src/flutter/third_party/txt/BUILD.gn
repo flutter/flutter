@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("$flutter_root/common/config.gni")
-import("$flutter_root/testing/testing.gni")
+import("//flutter/common/config.gni")
+import("//flutter/testing/testing.gni")
 
 declare_args() {
   flutter_use_fontconfig = false
@@ -129,7 +129,7 @@ source_set("txt") {
   public_configs = [ ":txt_config" ]
 
   public_deps = [
-    "$flutter_root/fml",
+    "//flutter/fml",
     "//third_party/harfbuzz",
     "//third_party/icu",
     "//third_party/skia",
@@ -156,7 +156,7 @@ source_set("txt") {
 
   if (is_mac || is_ios) {
     sources += [ "src/txt/platform_mac.mm" ]
-    deps += [ "$flutter_root/fml" ]
+    deps += [ "//flutter/fml" ]
   } else if (is_android) {
     sources += [ "src/txt/platform_android.cc" ]
   } else if (is_linux) {
@@ -172,7 +172,7 @@ source_set("txt") {
 
 txt_common_executable_deps = [
   "//third_party/dart/runtime:libdart_jit",  # For logging.
-  "$flutter_root/fml",  # For ICU initialization.
+  "//flutter/fml",  # For ICU initialization.
 ]
 
 source_set("txt_test_utils") {
@@ -183,7 +183,7 @@ source_set("txt_test_utils") {
 
   deps = [
     ":txt",
-    "$flutter_root/fml",
+    "//flutter/fml",
     "//third_party/skia",
   ]
 }
@@ -299,7 +299,7 @@ executable("txt_unittests") {
   deps = [
            ":txt",
            ":txt_test_utils",
-           "$flutter_root/testing:testing_lib",
+           "//flutter/testing:testing_lib",
            ":txt_fixtures",
          ] + txt_common_executable_deps
 }
@@ -318,7 +318,7 @@ executable("txt_benchmarks") {
   deps = [
            ":txt",
            ":txt_test_utils",
-           "$flutter_root/testing:testing_lib",
+           "//flutter/testing:testing_lib",
            "//third_party/benchmark",
            ":txt_fixtures",
          ] + txt_common_executable_deps

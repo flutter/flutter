@@ -4,8 +4,8 @@
 
 config("config") {
   include_dirs = [
-    "$flutter_root/third_party",
-    "$flutter_root",
+    "//flutter/third_party",
+    "//flutter",
   ]
 }
 

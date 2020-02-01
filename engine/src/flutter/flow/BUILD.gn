@@ -4,9 +4,9 @@
 
 if (is_fuchsia) {
   import("//build/fuchsia/sdk.gni")
-  import("$flutter_root/tools/fuchsia/fuchsia_archive.gni")
+  import("//flutter/tools/fuchsia/fuchsia_archive.gni")
 }
-import("$flutter_root/testing/testing.gni")
+import("//flutter/testing/testing.gni")
 
 source_set("flow") {
   sources = [
@@ -64,13 +64,13 @@ source_set("flow") {
     "texture.h",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [ "//flutter:config" ]
 
   public_deps = []
 
   deps = [
-    "$flutter_root/common",
-    "$flutter_root/fml",
+    "//flutter/common",
+    "//flutter/fml",
     "//third_party/skia",
   ]
 
@@ -119,7 +119,7 @@ source_set("flow_testing") {
 
   public_deps = [
     ":flow",
-    "$flutter_root/testing:skia",
+    "//flutter/testing:skia",
     "//third_party/googletest:gtest",
   ]
 }
@@ -160,9 +160,9 @@ executable("flow_unittests") {
     ":flow",
     ":flow_fixtures",
     ":flow_testing",
-    "$flutter_root/fml",
-    "$flutter_root/testing:skia",
-    "$flutter_root/testing:testing_lib",
+    "//flutter/fml",
+    "//flutter/testing:skia",
+    "//flutter/testing:testing_lib",
     "//third_party/dart/runtime:libdart_jit",  # for tracing
     "//third_party/googletest:gtest",
     "//third_party/skia",
@@ -181,23 +181,23 @@ if (is_fuchsia) {
 
     libraries = common_libs
 
-    meta_dir = "$flutter_root/testing/fuchsia/meta"
+    meta_dir = "//flutter/testing/fuchsia/meta"
     cmx_file = "$meta_dir/fuchsia_test.cmx"
 
     resources = [
       {
         path = rebase_path(
-                "$flutter_root/testing/resources/performance_overlay_gold_60fps.png")
+                "//flutter/testing/resources/performance_overlay_gold_60fps.png")
         dest = "flutter/testing/resources/performance_overlay_gold_60fps.png"
       },
       {
         path = rebase_path(
-                "$flutter_root/testing/resources/performance_overlay_gold_90fps.png")
+                "//flutter/testing/resources/performance_overlay_gold_90fps.png")
         dest = "flutter/testing/resources/performance_overlay_gold_90fps.png"
       },
       {
         path = rebase_path(
-                "$flutter_root/testing/resources/performance_overlay_gold_120fps.png")
+                "//flutter/testing/resources/performance_overlay_gold_120fps.png")
         dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
       },
     ]

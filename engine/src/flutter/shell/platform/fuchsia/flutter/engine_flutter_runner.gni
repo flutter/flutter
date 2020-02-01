@@ -89,18 +89,18 @@ template("flutter_runner") {
     # embedder API.
     flutter_deps = [
       "../flutter:fuchsia_gpu_configuration",
-      "$flutter_root/assets",
-      "$flutter_root/common",
-      "$flutter_root/flow",
-      "$flutter_root/lib/ui",
-      "$flutter_root/runtime",
-      "$flutter_root/third_party/txt",
-      "$flutter_root/vulkan",
-      "$flutter_root/fml",
-      "$flutter_root/shell/common",
+      "//flutter/assets",
+      "//flutter/common",
+      "//flutter/flow",
+      "//flutter/lib/ui",
+      "//flutter/runtime",
+      "//flutter/third_party/txt",
+      "//flutter/vulkan",
+      "//flutter/fml",
+      "//flutter/shell/common",
     ]
 
-    _fuchsia_platform = "$flutter_root/shell/platform/fuchsia"
+    _fuchsia_platform = "//flutter/shell/platform/fuchsia"
 
     # TODO(kaushikiska) evaluate if all of these are needed.
     fuchsia_deps = [
@@ -133,7 +133,7 @@ template("flutter_runner") {
              "$fuchsia_sdk_root/pkg:vfs_cpp",
              "$fuchsia_sdk_root/pkg:zx",
              "//third_party/skia",
-             "$flutter_root/third_party/tonic",
+             "//flutter/third_party/tonic",
            ] + fuchsia_deps + flutter_deps + extra_deps
 
     # The flags below are needed so that Dart's CPU profiler can walk the
