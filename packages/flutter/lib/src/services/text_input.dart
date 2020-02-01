@@ -413,12 +413,26 @@ class TextContentType {
   /// Initializes a TextContentType with the raw string value
   const TextContentType({this.rawValue, this.newPasswordRulesDescriptor});
 
+  /// Custom constructor for value that accepts suggestions for new passwords
+  ///
+  /// Corresponds to `UITextContentTypeNewPassword` on iOS
+  /// and `newPassword` on Android.
+  ///
+  /// Provide a [newPasswordRulesDescriptor] to customize the rules of new
+  /// password generation. Only iOS applications respect this descriptor.
+  ///
+  /// See: https://developer.apple.com/documentation/security/password_autofill/customizing_password_autofill_rules
+  const TextContentType.newPassword({this.rawValue = 'newPassword', this.newPasswordRulesDescriptor});
+
   /// The underlying string for content type
   ///
   /// On Android, this value is used as is to set the auto fill hint.
   ///
   /// On iOS, this value is mapped to a known UITextContentType value. If not known, attempts to
-  /// instantiate a UITextContentType with the provided raw value
+  /// instantiate a UITextContentType with the provided raw value.
+  ///
+  /// * Note that the iOS rawValue is different than the display value *
+  /// EX: UITextContentTypeTelephoneNumber == 'tel'
   final String rawValue;
 
   /// The descriptor to use when generating a new password for auto-fill
@@ -539,20 +553,6 @@ class TextContentType {
   /// Corresponds to `UITextContentTypePassword` on iOS
   /// and `password` on Android.
   static const TextContentType password = TextContentType(rawValue: 'password');
-
-  /// Accepts suggestions for new passwords
-  ///
-  /// Corresponds to `UITextContentTypeNewPassword` on iOS
-  /// and `newPassword` on Android.
-  ///
-  /// Provide a [newPasswordRulesDescriptor] to customize the rules of new
-  /// password generation. Only iOS applications respect this descriptor.
-  ///
-  /// See: https://developer.apple.com/documentation/security/password_autofill/customizing_password_autofill_rules
-  static TextContentType newPassword({String newPasswordRulesDescriptor}) {
-    TextContentType(rawValue: 'newPassword',
-        newPasswordRulesDescriptor: newPasswordRulesDescriptor);
-  }
 
   /// Accepts a one time code from an SMS message
   ///
