@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:meta/meta.dart';
 
+import '../base/io.dart';
 import '../base/logger.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../mdns_discovery.dart';
 import '../protocol_discovery.dart';
+import '../reporting/reporting.dart';
 
 /// A protocol for discovery of a vmservice on an attached iOS device with
 /// multiple fallbacks.
@@ -38,18 +40,18 @@ class FallbackDiscovery {
     @required MDnsObservatoryDiscovery mDnsObservatoryDiscovery,
     @required Logger logger,
     @required ProtocolDiscovery protocolDiscovery,
+    @required HttpClient httpClient,
   }) : _logger = logger,
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
-       _protocolDiscovery = protocolDiscovery;
+       _protocolDiscovery = protocolDiscovery,
+       _httpClient = httpClient;
 
   final DevicePortForwarder _portForwarder;
-
   final MDnsObservatoryDiscovery _mDnsObservatoryDiscovery;
-
   final Logger _logger;
-
   final ProtocolDiscovery _protocolDiscovery;
+  final HttpClient _httpClient;
 
   /// Attempt to discover the observatory port.
   Future<Uri> discover({
@@ -60,11 +62,30 @@ class FallbackDiscovery {
     @required int hostVmservicePort,
   }) async {
     try {
-      // TODO(jonahwilliams): determine if this succeeds even if there is nothing
-      // listening.
       final int hostPort = await _portForwarder.forward(assumedDevicePort, hostPort: hostVmservicePort);
-      UsageEvent('ios-mdns', 'precheck-success').send();
-      return Uri.parse('http://localhost:$hostPort');
+      final Uri assumedUri = Uri.parse('http://localhost:$hostPort');
+      // Attempt to connect to the vmservice with exponential backoff.
+      int attempts = 0;
+      int delaySeconds = 2;
+      while (attempts < 5) {
+        // Making a GET request to the forwarded URL should return an HTML
+        // response page, though we only care if it is 200 OK. There must
+        // be a version method/page that is more easily identifiable? We
+        // might otherwise connect to a random server.
+        final HttpClientRequest request = await _httpClient.getUrl(assumedUri);
+        final HttpClientResponse response = await request.close();
+        if (response.statusCode == HttpStatus.ok) {
+          final String responseBody = await response.transform(utf8.decoder).join('');
+          if (responseBody.contains('Dart')) {
+            _httpClient.close();
+            UsageEvent('ios-mdns', 'precheck-success').send();
+            return assumedUri;
+          }
+        }
+        await Future<void>.delayed(Duration(seconds: delaySeconds));
+        delaySeconds *= delaySeconds;
+        attempts += 1;
+      }
     } on Exception {
       UsageEvent('ios-mdns', 'precheck-failure').send();
       _logger.printTrace('Failed to connect directly, falling back to mDNS');

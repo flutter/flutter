@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -22,6 +23,7 @@ void main() {
   MockMDnsObservatoryDiscovery mockMDnsObservatoryDiscovery;
   MockPrototcolDiscovery mockPrototcolDiscovery;
   MockPortForwarder mockPortForwarder;
+  MockHttpClient mockHttpClient;
 
   setUp(() {
     logger = BufferLogger(
@@ -36,6 +38,7 @@ void main() {
       mDnsObservatoryDiscovery: mockMDnsObservatoryDiscovery,
       portForwarder: mockPortForwarder,
       protocolDiscovery: mockPrototcolDiscovery,
+      httpClient: mockHttpClient,
     );
   });
 
@@ -99,3 +102,4 @@ void main() {
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockPrototcolDiscovery extends Mock implements ProtocolDiscovery {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
+class MockHttpClient extends Mock implements HttpClient {}

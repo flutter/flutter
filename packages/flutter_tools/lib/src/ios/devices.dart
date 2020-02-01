@@ -364,11 +364,7 @@ class IOSDevice extends Device {
     try {
       ProtocolDiscovery observatoryDiscovery;
       if (debuggingOptions.debuggingEnabled) {
-        // Debugging is enabled, look for the observatory server port post launch.
         globals.printTrace('Debugging is enabled, connecting to observatory');
-
-        // TODO(danrubel): The Android device class does something similar to this code below.
-        // The various Device subclasses should be refactored and common code moved into the superclass.
         observatoryDiscovery = ProtocolDiscovery.observatory(
           getLogReader(app: package),
           portForwarder: portForwarder,
@@ -393,12 +389,14 @@ class IOSDevice extends Device {
       if (!debuggingOptions.debuggingEnabled) {
         return LaunchResult.succeeded();
       }
+
       globals.printTrace('Application launched on the device. Waiting for observatory port.');
       final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
         logger: globals.logger,
         mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
-        protocolDiscovery: observatoryDiscovery
+        protocolDiscovery: observatoryDiscovery,
+        httpClient: HttpClient(),
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
