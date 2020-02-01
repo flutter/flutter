@@ -408,69 +408,176 @@ enum TextCapitalization {
 }
 
 /// Configures how the platform will offer auto-fill suggestions for the input
-enum TextContentType {
+class TextContentType {
+
+  /// Initializes a TextContentType with the raw string value
+  const TextContentType({this.rawValue, this.newPasswordRulesDescriptor});
+
+  /// The underlying string for content type
+  ///
+  /// On Android, this value is used as is to set the auto fill hint.
+  ///
+  /// On iOS, this value is mapped to a known UITextContentType value. If not known, attempts to
+  /// instantiate a UITextContentType with the provided raw value
+  final String rawValue;
+
+  /// The descriptor to use when generating a new password for auto-fill
+  final String newPasswordRulesDescriptor;
+
   /// Accepts full name
-  name,
+  ///
+  /// Corresponds to `UITextContentTypeName` on iOS
+  /// and `personName` on Android.
+  static const TextContentType name = TextContentType(rawValue: 'personName');
 
   /// Accepts name prefix (Mr., Mrs., etc)
-  namePrefix,
+  ///
+  /// Corresponds to `UITextContentTypeNamePrefix` on iOS
+  /// and `personNamePrefix` on Android.
+  static const TextContentType namePrefix = TextContentType(rawValue: 'personNamePrefix');
 
   /// Accepts first name
-  givenName,
+  ///
+  /// Corresponds to `UITextContentTypeGivenName` on iOS
+  /// and `personGivenName` on Android.
+  static const TextContentType givenName = TextContentType(rawValue: 'personGivenName');
 
   /// Accepts middle name
-  middleName,
+  ///
+  /// Corresponds to `UITextContentTypeMiddleName` on iOS
+  /// and `personMiddleName` on Android.
+  static const TextContentType middleName = TextContentType(rawValue: 'personMiddleName');
 
   /// Accepts last name
-  familyName,
+  ///
+  /// Corresponds to `UITextContentTypeFamilyName` on iOS
+  /// and `personFamilyName` on Android.
+  static const TextContentType familyName = TextContentType(rawValue: 'personFamilyName');
 
   /// Accepts name suffix (Jr.)
-  nameSuffix,
+  ///
+  /// Corresponds to `UITextContentTypeNameSuffix` on iOS
+  /// and `personNameSuffix` on Android.
+  static const TextContentType nameSuffix = TextContentType(rawValue: 'personNameSuffix');
 
   /// Accepts a full street address
-  fullStreetAddress,
+  ///
+  /// Corresponds to `UITextContentTypeFullStreetAddress` on iOS
+  /// and `postalAddress` on Android.
+  static const TextContentType fullStreetAddress = TextContentType(rawValue: 'postalAddress');
 
   /// Accepts the first line of an address
-  addressLine1,
+  ///
+  /// Corresponds to `UITextContentTypeStreetAddressLine1` on iOS
+  /// and `streetAddress` on Android.
+  static const TextContentType addressLine1 = TextContentType(rawValue: 'streetAddress');
 
   /// Accepts the second line of an address
-  addressLine2,
+  ///
+  /// Corresponds to `UITextContentTypeStreetAddressLine2` on iOS
+  /// and `extendedAddress` on Android.
+  static const TextContentType addressLine2 = TextContentType(rawValue: 'extendedAddress');
 
   /// Accepts an address city/locality
-  addressCity,
+  ///
+  /// Corresponds to `UITextContentTypeAddressCity` on iOS
+  /// and `addressLocality` on Android.
+  static const TextContentType addressCity = TextContentType(rawValue: 'addressLocality');
 
   /// Accepts an address state/region
-  addressState,
+  ///
+  /// Corresponds to `UITextContentTypeAddressState` on iOS
+  /// and `addressRegion` on Android.
+  static const TextContentType addressState = TextContentType(rawValue: 'addressRegion');
 
   /// Accepts a country name
-  countryName,
+  ///
+  /// Corresponds to `UITextContentTypeCountryName` on iOS
+  /// and `addressCountry` on Android.
+  static const TextContentType countryName = TextContentType(rawValue: 'addressCountry');
 
   /// Accepts a postal code
-  postalCode,
+  ///
+  /// Corresponds to `UITextContentTypePostalCode` on iOS
+  /// and `postalCode` on Android.
+  static const TextContentType postalCode = TextContentType(rawValue: 'postalCode');
 
   /// Accepts a phone number
-  telephoneNumber,
-
-  /// Accepts an email address
-  emailAddress,
+  ///
+  /// Corresponds to `UITextContentTypeTelephoneNumber` on iOS
+  /// and `phoneNumber` on Android.
+  static const TextContentType phoneNumber = TextContentType(rawValue: 'phoneNumber');
+  
+  /// Accepts and email address
+  ///
+  /// Corresponds to `UITextContentTypeEmailAddress` on iOS
+  /// and `emailAddress` on Android.
+  static const TextContentType emailAddress = TextContentType(rawValue: 'emailAddress');
 
   /// Accepts a url
-  url,
+  ///
+  /// Corresponds to `UITextContentTypeURL` on iOS.
+  static const TextContentType url = TextContentType(rawValue: 'url');
 
   /// Accepts a credit card number
-  creditCardNumber,
+  ///
+  /// Corresponds to `UITextContentTypeCreditCardNumber` on iOS
+  /// and `creditCardNumber` on Android.
+  static const TextContentType creditCardNumber = TextContentType(rawValue: 'creditCardNumber');
 
   /// Accepts a username
-  username,
+  ///
+  /// Corresponds to `UITextContentTypeUsername` on iOS
+  /// and `username` on Android.
+  static const TextContentType username = TextContentType(rawValue: 'username');
 
   /// Accepts a password
-  password,
+  ///
+  /// Corresponds to `UITextContentTypePassword` on iOS
+  /// and `password` on Android.
+  static const TextContentType password = TextContentType(rawValue: 'password');
 
   /// Accepts suggestions for new passwords
-  newPassword,
+  ///
+  /// Corresponds to `UITextContentTypeNewPassword` on iOS
+  /// and `newPassword` on Android.
+  ///
+  /// Provide a [newPasswordRulesDescriptor] to customize the rules of new
+  /// password generation. Only iOS applications respect this descriptor.
+  ///
+  /// See: https://developer.apple.com/documentation/security/password_autofill/customizing_password_autofill_rules
+  static TextContentType newPassword({String newPasswordRulesDescriptor}) {
+    TextContentType(rawValue: 'newPassword',
+        newPasswordRulesDescriptor: newPasswordRulesDescriptor);
+  }
 
   /// Accepts a one time code from an SMS message
-  oneTimeCode
+  ///
+  /// Corresponds to `UITextContentTypeOneTimeCode` on iOS
+  /// and `smsOTPCode` on Android.
+  static const TextContentType oneTimeCode = TextContentType(rawValue: 'smsOTPCode');
+
+  // Enum value name, this is what enum.toString() would normally return.
+  String get _name => 'TextContentType.$rawValue';
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'name': _name,
+      'rawValue': rawValue,
+      'newPasswordRulesDescriptor': newPasswordRulesDescriptor,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TextContentType
+        && other.rawValue == rawValue
+        && other.newPasswordRulesDescriptor == newPasswordRulesDescriptor;
+  }
+
+  @override
+  int get hashCode => hashValues(rawValue, newPasswordRulesDescriptor);
 }
 
 /// Controls the visual appearance of the text input control.
@@ -530,12 +637,15 @@ class TextInputConfiguration {
   /// Defaults to true.
   final bool autocorrect;
 
+  /// {@template flutter.services.textInput.textContentType}
   /// Specifies the expected input type to inform the platform's auto-fill system
   ///
   /// Defaults to null.
   ///
   /// See also:
   ///  * <https://developer.apple.com/documentation/uikit/uitextcontenttype>
+  ///  * <https://developer.android.com/guide/topics/text/autofill-optimize>
+  /// {@endtemplate}
   final TextContentType textContentType;
 
   /// {@template flutter.services.textInput.smartDashesType}
@@ -639,7 +749,7 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
-      'textContentType': textContentType.toString(),
+      'textContentType': textContentType.toJson(),
     };
   }
 }

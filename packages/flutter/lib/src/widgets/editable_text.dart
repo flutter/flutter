@@ -523,9 +523,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool autocorrect;
 
-  /// Specifies the expected input type to inform the platform's auto-fill system
-  ///
-  /// Defaults to null.
+  /// {@macro flutter.services.textInput.textContentType}
   final TextContentType textContentType;
 
   /// {@macro flutter.services.textInput.smartDashesType}
