@@ -5,7 +5,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:mockito/mockito.dart';
 
 void main() {
@@ -140,48 +139,80 @@ void main() {
 
   testWidgets('Leading auto-populates with back button with previous title', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: Placeholder(),
+      CupertinoApp(
+        title: PAGE_1,
+        home:const Placeholder(),
+          onGenerateRoute: (RouteSettings settings) {
+            switch(settings.name){
+              case 'page2route':
+                return buildCupertinoPageRouteWithNavBar(PAGE_2, settings:settings);
+              case 'page4route':
+                return buildCupertinoPageRouteWithNavBar(PAGE_4, settings:settings);
+              case 'page5route':
+                return buildCupertinoPageRouteWithNavBar(PAGE_5, settings:settings);
+              case 'page6route':
+                return buildCupertinoPageRouteWithNavBar(PAGE_6, settings:settings);
+            }
+            throw Exception('Unknown test route');
+          }
       ),
     );
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
-        title: 'An iPod',
-        builder: (BuildContext context) {
-          return const CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(),
-            child: Placeholder(),
-          );
-        },
-      ),
+    // All '...removeUntil' navigator calls will lead to this route
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('page2route');
+
+    // Check that all Navigator 'push...' methods properly set previous route title at back button leading
+    tester.state<NavigatorState>(find.byType(Navigator)).push(buildCupertinoPageRouteWithNavBar(PAGE_3));
+
+    await pumpAndWait(tester);
+
+    checkCurrentPageTitle(PAGE_3, tester);
+    checkPreviousPageTitle(PAGE_2, tester);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushAndRemoveUntil(
+        buildCupertinoPageRouteWithNavBar(PAGE_4), ModalRoute.withName('page2route')
     );
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await pumpAndWait(tester);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
-        title: 'A Phone',
-        builder: (BuildContext context) {
-          return const CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(),
-            child: Placeholder(),
-          );
-        },
-      ),
+    checkCurrentPageTitle(PAGE_4, tester);
+    checkPreviousPageTitle(PAGE_2, tester);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamedAndRemoveUntil(
+        'page4route', ModalRoute.withName('page2route')
     );
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await pumpAndWait(tester);
 
-    expect(find.widgetWithText(CupertinoNavigationBar, 'A Phone'), findsOneWidget);
-    expect(tester.getCenter(find.text('A Phone')).dx, 400.0);
+    checkCurrentPageTitle(PAGE_4, tester);
+    checkPreviousPageTitle(PAGE_2, tester);
 
-    // Also shows the previous page's title next to the back button.
-    expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
-    // 2 paddings + 1 ahem character at font size 34.0.
-    expect(tester.getTopLeft(find.text('An iPod')).dx, 8.0 + 34.0 + 6.0);
+    tester.state<NavigatorState>(find.byType(Navigator)).pushReplacement(
+        buildCupertinoPageRouteWithNavBar(PAGE_5)
+    );
+
+    await pumpAndWait(tester);
+
+    checkCurrentPageTitle(PAGE_5, tester);
+    checkPreviousPageTitle(PAGE_2, tester);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushReplacementNamed(
+        'page5route'
+    );
+
+    await pumpAndWait(tester);
+
+    checkCurrentPageTitle(PAGE_5, tester);
+    checkPreviousPageTitle(PAGE_2, tester);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).popAndPushNamed(
+        'page6route'
+    );
+
+    await pumpAndWait(tester);
+
+    checkCurrentPageTitle(PAGE_6, tester);
+    checkPreviousPageTitle(PAGE_2, tester);
   });
 
   testWidgets('Previous title is correct on first transition frame', (WidgetTester tester) async {
@@ -1054,6 +1085,18 @@ void main() {
   });
 }
 
+void checkPreviousPageTitle(String previousPageTitle, WidgetTester tester) {
+  // Also shows the previous page's title next to the back button.
+  expect(find.widgetWithText(CupertinoButton, previousPageTitle), findsOneWidget);
+  // 2 paddings + 1 ahem character at font size 34.0.
+  expect(tester.getTopLeft(find.text(previousPageTitle)).dx, 8.0 + 34.0 + 6.0);
+}
+
+void checkCurrentPageTitle(String currentPageTitle, WidgetTester tester) {
+  expect(find.widgetWithText(CupertinoNavigationBar, currentPageTitle), findsOneWidget);
+  expect(tester.getCenter(find.text(currentPageTitle)).dx, 400.0);
+}
+
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
 class PopupObserver extends NavigatorObserver {
@@ -1078,4 +1121,28 @@ class DialogObserver extends NavigatorObserver {
     }
     super.didPush(route, previousRoute);
   }
+}
+
+CupertinoPageRoute<void> buildCupertinoPageRouteWithNavBar(String titleText, {RouteSettings settings = const RouteSettings()}) =>
+    CupertinoPageRoute<void>(
+      title: titleText,
+      settings: settings,
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(),
+          child: Placeholder(),
+        );
+      },
+    );
+// Rote title for auto-populate with title test
+const String PAGE_1 = 'page_1',
+    PAGE_2 = 'page_2',
+    PAGE_3 = 'page_3',
+    PAGE_4 = 'page_4',
+    PAGE_5 = 'page_5',
+    PAGE_6 = 'page_6';
+
+Future pumpAndWait(WidgetTester tester) async{
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 500));
 }
