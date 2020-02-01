@@ -41,6 +41,10 @@ class ExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
+    this.headerColorTweenBegin,
+    this.headerColorTweenEnd,
+    this.iconColorTweenBegin,
+    this.iconColorTweenEnd,
   }) : assert(initiallyExpanded != null),
        super(key: key);
 
@@ -79,6 +83,22 @@ class ExpansionTile extends StatefulWidget {
 
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
+
+  /// The color of the header when the tile is collapsed.
+  /// Default value is theme.textTheme.subtitle1.color
+  final Color headerColorTweenBegin;
+
+  /// The color of the header when the tile is expanded.
+  /// Default value is theme.accentColor
+  final Color headerColorTweenEnd;
+
+  /// The color of the icon when the tile is collapsed.
+  /// Default value is theme.unselectedWidgetColor
+  final Color iconColorTweenBegin;
+
+  /// The color of the icon when the tile is expanded.
+  /// Default value is theme.accentColor;
+  final Color iconColorTweenEnd;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -190,11 +210,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ThemeData theme = Theme.of(context);
     _borderColorTween.end = theme.dividerColor;
     _headerColorTween
-      ..begin = theme.textTheme.subtitle1.color
-      ..end = theme.accentColor;
+      ..begin = widget.headerColorTweenBegin ?? theme.textTheme.subtitle1.color
+      ..end = widget.headerColorTweenEnd ?? theme.accentColor;
     _iconColorTween
-      ..begin = theme.unselectedWidgetColor
-      ..end = theme.accentColor;
+      ..begin = widget.iconColorTweenBegin ?? theme.unselectedWidgetColor
+      ..end = widget.iconColorTweenEnd ?? theme.accentColor;
     _backgroundColorTween.end = widget.backgroundColor;
     super.didChangeDependencies();
   }
