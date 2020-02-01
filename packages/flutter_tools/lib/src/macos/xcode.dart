@@ -424,6 +424,9 @@ class XCDevice {
     if (error.containsKey('description')) {
       final String description = error['description'] as String;
       errorMessage.write(description);
+      if (!description.endsWith('.')) {
+        errorMessage.write('.');
+      }
     } else {
       errorMessage.write('Xcode pairing error.');
     }

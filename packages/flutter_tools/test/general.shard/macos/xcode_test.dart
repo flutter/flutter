@@ -390,7 +390,7 @@ void main() {
         expect(await xcdevice.getDiagnostics(), isEmpty);
       });
 
-      testUsingContext('returns error message with name', () async {
+      testUsingContext('returns error message', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
 
         const String xcdevicePath = '/path/to/xcdevice';
@@ -441,7 +441,7 @@ void main() {
     "error" : {
       "code" : -9,
       "failureReason" : "",
-      "description" : "iPhone is not paired with your computer.",
+      "description" : "iPhone is not paired with your computer",
       "domain" : "com.apple.platform.iphoneos"
     }
   },
@@ -468,9 +468,9 @@ void main() {
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<String> errors = await xcdevice.getDiagnostics();
         expect(errors, hasLength(3));
-        expect(errors[0], '"An iPhone (Space Gray)" error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)');
-        expect(errors[1], '"iPhone" error: iPhone is not paired with your computer. (code -9)');
-        expect(errors[2], 'Xcode pairing error (code -13)');
+        expect(errors[0], 'Error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)');
+        expect(errors[1], 'Error: iPhone is not paired with your computer. (code -9)');
+        expect(errors[2], 'Error: Xcode pairing error. (code -13)');
       }, overrides: <Type, Generator>{
         Platform: () => macPlatform,
       });
