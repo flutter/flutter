@@ -739,6 +739,7 @@ void main() {
     expect(state.didChangeDependenciesCount, 3);
     expect(state.deactivatedCount, 2);
   });
+
   testWidgets('StatefulElement subclass can decorate State.build', (WidgetTester tester) async {
     bool isDidChangeDependenciesDecorated;
     bool isBuildDecorated;
@@ -765,11 +766,17 @@ void main() {
 }
 
 class Decorate extends StatefulWidget {
-  const Decorate({Key key, this.didChangeDependencies, this.build}) : super(key: key);
+  const Decorate({
+    Key key,
+    @required this.didChangeDependencies,
+    @required this.build
+  }) :
+    assert(didChangeDependencies != null),
+    assert(build != null),
+    super(key: key);
 
   final void Function(bool isInBuild) didChangeDependencies;
   final void Function(bool isInBuild) build;
-
 
   @override
   _DecorateState createState() => _DecorateState();
@@ -798,12 +805,12 @@ class _DecorateState extends State<Decorate> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    widget.didChangeDependencies?.call((context as DecorateElement).isDecorated);
+    widget.didChangeDependencies.call((context as DecorateElement).isDecorated);
   }
   @override
   Widget build(covariant DecorateElement context) {
     context.dependOnInheritedWidgetOfExactType<Inherited>();
-    widget.build?.call(context.isDecorated);
+    widget.build.call(context.isDecorated);
     return Container();
   }
 }
