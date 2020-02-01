@@ -230,12 +230,12 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('save debugging info is enabled when an output directory is provided', () async {
+    testUsingContext('--split-debug-info is enabled when an output directory is provided', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
       await expectLater(() async {
-        await runBuildApkCommand(projectPath, arguments: <String>['--save-debugging-info=${tempDir.path}']);
+        await runBuildApkCommand(projectPath, arguments: <String>['--split-debug-info=${tempDir.path}']);
       }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
 
       verify(mockProcessManager.start(
