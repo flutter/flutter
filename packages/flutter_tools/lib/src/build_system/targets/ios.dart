@@ -223,6 +223,7 @@ abstract class IosAssetBundle extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App'),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
   ];
 
   @override
@@ -263,7 +264,7 @@ abstract class IosAssetBundle extends Target {
           .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
     } else {
       environment.buildDir.childDirectory('App.framework').childFile('App')
-        .copySync(frameworkDirectory.childFile('app').path);
+        .copySync(frameworkDirectory.childFile('App').path);
     }
 
     // Copy the assets.
@@ -272,6 +273,7 @@ abstract class IosAssetBundle extends Target {
 
 
     // Copy the plist from either the project or module.
+    // TODO(jonahwilliams): add plist to inputs
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final Directory plistRoot = flutterProject.isModule
       ? flutterProject.ios.ephemeralDirectory
