@@ -174,20 +174,20 @@ class IOSDevice extends Device {
     if (!globals.platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on Mac OS.');
     }
-    if (!iMobileDevice.isInstalled) {
+    if (!globals.iMobileDevice.isInstalled) {
       return <IOSDevice>[];
     }
 
     final List<IOSDevice> devices = <IOSDevice>[];
-    for (String id in (await iMobileDevice.getAvailableDeviceIDs()).split('\n')) {
+    for (String id in (await globals.iMobileDevice.getAvailableDeviceIDs()).split('\n')) {
       id = id.trim();
       if (id.isEmpty) {
         continue;
       }
 
       try {
-        final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
-        final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
+        final String deviceName = await globals.iMobileDevice.getInfoForDevice(id, 'DeviceName');
+        final String sdkVersion = await globals.iMobileDevice.getInfoForDevice(id, 'ProductVersion');
         devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
       } on IOSDeviceNotFoundError catch (error) {
         // Unable to find device with given udid. Possibly a network device.
@@ -283,7 +283,7 @@ class IOSDevice extends Device {
       String cpuArchitecture;
 
       try {
-        cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
+        cpuArchitecture = await globals.iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
       } on IOSDeviceNotFoundError catch (e) {
         globals.printError(e.message);
         return LaunchResult.failed();
@@ -460,11 +460,11 @@ class IOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  bool get supportsScreenshot => iMobileDevice.isInstalled;
+  bool get supportsScreenshot => globals.iMobileDevice.isInstalled;
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await iMobileDevice.takeScreenshot(outputFile);
+    await globals.iMobileDevice.takeScreenshot(outputFile);
   }
 
   @override
@@ -610,7 +610,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     if (device.majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
       return;
     }
-    iMobileDevice.startLogger(device.id).then<void>((Process process) {
+    globals.iMobileDevice.startLogger(device.id).then<void>((Process process) {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {

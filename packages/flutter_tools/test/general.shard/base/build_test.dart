@@ -326,7 +326,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
-         '--strip',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         '--no-causal-async-stacks',

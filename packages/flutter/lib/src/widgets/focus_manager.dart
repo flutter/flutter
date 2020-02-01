@@ -657,7 +657,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Has no effect on nodes that return true from [hasFocus], but false from
   /// [hasPrimaryFocus].
   ///
-  /// if [focusPrevious] is true, then rather than losing all focus, the focus
+  /// If [focusPrevious] is true, then rather than losing all focus, the focus
   /// will be moved to the node that the [enclosingScope] thinks should have it,
   /// based on its history of nodes that were set as first focus on it using
   /// [FocusScopeNode.setFirstFocus].

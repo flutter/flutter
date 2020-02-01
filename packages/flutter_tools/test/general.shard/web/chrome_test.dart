@@ -23,12 +23,13 @@ void main() {
 
   setUp(() {
     final MockPlatform platform = MockPlatform();
+    final MockOperatingSystemUtils os = MockOperatingSystemUtils();
     exitCompleter = Completer<int>.sync();
     when(platform.isWindows).thenReturn(false);
     testbed = Testbed(overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Platform: () => platform,
-      OperatingSystemUtils: () => MockOperatingSystemUtils(),
+      OperatingSystemUtils: () => os,
     }, setup: () {
       when(os.findFreePort()).thenAnswer((Invocation invocation) async {
         return 1234;

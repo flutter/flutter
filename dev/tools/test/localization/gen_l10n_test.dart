@@ -615,7 +615,7 @@ void main() {
       'Title',
       locale: _localeName,
       name: 'title',
-      desc: r'Title for the application'
+      desc: 'Title for the application'
     );
   }
 ''');
@@ -657,10 +657,10 @@ void main() {
         generator.classMethods.first,
         '''  String itemNumber(Object value) {
     return Intl.message(
-      \'Item \$value\',
+      'Item \${value}',
       locale: _localeName,
       name: 'itemNumber',
-      desc: r\'Item placement in list.\',
+      desc: 'Item placement in list.',
       args: <Object>[value]
     );
   }
@@ -710,10 +710,10 @@ void main() {
 
     String springBegins(Object springStartDate) {
       return Intl.message(
-        \'Spring begins on \$springStartDate\',
+        'Spring begins on \${springStartDate}',
         locale: _localeName,
-        name: \'springBegins\',
-        desc: r\'The first day of spring\',
+        name: 'springBegins',
+        desc: 'The first day of spring',
         args: <Object>[springStartDate]
       );
     }
@@ -837,10 +837,10 @@ void main() {
 
     String springGreetings(Object springStartDate, Object helloWorld) {
       return Intl.message(
-        \'Since it\' "\'" r\'s \$springStartDate, it\' "\'" r\'s finally spring! \$helloWorld!\',
+        "Since it's \${springStartDate}, it's finally spring! \${helloWorld}!",
         locale: _localeName,
-        name: \'springGreetings\',
-        desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
+        name: 'springGreetings',
+        desc: "A realization that it's finally the spring season, followed by a greeting.",
         args: <Object>[springStartDate, helloWorld]
       );
     }
@@ -897,10 +897,10 @@ void main() {
 
     String springRange(Object springStartDate, Object springEndDate) {
       return Intl.message(
-        \'Spring begins on \$springStartDate and ends on \$springEndDate\',
+        'Spring begins on \${springStartDate} and ends on \${springEndDate}',
         locale: _localeName,
-        name: \'springRange\',
-        desc: r\'The range of dates for spring in the year\',
+        name: 'springRange',
+        desc: 'The range of dates for spring in the year',
         args: <Object>[springStartDate, springEndDate]
       );
     }
@@ -954,10 +954,10 @@ void main() {
       locale: _localeName,
       name: \'helloWorlds\',
       args: <Object>[count, currentDate],
-      one: \'Hello World, today is \$currentDateString\',
-      two: \'Hello two worlds, today is \$currentDateString\',
-      many: \'Hello all \$count worlds, today is \$currentDateString\',
-      other: \'Hello other \$count worlds, today is \$currentDateString\'
+      one: \'Hello World, today is \${currentDateString}\',
+      two: \'Hello two worlds, today is \${currentDateString}\',
+      many: \'Hello all \${count} worlds, today is \${currentDateString}\',
+      other: \'Hello other \${count} worlds, today is \${currentDateString}\'
       );
     }
     return helloWorlds(count, currentDateString);
@@ -1009,10 +1009,10 @@ void main() {
 
     String courseCompletion(Object progress) {
       return Intl.message(
-        \'You have completed \$progress of the course.\',
+        'You have completed \${progress} of the course.',
         locale: _localeName,
-        name: \'courseCompletion\',
-        desc: r\'The amount of progress the student has made in their class.\',
+        name: 'courseCompletion',
+        desc: 'The amount of progress the student has made in their class.',
         args: <Object>[progress]
       );
     }
@@ -1079,10 +1079,10 @@ void main() {
 
     String courseCompletion(Object progress) {
       return Intl.message(
-        \'You have completed \$progress of the course.\',
+        'You have completed \${progress} of the course.',
         locale: _localeName,
-        name: \'courseCompletion\',
-        desc: r\'The amount of progress the student has made in their class.\',
+        name: 'courseCompletion',
+        desc: 'The amount of progress the student has made in their class.',
         args: <Object>[progress]
       );
     }
@@ -1139,10 +1139,10 @@ void main() {
 
     String courseCompletion(Object progress) {
       return Intl.message(
-        \'You have completed \$progress of the course.\',
+        'You have completed \${progress} of the course.',
         locale: _localeName,
-        name: \'courseCompletion\',
-        desc: r\'The amount of progress the student has made in their class.\',
+        name: 'courseCompletion',
+        desc: 'The amount of progress the student has made in their class.',
         args: <Object>[progress]
       );
     }
@@ -1232,9 +1232,9 @@ void main() {
       zero: 'Hello',
       one: 'Hello World',
       two: 'Hello two worlds',
-      few: 'Hello \$count worlds',
-      many: 'Hello all \$count worlds',
-      other: 'Hello other \$count worlds'
+      few: 'Hello \${count} worlds',
+      many: 'Hello all \${count} worlds',
+      other: 'Hello other \${count} worlds'
     );
   }
 '''
@@ -1280,11 +1280,11 @@ void main() {
       name: 'helloWorlds',
       args: <Object>[count, adjective],
       zero: 'Hello',
-      one: 'Hello \$adjective World',
-      two: 'Hello two \$adjective worlds',
-      few: 'Hello \$count \$adjective worlds',
-      many: 'Hello all \$count \$adjective worlds',
-      other: 'Hello other \$count \$adjective worlds'
+      one: 'Hello \${adjective} World',
+      two: 'Hello two \${adjective} worlds',
+      few: 'Hello \${count} \${adjective} worlds',
+      many: 'Hello all \${count} \${adjective} worlds',
+      other: 'Hello other \${count} \${adjective} worlds'
     );
   }
 '''
@@ -1336,10 +1336,10 @@ void main() {
       locale: _localeName,
       name: \'helloWorlds\',
       args: <Object>[count, currentDate],
-      one: \'Hello World, today is \$currentDateString\',
-      two: \'Hello two worlds, today is \$currentDateString\',
-      many: \'Hello all \$count worlds, today is \$currentDateString\',
-      other: \'Hello other \$count worlds, today is \$currentDateString\'
+      one: \'Hello World, today is \${currentDateString}\',
+      two: \'Hello two worlds, today is \${currentDateString}\',
+      many: \'Hello all \${count} worlds, today is \${currentDateString}\',
+      other: \'Hello other \${count} worlds, today is \${currentDateString}\'
       );
     }
     return helloWorlds(count, currentDateString);
@@ -1395,10 +1395,10 @@ void main() {
       locale: _localeName,
       name: \'helloWorlds\',
       args: <Object>[count, population],
-      one: \'Hello World of \$populationString citizens\',
-      two: \'Hello two worlds with \$populationString total citizens\',
-      many: \'Hello all \$count worlds, with a total of \$populationString citizens\',
-      other: \'Hello other \$count worlds, with a total of \$populationString citizens\'
+      one: \'Hello World of \${populationString} citizens\',
+      two: \'Hello two worlds with \${populationString} total citizens\',
+      many: \'Hello all \${count} worlds, with a total of \${populationString} citizens\',
+      other: \'Hello other \${count} worlds, with a total of \${populationString} citizens\'
       );
     }
     return helloWorlds(count, populationString);
@@ -1704,6 +1704,39 @@ void main() {
       final String outputFileString = generator.outputFile.readAsStringSync();
       expect(outputFileString, contains('class AppLocalizations'));
       expect(outputFileString, contains('class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations>'));
+    });
+  });
+
+  group('generateString', () {
+    test('handles simple string', () {
+      expect(generateString('abc'), "'abc'");
+    });
+    test('handles string with quote', () {
+      expect(generateString("ab'c"), '''"ab'c"''');
+    });
+    test('handles string with double quote', () {
+      expect(generateString('ab"c'), """'ab"c'""");
+    });
+    test('handles string with both single and double quote', () {
+      expect(generateString('''a'b"c'''), """'''a'b"c'''""");
+    });
+    test('handles string with a triple single quote and a double quote', () {
+      expect(generateString("""a"b'''c"""), '''"""a"b\'''c"""''');
+    });
+    test('handles string with a triple double quote and a single quote', () {
+      expect(generateString('''a'b"""c'''), """'''a'b\"""c'''""");
+    });
+    test('handles string with both triple single and triple double quote', () {
+      expect(generateString('''a\'''\'''\''b"""c'''), """'a' "'''"  "'''" '''''b\"""c'''""");
+    });
+    test('handles dollar', () {
+      expect(generateString(r'ab$c'), r"r'ab$c'");
+    });
+    test('handles back slash', () {
+      expect(generateString(r'ab\c'), r"r'ab\c'");
+    });
+    test("doesn't support multiline strings", () {
+      expect(() => generateString('ab\nc'), throwsA(isA<AssertionError>()));
     });
   });
 }

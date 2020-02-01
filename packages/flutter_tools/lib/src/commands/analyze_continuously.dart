@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -14,6 +13,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
@@ -21,26 +21,22 @@ import '../dart/sdk.dart' as sdk;
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages, {
+  AnalyzeContinuously(ArgResults argResults, List<String> repoRoots, List<Directory> repoPackages, {
     @required FileSystem fileSystem,
     @required Logger logger,
     @required AnsiTerminal terminal,
     @required Platform platform,
     @required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _terminal = terminal,
-       _processManager = processManager,
-       _platform = platform,
-       super(argResults);
-
-  final List<String> repoRoots;
-  final List<Directory> repoPackages;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final AnsiTerminal _terminal;
-  final Platform _platform;
-  final ProcessManager _processManager;
+  }) : super(
+        argResults,
+        repoPackages: repoPackages,
+        repoRoots: repoRoots,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        processManager: processManager,
+      );
 
   String analysisTarget;
   bool firstAnalysis = true;
@@ -61,23 +57,23 @@ class AnalyzeContinuously extends AnalyzeBase {
       directories = repoRoots;
       analysisTarget = 'Flutter repository';
 
-      _logger.printTrace('Analyzing Flutter repository:');
+      logger.printTrace('Analyzing Flutter repository:');
       for (final String projectPath in repoRoots) {
-        _logger.printTrace('  ${_fileSystem.path.relative(projectPath)}');
+        logger.printTrace('  ${fileSystem.path.relative(projectPath)}');
       }
     } else {
-      directories = <String>[_fileSystem.currentDirectory.path];
-      analysisTarget = _fileSystem.currentDirectory.path;
+      directories = <String>[fileSystem.currentDirectory.path];
+      analysisTarget = fileSystem.currentDirectory.path;
     }
 
     final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
 
     final AnalysisServer server = AnalysisServer(sdkPath, directories,
-      fileSystem: _fileSystem,
-      logger: _logger,
-      platform: _platform,
-      processManager: _processManager,
-      terminal: _terminal,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+      terminal: terminal,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
@@ -91,7 +87,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (exitCode != 0) {
       throwToolExit(message, exitCode: exitCode);
     }
-    _logger.printStatus(message);
+    logger.printStatus(message);
 
     if (server.didServerErrorOccur) {
       throwToolExit('Server error(s) occurred.');
@@ -102,9 +98,9 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (isAnalyzing) {
       analysisStatus?.cancel();
       if (!firstAnalysis) {
-        _logger.printStatus('\n');
+        logger.printStatus('\n');
       }
-      analysisStatus = _logger.startProgress('Analyzing $analysisTarget...', timeout: timeoutConfiguration.slowOperation);
+      analysisStatus = logger.startProgress('Analyzing $analysisTarget...', timeout: timeoutConfiguration.slowOperation);
       analyzedPaths.clear();
       analysisTimer = Stopwatch()..start();
     } else {
@@ -112,12 +108,12 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisStatus = null;
       analysisTimer.stop();
 
-      _logger.printStatus(_terminal.clearScreen(), newline: false);
+      logger.printStatus(terminal.clearScreen(), newline: false);
 
       // Remove errors for deleted files, sort, and print errors.
       final List<AnalysisError> errors = <AnalysisError>[];
       for (final String path in analysisErrors.keys.toList()) {
-        if (_fileSystem.isFileSync(path)) {
+        if (fileSystem.isFileSync(path)) {
           errors.addAll(analysisErrors[path]);
         } else {
           analysisErrors.remove(path);
@@ -138,9 +134,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       errors.sort();
 
       for (final AnalysisError error in errors) {
-        _logger.printStatus(error.toString());
+        logger.printStatus(error.toString());
         if (error.code != null) {
-          _logger.printTrace('error code: ${error.code}');
+          logger.printTrace('error code: ${error.code}');
         }
       }
 
@@ -173,9 +169,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       final String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
       final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
       if (undocumentedMembers > 0) {
-        _logger.printStatus('$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
+        logger.printStatus('$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
       } else {
-        _logger.printStatus('$errorsMessage • analyzed $files in $seconds seconds');
+        logger.printStatus('$errorsMessage • analyzed $files in $seconds seconds');
       }
 
       if (firstAnalysis && isBenchmarking) {

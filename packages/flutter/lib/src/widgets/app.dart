@@ -91,6 +91,11 @@ typedef GenerateAppTitle = String Function(BuildContext context);
 /// Creates a [PageRoute] using the given [RouteSettings] and [WidgetBuilder].
 typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, WidgetBuilder builder);
 
+/// The signature of [WidgetsApp.onGenerateInitialRoutes].
+///
+/// Creates a series of one or more initial routes.
+typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRoute);
+
 /// A convenience widget that wraps a number of widgets that are commonly
 /// required for an application.
 ///
@@ -164,6 +169,7 @@ class WidgetsApp extends StatefulWidget {
     Key key,
     this.navigatorKey,
     this.onGenerateRoute,
+    this.onGenerateInitialRoutes,
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.initialRoute,
@@ -191,6 +197,12 @@ class WidgetsApp extends StatefulWidget {
     this.actions,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
+       assert(
+         home == null ||
+         onGenerateInitialRoutes == null,
+         'If onGenerateInitialRoutes is specifiied, the home argument will be '
+         'redundant.'
+       ),
        assert(
          home == null ||
          !routes.containsKey(Navigator.defaultRouteName),
@@ -289,6 +301,16 @@ class WidgetsApp extends StatefulWidget {
   /// be set, and the [pageRouteBuilder] must also be set so that the
   /// default handler will know what routes and [PageRoute]s to build.
   final RouteFactory onGenerateRoute;
+
+  /// {@template flutter.widgets.widgetsApp.onGenerateInitialRoutes}
+  /// The routes generator callback used for generating initial routes if
+  /// [initialRoute] is provided.
+  ///
+  /// If this property is not set, the underlying
+  /// [Navigator.onGenerateInitialRoutes] will default to
+  /// [Navigator.defaultGenerateInitialRoutes].
+  /// {@endtemplate}
+  final InitialRouteListFactory onGenerateInitialRoutes;
 
   /// The [PageRoute] generator callback used when the app is navigated to a
   /// named route.
@@ -1265,6 +1287,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             ? WidgetsBinding.instance.window.defaultRouteName
             : widget.initialRoute ?? WidgetsBinding.instance.window.defaultRouteName,
         onGenerateRoute: _onGenerateRoute,
+        onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
+          ? Navigator.defaultGenerateInitialRoutes
+          : (NavigatorState navigator, String initialRouteName) {
+            return widget.onGenerateInitialRoutes(initialRouteName);
+          },
         onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers,
       );

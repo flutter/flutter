@@ -829,6 +829,7 @@ class _TextStyleProxy implements TextStyle {
     double textScaleFactor = 1.0,
     String ellipsis,
     int maxLines,
+    ui.TextHeightBehavior textHeightBehavior,
     Locale locale,
     String fontFamily,
     double fontSize,

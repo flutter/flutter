@@ -122,6 +122,11 @@ class AnalyzeCommand extends FlutterCommand {
         runner.getRepoRoots(),
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        platform: _platform,
+        processManager: _processManager,
+        terminal: _terminal,
       ).analyze();
     }
     return FlutterCommandResult.success();

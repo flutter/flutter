@@ -201,16 +201,6 @@ BuildApp() {
 
     RunCommand cp -r -- "${app_framework}" "${derived_dir}"
 
-    if [[ "${build_mode}" == "release" ]]; then
-      StreamOutput " ├─Stripping debug symbols..."
-      RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
-      if [[ $? -ne 0 ]]; then
-        EchoError "Failed to strip ${derived_dir}/App.framework/App."
-        exit -1
-      fi
-      StreamOutput "done"
-    fi
-
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
 
