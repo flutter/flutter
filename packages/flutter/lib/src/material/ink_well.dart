@@ -65,18 +65,29 @@ abstract class InteractiveInkFeature extends InkFeature {
     controller.markNeedsPaint();
   }
 
-  /// paints a ripple/splash Ink Circle
+  /// Called during [paintFeature] in [InkSplash] and [InkRipple] widgets
+  ///
+  /// Combines the common parts of painting a ripple and splash ink circle
   @protected
-  void paintInkCircle(
-    Canvas canvas,
-    Matrix4 transform,
-    Paint paint,
-    Offset center,
-    TextDirection textDirection,
-    Animation<double> radius,
+  void paintInkCircle({
+    @required Canvas canvas,
+    @required Matrix4 transform,
+    @required Paint paint,
+    @required Offset center,
+    @required TextDirection textDirection,
+    @required double radius,
     ShapeBorder customBorder,
-    BorderRadius borderRadius,
-    RectCallback clipCallback) {
+    BorderRadius borderRadius = BorderRadius.zero,
+    RectCallback clipCallback,
+    }) {
+    assert(canvas != null);
+    assert(transform != null);
+    assert(paint != null);
+    assert(center != null);
+    assert(textDirection != null);
+    assert(radius != null);
+    assert(borderRadius != null);
+
     final Offset originOffset = MatrixUtils.getAsTranslation(transform);
     canvas.save();
     if (originOffset == null) {
@@ -98,7 +109,7 @@ abstract class InteractiveInkFeature extends InkFeature {
         canvas.clipRect(rect);
       }
     }
-    canvas.drawCircle(center, radius.value, paint);
+    canvas.drawCircle(center, radius, paint);
     canvas.restore();
   }
 }

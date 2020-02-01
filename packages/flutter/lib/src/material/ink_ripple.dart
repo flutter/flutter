@@ -237,6 +237,16 @@ class InkRipple extends InteractiveInkFeature {
       referenceBox.size.center(Offset.zero),
       Curves.ease.transform(_radiusController.value),
     );
-    paintInkCircle(canvas, transform, paint, center, _textDirection, _radius, _customBorder, _borderRadius, _clipCallback);
+    paintInkCircle(
+      canvas: canvas,
+      transform: transform,
+      paint: paint,
+      center: center,
+      textDirection: _textDirection,
+      radius: _radius.value,
+      customBorder: _customBorder,
+      borderRadius: _borderRadius,
+      clipCallback: _clipCallback,
+    );
   }
 }
