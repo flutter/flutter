@@ -20,8 +20,8 @@ const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
   fontFamily: '.SF UI Display',
   inherit: false,
   fontSize: 18.0,
-  fontWeight: FontWeight.w600,
-  letterSpacing: 0.48,
+  fontWeight: FontWeight.bold,
+  letterSpacing: 0.25,
   textBaseline: TextBaseline.alphabetic,
 );
 
@@ -29,9 +29,9 @@ const TextStyle _kCupertinoDialogContentStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 13.4,
-  fontWeight: FontWeight.w400,
+  fontWeight: FontWeight.w600,
   height: 1.036,
-  letterSpacing: -0.25,
+  letterSpacing: 0.25,
   textBaseline: TextBaseline.alphabetic,
 );
 
@@ -895,7 +895,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
             left: _kEdgePadding,
             right: _kEdgePadding,
             bottom: _kEdgePadding * textScaleFactor,
-            top: title == null ? _kEdgePadding : 1.0,
+            top: title == null ? _kEdgePadding : 5.0,
           ),
           child: DefaultTextStyle(
             style: _kCupertinoDialogContentStyle.copyWith(
