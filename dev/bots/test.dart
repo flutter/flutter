@@ -453,7 +453,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
@@ -465,6 +465,30 @@ Future<void> _runFrameworkTests() async {
       environment: <String, String>{
         'FLUTTER_EXPERIMENTAL_BUILD': 'true',
       },
+    );
+    const String httpClientWarning =
+      'Warning: At least one test in this suite creates an HttpClient. When\n'
+      'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
+      'requests will return status code 400, and no network request will\n'
+      'actually be made. Any test expecting an real network connection and\n'
+      'status code will fail.\n'
+      'To test code that needs an HttpClient, provide your own HttpClient\n'
+      'implementation to the code under test, so that your test can\n'
+      'consistently provide a testable response to the code under test.';
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter_test'),
+      script: path.join('test', 'bindings_test_failure.dart'),
+      expectFailure: true,
+      printOutput: false,
+      outputChecker: (CapturedOutput output) {
+        final Iterable<Match> matches = httpClientWarning.allMatches(output.stdout);
+        if (matches == null || matches.isEmpty || matches.length > 1) {
+          return 'Failed to print warning about HttpClientUsage, or printed it too many times.\n'
+                 'stdout:\n${output.stdout}';
+        }
+        return null;
+      },
+      tableData: bigqueryApi?.tabledata,
     );
   }
 
@@ -785,6 +809,15 @@ Future<void> _runHostOnlyDeviceLabTests() async {
   // TODO(ianh): Move the tests that are not running on devicelab any more out
   // of the device lab directory.
 
+  const Map<String, String> kChromeVariables = <String, String>{
+    // This is required to be able to run Chrome on Cirrus and LUCI.
+    'CHROME_NO_SANDBOX': 'true',
+    // Causes Chrome to run in headless mode in environments without displays,
+    // such as Cirrus and LUCI. Do not use this variable when recording actual
+    // benchmark numbers.
+    'UNCALIBRATED_SMOKE_TEST': 'true',
+  };
+
   // List the tests to run.
   // We split these into subshards. The tests are randomly distributed into
   // those subshards so as to get a uniform distribution of costs, but the
@@ -812,6 +845,8 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),
+    if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_html', environment: kChromeVariables),
+    if (Platform.isLinux) () => _runDevicelabTest('web_benchmarks_canvaskit', environment: kChromeVariables),
   ]..shuffle(math.Random(0));
 
   final int testsPerShard = tests.length ~/ kDeviceLabShardCount;

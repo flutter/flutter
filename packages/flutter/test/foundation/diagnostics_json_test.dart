@@ -222,11 +222,6 @@ class _TestElement extends Element {
   _TestElement() : super(const Placeholder());
 
   @override
-  void forgetChild(Element child) {
-    // Intentionally left empty.
-  }
-
-  @override
   void performRebuild() {
     // Intentionally left empty.
   }
