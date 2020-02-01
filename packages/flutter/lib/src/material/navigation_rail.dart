@@ -42,12 +42,12 @@ enum NavigationRailGroupAlignment {
 class NavigationRailDestination {
   /// Creates an destination that is used with [NavigationRail.destinations].
   ///
-  /// [icon] should not be null and [title] should not be null when this
+  /// [icon] should not be null and [label] should not be null when this
   /// destination is used in the [NavigationRail].
   const NavigationRailDestination({
     @required this.icon,
     Widget activeIcon,
-    this.title,
+    this.label,
   }) : activeIcon = activeIcon ?? icon,
         assert(icon != null);
   /// The icon of the destination.
@@ -76,16 +76,15 @@ class NavigationRailDestination {
   ///    icons.
   final Widget activeIcon;
 
-  /// The title of the item. If the title is not provided only the icon will be
-  /// shown when not used in a [NavigationRail].
-  final Widget title;
+  /// The label for the destination.
+  ///
+  /// The label should be provided when used with the [NavigationRail], unless
+  /// [NavigationRailLabelType.none] used and the rail will not be extended.
+  final Widget label;
 }
 
-typedef Widget LeadingBuilder(BuildContext context, Animation animation);
-typedef Widget ExtendedLabelBuilder(BuildContext context, Animation animation, NavigationRailDestination destination, bool selected);
-
-class ExtendedNavigationRailAnimation extends InheritedWidget {
-  const ExtendedNavigationRailAnimation({
+class _ExtendedNavigationRailAnimation extends InheritedWidget {
+  const _ExtendedNavigationRailAnimation({
     Key key,
     @required this.animation,
     @required Widget child,
@@ -94,21 +93,21 @@ class ExtendedNavigationRailAnimation extends InheritedWidget {
 
   final Animation<double> animation;
 
-  static ExtendedNavigationRailAnimation of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ExtendedNavigationRailAnimation>();
+  static _ExtendedNavigationRailAnimation of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_ExtendedNavigationRailAnimation>();
   }
 
   @override
-  bool updateShouldNotify(ExtendedNavigationRailAnimation old) => animation != old.animation;
+  bool updateShouldNotify(_ExtendedNavigationRailAnimation old) => animation != old.animation;
 }
 
 /// TODO
 class NavigationRail extends StatefulWidget {
   /// TODO
   NavigationRail({
+    this.extended,
     this.leading,
-    this.buildExtendedLabel,
-    this.open,
+    this.trailing,
     this.destinations,
     this.currentIndex,
     this.onDestinationSelected,
@@ -119,16 +118,28 @@ class NavigationRail extends StatefulWidget {
     this.iconTheme,
     this.selectedIconTheme,
     this.backgroundColor,
-  });
+    this.extendedWidth = _extendedRailWidth,
+  }) : assert(extendedWidth >= _railWidth);
 
-  /// The leading widget in the rail that is placed above the items.
+  /// Indicates of the [NavigationRail] should be in the extended state.
+  ///
+  /// The rail will implicitly animate between the extended and normal state.
+  ///
+  /// If the rail is going to be in the extended state, then the [labelType]
+  /// should be set to [NavigationRailLabelType.none].
+  final bool extended;
+
+  /// The leading widget in the rail that is placed above the destinations.
   ///
   /// This is commonly a [FloatingActionButton], but may also be a non-button,
   /// such as a logo.
   final Widget leading;
 
-  final ExtendedLabelBuilder buildExtendedLabel;
-  final bool open;
+  /// The trailing widget in the rail that is placed below the destinations.
+  ///
+  /// This is commonly a list of additional options or destinations that is
+  /// usually only rendered when [extended] is true.
+  final Widget trailing;
 
   /// Defines the appearance of the button items that are arrayed within the
   /// navigation rail.
@@ -192,7 +203,23 @@ class NavigationRail extends StatefulWidget {
   /// used.
   final IconTheme selectedIconTheme;
 
+  /// Sets the color of the Container that holds all of the [NavigationRail]'s
+  /// contents.
   final Color backgroundColor;
+
+  /// The final width when the animation is complete for setting [extended] to
+  /// true.
+  ///
+  /// The default value is 256.
+  final double extendedWidth;
+
+  /// Returns the animation that controls the [NavigationRail.extended] state.
+  ///
+  /// This can be used to synchronize animations in the [leading] or [trailing]
+  /// widget, such as an animated menu or a [FloatingActionButton] animation.
+  static Animation<double> extendedAnimation(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_ExtendedNavigationRailAnimation>().animation;
+  }
 
   @override
   _NavigationRailState createState() => _NavigationRailState();
@@ -221,8 +248,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   void didUpdateWidget(NavigationRail oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.open != oldWidget.open) {
-      if (widget.open) {
+    if (widget.extended != oldWidget.extended) {
+      if (widget.extended) {
         _extendedController.forward();
       } else {
         _extendedController.reverse();
@@ -244,13 +271,14 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final Widget leading = widget.leading;
-    final double width = _railWidth + 120 * _extendedAnimation.value;
-    return ExtendedNavigationRailAnimation(
+    final Widget trailing = widget.trailing;
+    final double currentWidth = _railWidth + (widget.extendedWidth - _railWidth) * _extendedAnimation.value;
+    return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
       child: DefaultTextStyle(
         style: TextStyle(color: Theme.of(context).colorScheme.primary),
         child: Container(
-          width: width,
+          width: currentWidth,
           color: widget.backgroundColor ?? Theme.of(context).colorScheme.surface,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,36 +287,36 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
               if (leading != null)
                 ...<Widget>[
                   Container(
-                    height: _railItemHeight,
-                    width: width,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: leading,
-                    ),
+//                    height: _railWidth,
+//                    width: currentWidth,
+                    padding: const EdgeInsets.all(_spacing),
+                    child: leading,
                   ),
                   _verticalSpacing,
                 ],
               for (int i = 0; i < widget.destinations.length; i++)
-                _RailItem(
+                _RailDestinationBox(
                   animation: _destinationAnimations[i],
                   labelKind: widget.labelType,
                   selected: widget.currentIndex == i,
                   icon: widget.currentIndex == i
                       ? widget.destinations[i].activeIcon
                       : widget.destinations[i].icon,
-                  title: DefaultTextStyle(
+                  label: DefaultTextStyle(
                     style: TextStyle(
                         color: widget.currentIndex == i
                             ? Theme.of(context).colorScheme.primary
                             : Theme.of(context).colorScheme.onSurface.withOpacity(0.64)),
-                    child: widget.destinations[i].title,
+                    child: widget.destinations[i].label,
                   ),
                   onTap: () {
                     widget.onDestinationSelected(i);
                   },
-                  extendedLabel: _extendedAnimation.value > 0 ? widget.buildExtendedLabel(context, _extendedAnimation, widget.destinations[i], widget.currentIndex == i) : null,
+                  extended: _extendedAnimation.value > 0,
+                  width: _railWidth,
+                  height: _railWidth,
                 ),
+              if (trailing != null) trailing,
             ],
           ),
         ),
@@ -312,7 +340,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     _destinationAnimations = _destinationControllers.map((AnimationController controller) => controller.view).toList();
     _destinationControllers[widget.currentIndex].value = 1.0;
     _extendedController = AnimationController(
-      duration: kThemeAnimationDuration * 20,
+      duration: kThemeAnimationDuration,
       vsync: this,
     );
     _extendedAnimation = _extendedController.view;
@@ -336,15 +364,17 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   }
 }
 
-class _RailItem extends StatelessWidget {
-  _RailItem({
+class _RailDestinationBox extends StatelessWidget {
+  _RailDestinationBox({
     this.animation,
     this.labelKind = NavigationRailLabelType.all,
     this.selected,
     this.icon,
-    this.title,
+    this.label,
     this.onTap,
-    this.extendedLabel,
+    this.extended,
+    this.width,
+    this.height,
   }) : assert(labelKind != null),
        _positionAnimation = CurvedAnimation(
           parent: ReverseAnimation(animation),
@@ -356,9 +386,11 @@ class _RailItem extends StatelessWidget {
   final NavigationRailLabelType labelKind;
   final bool selected;
   final Widget icon;
-  final Widget title;
+  final Widget label;
   final VoidCallback onTap;
-  final Widget extendedLabel;
+  final bool extended;
+  final double width;
+  final double height;
 
   final Animation<double> _positionAnimation;
 
@@ -383,42 +415,54 @@ class _RailItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget content;
-    switch (labelKind) {
-      case NavigationRailLabelType.none:
-        final Widget destination = SizedBox(width: _railItemWidth, child: icon);
-        content = extendedLabel == null ? destination : Row(
-          children: <Widget>[destination, extendedLabel],
-        );
-        break;
-      case NavigationRailLabelType.selected:
-        content = SizedBox(
-          width: 72,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(height: _positionAnimation.value * 18),
-              icon,
-              Opacity(
-                alwaysIncludeSemantics: true,
-                opacity: selected ? _fadeInValue() : _fadeOutValue(),
-                child: title,
-              ),
-            ],
+    if (extended) {
+      content = Row(
+        children: <Widget>[
+          SizedBox(
+            width: width,
+            child: icon,
           ),
-        );
-        break;
-      case NavigationRailLabelType.all:
-        content = SizedBox(
-          width: 72,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              icon,
-              title,
-            ],
-          ),
-        );
-        break;
+          label,
+        ],
+      );
+    } else {
+      switch (labelKind) {
+        case NavigationRailLabelType.none:
+          content = SizedBox(
+            width: width,
+            child: icon,
+          );
+          break;
+        case NavigationRailLabelType.selected:
+          content = SizedBox(
+            width: width,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(height: _positionAnimation.value * height / 4),
+                icon,
+                Opacity(
+                  alwaysIncludeSemantics: true,
+                  opacity: selected ? _fadeInValue() : _fadeOutValue(),
+                  child: label,
+                ),
+              ],
+            ),
+          );
+          break;
+        case NavigationRailLabelType.all:
+          content = SizedBox(
+            width: width,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                icon,
+                label,
+              ],
+            ),
+          );
+          break;
+      }
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
@@ -427,13 +471,16 @@ class _RailItem extends StatelessWidget {
         color: selected ? colors.primary : colors.onSurface.withOpacity(0.64),
       ),
       child: SizedBox(
-        height: 72,
+        height: height,
         child: Material(
           type: MaterialType.transparency,
           clipBehavior: Clip.none,
           child: InkResponse(
             onTap: onTap,
             onHover: (_) {},
+            highlightShape: extended ? BoxShape.rectangle : BoxShape.circle,
+            borderRadius: BorderRadius.all(Radius.circular(width / 2)),
+            containedInkWell: true,
             splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
             hoverColor: Theme.of(context).colorScheme.primary.withOpacity(0.04),
             child: content,
@@ -445,7 +492,6 @@ class _RailItem extends StatelessWidget {
 }
 
 const double _railWidth = 72;
-const double _railItemWidth = _railWidth;
-const double _railItemHeight = _railItemWidth;
+const double _extendedRailWidth = 256;
 const double _spacing = 8;
 const Widget _verticalSpacing = SizedBox(height: _spacing);
