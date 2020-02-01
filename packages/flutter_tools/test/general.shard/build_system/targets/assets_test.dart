@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -12,7 +10,6 @@ import '../../../src/common.dart';
 import '../../../src/testbed.dart';
 
 void main() {
-  const BuildSystem buildSystem = BuildSystem();
   Environment environment;
   Testbed testbed;
 
