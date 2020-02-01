@@ -146,6 +146,14 @@ class PageStorageBucket {
 ///       ),
 ///     );
 /// ```
+///
+/// ```dart write data to [PageStorage]
+/// PageStorage.of(context).writeState(context, 'Data saved', identifier: ValueKey(mykey));
+/// ```
+///
+/// ``` dart read data from [PageStorage]
+/// PageStorage .of(context).readState(context, identifier: ValueKey(mykey));
+/// ```
 /// {@end-tool}
 class PageStorage extends StatelessWidget {
   /// Creates a widget that provides a storage bucket for its descendants.
