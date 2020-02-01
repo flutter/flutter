@@ -246,7 +246,7 @@ void main() {
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          '-Psave-debugging-info=${tempDir.path}',
+          '-Psplit-debug-info=${tempDir.path}',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
