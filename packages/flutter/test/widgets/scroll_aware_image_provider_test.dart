@@ -327,10 +327,6 @@ void main() {
 
     expect(imageCache.containsKey(testImageProvider), true);
     expect(imageCache.currentSize, 1);
-
-
-
-    expect(testImageProvider.configuration, null);
     expect(stream.completer, null);
   });
 }
@@ -364,6 +360,8 @@ class RecordingPhysics extends ScrollPhysics {
   }
 }
 
+// Ignore this so that we can mutate whether we defer loading or not at specific
+// times without worrying about actual scrolling mechanics.
 // ignore: must_be_immutable
 class ControllablePhysics extends ScrollPhysics {
   ControllablePhysics({ ScrollPhysics parent }) : super(parent: parent);
