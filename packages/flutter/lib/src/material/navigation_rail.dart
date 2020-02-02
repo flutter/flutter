@@ -360,8 +360,12 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     _extendedController = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: this,
+
     );
-    _extendedAnimation = _extendedController.view;
+    _extendedAnimation = CurvedAnimation(
+      parent: _extendedController,
+      curve: Curves.easeInOut,
+    );
     _extendedController.addListener(() {
       setState(() {
         // Rebuild.
@@ -434,53 +438,62 @@ class _RailDestinationBox extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget content;
     if (extended) {
-      content = Row(
-        children: <Widget>[
-          SizedBox(
-            width: width,
-            child: icon,
-          ),
-          label,
-        ],
+      content = SizedBox(
+        width: double.infinity,
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              child: SizedBox(
+                width: width,
+                height: height,
+                child: icon,
+              ),
+            ),
+            Positioned(
+              left: width,
+              child: Container(
+                alignment: AlignmentDirectional.centerStart,
+                height: height,
+                child: label,
+              ),
+            ),
+          ],
+        ),
       );
     } else {
       switch (labelKind) {
         case NavigationRailLabelType.none:
-          content = SizedBox(
-            width: width,
-            child: icon,
-          );
+          content = icon;
           break;
         case NavigationRailLabelType.selected:
-          content = SizedBox(
-            width: width,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(height: _positionAnimation.value * height / 4),
-                icon,
-                Opacity(
-                  alwaysIncludeSemantics: true,
-                  opacity: selected ? _fadeInValue() : _fadeOutValue(),
-                  child: label,
-                ),
-              ],
-            ),
+          content = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(height: _positionAnimation.value * height / 4),
+              icon,
+              Opacity(
+                alwaysIncludeSemantics: true,
+                opacity: selected ? _fadeInValue() : _fadeOutValue(),
+                child: label,
+              ),
+            ],
           );
           break;
         case NavigationRailLabelType.all:
-          content = SizedBox(
-            width: width,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                icon,
-                label,
-              ],
-            ),
+          content = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              icon,
+              label,
+            ],
           );
           break;
       }
+      content = SizedBox(
+        width: width,
+        height: height,
+        child: content,
+      );
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
@@ -488,21 +501,19 @@ class _RailDestinationBox extends StatelessWidget {
       data: IconThemeData(
         color: selected ? colors.primary : colors.onSurface.withOpacity(0.64),
       ),
-      child: SizedBox(
-        height: height,
-        child: Material(
-          type: MaterialType.transparency,
-          clipBehavior: Clip.none,
-          child: InkResponse(
-            onTap: onTap,
-            onHover: (_) {},
-            highlightShape: extended ? BoxShape.rectangle : BoxShape.circle,
-            borderRadius: BorderRadius.all(Radius.circular(width / 2)),
-            containedInkWell: true,
-            splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
-            hoverColor: Theme.of(context).colorScheme.primary.withOpacity(0.04),
-            child: content,
-          ),
+      child: Material(
+        type: MaterialType.transparency,
+        clipBehavior: Clip.none,
+        child: InkResponse(
+          onTap: onTap,
+          onHover: (_) {},
+          highlightShape: BoxShape.rectangle,
+//            highlightShape: extended ? BoxShape.rectangle : BoxShape.circle,
+          borderRadius: BorderRadius.all(Radius.circular(width / 2)),
+          containedInkWell: true,
+          splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+          hoverColor: Theme.of(context).colorScheme.primary.withOpacity(0.04),
+          child: content,
         ),
       ),
     );
