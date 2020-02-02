@@ -135,6 +135,9 @@ class RepetitiveStackFrameFilter extends StackFilter {
   }
 
   bool _matchesFrames(List<StackFrame> stackFrames) {
+    if (stackFrames.length < numFrames) {
+      return false;
+    }
     for (int index = 0; index < stackFrames.length; index++) {
       if (!frames[index].matches(stackFrames[index])) {
         return false;
