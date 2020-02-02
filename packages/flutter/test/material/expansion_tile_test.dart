@@ -235,10 +235,10 @@ void main() {
     final Key collapsedTitleKey = UniqueKey();
     final Key expandedIconKey = UniqueKey();
     final Key collapsedIconKey = UniqueKey();
-    final Color expandedTitleColor = Colors.blue;
-    final Color collapsedTitleColor = Colors.red;
-    final Color expandedIconColor = Colors.green;
-    final Color collapsedIconColor = Colors.orange;
+    const Color expandedTitleColor = Colors.blue;
+    const Color collapsedTitleColor = Colors.red;
+    const Color expandedIconColor = Colors.green;
+    const Color collapsedIconColor = Colors.orange;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -249,20 +249,20 @@ void main() {
                 const ListTile(title: Text('Top')),
                 ExpansionTile(
                   initiallyExpanded: true,
-                  headerColorTweenBegin = collapsedTitleColor,
-                  headerColorTweenEnd = expandedTitleColor,
-                  iconColorTweenBegin = collapsedIconColor,
-                  iconColorTweenEnd = expandedIconColor,
+                  headerColorTweenBegin: collapsedTitleColor,
+                  headerColorTweenEnd: expandedTitleColor,
+                  iconColorTweenBegin: collapsedIconColor,
+                  iconColorTweenEnd: expandedIconColor,
                   title: TestText('Expanded', key: expandedTitleKey),
                   children: const <Widget>[ListTile(title: Text('0'))],
                   trailing: TestIcon(key: expandedIconKey),
                 ),
                 ExpansionTile(
                   initiallyExpanded: false,
-                  headerColorTweenBegin = collapsedTitleColor,
-                  headerColorTweenEnd = expandedTitleColor,
-                  iconColorTweenBegin = collapsedIconColor,
-                  iconColorTweenEnd = expandedIconColor,
+                  headerColorTweenBegin: collapsedTitleColor,
+                  headerColorTweenEnd: expandedTitleColor,
+                  iconColorTweenBegin: collapsedIconColor,
+                  iconColorTweenEnd: expandedIconColor,
                   title: TestText('Collapsed', key: collapsedTitleKey),
                   children: const <Widget>[ListTile(title: Text('0'))],
                   trailing: TestIcon(key: collapsedIconKey),
