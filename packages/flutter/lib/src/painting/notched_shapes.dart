@@ -37,10 +37,15 @@ abstract class NotchedShape {
 ///
 ///  * [CircleBorder], a [ShapeBorder] that describes a circle.
 class CircularNotchedRectangle extends NotchedShape {
+  /// A convex notch shape. It's concave by default.
+  final bool convex;
+
   /// Creates a [CircularNotchedRectangle].
   ///
+  /// `convex` Inverts the default concave shape to a convex shape.
+  ///
   /// The same object can be used to create multiple shapes.
-  const CircularNotchedRectangle();
+  const CircularNotchedRectangle({this.convex = false});
 
   /// Creates a [Path] that describes a rectangle with a smooth circular notch.
   ///
@@ -81,8 +86,8 @@ class CircularNotchedRectangle extends NotchedShape {
     final double n2 = math.sqrt(b * b * r * r * (a * a + b * b - r * r));
     final double p2xA = ((a * r * r) - n2) / (a * a + b * b);
     final double p2xB = ((a * r * r) + n2) / (a * a + b * b);
-    final double p2yA = math.sqrt(r * r - p2xA * p2xA);
-    final double p2yB = math.sqrt(r * r - p2xB * p2xB);
+    final double p2yA = math.sqrt(r * r - p2xA * p2xA) * (convex ? -1 : 1);
+    final double p2yB = math.sqrt(r * r - p2xB * p2xB) * (convex ? -1 : 1);
 
     final List<Offset> p = List<Offset>(6);
 
@@ -109,7 +114,7 @@ class CircularNotchedRectangle extends NotchedShape {
       ..arcToPoint(
         p[3],
         radius: Radius.circular(notchRadius),
-        clockwise: false,
+        clockwise: convex,
       )
       ..quadraticBezierTo(p[4].dx, p[4].dy, p[5].dx, p[5].dy)
       ..lineTo(host.right, host.top)
