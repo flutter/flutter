@@ -273,6 +273,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final Widget leading = widget.leading;
     final Widget trailing = widget.trailing;
     final double currentWidth = _railWidth + (widget.extendedWidth - _railWidth) * _extendedAnimation.value;
+    final MainAxisAlignment destinationsAlignemnt = _resolveMainAxisAlignment();
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
       child: DefaultTextStyle(
@@ -287,41 +288,58 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
               if (leading != null)
                 ...<Widget>[
                   Container(
-//                    height: _railWidth,
-//                    width: currentWidth,
                     padding: const EdgeInsets.all(_spacing),
                     child: leading,
                   ),
                   _verticalSpacing,
                 ],
-              for (int i = 0; i < widget.destinations.length; i++)
-                _RailDestinationBox(
-                  animation: _destinationAnimations[i],
-                  labelKind: widget.labelType,
-                  selected: widget.currentIndex == i,
-                  icon: widget.currentIndex == i
-                      ? widget.destinations[i].activeIcon
-                      : widget.destinations[i].icon,
-                  label: DefaultTextStyle(
-                    style: TextStyle(
-                        color: widget.currentIndex == i
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.64)),
-                    child: widget.destinations[i].label,
-                  ),
-                  onTap: () {
-                    widget.onDestinationSelected(i);
-                  },
-                  extended: _extendedAnimation.value > 0,
-                  width: _railWidth,
-                  height: _railWidth,
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: destinationsAlignemnt,
+                  children: <Widget>[
+                    for (int i = 0; i < widget.destinations.length; i++)
+                      _RailDestinationBox(
+                        animation: _destinationAnimations[i],
+                        labelKind: widget.labelType,
+                        selected: widget.currentIndex == i,
+                        icon: widget.currentIndex == i
+                            ? widget.destinations[i].activeIcon
+                            : widget.destinations[i].icon,
+                        label: DefaultTextStyle(
+                          style: TextStyle(
+                              color: widget.currentIndex == i
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.64)),
+                          child: widget.destinations[i].label,
+                        ),
+                        onTap: () {
+                          widget.onDestinationSelected(i);
+                        },
+                        extended: _extendedAnimation.value > 0,
+                        width: _railWidth,
+                        height: _railWidth,
+                      ),
+                  ],
                 ),
+              ),
               if (trailing != null) trailing,
             ],
           ),
         ),
       ),
     );
+  }
+
+  MainAxisAlignment _resolveMainAxisAlignment() {
+    switch (widget.groupAlignment) {
+      case NavigationRailGroupAlignment.top:
+        return MainAxisAlignment.start;
+      case NavigationRailGroupAlignment.center:
+        return MainAxisAlignment.center;
+      case NavigationRailGroupAlignment.bottom:
+        return MainAxisAlignment.end;
+    }
+    return MainAxisAlignment.start;
   }
 
   void _disposeControllers() {
