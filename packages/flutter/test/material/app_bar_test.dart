@@ -1597,7 +1597,9 @@ void main() {
     (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(MaterialApp(home: Center(child: AppBar(title: const Text('Title')))));
+    await tester.pumpWidget(
+      MaterialApp(home: Center(child: SliverAppBar(title: const Text('Title')))),
+    );
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
