@@ -225,10 +225,6 @@ executable("fml_unittests") {
     "gpu_thread_merger_unittests.cc",
     "memory/ref_counted_unittest.cc",
     "memory/weak_ptr_unittest.cc",
-    "message_loop_task_queues_merge_unmerge_unittests.cc",
-    "message_loop_task_queues_unittests.cc",
-    "message_loop_unittests.cc",
-    "message_unittests.cc",
     "paths_unittests.cc",
     "platform/darwin/string_range_sanitization_unittests.mm",
     "synchronization/count_down_latch_unittests.cc",
@@ -242,7 +238,19 @@ executable("fml_unittests") {
     "time/time_unittest.cc",
   ]
 
-  # TODO(gw280): Figure out why these tests don't work currently on Fuchsia
+  # TODO(https://github.com/flutter/flutter/issues/50032) Enable after the
+  # Fuchsia message loop migration is complete.
+  if (!is_fuchsia) {
+    sources += [
+      "message_loop_task_queues_merge_unmerge_unittests.cc",
+      "message_loop_task_queues_unittests.cc",
+      "message_loop_unittests.cc",
+      "message_unittests.cc",
+    ]
+  }
+
+  # TODO(https://github.com/flutter/flutter/issues/50031):
+  # Figure out why these tests don't work currently on Fuchsia
   if (!is_fuchsia) {
     sources += [ "file_unittest.cc" ]
   }
