@@ -198,10 +198,15 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// If specified, the [maxLength] property must be greater than zero.
   ///
+  /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
+  /// changing the shape of the selection highlighting. These properties default
+  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], and [enableSuggestions]
-  /// properties must not be null.
+  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
+  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
   ///
   /// See also:
   ///
