@@ -127,11 +127,6 @@ BuildApp() {
     flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
   fi
 
-  local bitcode_flag=""
-  if [[ $ENABLE_BITCODE == "YES" ]]; then
-    bitcode_flag="true"
-  fi
-
   # TODO(jonahwilliams): move engine copying to build system.
   if [[ -e "${project_path}/.ios" ]]; then
     RunCommand rm -rf -- "${derived_dir}/engine"
@@ -151,9 +146,14 @@ BuildApp() {
     verbose_flag="--verbose"
   fi
 
-  local track_widget_creation_flag=""
+  local track_widget_creation_flag="false"
   if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
     track_widget_creation_flag="true"
+  fi
+
+  local bitcode_flag="false"
+  if [[ $ENABLE_BITCODE == "YES" ]]; then
+    bitcode_flag="true"
   fi
 
   RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
