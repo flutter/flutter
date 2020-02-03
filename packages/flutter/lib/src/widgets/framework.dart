@@ -1787,8 +1787,9 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
 /// for that child, it doesn't actually provide the updating logic.)
 ///
 /// Typically, the render object assigned to this widget will make use of
-/// [RenderObjectWithChildMixin] to grab the single child in the [RenderObject]
-/// subclass.
+/// [RenderObjectWithChildMixin] to implement a single-child model. The mixin
+/// exposes a [RenderObjectWithChildMixin.child] property that allows
+/// retrieving the render object belonging to the [child] widget.
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
