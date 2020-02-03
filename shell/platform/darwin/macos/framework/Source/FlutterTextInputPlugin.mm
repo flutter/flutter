@@ -181,15 +181,14 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
 
 - (void)deleteBackward:(id)sender {
   NSRange selection = self.activeModel.selectedRange;
-  if (selection.location == 0)
-    return;
   NSRange range = selection;
   if (selection.length == 0) {
+    if (selection.location == 0)
+      return;
     NSUInteger location = (selection.location == NSNotFound) ? self.activeModel.text.length - 1
                                                              : selection.location - 1;
     range = NSMakeRange(location, 1);
   }
-  self.activeModel.selectedRange = NSMakeRange(range.location, 0);
   [self insertText:@"" replacementRange:range];  // Updates edit state
 }
 
