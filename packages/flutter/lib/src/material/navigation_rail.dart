@@ -192,7 +192,7 @@ class NavigationRail extends StatefulWidget {
   /// If this field is not provided, or provided with any null properties, then
   ///a copy of the [IconThemeData.fallback] with a custom [NavigationRail]
   /// specific color will be used.
-  final IconTheme iconTheme;
+  final IconThemeData iconTheme;
 
   /// The size, opacity, and color of the icon in the selected
   /// [NavigationRailDestination].
@@ -201,7 +201,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// When the [NavigationRailDestination] is not selected, [iconTheme] will be
   /// used.
-  final IconTheme selectedIconTheme;
+  final IconThemeData selectedIconTheme;
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
@@ -274,6 +274,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final Widget trailing = widget.trailing;
     final double currentWidth = _railWidth + (widget.extendedWidth - _railWidth) * _extendedAnimation.value;
     final MainAxisAlignment destinationsAlignemnt = _resolveMainAxisAlignment();
+    final IconThemeData selectedIconTheme = widget.selectedIconTheme ?? widget.iconTheme;
+    final TextStyle selectedLabelTextStyle = widget.selectedLabelTextStyle ?? widget.selectedLabelTextStyle;
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
       child: DefaultTextStyle(
@@ -302,20 +304,22 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                         destinationAnimation: _destinationAnimations[i],
                         labelKind: widget.labelType,
                         selected: widget.currentIndex == i,
-                        icon: widget.currentIndex == i
-                            ? widget.destinations[i].activeIcon
-                            : widget.destinations[i].icon,
+                        icon: IconTheme(
+                          data: IconThemeData(
+                            color: widget.currentIndex == i ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.64),
+                          ).merge(widget.currentIndex == i ? selectedIconTheme : widget.iconTheme),
+                          child: widget.currentIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
+                        ),
                         label: DefaultTextStyle(
                           style: TextStyle(
-                              color: widget.currentIndex == i
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.64)),
+                            color: widget.currentIndex == i ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.64),
+                            ).merge(widget.currentIndex == i ? selectedLabelTextStyle : widget.labelTextStyle),
                           child: widget.destinations[i].label,
                         ),
                         onTap: () {
                           widget.onDestinationSelected(i);
                         },
-                        extended: _extendedAnimation.value > 0,
+                        extendedTransitionAnimation: _extendedAnimation,
                         width: _railWidth,
                         height: _railWidth,
                       ),
@@ -394,7 +398,7 @@ class _RailDestinationBox extends StatelessWidget {
     this.icon,
     this.label,
     this.onTap,
-    this.extendedAnima,
+    this.extendedTransitionAnimation,
     this.width,
     this.height,
   }) : assert(labelKind != null),
@@ -410,13 +414,13 @@ class _RailDestinationBox extends StatelessWidget {
   final Widget icon;
   final Widget label;
   final VoidCallback onTap;
-  final bool extended;
+  final Animation<double> extendedTransitionAnimation;
   final double width;
   final double height;
 
   final Animation<double> _positionAnimation;
 
-  double _fadeInValue() {
+  double _normalLabelFadeInValue() {
     if (destinationAnimation.value < 0.25) {
       return 0;
     } else if (destinationAnimation.value < 0.75) {
@@ -426,7 +430,7 @@ class _RailDestinationBox extends StatelessWidget {
     }
   }
 
-  double _fadeOutValue() {
+  double _normalLabelFadeOutValue() {
     if (destinationAnimation.value > 0.75) {
       return (destinationAnimation.value - 0.75) * 4;
     } else {
@@ -437,7 +441,7 @@ class _RailDestinationBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget content;
-    if (extended) {
+    if (extendedTransitionAnimation.value > 0) {
       content = SizedBox(
         width: double.infinity,
         child: Stack(
@@ -451,10 +455,13 @@ class _RailDestinationBox extends StatelessWidget {
             ),
             Positioned(
               left: width,
-              child: Container(
-                alignment: AlignmentDirectional.centerStart,
-                height: height,
-                child: label,
+              child: Opacity(
+                opacity: extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4 : 1,
+                child: Container(
+                  alignment: AlignmentDirectional.centerStart,
+                  height: height,
+                  child: label,
+                ),
               ),
             ),
           ],
@@ -473,7 +480,7 @@ class _RailDestinationBox extends StatelessWidget {
               icon,
               Opacity(
                 alwaysIncludeSemantics: true,
-                opacity: selected ? _fadeInValue() : _fadeOutValue(),
+                opacity: selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue(),
                 child: label,
               ),
             ],
@@ -497,23 +504,18 @@ class _RailDestinationBox extends StatelessWidget {
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
-    return IconTheme(
-      data: IconThemeData(
-        color: selected ? colors.primary : colors.onSurface.withOpacity(0.64),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        clipBehavior: Clip.none,
-        child: InkResponse(
-          onTap: onTap,
-          onHover: (_) {},
-          highlightShape: BoxShape.rectangle,
-          borderRadius: BorderRadius.all(Radius.circular(width / 2)),
-          containedInkWell: true,
-          splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
-          hoverColor: Theme.of(context).colorScheme.primary.withOpacity(0.04),
-          child: content,
-        ),
+    return Material(
+      type: MaterialType.transparency,
+      clipBehavior: Clip.none,
+      child: InkResponse(
+        onTap: onTap,
+        onHover: (_) {},
+        highlightShape: BoxShape.rectangle,
+        borderRadius: BorderRadius.all(Radius.circular(width / 2)),
+        containedInkWell: true,
+        splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+        hoverColor: Theme.of(context).colorScheme.primary.withOpacity(0.04),
+        child: content,
       ),
     );
   }
