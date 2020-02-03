@@ -541,6 +541,7 @@ class SimpleDialogOption extends StatelessWidget {
     Key key,
     this.onPressed,
     this.child,
+    this.padding,
   }) : super(key: key);
 
   /// The callback that is called when this option is selected.
@@ -556,12 +557,15 @@ class SimpleDialogOption extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
+  /// The amount of space by which to inset the [children].
+  final EdgeInsets padding;
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
+        padding: padding ?? const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
         child: child,
       ),
     );
