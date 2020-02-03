@@ -392,6 +392,24 @@ void main() {
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(44.0, 556.0));
     });
+
+    testWidgets('startTop', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startTop));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(44.0, 0.0));
+    });
+
+    testWidgets('centerTop', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.centerTop));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(400.0, 0.0));
+    });
+
+    testWidgets('endTop', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.endTop));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(756.0, 0.0));
+    });
   });
 
 }
