@@ -235,12 +235,11 @@ void main() {
       testWithoutContext('xcdevice fails', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
 
-        const String xcdevicePath = '/path/to/xcdevice';
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
-            .thenReturn(ProcessResult(1, 0, xcdevicePath, ''));
+            .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>[xcdevicePath, 'list', '--timeout', '1']))
-            .thenThrow(const ProcessException(xcdevicePath, <String>['list', '--timeout', '1']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '1']));
 
         expect(await xcdevice.getAvailableTetheredIOSDevices(), isEmpty);
       });
@@ -248,9 +247,8 @@ void main() {
       testUsingContext('returns devices', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
 
-        const String xcdevicePath = '/path/to/xcdevice';
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
-            .thenReturn(ProcessResult(1, 0, xcdevicePath, ''));
+            .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
         const String devicesOutput = '''
 [
@@ -345,7 +343,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>[xcdevicePath, 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
         expect(devices, hasLength(3));
@@ -380,12 +378,11 @@ void main() {
       testWithoutContext('xcdevice fails', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
 
-        const String xcdevicePath = '/path/to/xcdevice';
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
-            .thenReturn(ProcessResult(1, 0, xcdevicePath, ''));
+            .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>[xcdevicePath, 'list', '--timeout', '1']))
-            .thenThrow(const ProcessException(xcdevicePath, <String>['list', '--timeout', '1']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '1']));
 
         expect(await xcdevice.getDiagnostics(), isEmpty);
       });
@@ -393,9 +390,8 @@ void main() {
       testUsingContext('returns error message', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
 
-        const String xcdevicePath = '/path/to/xcdevice';
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
-            .thenReturn(ProcessResult(1, 0, xcdevicePath, ''));
+            .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
         const String devicesOutput = '''
 [
@@ -464,7 +460,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>[xcdevicePath, 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<String> errors = await xcdevice.getDiagnostics();
         expect(errors, hasLength(3));

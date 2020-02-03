@@ -234,7 +234,8 @@ class XCDevice {
       // USB-tethered devices should be found quickly. 1 second timeout is faster than the default.
       final RunResult result = await _processUtils.run(
         <String>[
-          xcdevicePath,
+          'xcrun',
+          'xcdevice',
           'list',
           '--timeout',
           '1',
