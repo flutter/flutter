@@ -70,6 +70,17 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface {
         expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
   }
 
+  Future<Null> compileExpressionToJs(
+      String libraryUri,
+      int line,
+      int column,
+      Map<String,String> jsModules,
+      Map<String,String> jsFrameValues,
+      String moduleName,
+      String expression) {
+    throw UnimplementedError('Compile expression to JS is not supported');
+  }
+
   @override
   void reportError(String msg) {
     _compiler.reportError(msg);
