@@ -126,7 +126,9 @@ class AnalyzeCommand extends FlutterCommand {
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
         fileSystem: _fileSystem,
-        logger: _logger,
+        // TODO(jonahwilliams): determine a better way to inject the logger,
+        // since it is constructed on-demand.
+        logger: _logger ?? globals.logger,
         platform: _platform,
         processManager: _processManager,
         terminal: _terminal,
