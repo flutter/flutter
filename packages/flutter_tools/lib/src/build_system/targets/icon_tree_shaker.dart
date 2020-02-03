@@ -186,7 +186,9 @@ class IconTreeShaker {
       fontSubsetProcess.stdin.writeln(codePoints);
       await fontSubsetProcess.stdin.flush();
       await fontSubsetProcess.stdin.close();
-    } catch (e) {
+    } on Exception catch (_) {
+      // handled by checking the exit code.
+    } on OSError catch (_) {
       // handled by checking the exit code.
     }
 

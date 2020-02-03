@@ -354,8 +354,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     'xcrun',
     'xcodebuild',
     '-configuration', configuration,
-    if (buildInfo.treeShakeIcons)
-      'TREE_SHAKE_ICONS=true'
   ];
 
   if (globals.logger.isVerbose) {

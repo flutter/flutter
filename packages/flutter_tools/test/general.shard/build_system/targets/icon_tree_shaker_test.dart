@@ -110,12 +110,8 @@ void main() {
   });
 
   Environment _createEnvironment(Map<String, String> defines) {
-    return Environment(
-      cacheDir: fs.directory('/build/cache')..createSync(recursive: true),
-      flutterRootDir: fs.directory('/flutter')..createSync(recursive: true),
-      outputDir: fs.directory('/build/output')..createSync(recursive: true),
-      projectDir: fs.directory('/project')..createSync(recursive: true),
-      buildDir: fs.directory('/build')..createSync(recursive: true),
+    return Environment.test(
+      fs.directory('/icon_test')..createSync(recursive: true),
       defines: defines,
     );
   }
@@ -131,7 +127,7 @@ void main() {
       fontManifestContent,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 
@@ -163,7 +159,7 @@ void main() {
       null,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 
@@ -187,7 +183,7 @@ void main() {
       fontManifestContent,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 
@@ -211,7 +207,7 @@ void main() {
       fontManifestContent,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 
@@ -238,7 +234,7 @@ void main() {
       fontManifestContent,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 
@@ -280,7 +276,7 @@ void main() {
       fontManifestContent,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 
@@ -314,7 +310,7 @@ void main() {
       fontManifestContent,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 
@@ -348,7 +344,7 @@ void main() {
       fontManifestContent,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 
@@ -384,7 +380,7 @@ void main() {
       fontManifestContent,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 
@@ -418,7 +414,7 @@ void main() {
       fontManifestContent,
       logger: logger,
       processManager: mockProcessManager,
-      fs: fs,
+      fileSystem: fs,
       artifacts: mockArtifacts,
     );
 

@@ -39,7 +39,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
     assetBundle.entries[kFontManifestJson] as DevFSStringContent,
     processManager: globals.processManager,
     logger: globals.logger,
-    fs: globals.fs,
+    fileSystem: globals.fs,
     artifacts: globals.artifacts,
   );
 
