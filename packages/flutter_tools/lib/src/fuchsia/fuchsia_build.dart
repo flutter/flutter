@@ -98,7 +98,8 @@ Future<void> _genSnapshot(
 
   final List<String> command = <String>[
     genSnapshot,
-    '--no_causal_async_stacks',
+    '--no-causal-async-stacks',
+    '--lazy-async-stacks',
     '--deterministic',
     '--snapshot_kind=app-aot-blobs',
     '--vm_snapshot_data=$vmSnapshotData',

@@ -26,7 +26,7 @@ void main() {
     Completer<void> firstNameFound = Completer<void>();
     Completer<void> secondNameFound = Completer<void>();
     final Process runProcess = await _run(device: device, command:
-        <String>['run', '--disable-service-auth-codes'], stdoutListener: (String line) {
+        <String>['run', '--disable-service-auth-codes', '--no-fast-start'], stdoutListener: (String line) {
       if (line.contains(_kFirstIsolateName)) {
         firstNameFound.complete();
       } else if (line.contains(_kSecondIsolateName)) {
@@ -51,7 +51,7 @@ void main() {
     print('Extracted observatory port: $observatoryUri');
     final Process attachProcess =
       await _run(device: device, command: <String>['attach', '--debug-uri',
-          observatoryUri, '--isolate-filter', '$_kSecondIsolateName'], stdoutListener: (String line) {
+          observatoryUri, '--isolate-filter', _kSecondIsolateName], stdoutListener: (String line) {
         if (line.contains(_kFirstIsolateName)) {
           firstNameFound.complete();
         } else if (line.contains(_kSecondIsolateName)) {

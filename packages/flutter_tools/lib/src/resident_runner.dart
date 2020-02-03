@@ -406,7 +406,7 @@ class FlutterDevice {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-      'Launching ${fsUtils.getDisplayPath(hotRunner.mainPath)} '
+      'Launching ${globals.fsUtils.getDisplayPath(hotRunner.mainPath)} '
       'on ${device.name} in $modeName mode...',
     );
 
@@ -481,7 +481,7 @@ class FlutterDevice {
       );
     } else {
       globals.printStatus(
-        'Launching ${fsUtils.getDisplayPath(coldRunner.mainPath)} '
+        'Launching ${globals.fsUtils.getDisplayPath(coldRunner.mainPath)} '
         'on ${device.name} in $modeName mode...',
       );
     }
@@ -862,7 +862,7 @@ abstract class ResidentRunner {
       'Taking screenshot for ${device.device.name}...',
       timeout: timeoutConfiguration.fastOperation,
     );
-    final File outputFile = fsUtils.getUniqueFile(
+    final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
       'png',

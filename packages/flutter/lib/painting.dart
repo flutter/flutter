@@ -17,7 +17,7 @@
 ///    painting boxes.
 library painting;
 
-export 'dart:ui' show Shadow, PlaceholderAlignment;
+export 'dart:ui' show Shadow, PlaceholderAlignment, TextHeightBehavior;
 
 export 'src/painting/alignment.dart';
 export 'src/painting/basic_types.dart';

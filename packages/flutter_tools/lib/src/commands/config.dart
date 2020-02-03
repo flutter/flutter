@@ -12,7 +12,6 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import '../version.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
@@ -68,7 +67,7 @@ class ConfigCommand extends FlutterCommand {
     // List all config settings. for feature flags, include whether they
     // are available.
     final Map<String, Feature> featuresByName = <String, Feature>{};
-    final String channel = FlutterVersion.instance.channel;
+    final String channel = globals.flutterVersion.channel;
     for (final Feature feature in allFeatures) {
       if (feature.configSetting != null) {
         featuresByName[feature.configSetting] = feature;

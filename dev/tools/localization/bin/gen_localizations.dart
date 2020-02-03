@@ -464,10 +464,7 @@ String generateValue(String value, Map<String, dynamic> attributes, LocaleInfo l
         return _scriptCategoryToEnum[value];
     }
   }
-  // Localization strings for the Kannada locale ('kn') are encoded because
-  // some of the localized strings contain characters that can crash Emacs on Linux.
-  // See packages/flutter_localizations/lib/src/l10n/README for more information.
-  return locale.languageCode == 'kn' ? generateEncodedString(value) : generateString(value);
+  return  generateEncodedString(locale.languageCode, value);
 }
 
 /// Combines [generateType], [generateKey], and [generateValue] to return

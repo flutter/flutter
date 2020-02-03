@@ -1184,7 +1184,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: FocusNode(),
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -1221,7 +1221,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -1251,7 +1251,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -1288,7 +1288,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -1328,7 +1328,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -1368,7 +1368,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         maxLines: 1,
         onEditingComplete: () {
@@ -1408,7 +1408,7 @@ void main() {
         backgroundCursorColor: Colors.grey,
         controller: TextEditingController(),
         focusNode: focusNode,
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         maxLines: 3,
         onEditingComplete: () {
@@ -1461,9 +1461,9 @@ void main() {
                       backgroundCursorColor: Colors.grey,
                       controller: currentController,
                       focusNode: focusNode,
-                      style: Typography(platform: TargetPlatform.android)
+                      style: Typography.material2018(platform: TargetPlatform.android)
                           .black
-                          .subhead,
+                          .subtitle1,
                       cursorColor: Colors.blue,
                       selectionControls: materialTextSelectionControls,
                       keyboardType: TextInputType.text,
@@ -2568,7 +2568,7 @@ void main() {
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
           ),
@@ -2599,7 +2599,7 @@ void main() {
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
           ),
@@ -2645,7 +2645,7 @@ void main() {
                 key: ValueKey<String>(controller1.text),
                 controller: controller1,
                 focusNode: FocusNode(),
-                style: Typography(platform: TargetPlatform.android).black.subhead,
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
               ),
@@ -2654,7 +2654,7 @@ void main() {
                 key: ValueKey<String>(controller2.text),
                 controller: controller2,
                 focusNode: FocusNode(),
-                style: Typography(platform: TargetPlatform.android).black.subhead,
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 minLines: 10,
@@ -2879,7 +2879,7 @@ void main() {
           child: EditableText(
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardAppearance: Brightness.dark,
@@ -2952,7 +2952,7 @@ void main() {
             showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -3119,7 +3119,7 @@ void main() {
             controller: controller,
             showSelectionHandles: true,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -3243,7 +3243,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead,
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -3754,6 +3754,51 @@ void main() {
       reason: 'on $platform',
     );
     expect(controller.text, isEmpty, reason: 'on $platform');
+
+    /// Paste and Select All
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyV,
+        LogicalKeyboardKey.keyA,
+      ],
+      shortcutModifier: true,
+      platform: platform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: testText.length,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    // Backspace
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.delete,
+      ],
+      platform: platform,
+    );
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 72,
+          affinity: TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, isEmpty, reason: 'on $platform');
   }
 
   testWidgets('keyboard text selection works as expected on linux', (WidgetTester tester) async {
@@ -3773,9 +3818,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
-  testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
     final TextEditingController controller = TextEditingController(text: testText);
@@ -3790,7 +3833,7 @@ void main() {
               showSelectionHandles: true,
               controller: controller,
               focusNode: FocusNode(),
-              style: Typography(platform: TargetPlatform.iOS).black.subhead,
+              style: Typography.material2018(platform: TargetPlatform.iOS).black.subtitle1,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
               selectionControls: cupertinoTextSelectionControls,
@@ -3940,9 +3983,7 @@ void main() {
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
-
-    debugDefaultTargetPlatformOverride = null;
-  }, skip: isBrowser);
+  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('scrolling doesn\'t bounce', (WidgetTester tester) async {
     // 3 lines of text, where the last line overflows and requires scrolling.
@@ -3959,7 +4000,7 @@ void main() {
             maxLines: 2,
             controller: controller,
             focusNode: FocusNode(),
-            style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+            style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -4036,7 +4077,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -4072,7 +4113,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -4117,7 +4158,7 @@ void main() {
       focusNode: FocusNode(),
       cursorColor: Colors.red,
       backgroundCursorColor: Colors.blue,
-      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1.copyWith(fontFamily: 'Roboto'),
       keyboardType: TextInputType.text,
     );
 
@@ -4153,6 +4194,114 @@ void main() {
     }
     expect(tester.testTextInput.editingState['text'], 'flutter is the best!...');
   });
+
+  testWidgets('updateEditingValue filters multiple calls from formatter', (WidgetTester tester) async {
+    final MockTextFormatter formatter = MockTextFormatter();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+              inputFormatters: <TextInputFormatter>[formatter],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    state.updateEditingValue(const TextEditingValue(text: ''));
+    state.updateEditingValue(const TextEditingValue(text: 'a'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaaaaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa'));
+    state.updateEditingValue(const TextEditingValue(text: 'aaaaaaaaa')); // Skipped
+
+    const List<String> referenceLog = <String>[
+      '[1]: , a',
+      '[1]: normal aa',
+      '[2]: aa, aaa',
+      '[2]: normal aaaa',
+      '[3]: aaaa, aa',
+      '[3]: deleting a',
+      '[4]: a, aaa',
+      '[4]: normal aaaaaaaa',
+      '[5]: aaaaaaaa, aaaa',
+      '[5]: deleting aaa',
+      '[6]: aaa, aa',
+      '[6]: deleting aaaa',
+      '[7]: aaaa, aaaaaaa',
+      '[7]: normal aaaaaaaaaaaaaa',
+      '[8]: aaaaaaaaaaaaaa, aa',
+      '[8]: deleting aaaaaa',
+      '[9]: aaaaaa, aaaaaaaaa',
+      '[9]: normal aaaaaaaaaaaaaaaaaa',
+    ];
+
+    expect(formatter.log, referenceLog);
+  });
+}
+
+class MockTextFormatter extends TextInputFormatter {
+  MockTextFormatter() : _counter = 0, log = <String>[];
+
+  int _counter;
+  List<String> log;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    _counter++;
+    log.add('[$_counter]: ${oldValue.text}, ${newValue.text}');
+    TextEditingValue finalValue;
+    if (newValue.text.length < oldValue.text.length) {
+      finalValue = _handleTextDeletion(oldValue, newValue);
+    } else {
+      finalValue = _formatText(newValue);
+    }
+    return finalValue;
+  }
+
+
+  TextEditingValue _handleTextDeletion(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final String result = 'a' * (_counter - 2);
+    log.add('[$_counter]: deleting $result');
+    return TextEditingValue(text: result);
+  }
+
+  TextEditingValue _formatText(TextEditingValue value) {
+    final String result = 'a' * _counter * 2;
+    log.add('[$_counter]: normal $result');
+    return TextEditingValue(text: result);
+  }
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {
@@ -4231,7 +4380,7 @@ class _TransformedEditableTextState extends State<TransformedEditableText> {
               child: EditableText(
                 controller: TextEditingController(),
                 focusNode: FocusNode(),
-                style: Typography(platform: TargetPlatform.android).black.subhead,
+                style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
               ),

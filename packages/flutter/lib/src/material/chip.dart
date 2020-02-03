@@ -2072,6 +2072,7 @@ class _RenderChipElement extends RenderObjectElement {
     final _ChipSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
+    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _ChipSlot slot) {

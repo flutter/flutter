@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -63,6 +64,9 @@ void testUsingContext(
       'that you are dealing with in your test.'
     );
   }
+  if (overrides.containsKey(ProcessUtils)) {
+    throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
+  }
 
   // Ensure we don't rely on the default [Config] constructor which will
   // leak a sticky $HOME/.flutter_settings behind!
@@ -78,7 +82,7 @@ void testUsingContext(
     final File settingsFile = globals.fs.file(
       globals.fs.path.join(configDir.path, '.flutter_settings')
     );
-    return Config(settingsFile);
+    return Config(file: settingsFile, logger: globals.logger);
   }
   PersistentToolState buildPersistentToolState(FileSystem fs) {
     configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');

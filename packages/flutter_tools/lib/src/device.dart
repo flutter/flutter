@@ -468,7 +468,7 @@ abstract class Device {
       table.add(<String>[
         device.name,
         device.id,
-        '${getNameForTargetPlatform(targetPlatform)}',
+        getNameForTargetPlatform(targetPlatform),
         '${await device.sdkNameAndVersion}$supportIndicator',
       ]);
     }

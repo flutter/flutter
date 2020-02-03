@@ -26,7 +26,7 @@ abstract class Decoration extends Diagnosticable {
   const Decoration();
 
   @override
-  String toStringShort() => '${objectRuntimeType(this, 'Decoration')}';
+  String toStringShort() => objectRuntimeType(this, 'Decoration');
 
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.

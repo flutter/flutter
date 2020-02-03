@@ -2325,12 +2325,11 @@ void main() {
   });
 
   testWidgets(
-    'tap moves cursor to the edge of the word it tapped on (iOS)',
+    'tap moves cursor to the edge of the word it tapped',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2353,8 +2352,7 @@ void main() {
 
       // But don't trigger the toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'tap moves cursor to the position tapped (Android)',
@@ -2389,12 +2387,11 @@ void main() {
   );
 
   testWidgets(
-    'two slow taps do not trigger a word selection (iOS)',
+    'two slow taps do not trigger a word selection',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2420,16 +2417,14 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'double tap selects word and first tap of double tap moves cursor (iOS)',
+    'double tap selects word and first tap of double tap moves cursor',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2466,8 +2461,7 @@ void main() {
 
       // Selected text shows 1 toolbar buttons.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor and shows toolbar (Android)',
@@ -2568,12 +2562,11 @@ void main() {
   );
 
   testWidgets(
-    'double tap hold selects word (iOS)',
+    'double tap hold selects word',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2611,16 +2604,14 @@ void main() {
       );
       // The toolbar is still showing.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'tap after a double tap select is not affected (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2658,16 +2649,14 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long press moves cursor to the exact long press position and shows toolbar (iOS)',
+    'long press moves cursor to the exact long press position and shows toolbar',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2691,8 +2680,7 @@ void main() {
 
       // Collapsed toolbar shows 2 buttons.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'long press selects word and shows toolbar (Android)',
@@ -2729,12 +2717,11 @@ void main() {
   );
 
   testWidgets(
-    'long press tap cannot initiate a double tap (iOS)',
+    'long press tap cannot initiate a double tap',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2761,16 +2748,14 @@ void main() {
       );
 
       expect(find.byType(CupertinoButton), findsNothing);
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'long press drag moves the cursor under the drag and shows toolbar on lift (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2827,14 +2812,12 @@ void main() {
       );
       // The toolbar now shows up.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('long press drag can edge scroll (iOS)', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: SelectableText(
               'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
@@ -2918,15 +2901,14 @@ void main() {
     expect(firstCharEndpoint.length, 1);
     // The first character is now offscreen to the left.
     expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-125, epsilon: 1));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'long tap after a double tap select is not affected (iOS)',
+    'long tap after a double tap select is not affected',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -2961,16 +2943,14 @@ void main() {
 
       // Long press toolbar.
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 //convert
   testWidgets(
-    'double tap after a long tap is not affected (iOS)',
+    'double tap after a long tap is not affected',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -3003,16 +2983,14 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
-    'double tap chains work (iOS)',
+    'double tap chains work',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(
+        const MaterialApp(
+          home: Material(
             child: Center(
               child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
             ),
@@ -3070,8 +3048,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       expect(find.byType(CupertinoButton), findsNWidgets(1));
-    },
-  );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('force press does not select a word on (android)', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -3109,11 +3086,10 @@ void main() {
     expect(find.byType(FlatButton), findsNothing);
   });
 
-  testWidgets('force press selects word (iOS)', (WidgetTester tester) async {
+  testWidgets('force press selects word', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
         ),
       ),
@@ -3149,13 +3125,12 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(find.byType(CupertinoButton), findsNWidgets(1));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('tap on non-force-press-supported devices work (iOS)', (WidgetTester tester) async {
+  testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: SelectableText('Atwater Peel Sherbrooke Bonaventure'),
         ),
       ),
@@ -3194,7 +3169,11 @@ void main() {
     await tester.pump();
     // Single taps shouldn't trigger the toolbar.
     expect(find.byType(CupertinoButton), findsNothing);
-  });
+
+    // TODO(gspencergoog): Add in TargetPlatform.macOS in the line below when we
+    // figure out what global state is leaking.
+    // https://github.com/flutter/flutter/issues/43445
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('default SelectableText debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -3576,8 +3555,7 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   });
 
-  testWidgets('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
 
     await tester.pumpWidget(
@@ -3603,9 +3581,7 @@ void main() {
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(

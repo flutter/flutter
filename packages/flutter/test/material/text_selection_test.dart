@@ -329,4 +329,39 @@ void main() {
       // TODO(justinmc): Unskip when you fix rendering below the text.
     }, skip: true);
   });
+
+  group('material handles', () {
+    testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(RepaintBoundary(
+        child: Theme(
+          data: ThemeData(
+            textSelectionHandleColor: const Color(0x550000AA),
+          ),
+          isMaterialAppTheme: true,
+          child: Builder(
+            builder: (BuildContext context) {
+              return Container(
+                color: Colors.white,
+                height: 800,
+                width: 800,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 250),
+                  child: FittedBox(
+                    child: materialTextSelectionControls.buildHandle(
+                      context, TextSelectionHandleType.right, 10.0,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byType(RepaintBoundary),
+        matchesGoldenFile('transparent_handle.png'),
+      );
+    });
+  });
 }

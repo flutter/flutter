@@ -549,7 +549,7 @@ Future<void> buildGradleAar({
 
     // Copy the local engine repo in the output directory.
     try {
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         localEngineRepo,
         getRepoDirectory(outputDirectory),
       );
