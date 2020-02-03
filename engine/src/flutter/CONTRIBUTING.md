@@ -30,3 +30,7 @@ C++ and Objective-C/C++ files are formatted with `clang-format`, and GN files wi
 [code_of_conduct]: https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md
 [contrib_guide]: https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md
 [engine_dev_setup]: https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment
+
+### Fuchsia Contributions from Googlers
+
+Googlers contributing to Fuchsia should follow the additional steps at: go/flutter-fuchsia-pr-policy.
