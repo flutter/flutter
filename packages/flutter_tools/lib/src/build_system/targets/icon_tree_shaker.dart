@@ -47,16 +47,16 @@ class IconTreeShaker {
     DevFSStringContent fontManifest, {
     @required ProcessManager processManager,
     @required Logger logger,
-    @required FileSystem fs,
+    @required FileSystem fileSystem,
     @required Artifacts artifacts,
   }) : assert(_environment != null),
        assert(processManager != null),
        assert(logger != null),
-       assert(fs != null),
+       assert(fileSystem != null),
        assert(artifacts != null),
        _processManager = processManager,
        _logger = logger,
-       _fs = fs,
+       _fs = fileSystem,
        _artifacts = artifacts,
        _fontManifest = fontManifest?.string {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
@@ -170,7 +170,7 @@ class IconTreeShaker {
       _artifacts.getArtifactPath(Artifact.fontSubset),
     );
     if (!fontSubset.existsSync()) {
-      throwToolExit('The font-subset utility is missing. Run "flutter doctor".');
+      throw IconTreeShakerException._('The font-subset utility is missing. Run "flutter doctor".');
     }
 
     final List<String> cmd = <String>[

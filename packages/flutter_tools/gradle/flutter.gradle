@@ -832,11 +832,11 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
-            if (extraGenSnapshotOptions != null) {
-                args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
-            }
             if (treeShakeIcons == true) {
                 args "-dTreeShakeIcons=true"
+            }
+            if (extraGenSnapshotOptions != null) {
+                args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
             args ruleNames
         }
