@@ -53,6 +53,9 @@ class CommandHelp {
   CommandHelpOption _a;
   CommandHelpOption get a => _a ??= _makeOption('a', 'Toggle timeline events for all widget build methods.', 'debugProfileWidgetBuilds');
 
+  CommandHelpOption _c;
+  CommandHelpOption get c => _c ??= _makeOption('c', 'Clear the screen');
+
   CommandHelpOption _d;
   CommandHelpOption get d => _d ??= _makeOption('d', 'Detach (terminate "flutter run" but leave application running).');
 
