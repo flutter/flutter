@@ -82,7 +82,7 @@ toolchain("custom") {
     tocfile = sofile + ".TOC"
     temporary_tocname = sofile + ".tmp"
     link_command = "$ld $target_triple_flags $sysroot_flags -shared {{ldflags}} -o $unstripped_sofile $custom_lib_flags -Wl,--build-id -Wl,-soname=$soname @$rspfile"
-    toc_command = "{ $readelf -d $unstripped_sofile | grep SONAME ; $nm -gD -f p $unstripped_sofile | cut -f1-2 -d' '; } > $temporary_tocname"
+    toc_command = "{ $readelf -d $unstripped_sofile | grep SONAME ; $nm -gD -f posix $unstripped_sofile | cut -f1-2 -d' '; } > $temporary_tocname"
     replace_command = "if ! cmp -s $temporary_tocname $tocfile; then mv $temporary_tocname $tocfile; fi"
     strip_command = "$strip -o $sofile $unstripped_sofile"
 
