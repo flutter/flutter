@@ -3002,7 +3002,7 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 /// Provides a child model for a render object subclass that has a doubly-linked
 /// list of children.
 /// 
-/// The [ChildType] specifies the type of render object for the children,
+/// The [ChildType] specifies the type of the children (extending [RenderObject]),
 /// e.g. [RenderBox].
 /// For the parent data of the children, the [ParentDataType] is required to 
 /// extend [ContainerParentDataMixin], which provides the necessary functionality to
@@ -3011,7 +3011,7 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 /// the children are set up correctly in [RenderObject.setupParentData] of the
 /// parent render object (the one with this mixin).
 ///
-/// If using [RenderBox] for the child type, you will usually want to make use of
+/// When using [RenderBox] as the child type, you will usually want to make use of
 /// [RenderBoxContainerDefaultsMixin] and extend [ContainerBoxParentData] for the
 /// parent data.
 ///
