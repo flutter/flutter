@@ -1195,6 +1195,12 @@ class SliverAppBar extends StatefulWidget {
   /// offset specified by [stretchTriggerOffset].
   final AsyncCallback onStretchTrigger;
 
+  /// Controls whether mark header.
+  ///
+  /// If true and [leading] is null, automatically try to deduce what the leading
+  /// widget should be. If false and [leading] is null, leading space is given to [title].
+  /// If leading widget is not null, this parameter has no effect.
+
   final bool automaticallyMarkHeader;
 
   @override
