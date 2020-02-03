@@ -1917,7 +1917,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// the framework.
   ///
   /// Warning: This getter must not change value over the lifetime of this object.
-  /// 
+  ///
   /// See [RepaintBoundary] for more information about how repaint boundaries function.
   bool get isRepaintBoundary => false;
 
