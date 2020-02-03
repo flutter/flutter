@@ -3001,6 +3001,10 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 ///
 /// Provides a child model for a render object subclass that has a doubly-linked
 /// list of children.
+///
+/// This is typically used for a [RenderBox] in conjunction with the [RenderBoxContainerDefaultsMixin].
+///
+/// Moreover, this is a default mixin for render objects returned to [MultiChildRenderObjectWidget].
 mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
     ParentDataType childParentData = child.parentData as ParentDataType;
