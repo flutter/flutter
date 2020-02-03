@@ -672,9 +672,20 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _mediaQueryData = mediaQueryData,
        _onChanged = onChanged,
        _state = state,
-       _textDirection = textDirection,
-       _team = GestureArenaTeam() {
+       _textDirection = textDirection {
     _updateLabelPainter();
+    final GestureArenaTeam team = GestureArenaTeam();
+    _drag = HorizontalDragGestureRecognizer()
+      ..team = team
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..onCancel = _endInteraction;
+    _tap = TapGestureRecognizer()
+      ..team = team
+      ..onTapDown = _handleTapDown
+      ..onTapUp = _handleTapUp
+      ..onTapCancel = _endInteraction;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -693,8 +704,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   // This value is the touch target, 48, multiplied by 3.
   static const double _minPreferredTrackWidth = 144.0;
-
-  final GestureArenaTeam _team;
 
   // Compute the largest width and height needed to paint the slider shapes,
   // other than the track shape. It is assumed that these shapes are vertically
@@ -922,19 +931,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-
-    _drag = HorizontalDragGestureRecognizer()
-      ..team = _team
-      ..onStart = _handleDragStart
-      ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd
-      ..onCancel = _endInteraction;
-    _tap = TapGestureRecognizer()
-      ..team = _team
-      ..onTapDown = _handleTapDown
-      ..onTapUp = _handleTapUp
-      ..onTapCancel = _endInteraction;
-
     _overlayAnimation.addListener(markNeedsPaint);
     _valueIndicatorAnimation.addListener(markNeedsPaint);
     _enableAnimation.addListener(markNeedsPaint);
@@ -947,10 +943,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _valueIndicatorAnimation.removeListener(markNeedsPaint);
     _enableAnimation.removeListener(markNeedsPaint);
     _state.positionController.removeListener(markNeedsPaint);
-
-    _drag.dispose();
-    _tap.dispose();
-
     super.detach();
   }
 
