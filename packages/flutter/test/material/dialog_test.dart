@@ -11,7 +11,7 @@ import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
+MaterialApp _buildAppWithDialog(Widget dialog, ThemeData theme) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -34,6 +34,14 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { Theme
       ),
     ),
   );
+}
+
+MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
+  return _buildAppWithDialog(dialog, theme);
+}
+
+MaterialApp _appWithSimpleDialog(WidgetTester tester, SimpleDialog dialog, { ThemeData theme }) {
+  return _buildAppWithDialog(dialog, theme);
 }
 
 Material _getMaterialFromDialog(WidgetTester tester) {
@@ -241,6 +249,26 @@ void main() {
     await tester.tap(find.text('First option'));
 
     expect(await result, equals(42));
+  });
+
+  testWidgets('Custom padding on SimpleDialogOption', (WidgetTester tester) async {
+    const EdgeInsets customPadding = EdgeInsets.all(10);
+    final SimpleDialog dialog = SimpleDialog(
+      title: const Text('Title'),
+      children: <Widget>[
+        SimpleDialogOption(
+          onPressed: () {},
+          child: const Text('First option'),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(_appWithSimpleDialog(tester, dialog));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final SimpleDialogOption dialogOption = tester.renderObject(find.byType(SimpleDialogOption));
+    expect(dialogOption.padding, customPadding);
   });
 
   testWidgets('Barrier dismissible', (WidgetTester tester) async {
