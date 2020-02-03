@@ -239,6 +239,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(readOnly != null),
        assert(forceLine != null),
        assert(devicePixelRatio != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -264,6 +266,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _floatingCursorAddedMargin = floatingCursorAddedMargin,
        _enableInteractiveSelection = enableInteractiveSelection,
        _devicePixelRatio = devicePixelRatio,
+       _selectionHeightStyle = selectionHeightStyle,
+       _selectionWidthStyle = selectionWidthStyle,
        _startHandleLayerLink = startHandleLayerLink,
        _endHandleLayerLink = endHandleLayerLink,
        _obscureText = obscureText,
@@ -1099,6 +1103,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
   ui.BoxHeightStyle _selectionHeightStyle;
   set selectionHeightStyle(ui.BoxHeightStyle value) {
+    assert(value != null);
     if (_selectionHeightStyle == value)
       return;
     _selectionHeightStyle = value;
@@ -1108,6 +1113,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
   ui.BoxWidthStyle _selectionWidthStyle;
   set selectionWidthStyle(ui.BoxWidthStyle value) {
+    assert(value != null);
     if (_selectionWidthStyle == value)
       return;
     _selectionWidthStyle = value;

@@ -817,6 +817,8 @@ class TextPainter {
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     assert(!_needsLayout);
+    assert(boxHeightStyle != null);
+    assert(boxWidthStyle != null);
     return _paragraph.getBoxesForRange(
       selection.start,
       selection.end,
