@@ -96,6 +96,42 @@ void main() {
     expect(action.calls, equals(1));
   });
 
+  testWidgets('WidgetApp default activation key mappings work', (WidgetTester tester) async {
+    bool checked = false;
+    await tester.pumpWidget(
+      WidgetsApp(
+        key: key,
+        builder: (BuildContext context, Widget child) {
+          return Material(
+            child: Checkbox(
+              value: checked,
+              autofocus: true,
+              onChanged: (bool value) {
+                checked = value;
+              },
+            ),
+          );
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    await tester.pump();
+
+    // Test three default buttons for the activation action
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(checked, isFalse);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
+  });
+
   group('error control test', () {
     Future<void> expectFlutterError({
       GlobalKey<NavigatorState> key,
