@@ -236,36 +236,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _textDirection = textDirection,
        _vsync = vsync,
        _initialDragStartBehavior = dragStartBehavior,
-       super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
-    _tap = TapGestureRecognizer()
-      ..onTapDown = _handleTapDown
-      ..onTap = _handleTap
-      ..onTapUp = _handleTapUp
-      ..onTapCancel = _handleTapCancel;
-    _drag = HorizontalDragGestureRecognizer()
-      ..onStart = _handleDragStart
-      ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd
-      ..dragStartBehavior = dragStartBehavior;
-    _positionController = AnimationController(
-      duration: _kToggleDuration,
-      value: value ? 1.0 : 0.0,
-      vsync: vsync,
-    );
-    _position = CurvedAnimation(
-      parent: _positionController,
-      curve: Curves.linear,
-    )..addListener(markNeedsPaint)
-     ..addStatusListener(_handlePositionStateChanged);
-    _reactionController = AnimationController(
-      duration: _kReactionDuration,
-      vsync: vsync,
-    );
-    _reaction = CurvedAnimation(
-      parent: _reactionController,
-      curve: Curves.ease,
-    )..addListener(markNeedsPaint);
-  }
+       super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight));
 
   final DragStartBehavior _initialDragStartBehavior;
 
@@ -374,6 +345,25 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       ..onEnd = _handleDragEnd
       ..dragStartBehavior = _initialDragStartBehavior;
 
+    _positionController = AnimationController(
+      duration: _kToggleDuration,
+      value: value ? 1.0 : 0.0,
+      vsync: vsync,
+    );
+    _position = CurvedAnimation(
+      parent: _positionController,
+      curve: Curves.linear,
+    )..addListener(markNeedsPaint)
+     ..addStatusListener(_handlePositionStateChanged);
+    _reactionController = AnimationController(
+      duration: _kReactionDuration,
+      vsync: vsync,
+    );
+    _reaction = CurvedAnimation(
+      parent: _reactionController,
+      curve: Curves.ease,
+    )..addListener(markNeedsPaint);
+
     if (value)
       _positionController.forward();
     else
@@ -396,8 +386,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   @override
   void detach() {
-    _positionController.stop();
-    _reactionController.stop();
+    _positionController.dispose();
+    _reactionController.dispose();
 
     _tap.dispose();
     _drag.dispose();

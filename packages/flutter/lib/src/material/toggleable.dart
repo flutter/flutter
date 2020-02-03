@@ -56,44 +56,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
        _hasFocus = hasFocus,
        _hovering = hovering,
        _vsync = vsync,
-       super(additionalConstraints: additionalConstraints) {
-    _positionController = AnimationController(
-      duration: _kToggleDuration,
-      value: value == false ? 0.0 : 1.0,
-      vsync: vsync,
-    );
-    _position = CurvedAnimation(
-      parent: _positionController,
-      curve: Curves.linear,
-    )..addListener(markNeedsPaint)
-     ..addStatusListener(_handlePositionStateChanged);
-    _reactionController = AnimationController(
-      duration: kRadialReactionDuration,
-      vsync: vsync,
-    );
-    _reaction = CurvedAnimation(
-      parent: _reactionController,
-      curve: Curves.fastOutSlowIn,
-    )..addListener(markNeedsPaint);
-    _reactionHoverFadeController = AnimationController(
-      duration: _kReactionFadeDuration,
-      value: hovering || hasFocus ? 1.0 : 0.0,
-      vsync: vsync,
-    );
-    _reactionHoverFade = CurvedAnimation(
-      parent: _reactionHoverFadeController,
-      curve: Curves.fastOutSlowIn,
-    )..addListener(markNeedsPaint);
-    _reactionFocusFadeController = AnimationController(
-      duration: _kReactionFadeDuration,
-      value: hovering || hasFocus ? 1.0 : 0.0,
-      vsync: vsync,
-    );
-    _reactionFocusFade = CurvedAnimation(
-      parent: _reactionFocusFadeController,
-      curve: Curves.fastOutSlowIn,
-    )..addListener(markNeedsPaint);
-  }
+       super(additionalConstraints: additionalConstraints);
 
   /// Used by subclasses to manipulate the visual value of the control.
   ///
@@ -372,6 +335,43 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       ..onTapUp = _handleTapUp
       ..onTapCancel = _handleTapCancel;
 
+    _positionController = AnimationController(
+      duration: _kToggleDuration,
+      value: value == false ? 0.0 : 1.0,
+      vsync: vsync,
+    );
+    _position = CurvedAnimation(
+      parent: _positionController,
+      curve: Curves.linear,
+    )..addListener(markNeedsPaint)
+     ..addStatusListener(_handlePositionStateChanged);
+    _reactionController = AnimationController(
+      duration: kRadialReactionDuration,
+      vsync: vsync,
+    );
+    _reaction = CurvedAnimation(
+      parent: _reactionController,
+      curve: Curves.fastOutSlowIn,
+    )..addListener(markNeedsPaint);
+    _reactionHoverFadeController = AnimationController(
+      duration: _kReactionFadeDuration,
+      value: hovering || hasFocus ? 1.0 : 0.0,
+      vsync: vsync,
+    );
+    _reactionHoverFade = CurvedAnimation(
+      parent: _reactionHoverFadeController,
+      curve: Curves.fastOutSlowIn,
+    )..addListener(markNeedsPaint);
+    _reactionFocusFadeController = AnimationController(
+      duration: _kReactionFadeDuration,
+      value: hovering || hasFocus ? 1.0 : 0.0,
+      vsync: vsync,
+    );
+    _reactionFocusFade = CurvedAnimation(
+      parent: _reactionFocusFadeController,
+      curve: Curves.fastOutSlowIn,
+    )..addListener(markNeedsPaint);
+
     if (value == false)
       _positionController.reverse();
     else
@@ -394,10 +394,10 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
   @override
   void detach() {
-    _positionController.stop();
-    _reactionController.stop();
-
     _tap.dispose();
+
+    _positionController.dispose();
+    _reactionController.dispose();
 
     super.detach();
   }

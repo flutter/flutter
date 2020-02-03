@@ -672,7 +672,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _mediaQueryData = mediaQueryData,
        _onChanged = onChanged,
        _state = state,
-       _textDirection = textDirection {
+       _textDirection = textDirection,
+       _team = GestureArenaTeam() {
     _updateLabelPainter();
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
@@ -692,6 +693,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   // This value is the touch target, 48, multiplied by 3.
   static const double _minPreferredTrackWidth = 144.0;
+
+  final GestureArenaTeam _team;
 
   // Compute the largest width and height needed to paint the slider shapes,
   // other than the track shape. It is assumed that these shapes are vertically
@@ -920,15 +923,14 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void attach(PipelineOwner owner) {
     super.attach(owner);
 
-    final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
-      ..team = team
+      ..team = _team
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
       ..onCancel = _endInteraction;
     _tap = TapGestureRecognizer()
-      ..team = team
+      ..team = _team
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
       ..onTapCancel = _endInteraction;
