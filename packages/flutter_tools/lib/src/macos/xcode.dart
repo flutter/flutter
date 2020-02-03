@@ -296,8 +296,6 @@ class XCDevice {
     //  },
     // ...
 
-    final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
-
     final List<IOSDevice> devices = <IOSDevice>[];
     for (final dynamic device in allAvailableDevices) {
       if (device is! Map) {
@@ -305,14 +303,9 @@ class XCDevice {
       }
       final Map<String, dynamic> deviceProperties = device as Map<String, dynamic>;
 
-      if (deviceProperties.containsKey('platform')) {
-        final String platform = deviceProperties['platform'] as String;
-
-        // Despite the name, com.apple.platform.iphoneos includes iPads and all iOS devices.
-        // Excludes simulators.
-        if (platform != 'com.apple.platform.iphoneos') {
-          continue;
-        }
+      // Only include iPhone, iPad, iPod, or other iOS devices.
+      if (!_isIPhoneOSDevice(deviceProperties)) {
+        continue;
       }
 
       final String errorMessage = _parseErrorMessage(deviceProperties);
@@ -326,41 +319,70 @@ class XCDevice {
       }
 
       // In case unavailable without an error (may not be possible...)
-      if (deviceProperties.containsKey('available') && !(deviceProperties['available'] as bool)) {
+      if (!_isAvailable(deviceProperties)) {
         continue;
       }
 
       // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
-      if (deviceProperties.containsKey('interface') && (deviceProperties['interface'] as String) != 'usb') {
+      if (!_isUSBTethered(deviceProperties)) {
         continue;
       }
 
-      String sdkVersion;
-      if (deviceProperties.containsKey('operatingSystemVersion')) {
-        final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
-        sdkVersion = operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
-      }
-
-      DarwinArch cpuArchitecture;
-      if (deviceProperties.containsKey('architecture')) {
-        final String architecture = deviceProperties['architecture'] as String;
-        try {
-          cpuArchitecture = getIOSArchForName(architecture);
-        } catch (error) {
-          // Fallback to default iOS architecture. Future-proof against a theoretical version
-          // of Xcode that changes this string to something slightly different like "ARM64".
-          cpuArchitecture ??= defaultIOSArchs.first;
-          _logger.printError('Unknown architecture $architecture, defaulting to ${getNameForDarwinArch(cpuArchitecture)}');
-        }
-      }
       devices.add(IOSDevice(
         device['identifier'] as String,
         name: device['name'] as String,
-        cpuArchitecture: cpuArchitecture,
-        sdkVersion: sdkVersion,
+        cpuArchitecture: _cpuArchitecture(deviceProperties),
+        sdkVersion: _sdkVersion(deviceProperties),
       ));
     }
     return devices;
+  }
+
+  /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
+  /// Excludes simulators.
+  static bool _isIPhoneOSDevice(Map<String, dynamic> deviceProperties) {
+    if (deviceProperties.containsKey('platform')) {
+      final String platform = deviceProperties['platform'] as String;
+      return platform == 'com.apple.platform.iphoneos';
+    }
+    return false;
+  }
+
+  static bool _isAvailable(Map<String, dynamic> deviceProperties) {
+    return deviceProperties.containsKey('available') && (deviceProperties['available'] as bool);
+  }
+
+  static bool _isUSBTethered(Map<String, dynamic> deviceProperties) {
+    // Interface can be "usb", "network", or not present for simulators.
+    return deviceProperties.containsKey('interface') &&
+        (deviceProperties['interface'] as String).toLowerCase() == 'usb';
+  }
+
+  static String _sdkVersion(Map<String, dynamic> deviceProperties) {
+    if (deviceProperties.containsKey('operatingSystemVersion')) {
+      // Parse out the OS version, ignore the build number in parentheses.
+      // "13.3 (17C54)"
+      final RegExp operatingSystemRegex = RegExp(r'(.*) \(.*\)$');
+      final String operatingSystemVersion = deviceProperties['operatingSystemVersion'] as String;
+      return operatingSystemRegex.firstMatch(operatingSystemVersion.trim())?.group(1);
+    }
+    return null;
+  }
+
+  DarwinArch _cpuArchitecture(Map<String, dynamic> deviceProperties) {
+    DarwinArch cpuArchitecture;
+    if (deviceProperties.containsKey('architecture')) {
+      final String architecture = deviceProperties['architecture'] as String;
+      try {
+        cpuArchitecture = getIOSArchForName(architecture);
+      } catch (error) {
+        // Fallback to default iOS architecture. Future-proof against a theoretical version
+        // of Xcode that changes this string to something slightly different like "ARM64".
+        cpuArchitecture ??= defaultIOSArchs.first;
+        _logger.printError('Unknown architecture $architecture, defaulting to ${getNameForDarwinArch(cpuArchitecture)}');
+      }
+    }
+    return cpuArchitecture;
   }
 
   /// Error message parsed from xcdevice. null if no error.
