@@ -113,7 +113,6 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
     [self updateEditState];
   } else {
     handled = NO;
-    NSLog(@"Unhandled text input method '%@'", method);
   }
   result(handled ? nil : FlutterMethodNotImplemented);
 }
