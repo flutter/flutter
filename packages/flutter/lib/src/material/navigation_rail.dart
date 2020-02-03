@@ -299,7 +299,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                   children: <Widget>[
                     for (int i = 0; i < widget.destinations.length; i++)
                       _RailDestinationBox(
-                        animation: _destinationAnimations[i],
+                        destinationAnimation: _destinationAnimations[i],
                         labelKind: widget.labelType,
                         selected: widget.currentIndex == i,
                         icon: widget.currentIndex == i
@@ -388,23 +388,23 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
 class _RailDestinationBox extends StatelessWidget {
   _RailDestinationBox({
-    this.animation,
+    this.destinationAnimation,
     this.labelKind = NavigationRailLabelType.all,
     this.selected,
     this.icon,
     this.label,
     this.onTap,
-    this.extended,
+    this.extendedAnima,
     this.width,
     this.height,
   }) : assert(labelKind != null),
        _positionAnimation = CurvedAnimation(
-          parent: ReverseAnimation(animation),
+          parent: ReverseAnimation(destinationAnimation),
           curve: Curves.easeInOut,
           reverseCurve: Curves.easeInOut.flipped,
        );
 
-  final Animation<double> animation;
+  final Animation<double> destinationAnimation;
   final NavigationRailLabelType labelKind;
   final bool selected;
   final Widget icon;
@@ -417,18 +417,18 @@ class _RailDestinationBox extends StatelessWidget {
   final Animation<double> _positionAnimation;
 
   double _fadeInValue() {
-    if (animation.value < 0.25) {
+    if (destinationAnimation.value < 0.25) {
       return 0;
-    } else if (animation.value < 0.75) {
-      return (animation.value - 0.25) * 2;
+    } else if (destinationAnimation.value < 0.75) {
+      return (destinationAnimation.value - 0.25) * 2;
     } else {
       return 1;
     }
   }
 
   double _fadeOutValue() {
-    if (animation.value > 0.75) {
-      return (animation.value - 0.75) * 4;
+    if (destinationAnimation.value > 0.75) {
+      return (destinationAnimation.value - 0.75) * 4;
     } else {
       return 0;
     }
@@ -508,7 +508,6 @@ class _RailDestinationBox extends StatelessWidget {
           onTap: onTap,
           onHover: (_) {},
           highlightShape: BoxShape.rectangle,
-//            highlightShape: extended ? BoxShape.rectangle : BoxShape.circle,
           borderRadius: BorderRadius.all(Radius.circular(width / 2)),
           containedInkWell: true,
           splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
