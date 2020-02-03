@@ -98,6 +98,7 @@ void main() {
 
   testWidgets('WidgetsApp default activation key mappings work', (WidgetTester tester) async {
     bool checked = false;
+
     await tester.pumpWidget(
       WidgetsApp(
         builder: (BuildContext context, Widget child) {
@@ -114,19 +115,19 @@ void main() {
         color: const Color(0xFF123456),
       ),
     );
+    await tester.pump();
 
     // Test three default buttons for the activation action
-    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(checked, isTrue);
 
-    await tester.pump();
+    checked = false;
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
-    expect(checked, isFalse);
+    expect(checked, isTrue);
 
-    await tester.pump();
+    checked = false;
     await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
     await tester.pumpAndSettle();
     expect(checked, isTrue);
