@@ -375,12 +375,15 @@ void main() {
   }, skip: isBrowser);
 
   group('New Floating Action Button Locations', () {
-    Widget _singleFABScaffold(FloatingActionButtonLocation location) {
+    // TODO: Add top and bottom bars.
+
+    Widget _singleFABScaffold(FloatingActionButtonLocation location, {bool mini = false}) {
       return MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: () {},
             child: Icon(Icons.beach_access),
+            mini: mini,
           ),
           floatingActionButtonLocation: location,
         ),
@@ -409,6 +412,12 @@ void main() {
       await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.endTop));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(756.0, 0.0));
+    });
+
+    testWidgets('miniEndTop', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniEndTop, mini: true));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(764.0, 0.0));
     });
   });
 
