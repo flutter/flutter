@@ -2758,6 +2758,28 @@ class InputDecoration {
   ///  * [suffixIcon], which is the same but on the trailing edge.
   final Widget prefixIcon;
 
+  /// The constraints for the prefix icon.
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding [prefixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than 48px. This can be achieved by setting [isDense] to true and
+  /// setting the constraints' minimum height and width to a value lower than
+  /// 48px.
+  ///
+  /// ```dart
+  /// InputDecoration(
+  ///   prefixIcon: Icon(Icons.search, size: 26),
+  ///   prefixIconConstraints: BoxConstraints(
+  ///     minHeight: 32,
+  ///     minWidth: 32,
+  ///   ),
+  ///   isDense: true,
+  /// )
+  /// ```
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
   final BoxConstraints prefixIconConstraints;
 
   /// Optional widget to place on the line before the input.
@@ -2873,6 +2895,28 @@ class InputDecoration {
   ///  * [prefixStyle], the equivalent but on the leading edge.
   final TextStyle suffixStyle;
 
+  /// The constraints for the suffix icon.
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding [suffixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than 48px. This can be achieved by setting [isDense] to true and
+  /// setting the constraints' minimum height and width to a value lower than
+  /// 48px.
+  ///
+  /// ```dart
+  /// InputDecoration(
+  ///   suffixIcon: Icon(Icons.search, size: 26),
+  ///   suffixIconConstraints: BoxConstraints(
+  ///     minHeight: 32,
+  ///     minWidth: 32,
+  ///   ),
+  ///   isDense: true,
+  /// )
+  /// ```
+  ///
+  /// If null, a [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
   final BoxConstraints suffixIconConstraints;
 
   /// Optional text to place below the line as a character count.
