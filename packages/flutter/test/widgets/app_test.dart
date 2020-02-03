@@ -100,7 +100,6 @@ void main() {
     bool checked = false;
     await tester.pumpWidget(
       WidgetsApp(
-        key: key,
         builder: (BuildContext context, Widget child) {
           return Material(
             child: Checkbox(
