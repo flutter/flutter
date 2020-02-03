@@ -127,7 +127,8 @@ BuildApp() {
     flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
   fi
 
-  # TODO(jonahwilliams): move engine copying to build system.
+  # TODO(jonahwilliams): move engine copying to build system. for example,
+  # copyEngineArtifactToProject in project.dart.
   if [[ -e "${project_path}/.ios" ]]; then
     RunCommand rm -rf -- "${derived_dir}/engine"
     mkdir "${derived_dir}/engine"
