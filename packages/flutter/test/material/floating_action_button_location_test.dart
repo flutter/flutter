@@ -375,20 +375,20 @@ void main() {
   }, skip: isBrowser);
 
   group('New Floating Action Button Locations', () {
-    testWidgets('startFloat', (WidgetTester tester) async {
-      Widget build() {
-        return MaterialApp(
-          home: Scaffold(
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {},
-              child: Icon(Icons.beach_access),
-            ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+    Widget _singleFABScaffold(FloatingActionButtonLocation location) {
+      return MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: Icon(Icons.beach_access),
           ),
-        );
-      }
-
-      await tester.pumpWidget(build());
+          floatingActionButtonLocation: location,
+        ),
+      );
+    }
+    
+    testWidgets('startFloat', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(44.0, 556.0));
     });
