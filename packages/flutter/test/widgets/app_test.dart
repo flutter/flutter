@@ -96,7 +96,7 @@ void main() {
     expect(action.calls, equals(1));
   });
 
-  testWidgets('WidgetApp default activation key mappings work', (WidgetTester tester) async {
+  testWidgets('WidgetsApp default activation key mappings work', (WidgetTester tester) async {
     bool checked = false;
     await tester.pumpWidget(
       WidgetsApp(
@@ -115,17 +115,18 @@ void main() {
       ),
     );
 
-    await tester.pump();
-
     // Test three default buttons for the activation action
+    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(checked, isTrue);
 
+    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
     expect(checked, isFalse);
 
+    await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
     await tester.pumpAndSettle();
     expect(checked, isTrue);
