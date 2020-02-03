@@ -1592,17 +1592,12 @@ void main() {
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 
-  testWidgets('SliverAppBar provides correct semantics with default automaticallyMarkHeader value', (WidgetTester tester) async {
+  testWidgets(
+    'SliverAppBar provides correct semantics with default automaticallyMarkHeader value',
+    (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: AppBar(title: const Text('Title')),
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(home: Center(child: AppBar(title: const Text('Title')))));
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
