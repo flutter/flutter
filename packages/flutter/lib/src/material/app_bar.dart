@@ -694,6 +694,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.snapConfiguration,
     @required this.stretchConfiguration,
     @required this.shape,
+    @required this.automaticallyMarkHeader,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
@@ -719,6 +720,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool floating;
   final bool pinned;
   final ShapeBorder shape;
+  final bool automaticallyMarkHeader;
 
   final double _bottomHeight;
 
@@ -763,7 +765,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: title,
         actions: actions,
-        flexibleSpace: flexibleSpace,
+        flexibleSpace: (title == null && flexibleSpace != null)
+          ? Semantics(child: flexibleSpace, header: automaticallyMarkHeader)
+          : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4.0 : 0.0,
         backgroundColor: backgroundColor,
@@ -805,7 +809,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || pinned != oldDelegate.pinned
         || floating != oldDelegate.floating
         || snapConfiguration != oldDelegate.snapConfiguration
-        || stretchConfiguration != oldDelegate.stretchConfiguration;
+        || stretchConfiguration != oldDelegate.stretchConfiguration
+        || automaticallyMarkHeader != oldDelegate.automaticallyMarkHeader;
   }
 
   @override
@@ -923,6 +928,7 @@ class SliverAppBar extends StatefulWidget {
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
     this.shape,
+    this.automaticallyMarkHeader = true,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
@@ -1189,6 +1195,8 @@ class SliverAppBar extends StatefulWidget {
   /// offset specified by [stretchTriggerOffset].
   final AsyncCallback onStretchTrigger;
 
+  final bool automaticallyMarkHeader;
+
   @override
   _SliverAppBarState createState() => _SliverAppBarState();
 }
@@ -1276,6 +1284,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           shape: widget.shape,
           snapConfiguration: _snapConfiguration,
           stretchConfiguration: _stretchConfiguration,
+          automaticallyMarkHeader: widget.automaticallyMarkHeader,
         ),
       ),
     );
