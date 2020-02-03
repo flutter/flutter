@@ -3007,8 +3007,9 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 /// For the parent data of the children, the [ParentDataType] is required to 
 /// extend [ContainerParentDataMixin], which provides the necessary functionality to
 /// grab the siblings of [firstChild] or [lastChild]. 
-/// This data will be accessible via [RenderObject.parentData] if the children are
-/// set up correctly in [RenderObject.setupParentData].
+/// This data will be accessible via [RenderObject.parentData] of the children if 
+/// the children are set up correctly in [RenderObject.setupParentData] of the
+/// parent render object (the one with this mixin).
 ///
 /// If using [RenderBox] for the child type, you will usually want to make use of
 /// [RenderBoxContainerDefaultsMixin] and extend [ContainerBoxParentData] for the
