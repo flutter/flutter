@@ -33,6 +33,7 @@ void main() {
     mockMDnsObservatoryDiscovery = MockMDnsObservatoryDiscovery();
     mockPrototcolDiscovery = MockPrototcolDiscovery();
     mockPortForwarder = MockPortForwarder();
+    mockHttpClient = MockHttpClient();
     fallbackDiscovery = FallbackDiscovery(
       logger: logger,
       mDnsObservatoryDiscovery: mockMDnsObservatoryDiscovery,
@@ -43,6 +44,33 @@ void main() {
   });
 
   testUsingContext('Selects assumed port of PortFowarder does not throw', () async {
+    final MockHttpClientResponse response = MockHttpClientResponse();
+    final MockHttpClientRequest request = MockHttpClientRequest();
+    when(mockHttpClient.getUrl(any)).thenAnswer((Invocation invocation) async {
+      return request;
+    });
+    when(request.close()).thenAnswer((Invocation invocation) async {
+      return response;
+    });
+    when(response.statusCode).thenReturn(HttpStatus.ok);
+    when(response.transform<String>(any)).thenAnswer((Invocation invocation) {
+      return Stream<String>.fromIterable(<String>[
+        '''
+        <!DOCTYPE html>
+        <html style="height: 100%">
+        <head>
+          <meta charset="utf-8">
+          <title>Dart VM Observatory</title>
+          <link rel="stylesheet" href="packages/charted/charts/themes/quantum_theme.css">
+          <link rel="stylesheet" href="packages/observatory/src/elements/css/shared.css">
+          <script defer src="main.dart.js"></script>
+        </head>
+        <body style="height: 100%">
+        </body>
+        </html>
+        '''
+      ]);
+    });
     when(mockPortForwarder.forward(23, hostPort: anyNamed('hostPort')))
       .thenAnswer((Invocation invocation) async => 1);
 
@@ -103,3 +131,5 @@ class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscov
 class MockPrototcolDiscovery extends Mock implements ProtocolDiscovery {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 class MockHttpClient extends Mock implements HttpClient {}
+class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+class MockHttpClientRequest extends Mock implements HttpClientRequest {}

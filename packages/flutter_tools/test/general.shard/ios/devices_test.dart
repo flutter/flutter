@@ -380,7 +380,7 @@ void main() {
         Usage: () => mockUsage,
       });
 
-      testUsingContext(' fails in debug mode when mDNS fails and when Observatory URI is malformed', () async {
+      testUsingContext('fails in debug mode when mDNS fails and when Observatory URI is malformed', () async {
         final IOSDevice device = IOSDevice('123');
         device.portForwarder = mockPortForwarder;
         device.setLogReader(mockApp, mockLogReader);
@@ -398,6 +398,7 @@ void main() {
             debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
             platformArgs: <String, dynamic>{},
         );
+        verify(mockUsage.sendEvent('ios-mdns', 'precheck-failure')).called(1);
         verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
         verify(mockUsage.sendEvent('ios-mdns', 'fallback-failure')).called(1);
         expect(launchResult.started, isFalse);

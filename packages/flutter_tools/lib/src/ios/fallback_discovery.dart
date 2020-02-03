@@ -64,14 +64,14 @@ class FallbackDiscovery {
     try {
       final int hostPort = await _portForwarder.forward(assumedDevicePort, hostPort: hostVmservicePort);
       final Uri assumedUri = Uri.parse('http://localhost:$hostPort');
-      // Attempt to connect to the vmservice with exponential backoff.
+      // Attempt to connect to the vmservice.
       int attempts = 0;
-      int delaySeconds = 2;
+      const int delaySeconds = 2;
       while (attempts < 5) {
         // Making a GET request to the forwarded URL should return an HTML
-        // response page, though we only care if it is 200 OK. There must
-        // be a version method/page that is more easily identifiable? We
-        // might otherwise connect to a random server.
+        // response page containing a specific string. This logic needs to
+        // be tightened up to ensure we don't accidentally try to connect
+        // to some arbitrary server.
         final HttpClientRequest request = await _httpClient.getUrl(assumedUri);
         final HttpClientResponse response = await request.close();
         if (response.statusCode == HttpStatus.ok) {
@@ -82,14 +82,19 @@ class FallbackDiscovery {
             return assumedUri;
           }
         }
-        await Future<void>.delayed(Duration(seconds: delaySeconds));
-        delaySeconds *= delaySeconds;
+
+        // No exponential backoff is used here to keep the amount of time the
+        // tool waits for a connection to be reasonable. If the vmservice cannot
+        // be connected to in this way, the mDNS discovery must be reached
+        // sooner rather than later.
+        await Future<void>.delayed(const Duration(seconds: delaySeconds));
         attempts += 1;
       }
     } on Exception {
-      UsageEvent('ios-mdns', 'precheck-failure').send();
       _logger.printTrace('Failed to connect directly, falling back to mDNS');
     }
+    UsageEvent('ios-mdns', 'precheck-failure').send();
+
     try {
       final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
         packageId,
@@ -97,20 +102,25 @@ class FallbackDiscovery {
         usesIpv6: usesIpv6,
         hostVmservicePort: hostVmservicePort,
       );
-      UsageEvent('ios-mdns', 'success').send();
-      return result;
+      if (result != null) {
+        UsageEvent('ios-mdns', 'success').send();
+        return result;
+      }
     } on Exception {
       _logger.printTrace('Failed to connect with mDNS, falling back to log scanning');
-      UsageEvent('ios-mdns', 'failure').send();
     }
+    UsageEvent('ios-mdns', 'failure').send();
+
     try {
       final Uri result = await _protocolDiscovery.uri;
       UsageEvent('ios-mdns', 'fallback-success').send();
       return result;
-    } on Exception {
+    // In the event of an invalid InternetAddress, this code attempts to catch
+    // an ArgumentError from protocol_discovery.dart
+    } catch (err) {
       _logger.printTrace('Failed to connect with log scanning');
-      UsageEvent('ios-mdns', 'fallback-failure').send();
     }
+    UsageEvent('ios-mdns', 'fallback-failure').send();
     return null;
   }
 }
