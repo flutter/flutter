@@ -1806,7 +1806,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 ///
 /// This will return a [RenderObject] mixing in [ContainerRenderObjectMixin].
 /// Typically, this is a [RenderBox] with [RenderBoxContainerDefaultsMixin],
-/// which provide the necessary functionality to grab the children of the
+/// which provide the necessary functionality to visit the children of the
 /// container render object (the render object belonging to the [children] widgets).
 ///
 /// See also:
