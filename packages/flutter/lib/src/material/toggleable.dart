@@ -57,11 +57,6 @@ abstract class RenderToggleable extends RenderConstrainedBox {
        _hovering = hovering,
        _vsync = vsync,
        super(additionalConstraints: additionalConstraints) {
-    _tap = TapGestureRecognizer()
-      ..onTapDown = _handleTapDown
-      ..onTap = _handleTap
-      ..onTapUp = _handleTapUp
-      ..onTapCancel = _handleTapCancel;
     _positionController = AnimationController(
       duration: _kToggleDuration,
       value: value == false ? 0.0 : 1.0,
@@ -370,6 +365,13 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+
+    _tap = TapGestureRecognizer()
+      ..onTapDown = _handleTapDown
+      ..onTap = _handleTap
+      ..onTapUp = _handleTapUp
+      ..onTapCancel = _handleTapCancel;
+
     if (value == false)
       _positionController.reverse();
     else
@@ -394,6 +396,9 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   void detach() {
     _positionController.stop();
     _reactionController.stop();
+
+    _tap.dispose();
+
     super.detach();
   }
 

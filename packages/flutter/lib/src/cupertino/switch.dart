@@ -235,6 +235,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _onChanged = onChanged,
        _textDirection = textDirection,
        _vsync = vsync,
+       _initialDragStartBehavior = dragStartBehavior,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
     _tap = TapGestureRecognizer()
       ..onTapDown = _handleTapDown
@@ -265,6 +266,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       curve: Curves.ease,
     )..addListener(markNeedsPaint);
   }
+
+  final DragStartBehavior _initialDragStartBehavior;
 
   AnimationController _positionController;
   CurvedAnimation _position;
@@ -359,6 +362,18 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+
+    _tap = TapGestureRecognizer()
+      ..onTapDown = _handleTapDown
+      ..onTap = _handleTap
+      ..onTapUp = _handleTapUp
+      ..onTapCancel = _handleTapCancel;
+    _drag = HorizontalDragGestureRecognizer()
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..dragStartBehavior = _initialDragStartBehavior;
+
     if (value)
       _positionController.forward();
     else
@@ -383,6 +398,10 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void detach() {
     _positionController.stop();
     _reactionController.stop();
+
+    _tap.dispose();
+    _drag.dispose();
+
     super.detach();
   }
 

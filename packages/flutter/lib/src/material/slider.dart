@@ -674,18 +674,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _state = state,
        _textDirection = textDirection {
     _updateLabelPainter();
-    final GestureArenaTeam team = GestureArenaTeam();
-    _drag = HorizontalDragGestureRecognizer()
-      ..team = team
-      ..onStart = _handleDragStart
-      ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd
-      ..onCancel = _endInteraction;
-    _tap = TapGestureRecognizer()
-      ..team = team
-      ..onTapDown = _handleTapDown
-      ..onTapUp = _handleTapUp
-      ..onTapCancel = _endInteraction;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
@@ -931,6 +919,20 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+
+    final GestureArenaTeam team = GestureArenaTeam();
+    _drag = HorizontalDragGestureRecognizer()
+      ..team = team
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..onCancel = _endInteraction;
+    _tap = TapGestureRecognizer()
+      ..team = team
+      ..onTapDown = _handleTapDown
+      ..onTapUp = _handleTapUp
+      ..onTapCancel = _endInteraction;
+
     _overlayAnimation.addListener(markNeedsPaint);
     _valueIndicatorAnimation.addListener(markNeedsPaint);
     _enableAnimation.addListener(markNeedsPaint);
@@ -943,6 +945,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _valueIndicatorAnimation.removeListener(markNeedsPaint);
     _enableAnimation.removeListener(markNeedsPaint);
     _state.positionController.removeListener(markNeedsPaint);
+
+    _drag.dispose();
+    _tap.dispose();
+
     super.detach();
   }
 
