@@ -33,7 +33,6 @@ void main() {
   MemoryFileSystem fs;
   MockProcessManager processManager;
   MockStdio stdio;
-  OperatingSystemUtils os;
   UserMessages userMessages;
 
   setUp(() {
@@ -47,7 +46,6 @@ void main() {
       ),
       outputPreferences: OutputPreferences.test(),
     );
-    os = MockOperatingSystemUtils();
     processManager = MockProcessManager();
     stdio = MockStdio();
     userMessages = UserMessages();
@@ -231,7 +229,6 @@ void main() {
       androidSdk: sdk,
       fs: fs,
       logger: logger,
-      os: os,
       processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: userMessages,
@@ -265,7 +262,6 @@ void main() {
       androidSdk: sdk,
       fs: fs,
       logger: logger,
-      os: os,
       processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: userMessages,
@@ -325,7 +321,6 @@ void main() {
       androidStudio: null,
       fs: fs,
       logger: logger,
-      os: os,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,
       userMessages: userMessages,
@@ -343,7 +338,6 @@ void main() {
       androidStudio: null,
       fs: fs,
       logger: logger,
-      os: os,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,
       userMessages: userMessages,

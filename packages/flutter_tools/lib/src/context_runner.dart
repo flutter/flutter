@@ -74,7 +74,6 @@ Future<T> runInContext<T>(
         androidSdk: globals.androidSdk,
         fs: globals.fs,
         logger: globals.logger,
-        os: globals.os,
         platform: globals.platform,
         processManager: globals.processManager,
         userMessages: globals.userMessages,
