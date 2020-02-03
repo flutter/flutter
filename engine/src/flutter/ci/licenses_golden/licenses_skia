@@ -1,4 +1,4 @@
-Signature: d568d3527e5c5b3767b1b7ddfb1a94af
+Signature: b4f113b81eac64cdd82e6558f884caef
 
 UNUSED LICENSES:
 
@@ -1881,9 +1881,9 @@ FILE: ../../../third_party/skia/gm/smallarc.cpp
 FILE: ../../../third_party/skia/gm/stroketext.cpp
 FILE: ../../../third_party/skia/gm/surface.cpp
 FILE: ../../../third_party/skia/gm/tallstretchedbitmaps.cpp
+FILE: ../../../third_party/skia/gm/texelsubset.cpp
 FILE: ../../../third_party/skia/gm/textblob.cpp
 FILE: ../../../third_party/skia/gm/textblobshader.cpp
-FILE: ../../../third_party/skia/gm/texturedomaineffect.cpp
 FILE: ../../../third_party/skia/gm/tiledscaledbitmap.cpp
 FILE: ../../../third_party/skia/gm/variedtext.cpp
 FILE: ../../../third_party/skia/gm/yuvtorgbeffect.cpp
