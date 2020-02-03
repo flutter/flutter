@@ -1782,9 +1782,13 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   LeafRenderObjectElement createElement() => LeafRenderObjectElement(this);
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have a single child slot. (This superclass only provides the storage
 /// for that child, it doesn't actually provide the updating logic.)
+///
+/// Typically, the render object assigned to this widget will make use of
+/// [RenderObjectWithChildMixin] to grab the single child in the [RenderObject]
+/// subclass.
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
