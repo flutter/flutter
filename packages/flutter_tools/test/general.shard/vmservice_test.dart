@@ -347,4 +347,3 @@ class MockFlutterVersion extends Mock implements FlutterVersion {
   @override
   Map<String, Object> toJson() => const <String, Object>{'Mock': 'Version'};
 }
-
