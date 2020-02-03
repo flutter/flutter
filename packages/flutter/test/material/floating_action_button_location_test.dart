@@ -389,7 +389,7 @@ void main() {
         ),
       );
     }
-    
+
     testWidgets('startFloat', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startFloat));
 
