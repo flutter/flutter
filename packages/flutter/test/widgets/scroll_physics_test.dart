@@ -239,10 +239,10 @@ void main() {
     } finally {
       expect(error, isNotNull);
       expect(error.diagnostics.length, 4);
-      expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<ScrollPhysics>>());
+      expect(error.diagnostics[2], isA<DiagnosticsProperty<ScrollPhysics>>());
       expect(error.diagnostics[2].style, DiagnosticsTreeStyle.errorProperty);
       expect(error.diagnostics[2].value, physics);
-      expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ScrollMetrics>>());
+      expect(error.diagnostics[3], isA<DiagnosticsProperty<ScrollMetrics>>());
       expect(error.diagnostics[3].style, DiagnosticsTreeStyle.errorProperty);
       expect(error.diagnostics[3].value, position);
       // RegExp matcher is required here due to flutter web and flutter mobile generating

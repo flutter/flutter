@@ -8,7 +8,6 @@ import 'package:quiver/core.dart' show hash2;
 
 import '../convert.dart' show json;
 import '../globals.dart' as globals;
-import '../version.dart';
 import 'file_system.dart';
 import 'utils.dart';
 
@@ -123,7 +122,7 @@ class Fingerprint {
     final Map<String, dynamic> content = castStringKeyedMap(json.decode(jsonData));
 
     final String version = content['version'] as String;
-    if (version != FlutterVersion.instance.frameworkRevision) {
+    if (version != globals.flutterVersion.frameworkRevision) {
       throw ArgumentError('Incompatible fingerprint version: $version');
     }
     _checksums = castStringKeyedMap(content['files'])?.cast<String,String>() ?? <String, String>{};
@@ -134,7 +133,7 @@ class Fingerprint {
   Map<String, String> _properties;
 
   String toJson() => json.encode(<String, dynamic>{
-    'version': FlutterVersion.instance.frameworkRevision,
+    'version': globals.flutterVersion.frameworkRevision,
     'properties': _properties,
     'files': _checksums,
   });

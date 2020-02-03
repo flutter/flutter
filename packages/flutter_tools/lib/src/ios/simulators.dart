@@ -19,7 +19,6 @@ import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
-import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
@@ -47,7 +46,7 @@ class IOSSimulatorUtils {
   static IOSSimulatorUtils get instance => context.get<IOSSimulatorUtils>();
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
-    if (!xcode.isInstalledAndMeetsVersionCheck) {
+    if (!globals.xcode.isInstalledAndMeetsVersionCheck) {
       return <IOSSimulator>[];
     }
 
@@ -472,8 +471,15 @@ class IOSSimulator extends Device {
 
   String get logFilePath {
     return globals.platform.environment.containsKey('IOS_SIMULATOR_LOG_FILE_PATH')
-        ? globals.platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'].replaceAll('%{id}', id)
-        : globals.fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
+      ? globals.platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'].replaceAll('%{id}', id)
+      : globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Logs',
+          'CoreSimulator',
+          id,
+          'system.log',
+        );
   }
 
   @override
@@ -519,7 +525,7 @@ class IOSSimulator extends Device {
   }
 
   bool get _xcodeVersionSupportsScreenshot {
-    return xcode.majorVersion > 8 || (xcode.majorVersion == 8 && xcode.minorVersion >= 2);
+    return globals.xcode.majorVersion > 8 || (globals.xcode.majorVersion == 8 && globals.xcode.minorVersion >= 2);
   }
 
   @override
