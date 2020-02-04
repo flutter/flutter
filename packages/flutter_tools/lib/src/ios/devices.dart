@@ -275,6 +275,9 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
+    print('!!!!!!!');
+    print(package.name);
+    print(package.displayName);
 
     String packageId;
 
@@ -324,9 +327,10 @@ class IOSDevice extends Device {
     }
 
     // Step 2.5: Generate a potential open port using the provided argument,
-    // or randomly with the package name as a seed.
+    // or randomly with the package name as a seed. Intentionally choose
+    // ports within the ephemeral port range.
     final int assumedObservatoryPort = debuggingOptions?.deviceVmServicePort
-      ?? math.Random(packageId.hashCode).nextInt(1000) + 6000;
+      ?? math.Random(packageId.hashCode).nextInt(16383) + 49152;
 
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = <String>[
@@ -396,7 +400,6 @@ class IOSDevice extends Device {
         mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
-        httpClient: HttpClient(),
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
@@ -404,6 +407,7 @@ class IOSDevice extends Device {
         usesIpv6: ipv6,
         hostVmservicePort: debuggingOptions.hostVmServicePort,
         packageId: packageId,
+        packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
         return LaunchResult.failed();
