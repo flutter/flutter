@@ -276,10 +276,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     const PartialStackFrame elementUpdateChild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'updateChild');
     const PartialStackFrame elementRebuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'rebuild');
     const PartialStackFrame componentElementPerformRebuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'ComponentElement', method: 'performRebuild');
-    const PartialStackFrame componentElementFristBuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'ComponentElement', method: '_firstBuild');
+    const PartialStackFrame componentElementFirstBuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'ComponentElement', method: '_firstBuild');
     const PartialStackFrame componentElementMount = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'ComponentElement', method: 'mount');
-    const PartialStackFrame statefulElementFristBuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'StatefulElement', method: '_firstBuild');
+    const PartialStackFrame statefulElementFirstBuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'StatefulElement', method: '_firstBuild');
     const PartialStackFrame singleChildMount = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'SingleChildRenderObjectElement', method: 'mount');
+    const PartialStackFrame statefulElementRebuild = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'StatefulElement', method: 'performRebuild');
 
     const String replacementString = '...     Normal element mounting';
 
@@ -290,7 +291,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         elementUpdateChild,
         componentElementPerformRebuild,
         elementRebuild,
-        componentElementFristBuild,
+        componentElementFirstBuild,
         componentElementMount,
       ],
       replacement: replacementString,
@@ -300,7 +301,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         elementUpdateChild,
         componentElementPerformRebuild,
         elementRebuild,
-        componentElementFristBuild,
+        componentElementFirstBuild,
         componentElementMount,
       ],
       replacement: replacementString,
@@ -312,9 +313,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         elementInflateWidget,
         elementUpdateChild,
         componentElementPerformRebuild,
+        statefulElementRebuild,
         elementRebuild,
-        componentElementFristBuild,
-        statefulElementFristBuild,
+        componentElementFirstBuild,
+        statefulElementFirstBuild,
         componentElementMount,
       ],
       replacement: replacementString,
@@ -323,9 +325,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       frames: <PartialStackFrame>[
         elementUpdateChild,
         componentElementPerformRebuild,
+        statefulElementRebuild,
         elementRebuild,
-        componentElementFristBuild,
-        statefulElementFristBuild,
+        componentElementFirstBuild,
+        statefulElementFirstBuild,
         componentElementMount,
       ],
       replacement: replacementString,
