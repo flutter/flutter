@@ -1620,6 +1620,8 @@ class ParagraphConstraints {
 
 /// Defines various ways to vertically bound the boxes returned by
 /// [Paragraph.getBoxesForRange].
+///
+/// See [BoxWidthStyle] for a similar property to control width.
 enum BoxHeightStyle {
   /// Provide tight bounding boxes that fit heights per run. This style may result
   /// in uneven bounding boxes that do not nicely connect with adjacent boxes.
@@ -1675,6 +1677,8 @@ enum BoxHeightStyle {
 
 /// Defines various ways to horizontally bound the boxes returned by
 /// [Paragraph.getBoxesForRange].
+///
+/// See [BoxHeightStyle] for a similar property to control height.
 enum BoxWidthStyle {
   /// Provide tight bounding boxes that fit widths to the runs of each line
   /// independently.
