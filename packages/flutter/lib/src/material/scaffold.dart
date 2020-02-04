@@ -809,16 +809,26 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
-// TODO: Document.
+/// An object containing a floating action button with its location and animator.
+///
+/// Used to indicate different configurations for separate [FloatingActionButtonConfiguration]s
+/// in a [Scaffold].
 class FloatingActionButtonConfiguration {
+  /// Creates a floating action button configuration.
   FloatingActionButtonConfiguration({
     @required this.button,
     @required this.location,
     this.animator,
   });
 
+  /// The widget used as the floating action button.
   final Widget button;
+
+  /// The location of the floating action button in its scaffold.
   final FloatingActionButtonLocation location;
+
+  /// The animator used to move floating action button between different
+  /// locations.
   final FloatingActionButtonAnimator animator;
 }
 
