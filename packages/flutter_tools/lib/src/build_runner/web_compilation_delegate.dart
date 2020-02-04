@@ -87,7 +87,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
           'packages',
           globals.fs.path.basename(childDirectory.path),
         );
-        fsUtils.copyDirectorySync(
+        globals.fsUtils.copyDirectorySync(
           childDirectory.childDirectory('lib'),
           globals.fs.directory(path),
         );
@@ -95,7 +95,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       final Directory outputDirectory = rootDirectory
         .childDirectory(projectName)
         .childDirectory('test');
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         outputDirectory,
         globals.fs.directory(globals.fs.path.join(testOutputDir)),
       );

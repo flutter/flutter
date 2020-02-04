@@ -246,7 +246,7 @@ class _OptionsState extends State<Options> {
                       ),
                     ),
                     Text(
-                      '${widget.model.size.toStringAsFixed(3)}',
+                      widget.model.size.toStringAsFixed(3),
                       style: TextStyle(color: Colors.grey[50]),
                     ),
                   ],
@@ -261,7 +261,7 @@ class _OptionsState extends State<Options> {
                       child: SliderTheme(
                         data: controlTheme,
                         child: Slider(
-                          label: '${widget.model.density.horizontal.toStringAsFixed(1)}',
+                          label: widget.model.density.horizontal.toStringAsFixed(1),
                           min: VisualDensity.minimumDensity,
                           max: VisualDensity.maximumDensity,
                           onChanged: (double value) {
@@ -272,7 +272,7 @@ class _OptionsState extends State<Options> {
                       ),
                     ),
                     Text(
-                      '${widget.model.density.horizontal.toStringAsFixed(3)}',
+                      widget.model.density.horizontal.toStringAsFixed(3),
                       style: TextStyle(color: Colors.grey[50]),
                     ),
                   ],
@@ -287,7 +287,7 @@ class _OptionsState extends State<Options> {
                       child: SliderTheme(
                         data: controlTheme,
                         child: Slider(
-                          label: '${widget.model.density.vertical.toStringAsFixed(1)}',
+                          label: widget.model.density.vertical.toStringAsFixed(1),
                           min: VisualDensity.minimumDensity,
                           max: VisualDensity.maximumDensity,
                           onChanged: (double value) {
@@ -298,7 +298,7 @@ class _OptionsState extends State<Options> {
                       ),
                     ),
                     Text(
-                      '${widget.model.density.vertical.toStringAsFixed(3)}',
+                      widget.model.density.vertical.toStringAsFixed(3),
                       style: TextStyle(color: Colors.grey[50]),
                     ),
                   ],

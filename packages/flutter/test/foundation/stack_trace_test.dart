@@ -16,13 +16,13 @@ void main() {
     expect(filtered[0], matches(r'^#0 +main\.<anonymous closure> \(.*stack_trace_test\.dart:[0-9]+:[0-9]+\)$'));
     expect(filtered[1], matches(r'^#1 +Declarer\.test\.<anonymous closure>.<anonymous closure>.<anonymous closure> \(package:test_api/.+:[0-9]+:[0-9]+\)$'));
     expect(filtered[2], equals('<asynchronous suspension>'));
-    expect(filtered.last, matches(r'^\(elided [1-9][0-9]+ frames from package dart:async(, package dart:async-patch,)? and package stack_trace\)$'));
+    expect(filtered.last, matches(r'^\(elided [1-9][0-9]+ frames from class _RawReceivePortImpl, class _Timer, dart:async(, dart:async-patch,)? and package:stack_trace\)$'));
   });
 
   test('FlutterError.defaultStackFilter (async test body)', () async {
     final List<String> filtered = FlutterError.defaultStackFilter(StackTrace.current.toString().trimRight().split('\n')).toList();
     expect(filtered.length, greaterThanOrEqualTo(3));
     expect(filtered[0], matches(r'^#0 +main\.<anonymous closure> \(.*stack_trace_test\.dart:[0-9]+:[0-9]+\)$'));
-    expect(filtered.last, matches(r'^\(elided [1-9][0-9]+ frames from package dart:async(, package dart:async-patch,)? and package stack_trace\)$'));
+    expect(filtered.last, matches(r'^\(elided [1-9][0-9]+ frames from class _RawReceivePortImpl, class _Timer, dart:async(, dart:async-patch,)? and package:stack_trace\)$'));
   });
 }

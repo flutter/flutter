@@ -227,6 +227,11 @@ class ImageCache {
     return result;
   }
 
+  /// Returns whether this `key` has been previously added by [putIfAbsent].
+  bool containsKey(Object key) {
+    return _pendingImages[key] != null || _cache[key] != null;
+  }
+
   // Remove images from the cache until both the length and bytes are below
   // maximum, or the cache is empty.
   void _checkCacheSize() {
