@@ -58,7 +58,7 @@ class SkiaFontCollection {
         final String asset = fontAsset['asset'];
         _loadingFontBuffers.add(html.window
             .fetch(assetManager.getAssetUrl(asset))
-            .then((dynamic fetchResult) => fetchResult.arrayBuffer()));
+            .then(_getArrayBuffer));
       }
     }
 
@@ -69,8 +69,12 @@ class SkiaFontCollection {
       // Download Roboto and add it to the font buffers.
       _loadingFontBuffers.add(html.window
           .fetch(_robotoUrl)
-          .then((dynamic fetchResult) => fetchResult.arrayBuffer()));
+          .then(_getArrayBuffer));
     }
+  }
+
+  Future<ByteBuffer> _getArrayBuffer(dynamic fetchResult) {
+    return fetchResult.arrayBuffer().then<ByteBuffer>((x) => x as ByteBuffer);
   }
 
   js.JsObject skFontMgr;
