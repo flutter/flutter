@@ -98,8 +98,11 @@ class SkiaGoldClient {
   /// will only be called once for each instance of
   /// [FlutterSkiaGoldFileComparator].
   Future<void> auth() async {
-    if (_clientIsAuthorized())
+    if (_clientIsAuthorized()) {
+      print('Skia Client is already authorized.');
+      print('auth_opt.json: ${await _printClientAuthConfig()}');
       return;
+    }
 
     if (_serviceAccount.isEmpty) {
       final StringBuffer buf = StringBuffer()
@@ -131,12 +134,18 @@ class SkiaGoldClient {
         ..writeln('This could be caused by incorrect user permissions, if the ')
         ..writeln('debug information below contains ENCRYPTED, the wrong ')
         ..writeln('comparator was chosen for the test case.')
-        ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
     }
+
+    print('Goldctl has been successfully authorized.');
+    print('exit code: ${result.exitCode}');
+    print('stdout: ${result.stdout}');
+    print('stderr: ${result.stderr}');
+    print('auth_opt.json:');
+    print(_printClientAuthConfig());
   }
 
   /// Prepares the local work space for an unauthorized client to lookup golden
@@ -160,7 +169,6 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold emptyAuth failed.')
-        ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
@@ -211,7 +219,6 @@ class SkiaGoldClient {
         ..writeln('Skia Gold imgtest init failed.')
         ..writeln('An error occured when initializing golden file test with ')
         ..writeln('goldctl.')
-        ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
@@ -308,12 +315,18 @@ class SkiaGoldClient {
         ..writeln('Skia Gold tryjobInit failure.')
         ..writeln('An error occured when initializing golden file tryjob with ')
         ..writeln('goldctl.')
-        ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw Exception(buf.toString());
     }
+
+    print('Goldctl has been successfully initialized for tryjobs.');
+    print('exitcode: ${result.exitCode}');
+    print('stdout: ${result.stdout}');
+    print('stderr: ${result.stderr}');
+    print('auth_opt.json:');
+    print(await _printClientAuthConfig());
   }
 
   /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
@@ -355,19 +368,18 @@ class SkiaGoldClient {
           ..writeln('and the visual difference, visit: ')
           ..writeln(failureLinks.last)
           ..writeln('There you can also triage this image (e.g. because this ')
-          ..writeln('is an intentional change).')
-          ..writeln();
+          ..writeln('is an intentional change).');
         throw Exception(buf.toString());
       } else {
         final StringBuffer buf = StringBuffer()
           ..writeln('Unexpected Gold tryjobAdd failure.')
           ..writeln('Tryjob execution for golden file test $testName failed for')
           ..writeln('a reason unrelated to pixel comparison.')
-          ..writeln()
           ..writeln('Debug information for Gold:')
           ..writeln('stdout: ${result.stdout}')
           ..writeln('stderr: ${result.stderr}')
-          ..writeln();
+          ..writeln('auth_opt.json:')
+          ..writeln(await _printClientAuthConfig());
         throw Exception(buf.toString());
       }
     }
@@ -610,6 +622,14 @@ class SkiaGoldClient {
       'auth_opt.json',
     ));
     return authFile.existsSync();
+  }
+
+  /// Returns the contents of the authorization configuration.
+  Future<String> _printClientAuthConfig() async {
+    return workDirectory.childFile(fs.path.join(
+      'temp',
+      'auth_opt.json',
+    )).readAsString();
   }
 }
 
