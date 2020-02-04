@@ -515,7 +515,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
           'import "$generatedImport";',
         'Future<void> main() async {',
         if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistry);'
+          '  registerPlugins(webPluginRegistry);',
         '  await ui.webOnlyInitializePlatform();',
         '  entrypoint.main();',
         '}',
