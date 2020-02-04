@@ -1115,7 +1115,11 @@ class Scaffold extends StatefulWidget {
   /// If null, the [ScaffoldState] will use the default animator, [FloatingActionButtonAnimator.scaling].
   final FloatingActionButtonAnimator floatingActionButtonAnimator;
 
-  // TODO: Document.
+  /// A [Map] object containing a configuration for each additional floating action button.
+  ///
+  /// If this parameter changes, additional floating action buttons
+  /// mapped to by the same key in [additionalFloatingActionButtonConfigurations]
+  /// are identified, and an animation between them is played.
   final Map<Key, FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
   Set<Key> get _fabKeys => additionalFloatingActionButtonConfigurations.keys.toSet()..add(_primaryFABKey);
