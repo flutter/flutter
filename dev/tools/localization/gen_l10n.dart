@@ -354,7 +354,6 @@ class LocalizationsGenerator {
 
   static RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
   static RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
-  static RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
 
   final file.FileSystem _fs;
 
