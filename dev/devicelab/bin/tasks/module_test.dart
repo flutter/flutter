@@ -51,10 +51,12 @@ Future<void> main() async {
         return TaskResult.failure('Failed to create read-only asset');
       }
 
-      await exec('chmod', <String>[
-        '444',
-        readonlyTxtAssetFile.path
-      ]);
+      if (!Platform.isWindows) {
+        await exec('chmod', <String>[
+          '444',
+          readonlyTxtAssetFile.path
+        ]);
+      }
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
@@ -250,26 +252,28 @@ Future<void> main() async {
         );
       }
 
-      section('Check file access modes for read-only asset from Flutter module');
+      if (!Platform.isWindows) {
+        section('Check file access modes for read-only asset from Flutter module');
 
-      final String readonlyDebugAssetFilePath = path.join(
-        hostApp.path,
-        'app',
-        'build',
-        'intermediates',
-        'merged_assets',
-        'debug',
-        'out',
-        'flutter_assets/assets/read-only.txt',
-      );
-      final File readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
-      if (!exists(readonlyDebugAssetFile)) {
-        return TaskResult.failure('Failed to copy read-only asset file');
-      }
+        final String readonlyDebugAssetFilePath = path.join(
+          hostApp.path,
+          'app',
+          'build',
+          'intermediates',
+          'merged_assets',
+          'debug',
+          'out',
+          'flutter_assets/assets/read-only.txt',
+        );
+        final File readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
+        if (!exists(readonlyDebugAssetFile)) {
+          return TaskResult.failure('Failed to copy read-only asset file');
+        }
 
-      String modes = readonlyDebugAssetFile.statSync().modeString();
-      if (modes != null && modes.compareTo('rw-r--r--') != 0) {
-        return TaskResult.failure('Failed to make assets user-readable and writable');
+        String modes = readonlyDebugAssetFile.statSync().modeString();
+        if (modes != null && modes.compareTo('rw-r--r--') != 0) {
+          return TaskResult.failure('Failed to make assets user-readable and writable');
+        }
       }
 
       section('Build release host APK');
@@ -319,26 +323,28 @@ Future<void> main() async {
         return TaskResult.failure('Release host APK doesn\'t contain metadata: flutterProjectType = module ');
       }
 
-      section('Check file access modes for read-only asset from Flutter module');
+      if (!Platform.isWindows) {
+        section('Check file access modes for read-only asset from Flutter module');
 
-      final String readonlyReleaseAssetFilePath = path.join(
-        hostApp.path,
-        'app',
-        'build',
-        'intermediates',
-        'merged_assets',
-        'release',
-        'out',
-        'flutter_assets/assets/read-only.txt',
-      );
-      final File readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
-      if (!exists(readonlyReleaseAssetFile)) {
-        return TaskResult.failure('Failed to copy read-only asset file');
-      }
+        final String readonlyReleaseAssetFilePath = path.join(
+          hostApp.path,
+          'app',
+          'build',
+          'intermediates',
+          'merged_assets',
+          'release',
+          'out',
+          'flutter_assets/assets/read-only.txt',
+        );
+        final File readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
+        if (!exists(readonlyReleaseAssetFile)) {
+          return TaskResult.failure('Failed to copy read-only asset file');
+        }
 
-      modes = readonlyReleaseAssetFile.statSync().modeString();
-      if (modes != null && modes.compareTo('rw-r--r--') != 0) {
-        return TaskResult.failure('Failed to make assets user-readable and writable');
+        String modes = readonlyReleaseAssetFile.statSync().modeString();
+        if (modes != null && modes.compareTo('rw-r--r--') != 0) {
+          return TaskResult.failure('Failed to make assets user-readable and writable');
+        }
       }
 
       return TaskResult.success(null);
