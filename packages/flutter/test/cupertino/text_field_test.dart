@@ -3998,27 +3998,25 @@ void main() {
     await tester.pumpWidget(
        CupertinoApp(
         home: Center(
-          child: Center(
-            child: RepaintBoundary(
-              child: Container(
-                width: 650.0,
-                height: 600.0,
-                decoration: const BoxDecoration(
-                  color: Color(0xff00ff00),
-                ),
-                child: Column(
-                  children: <Widget>[
-                    CupertinoTextField(
-                      key: Key('field0'),
-                      controller: controller,
-                      style: TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
-                      toolbarOptions: ToolbarOptions(selectAll: true),
-                      selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
-                      selectionWidthStyle: ui.BoxWidthStyle.max,
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
+          child: RepaintBoundary(
+            child: Container(
+              width: 650.0,
+              height: 600.0,
+              decoration: const BoxDecoration(
+                color: Color(0xff00ff00),
+              ),
+              child: Column(
+                children: <Widget>[
+                  CupertinoTextField(
+                    key: const Key('field0'),
+                    controller: controller,
+                    style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
+                    toolbarOptions: const ToolbarOptions(selectAll: true),
+                    selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+                    selectionWidthStyle: ui.BoxWidthStyle.max,
+                    maxLines: 3,
+                  ),
+                ],
               ),
             ),
           ),
@@ -4026,7 +4024,7 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(Key('field0')));
+    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
     await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 150));
@@ -4046,35 +4044,33 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: Center(
-            child: RepaintBoundary(
-              child: Container(
-                width: 650.0,
-                height: 600.0,
-                decoration: const BoxDecoration(
-                  color: Color(0xff00ff00),
-                ),
-                child: Column(
-                  children: <Widget>[
-                    CupertinoTextField(
-                      key: Key('field0'),
-                      controller: controller,
-                      style: TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
-                      toolbarOptions: ToolbarOptions(selectAll: true),
-                      selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
-                      selectionWidthStyle: ui.BoxWidthStyle.tight,
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
+          child: RepaintBoundary(
+            child: Container(
+              width: 650.0,
+              height: 600.0,
+              decoration: const BoxDecoration(
+                color: Color(0xff00ff00),
+              ),
+              child: Column(
+                children: <Widget>[
+                  CupertinoTextField(
+                    key: const Key('field0'),
+                    controller: controller,
+                    style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
+                    toolbarOptions: const ToolbarOptions(selectAll: true),
+                    selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                    selectionWidthStyle: ui.BoxWidthStyle.tight,
+                    maxLines: 3,
+                  ),
+                ],
               ),
             ),
           ),
-        ),
+        ), 
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(Key('field0')));
+    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
     await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 150));

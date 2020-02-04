@@ -554,10 +554,10 @@ void main() {
                 child: Column(
                   children: <Widget>[
                     TextField(
-                      key: Key('field0'),
+                      key: const Key('field0'),
                       controller: controller,
-                      style: TextStyle(height: 4, color: Colors.black45),
-                      toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
+                      style: const TextStyle(height: 4, color: Colors.black45),
+                      toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
                       selectionWidthStyle: ui.BoxWidthStyle.max,
                       maxLines: 3,
@@ -571,7 +571,7 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(Key('field0')));
+    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
     await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 50));
@@ -602,10 +602,10 @@ void main() {
                 child: Column(
                   children: <Widget>[
                     TextField(
-                      key: Key('field0'),
+                      key: const Key('field0'),
                       controller: controller,
-                      style: TextStyle(height: 4, color: Colors.black45),
-                      toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
+                      style: const TextStyle(height: 4, color: Colors.black45),
+                      toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
                       selectionWidthStyle: ui.BoxWidthStyle.tight,
                       maxLines: 3,
@@ -619,7 +619,7 @@ void main() {
       ),
     );
 
-    final Offset textfieldStart = tester.getTopLeft(find.byKey(Key('field0')));
+    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
 
     await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 50));
