@@ -259,7 +259,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   // A callback method that disposes existing train hopping animation and
   // removes its listener.
   //
-  // This field is non-null if there is a train hopping in progress.
+  // The caller must reset this property to null once it is called, and this
+  // property is non-null if there is a train hopping in progress
   VoidCallback _trainHoppingListenerRemover;
 
   void _updateSecondaryAnimation(Route<dynamic> nextRoute) {
@@ -267,6 +268,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     // dispose current train hopping animation until we replace it with a new
     // animation.
     final VoidCallback previousTrainHoppingListenerRemover = _trainHoppingListenerRemover;
+    _trainHoppingListenerRemover = null;
 
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       final Animation<double> current = _secondaryAnimation.parent;
@@ -287,9 +289,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           //  2. There is no chance to hop on nextTrain because two trains never
           //     cross each other. We have to directly set the animation to
           //     nextTrain once the nextTrain stops animating.
-          //  3. A new update secondary animation is called before train hopping
+          //  3. A new _updateSecondaryAnimation is called before train hopping
           //     finishes. We leave a listener remover for the next call to
-          //     properly clean up the existing train hopping
+          //     properly clean up the existing train hopping.
           TrainHoppingAnimation newAnimation;
           void _jumpOnAnimationEnd(AnimationStatus status) {
             switch (status) {
@@ -338,11 +340,9 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       _setSecondaryAnimation(kAlwaysDismissedAnimation);
     }
     // Finally, we dispose any previous train hopping animation because it
-    // should be successfully updated at this point.
+    // has been successfully updated at this point.
     if (previousTrainHoppingListenerRemover != null) {
       previousTrainHoppingListenerRemover();
-      if (previousTrainHoppingListenerRemover == _trainHoppingListenerRemover)
-        _trainHoppingListenerRemover = null;
     }
   }
 

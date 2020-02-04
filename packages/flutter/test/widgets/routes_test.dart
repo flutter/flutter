@@ -810,8 +810,8 @@ void main() {
           initialRoute: '/a',
         )
       );
-      // secondary animation of bottom route should be chained with the primary
-      // animation of top most route.
+      // The secondary animation of the bottom route should be chained with the
+      // primary animation of top most route.
       expect(secondaryAnimationOfRouteOne.value, 1.0);
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
       // Pops the top most route and verifies two routes are still chained.
