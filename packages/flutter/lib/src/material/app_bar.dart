@@ -499,7 +499,7 @@ class _AppBarState extends State<AppBar> {
         child: Semantics(
           namesRoute: namesRoute,
           child: _AppBarTitleBox(child: title),
-          header: automaticallyMarkHeader,
+          header: widget.automaticallyMarkHeader,
         ),
       );
     }
@@ -1205,7 +1205,6 @@ class SliverAppBar extends StatefulWidget {
   /// If true and [leading] is null, automatically try to deduce what the leading
   /// widget should be. If false and [leading] is null, leading space is given to [title].
   /// If leading widget is not null, this parameter has no effect.
-
   final bool automaticallyMarkHeader;
 
   @override
