@@ -41,7 +41,7 @@ Future<void> main() async {
 
       section('Add read-only asset');
 
-      final File readonlyTxtAssetFile = await new File(path.join(
+      final File readonlyTxtAssetFile = await File(path.join(
         projectDir.path,
         'assets/read-only.txt'
       ))
