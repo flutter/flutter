@@ -2110,8 +2110,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(Scaffold oldWidget) {
     // Update the Floating Action Button Animator, and then schedule the Floating Action Button for repositioning.
-    // TODO: Generalize. Update not only for FABs but for additionalFABs as well.
-    // TODO: Implement rigorously!
 
     final Set<Key> possiblyChangedFABKeys =
         oldWidget._fabKeys.union(widget._fabKeys);
@@ -2307,7 +2305,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     });
   }
 
-  // TODO: Build.
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -2786,5 +2783,4 @@ class _FABKey extends ValueKey<int> {
   const _FABKey(int value): super(value);
 }
 
-// TODO: Generalize _FABKey.
 const _FABKey _primaryFABKey = _FABKey(0);
