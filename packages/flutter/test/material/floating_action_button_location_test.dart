@@ -380,6 +380,21 @@ void main() {
     Widget _singleFABScaffold(FloatingActionButtonLocation location, {bool mini = false}) {
       return MaterialApp(
         home: Scaffold(
+          appBar: AppBar(
+            title: Text('FloatingActionButtonLocation Test.'),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                title: Text('Home'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.school),
+                title: Text('School'),
+              ),
+            ],
+          ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {},
             child: Icon(Icons.beach_access),
