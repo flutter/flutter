@@ -375,8 +375,6 @@ void main() {
   }, skip: isBrowser);
 
   group('New Floating Action Button Locations', () {
-    // TODO: Add top and bottom bars.
-
     const double _leftOffsetX = 44.0;
     const double _centerOffsetX = 400.0;
     const double _rightOffsetX = 756.0;
