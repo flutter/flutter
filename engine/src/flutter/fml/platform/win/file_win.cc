@@ -76,7 +76,7 @@ static DWORD GetShareFlags(FilePermission permission) {
 }
 
 static DWORD GetFileAttributesForUtf8Path(const char* absolute_path) {
-  return ::GetFileAttributes(ConvertToWString(absolute_path).c_str());
+  return ::GetFileAttributes(StringToWideString(absolute_path).c_str());
 }
 
 static DWORD GetFileAttributesForUtf8Path(const fml::UniqueFD& base_directory,
@@ -272,7 +272,7 @@ bool IsFile(const std::string& path) {
 }
 
 bool UnlinkDirectory(const char* path) {
-  if (!::RemoveDirectory(ConvertToWString(path).c_str())) {
+  if (!::RemoveDirectory(StringToWideString(path).c_str())) {
     FML_DLOG(ERROR) << "Could not remove directory: '" << path << "'. "
                     << GetLastErrorMessage();
     return false;
@@ -291,7 +291,7 @@ bool UnlinkDirectory(const fml::UniqueFD& base_directory, const char* path) {
 }
 
 bool UnlinkFile(const char* path) {
-  if (!::DeleteFile(ConvertToWString(path).c_str())) {
+  if (!::DeleteFile(StringToWideString(path).c_str())) {
     FML_DLOG(ERROR) << "Could not remove file: '" << path << "'. "
                     << GetLastErrorMessage();
     return false;

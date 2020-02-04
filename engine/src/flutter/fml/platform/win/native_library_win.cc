@@ -16,7 +16,7 @@ NativeLibrary::NativeLibrary(const char* path)
     return;
   }
 
-  handle_ = ::LoadLibrary(ConvertToWString(path).c_str());
+  handle_ = ::LoadLibrary(StringToWideString(path).c_str());
 }
 
 NativeLibrary::NativeLibrary(Handle handle, bool close_handle)
