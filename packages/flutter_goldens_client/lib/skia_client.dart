@@ -98,7 +98,7 @@ class SkiaGoldClient {
   /// will only be called once for each instance of
   /// [FlutterSkiaGoldFileComparator].
   Future<void> auth() async {
-    if (_clientIsAuthorized())
+    if (await clientIsAuthorized())
       return;
 
     if (_serviceAccount.isEmpty) {
@@ -604,12 +604,15 @@ class SkiaGoldClient {
 
   /// Returns a boolean value to prevent the client from re-authorizing itself
   /// for multiple tests.
-  bool _clientIsAuthorized() {
+  Future<bool> clientIsAuthorized() async {
     final File authFile = workDirectory?.childFile(fs.path.join(
       'temp',
       'auth_opt.json',
     ));
-    return authFile.existsSync();
+    final String contents = await authFile.readAsString();
+    final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
+    final bool usingGsutil = decoded['GSUtil'] as bool;
+    return await authFile.exists() && !usingGsutil;
   }
 }
 

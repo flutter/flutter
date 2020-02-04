@@ -43,7 +43,10 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem();
     platform = FakePlatform(
-      environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
+      environment: <String, String>{
+        'FLUTTER_ROOT': _kFlutterRoot,
+        'GOLD_SERVICE_ACCOUNT': 'service account',
+      },
       operatingSystem: 'macos'
     );
     process = MockProcessManager();
@@ -68,8 +71,9 @@ void main() {
     });
 
     test('auth performs minimal work if already authorized', () async {
-      fs.file('/workDirectory/temp/auth_opt.json')
+      final File authFile = fs.file('/workDirectory/temp/auth_opt.json')
         ..createSync(recursive: true);
+      authFile.writeAsStringSync(authTemplate());
       when(process.run(any))
         .thenAnswer((_) => Future<ProcessResult>
         .value(ProcessResult(123, 0, '', '')));
@@ -79,6 +83,16 @@ void main() {
         captureAny,
         workingDirectory: captureAnyNamed('workingDirectory'),
       ));
+    });
+
+    test('gsuti is checked when authorization file is present', () async {
+      final File authFile = fs.file('/workDirectory/temp/auth_opt.json')
+        ..createSync(recursive: true);
+      authFile.writeAsStringSync(authTemplate(gsutil: true));
+      expect(
+        await skiaClient.clientIsAuthorized(),
+        isFalse,
+      );
     });
 
     test('throws for error state from auth', () async {
@@ -110,7 +124,7 @@ void main() {
       );
     });
 
-    test(' throws for error state from init', () {
+    test('throws for error state from init', () {
       platform = FakePlatform(
         environment: <String, String>{
           'FLUTTER_ROOT': _kFlutterRoot,

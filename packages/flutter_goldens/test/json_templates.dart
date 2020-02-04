@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+String authTemplate({
+  bool gsutil = false,
+}) {
+  return '''
+    {
+      "Luci":false,
+      "ServiceAccount":"${gsutil ? '' : '/packages/flutter/test/widgets/serviceAccount.json'}",
+      "GSUtil":$gsutil
+    }
+  ''';
+}
+
 /// JSON response template for Skia Gold expectations request:
 /// https://flutter-gold.skia.org/json/expectations/commit/HEAD
 String rawExpectationsTemplate() {
