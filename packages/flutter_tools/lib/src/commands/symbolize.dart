@@ -22,10 +22,14 @@ import '../runner/flutter_command.dart';
 /// stack trace and an output file for the symbolicated trace to be
 /// written, or it accepts a stack trace over stdin and outputs it
 /// over stdout.
-class SymbolicateCommand extends FlutterCommand {
-  SymbolicateCommand({@required Stdio stdio, @required FileSystem fileSystem})
-    : _stdio = stdio,
-      _fileSystem = fileSystem {
+class SymbolizeCommand extends FlutterCommand {
+  SymbolizeCommand({
+    @required Stdio stdio,
+    @required FileSystem fileSystem,
+    DwarfSymbolicationService dwarfSymbolicationService = const DwarfSymbolicationService(),
+  }) : _stdio = stdio,
+       _fileSystem = fileSystem,
+       _dwarfSymbolicationService = dwarfSymbolicationService {
     argParser.addOption(
       'debug-info',
       abbr: 'd',
@@ -50,6 +54,7 @@ class SymbolicateCommand extends FlutterCommand {
 
   final Stdio _stdio;
   final FileSystem _fileSystem;
+  final DwarfSymbolicationService _dwarfSymbolicationService;
 
   @override
   String get description => 'symbolicate a stack trace from an AOT compiled flutter application.';
@@ -68,43 +73,71 @@ class SymbolicateCommand extends FlutterCommand {
     if (!_fileSystem.isFileSync(stringArg('debug-info'))) {
       throwToolExit('${stringArg('debug-info')} does not exist.');
     }
-    if ((argResults.wasParsed('input') && !argResults.wasParsed('output')) ||
-        (!argResults.wasParsed('input') && argResults.wasParsed('output'))) {
-      throwToolExit('"--input" and "--output" are only supported when both are provided.');
-    }
     if (argResults.wasParsed('input') && !_fileSystem.isFileSync(stringArg('input'))) {
       throwToolExit('${stringArg('input')} does not exist.');
     }
     return super.validateCommand();
   }
 
-  // Validated above that both need to be provided.
-  bool get _usingFileValues => argResults.wasParsed('input') && argResults.wasParsed('output');
-
   @override
   Future<FlutterCommandResult> runCommand() async {
-    _stdio.stdin.transform(const Utf8Decoder()).listen(print, onDone: () {print('Done');});
     Stream<List<int>> input;
     IOSink output;
 
-    if (_usingFileValues) {
-      final File inputFile = _fileSystem.file(stringArg('input'));
+    // Configure output to either specified file or stdout.
+    if (argResults.wasParsed('output')) {
       final File outputFile = _fileSystem.file(stringArg('output'));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
-      input = inputFile.openRead();
-      outputFile.createSync();
-      output = outputFile.openWrite();
+       output = outputFile.openWrite();
     } else {
-      input = _stdio.stdin;
-      output = _stdio.stdout;
+      final StreamController<List<int>> outputController = StreamController<List<int>>();
+      outputController
+        .stream
+        .transform(utf8.decoder)
+        .listen(_stdio.stdoutWrite);
+      output = IOSink(outputController);
     }
 
-    final Uint8List debugInfo = _fileSystem.file(stringArg('debug-info')).readAsBytesSync();
-    final Dwarf dwarf = Dwarf.fromElf(Elf.fromReader(Reader.fromTypedData(debugInfo)));
+    // Configure input from either specified file or stdin.
+    if (argResults.wasParsed('input')) {
+      input = _fileSystem.file(stringArg('input')).openRead();
+    } else {
+      input = _stdio.stdin;
+    }
+
+    final Uint8List symbols = _fileSystem.file(stringArg('debug-info')).readAsBytesSync();
+    await _dwarfSymbolicationService.decode(
+      input: input,
+      output: output,
+      symbols: symbols,
+    );
+
+    return FlutterCommandResult.success();
+  }
+}
+
+/// A service which decodes stack traces from Dart applications.
+class DwarfSymbolicationService {
+
+  const DwarfSymbolicationService();
+
+  /// Decode a stack trace from [input] and place the results in [output].
+  ///
+  /// Requires [symbols] to be a buffer created from the `--split-debug-info`
+  /// command line flag.
+  ///
+  /// Throws a [ToolExit] if the symbols cannot be parsed or the stack trace
+  /// cannot be decoded.
+  Future<void> decode({
+    @required Stream<List<int>> input,
+    @required IOSink output,
+    @required Uint8List symbols,
+  }) async {
+    final Dwarf dwarf = Dwarf.fromElf(Elf.fromReader(Reader.fromTypedData(symbols)));
     if (dwarf == null) {
-      throwToolExit('Failed to decode debug file at ${stringArg('debug-info')}');
+      throwToolExit('Failed to decode symbols file');
     }
 
     final Completer<void> onDone = Completer<void>();
@@ -120,6 +153,5 @@ class SymbolicateCommand extends FlutterCommand {
     } on Exception catch (err) {
       throwToolExit('Failed to symbolicated stack trace:\n $err');
     }
-    return FlutterCommandResult.success();
   }
 }
