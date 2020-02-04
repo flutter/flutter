@@ -1061,7 +1061,9 @@ abstract class ResidentRunner {
   Future<void> cleanupAtFinish();
 
   // Clears the screen.
-  void clearScreen() => globals.stdio.stdoutWrite(globals.terminal.clearScreen() + '\n');
+  void clearScreen([BufferLogger logger]) => logger == null
+    ? globals.stdio.stdoutWrite(globals.terminal.clearScreen() + '\n')
+    : logger.clear();
 }
 
 class OperationResult {
