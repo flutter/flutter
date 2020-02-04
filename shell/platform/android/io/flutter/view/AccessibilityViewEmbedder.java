@@ -197,11 +197,19 @@ final class AccessibilityViewEmbedder {
         flutterIdToOrigin.put(flutterId, origin);
     }
 
+    // Supressing deprecation warning for AccessibilityNodeInfo#getBoundsinParent and
+    // AccessibilityNodeInfo#getBoundsinParent as we are copying the platform view's
+    // accessibility node and we should not lose any available bounds information.
+    @SuppressWarnings("deprecation")
     private void setFlutterNodesTranslateBounds(
             @NonNull AccessibilityNodeInfo originNode,
             @NonNull Rect displayBounds,
             @NonNull AccessibilityNodeInfo resultNode
     ) {
+        Rect boundsInParent = new Rect();
+        originNode.getBoundsInParent(boundsInParent);
+        resultNode.setBoundsInParent(boundsInParent);
+
         Rect boundsInScreen = new Rect();
         originNode.getBoundsInScreen(boundsInScreen);
         boundsInScreen.offset(displayBounds.left, displayBounds.top);
