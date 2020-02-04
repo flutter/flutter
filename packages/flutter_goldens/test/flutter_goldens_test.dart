@@ -67,19 +67,19 @@ void main() {
       );
     });
 
-    test('auth performs minimal work if already authorized', () async {
-      fs.file('/workDirectory/temp/auth_opt.json')
-        ..createSync(recursive: true);
-      when(process.run(any))
-        .thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(123, 0, '', '')));
-      await skiaClient.auth();
-
-      verifyNever(process.run(
-        captureAny,
-        workingDirectory: captureAnyNamed('workingDirectory'),
-      ));
-    });
+//    test('auth performs minimal work if already authorized', () async {
+//      fs.file('/workDirectory/temp/auth_opt.json')
+//        ..createSync(recursive: true);
+//      when(process.run(any))
+//        .thenAnswer((_) => Future<ProcessResult>
+//        .value(ProcessResult(123, 0, '', '')));
+//      await skiaClient.auth();
+//
+//      verifyNever(process.run(
+//        captureAny,
+//        workingDirectory: captureAnyNamed('workingDirectory'),
+//      ));
+//    });
 
     test('throws for error state from auth', () async {
       platform = FakePlatform(
