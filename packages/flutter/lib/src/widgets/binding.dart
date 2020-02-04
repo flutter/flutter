@@ -290,30 +290,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         elementInflateWidget,
         elementUpdateChild,
         componentElementPerformRebuild,
-        statefulElementRebuild,
-        elementRebuild,
-        componentElementFirstBuild,
-        componentElementMount,
-      ],
-      replacement: replacementString,
-    ));
-    FlutterError.addDefaultStackFilter(const RepetitiveStackFrameFilter(
-      frames: <PartialStackFrame>[
-        elementUpdateChild,
-        componentElementPerformRebuild,
-        statefulElementRebuild,
-        elementRebuild,
-        componentElementFirstBuild,
-        componentElementMount,
-      ],
-      replacement: replacementString,
-    ));
-
-    FlutterError.addDefaultStackFilter(const RepetitiveStackFrameFilter(
-      frames: <PartialStackFrame>[
-        elementInflateWidget,
-        elementUpdateChild,
-        componentElementPerformRebuild,
         elementRebuild,
         componentElementFirstBuild,
         componentElementMount,
@@ -337,6 +313,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         elementInflateWidget,
         elementUpdateChild,
         componentElementPerformRebuild,
+        statefulElementRebuild,
         elementRebuild,
         componentElementFirstBuild,
         statefulElementFirstBuild,
@@ -348,6 +325,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       frames: <PartialStackFrame>[
         elementUpdateChild,
         componentElementPerformRebuild,
+        statefulElementRebuild,
         elementRebuild,
         componentElementFirstBuild,
         statefulElementFirstBuild,
