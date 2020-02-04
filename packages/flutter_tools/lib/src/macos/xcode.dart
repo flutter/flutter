@@ -257,6 +257,9 @@ class XCDevice {
       _logger.printTrace('Process exception running xcdevice list:\n$exception');
     } on ArgumentError catch (exception) {
       _logger.printTrace('Argument exception running xcdevice list:\n$exception');
+    } on FormatException catch (exception) {
+      // Failed to parse the xcdevice output, or it returned junk.
+      _logger.printError('xcdevice returned non-JSON response:\n$exception');
     }
 
     return null;
