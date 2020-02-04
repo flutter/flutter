@@ -609,10 +609,13 @@ class SkiaGoldClient {
       'temp',
       'auth_opt.json',
     ));
-    final String contents = await authFile.readAsString();
-    final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
-    final bool usingGsutil = decoded['GSUtil'] as bool;
-    return await authFile.exists() && !usingGsutil;
+
+    if(await authFile.exists()) {
+      final String contents = await authFile.readAsString();
+      final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
+      return !(decoded['GSUtil'] as bool);
+    }
+    return false;
   }
 }
 
