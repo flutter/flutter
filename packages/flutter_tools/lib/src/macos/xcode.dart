@@ -217,18 +217,22 @@ class XCDevice {
             'xcdevice'
           ],
         ).stdout.trim();
-      } on ProcessException {
-        // Ignored, return null below.
-      } on ArgumentError {
-        // Ignored, return null below.
+      } on ProcessException catch (exception) {
+        _logger.printTrace('Process exception finding xcdevice:\n$exception');
+      } on ArgumentError catch (exception) {
+        _logger.printTrace('Argument exception finding xcdevice:\n$exception');
       }
     }
     return _xcdevicePath;
   }
 
-  Future<List<dynamic>> _getAllDevices() async {
+  Future<List<dynamic>> _getAllDevices({bool useCache = false}) async {
     if (!isInstalled) {
+      _logger.printTrace('Xcode not found. Run \'flutter doctor\' for more information.');
       return null;
+    }
+    if (useCache && _cachedListResults != null) {
+      return _cachedListResults;
     }
     try {
       // USB-tethered devices should be found quickly. 1 second timeout is faster than the default.
@@ -242,15 +246,21 @@ class XCDevice {
         ],
       );
       if (result.exitCode == 0) {
-        return json.decode(result.stdout) as List<dynamic>;
+        final List<dynamic> listResults = json.decode(result.stdout) as List<dynamic>;
+        _cachedListResults = listResults;
+        return listResults;
       }
       _logger.printTrace('xcdevice returned an error:\n${result.stderr}');
-    } on ProcessException {
-      _logger.printTrace('Failed to invoke xcdevice');
+    } on ProcessException catch (exception) {
+      _logger.printTrace('Process exception running xcdevice list:\n$exception');
+    } on ArgumentError catch (exception) {
+      _logger.printTrace('Argument exception running xcdevice list:\n$exception');
     }
 
     return null;
   }
+
+  List<dynamic> _cachedListResults;
 
   /// List of devices available over USB.
   Future<List<IOSDevice>> getAvailableTetheredIOSDevices() async {
@@ -469,7 +479,7 @@ class XCDevice {
 
   /// List of all devices reporting errors.
   Future<List<String>> getDiagnostics() async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices();
+    final List<dynamic> allAvailableDevices = await _getAllDevices(useCache: true);
 
     if (allAvailableDevices == null) {
       return const <String>[];
