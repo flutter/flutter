@@ -88,12 +88,10 @@ TEST_F(SkiaGpuObjectTest, ObjectDestructor) {
   std::shared_ptr<fml::AutoResetWaitableEvent> latch =
       std::make_shared<fml::AutoResetWaitableEvent>();
   fml::TaskQueueId dtor_task_queue_id(0);
-
+  auto object = sk_make_sp<TestSkObject>(latch, &dtor_task_queue_id);
   {
-    auto object = sk_make_sp<TestSkObject>(latch, &dtor_task_queue_id);
-    SkiaGPUObject<TestSkObject> sk_object(object, unref_queue());
-    ASSERT_EQ(sk_object.get(), object);
-    ASSERT_EQ(dtor_task_queue_id, 0);
+    SkiaGPUObject<TestSkObject> sk_object(std::move(object), unref_queue());
+    // Verify that the default SkiaGPUObject dtor queues and unref.
   }
 
   latch->Wait();
@@ -106,29 +104,9 @@ TEST_F(SkiaGpuObjectTest, ObjectReset) {
   fml::TaskQueueId dtor_task_queue_id(0);
   SkiaGPUObject<TestSkObject> sk_object(
       sk_make_sp<TestSkObject>(latch, &dtor_task_queue_id), unref_queue());
-
+  // Verify that explicitly resetting the GPU object queues and unref.
   sk_object.reset();
   ASSERT_EQ(sk_object.get(), nullptr);
-
-  latch->Wait();
-  ASSERT_EQ(dtor_task_queue_id, unref_task_runner()->GetTaskQueueId());
-}
-
-TEST_F(SkiaGpuObjectTest, ObjectResetBeforeDestructor) {
-  std::shared_ptr<fml::AutoResetWaitableEvent> latch =
-      std::make_shared<fml::AutoResetWaitableEvent>();
-  fml::TaskQueueId dtor_task_queue_id(0);
-
-  {
-    auto object = sk_make_sp<TestSkObject>(latch, &dtor_task_queue_id);
-    SkiaGPUObject<TestSkObject> sk_object(object, unref_queue());
-    ASSERT_EQ(sk_object.get(), object);
-    ASSERT_EQ(dtor_task_queue_id, 0);
-
-    sk_object.reset();
-    ASSERT_EQ(sk_object.get(), nullptr);
-  }
-
   latch->Wait();
   ASSERT_EQ(dtor_task_queue_id, unref_task_runner()->GetTaskQueueId());
 }
