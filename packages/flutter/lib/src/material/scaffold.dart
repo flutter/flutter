@@ -161,7 +161,7 @@ class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
 
   const _TransitionSnapshotFabLocation(this.begin, this.end, this.animator, this.progress);
 
-  _TransitionSnapshotFabLocation.fromFABStatus(_FABStatus status):
+  _TransitionSnapshotFabLocation.fromFabStatus(_FabStatus status):
         begin = status.previousLocation,
         end = status.location,
         animator = status.animator,
@@ -414,7 +414,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
-  final Map<Key, _FABStatus> fabStatuses;
+  final Map<Key, _FabStatus> fabStatuses;
   Set<Key> get fabKeys => Set<Key>.of(fabStatuses.keys);
 
   final Map<Key, double> fabProgresses;
@@ -526,7 +526,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     Rect floatingActionButtonRect;
     fabStatuses.forEach(
-      (Key key, _FABStatus status) {
+      (Key key, _FabStatus status) {
         if (hasChild(key)) {
           final Size fabSize = layoutChild(key, looseConstraints);
 
@@ -1122,10 +1122,10 @@ class Scaffold extends StatefulWidget {
   /// are identified, and an animation between them is played.
   final Map<Key, FloatingActionButtonConfiguration> additionalFloatingActionButtonConfigurations;
 
-  Set<Key> get _fabKeys => additionalFloatingActionButtonConfigurations.keys.toSet()..add(_primaryFABKey);
+  Set<Key> get _fabKeys => additionalFloatingActionButtonConfigurations.keys.toSet()..add(_primaryFabKey);
 
   FloatingActionButtonConfiguration _fabConfiguration(Key key) {
-    if (key == _primaryFABKey) {
+    if (key == _primaryFabKey) {
       return FloatingActionButtonConfiguration(
         button: floatingActionButton,
         location: floatingActionButtonLocation,
@@ -2021,7 +2021,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // Floating Action Button API
   AnimationController _floatingActionButtonVisibilityController;
-  Map<Key, _FABStatus> _fabStatuses;
+  Map<Key, _FabStatus> _fabStatuses;
 
   /// Gets the current value of the visibility animation for the
   /// [Scaffold.floatingActionButton].
@@ -2043,12 +2043,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   // Moves the Floating Action Button with key [key] to the new Floating Action Button Location.
-  void _moveFloatingActionButton(_FABStatus status, final FloatingActionButtonLocation newLocation) {
+  void _moveFloatingActionButton(_FabStatus status, final FloatingActionButtonLocation newLocation) {
     FloatingActionButtonLocation previousLocation = status.location;
     double restartAnimationFrom = 0.0;
     // If the Floating Action Button is moving right now, we need to start from a snapshot of the current transition.
     if (status.moveController.isAnimating) {
-      previousLocation = _TransitionSnapshotFabLocation.fromFABStatus(status);
+      previousLocation = _TransitionSnapshotFabLocation.fromFabStatus(status);
       restartAnimationFrom = status.animator.getAnimationRestart(status.moveController.value);
     }
 
@@ -2096,11 +2096,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     super.initState();
     _geometryNotifier = _ScaffoldGeometryNotifier(const ScaffoldGeometry(), context);
 
-    _fabStatuses = <Key, _FABStatus> {};
+    _fabStatuses = <Key, _FabStatus> {};
 
     for (final Key key in widget._fabKeys) {
       final FloatingActionButtonConfiguration configuration = widget._fabConfiguration(key);
-      _fabStatuses[key] = _FABStatus(
+      _fabStatuses[key] = _FabStatus(
         button: configuration.button,
         location: configuration.location ?? _kDefaultFloatingActionButtonLocation,
         animator: configuration.animator ?? _kDefaultFloatingActionButtonAnimator,
@@ -2125,14 +2125,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void didUpdateWidget(Scaffold oldWidget) {
     // Update the Floating Action Button Animator, and then schedule the Floating Action Button for repositioning.
 
-    final Set<Key> possiblyChangedFABKeys =
+    final Set<Key> possiblyChangedFabKeys =
         oldWidget._fabKeys.union(widget._fabKeys);
 
-    for (final Key key in possiblyChangedFABKeys) {
+    for (final Key key in possiblyChangedFabKeys) {
       final FloatingActionButtonConfiguration newConfiguration = widget._fabConfiguration(key);
       final FloatingActionButtonConfiguration oldConfiguration = oldWidget._fabConfiguration(key);
 
-      _fabStatuses[key] ??= _FABStatus(
+      _fabStatuses[key] ??= _FabStatus(
         button: oldConfiguration?.button,
         location: oldConfiguration?.location ?? _kDefaultFloatingActionButtonLocation,
         animator: oldConfiguration?.animator ?? _kDefaultFloatingActionButtonAnimator,
@@ -2210,7 +2210,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _currentBottomSheet._widget.animationController?.dispose();
     }
     _fabStatuses.forEach(
-      (Key key, _FABStatus status) {
+      (Key key, _FabStatus status) {
         status?.moveController?.dispose();
       },
     );
@@ -2477,7 +2477,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
 
     _fabStatuses.forEach(
-      (Key key, _FABStatus status) {
+      (Key key, _FabStatus status) {
         final Widget newButton = widget._fabConfiguration(key).button;
 
         _addIfNonNull(
@@ -2539,7 +2539,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     final Listenable combinedMoveController = Listenable.merge(
       _fabStatuses.values.map(
-          (_FABStatus status) => status.moveController
+          (_FabStatus status) => status.moveController
       ).toList()
     );
 
@@ -2559,7 +2559,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 minInsets: minInsets,
                 fabStatuses: _fabStatuses,
                 fabProgresses: _fabStatuses.map<Key, double>(
-                    (Key key, _FABStatus status) => MapEntry<Key, double>(key, status.moveController.value)
+                    (Key key, _FabStatus status) => MapEntry<Key, double>(key, status.moveController.value)
                 ),
                 geometryNotifier: _geometryNotifier,
                 textDirection: textDirection,
@@ -2763,8 +2763,8 @@ class _ScaffoldScope extends InheritedWidget {
 /// the widget used ([button]), its previous ([previousLocation]) and current
 /// locations ([location]), its animator ([animator]), and the controller
 /// for its animation between different locations ([moveController]).
-class _FABStatus {
-  _FABStatus({
+class _FabStatus {
+  _FabStatus({
     this.button,
     this.location,
     this.animator,
@@ -2787,7 +2787,7 @@ class _FABStatus {
 
   @override
   String toString() =>
-      '_FABStatus('
+      '_FabStatus('
         'button: $button, '
         'location: $location, '
         'animator: $animator, '
@@ -2796,8 +2796,8 @@ class _FABStatus {
       ')';
 }
 
-class _FABKey extends ValueKey<int> {
-  const _FABKey(int value): super(value);
+class _FabKey extends ValueKey<int> {
+  const _FabKey(int value): super(value);
 }
 
-const _FABKey _primaryFABKey = _FABKey(0);
+const _FabKey _primaryFabKey = _FabKey(0);
