@@ -381,17 +381,17 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
-            title: Text('FloatingActionButtonLocation Test.'),
+            title: const Text('FloatingActionButtonLocation Test.'),
           ),
           bottomNavigationBar: BottomNavigationBar(
             items: [
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
-                title: Text('Home'),
+                title: const Text('Home'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.school),
-                title: Text('School'),
+                title: const Text('School'),
               ),
             ],
           ),
