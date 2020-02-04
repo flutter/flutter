@@ -8,13 +8,15 @@
 #include <jni.h>
 #include <memory>
 #include "flutter/fml/macros.h"
+#include "flutter/shell/gpu/gpu_surface_vulkan_delegate.h"
 #include "flutter/shell/platform/android/android_native_window.h"
 #include "flutter/shell/platform/android/android_surface.h"
 #include "flutter/vulkan/vulkan_window.h"
 
 namespace flutter {
 
-class AndroidSurfaceVulkan : public AndroidSurface {
+class AndroidSurfaceVulkan : public AndroidSurface,
+                             public GPUSurfaceVulkanDelegate {
  public:
   AndroidSurfaceVulkan();
 
@@ -40,6 +42,12 @@ class AndroidSurfaceVulkan : public AndroidSurface {
 
   // |AndroidSurface|
   bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
+
+  // |GPUSurfaceVulkanDelegate|
+  ExternalViewEmbedder* GetExternalViewEmbedder() override;
+
+  // |GPUSurfaceVulkanDelegate|
+  fml::RefPtr<vulkan::VulkanProcTable> vk() override;
 
  private:
   fml::RefPtr<vulkan::VulkanProcTable> proc_table_;

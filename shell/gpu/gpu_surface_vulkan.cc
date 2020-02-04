@@ -8,21 +8,31 @@
 namespace flutter {
 
 GPUSurfaceVulkan::GPUSurfaceVulkan(
-    fml::RefPtr<vulkan::VulkanProcTable> proc_table,
-    std::unique_ptr<vulkan::VulkanNativeSurface> native_surface)
-    : window_(std::move(proc_table), std::move(native_surface)),
+    GPUSurfaceVulkanDelegate* delegate,
+    std::unique_ptr<vulkan::VulkanNativeSurface> native_surface,
+    bool render_to_surface)
+    : window_(delegate->vk(), std::move(native_surface), render_to_surface),
+      delegate_(delegate),
+      render_to_surface_(render_to_surface),
       weak_factory_(this) {}
 
 GPUSurfaceVulkan::~GPUSurfaceVulkan() = default;
 
-// |Surface|
 bool GPUSurfaceVulkan::IsValid() {
   return window_.IsValid();
 }
 
-// |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
     const SkISize& size) {
+  // TODO(38466): Refactor GPU surface APIs take into account the fact that an
+  // external view embedder may want to render to the root surface.
+  if (!render_to_surface_) {
+    return std::make_unique<SurfaceFrame>(
+        nullptr, true, [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
+          return true;
+        });
+  }
+
   auto surface = window_.AcquireSurface();
 
   if (surface == nullptr) {
@@ -44,7 +54,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
                                         std::move(callback));
 }
 
-// |Surface|
 SkMatrix GPUSurfaceVulkan::GetRootTransformation() const {
   // This backend does not support delegating to the underlying platform to
   // query for root surface transformations. Just return identity.
@@ -53,9 +62,12 @@ SkMatrix GPUSurfaceVulkan::GetRootTransformation() const {
   return matrix;
 }
 
-// |Surface|
 GrContext* GPUSurfaceVulkan::GetContext() {
   return window_.GetSkiaGrContext();
+}
+
+flutter::ExternalViewEmbedder* GPUSurfaceVulkan::GetExternalViewEmbedder() {
+  return delegate_->GetExternalViewEmbedder();
 }
 
 }  // namespace flutter
