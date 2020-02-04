@@ -11,6 +11,7 @@ import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementa
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
+import '_goldens_web.dart';
 import 'binding.dart';
 import 'finders.dart';
 import 'goldens.dart';

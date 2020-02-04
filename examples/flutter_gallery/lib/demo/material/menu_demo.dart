@@ -86,133 +86,138 @@ class MenuDemoState extends State<MenuDemo> {
           ),
         ],
       ),
-      body: ListView(
-        padding: kMaterialListPadding,
-        children: <Widget>[
-          // Pressing the PopupMenuButton on the right of this item shows
-          // a simple menu with one disabled item. Typically the contents
-          // of this "contextual menu" would reflect the app's state.
-          ListTile(
-            title: const Text('An item with a context menu button'),
-            trailing: PopupMenuButton<String>(
+      body: ListTileTheme(
+        iconColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.grey[600]
+            : Colors.grey[500],
+        child: ListView(
+          padding: kMaterialListPadding,
+          children: <Widget>[
+            // Pressing the PopupMenuButton on the right of this item shows
+            // a simple menu with one disabled item. Typically the contents
+            // of this "contextual menu" would reflect the app's state.
+            ListTile(
+              title: const Text('An item with a context menu button'),
+              trailing: PopupMenuButton<String>(
+                padding: EdgeInsets.zero,
+                onSelected: showMenuSelection,
+                itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                  PopupMenuItem<String>(
+                    value: _simpleValue1,
+                    child: const Text('Context menu item one'),
+                  ),
+                  const PopupMenuItem<String>(
+                    enabled: false,
+                    child: Text('A disabled menu item'),
+                  ),
+                  PopupMenuItem<String>(
+                    value: _simpleValue3,
+                    child: const Text('Context menu item three'),
+                  ),
+                ],
+              ),
+            ),
+            // Pressing the PopupMenuButton on the right of this item shows
+            // a menu whose items have text labels and icons and a divider
+            // That separates the first three items from the last one.
+            ListTile(
+              title: const Text('An item with a sectioned menu'),
+              trailing: PopupMenuButton<String>(
+                padding: EdgeInsets.zero,
+                onSelected: showMenuSelection,
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'Preview',
+                    child: ListTile(
+                      leading: Icon(Icons.visibility),
+                      title: Text('Preview'),
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'Share',
+                    child: ListTile(
+                      leading: Icon(Icons.person_add),
+                      title: Text('Share'),
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'Get Link',
+                    child: ListTile(
+                      leading: Icon(Icons.link),
+                      title: Text('Get link'),
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem<String>(
+                    value: 'Remove',
+                    child: ListTile(
+                      leading: Icon(Icons.delete),
+                      title: Text('Remove'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // This entire list item is a PopupMenuButton. Tapping anywhere shows
+            // a menu whose current value is highlighted and aligned over the
+            // list item's center line.
+            PopupMenuButton<String>(
               padding: EdgeInsets.zero,
+              initialValue: _simpleValue,
               onSelected: showMenuSelection,
+              child: ListTile(
+                title: const Text('An item with a simple menu'),
+                subtitle: Text(_simpleValue),
+              ),
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 PopupMenuItem<String>(
                   value: _simpleValue1,
-                  child: const Text('Context menu item one'),
+                  child: Text(_simpleValue1),
                 ),
-                const PopupMenuItem<String>(
-                  enabled: false,
-                  child: Text('A disabled menu item'),
+                PopupMenuItem<String>(
+                  value: _simpleValue2,
+                  child: Text(_simpleValue2),
                 ),
                 PopupMenuItem<String>(
                   value: _simpleValue3,
-                  child: const Text('Context menu item three'),
+                  child: Text(_simpleValue3),
                 ),
               ],
             ),
-          ),
-          // Pressing the PopupMenuButton on the right of this item shows
-          // a menu whose items have text labels and icons and a divider
-          // That separates the first three items from the last one.
-          ListTile(
-            title: const Text('An item with a sectioned menu'),
-            trailing: PopupMenuButton<String>(
-              padding: EdgeInsets.zero,
-              onSelected: showMenuSelection,
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'Preview',
-                  child: ListTile(
-                    leading: Icon(Icons.visibility),
-                    title: Text('Preview'),
+            // Pressing the PopupMenuButton on the right of this item shows a menu
+            // whose items have checked icons that reflect this app's state.
+            ListTile(
+              title: const Text('An item with a checklist menu'),
+              trailing: PopupMenuButton<String>(
+                padding: EdgeInsets.zero,
+                onSelected: showCheckedMenuSelections,
+                itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                  CheckedPopupMenuItem<String>(
+                    value: _checkedValue1,
+                    checked: isChecked(_checkedValue1),
+                    child: Text(_checkedValue1),
                   ),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Share',
-                  child: ListTile(
-                    leading: Icon(Icons.person_add),
-                    title: Text('Share'),
+                  CheckedPopupMenuItem<String>(
+                    value: _checkedValue2,
+                    enabled: false,
+                    checked: isChecked(_checkedValue2),
+                    child: Text(_checkedValue2),
                   ),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Get Link',
-                  child: ListTile(
-                    leading: Icon(Icons.link),
-                    title: Text('Get link'),
+                  CheckedPopupMenuItem<String>(
+                    value: _checkedValue3,
+                    checked: isChecked(_checkedValue3),
+                    child: Text(_checkedValue3),
                   ),
-                ),
-                const PopupMenuDivider(),
-                const PopupMenuItem<String>(
-                  value: 'Remove',
-                  child: ListTile(
-                    leading: Icon(Icons.delete),
-                    title: Text('Remove'),
+                  CheckedPopupMenuItem<String>(
+                    value: _checkedValue4,
+                    checked: isChecked(_checkedValue4),
+                    child: Text(_checkedValue4),
                   ),
-                ),
-              ],
-            ),
-          ),
-          // This entire list item is a PopupMenuButton. Tapping anywhere shows
-          // a menu whose current value is highlighted and aligned over the
-          // list item's center line.
-          PopupMenuButton<String>(
-            padding: EdgeInsets.zero,
-            initialValue: _simpleValue,
-            onSelected: showMenuSelection,
-            child: ListTile(
-              title: const Text('An item with a simple menu'),
-              subtitle: Text(_simpleValue),
-            ),
-            itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-              PopupMenuItem<String>(
-                value: _simpleValue1,
-                child: Text(_simpleValue1),
+                ],
               ),
-              PopupMenuItem<String>(
-                value: _simpleValue2,
-                child: Text(_simpleValue2),
-              ),
-              PopupMenuItem<String>(
-                value: _simpleValue3,
-                child: Text(_simpleValue3),
-              ),
-            ],
-          ),
-          // Pressing the PopupMenuButton on the right of this item shows a menu
-          // whose items have checked icons that reflect this app's state.
-          ListTile(
-            title: const Text('An item with a checklist menu'),
-            trailing: PopupMenuButton<String>(
-              padding: EdgeInsets.zero,
-              onSelected: showCheckedMenuSelections,
-              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-                CheckedPopupMenuItem<String>(
-                  value: _checkedValue1,
-                  checked: isChecked(_checkedValue1),
-                  child: Text(_checkedValue1),
-                ),
-                CheckedPopupMenuItem<String>(
-                  value: _checkedValue2,
-                  enabled: false,
-                  checked: isChecked(_checkedValue2),
-                  child: Text(_checkedValue2),
-                ),
-                CheckedPopupMenuItem<String>(
-                  value: _checkedValue3,
-                  checked: isChecked(_checkedValue3),
-                  child: Text(_checkedValue3),
-                ),
-                CheckedPopupMenuItem<String>(
-                  value: _checkedValue4,
-                  checked: isChecked(_checkedValue4),
-                  child: Text(_checkedValue4),
-                ),
-              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -261,7 +261,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
       if (renderObject == null || !renderObject.owner.debugDoingPaint)
         throw FlutterError(
             'Scaffold.geometryOf() must only be accessed during the paint phase.\n'
-            'The ScaffoldGeometry is only available during the paint phase, because\n'
+            'The ScaffoldGeometry is only available during the paint phase, because '
             'its value is computed during the animation and layout phases prior to painting.'
         );
       return true;

@@ -29,7 +29,6 @@ dart_library("flutter_tools") {
     # because it uses mirrors which Fuchsia's Dart VM doesn't support.
     "//third_party/dart-pkg/pub/json_rpc_2",
     "//third_party/dart-pkg/pub/json_schema",
-    "//third_party/dart-pkg/pub/linter",
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/mime",
     "//third_party/dart-pkg/pub/multi_server_socket",

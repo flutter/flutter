@@ -176,21 +176,17 @@ void main() {
 
     final ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
     expect(ps2, equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
-    expect(ps2.toString(), 'ParagraphStyle(textAlign: TextAlign.center, textDirection: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 10.0, height: 100.0x, ellipsis: unspecified, locale: unspecified)');
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(ps5, equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
-    expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 12.0, height: 123.0x, ellipsis: unspecified, locale: unspecified)');
   }, skip: isBrowser);
 
 
   test('TextStyle with text direction', () {
     final ui.ParagraphStyle ps6 = const TextStyle().getParagraphStyle(textDirection: TextDirection.ltr);
     expect(ps6, equals(ui.ParagraphStyle(textDirection: TextDirection.ltr, fontSize: 14.0)));
-    expect(ps6.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.ltr, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, height: unspecified, ellipsis: unspecified, locale: unspecified)');
 
     final ui.ParagraphStyle ps7 = const TextStyle().getParagraphStyle(textDirection: TextDirection.rtl);
     expect(ps7, equals(ui.ParagraphStyle(textDirection: TextDirection.rtl, fontSize: 14.0)));
-    expect(ps7.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, height: unspecified, ellipsis: unspecified, locale: unspecified)');
   });
 
   test('TextStyle using package font', () {

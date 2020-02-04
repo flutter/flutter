@@ -14,7 +14,6 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
-import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
@@ -291,7 +290,7 @@ abstract class IOSApp extends ApplicationPackage {
       shutdownHooks.addShutdownHook(() async {
         await tempDir.delete(recursive: true);
       }, ShutdownStage.STILL_RECORDING);
-      os.unzip(globals.fs.file(applicationBinary), tempDir);
+      globals.os.unzip(globals.fs.file(applicationBinary), tempDir);
       final Directory payloadDir = globals.fs.directory(
         globals.fs.path.join(tempDir.path, 'Payload'),
       );

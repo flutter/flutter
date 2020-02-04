@@ -5,18 +5,32 @@
 import 'dart:convert' show jsonEncode;
 
 import 'package:platform/platform.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
+import '../../src/mocks.dart' as mocks;
 
 final Platform _kNoAnsiPlatform = FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final String red = RegExp.escape(AnsiTerminal.red);
 final String bold = RegExp.escape(AnsiTerminal.bold);
 final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
 final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
+
+class MockStdout extends Mock implements Stdout {}
+
+class ThrowingStdio extends Stdio {
+  ThrowingStdio(this.stdout, this.stderr);
+
+  @override
+  final Stdout stdout;
+
+  @override
+  final IOSink stderr;
+}
 
 void main() {
   group('AppContext', () {
@@ -25,10 +39,11 @@ void main() {
     setUp(() {
       fakeStopWatch = FakeStopwatch();
     });
+
     testWithoutContext('error', () async {
       final BufferLogger mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: MockStdio(),
+          stdio: mocks.MockStdio(),
           platform: _kNoAnsiPlatform,
         ),
         outputPreferences: OutputPreferences.test(showColor: false),
@@ -51,7 +66,7 @@ void main() {
     testWithoutContext('ANSI colored errors', () async {
       final BufferLogger mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio:  MockStdio(),
+          stdio:  mocks.MockStdio(),
           platform: FakePlatform()..stdoutSupportsAnsi = true,
         ),
         outputPreferences: OutputPreferences.test(showColor: true),
@@ -75,8 +90,38 @@ void main() {
     });
   });
 
+  testWithoutContext('Logger does not throw when stdio write throws', () async {
+    final MockStdout stdout = MockStdout();
+    final MockStdout stderr = MockStdout();
+    final ThrowingStdio stdio = ThrowingStdio(stdout, stderr);
+    bool stdoutThrew = false;
+    bool stderrThrew = false;
+    when(stdout.write(any)).thenAnswer((_) {
+      stdoutThrew = true;
+      throw 'Error';
+    });
+    when(stderr.write(any)).thenAnswer((_) {
+      stderrThrew = true;
+      throw 'Error';
+    });
+    final Logger logger = StdoutLogger(
+      terminal: AnsiTerminal(
+        stdio: stdio,
+        platform: _kNoAnsiPlatform,
+      ),
+      stdio: stdio,
+      outputPreferences: OutputPreferences.test(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+      platform: FakePlatform(),
+    );
+    logger.printStatus('message');
+    logger.printError('error message');
+    expect(stdoutThrew, true);
+    expect(stderrThrew, true);
+  });
+
   group('Spinners', () {
-    MockStdio mockStdio;
+    mocks.MockStdio mockStdio;
     FakeStopwatch mockStopwatch;
     FakeStopwatchFactory stopwatchFactory;
     int called;
@@ -85,7 +130,7 @@ void main() {
 
     setUp(() {
       mockStopwatch = FakeStopwatch();
-      mockStdio = MockStdio();
+      mockStdio = mocks.MockStdio();
       called = 0;
       stopwatchFactory = FakeStopwatchFactory(mockStopwatch);
     });
@@ -144,8 +189,8 @@ void main() {
           expect(lines.length, equals(1));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(ansiSpinner.stop, throwsA(isInstanceOf<AssertionError>()));
-          expect(ansiSpinner.cancel, throwsA(isInstanceOf<AssertionError>()));
+          expect(ansiSpinner.stop, throwsAssertionError);
+          expect(ansiSpinner.cancel, throwsAssertionError);
           done = true;
         });
         expect(done, isTrue);
@@ -323,8 +368,8 @@ void main() {
           expect(lines[1], equals(''));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-          expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+          expect(() { ansiStatus.cancel(); }, throwsAssertionError);
+          expect(() { ansiStatus.stop(); }, throwsAssertionError);
           done = true;
         });
         expect(done, isTrue);
@@ -367,22 +412,23 @@ void main() {
           expect(lines[1], equals(''));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(ansiStatus.stop, throwsA(isInstanceOf<AssertionError>()));
-          expect(ansiStatus.cancel, throwsA(isInstanceOf<AssertionError>()));
+          expect(ansiStatus.stop, throwsAssertionError);
+          expect(ansiStatus.cancel, throwsAssertionError);
           done = true;
         });
         expect(done, isTrue);
       });
     }
   });
+
   group('Output format', () {
-    MockStdio mockStdio;
+    mocks.MockStdio mockStdio;
     SummaryStatus summaryStatus;
     int called;
     final RegExp secondDigits = RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
-      mockStdio = MockStdio();
+      mockStdio = mocks.MockStdio();
       called = 0;
       summaryStatus = SummaryStatus(
         message: 'Hello world',
@@ -736,8 +782,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(summaryStatus.cancel, throwsA(isInstanceOf<AssertionError>()));
-      expect(summaryStatus.stop, throwsA(isInstanceOf<AssertionError>()));
+      expect(summaryStatus.cancel, throwsAssertionError);
+      expect(summaryStatus.stop, throwsAssertionError);
     });
 
     testWithoutContext('SummaryStatus works when stopped', () async {
@@ -759,8 +805,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(summaryStatus.stop, throwsA(isInstanceOf<AssertionError>()));
-      expect(summaryStatus.cancel, throwsA(isInstanceOf<AssertionError>()));
+      expect(summaryStatus.stop, throwsAssertionError);
+      expect(summaryStatus.cancel, throwsAssertionError);
     });
 
     testWithoutContext('sequential startProgress calls with StdoutLogger', () async {

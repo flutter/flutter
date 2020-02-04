@@ -57,7 +57,7 @@ class DualHeaderWithHint extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 name,
-                style: textTheme.body1.copyWith(fontSize: 15.0),
+                style: textTheme.bodyText2.copyWith(fontSize: 15.0),
               ),
             ),
           ),

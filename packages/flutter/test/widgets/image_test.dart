@@ -1101,14 +1101,14 @@ void main() {
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(Padding), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-    expect(tester.widget<Padding>(find.byType(Padding)).child, isInstanceOf<RawImage>());
+    expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     await tester.pump();
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(Padding), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-    expect(tester.widget<Center>(find.byType(Center)).child, isInstanceOf<Padding>());
-    expect(tester.widget<Padding>(find.byType(Padding)).child, isInstanceOf<RawImage>());
+    expect(tester.widget<Center>(find.byType(Center)).child, isA<Padding>());
+    expect(tester.widget<Padding>(find.byType(Padding)).child, isA<RawImage>());
   }, skip: isBrowser);
 
   testWidgets('Image state handles loadingBuilder update from null to non-null', (WidgetTester tester) async {
@@ -1175,6 +1175,54 @@ void main() {
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
   }, skip: isBrowser);
+
+  testWidgets('Image defers loading while fast scrolling', (WidgetTester tester) async {
+    const int gridCells = 1000;
+    final List<TestImageProvider> imageProviders = <TestImageProvider>[];
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: GridView.builder(
+        controller: controller,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        itemCount: gridCells,
+        itemBuilder: (_, int index) {
+          final TestImageProvider provider = TestImageProvider();
+          imageProviders.add(provider);
+          return SizedBox(
+            height: 250,
+            width: 250,
+            child: Image(
+              image: provider,
+              semanticLabel: index.toString(),
+            ),
+          );
+        },
+      ),
+    ));
+
+    final bool Function(TestImageProvider) loadCalled = (TestImageProvider provider) => provider.loadCalled;
+    final bool Function(TestImageProvider) loadNotCalled = (TestImageProvider provider) => !provider.loadCalled;
+
+    expect(find.bySemanticsLabel('5'), findsOneWidget);
+    expect(imageProviders.length, 12);
+    expect(imageProviders.every(loadCalled), true);
+
+    imageProviders.clear();
+
+    // Simulate a very fast fling.
+    controller.animateTo(
+      30000,
+      duration: const Duration(seconds: 2),
+      curve: Curves.linear,
+    );
+    await tester.pumpAndSettle();
+    // The last 15 images on screen have loaded because the scrolling settled there.
+    // The rest have not loaded.
+    expect(imageProviders.length, 309);
+    expect(imageProviders.skip(309 - 15).every(loadCalled), true);
+    expect(imageProviders.take(309 - 15).every(loadNotCalled), true);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
@@ -1187,19 +1235,25 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   ImageStreamCompleter _streamCompleter;
   ImageConfiguration _lastResolvedConfiguration;
 
+  bool get loadCalled => _loadCalled;
+  bool _loadCalled = false;
+
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
-  ImageStream resolve(ImageConfiguration configuration) {
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, TestImageProvider key, ImageErrorListener handleError) {
     _lastResolvedConfiguration = configuration;
-    return super.resolve(configuration);
+    super.resolveStreamForKey(configuration, stream, key, handleError);
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) => _streamCompleter;
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+    _loadCalled = true;
+    return _streamCompleter;
+  }
 
   void complete() {
     _completer.complete(ImageInfo(image: TestImage()));

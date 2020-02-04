@@ -360,7 +360,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     super.initState();
     _controller = AnimationController(
       duration: widget.duration,
-      debugLabel: kDebugMode ? '${widget.toStringShort()}' : null,
+      debugLabel: kDebugMode ? widget.toStringShort() : null,
       vsync: this,
     );
     _controller.addStatusListener((AnimationStatus status) {

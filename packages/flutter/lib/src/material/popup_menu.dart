@@ -239,7 +239,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The text style of the popup menu item.
   ///
   /// If this property is null, then [PopupMenuThemeData.textStyle] is used.
-  /// If [PopupMenuThemeData.textStyle] is also null, then [ThemeData.textTheme.subhead] is used.
+  /// If [PopupMenuThemeData.textStyle] is also null, then [ThemeData.textTheme.subtitle1] is used.
   final TextStyle textStyle;
 
   /// The widget below this widget in the tree.
@@ -297,7 +297,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subhead;
+    TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subtitle1;
 
     if (!widget.enabled)
       style = style.copyWith(color: theme.disabledColor);

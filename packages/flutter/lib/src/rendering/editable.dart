@@ -409,8 +409,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ) {
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
-    // changed.
-    if (nextSelection == selection && cause != SelectionChangedCause.keyboard) {
+    // changed. Also, focusing an empty field is sent as a selection change even
+    // if the selection offset didn't change.
+    final bool focusingEmpty = nextSelection.baseOffset == 0
+      && nextSelection.extentOffset == 0
+      && !hasFocus;
+    if (nextSelection == selection
+        && cause != SelectionChangedCause.keyboard
+        && !focusingEmpty) {
       return;
     }
     if (onSelectionChanged != null) {
@@ -425,12 +431,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     LogicalKeyboardKey.arrowDown,
   };
 
+  static final Set<LogicalKeyboardKey> _deleteKeys = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.delete,
+    LogicalKeyboardKey.backspace,
+  };
+
   static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.keyA,
     LogicalKeyboardKey.keyC,
     LogicalKeyboardKey.keyV,
     LogicalKeyboardKey.keyX,
-    LogicalKeyboardKey.delete,
+    ..._deleteKeys,
   };
 
   static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
@@ -485,7 +496,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
-    } else if (key == LogicalKeyboardKey.delete) {
+    } else if (_deleteKeys.contains(key)) {
       _handleDelete();
     }
   }

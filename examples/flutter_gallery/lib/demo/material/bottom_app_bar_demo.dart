@@ -253,7 +253,7 @@ class _RadioItem<T> extends StatelessWidget {
                   },
                   child: Text(
                     value.title,
-                    style: theme.textTheme.subhead,
+                    style: theme.textTheme.subtitle1,
                   ),
                 ),
               ),
@@ -323,7 +323,7 @@ class _Heading extends StatelessWidget {
       alignment: AlignmentDirectional.centerStart,
       child: Text(
         text,
-        style: theme.textTheme.body1.copyWith(
+        style: theme.textTheme.bodyText2.copyWith(
           color: theme.primaryColor,
         ),
       ),

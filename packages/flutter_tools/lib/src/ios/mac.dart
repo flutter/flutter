@@ -9,11 +9,9 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -25,8 +23,6 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
-
-IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 
 /// Specialized exception for expected situations where the ideviceinfo
 /// tool responds with exit code 255 / 'No device found' message
@@ -422,7 +418,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (globals.logger.hasTerminal) {
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_build_log_pipe.');
     scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
-    os.makePipe(scriptOutputPipeFile.path);
+    globals.os.makePipe(scriptOutputPipeFile.path);
 
     Future<void> listenToScriptOutputLine() async {
       final List<String> lines = await scriptOutputPipeFile.readAsLines();
@@ -458,7 +454,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // e.g. `flutter build bundle`.
   buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
   buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
-  buildCommands.addAll(environmentVariablesAsXcodeBuildSettings());
+  buildCommands.addAll(environmentVariablesAsXcodeBuildSettings(globals.platform));
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = globals.logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
@@ -473,7 +469,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus = null;
   globals.printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
-        + '${getElapsedAsSeconds(sw.elapsed).padLeft(5)}',
+        + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
   flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
@@ -551,7 +547,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         // (for example, kernel binary files produced from previous run).
         globals.fs.directory(outputDir).deleteSync(recursive: true);
       }
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         globals.fs.directory(expectedOutputDirectory),
         globals.fs.directory(outputDir),
       );
@@ -717,7 +713,7 @@ bool _checkXcodeVersion() {
     globals.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
-  if (!xcode.isVersionSatisfactory) {
+  if (!globals.xcode.isVersionSatisfactory) {
     globals.printError('Found "${xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
     return false;
   }

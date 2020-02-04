@@ -32,6 +32,7 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 const String kCspMode = 'cspMode';
 
 /// Generates an entry point for a web target.
+// Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
 
@@ -83,7 +84,8 @@ class WebEntrypointTarget extends Target {
         .childDirectory('lib')
         .childFile('generated_plugin_registrant.dart')
         .absolute.path;
-      final Uri generatedImport = packageUriMapper.map(generatedPath);
+      final String generatedImport = packageUriMapper.map(generatedPath)?.toString()
+        ?? globals.fs.file(generatedPath).absolute.uri.toString();
       contents = '''
 import 'dart:ui' as ui;
 

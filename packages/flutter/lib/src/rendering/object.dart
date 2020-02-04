@@ -1917,6 +1917,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// the framework.
   ///
   /// Warning: This getter must not change value over the lifetime of this object.
+  ///
+  /// See [RepaintBoundary] for more information about how repaint boundaries function.
   bool get isRepaintBoundary => false;
 
   /// Called, in checked mode, if [isRepaintBoundary] is true, when either the
@@ -2692,7 +2694,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// invisible).
   ///
   /// The default implementation mirrors the behavior of
-  /// [visitChildren()] (which is supposed to walk all the children).
+  /// [visitChildren] (which is supposed to walk all the children).
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren(visitor);
   }
