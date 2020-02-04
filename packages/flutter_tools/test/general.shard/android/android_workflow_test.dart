@@ -251,6 +251,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.latestVersion).thenReturn(mockSdkVersion);
     when(sdk.validateSdkWellFormed()).thenReturn(<String>[]);
+    when(processManager.runSync(<String>['which', 'java'])).thenReturn(ProcessResult(123, 1, '', ''));
     final String errorMessage = userMessages.androidSdkBuildToolsOutdated(
       sdk.sdkManagerPath,
       kAndroidSdkMinVersion,
