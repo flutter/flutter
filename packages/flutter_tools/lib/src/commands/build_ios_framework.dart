@@ -312,7 +312,7 @@ end
           '-output',
           fatFlutterFrameworkBinary.path
         ];
-        final RunResult lipoResult = processUtils.runSync(
+        final RunResult lipoResult = await processUtils.run(
           lipoCommand,
           allowReentrantFlutter: false,
         );
@@ -327,7 +327,7 @@ end
       status.stop();
     }
 
-    _produceXCFramework(mode, fatFlutterFrameworkCopy);
+    await _produceXCFramework(mode, fatFlutterFrameworkCopy);
   }
 
   Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
@@ -365,7 +365,7 @@ end
     } finally {
       status.stop();
     }
-    _produceXCFramework(mode, destinationAppFrameworkDirectory);
+    await _produceXCFramework(mode, destinationAppFrameworkDirectory);
   }
 
   Future<void> _produceStubAppFrameworkIfNeeded(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory destinationAppFrameworkDirectory) async {
@@ -393,7 +393,7 @@ end
       destinationAppFrameworkDirectory.childFile(binaryName).path
     ];
 
-    final RunResult lipoResult = processUtils.runSync(
+    final RunResult lipoResult = await processUtils.run(
       lipoCommand,
       allowReentrantFlutter: false,
     );
@@ -465,7 +465,7 @@ end
         'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
       ];
 
-      RunResult buildPluginsResult = processUtils.runSync(
+      RunResult buildPluginsResult = await processUtils.run(
         pluginsBuildCommand,
         workingDirectory: _project.ios.hostAppRoot.childDirectory('Pods').path,
         allowReentrantFlutter: false,
@@ -490,7 +490,7 @@ end
           // No device targeted, so build all valid architectures.
         ];
 
-        buildPluginsResult = processUtils.runSync(
+        buildPluginsResult = await processUtils.run(
           pluginsBuildCommand,
           workingDirectory: _project.ios.hostAppRoot
             .childDirectory('Pods')
@@ -542,7 +542,7 @@ end
               modeDirectory.childDirectory(podFrameworkName).childFile(binaryName).path
             ];
 
-            final RunResult pluginsLipoResult = processUtils.runSync(
+            final RunResult pluginsLipoResult = await processUtils.run(
               lipoCommand,
               workingDirectory: outputDirectory.path,
               allowReentrantFlutter: false,
@@ -573,7 +573,7 @@ end
               modeDirectory.childFile('$binaryName.xcframework').path
             ];
 
-            final RunResult xcframeworkResult = processUtils.runSync(
+            final RunResult xcframeworkResult = await processUtils.run(
               xcframeworkCommand,
               workingDirectory: outputDirectory.path,
               allowReentrantFlutter: false,
@@ -592,7 +592,7 @@ end
     }
   }
 
-  void _produceXCFramework(BuildMode mode, Directory fatFramework) {
+  Future<void> _produceXCFramework(BuildMode mode, Directory fatFramework) async {
     if (boolArg('xcframework')) {
       final String frameworkBinaryName = globals.fs.path.basenameWithoutExtension(
           fatFramework.basename);
@@ -603,9 +603,9 @@ end
       );
       try {
         if (mode == BuildMode.debug) {
-          _produceDebugXCFramework(fatFramework, frameworkBinaryName);
+          await _produceDebugXCFramework(fatFramework, frameworkBinaryName);
         } else {
-          _produceNonDebugXCFramework(mode, fatFramework, frameworkBinaryName);
+          await _produceNonDebugXCFramework(mode, fatFramework, frameworkBinaryName);
         }
       } finally {
         status.stop();
@@ -617,7 +617,7 @@ end
     }
   }
 
-  void _produceDebugXCFramework(Directory fatFramework, String frameworkBinaryName) {
+  Future<void> _produceDebugXCFramework(Directory fatFramework, String frameworkBinaryName) async {
     final String frameworkFileName = fatFramework.basename;
     final File fatFlutterFrameworkBinary = fatFramework.childFile(
       frameworkBinaryName,
@@ -650,7 +650,7 @@ end
         armFlutterFrameworkBinary.path
       ];
 
-      RunResult lipoResult = processUtils.runSync(
+      RunResult lipoResult = await processUtils.run(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -676,7 +676,7 @@ end
         simulatorFlutterFrameworkBinary.path
       ];
 
-      lipoResult = processUtils.runSync(
+      lipoResult = await processUtils.run(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -698,7 +698,7 @@ end
             .path
       ];
 
-      final RunResult xcframeworkResult = processUtils.runSync(
+      final RunResult xcframeworkResult = await processUtils.run(
         xcframeworkCommand,
         allowReentrantFlutter: false,
       );
@@ -713,11 +713,11 @@ end
     }
   }
 
-  void _produceNonDebugXCFramework(
+  Future<void> _produceNonDebugXCFramework(
     BuildMode mode,
     Directory fatFramework,
     String frameworkBinaryName,
-  ) {
+  ) async {
     // Simulator is only supported in Debug mode.
     // "Fat" framework here must only contain arm.
     final List<String> xcframeworkCommand = <String>[
@@ -730,7 +730,7 @@ end
           .path
     ];
 
-    final RunResult xcframeworkResult = processUtils.runSync(
+    final RunResult xcframeworkResult = await processUtils.run(
       xcframeworkCommand,
       allowReentrantFlutter: false,
     );
