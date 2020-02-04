@@ -67,6 +67,14 @@ abstract class InteractiveInkFeature extends InkFeature {
 
   /// Draws an ink splash or ink ripple on the passed in [Canvas].
   ///
+  /// The [transform] argument gives the coordinate conversion from the coordinate
+  /// system of the canvas to the coordinate system of the [referenceBox].
+  ///
+  /// [Center], [Paint] and [radius] are used to paint the cirle with desired origin,
+  /// paint and radius
+  ///
+  /// [TextDirection] is used for calculating path to clip if [customBorder] is not null.
+  ///
   /// If [customBorder] is not null, the canvas is clipped by the [ShapeBorder] provided. If
   /// [customBorder] is null and [borderRadius] is provided (i.e not [BorderRadius.zero]),
   /// the canvas is clipped by the [BorderRadius] provided.
