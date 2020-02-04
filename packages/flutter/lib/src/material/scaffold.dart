@@ -2759,7 +2759,10 @@ class _ScaffoldScope extends InheritedWidget {
   }
 }
 
-// TODO: Write basic documentation.
+/// An object storing the current status of a floating action button, including
+/// the widget used ([button]), its previous ([previousLocation]) and current
+/// locations ([location]), its animator ([animator]), and the controller
+/// for its animation between different locations ([moveController]).
 class _FABStatus {
   _FABStatus({
     this.button,
