@@ -196,12 +196,14 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
+    this.automaticallyMarkHeader = true,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
        assert(primary != null),
        assert(titleSpacing != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
+       assert(automaticallyMarkHeader != null),
        preferredSize = Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
        super(key: key);
 
@@ -377,6 +379,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// bar is scrolled.
   final double bottomOpacity;
 
+  /// How to.
+  final bool automaticallyMarkHeader;
+
   /// A size whose height is the sum of [kToolbarHeight] and the [bottom] widget's
   /// preferred height.
   ///
@@ -494,7 +499,7 @@ class _AppBarState extends State<AppBar> {
         child: Semantics(
           namesRoute: namesRoute,
           child: _AppBarTitleBox(child: title),
-          header: true,
+          header: automaticallyMarkHeader,
         ),
       );
     }
