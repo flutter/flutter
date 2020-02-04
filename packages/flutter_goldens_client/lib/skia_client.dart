@@ -100,7 +100,8 @@ class SkiaGoldClient {
   Future<void> auth() async {
     if (_clientIsAuthorized()) {
       print('Skia Client is already authorized.');
-      print('auth_opt.json: ${await _printClientAuthConfig()}');
+      print('auth_opt.json: ${await _getClientAuthConfig()}');
+      print('client_email: ${await _getClientEmail()}');
       return;
     }
 
@@ -145,7 +146,8 @@ class SkiaGoldClient {
     print('stdout: ${result.stdout}');
     print('stderr: ${result.stderr}');
     print('auth_opt.json:');
-    print(await _printClientAuthConfig());
+    print(await _getClientAuthConfig());
+    print('client_email: ${await _getClientEmail()}');
   }
 
   /// Prepares the local work space for an unauthorized client to lookup golden
@@ -326,7 +328,8 @@ class SkiaGoldClient {
     print('stdout: ${result.stdout}');
     print('stderr: ${result.stderr}');
     print('auth_opt.json:');
-    print(await _printClientAuthConfig());
+    print(await _getClientAuthConfig());
+    print('client_email: ${await _getClientEmail()}');
   }
 
   /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
@@ -379,7 +382,8 @@ class SkiaGoldClient {
           ..writeln('stdout: ${result.stdout}')
           ..writeln('stderr: ${result.stderr}')
           ..writeln('auth_opt.json:')
-          ..writeln(await _printClientAuthConfig());
+          ..writeln(await _getClientAuthConfig())
+          ..writeln('client_email: ${await _getClientEmail()}');
         throw Exception(buf.toString());
       }
     }
@@ -625,11 +629,17 @@ class SkiaGoldClient {
   }
 
   /// Returns the contents of the authorization configuration.
-  Future<String> _printClientAuthConfig() async {
+  Future<String> _getClientAuthConfig() async {
     return workDirectory.childFile(fs.path.join(
       'temp',
       'auth_opt.json',
     )).readAsString();
+  }
+
+  /// Returns the client_email of the service account goldctl is using.
+  Future<String> _getClientEmail() async {
+    final Map<String, dynamic> serviceAccountJson = json.decode(_serviceAccount) as Map<String, dynamic>;
+    return serviceAccountJson['client_email'] as String;
   }
 }
 
