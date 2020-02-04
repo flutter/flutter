@@ -325,6 +325,8 @@ void main() {
       expect(tester.getCenter(find.byIcon(Icons.add_location)), const Offset(_leftOffsetX, _floatOffsetY));
       expect(tester.getCenter(find.byIcon(Icons.cake)), const Offset(_centerOffsetX, _floatOffsetY));
     });
+
+    // TODO: Add another test with animations, possibly with custom animators.
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
