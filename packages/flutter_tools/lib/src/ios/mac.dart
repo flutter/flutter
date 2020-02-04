@@ -24,83 +24,18 @@ import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
-/// Specialized exception for expected situations where the ideviceinfo
-/// tool responds with exit code 255 / 'No device found' message
-class IOSDeviceNotFoundError implements Exception {
-  const IOSDeviceNotFoundError(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
-
-/// Exception representing an attempt to find information on an iOS device
-/// that failed because the user had not paired the device with the host yet.
-class IOSDeviceNotTrustedError implements Exception {
-  const IOSDeviceNotTrustedError(this.message, this.lockdownCode);
-
-  /// The error message to show to the user.
-  final String message;
-
-  /// The associated `lockdownd` error code.
-  final LockdownReturnCode lockdownCode;
-
-  @override
-  String toString() => '$message (lockdownd error code ${lockdownCode.code})';
-}
-
-/// Class specifying possible return codes from `lockdownd`.
-///
-/// This contains only a subset of the return codes that `lockdownd` can return,
-/// as we only care about a limited subset. These values should be kept in sync with
-/// https://github.com/libimobiledevice/libimobiledevice/blob/26373b3/include/libimobiledevice/lockdown.h#L37
-class LockdownReturnCode {
-  const LockdownReturnCode._(this.code);
-
-  /// Creates a new [LockdownReturnCode] from the specified OS exit code.
-  ///
-  /// If the [code] maps to one of the known codes, a `const` instance will be
-  /// returned.
-  factory LockdownReturnCode.fromCode(int code) {
-    final Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
-      pairingDialogResponsePending.code: pairingDialogResponsePending,
-      invalidHostId.code: invalidHostId,
-    };
-
-    return knownCodes.containsKey(code) ? knownCodes[code] : LockdownReturnCode._(code);
-  }
-
-  /// The OS exit code.
-  final int code;
-
-  /// Error code indicating that the pairing dialog has been shown to the user,
-  /// and the user has not yet responded as to whether to trust the host.
-  static const LockdownReturnCode pairingDialogResponsePending = LockdownReturnCode._(19);
-
-  /// Error code indicating that the host is not trusted.
-  ///
-  /// This can happen if the user explicitly says "do not trust this  computer"
-  /// or if they revoke all trusted computers in the device settings.
-  static const LockdownReturnCode invalidHostId = LockdownReturnCode._(21);
-}
-
 class IMobileDevice {
   IMobileDevice()
-      : _ideviceIdPath = globals.artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
-        _ideviceinfoPath = globals.artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
-        _idevicesyslogPath = globals.artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+      : _idevicesyslogPath = globals.artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
         _idevicescreenshotPath = globals.artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
 
-  final String _ideviceIdPath;
-  final String _ideviceinfoPath;
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
 
   bool get isInstalled {
     _isInstalled ??= processUtils.exitsHappySync(
       <String>[
-        _ideviceIdPath,
+        _idevicescreenshotPath,
         '-h',
       ],
       environment: Map<String, String>.fromEntries(
@@ -110,68 +45,6 @@ class IMobileDevice {
     return _isInstalled;
   }
   bool _isInstalled;
-
-  Future<String> getAvailableDeviceIDs() async {
-    try {
-      final ProcessResult result = await globals.processManager.run(
-        <String>[
-          _ideviceIdPath,
-          '-l',
-        ],
-        environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
-        ),
-      );
-      if (result.exitCode != 0) {
-        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
-      }
-      return result.stdout as String;
-    } on ProcessException {
-      throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
-    }
-  }
-
-  Future<String> getInfoForDevice(String deviceID, String key) async {
-    try {
-      final ProcessResult result = await globals.processManager.run(
-        <String>[
-          _ideviceinfoPath,
-          '-u',
-          deviceID,
-          '-k',
-          key,
-        ],
-        environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
-        ),
-      );
-      final String stdout = result.stdout as String;
-      final String stderr = result.stderr as String;
-      if (result.exitCode == 255 && stdout != null && stdout.contains('No device found')) {
-        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n$stdout. Try unlocking attached devices.');
-      }
-      if (result.exitCode == 255 && stderr != null && stderr.contains('Could not connect to lockdownd')) {
-        if (stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
-          throw const IOSDeviceNotTrustedError(
-            'Device info unavailable. Is the device asking to "Trust This Computer?"',
-            LockdownReturnCode.pairingDialogResponsePending,
-          );
-        }
-        if (stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
-          throw const IOSDeviceNotTrustedError(
-            'Device info unavailable. Device pairing "trust" may have been revoked.',
-            LockdownReturnCode.invalidHostId,
-          );
-        }
-      }
-      if (result.exitCode != 0) {
-        throw ToolExit('ideviceinfo returned an error:\n$stderr');
-      }
-      return stdout.trim();
-    } on ProcessException {
-      throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
-    }
-  }
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
