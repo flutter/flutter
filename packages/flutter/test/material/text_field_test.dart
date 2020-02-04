@@ -536,9 +536,9 @@ void main() {
     expect(find.text('Select All'), findsNothing);
   }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('text selection style', (WidgetTester tester) async {
-    final TextEditingController controller0 = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwassssup!',
+  testWidgets('text selection style 1', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwasssup!',
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -555,7 +555,7 @@ void main() {
                   children: <Widget>[
                     TextField(
                       key: Key('field0'),
-                      controller: controller0,
+                      controller: controller,
                       style: TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
@@ -575,15 +575,19 @@ void main() {
 
     await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.longPressAt(textfieldStart + const Offset(100.0, 107.0));
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
+    await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.pump(const Duration(milliseconds: 150));
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('text_golden.TextSelectionStyle.1.png'),
+      matchesGoldenFile('text_field_golden.TextSelectionStyle.1.png'),
     );
+  });
 
+  testWidgets('text selection style 2', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwasssup!',
+    );
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -591,7 +595,7 @@ void main() {
             child: RepaintBoundary(
               child: Container(
                 width: 650.0,
-                height: 300.0,
+                height: 600.0,
                 decoration: const BoxDecoration(
                   color: Color(0xff00ff00),
                 ),
@@ -599,10 +603,10 @@ void main() {
                   children: <Widget>[
                     TextField(
                       key: Key('field0'),
-                      controller: controller0,
+                      controller: controller,
                       style: TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
-                      selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
+                      selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
                       selectionWidthStyle: ui.BoxWidthStyle.tight,
                       maxLines: 3,
                     ),
@@ -615,15 +619,16 @@ void main() {
       ),
     );
 
+    final Offset textfieldStart = tester.getTopLeft(find.byKey(Key('field0')));
+
     await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.longPressAt(textfieldStart + const Offset(100.0, 107.0));
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.tapAt(textfieldStart + const Offset(100.0, 107.0));
+    await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.pump(const Duration(milliseconds: 150));
     await expectLater(
       find.byType(MaterialApp),
-      matchesGoldenFile('text_golden.TextSelectionStyle.2.png'),
+      matchesGoldenFile('text_field_golden.TextSelectionStyle.2.png'),
     );
   });
 
