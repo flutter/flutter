@@ -23,6 +23,7 @@ environment:
 # LINUX SHARDS
 task:
   container:
+    # https://cirrus-ci.org/guide/docker-builder-vm/#dockerfile-as-a-ci-environment
     dockerfile: "dev/ci/docker_linux/Dockerfile"
     cpu: $CPU
     memory: $MEMORY
@@ -35,7 +36,7 @@ task:
     CPU: 1 # 0.1-8 without compute credits, 0.1-30 with (yes, you can go fractional)
     MEMORY: 4G # 256M-24G without compute credits, 256M-90G with
     CIRRUS_WORKING_DIR: "/tmp/$FLUTTER_SDK_PATH_WITH_SPACE"
-    CIRRUS_DOCKER_CONTEXT: "dev/ci/docker_linux"
+    CIRRUS_DOCKER_CONTEXT: "dev/"
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
   pub_cache:
@@ -75,10 +76,8 @@ task:
         # We use 3 CPUs because that's the minimum required to get framework_tests-widgets-linux
         # running fast enough that it is not the long pole, as of OCtober 2019.
         CPU: 3
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: framework_tests-libraries-linux
@@ -88,10 +87,8 @@ task:
         # framework_tests-libraries-linux shard running fast enough that it is not the long pole, as
         # of October 2019.
         CPU: 3
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: framework_tests-misc-linux
@@ -153,10 +150,8 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-1-linux
@@ -165,10 +160,8 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-2-linux
@@ -177,10 +170,8 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-3-linux
@@ -189,10 +180,8 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-4-linux
@@ -201,10 +190,8 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-5-linux
@@ -213,10 +200,8 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-6-linux
@@ -225,10 +210,8 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-7_last-linux # last Web shard must end with _last
@@ -237,10 +220,8 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
-        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: build_tests-linux
