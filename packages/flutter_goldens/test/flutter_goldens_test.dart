@@ -82,7 +82,7 @@ void main() {
       ));
     });
 
-    test('gsuti is checked when authorization file is present', () async {
+    test('gsutil is checked when authorization file is present', () async {
       final File authFile = fs.file('/workDirectory/temp/auth_opt.json')
         ..createSync(recursive: true);
       authFile.writeAsStringSync(authTemplate(gsutil: true));
