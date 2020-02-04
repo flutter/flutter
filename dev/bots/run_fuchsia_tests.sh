@@ -74,8 +74,5 @@ find $flutter_dir -name ".packages" | xargs rm
 
 cd $flutter_dir/dev/benchmarks/test_apps/stocks/
 
-$flutter_bin precache --fuchsia
-$flutter_bin precache --flutter_runner
-
 $flutter_bin pub get
 $flutter_bin drive -v --target=test_driver/stock_view.dart
