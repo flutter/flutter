@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/build_config.h"
+#include "flutter/testing/test_timeout_listener.h"
 #include "gtest/gtest.h"
 
 #ifdef OS_IOS
@@ -18,5 +19,10 @@ int main(int argc, char** argv) {
 #endif  // OS_IOS
 
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  auto timeout_listener = new flutter::testing::TestTimeoutListener();
+  auto& listeners = ::testing::UnitTest::GetInstance()->listeners();
+  listeners.Append(timeout_listener);
+  auto result = RUN_ALL_TESTS();
+  delete listeners.Release(timeout_listener);
+  return result;
 }
