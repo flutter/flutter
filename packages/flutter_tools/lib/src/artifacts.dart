@@ -45,7 +45,6 @@ enum Artifact {
   iosDeploy,
   ideviceinfo,
   ideviceId,
-  idevicename,
   idevicesyslog,
   idevicescreenshot,
   ideviceinstaller,
@@ -113,8 +112,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'ideviceinfo';
     case Artifact.ideviceId:
       return 'idevice_id';
-    case Artifact.idevicename:
-      return 'idevicename';
     case Artifact.idevicesyslog:
       return 'idevicesyslog';
     case Artifact.idevicescreenshot:
@@ -263,7 +260,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.ideviceinfo:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
-      case Artifact.idevicename:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
@@ -515,7 +511,6 @@ class LocalEngineArtifacts extends Artifacts {
         return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
       case Artifact.ideviceId:
       case Artifact.ideviceinfo:
-      case Artifact.idevicename:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;

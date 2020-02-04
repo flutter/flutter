@@ -89,13 +89,11 @@ class IMobileDevice {
   IMobileDevice()
       : _ideviceIdPath = globals.artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
         _ideviceinfoPath = globals.artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
-        _idevicenamePath = globals.artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
         _idevicesyslogPath = globals.artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
         _idevicescreenshotPath = globals.artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
 
   final String _ideviceIdPath;
   final String _ideviceinfoPath;
-  final String _idevicenamePath;
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
 
@@ -112,56 +110,6 @@ class IMobileDevice {
     return _isInstalled;
   }
   bool _isInstalled;
-
-  /// Returns true if libimobiledevice is installed and working as expected.
-  ///
-  /// Older releases of libimobiledevice fail to work with iOS 10.3 and above.
-  Future<bool> get isWorking async {
-    if (_isWorking != null) {
-      return _isWorking;
-    }
-    if (!isInstalled) {
-      _isWorking = false;
-      return _isWorking;
-    }
-    // If usage info is printed in a hyphenated id, we need to update.
-    const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final Map<String, String> executionEnv = Map<String, String>.fromEntries(
-      <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
-    );
-    final ProcessResult ideviceResult = (await processUtils.run(
-      <String>[
-        _ideviceinfoPath,
-        '-u',
-        fakeIphoneId,
-      ],
-      environment: executionEnv,
-    )).processResult;
-    if ((ideviceResult.stdout as String).contains('Usage: ideviceinfo')) {
-      _isWorking = false;
-      return _isWorking;
-    }
-
-    // If no device is attached, we're unable to detect any problems. Assume all is well.
-    final ProcessResult result = (await processUtils.run(
-      <String>[
-        _ideviceIdPath,
-        '-l',
-      ],
-      environment: executionEnv,
-    )).processResult;
-    if (result.exitCode == 0 && (result.stdout as String).isEmpty) {
-      _isWorking = true;
-    } else {
-      // Check that we can look up the names of any attached devices.
-      _isWorking = await processUtils.exitsHappy(
-        <String>[_idevicenamePath],
-        environment: executionEnv,
-      );
-    }
-    return _isWorking;
-  }
-  bool _isWorking;
 
   Future<String> getAvailableDeviceIDs() async {
     try {
