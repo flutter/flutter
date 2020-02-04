@@ -10,6 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      key: Key('mainapp'),
       title: 'Counter App',
       home: MyHomePage(title: 'Counter App Home Page'),
     );

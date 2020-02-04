@@ -27,6 +27,7 @@ void main() {
     expect(find.text('You have pushed the button this many times:'),
         findsOneWidget);
     expect(find.byKey(Key('input')), findsOneWidget);
+    await binding.takeScreenshot('unfocusedInput');
   });
 
   testWidgets('finding semantics on DOM', (WidgetTester tester) async {
@@ -45,13 +46,19 @@ void main() {
     expect(find.byKey(Key('input')), findsOneWidget);
     await tester.tap(find.byKey(Key('input')));
 
-    final List<Node> nodeList =
-    document.getElementsByTagName('input');
+    final List<Node> nodeList = document.getElementsByTagName('input');
     expect(nodeList.length, equals(1));
+    await binding.takeScreenshot('focusedInput');
   });
 
   // For some reason we need to explicity call complete with flutter for web
   tearDownAll(() {
+    if (!binding.screenshotPipe.isCompleted) {
+      binding.screenshotPipe.complete(Future.value(''));
+    }
+    if (!binding.waitingForDriverScreenshot.isCompleted) {
+      binding.waitingForDriverScreenshot.complete(Future.value(false));
+    }
     binding.allTestsPassed.complete(Future.value(true));
   });
 }
