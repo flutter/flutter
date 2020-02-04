@@ -173,7 +173,11 @@ Future<bool> run(List<String> arguments) async {
     } finally {
       if (verbose)
         print('Deleting temporary directory...');
-      checkout.deleteSync(recursive: true);
+      try {
+        checkout.deleteSync(recursive: true);
+      } on FileSystemException catch (e) {
+        print('Failed to delete "${checkout.path}".\nReason: ${e.message}');
+      }
     }
     if (verbose)
       print('');
