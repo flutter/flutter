@@ -238,10 +238,36 @@ void main() {
   });
 
   group('Multiple Floating Action Buttons', () {
+    const double _leftOffsetX = 44.0;
+    const double _centerOffsetX = 400.0;
+    const double _rightOffsetX = 756.0;
+    const double _miniLeftOffsetX = _leftOffsetX - kMiniButtonOffsetAdjustment;
+    const double _miniRightOffsetX = _rightOffsetX + kMiniButtonOffsetAdjustment;
+
+    const double _topOffsetY = 56.0;
+    const double _floatOffsetY = 500.0;
+    const double _dockedOffsetY = 544.0;
+    const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
+
     testWidgets('All render correctly', (WidgetTester tester) async {
       Widget build() {
         return MaterialApp(
           home: Scaffold(
+            appBar: AppBar(
+              title: const Text('FloatingActionButtonLocation Test.'),
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  title: const Text('Home'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.school),
+                  title: const Text('School'),
+                ),
+              ],
+            ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {},
               child: Icon(Icons.beach_access),
@@ -291,6 +317,13 @@ void main() {
       await tester.pumpWidget(build());
 
       expect(find.byType(FloatingActionButton), findsNWidgets(6));
+
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), const Offset(_rightOffsetX, _floatOffsetY));
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), const Offset(_rightOffsetX, _topOffsetY));
+      expect(tester.getCenter(find.byIcon(Icons.android)), const Offset(_centerOffsetX, _topOffsetY));
+      expect(tester.getCenter(find.byIcon(Icons.book)), const Offset(_leftOffsetX, _topOffsetY));
+      expect(tester.getCenter(find.byIcon(Icons.add_location)), const Offset(_leftOffsetX, _floatOffsetY));
+      expect(tester.getCenter(find.byIcon(Icons.cake)), const Offset(_centerOffsetX, _floatOffsetY));
     });
   });
 
