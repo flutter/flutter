@@ -65,9 +65,15 @@ abstract class InteractiveInkFeature extends InkFeature {
     controller.markNeedsPaint();
   }
 
-  /// Called during [paintFeature] in [InkSplash] and [InkRipple] widgets
+  /// Draws an ink splash or ink ripple on the passed in [Canvas].
   ///
-  /// Combines the common parts of painting a ripple and splash ink circle
+  /// If [customBorder] is not null, the canvas is clipped by the [ShapeBorder] provided. If
+  /// [customBorder] is null and [borderRadius] is provided (i.e not [BorderRadius.zero]),
+  /// the canvas is clipped by the [BorderRadius] provided.
+  ///
+  /// If [clipCallBack] is null, no clipping is performed and only the ink circle is painted
+  ///
+  /// The [InkSplash] and [InkRipple] widgets draw their ink circles using this function.
   @protected
   void paintInkCircle({
     @required Canvas canvas,
