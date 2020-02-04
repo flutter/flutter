@@ -216,6 +216,7 @@ class XCDevice {
             '--find',
             'xcdevice'
           ],
+          throwOnError: true,
         ).stdout.trim();
       } on ProcessException catch (exception) {
         _logger.printTrace('Process exception finding xcdevice:\n$exception');
@@ -244,6 +245,7 @@ class XCDevice {
           '--timeout',
           '1',
         ],
+        throwOnError: true,
       );
       if (result.exitCode == 0) {
         final List<dynamic> listResults = json.decode(result.stdout) as List<dynamic>;
