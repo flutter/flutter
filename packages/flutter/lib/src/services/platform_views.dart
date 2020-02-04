@@ -532,6 +532,7 @@ class AndroidViewController {
       await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
     _platformViewCreatedCallbacks.clear();
     _state = _AndroidViewState.disposed;
+    PlatformViewsService._instance._focusCallbacks.remove(id);
   }
 
   /// Sizes the Android View.
