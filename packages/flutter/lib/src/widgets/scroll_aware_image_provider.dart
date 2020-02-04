@@ -81,6 +81,7 @@ class ScrollAwareImageProvider<T> extends ImageProvider<T> {
     // Something else got this image into the cache. Return it.
     if (PaintingBinding.instance.imageCache.containsKey(key)) {
       imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
+      return;
     }
     // The context has gone out of the tree - ignore it.
     if (context.context == null) {

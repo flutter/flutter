@@ -469,7 +469,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus = null;
   globals.printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
-        + '${getElapsedAsSeconds(sw.elapsed).padLeft(5)}',
+        + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
   flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
@@ -547,7 +547,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         // (for example, kernel binary files produced from previous run).
         globals.fs.directory(outputDir).deleteSync(recursive: true);
       }
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         globals.fs.directory(expectedOutputDirectory),
         globals.fs.directory(outputDir),
       );

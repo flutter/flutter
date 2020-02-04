@@ -367,7 +367,7 @@ abstract class FloatingActionButtonLocation {
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'FloatingActionButtonLocation')}';
+  String toString() => objectRuntimeType(this, 'FloatingActionButtonLocation');
 }
 
 typedef _OffsetXFunction = double Function(ScaffoldPrelayoutGeometry scaffoldGeometry, {double adjustment});
@@ -584,7 +584,7 @@ abstract class FloatingActionButtonAnimator {
   double getAnimationRestart(double previousValue) => 0.0;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'FloatingActionButtonAnimator')}';
+  String toString() => objectRuntimeType(this, 'FloatingActionButtonAnimator');
 }
 
 class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
