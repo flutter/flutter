@@ -1000,6 +1000,9 @@ class NotifyingLogger extends Logger {
 
   @override
   bool get hasTerminal => false;
+
+  @override
+  void clear() => _messageController.add(LogMessage('status', globals.terminal.clearScreen() + '\n'));
 }
 
 /// A running application, started by this daemon.
@@ -1230,6 +1233,9 @@ class _AppRunLogger extends Logger {
 
   @override
   bool get hasTerminal => false;
+
+  @override
+  void clear() => parent?.printStatus(globals.terminal.clearScreen() + '\n');
 }
 
 class LogMessage {
