@@ -43,10 +43,7 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem();
     platform = FakePlatform(
-      environment: <String, String>{
-        'FLUTTER_ROOT': _kFlutterRoot,
-        'GOLD_SERVICE_ACCOUNT': 'service account',
-      },
+      environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
       operatingSystem: 'macos'
     );
     process = MockProcessManager();
