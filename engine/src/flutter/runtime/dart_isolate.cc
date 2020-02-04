@@ -625,7 +625,9 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           tonic::DartState::HandleLibraryTag,  // embedder library tag handler
           false,  //  disable websocket origin check
           settings.disable_service_auth_codes,  // disable VM service auth codes
-          error                                 // error (out)
+          settings.enable_service_port_fallback,  // enable fallback to port 0
+                                                  // when bind fails.
+          error                                   // error (out)
           )) {
     // Error is populated by call to startup.
     FML_DLOG(ERROR) << *error;

@@ -26,6 +26,7 @@ class DartServiceIsolate {
                       Dart_LibraryTagHandler embedder_tag_handler,
                       bool disable_origin_check,
                       bool disable_service_auth_codes,
+                      bool enable_service_port_fallback,
                       char** error);
 
   using CallbackHandle = ptrdiff_t;
