@@ -4586,13 +4586,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  Widget build() {
-    if (_didChangeDependencies) {
-      _state.didChangeDependencies();
-      _didChangeDependencies = false;
-    }
-    return state.build(this);
-  }
+  Widget build() => _state.build(this);
 
   /// The [State] instance associated with this location in the tree.
   ///
@@ -4640,6 +4634,15 @@ class StatefulElement extends ComponentElement {
       return true;
     }());
     super._firstBuild();
+  }
+
+  @override
+  void performRebuild() {
+    if (_didChangeDependencies) {
+      _state.didChangeDependencies();
+      _didChangeDependencies = false;
+    }
+    super.performRebuild();
   }
 
   @override
