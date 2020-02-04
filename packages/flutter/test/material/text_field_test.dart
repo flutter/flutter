@@ -537,9 +537,8 @@ void main() {
   }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('text selection style', (WidgetTester tester) async {
-
     final TextEditingController controller0 = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure\nhi',
+      text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwassssup!',
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -561,7 +560,7 @@ void main() {
                       toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
                       selectionWidthStyle: ui.BoxWidthStyle.max,
-                      maxLines: 2,
+                      maxLines: 3,
                     ),
                   ],
                 ),
@@ -592,7 +591,7 @@ void main() {
             child: RepaintBoundary(
               child: Container(
                 width: 650.0,
-                height: 600.0,
+                height: 300.0,
                 decoration: const BoxDecoration(
                   color: Color(0xff00ff00),
                 ),
@@ -604,8 +603,8 @@ void main() {
                       style: TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
-                      selectionWidthStyle: ui.BoxWidthStyle.max,
-                      maxLines: 2,
+                      selectionWidthStyle: ui.BoxWidthStyle.tight,
+                      maxLines: 3,
                     ),
                   ],
                 ),
