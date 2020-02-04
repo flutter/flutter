@@ -1,4 +1,4 @@
-Signature: b47a2e0b85d0f0730a965160e75f46a8
+Signature: 7eee75c10d5417c5bff805c87dd1183b
 
 UNUSED LICENSES:
 
@@ -483,6 +483,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
@@ -1403,6 +1404,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/images.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/player.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/publisher.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/sound_player.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_consumer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_core.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
@@ -2177,6 +2180,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
