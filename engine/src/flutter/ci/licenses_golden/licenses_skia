@@ -1,4 +1,4 @@
-Signature: e07e81dc6599cd1e2f266f6f900dfb65
+Signature: f8c0f0571265c025ed51b5a016fafb68
 
 UNUSED LICENSES:
 
@@ -5610,6 +5610,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/gm/3d.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/3d.cpp
+FILE: ../../../third_party/skia/gm/bc1_transparency.cpp
 FILE: ../../../third_party/skia/gm/bicubic.cpp
 FILE: ../../../third_party/skia/gm/compressed_textures.cpp
 FILE: ../../../third_party/skia/gm/exoticformats.cpp
