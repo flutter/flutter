@@ -136,23 +136,41 @@ class PageStorageBucket {
 /// This sample creates a page storage for MyHomePage
 ///
 /// ```dart
-///  final PageStorageBucket _bucket = PageStorageBucket();
-///  final PageStorageKey mykey = PageStorageKey('testkey');
-///  MaterialApp(
+/// class MyApp extends StatelessWidget {
+///   final PageStorageBucket _bucket = PageStorageBucket();
+///   final PageStorageKey mykey = PageStorageKey('testkey');
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
 ///       home: PageStorage(
 ///         child: MyHomePage(),
 ///         bucket: _bucket,
 ///         key: mykey,
 ///       ),
 ///     );
+///   }
+/// }
+///
+/// class MyHomePage extends StatelessWidget {
+/// @override
+/// Widget build(BuildContext context) {
+///   return Text('PageStorage is awesome');
+///   }
+/// }
 /// ```
 ///
 /// ```dart write data to [PageStorage]
-/// PageStorage.of(context).writeState(context, 'Data saved', identifier: ValueKey(mykey));
+/// void writeData(context,mykey){
+///   // mykey is the [PageStorageKey] defined before.
+///   PageStorage.of(context).writeState(context, 'Data saved', identifier: ValueKey(mykey));
+/// }
 /// ```
 ///
 /// ``` dart read data from [PageStorage]
-/// PageStorage .of(context).readState(context, identifier: ValueKey(mykey));
+/// void readData(context,mykey){
+///   // mykey is the [PageStorageKey] defined before.
+///   PageStorage.of(context).readState(context, identifier: ValueKey(mykey));
+/// }
 /// ```
 /// {@end-tool}
 class PageStorage extends StatelessWidget {
