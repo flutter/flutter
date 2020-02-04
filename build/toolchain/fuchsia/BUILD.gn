@@ -100,7 +100,7 @@ toolchain("fuchsia") {
     # existing .TOC file, overwrite it, otherwise, don't change it.
     tocfile = sofile + ".TOC"
     temporary_tocname = sofile + ".tmp"
-    link_command = "$goma_prefix $ld $target_triple_flags $sysroot_flags $lto_flags -shared {{ldflags}} -o $unstripped_sofile -Wl,--build-id -Wl,-soname=$soname @$rspfile"
+    link_command = "$goma_prefix $ld $target_triple_flags $sysroot_flags $lto_flags -shared {{ldflags}} -o $unstripped_sofile -Wl,--build-id=sha1 -Wl,-soname=$soname @$rspfile"
     toc_command = "{ $readelf -d $unstripped_sofile | grep SONAME ; $nm -gD -f p $unstripped_sofile | cut -f1-2 -d' '; } > $temporary_tocname"
     replace_command = "if ! cmp -s $temporary_tocname $tocfile; then mv $temporary_tocname $tocfile; fi"
     strip_command = "$strip -o $sofile $unstripped_sofile"
@@ -137,7 +137,7 @@ toolchain("fuchsia") {
     outfile = "{{root_out_dir}}/$exename"
     rspfile = "$outfile.rsp"
     unstripped_outfile = "{{root_out_dir}}/exe.unstripped/$exename"
-    command = "$goma_prefix $ld $target_triple_flags $sysroot_flags $lto_flags {{ldflags}} -o $unstripped_outfile -Wl,--build-id -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group {{libs}} && ${strip} -o $outfile $unstripped_outfile"
+    command = "$goma_prefix $ld $target_triple_flags $sysroot_flags $lto_flags {{ldflags}} -o $unstripped_outfile -Wl,--build-id=sha1 -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group {{libs}} && ${strip} -o $outfile $unstripped_outfile"
     description = "LINK $outfile"
     rspfile_content = "{{inputs}}"
     outputs = [
