@@ -176,7 +176,7 @@ Future<bool> run(List<String> arguments) async {
       try {
         checkout.deleteSync(recursive: true);
       } on FileSystemException catch (e) {
-        print('Failed to delete "${checkout.path}".\nReason: ${e.message}');
+        print('Failed to delete "${checkout.path}".');
       }
     }
     if (verbose)
