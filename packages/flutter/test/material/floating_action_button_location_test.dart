@@ -405,12 +405,6 @@ void main() {
       );
     }
 
-    testWidgets('startFloat', (WidgetTester tester) async {
-      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startFloat));
-
-      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(44.0, 500.0));
-    });
-
     testWidgets('startTop', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startTop));
 
@@ -429,10 +423,82 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(756.0, 56.0));
     });
 
-    testWidgets('miniEndTop', (WidgetTester tester) async {
-      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniEndTop, mini: true));
+    testWidgets('startFloat', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startFloat));
 
-      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(764.0, 56.0));
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(44.0, 500.0));
+    });
+
+    testWidgets('centerFloat', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.centerFloat));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(400.0, 500.0));
+    });
+
+    testWidgets('endFloat', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.endFloat));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(756.0, 500.0));
+    });
+
+    testWidgets('startDocked', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startDocked));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(44.0, 544.0));
+    });
+
+    testWidgets('centerDocked', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.centerDocked));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(400.0, 544.0));
+    });
+
+    testWidgets('endDocked', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.endDocked));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(756.0, 544.0));
+    });
+
+    testWidgets('miniStartTop', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniStartTop));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(40.0, 56.0));
+    });
+
+    testWidgets('miniEndTop', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniEndTop));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(760.0, 56.0));
+    });
+
+    testWidgets('miniStartFloat', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniStartFloat));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(40.0, 504.0));
+    });
+
+    testWidgets('miniCenterFloat', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniCenterFloat));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(400.0, 504.0));
+    });
+
+    testWidgets('miniEndFloat', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniEndFloat));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(760.0, 504.0));
+    });
+
+    testWidgets('miniStartDocked', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniStartDocked));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(40.0, 544.0));
+    });
+
+    testWidgets('miniEndDocked', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniEndDocked));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), Offset(760.0, 544.0));
     });
   });
 
