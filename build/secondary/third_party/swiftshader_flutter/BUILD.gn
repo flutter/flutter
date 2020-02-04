@@ -112,6 +112,9 @@ source_set("subzero") {
   } else if (is_mac) {
     include_dirs +=
         [ "$source_root/third_party/llvm-subzero/build/MacOS/include" ]
+  } else if (is_fuchsia) {
+    include_dirs +=
+        [ "$source_root/third_party/llvm-subzero/build/Fuchsia/include" ]
   } else {
     assert(false, "Unsupported platform.")
   }
@@ -239,6 +242,89 @@ source_set("subzero") {
   }
 }
 
+source_set("pipeline") {
+  public = []
+
+  configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/Pipeline/ComputeProgram.cpp",
+    "$source_root/src/Pipeline/Constants.cpp",
+    "$source_root/src/Pipeline/PixelProgram.cpp",
+    "$source_root/src/Pipeline/PixelRoutine.cpp",
+    "$source_root/src/Pipeline/SamplerCore.cpp",
+    "$source_root/src/Pipeline/SetupRoutine.cpp",
+    "$source_root/src/Pipeline/ShaderCore.cpp",
+    "$source_root/src/Pipeline/SpirvShader.cpp",
+    "$source_root/src/Pipeline/SpirvShaderSampling.cpp",
+    "$source_root/src/Pipeline/SpirvShader_dbg.cpp",
+    "$source_root/src/Pipeline/VertexProgram.cpp",
+    "$source_root/src/Pipeline/VertexRoutine.cpp",
+  ]
+
+  include_dirs = [
+    "$source_root/src",
+    "$source_root/include",
+    "$source_root/third_party/SPIRV-Headers/include",
+    "$source_root/third_party/marl/include",
+  ]
+}
+
+source_set("wsi") {
+  public = []
+
+  configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
+  configs += [ ":swiftshader_libvulkan_private_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/WSI/VkSurfaceKHR.cpp",
+    "$source_root/src/WSI/VkSwapchainKHR.cpp",
+  ]
+
+  if (is_linux) {
+    sources += [
+      "$source_root/src/WSI/XcbSurfaceKHR.cpp",
+      "$source_root/src/WSI/XlibSurfaceKHR.cpp",
+      "$source_root/src/WSI/libX11.cpp",
+    ]
+  }
+
+  if (is_win) {
+    sources += [
+      "$source_root/src/WSI/Win32SurfaceKHR.cpp",
+    ]
+  }
+
+  if (is_mac) {
+    sources += [
+      "$source_root/src/WSI/MetalSurface.mm",
+    ]
+    libs = [
+      "Cocoa.framework",
+      "QuartzCore.framework",
+    ]
+  }
+
+  include_dirs = [
+    "$source_root/src",
+    "$source_root/include",
+    "$source_root/third_party/SPIRV-Headers/include",
+    "$source_root/third_party/marl/include",
+  ]
+}
+
 source_set("reactor") {
   configs += [ ":internal_config" ]
   configs -= [ "//build/config/compiler:cxx_version_default" ]
@@ -293,6 +379,41 @@ source_set("renderer") {
   deps = [
     ":shader",
   ]
+}
+
+source_set("marl") {
+  configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  include_dirs = [ "$source_root/third_party/marl/include" ]
+
+  sources = [
+    "$source_root/third_party/marl/src/debug.cpp",
+    "$source_root/third_party/marl/src/memory.cpp",
+    "$source_root/third_party/marl/src/scheduler.cpp",
+    "$source_root/third_party/marl/src/thread.cpp",
+    "$source_root/third_party/marl/src/trace.cpp",
+  ]
+
+  if (!is_win) {
+    sources += [
+      "$source_root/third_party/marl/src/osfiber_aarch64.c",
+      "$source_root/third_party/marl/src/osfiber_arm.c",
+      "$source_root/third_party/marl/src/osfiber_asm_aarch64.S",
+      "$source_root/third_party/marl/src/osfiber_asm_arm.S",
+      "$source_root/third_party/marl/src/osfiber_asm_ppc64.S",
+      "$source_root/third_party/marl/src/osfiber_asm_x64.S",
+      "$source_root/third_party/marl/src/osfiber_asm_x86.S",
+      "$source_root/third_party/marl/src/osfiber_ppc64.c",
+      "$source_root/third_party/marl/src/osfiber_x64.c",
+      "$source_root/third_party/marl/src/osfiber_x86.c",
+    ]
+  }
 }
 
 source_set("opengl_common") {
@@ -489,14 +610,16 @@ source_set("system") {
     "$source_root/src/System/Math.hpp",
     "$source_root/src/System/Memory.cpp",
     "$source_root/src/System/Memory.hpp",
-    "$source_root/src/System/Resource.cpp",
-    "$source_root/src/System/Resource.hpp",
-    "$source_root/src/System/Socket.cpp",
-    "$source_root/src/System/Socket.hpp",
-    "$source_root/src/System/Thread.hpp",
     "$source_root/src/System/Timer.cpp",
     "$source_root/src/System/Timer.hpp",
   ]
+
+  if (is_linux || is_android) {
+    sources += [
+      "$source_root/src/System/Linux/MemFd.cpp",
+    ]
+  }
+
 }
 
 source_set("device") {
@@ -510,41 +633,25 @@ source_set("device") {
     configs -= [ "//build/config/win:unicode" ]
   }
 
-  include_dirs = [ "$source_root/third_party/SPIRV-Headers/include" ]
+  include_dirs = [ "$source_root/third_party/SPIRV-Headers/include",
+  "$source_root/third_party/marl/include", ]
 
   sources = [
     "$source_root/src/Device/Blitter.cpp",
-    "$source_root/src/Device/Blitter.hpp",
     "$source_root/src/Device/Clipper.cpp",
-    "$source_root/src/Device/Clipper.hpp",
     "$source_root/src/Device/Color.cpp",
-    "$source_root/src/Device/Color.hpp",
     "$source_root/src/Device/Config.cpp",
-    "$source_root/src/Device/Config.hpp",
     "$source_root/src/Device/Context.cpp",
-    "$source_root/src/Device/Context.hpp",
     "$source_root/src/Device/ETC_Decoder.cpp",
-    "$source_root/src/Device/ETC_Decoder.hpp",
     "$source_root/src/Device/Matrix.cpp",
-    "$source_root/src/Device/Matrix.hpp",
     "$source_root/src/Device/PixelProcessor.cpp",
-    "$source_root/src/Device/PixelProcessor.hpp",
     "$source_root/src/Device/Plane.cpp",
-    "$source_root/src/Device/Plane.hpp",
     "$source_root/src/Device/Point.cpp",
-    "$source_root/src/Device/Point.hpp",
     "$source_root/src/Device/QuadRasterizer.cpp",
-    "$source_root/src/Device/QuadRasterizer.hpp",
     "$source_root/src/Device/Renderer.cpp",
-    "$source_root/src/Device/Renderer.hpp",
     "$source_root/src/Device/SetupProcessor.cpp",
-    "$source_root/src/Device/SetupProcessor.hpp",
-    "$source_root/src/Device/SwiftConfig.cpp",
-    "$source_root/src/Device/SwiftConfig.hpp",
     "$source_root/src/Device/Vector.cpp",
-    "$source_root/src/Device/Vector.hpp",
     "$source_root/src/Device/VertexProcessor.cpp",
-    "$source_root/src/Device/VertexProcessor.hpp",
   ]
 }
 
@@ -721,9 +828,856 @@ shared_library("gles") {
   }
 }
 
+config("swiftshader_libvulkan_private_config") {
+  if (is_linux) {
+    defines = [
+      "VK_USE_PLATFORM_XLIB_KHR",
+      "VK_USE_PLATFORM_XCB_KHR",
+      "VK_EXPORT=__attribute__((visibility(\"default\")))",
+    ]
+  } else if (is_fuchsia) {
+    defines = [
+      "VK_USE_PLATFORM_FUCHSIA=1",
+      "VK_EXPORT=__attribute__((visibility(\"default\")))",
+    ]
+  } else if (is_win) {
+    defines = [
+      "VK_USE_PLATFORM_WIN32_KHR=1",
+      "VK_EXPORT=",
+    ]
+  } else if (is_mac) {
+    defines = [
+      "VK_USE_PLATFORM_MACOS_MVK=1",
+      "VK_USE_PLATFORM_METAL_EXT=1",
+      "VK_EXPORT=__attribute__((visibility(\"default\")))",
+    ]
+  } else {
+    defines = [ "VK_EXPORT=" ]
+  }
+
+  if (is_clang) {
+    cflags = [
+      "-Wno-unused-private-field",
+      "-Wno-switch",
+    ]
+  }
+}
+
+shared_library("vulkan") {
+  if (is_win) {
+    output_name = "vk_swiftshader"
+  } else {
+    output_name = "libvk_swiftshader"
+  }
+
+  configs += [ ":internal_config",
+               ":swiftshader_libvulkan_private_config", ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
+
+  public_configs = [ ":swiftshader_config" ]
+
+  include_dirs = [ "$source_root/src/Vulkan",
+                   "$source_root/third_party/marl/include",
+    "$source_root/third_party/SPIRV-Headers/include", 
+    "$source_root/third_party/SPIRV-Tools/include",]
+
+  public = []
+
+  sources = [
+    "$source_root/src/Common/SharedLibrary.cpp",
+    "$source_root/src/Vulkan/VkBuffer.cpp",
+    "$source_root/src/Vulkan/VkBufferView.cpp",
+    "$source_root/src/Vulkan/VkCommandBuffer.cpp",
+    "$source_root/src/Vulkan/VkCommandPool.cpp",
+    "$source_root/src/Vulkan/VkDebug.cpp",
+    "$source_root/src/Vulkan/VkDescriptorPool.cpp",
+    "$source_root/src/Vulkan/VkDescriptorSetLayout.cpp",
+    "$source_root/src/Vulkan/VkDescriptorUpdateTemplate.cpp",
+    "$source_root/src/Vulkan/VkDevice.cpp",
+    "$source_root/src/Vulkan/VkDeviceMemory.cpp",
+    "$source_root/src/Vulkan/VkFormat.cpp",
+    "$source_root/src/Vulkan/VkFramebuffer.cpp",
+    "$source_root/src/Vulkan/VkGetProcAddress.cpp",
+    "$source_root/src/Vulkan/VkImage.cpp",
+    "$source_root/src/Vulkan/VkImageView.cpp",
+    "$source_root/src/Vulkan/VkInstance.cpp",
+    "$source_root/src/Vulkan/VkMemory.cpp",
+    "$source_root/src/Vulkan/VkPhysicalDevice.cpp",
+    "$source_root/src/Vulkan/VkPipeline.cpp",
+    "$source_root/src/Vulkan/VkPipelineCache.cpp",
+    "$source_root/src/Vulkan/VkPipelineLayout.cpp",
+    "$source_root/src/Vulkan/VkPromotedExtensions.cpp",
+    "$source_root/src/Vulkan/VkQueryPool.cpp",
+    "$source_root/src/Vulkan/VkQueue.cpp",
+    "$source_root/src/Vulkan/VkRenderPass.cpp",
+    "$source_root/src/Vulkan/VkSampler.cpp",
+    "$source_root/src/Vulkan/VkSemaphore.cpp",
+    "$source_root/src/Vulkan/VkShaderModule.cpp",
+    "$source_root/src/Vulkan/Vulkan.rc",
+    "$source_root/src/Vulkan/libVulkan.cpp",
+    "$source_root/src/Vulkan/main.cpp",
+    "$source_root/src/Vulkan/resource.h",
+  ]
+
+  deps = [
+    ":marl",
+    ":device",
+    ":pipeline",
+    ":reactor",
+    ":wsi",
+    ":system",
+    ":SPIRV-Tools",
+  ]
+
+  libs = []
+  ldflags = []
+
+  if (is_mac) {
+    ldflags = [
+      "-Wl,-install_name,@rpath/libvk_swiftshader.dylib",
+      "-Wl,-exported_symbols_list," +
+          rebase_path("$source_root/src/Vulkan/vk_swiftshader.exports", root_build_dir),
+    ]
+  } else if (is_linux || is_fuchsia) {
+    inputs = [
+      "$source_root/src/Vulkan/vk_swiftshader.lds",
+    ]
+    ldflags = [ "-Wl,--version-script=" +
+                rebase_path("$source_root/src/Vulkan/vk_swiftshader.lds", root_build_dir) ]
+  }
+}
+
+# TODO(gw280): remove this target once Flutter change to use swiftshader_gl is merged
 group("swiftshader") {
   deps = [
     ":egl",
     ":gles",
+  ]
+}
+
+group("swiftshader_gl") {
+  deps = [
+    ":egl",
+    ":gles",
+  ]
+}
+
+group("swiftshader_vulkan") {
+  deps = [
+    ":vulkan",
+  ]
+}
+
+spirv_headers = "//third_party/swiftshader/third_party/SPIRV-Headers"
+spirv_tools = "//third_party/swiftshader/third_party/SPIRV-Tools"
+
+template("spvtools_core_tables") {
+  assert(defined(invoker.version), "Need version in $target_name generation.")
+
+  action("spvtools_core_tables_" + target_name) {
+    script = "$spirv_tools/utils/generate_grammar_tables.py"
+
+    version = invoker.version
+
+    core_json_file =
+        "${spirv_headers}/include/spirv/$version/spirv.core.grammar.json"
+    core_insts_file = "${target_gen_dir}/core.insts-$version.inc"
+    operand_kinds_file = "${target_gen_dir}/operand.kinds-$version.inc"
+    extinst_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+
+    sources = [
+      core_json_file,
+    ]
+    outputs = [
+      core_insts_file,
+      operand_kinds_file,
+    ]
+    args = [
+      "--spirv-core-grammar",
+      rebase_path(core_json_file, root_build_dir),
+      "--core-insts-output",
+      rebase_path(core_insts_file, root_build_dir),
+      "--extinst-debuginfo-grammar",
+      rebase_path(extinst_file, root_build_dir),
+      "--operand-kinds-output",
+      rebase_path(operand_kinds_file, root_build_dir),
+    ]
+  }
+}
+
+template("spvtools_core_enums") {
+  assert(defined(invoker.version), "Need version in $target_name generation.")
+
+  action("spvtools_core_enums_" + target_name) {
+    script = "$spirv_tools/utils/generate_grammar_tables.py"
+
+    version = invoker.version
+
+    core_json_file =
+        "${spirv_headers}/include/spirv/$version/spirv.core.grammar.json"
+    debug_insts_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+    extension_enum_file = "${target_gen_dir}/extension_enum.inc"
+    extension_map_file = "${target_gen_dir}/enum_string_mapping.inc"
+
+    args = [
+      "--spirv-core-grammar",
+      rebase_path(core_json_file, root_build_dir),
+      "--extinst-debuginfo-grammar",
+      rebase_path(debug_insts_file, root_build_dir),
+      "--extension-enum-output",
+      rebase_path(extension_enum_file, root_build_dir),
+      "--enum-string-mapping-output",
+      rebase_path(extension_map_file, root_build_dir),
+    ]
+    inputs = [
+      core_json_file,
+    ]
+    outputs = [
+      extension_enum_file,
+      extension_map_file,
+    ]
+  }
+}
+
+template("spvtools_glsl_tables") {
+  assert(defined(invoker.version), "Need version in $target_name generation.")
+
+  action("spvtools_glsl_tables_" + target_name) {
+    script = "$spirv_tools/utils/generate_grammar_tables.py"
+
+    version = invoker.version
+
+    core_json_file =
+        "${spirv_headers}/include/spirv/$version/spirv.core.grammar.json"
+    glsl_json_file = "${spirv_headers}/include/spirv/${version}/extinst.glsl.std.450.grammar.json"
+    glsl_insts_file = "${target_gen_dir}/glsl.std.450.insts.inc"
+    debug_insts_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+
+    args = [
+      "--spirv-core-grammar",
+      rebase_path(core_json_file, root_build_dir),
+      "--extinst-glsl-grammar",
+      rebase_path(glsl_json_file, root_build_dir),
+      "--glsl-insts-output",
+      rebase_path(glsl_insts_file, root_build_dir),
+      "--extinst-debuginfo-grammar",
+      rebase_path(debug_insts_file, root_build_dir),
+    ]
+    inputs = [
+      core_json_file,
+      glsl_json_file,
+    ]
+    outputs = [
+      glsl_insts_file,
+    ]
+  }
+}
+
+template("spvtools_opencl_tables") {
+  assert(defined(invoker.version), "Need version in $target_name generation.")
+
+  action("spvtools_opencl_tables_" + target_name) {
+    script = "$spirv_tools/utils/generate_grammar_tables.py"
+
+    version = invoker.version
+
+    core_json_file =
+        "${spirv_headers}/include/spirv/$version/spirv.core.grammar.json"
+    opengl_json_file = "${spirv_headers}/include/spirv/${version}/extinst.opencl.std.100.grammar.json"
+    opencl_insts_file = "${target_gen_dir}/opencl.std.insts.inc"
+    debug_insts_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+
+    args = [
+      "--spirv-core-grammar",
+      rebase_path(core_json_file, root_build_dir),
+      "--extinst-opencl-grammar",
+      rebase_path(opengl_json_file, root_build_dir),
+      "--opencl-insts-output",
+      rebase_path(opencl_insts_file, root_build_dir),
+      "--extinst-debuginfo-grammar",
+      rebase_path(debug_insts_file, root_build_dir),
+    ]
+    inputs = [
+      core_json_file,
+      opengl_json_file,
+    ]
+    outputs = [
+      opencl_insts_file,
+    ]
+  }
+}
+
+template("spvtools_language_header") {
+  assert(defined(invoker.name), "Need name in $target_name generation.")
+
+  action("spvtools_language_header_" + target_name) {
+    script = "$spirv_tools/utils/generate_language_headers.py"
+
+    name = invoker.name
+    extinst_output_base = "${target_gen_dir}/${name}"
+    debug_insts_file = "$spirv_tools/source/extinst.debuginfo.grammar.json"
+
+    args = [
+      "--extinst-name",
+      "${name}",
+      "--extinst-grammar",
+      rebase_path(debug_insts_file, root_build_dir),
+      "--extinst-output-base",
+      rebase_path(extinst_output_base, root_build_dir),
+    ]
+    inputs = [
+      debug_insts_file,
+    ]
+    outputs = [
+      "${extinst_output_base}.h",
+    ]
+  }
+}
+
+template("spvtools_vendor_table") {
+  assert(defined(invoker.name), "Need name in $target_name generation.")
+
+  action("spvtools_vendor_tables_" + target_name) {
+    script = "$spirv_tools/utils/generate_grammar_tables.py"
+
+    name = invoker.name
+    extinst_vendor_grammar = "$spirv_tools/source/extinst.${name}.grammar.json"
+    extinst_file = "${target_gen_dir}/${name}.insts.inc"
+
+    args = [
+      "--extinst-vendor-grammar",
+      rebase_path(extinst_vendor_grammar, root_build_dir),
+      "--vendor-insts-output",
+      rebase_path(extinst_file, root_build_dir),
+    ]
+    inputs = [
+      extinst_vendor_grammar,
+    ]
+    outputs = [
+      extinst_file,
+    ]
+  }
+}
+
+action("spvtools_generators_inc") {
+  script = "$spirv_tools/utils/generate_registry_tables.py"
+
+  # TODO(dsinclair): Make work for chrome
+  xml_file = "${spirv_headers}/include/spirv/spir-v.xml"
+  inc_file = "${target_gen_dir}/generators.inc"
+
+  sources = [
+    xml_file,
+  ]
+  outputs = [
+    inc_file,
+  ]
+  args = [
+    "--xml",
+    rebase_path(xml_file, root_build_dir),
+    "--generator",
+    rebase_path(inc_file, root_build_dir),
+  ]
+}
+
+action("spvtools_build_version") {
+  script = "$spirv_tools/utils/update_build_version.py"
+
+  src_dir = "."
+  inc_file = "${target_gen_dir}/build-version.inc"
+
+  outputs = [
+    inc_file,
+  ]
+  args = [
+    rebase_path(src_dir, root_build_dir),
+    rebase_path(inc_file, root_build_dir),
+  ]
+}
+
+spvtools_core_tables("unified1") {
+  version = "unified1"
+}
+spvtools_core_enums("unified1") {
+  version = "unified1"
+}
+spvtools_glsl_tables("glsl1-0") {
+  version = "1.0"
+}
+spvtools_opencl_tables("opencl1-0") {
+  version = "1.0"
+}
+spvtools_language_header("unified1") {
+  name = "DebugInfo"
+}
+
+spvtools_vendor_tables = [
+  "spv-amd-shader-explicit-vertex-parameter",
+  "spv-amd-shader-trinary-minmax",
+  "spv-amd-gcn-shader",
+  "spv-amd-shader-ballot",
+  "debuginfo",
+]
+
+foreach(table, spvtools_vendor_tables) {
+  spvtools_vendor_table(table) {
+    name = table
+  }
+}
+
+config("spvtools_public_config") {
+  include_dirs = [ "$spirv_tools/include" ]
+}
+
+config("spvtools_internal_config") {
+  include_dirs = [
+    "$spirv_tools",
+    "$target_gen_dir",
+    "${spirv_headers}/include",
+  ]
+
+  configs = [ ":spvtools_public_config" ]
+
+  if (is_clang) {
+    cflags = [ "-Wno-implicit-fallthrough",
+    "-Wno-newline-eof" ]
+  }
+}
+
+source_set("spvtools") {
+  deps = [
+    ":spvtools_core_tables_unified1",
+    ":spvtools_generators_inc",
+    ":spvtools_glsl_tables_glsl1-0",
+    ":spvtools_language_header_unified1",
+    ":spvtools_opencl_tables_opencl1-0",
+  ]
+  foreach(target_name, spvtools_vendor_tables) {
+    deps += [ ":spvtools_vendor_tables_$target_name" ]
+  }
+
+  sources = [
+    "$spirv_tools/source/assembly_grammar.cpp",
+    "$spirv_tools/source/assembly_grammar.h",
+    "$spirv_tools/source/binary.cpp",
+    "$spirv_tools/source/binary.h",
+    "$spirv_tools/source/diagnostic.cpp",
+    "$spirv_tools/source/diagnostic.h",
+    "$spirv_tools/source/disassemble.cpp",
+    "$spirv_tools/source/enum_set.h",
+    "$spirv_tools/source/enum_string_mapping.cpp",
+    "$spirv_tools/source/ext_inst.cpp",
+    "$spirv_tools/source/ext_inst.h",
+    "$spirv_tools/source/extensions.cpp",
+    "$spirv_tools/source/extensions.h",
+    "$spirv_tools/source/instruction.h",
+    "$spirv_tools/source/libspirv.cpp",
+    "$spirv_tools/source/macro.h",
+    "$spirv_tools/source/name_mapper.cpp",
+    "$spirv_tools/source/name_mapper.h",
+    "$spirv_tools/source/opcode.cpp",
+    "$spirv_tools/source/opcode.h",
+    "$spirv_tools/source/operand.cpp",
+    "$spirv_tools/source/operand.h",
+    "$spirv_tools/source/parsed_operand.cpp",
+    "$spirv_tools/source/parsed_operand.h",
+    "$spirv_tools/source/print.cpp",
+    "$spirv_tools/source/print.h",
+    "$spirv_tools/source/spirv_constant.h",
+    "$spirv_tools/source/spirv_definition.h",
+    "$spirv_tools/source/spirv_endian.cpp",
+    "$spirv_tools/source/spirv_endian.h",
+    "$spirv_tools/source/spirv_optimizer_options.cpp",
+    "$spirv_tools/source/spirv_optimizer_options.h",
+    "$spirv_tools/source/spirv_target_env.cpp",
+    "$spirv_tools/source/spirv_target_env.h",
+    "$spirv_tools/source/spirv_validator_options.cpp",
+    "$spirv_tools/source/spirv_validator_options.h",
+    "$spirv_tools/source/table.cpp",
+    "$spirv_tools/source/table.h",
+    "$spirv_tools/source/text.cpp",
+    "$spirv_tools/source/text.h",
+    "$spirv_tools/source/text_handler.cpp",
+    "$spirv_tools/source/text_handler.h",
+    "$spirv_tools/source/util/bit_vector.cpp",
+    "$spirv_tools/source/util/bit_vector.h",
+    "$spirv_tools/source/util/bitutils.h",
+    "$spirv_tools/source/util/hex_float.h",
+    "$spirv_tools/source/util/ilist.h",
+    "$spirv_tools/source/util/ilist_node.h",
+    "$spirv_tools/source/util/make_unique.h",
+    "$spirv_tools/source/util/parse_number.cpp",
+    "$spirv_tools/source/util/parse_number.h",
+    "$spirv_tools/source/util/small_vector.h",
+    "$spirv_tools/source/util/string_utils.cpp",
+    "$spirv_tools/source/util/string_utils.h",
+    "$spirv_tools/source/util/timer.cpp",
+    "$spirv_tools/source/util/timer.h",
+  ]
+
+  public_deps = [
+    ":spvtools_core_enums_unified1",
+  ]
+
+  configs += [ ":spvtools_internal_config" ]
+}
+
+source_set("spvtools_val") {
+  sources = [
+    "$spirv_tools/source/val/basic_block.cpp",
+    "$spirv_tools/source/val/construct.cpp",
+    "$spirv_tools/source/val/function.cpp",
+    "$spirv_tools/source/val/instruction.cpp",
+    "$spirv_tools/source/val/validate.cpp",
+    "$spirv_tools/source/val/validate.h",
+    "$spirv_tools/source/val/validate_adjacency.cpp",
+    "$spirv_tools/source/val/validate_annotation.cpp",
+    "$spirv_tools/source/val/validate_arithmetics.cpp",
+    "$spirv_tools/source/val/validate_atomics.cpp",
+    "$spirv_tools/source/val/validate_barriers.cpp",
+    "$spirv_tools/source/val/validate_bitwise.cpp",
+    "$spirv_tools/source/val/validate_builtins.cpp",
+    "$spirv_tools/source/val/validate_capability.cpp",
+    "$spirv_tools/source/val/validate_cfg.cpp",
+    "$spirv_tools/source/val/validate_composites.cpp",
+    "$spirv_tools/source/val/validate_constants.cpp",
+    "$spirv_tools/source/val/validate_conversion.cpp",
+    "$spirv_tools/source/val/validate_datarules.cpp",
+    "$spirv_tools/source/val/validate_debug.cpp",
+    "$spirv_tools/source/val/validate_decorations.cpp",
+    "$spirv_tools/source/val/validate_derivatives.cpp",
+    "$spirv_tools/source/val/validate_execution_limitations.cpp",
+    "$spirv_tools/source/val/validate_extensions.cpp",
+    "$spirv_tools/source/val/validate_function.cpp",
+    "$spirv_tools/source/val/validate_id.cpp",
+    "$spirv_tools/source/val/validate_image.cpp",
+    "$spirv_tools/source/val/validate_instruction.cpp",
+    "$spirv_tools/source/val/validate_interfaces.cpp",
+    "$spirv_tools/source/val/validate_layout.cpp",
+    "$spirv_tools/source/val/validate_literals.cpp",
+    "$spirv_tools/source/val/validate_logicals.cpp",
+    "$spirv_tools/source/val/validate_memory.cpp",
+    "$spirv_tools/source/val/validate_memory_semantics.cpp",
+    "$spirv_tools/source/val/validate_misc.cpp",
+    "$spirv_tools/source/val/validate_mode_setting.cpp",
+    "$spirv_tools/source/val/validate_non_uniform.cpp",
+    "$spirv_tools/source/val/validate_primitives.cpp",
+    "$spirv_tools/source/val/validate_scopes.cpp",
+    "$spirv_tools/source/val/validate_small_type_uses.cpp",
+    "$spirv_tools/source/val/validate_type.cpp",
+    "$spirv_tools/source/val/validation_state.cpp",
+  ]
+
+  deps = [
+    ":spvtools",
+  ]
+  configs += [ ":spvtools_internal_config" ]
+}
+
+source_set("spvtools_opt") {
+  sources = [
+    "$spirv_tools/source/opt/aggressive_dead_code_elim_pass.cpp",
+    "$spirv_tools/source/opt/aggressive_dead_code_elim_pass.h",
+    "$spirv_tools/source/opt/amd_ext_to_khr.cpp",
+    "$spirv_tools/source/opt/amd_ext_to_khr.h",
+    "$spirv_tools/source/opt/basic_block.cpp",
+    "$spirv_tools/source/opt/basic_block.h",
+    "$spirv_tools/source/opt/block_merge_pass.cpp",
+    "$spirv_tools/source/opt/block_merge_pass.h",
+    "$spirv_tools/source/opt/block_merge_util.cpp",
+    "$spirv_tools/source/opt/block_merge_util.h",
+    "$spirv_tools/source/opt/build_module.cpp",
+    "$spirv_tools/source/opt/build_module.h",
+    "$spirv_tools/source/opt/ccp_pass.cpp",
+    "$spirv_tools/source/opt/ccp_pass.h",
+    "$spirv_tools/source/opt/cfg.cpp",
+    "$spirv_tools/source/opt/cfg.h",
+    "$spirv_tools/source/opt/cfg_cleanup_pass.cpp",
+    "$spirv_tools/source/opt/cfg_cleanup_pass.h",
+    "$spirv_tools/source/opt/code_sink.cpp",
+    "$spirv_tools/source/opt/code_sink.h",
+    "$spirv_tools/source/opt/combine_access_chains.cpp",
+    "$spirv_tools/source/opt/combine_access_chains.h",
+    "$spirv_tools/source/opt/compact_ids_pass.cpp",
+    "$spirv_tools/source/opt/compact_ids_pass.h",
+    "$spirv_tools/source/opt/composite.cpp",
+    "$spirv_tools/source/opt/composite.h",
+    "$spirv_tools/source/opt/const_folding_rules.cpp",
+    "$spirv_tools/source/opt/const_folding_rules.h",
+    "$spirv_tools/source/opt/constants.cpp",
+    "$spirv_tools/source/opt/constants.h",
+    "$spirv_tools/source/opt/copy_prop_arrays.cpp",
+    "$spirv_tools/source/opt/copy_prop_arrays.h",
+    "$spirv_tools/source/opt/dead_branch_elim_pass.cpp",
+    "$spirv_tools/source/opt/dead_branch_elim_pass.h",
+    "$spirv_tools/source/opt/dead_insert_elim_pass.cpp",
+    "$spirv_tools/source/opt/dead_insert_elim_pass.h",
+    "$spirv_tools/source/opt/dead_variable_elimination.cpp",
+    "$spirv_tools/source/opt/dead_variable_elimination.h",
+    "$spirv_tools/source/opt/decompose_initialized_variables_pass.cpp",
+    "$spirv_tools/source/opt/decompose_initialized_variables_pass.h",
+    "$spirv_tools/source/opt/decoration_manager.cpp",
+    "$spirv_tools/source/opt/decoration_manager.h",
+    "$spirv_tools/source/opt/def_use_manager.cpp",
+    "$spirv_tools/source/opt/def_use_manager.h",
+    "$spirv_tools/source/opt/desc_sroa.cpp",
+    "$spirv_tools/source/opt/desc_sroa.h",
+    "$spirv_tools/source/opt/dominator_analysis.cpp",
+    "$spirv_tools/source/opt/dominator_analysis.h",
+    "$spirv_tools/source/opt/dominator_tree.cpp",
+    "$spirv_tools/source/opt/dominator_tree.h",
+    "$spirv_tools/source/opt/eliminate_dead_constant_pass.cpp",
+    "$spirv_tools/source/opt/eliminate_dead_constant_pass.h",
+    "$spirv_tools/source/opt/eliminate_dead_functions_pass.cpp",
+    "$spirv_tools/source/opt/eliminate_dead_functions_pass.h",
+    "$spirv_tools/source/opt/eliminate_dead_functions_util.cpp",
+    "$spirv_tools/source/opt/eliminate_dead_functions_util.h",
+    "$spirv_tools/source/opt/eliminate_dead_members_pass.cpp",
+    "$spirv_tools/source/opt/eliminate_dead_members_pass.h",
+    "$spirv_tools/source/opt/feature_manager.cpp",
+    "$spirv_tools/source/opt/feature_manager.h",
+    "$spirv_tools/source/opt/fix_storage_class.cpp",
+    "$spirv_tools/source/opt/fix_storage_class.h",
+    "$spirv_tools/source/opt/flatten_decoration_pass.cpp",
+    "$spirv_tools/source/opt/flatten_decoration_pass.h",
+    "$spirv_tools/source/opt/fold.cpp",
+    "$spirv_tools/source/opt/fold.h",
+    "$spirv_tools/source/opt/fold_spec_constant_op_and_composite_pass.cpp",
+    "$spirv_tools/source/opt/fold_spec_constant_op_and_composite_pass.h",
+    "$spirv_tools/source/opt/folding_rules.cpp",
+    "$spirv_tools/source/opt/folding_rules.h",
+    "$spirv_tools/source/opt/freeze_spec_constant_value_pass.cpp",
+    "$spirv_tools/source/opt/freeze_spec_constant_value_pass.h",
+    "$spirv_tools/source/opt/function.cpp",
+    "$spirv_tools/source/opt/function.h",
+    "$spirv_tools/source/opt/generate_webgpu_initializers_pass.cpp",
+    "$spirv_tools/source/opt/generate_webgpu_initializers_pass.h",
+    "$spirv_tools/source/opt/graphics_robust_access_pass.cpp",
+    "$spirv_tools/source/opt/graphics_robust_access_pass.h",
+    "$spirv_tools/source/opt/if_conversion.cpp",
+    "$spirv_tools/source/opt/if_conversion.h",
+    "$spirv_tools/source/opt/inline_exhaustive_pass.cpp",
+    "$spirv_tools/source/opt/inline_exhaustive_pass.h",
+    "$spirv_tools/source/opt/inline_opaque_pass.cpp",
+    "$spirv_tools/source/opt/inline_opaque_pass.h",
+    "$spirv_tools/source/opt/inline_pass.cpp",
+    "$spirv_tools/source/opt/inline_pass.h",
+    "$spirv_tools/source/opt/inst_bindless_check_pass.cpp",
+    "$spirv_tools/source/opt/inst_bindless_check_pass.h",
+    "$spirv_tools/source/opt/inst_buff_addr_check_pass.cpp",
+    "$spirv_tools/source/opt/inst_buff_addr_check_pass.h",
+    "$spirv_tools/source/opt/instruction.cpp",
+    "$spirv_tools/source/opt/instruction.h",
+    "$spirv_tools/source/opt/instruction_list.cpp",
+    "$spirv_tools/source/opt/instruction_list.h",
+    "$spirv_tools/source/opt/instrument_pass.cpp",
+    "$spirv_tools/source/opt/instrument_pass.h",
+    "$spirv_tools/source/opt/ir_builder.h",
+    "$spirv_tools/source/opt/ir_context.cpp",
+    "$spirv_tools/source/opt/ir_context.h",
+    "$spirv_tools/source/opt/ir_loader.cpp",
+    "$spirv_tools/source/opt/ir_loader.h",
+    "$spirv_tools/source/opt/iterator.h",
+    "$spirv_tools/source/opt/legalize_vector_shuffle_pass.cpp",
+    "$spirv_tools/source/opt/legalize_vector_shuffle_pass.h",
+    "$spirv_tools/source/opt/licm_pass.cpp",
+    "$spirv_tools/source/opt/licm_pass.h",
+    "$spirv_tools/source/opt/local_access_chain_convert_pass.cpp",
+    "$spirv_tools/source/opt/local_access_chain_convert_pass.h",
+    "$spirv_tools/source/opt/local_redundancy_elimination.cpp",
+    "$spirv_tools/source/opt/local_redundancy_elimination.h",
+    "$spirv_tools/source/opt/local_single_block_elim_pass.cpp",
+    "$spirv_tools/source/opt/local_single_block_elim_pass.h",
+    "$spirv_tools/source/opt/local_single_store_elim_pass.cpp",
+    "$spirv_tools/source/opt/local_single_store_elim_pass.h",
+    "$spirv_tools/source/opt/local_ssa_elim_pass.cpp",
+    "$spirv_tools/source/opt/local_ssa_elim_pass.h",
+    "$spirv_tools/source/opt/log.h",
+    "$spirv_tools/source/opt/loop_dependence.cpp",
+    "$spirv_tools/source/opt/loop_dependence.h",
+    "$spirv_tools/source/opt/loop_dependence_helpers.cpp",
+    "$spirv_tools/source/opt/loop_descriptor.cpp",
+    "$spirv_tools/source/opt/loop_descriptor.h",
+    "$spirv_tools/source/opt/loop_fission.cpp",
+    "$spirv_tools/source/opt/loop_fission.h",
+    "$spirv_tools/source/opt/loop_fusion.cpp",
+    "$spirv_tools/source/opt/loop_fusion.h",
+    "$spirv_tools/source/opt/loop_fusion_pass.cpp",
+    "$spirv_tools/source/opt/loop_fusion_pass.h",
+    "$spirv_tools/source/opt/loop_peeling.cpp",
+    "$spirv_tools/source/opt/loop_peeling.h",
+    "$spirv_tools/source/opt/loop_unroller.cpp",
+    "$spirv_tools/source/opt/loop_unroller.h",
+    "$spirv_tools/source/opt/loop_unswitch_pass.cpp",
+    "$spirv_tools/source/opt/loop_unswitch_pass.h",
+    "$spirv_tools/source/opt/loop_utils.cpp",
+    "$spirv_tools/source/opt/loop_utils.h",
+    "$spirv_tools/source/opt/mem_pass.cpp",
+    "$spirv_tools/source/opt/mem_pass.h",
+    "$spirv_tools/source/opt/merge_return_pass.cpp",
+    "$spirv_tools/source/opt/merge_return_pass.h",
+    "$spirv_tools/source/opt/module.cpp",
+    "$spirv_tools/source/opt/module.h",
+    "$spirv_tools/source/opt/null_pass.h",
+    "$spirv_tools/source/opt/optimizer.cpp",
+    "$spirv_tools/source/opt/pass.cpp",
+    "$spirv_tools/source/opt/pass.h",
+    "$spirv_tools/source/opt/pass_manager.cpp",
+    "$spirv_tools/source/opt/pass_manager.h",
+    "$spirv_tools/source/opt/passes.h",
+    "$spirv_tools/source/opt/private_to_local_pass.cpp",
+    "$spirv_tools/source/opt/private_to_local_pass.h",
+    "$spirv_tools/source/opt/process_lines_pass.cpp",
+    "$spirv_tools/source/opt/process_lines_pass.h",
+    "$spirv_tools/source/opt/propagator.cpp",
+    "$spirv_tools/source/opt/propagator.h",
+    "$spirv_tools/source/opt/reduce_load_size.cpp",
+    "$spirv_tools/source/opt/reduce_load_size.h",
+    "$spirv_tools/source/opt/redundancy_elimination.cpp",
+    "$spirv_tools/source/opt/redundancy_elimination.h",
+    "$spirv_tools/source/opt/reflect.h",
+    "$spirv_tools/source/opt/register_pressure.cpp",
+    "$spirv_tools/source/opt/register_pressure.h",
+    "$spirv_tools/source/opt/remove_duplicates_pass.cpp",
+    "$spirv_tools/source/opt/remove_duplicates_pass.h",
+    "$spirv_tools/source/opt/replace_invalid_opc.cpp",
+    "$spirv_tools/source/opt/replace_invalid_opc.h",
+    "$spirv_tools/source/opt/scalar_analysis.cpp",
+    "$spirv_tools/source/opt/scalar_analysis.h",
+    "$spirv_tools/source/opt/scalar_analysis_nodes.h",
+    "$spirv_tools/source/opt/scalar_analysis_simplification.cpp",
+    "$spirv_tools/source/opt/scalar_replacement_pass.cpp",
+    "$spirv_tools/source/opt/scalar_replacement_pass.h",
+    "$spirv_tools/source/opt/set_spec_constant_default_value_pass.cpp",
+    "$spirv_tools/source/opt/set_spec_constant_default_value_pass.h",
+    "$spirv_tools/source/opt/simplification_pass.cpp",
+    "$spirv_tools/source/opt/simplification_pass.h",
+    "$spirv_tools/source/opt/split_invalid_unreachable_pass.cpp",
+    "$spirv_tools/source/opt/split_invalid_unreachable_pass.h",
+    "$spirv_tools/source/opt/ssa_rewrite_pass.cpp",
+    "$spirv_tools/source/opt/ssa_rewrite_pass.h",
+    "$spirv_tools/source/opt/strength_reduction_pass.cpp",
+    "$spirv_tools/source/opt/strength_reduction_pass.h",
+    "$spirv_tools/source/opt/strip_atomic_counter_memory_pass.cpp",
+    "$spirv_tools/source/opt/strip_atomic_counter_memory_pass.h",
+    "$spirv_tools/source/opt/strip_debug_info_pass.cpp",
+    "$spirv_tools/source/opt/strip_debug_info_pass.h",
+    "$spirv_tools/source/opt/strip_reflect_info_pass.cpp",
+    "$spirv_tools/source/opt/strip_reflect_info_pass.h",
+    "$spirv_tools/source/opt/struct_cfg_analysis.cpp",
+    "$spirv_tools/source/opt/struct_cfg_analysis.h",
+    "$spirv_tools/source/opt/tree_iterator.h",
+    "$spirv_tools/source/opt/type_manager.cpp",
+    "$spirv_tools/source/opt/type_manager.h",
+    "$spirv_tools/source/opt/types.cpp",
+    "$spirv_tools/source/opt/types.h",
+    "$spirv_tools/source/opt/unify_const_pass.cpp",
+    "$spirv_tools/source/opt/unify_const_pass.h",
+    "$spirv_tools/source/opt/upgrade_memory_model.cpp",
+    "$spirv_tools/source/opt/upgrade_memory_model.h",
+    "$spirv_tools/source/opt/value_number_table.cpp",
+    "$spirv_tools/source/opt/value_number_table.h",
+    "$spirv_tools/source/opt/vector_dce.cpp",
+    "$spirv_tools/source/opt/vector_dce.h",
+    "$spirv_tools/source/opt/workaround1209.cpp",
+    "$spirv_tools/source/opt/workaround1209.h",
+    "$spirv_tools/source/opt/wrap_opkill.cpp",
+    "$spirv_tools/source/opt/wrap_opkill.h",
+  ]
+
+  deps = [
+    ":spvtools",
+    ":spvtools_vendor_tables_spv-amd-shader-ballot",
+  ]
+
+  configs += [ ":spvtools_internal_config" ]
+}
+
+source_set("spvtools_link") {
+  sources = [
+    "$spirv_tools/source/link/linker.cpp",
+  ]
+  deps = [
+    ":spvtools",
+    ":spvtools_opt",
+    ":spvtools_val",
+  ]
+  configs += [ ":spvtools_internal_config" ]
+}
+
+source_set("spvtools_reduce") {
+  sources = [
+    "$spirv_tools/source/reduce/change_operand_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/change_operand_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/change_operand_to_undef_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/change_operand_to_undef_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/conditional_branch_to_simple_conditional_branch_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/conditional_branch_to_simple_conditional_branch_opportunity_finder.h",
+    "$spirv_tools/source/reduce/conditional_branch_to_simple_conditional_branch_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/conditional_branch_to_simple_conditional_branch_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/merge_blocks_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/merge_blocks_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/merge_blocks_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/merge_blocks_reduction_opportunity_finder.h",
+    "$spirv_tools/source/reduce/operand_to_const_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/operand_to_const_reduction_opportunity_finder.h",
+    "$spirv_tools/source/reduce/operand_to_dominating_id_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/operand_to_dominating_id_reduction_opportunity_finder.h",
+    "$spirv_tools/source/reduce/operand_to_undef_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/operand_to_undef_reduction_opportunity_finder.h",
+    "$spirv_tools/source/reduce/reducer.cpp",
+    "$spirv_tools/source/reduce/reducer.h",
+    "$spirv_tools/source/reduce/reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/reduction_opportunity.h",
+    "$spirv_tools/source/reduce/reduction_pass.cpp",
+    "$spirv_tools/source/reduce/reduction_pass.h",
+    "$spirv_tools/source/reduce/reduction_util.cpp",
+    "$spirv_tools/source/reduce/reduction_util.h",
+    "$spirv_tools/source/reduce/remove_block_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/remove_block_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/remove_block_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/remove_block_reduction_opportunity_finder.h",
+    "$spirv_tools/source/reduce/remove_function_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/remove_function_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/remove_function_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/remove_function_reduction_opportunity_finder.h",
+    "$spirv_tools/source/reduce/remove_instruction_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/remove_instruction_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/remove_opname_instruction_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/remove_opname_instruction_reduction_opportunity_finder.h",
+    "$spirv_tools/source/reduce/remove_relaxed_precision_decoration_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/remove_relaxed_precision_decoration_opportunity_finder.h",
+    "$spirv_tools/source/reduce/remove_selection_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/remove_selection_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/remove_selection_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/remove_selection_reduction_opportunity_finder.h",
+    "$spirv_tools/source/reduce/remove_unreferenced_instruction_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/remove_unreferenced_instruction_reduction_opportunity_finder.h",
+    "$spirv_tools/source/reduce/simple_conditional_branch_to_branch_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/simple_conditional_branch_to_branch_opportunity_finder.h",
+    "$spirv_tools/source/reduce/simple_conditional_branch_to_branch_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/simple_conditional_branch_to_branch_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/structured_loop_to_selection_reduction_opportunity.cpp",
+    "$spirv_tools/source/reduce/structured_loop_to_selection_reduction_opportunity.h",
+    "$spirv_tools/source/reduce/structured_loop_to_selection_reduction_opportunity_finder.cpp",
+    "$spirv_tools/source/reduce/structured_loop_to_selection_reduction_opportunity_finder.h",
+    "$spirv_tools/source/spirv_reducer_options.cpp",
+    "$spirv_tools/source/spirv_reducer_options.h",
+  ]
+  deps = [
+    ":spvtools",
+    ":spvtools_opt",
+  ]
+  configs += [ ":spvtools_internal_config" ]
+}
+
+group("SPIRV-Tools") {
+  deps = [
+    ":spvtools",
+    ":spvtools_link",
+    ":spvtools_opt",
+    ":spvtools_reduce",
+    ":spvtools_val",
   ]
 }
