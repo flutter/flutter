@@ -1593,12 +1593,29 @@ void main() {
   });
 
   testWidgets(
-    'SliverAppBar provides correct semantics with default automaticallyMarkHeader value',
+    'SliverAppBar provides correct semantics if automaticallyMarkHeader is false',
     (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Center(child: SliverAppBar(title: const Text('Title')))),
+      MaterialApp(
+        home: Center(
+          child: AppBar(
+            leading: const Text('Leading'),
+            title: const Text('Title'),
+            actions: const <Widget>[
+              Text('Action 1'),
+              Text('Action 2'),
+              Text('Action 3'),
+            ],
+            bottom: const PreferredSize(
+              preferredSize: Size(0.0, kToolbarHeight),
+              child: Text('Bottom'),
+            ),
+            automaticallyMarkHeader: false,
+          ),
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(
@@ -1612,11 +1629,30 @@ void main() {
                   TestSemantics(
                     children: <TestSemantics>[
                       TestSemantics(
+                        label: 'Leading',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
                         flags: <SemanticsFlag>[
                           SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
                         ],
                         label: 'Title',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Action 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Action 2',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Action 3',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Bottom',
                         textDirection: TextDirection.ltr,
                       ),
                     ],
