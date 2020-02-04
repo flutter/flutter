@@ -1,10 +1,10 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 // This file has been automatically generated. Please do not edit it manually.
 // To regenerate the file, use:
-// dart dev/tools/localization/bin/gen_localizations.dart --overwrite
+// dart dev/tools/localization/gen_localizations.dart --overwrite
 
 import 'dart:collection';
 
@@ -49,22 +49,22 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Opletberig';
+  String get alertDialogLabel => r'Opletberig';
 
   @override
-  String get anteMeridiemAbbreviation => 'vm.';
+  String get anteMeridiemAbbreviation => r'vm.';
 
   @override
-  String get copyButtonLabel => 'Kopieer';
+  String get copyButtonLabel => r'Kopieer';
 
   @override
-  String get cutButtonLabel => 'Knip';
+  String get cutButtonLabel => r'Knip';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -91,7 +91,7 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuut';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuut';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minute';
@@ -103,13 +103,13 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Plak';
+  String get pasteButtonLabel => r'Plak';
 
   @override
-  String get postMeridiemAbbreviation => 'nm.';
+  String get postMeridiemAbbreviation => r'nm.';
 
   @override
-  String get selectAllButtonLabel => 'Kies alles';
+  String get selectAllButtonLabel => r'Kies alles';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -118,10 +118,10 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'uur';
+  String get timerPickerHourLabelOne => r'uur';
 
   @override
-  String get timerPickerHourLabelOther => 'uur';
+  String get timerPickerHourLabelOther => r'uur';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -136,10 +136,10 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -154,10 +154,10 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sek.';
+  String get timerPickerSecondLabelOne => r'sek.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sek.';
+  String get timerPickerSecondLabelOther => r'sek.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -166,7 +166,7 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Vandag';
+  String get todayLabel => r'Vandag';
 }
 
 /// The translations for Amharic (`am`).
@@ -197,22 +197,22 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'ማንቂያ';
+  String get alertDialogLabel => r'ማንቂያ';
 
   @override
-  String get anteMeridiemAbbreviation => 'ጥዋት';
+  String get anteMeridiemAbbreviation => r'ጥዋት';
 
   @override
-  String get copyButtonLabel => 'ቅዳ';
+  String get copyButtonLabel => r'ቅዳ';
 
   @override
-  String get cutButtonLabel => 'ቁረጥ';
+  String get cutButtonLabel => r'ቁረጥ';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -239,7 +239,7 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 ደቂቃ';
+  String get datePickerMinuteSemanticsLabelOne => r'1 ደቂቃ';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute ደቂቃዎች';
@@ -251,13 +251,13 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'ለጥፍ';
+  String get pasteButtonLabel => r'ለጥፍ';
 
   @override
-  String get postMeridiemAbbreviation => 'ከሰዓት';
+  String get postMeridiemAbbreviation => r'ከሰዓት';
 
   @override
-  String get selectAllButtonLabel => 'ሁሉንም ምረጥ';
+  String get selectAllButtonLabel => r'ሁሉንም ምረጥ';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -266,10 +266,10 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ሰዓት';
+  String get timerPickerHourLabelOne => r'ሰዓት';
 
   @override
-  String get timerPickerHourLabelOther => 'ሰዓቶች';
+  String get timerPickerHourLabelOther => r'ሰዓቶች';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -284,10 +284,10 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'ደቂቃ';
+  String get timerPickerMinuteLabelOne => r'ደቂቃ';
 
   @override
-  String get timerPickerMinuteLabelOther => 'ደቂቃ';
+  String get timerPickerMinuteLabelOther => r'ደቂቃ';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -302,10 +302,10 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'ሴኮ';
+  String get timerPickerSecondLabelOne => r'ሴኮ';
 
   @override
-  String get timerPickerSecondLabelOther => 'ሴኮ';
+  String get timerPickerSecondLabelOther => r'ሴኮ';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -314,7 +314,7 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'ዛሬ';
+  String get todayLabel => r'ዛሬ';
 }
 
 /// The translations for Arabic (`ar`).
@@ -345,22 +345,22 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'تنبيه';
+  String get alertDialogLabel => r'تنبيه';
 
   @override
-  String get anteMeridiemAbbreviation => 'ص';
+  String get anteMeridiemAbbreviation => r'ص';
 
   @override
-  String get copyButtonLabel => 'نسخ';
+  String get copyButtonLabel => r'نسخ';
 
   @override
-  String get cutButtonLabel => 'قص';
+  String get cutButtonLabel => r'قص';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour بالضبط';
@@ -387,7 +387,7 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => r'$minute دقيقة​';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => 'دقيقة واحدة';
+  String get datePickerMinuteSemanticsLabelOne => r'دقيقة واحدة';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute دقيقة​';
@@ -399,70 +399,70 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => r'$minute دقيقة​';
 
   @override
-  String get pasteButtonLabel => 'لصق';
+  String get pasteButtonLabel => r'لصق';
 
   @override
-  String get postMeridiemAbbreviation => 'م';
+  String get postMeridiemAbbreviation => r'م';
 
   @override
-  String get selectAllButtonLabel => 'اختيار الكل';
+  String get selectAllButtonLabel => r'اختيار الكل';
 
   @override
-  String get timerPickerHourLabelFew => 'ساعات';
+  String get timerPickerHourLabelFew => r'ساعات';
 
   @override
-  String get timerPickerHourLabelMany => 'ساعة';
+  String get timerPickerHourLabelMany => r'ساعة';
 
   @override
-  String get timerPickerHourLabelOne => 'ساعة';
+  String get timerPickerHourLabelOne => r'ساعة';
 
   @override
-  String get timerPickerHourLabelOther => 'ساعة';
+  String get timerPickerHourLabelOther => r'ساعة';
 
   @override
-  String get timerPickerHourLabelTwo => 'ساعتان';
+  String get timerPickerHourLabelTwo => r'ساعتان';
 
   @override
-  String get timerPickerHourLabelZero => 'ساعة';
+  String get timerPickerHourLabelZero => r'ساعة';
 
   @override
-  String get timerPickerMinuteLabelFew => 'دقائق';
+  String get timerPickerMinuteLabelFew => r'دقائق';
 
   @override
-  String get timerPickerMinuteLabelMany => 'دقيقة';
+  String get timerPickerMinuteLabelMany => r'دقيقة';
 
   @override
-  String get timerPickerMinuteLabelOne => 'دقيقة واحدة';
+  String get timerPickerMinuteLabelOne => r'دقيقة واحدة';
 
   @override
-  String get timerPickerMinuteLabelOther => 'دقيقة';
+  String get timerPickerMinuteLabelOther => r'دقيقة';
 
   @override
-  String get timerPickerMinuteLabelTwo => 'دقيقتان';
+  String get timerPickerMinuteLabelTwo => r'دقيقتان';
 
   @override
-  String get timerPickerMinuteLabelZero => 'دقيقة';
+  String get timerPickerMinuteLabelZero => r'دقيقة';
 
   @override
-  String get timerPickerSecondLabelFew => 'ثوانٍ';
+  String get timerPickerSecondLabelFew => r'ثوانٍ';
 
   @override
-  String get timerPickerSecondLabelMany => 'ثانية';
+  String get timerPickerSecondLabelMany => r'ثانية';
 
   @override
-  String get timerPickerSecondLabelOne => 'ثانية واحدة';
+  String get timerPickerSecondLabelOne => r'ثانية واحدة';
 
   @override
-  String get timerPickerSecondLabelOther => 'ثانية';
+  String get timerPickerSecondLabelOther => r'ثانية';
 
   @override
-  String get timerPickerSecondLabelTwo => 'ثانيتان';
+  String get timerPickerSecondLabelTwo => r'ثانيتان';
 
   @override
-  String get timerPickerSecondLabelZero => 'ثانية';
+  String get timerPickerSecondLabelZero => r'ثانية';
 
   @override
-  String get todayLabel => 'اليوم';
+  String get todayLabel => r'اليوم';
 }
 
 /// The translations for Assamese (`as`).
@@ -493,22 +493,22 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'সতৰ্কবাৰ্তা';
+  String get alertDialogLabel => r'সতৰ্কবাৰ্তা';
 
   @override
-  String get anteMeridiemAbbreviation => 'পূৰ্বাহ্ন';
+  String get anteMeridiemAbbreviation => r'পূৰ্বাহ্ন';
 
   @override
-  String get copyButtonLabel => 'প্ৰতিলিপি কৰক';
+  String get copyButtonLabel => r'প্ৰতিলিপি কৰক';
 
   @override
-  String get cutButtonLabel => 'কাট কৰক';
+  String get cutButtonLabel => r'কাট কৰক';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -535,7 +535,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '১মিনিট';
+  String get datePickerMinuteSemanticsLabelOne => r'১মিনিট';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minuteমিনিট';
@@ -547,13 +547,13 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => "পে'ষ্ট কৰক";
+  String get pasteButtonLabel => r'পে' "'" r'ষ্ট কৰক';
 
   @override
-  String get postMeridiemAbbreviation => 'অপৰাহ্ন';
+  String get postMeridiemAbbreviation => r'অপৰাহ্ন';
 
   @override
-  String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
+  String get selectAllButtonLabel => r'সকলো বাছনি কৰক';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -562,10 +562,10 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ঘণ্টা';
+  String get timerPickerHourLabelOne => r'ঘণ্টা';
 
   @override
-  String get timerPickerHourLabelOther => 'ঘণ্টা';
+  String get timerPickerHourLabelOther => r'ঘণ্টা';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -580,10 +580,10 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'মিনিট।';
+  String get timerPickerMinuteLabelOne => r'মিনিট।';
 
   @override
-  String get timerPickerMinuteLabelOther => 'মিনিট।';
+  String get timerPickerMinuteLabelOther => r'মিনিট।';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -598,10 +598,10 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'ছেকেণ্ড।';
+  String get timerPickerSecondLabelOne => r'ছেকেণ্ড।';
 
   @override
-  String get timerPickerSecondLabelOther => 'ছেকেণ্ড।';
+  String get timerPickerSecondLabelOther => r'ছেকেণ্ড।';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -610,7 +610,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'আজি';
+  String get todayLabel => r'আজি';
 }
 
 /// The translations for Azerbaijani (`az`).
@@ -641,22 +641,22 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Bildiriş';
+  String get alertDialogLabel => r'Bildiriş';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopyalayın';
+  String get copyButtonLabel => r'Kopyalayın';
 
   @override
-  String get cutButtonLabel => 'Kəsin';
+  String get cutButtonLabel => r'Kəsin';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -683,7 +683,7 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 dəqiqə';
+  String get datePickerMinuteSemanticsLabelOne => r'1 dəqiqə';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute dəqiqə';
@@ -695,13 +695,13 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Yerləşdirin';
+  String get pasteButtonLabel => r'Yerləşdirin';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Hamısını seçin';
+  String get selectAllButtonLabel => r'Hamısını seçin';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -710,10 +710,10 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'saat';
+  String get timerPickerHourLabelOne => r'saat';
 
   @override
-  String get timerPickerHourLabelOther => 'saat';
+  String get timerPickerHourLabelOther => r'saat';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -728,10 +728,10 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'dəq.';
+  String get timerPickerMinuteLabelOne => r'dəq.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'dəq.';
+  String get timerPickerMinuteLabelOther => r'dəq.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -746,10 +746,10 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'san.';
+  String get timerPickerSecondLabelOne => r'san.';
 
   @override
-  String get timerPickerSecondLabelOther => 'san.';
+  String get timerPickerSecondLabelOther => r'san.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -758,7 +758,7 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Bu gün';
+  String get todayLabel => r'Bu gün';
 }
 
 /// The translations for Belarusian (`be`).
@@ -789,22 +789,22 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Абвестка';
+  String get alertDialogLabel => r'Абвестка';
 
   @override
-  String get anteMeridiemAbbreviation => 'раніцы';
+  String get anteMeridiemAbbreviation => r'раніцы';
 
   @override
-  String get copyButtonLabel => 'Капіраваць';
+  String get copyButtonLabel => r'Капіраваць';
 
   @override
-  String get cutButtonLabel => 'Выразаць';
+  String get cutButtonLabel => r'Выразаць';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour гадзіны нуль хвілін';
@@ -831,7 +831,7 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => r'$minute хвілін';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 хвіліна';
+  String get datePickerMinuteSemanticsLabelOne => r'1 хвіліна';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute хвіліны';
@@ -843,25 +843,25 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Уставіць';
+  String get pasteButtonLabel => r'Уставіць';
 
   @override
-  String get postMeridiemAbbreviation => 'вечара';
+  String get postMeridiemAbbreviation => r'вечара';
 
   @override
-  String get selectAllButtonLabel => 'Выбраць усе';
+  String get selectAllButtonLabel => r'Выбраць усе';
 
   @override
-  String get timerPickerHourLabelFew => 'гадзіны';
+  String get timerPickerHourLabelFew => r'гадзіны';
 
   @override
-  String get timerPickerHourLabelMany => 'гадзін';
+  String get timerPickerHourLabelMany => r'гадзін';
 
   @override
-  String get timerPickerHourLabelOne => 'гадзіна';
+  String get timerPickerHourLabelOne => r'гадзіна';
 
   @override
-  String get timerPickerHourLabelOther => 'гадзіны';
+  String get timerPickerHourLabelOther => r'гадзіны';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -870,16 +870,16 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'хв';
+  String get timerPickerMinuteLabelFew => r'хв';
 
   @override
-  String get timerPickerMinuteLabelMany => 'хв';
+  String get timerPickerMinuteLabelMany => r'хв';
 
   @override
-  String get timerPickerMinuteLabelOne => 'хв';
+  String get timerPickerMinuteLabelOne => r'хв';
 
   @override
-  String get timerPickerMinuteLabelOther => 'хв';
+  String get timerPickerMinuteLabelOther => r'хв';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -888,16 +888,16 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 'с';
+  String get timerPickerSecondLabelFew => r'с';
 
   @override
-  String get timerPickerSecondLabelMany => 'с';
+  String get timerPickerSecondLabelMany => r'с';
 
   @override
-  String get timerPickerSecondLabelOne => 'с';
+  String get timerPickerSecondLabelOne => r'с';
 
   @override
-  String get timerPickerSecondLabelOther => 'с';
+  String get timerPickerSecondLabelOther => r'с';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -906,7 +906,7 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Сёння';
+  String get todayLabel => r'Сёння';
 }
 
 /// The translations for Bulgarian (`bg`).
@@ -937,22 +937,22 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Сигнал';
+  String get alertDialogLabel => r'Сигнал';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Копиране';
+  String get copyButtonLabel => r'Копиране';
 
   @override
-  String get cutButtonLabel => 'Изрязване';
+  String get cutButtonLabel => r'Изрязване';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -979,7 +979,7 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 минута';
+  String get datePickerMinuteSemanticsLabelOne => r'1 минута';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute минути';
@@ -991,13 +991,13 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Поставяне';
+  String get pasteButtonLabel => r'Поставяне';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Избиране на всички';
+  String get selectAllButtonLabel => r'Избиране на всички';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1006,10 +1006,10 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'час';
+  String get timerPickerHourLabelOne => r'час';
 
   @override
-  String get timerPickerHourLabelOther => 'часа';
+  String get timerPickerHourLabelOther => r'часа';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -1024,10 +1024,10 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'мин';
+  String get timerPickerMinuteLabelOne => r'мин';
 
   @override
-  String get timerPickerMinuteLabelOther => 'мин';
+  String get timerPickerMinuteLabelOther => r'мин';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -1042,10 +1042,10 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'сек';
+  String get timerPickerSecondLabelOne => r'сек';
 
   @override
-  String get timerPickerSecondLabelOther => 'сек';
+  String get timerPickerSecondLabelOther => r'сек';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -1054,7 +1054,7 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Днес';
+  String get todayLabel => r'Днес';
 }
 
 /// The translations for Bengali Bangla (`bn`).
@@ -1085,22 +1085,22 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'সতর্কতা';
+  String get alertDialogLabel => r'সতর্কতা';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'কপি করুন';
+  String get copyButtonLabel => r'কপি করুন';
 
   @override
-  String get cutButtonLabel => 'কাট করুন';
+  String get cutButtonLabel => r'কাট করুন';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -1127,7 +1127,7 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '১ মিনিট';
+  String get datePickerMinuteSemanticsLabelOne => r'১ মিনিট';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute মিনিট';
@@ -1139,13 +1139,13 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'পেস্ট করুন';
+  String get pasteButtonLabel => r'পেস্ট করুন';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'সব বেছে নিন';
+  String get selectAllButtonLabel => r'সব বেছে নিন';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1154,10 +1154,10 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ঘণ্টা';
+  String get timerPickerHourLabelOne => r'ঘণ্টা';
 
   @override
-  String get timerPickerHourLabelOther => 'ঘণ্টা';
+  String get timerPickerHourLabelOther => r'ঘণ্টা';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -1172,10 +1172,10 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'মিনিট।';
+  String get timerPickerMinuteLabelOne => r'মিনিট।';
 
   @override
-  String get timerPickerMinuteLabelOther => 'মিনিট।';
+  String get timerPickerMinuteLabelOther => r'মিনিট।';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -1190,10 +1190,10 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'সেকেন্ড।';
+  String get timerPickerSecondLabelOne => r'সেকেন্ড।';
 
   @override
-  String get timerPickerSecondLabelOther => 'সেকেন্ড।';
+  String get timerPickerSecondLabelOther => r'সেকেন্ড।';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -1202,7 +1202,7 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'আজ';
+  String get todayLabel => r'আজ';
 }
 
 /// The translations for Bosnian (`bs`).
@@ -1233,22 +1233,22 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Upozorenje';
+  String get alertDialogLabel => r'Upozorenje';
 
   @override
-  String get anteMeridiemAbbreviation => 'prijepodne';
+  String get anteMeridiemAbbreviation => r'prijepodne';
 
   @override
-  String get copyButtonLabel => 'Kopiraj';
+  String get copyButtonLabel => r'Kopiraj';
 
   @override
-  String get cutButtonLabel => 'Izreži';
+  String get cutButtonLabel => r'Izreži';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour sata';
@@ -1275,7 +1275,7 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuta';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuta';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuta';
@@ -1287,25 +1287,25 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Zalijepi';
+  String get pasteButtonLabel => r'Zalijepi';
 
   @override
-  String get postMeridiemAbbreviation => 'poslijepodne';
+  String get postMeridiemAbbreviation => r'poslijepodne';
 
   @override
-  String get selectAllButtonLabel => 'Odaberi sve';
+  String get selectAllButtonLabel => r'Odaberi sve';
 
   @override
-  String get timerPickerHourLabelFew => 'sata';
+  String get timerPickerHourLabelFew => r'sata';
 
   @override
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'sat';
+  String get timerPickerHourLabelOne => r'sat';
 
   @override
-  String get timerPickerHourLabelOther => 'sati';
+  String get timerPickerHourLabelOther => r'sati';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -1314,16 +1314,16 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'min.';
+  String get timerPickerMinuteLabelFew => r'min.';
 
   @override
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -1332,16 +1332,16 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 'sec.';
+  String get timerPickerSecondLabelFew => r'sec.';
 
   @override
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sec.';
+  String get timerPickerSecondLabelOne => r'sec.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sec.';
+  String get timerPickerSecondLabelOther => r'sec.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -1350,7 +1350,7 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Danas';
+  String get todayLabel => r'Danas';
 }
 
 /// The translations for Catalan Valencian (`ca`).
@@ -1381,22 +1381,22 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alerta';
+  String get alertDialogLabel => r'Alerta';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Copia';
+  String get copyButtonLabel => r'Copia';
 
   @override
-  String get cutButtonLabel => 'Retalla';
+  String get cutButtonLabel => r'Retalla';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -1423,7 +1423,7 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minut';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minut';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuts';
@@ -1435,13 +1435,13 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Enganxa';
+  String get pasteButtonLabel => r'Enganxa';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Selecciona-ho tot';
+  String get selectAllButtonLabel => r'Selecciona-ho tot';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1450,10 +1450,10 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'hora';
+  String get timerPickerHourLabelOne => r'hora';
 
   @override
-  String get timerPickerHourLabelOther => 'hores';
+  String get timerPickerHourLabelOther => r'hores';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -1468,10 +1468,10 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -1486,10 +1486,10 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -1498,7 +1498,7 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Avui';
+  String get todayLabel => r'Avui';
 }
 
 /// The translations for Czech (`cs`).
@@ -1529,22 +1529,22 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Upozornění';
+  String get alertDialogLabel => r'Upozornění';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopírovat';
+  String get copyButtonLabel => r'Kopírovat';
 
   @override
-  String get cutButtonLabel => 'Vyjmout';
+  String get cutButtonLabel => r'Vyjmout';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour hodiny';
@@ -1571,7 +1571,7 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => r'$minute minuty';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuta';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuta';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minut';
@@ -1583,25 +1583,25 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Vložit';
+  String get pasteButtonLabel => r'Vložit';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Vybrat vše';
+  String get selectAllButtonLabel => r'Vybrat vše';
 
   @override
-  String get timerPickerHourLabelFew => 'hodiny';
+  String get timerPickerHourLabelFew => r'hodiny';
 
   @override
-  String get timerPickerHourLabelMany => 'hodiny';
+  String get timerPickerHourLabelMany => r'hodiny';
 
   @override
-  String get timerPickerHourLabelOne => 'hodina';
+  String get timerPickerHourLabelOne => r'hodina';
 
   @override
-  String get timerPickerHourLabelOther => 'hodin';
+  String get timerPickerHourLabelOther => r'hodin';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -1610,16 +1610,16 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'min';
+  String get timerPickerMinuteLabelFew => r'min';
 
   @override
-  String get timerPickerMinuteLabelMany => 'min';
+  String get timerPickerMinuteLabelMany => r'min';
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -1628,16 +1628,16 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 's';
+  String get timerPickerSecondLabelFew => r's';
 
   @override
-  String get timerPickerSecondLabelMany => 's';
+  String get timerPickerSecondLabelMany => r's';
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -1646,7 +1646,7 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Dnes';
+  String get todayLabel => r'Dnes';
 }
 
 /// The translations for Danish (`da`).
@@ -1677,22 +1677,22 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Underretning';
+  String get alertDialogLabel => r'Underretning';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopiér';
+  String get copyButtonLabel => r'Kopiér';
 
   @override
-  String get cutButtonLabel => 'Klip';
+  String get cutButtonLabel => r'Klip';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -1719,7 +1719,7 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minut';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minut';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minutter';
@@ -1731,13 +1731,13 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Sæt ind';
+  String get pasteButtonLabel => r'Sæt ind';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Vælg alle';
+  String get selectAllButtonLabel => r'Vælg alle';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1746,10 +1746,10 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'time';
+  String get timerPickerHourLabelOne => r'time';
 
   @override
-  String get timerPickerHourLabelOther => 'timer';
+  String get timerPickerHourLabelOther => r'timer';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -1764,10 +1764,10 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -1782,10 +1782,10 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sek.';
+  String get timerPickerSecondLabelOne => r'sek.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sek.';
+  String get timerPickerSecondLabelOther => r'sek.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -1794,7 +1794,7 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'I dag';
+  String get todayLabel => r'I dag';
 }
 
 /// The translations for German (`de`).
@@ -1825,22 +1825,22 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Benachrichtigung';
+  String get alertDialogLabel => r'Benachrichtigung';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopieren';
+  String get copyButtonLabel => r'Kopieren';
 
   @override
-  String get cutButtonLabel => 'Ausschneiden';
+  String get cutButtonLabel => r'Ausschneiden';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -1867,7 +1867,7 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 Minute';
+  String get datePickerMinuteSemanticsLabelOne => r'1 Minute';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute Minuten';
@@ -1879,13 +1879,13 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Einsetzen';
+  String get pasteButtonLabel => r'Einsetzen';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Alles auswählen';
+  String get selectAllButtonLabel => r'Alles auswählen';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -1894,10 +1894,10 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'Stunde';
+  String get timerPickerHourLabelOne => r'Stunde';
 
   @override
-  String get timerPickerHourLabelOther => 'Stunden';
+  String get timerPickerHourLabelOther => r'Stunden';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -1912,10 +1912,10 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -1930,10 +1930,10 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -1942,7 +1942,7 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Heute';
+  String get todayLabel => r'Heute';
 }
 
 /// The translations for Modern Greek (`el`).
@@ -1973,22 +1973,22 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Ειδοποίηση';
+  String get alertDialogLabel => r'Ειδοποίηση';
 
   @override
-  String get anteMeridiemAbbreviation => 'π.μ.';
+  String get anteMeridiemAbbreviation => r'π.μ.';
 
   @override
-  String get copyButtonLabel => 'Αντιγραφή';
+  String get copyButtonLabel => r'Αντιγραφή';
 
   @override
-  String get cutButtonLabel => 'Αποκοπή';
+  String get cutButtonLabel => r'Αποκοπή';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -2015,7 +2015,7 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 λεπτό';
+  String get datePickerMinuteSemanticsLabelOne => r'1 λεπτό';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute λεπτά';
@@ -2027,13 +2027,13 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Επικόλληση';
+  String get pasteButtonLabel => r'Επικόλληση';
 
   @override
-  String get postMeridiemAbbreviation => 'μ.μ.';
+  String get postMeridiemAbbreviation => r'μ.μ.';
 
   @override
-  String get selectAllButtonLabel => 'Επιλογή όλων';
+  String get selectAllButtonLabel => r'Επιλογή όλων';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -2042,10 +2042,10 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ώρα';
+  String get timerPickerHourLabelOne => r'ώρα';
 
   @override
-  String get timerPickerHourLabelOther => 'ώρες';
+  String get timerPickerHourLabelOther => r'ώρες';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -2060,10 +2060,10 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'λεπ.';
+  String get timerPickerMinuteLabelOne => r'λεπ.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'λεπ.';
+  String get timerPickerMinuteLabelOther => r'λεπ.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -2078,10 +2078,10 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'δευτ.';
+  String get timerPickerSecondLabelOne => r'δευτ.';
 
   @override
-  String get timerPickerSecondLabelOther => 'δευτ.';
+  String get timerPickerSecondLabelOther => r'δευτ.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -2090,7 +2090,7 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Σήμερα';
+  String get todayLabel => r'Σήμερα';
 }
 
 /// The translations for English (`en`).
@@ -2121,22 +2121,22 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alert';
+  String get alertDialogLabel => r'Alert';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Copy';
+  String get copyButtonLabel => r'Copy';
 
   @override
-  String get cutButtonLabel => 'Cut';
+  String get cutButtonLabel => r'Cut';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -2145,10 +2145,10 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get datePickerHourSemanticsLabelMany => null;
 
   @override
-  String get datePickerHourSemanticsLabelOne => r"$hour o'clock";
+  String get datePickerHourSemanticsLabelOne => r'$hour o' "'" r'clock';
 
   @override
-  String get datePickerHourSemanticsLabelOther => r"$hour o'clock";
+  String get datePickerHourSemanticsLabelOther => r'$hour o' "'" r'clock';
 
   @override
   String get datePickerHourSemanticsLabelTwo => null;
@@ -2163,7 +2163,7 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minute';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minute';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minutes';
@@ -2175,13 +2175,13 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Paste';
+  String get pasteButtonLabel => r'Paste';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Select All';
+  String get selectAllButtonLabel => r'Select All';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -2190,10 +2190,10 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'hour';
+  String get timerPickerHourLabelOne => r'hour';
 
   @override
-  String get timerPickerHourLabelOther => 'hours';
+  String get timerPickerHourLabelOther => r'hours';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -2208,10 +2208,10 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -2226,10 +2226,10 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sec.';
+  String get timerPickerSecondLabelOne => r'sec.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sec.';
+  String get timerPickerSecondLabelOther => r'sec.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -2238,7 +2238,7 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Today';
+  String get todayLabel => r'Today';
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
@@ -2269,10 +2269,10 @@ class CupertinoLocalizationEnAu extends CupertinoLocalizationEn {
   );
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => r'Select all';
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
@@ -2303,10 +2303,10 @@ class CupertinoLocalizationEnCa extends CupertinoLocalizationEn {
   );
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => r'Select all';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
@@ -2337,10 +2337,10 @@ class CupertinoLocalizationEnGb extends CupertinoLocalizationEn {
   );
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => r'Select all';
 }
 
 /// The translations for English, as used in Ireland (`en_IE`).
@@ -2371,10 +2371,10 @@ class CupertinoLocalizationEnIe extends CupertinoLocalizationEn {
   );
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => r'Select all';
 }
 
 /// The translations for English, as used in India (`en_IN`).
@@ -2405,10 +2405,10 @@ class CupertinoLocalizationEnIn extends CupertinoLocalizationEn {
   );
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => r'Select all';
 }
 
 /// The translations for English, as used in New Zealand (`en_NZ`).
@@ -2439,10 +2439,10 @@ class CupertinoLocalizationEnNz extends CupertinoLocalizationEn {
   );
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => r'Select all';
 }
 
 /// The translations for English, as used in Singapore (`en_SG`).
@@ -2473,10 +2473,10 @@ class CupertinoLocalizationEnSg extends CupertinoLocalizationEn {
   );
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => r'Select all';
 }
 
 /// The translations for English, as used in South Africa (`en_ZA`).
@@ -2507,10 +2507,10 @@ class CupertinoLocalizationEnZa extends CupertinoLocalizationEn {
   );
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get selectAllButtonLabel => 'Select all';
+  String get selectAllButtonLabel => r'Select all';
 }
 
 /// The translations for Spanish Castilian (`es`).
@@ -2541,22 +2541,22 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alerta';
+  String get alertDialogLabel => r'Alerta';
 
   @override
-  String get anteMeridiemAbbreviation => 'A.M.';
+  String get anteMeridiemAbbreviation => r'A.M.';
 
   @override
-  String get copyButtonLabel => 'Copiar';
+  String get copyButtonLabel => r'Copiar';
 
   @override
-  String get cutButtonLabel => 'Cortar';
+  String get cutButtonLabel => r'Cortar';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -2583,7 +2583,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuto';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuto';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minutos';
@@ -2595,13 +2595,13 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Pegar';
+  String get pasteButtonLabel => r'Pegar';
 
   @override
-  String get postMeridiemAbbreviation => 'P.M.';
+  String get postMeridiemAbbreviation => r'P.M.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todo';
+  String get selectAllButtonLabel => r'Seleccionar todo';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -2610,10 +2610,10 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'hora';
+  String get timerPickerHourLabelOne => r'hora';
 
   @override
-  String get timerPickerHourLabelOther => 'horas';
+  String get timerPickerHourLabelOther => r'horas';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -2628,10 +2628,10 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -2646,10 +2646,10 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -2658,7 +2658,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Hoy';
+  String get todayLabel => r'Hoy';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -2695,16 +2695,16 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Argentina (`es_AR`).
@@ -2741,16 +2741,16 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Bolivia (`es_BO`).
@@ -2787,16 +2787,16 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Chile (`es_CL`).
@@ -2833,16 +2833,16 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Colombia (`es_CO`).
@@ -2879,16 +2879,16 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Costa Rica (`es_CR`).
@@ -2925,16 +2925,16 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in the Dominican Republic (`es_DO`).
@@ -2971,16 +2971,16 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Ecuador (`es_EC`).
@@ -3017,16 +3017,16 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
@@ -3063,16 +3063,16 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Honduras (`es_HN`).
@@ -3109,16 +3109,16 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Mexico (`es_MX`).
@@ -3155,16 +3155,16 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Nicaragua (`es_NI`).
@@ -3201,16 +3201,16 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Panama (`es_PA`).
@@ -3247,16 +3247,16 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Peru (`es_PE`).
@@ -3293,16 +3293,16 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Puerto Rico (`es_PR`).
@@ -3339,16 +3339,16 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Paraguay (`es_PY`).
@@ -3385,16 +3385,16 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in El Salvador (`es_SV`).
@@ -3431,16 +3431,16 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in the United States (`es_US`).
@@ -3477,16 +3477,16 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Uruguay (`es_UY`).
@@ -3523,16 +3523,16 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Venezuela (`es_VE`).
@@ -3569,16 +3569,16 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => r'$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => r'Seleccionar todos';
 }
 
 /// The translations for Estonian (`et`).
@@ -3609,22 +3609,22 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Märguanne';
+  String get alertDialogLabel => r'Märguanne';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopeeri';
+  String get copyButtonLabel => r'Kopeeri';
 
   @override
-  String get cutButtonLabel => 'Lõika';
+  String get cutButtonLabel => r'Lõika';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -3651,7 +3651,7 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minut';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minut';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minutit';
@@ -3663,13 +3663,13 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Kleebi';
+  String get pasteButtonLabel => r'Kleebi';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Vali kõik';
+  String get selectAllButtonLabel => r'Vali kõik';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -3678,10 +3678,10 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'tund';
+  String get timerPickerHourLabelOne => r'tund';
 
   @override
-  String get timerPickerHourLabelOther => 'tundi';
+  String get timerPickerHourLabelOther => r'tundi';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -3696,10 +3696,10 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -3714,10 +3714,10 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -3726,7 +3726,7 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Täna';
+  String get todayLabel => r'Täna';
 }
 
 /// The translations for Basque (`eu`).
@@ -3757,22 +3757,22 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alerta';
+  String get alertDialogLabel => r'Alerta';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopiatu';
+  String get copyButtonLabel => r'Kopiatu';
 
   @override
-  String get cutButtonLabel => 'Ebaki';
+  String get cutButtonLabel => r'Ebaki';
 
   @override
-  String get datePickerDateOrderString => 'ymd';
+  String get datePickerDateOrderString => r'ymd';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -3799,7 +3799,7 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => 'Minutu bat';
+  String get datePickerMinuteSemanticsLabelOne => r'Minutu bat';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minutu';
@@ -3811,13 +3811,13 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Itsatsi';
+  String get pasteButtonLabel => r'Itsatsi';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Hautatu guztiak';
+  String get selectAllButtonLabel => r'Hautatu guztiak';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -3826,10 +3826,10 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ordu';
+  String get timerPickerHourLabelOne => r'ordu';
 
   @override
-  String get timerPickerHourLabelOther => 'ordu';
+  String get timerPickerHourLabelOther => r'ordu';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -3844,10 +3844,10 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -3862,10 +3862,10 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -3874,7 +3874,7 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Gaur';
+  String get todayLabel => r'Gaur';
 }
 
 /// The translations for Persian (`fa`).
@@ -3905,22 +3905,22 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'هشدار';
+  String get alertDialogLabel => r'هشدار';
 
   @override
-  String get anteMeridiemAbbreviation => 'ق.ظ.';
+  String get anteMeridiemAbbreviation => r'ق.ظ.';
 
   @override
-  String get copyButtonLabel => 'کپی';
+  String get copyButtonLabel => r'کپی';
 
   @override
-  String get cutButtonLabel => 'برش';
+  String get cutButtonLabel => r'برش';
 
   @override
-  String get datePickerDateOrderString => 'ymd';
+  String get datePickerDateOrderString => r'ymd';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -3947,7 +3947,7 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '۱ دقیقه';
+  String get datePickerMinuteSemanticsLabelOne => r'۱ دقیقه';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute دقیقه';
@@ -3959,13 +3959,13 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'جای‌گذاری';
+  String get pasteButtonLabel => r'جای‌گذاری';
 
   @override
-  String get postMeridiemAbbreviation => 'ب.ظ.';
+  String get postMeridiemAbbreviation => r'ب.ظ.';
 
   @override
-  String get selectAllButtonLabel => 'انتخاب همه';
+  String get selectAllButtonLabel => r'انتخاب همه';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -3974,10 +3974,10 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ساعت';
+  String get timerPickerHourLabelOne => r'ساعت';
 
   @override
-  String get timerPickerHourLabelOther => 'ساعت';
+  String get timerPickerHourLabelOther => r'ساعت';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -3992,10 +3992,10 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'دقیقه';
+  String get timerPickerMinuteLabelOne => r'دقیقه';
 
   @override
-  String get timerPickerMinuteLabelOther => 'دقیقه';
+  String get timerPickerMinuteLabelOther => r'دقیقه';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -4010,10 +4010,10 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'ثانیه';
+  String get timerPickerSecondLabelOne => r'ثانیه';
 
   @override
-  String get timerPickerSecondLabelOther => 'ثانیه';
+  String get timerPickerSecondLabelOther => r'ثانیه';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -4022,7 +4022,7 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'امروز';
+  String get todayLabel => r'امروز';
 }
 
 /// The translations for Finnish (`fi`).
@@ -4053,22 +4053,22 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Ilmoitus';
+  String get alertDialogLabel => r'Ilmoitus';
 
   @override
-  String get anteMeridiemAbbreviation => 'ap';
+  String get anteMeridiemAbbreviation => r'ap';
 
   @override
-  String get copyButtonLabel => 'Kopioi';
+  String get copyButtonLabel => r'Kopioi';
 
   @override
-  String get cutButtonLabel => 'Leikkaa';
+  String get cutButtonLabel => r'Leikkaa';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -4095,7 +4095,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuutti';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuutti';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuuttia';
@@ -4107,13 +4107,13 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Liitä';
+  String get pasteButtonLabel => r'Liitä';
 
   @override
-  String get postMeridiemAbbreviation => 'ip';
+  String get postMeridiemAbbreviation => r'ip';
 
   @override
-  String get selectAllButtonLabel => 'Valitse kaikki';
+  String get selectAllButtonLabel => r'Valitse kaikki';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4122,10 +4122,10 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'tunti';
+  String get timerPickerHourLabelOne => r'tunti';
 
   @override
-  String get timerPickerHourLabelOther => 'tuntia';
+  String get timerPickerHourLabelOther => r'tuntia';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -4140,10 +4140,10 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -4158,10 +4158,10 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -4170,7 +4170,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Tänään';
+  String get todayLabel => r'Tänään';
 }
 
 /// The translations for Filipino Pilipino (`fil`).
@@ -4201,22 +4201,22 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alerto';
+  String get alertDialogLabel => r'Alerto';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopyahin';
+  String get copyButtonLabel => r'Kopyahin';
 
   @override
-  String get cutButtonLabel => 'I-cut';
+  String get cutButtonLabel => r'I-cut';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -4243,7 +4243,7 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuto';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuto';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute na minuto';
@@ -4255,13 +4255,13 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'I-paste';
+  String get pasteButtonLabel => r'I-paste';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Piliin Lahat';
+  String get selectAllButtonLabel => r'Piliin Lahat';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4270,10 +4270,10 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'oras';
+  String get timerPickerHourLabelOne => r'oras';
 
   @override
-  String get timerPickerHourLabelOther => 'na oras';
+  String get timerPickerHourLabelOther => r'na oras';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -4288,10 +4288,10 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'na min.';
+  String get timerPickerMinuteLabelOther => r'na min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -4306,10 +4306,10 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'seg.';
+  String get timerPickerSecondLabelOne => r'seg.';
 
   @override
-  String get timerPickerSecondLabelOther => 'na seg.';
+  String get timerPickerSecondLabelOther => r'na seg.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -4318,7 +4318,7 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Ngayon';
+  String get todayLabel => r'Ngayon';
 }
 
 /// The translations for French (`fr`).
@@ -4349,22 +4349,22 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alerte';
+  String get alertDialogLabel => r'Alerte';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Copier';
+  String get copyButtonLabel => r'Copier';
 
   @override
-  String get cutButtonLabel => 'Couper';
+  String get cutButtonLabel => r'Couper';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -4391,7 +4391,7 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minute';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minute';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minutes';
@@ -4403,13 +4403,13 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Coller';
+  String get pasteButtonLabel => r'Coller';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Tout sélect.';
+  String get selectAllButtonLabel => r'Tout sélect.';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4418,10 +4418,10 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'heure';
+  String get timerPickerHourLabelOne => r'heure';
 
   @override
-  String get timerPickerHourLabelOther => 'heures';
+  String get timerPickerHourLabelOther => r'heures';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -4436,10 +4436,10 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'minute';
+  String get timerPickerMinuteLabelOne => r'minute';
 
   @override
-  String get timerPickerMinuteLabelOther => 'minutes';
+  String get timerPickerMinuteLabelOther => r'minutes';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -4454,10 +4454,10 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -4466,7 +4466,7 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => "aujourd'hui";
+  String get todayLabel => r'aujourd' "'" r'hui';
 }
 
 /// The translations for French, as used in Canada (`fr_CA`).
@@ -4503,22 +4503,22 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
   String get datePickerHourSemanticsLabelOther => r'$hour heures';
 
   @override
-  String get anteMeridiemAbbreviation => 'am';
+  String get anteMeridiemAbbreviation => r'am';
 
   @override
-  String get postMeridiemAbbreviation => 'pm';
+  String get postMeridiemAbbreviation => r'pm';
 
   @override
-  String get todayLabel => "Aujourd'hui";
+  String get todayLabel => r'Aujourd' "'" r'hui';
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
-  String get selectAllButtonLabel => 'Tout sélectionner';
+  String get selectAllButtonLabel => r'Tout sélectionner';
 }
 
 /// The translations for Galician (`gl`).
@@ -4549,22 +4549,22 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alerta';
+  String get alertDialogLabel => r'Alerta';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get copyButtonLabel => 'Copiar';
+  String get copyButtonLabel => r'Copiar';
 
   @override
-  String get cutButtonLabel => 'Cortar';
+  String get cutButtonLabel => r'Cortar';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -4591,7 +4591,7 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuto';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuto';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minutos';
@@ -4603,13 +4603,13 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Pegar';
+  String get pasteButtonLabel => r'Pegar';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todo';
+  String get selectAllButtonLabel => r'Seleccionar todo';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4618,10 +4618,10 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'hora';
+  String get timerPickerHourLabelOne => r'hora';
 
   @override
-  String get timerPickerHourLabelOther => 'horas';
+  String get timerPickerHourLabelOther => r'horas';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -4636,10 +4636,10 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -4654,10 +4654,10 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -4666,7 +4666,7 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Hoxe';
+  String get todayLabel => r'Hoxe';
 }
 
 /// The translations for Swiss German Alemannic Alsatian (`gsw`).
@@ -4697,22 +4697,22 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Benachrichtigung';
+  String get alertDialogLabel => r'Benachrichtigung';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopieren';
+  String get copyButtonLabel => r'Kopieren';
 
   @override
-  String get cutButtonLabel => 'Ausschneiden';
+  String get cutButtonLabel => r'Ausschneiden';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -4739,7 +4739,7 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 Minute';
+  String get datePickerMinuteSemanticsLabelOne => r'1 Minute';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute Minuten';
@@ -4751,13 +4751,13 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Einsetzen';
+  String get pasteButtonLabel => r'Einsetzen';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Alles auswählen';
+  String get selectAllButtonLabel => r'Alles auswählen';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4766,10 +4766,10 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'Stunde';
+  String get timerPickerHourLabelOne => r'Stunde';
 
   @override
-  String get timerPickerHourLabelOther => 'Stunden';
+  String get timerPickerHourLabelOther => r'Stunden';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -4784,10 +4784,10 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -4802,10 +4802,10 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -4814,7 +4814,7 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Heute';
+  String get todayLabel => r'Heute';
 }
 
 /// The translations for Gujarati (`gu`).
@@ -4845,22 +4845,22 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'અલર્ટ';
+  String get alertDialogLabel => r'અલર્ટ';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'કૉપિ કરો';
+  String get copyButtonLabel => r'કૉપિ કરો';
 
   @override
-  String get cutButtonLabel => 'કાપો';
+  String get cutButtonLabel => r'કાપો';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -4887,7 +4887,7 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 મિનિટ';
+  String get datePickerMinuteSemanticsLabelOne => r'1 મિનિટ';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute મિનિટ';
@@ -4899,13 +4899,13 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'પેસ્ટ કરો';
+  String get pasteButtonLabel => r'પેસ્ટ કરો';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'બધા પસંદ કરો';
+  String get selectAllButtonLabel => r'બધા પસંદ કરો';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -4914,10 +4914,10 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'કલાક';
+  String get timerPickerHourLabelOne => r'કલાક';
 
   @override
-  String get timerPickerHourLabelOther => 'કલાક';
+  String get timerPickerHourLabelOther => r'કલાક';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -4932,10 +4932,10 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'મિનિટ';
+  String get timerPickerMinuteLabelOne => r'મિનિટ';
 
   @override
-  String get timerPickerMinuteLabelOther => 'મિનિટ';
+  String get timerPickerMinuteLabelOther => r'મિનિટ';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -4950,10 +4950,10 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'સેકન્ડ';
+  String get timerPickerSecondLabelOne => r'સેકન્ડ';
 
   @override
-  String get timerPickerSecondLabelOther => 'સેકન્ડ';
+  String get timerPickerSecondLabelOther => r'સેકન્ડ';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -4962,7 +4962,7 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'આજે';
+  String get todayLabel => r'આજે';
 }
 
 /// The translations for Hebrew (`he`).
@@ -4993,22 +4993,22 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'התראה';
+  String get alertDialogLabel => r'התראה';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'העתקה';
+  String get copyButtonLabel => r'העתקה';
 
   @override
-  String get cutButtonLabel => 'גזירה';
+  String get cutButtonLabel => r'גזירה';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -5035,7 +5035,7 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => r'$minute דקות';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => 'דקה אחת';
+  String get datePickerMinuteSemanticsLabelOne => r'דקה אחת';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute דקות';
@@ -5047,28 +5047,28 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'הדבקה';
+  String get pasteButtonLabel => r'הדבקה';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'בחירת הכול';
+  String get selectAllButtonLabel => r'בחירת הכול';
 
   @override
   String get timerPickerHourLabelFew => null;
 
   @override
-  String get timerPickerHourLabelMany => 'שעות';
+  String get timerPickerHourLabelMany => r'שעות';
 
   @override
-  String get timerPickerHourLabelOne => 'שעה';
+  String get timerPickerHourLabelOne => r'שעה';
 
   @override
-  String get timerPickerHourLabelOther => 'שעות';
+  String get timerPickerHourLabelOther => r'שעות';
 
   @override
-  String get timerPickerHourLabelTwo => 'שעות';
+  String get timerPickerHourLabelTwo => r'שעות';
 
   @override
   String get timerPickerHourLabelZero => null;
@@ -5077,16 +5077,16 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelFew => null;
 
   @override
-  String get timerPickerMinuteLabelMany => 'דק’';
+  String get timerPickerMinuteLabelMany => r'דק’';
 
   @override
-  String get timerPickerMinuteLabelOne => 'דק’';
+  String get timerPickerMinuteLabelOne => r'דק’';
 
   @override
-  String get timerPickerMinuteLabelOther => 'דק’';
+  String get timerPickerMinuteLabelOther => r'דק’';
 
   @override
-  String get timerPickerMinuteLabelTwo => 'דק’';
+  String get timerPickerMinuteLabelTwo => r'דק’';
 
   @override
   String get timerPickerMinuteLabelZero => null;
@@ -5095,22 +5095,22 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelFew => null;
 
   @override
-  String get timerPickerSecondLabelMany => 'שנ’';
+  String get timerPickerSecondLabelMany => r'שנ’';
 
   @override
-  String get timerPickerSecondLabelOne => 'שנ’';
+  String get timerPickerSecondLabelOne => r'שנ’';
 
   @override
-  String get timerPickerSecondLabelOther => 'שנ’';
+  String get timerPickerSecondLabelOther => r'שנ’';
 
   @override
-  String get timerPickerSecondLabelTwo => 'שנ’';
+  String get timerPickerSecondLabelTwo => r'שנ’';
 
   @override
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'היום';
+  String get todayLabel => r'היום';
 }
 
 /// The translations for Hindi (`hi`).
@@ -5141,22 +5141,22 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'अलर्ट';
+  String get alertDialogLabel => r'अलर्ट';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'कॉपी करें';
+  String get copyButtonLabel => r'कॉपी करें';
 
   @override
-  String get cutButtonLabel => 'काटें';
+  String get cutButtonLabel => r'काटें';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -5183,7 +5183,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 मिनट';
+  String get datePickerMinuteSemanticsLabelOne => r'1 मिनट';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute मिनट';
@@ -5195,13 +5195,13 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'चिपकाएं';
+  String get pasteButtonLabel => r'चिपकाएं';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'सभी चुनें';
+  String get selectAllButtonLabel => r'सभी चुनें';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5210,10 +5210,10 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'घंटा';
+  String get timerPickerHourLabelOne => r'घंटा';
 
   @override
-  String get timerPickerHourLabelOther => 'घंटे';
+  String get timerPickerHourLabelOther => r'घंटे';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -5228,10 +5228,10 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'मिनट';
+  String get timerPickerMinuteLabelOne => r'मिनट';
 
   @override
-  String get timerPickerMinuteLabelOther => 'मिनट';
+  String get timerPickerMinuteLabelOther => r'मिनट';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -5246,10 +5246,10 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'सेकंड';
+  String get timerPickerSecondLabelOne => r'सेकंड';
 
   @override
-  String get timerPickerSecondLabelOther => 'सेकंड';
+  String get timerPickerSecondLabelOther => r'सेकंड';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -5258,7 +5258,7 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'आज';
+  String get todayLabel => r'आज';
 }
 
 /// The translations for Croatian (`hr`).
@@ -5289,22 +5289,22 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Upozorenje';
+  String get alertDialogLabel => r'Upozorenje';
 
   @override
-  String get anteMeridiemAbbreviation => 'prijepodne';
+  String get anteMeridiemAbbreviation => r'prijepodne';
 
   @override
-  String get copyButtonLabel => 'Kopiraj';
+  String get copyButtonLabel => r'Kopiraj';
 
   @override
-  String get cutButtonLabel => 'Izreži';
+  String get cutButtonLabel => r'Izreži';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour sata';
@@ -5331,7 +5331,7 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => 'Jedna minuta';
+  String get datePickerMinuteSemanticsLabelOne => r'Jedna minuta';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuta';
@@ -5343,25 +5343,25 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Zalijepi';
+  String get pasteButtonLabel => r'Zalijepi';
 
   @override
-  String get postMeridiemAbbreviation => 'popodne';
+  String get postMeridiemAbbreviation => r'popodne';
 
   @override
-  String get selectAllButtonLabel => 'Odaberi sve';
+  String get selectAllButtonLabel => r'Odaberi sve';
 
   @override
-  String get timerPickerHourLabelFew => 'sata';
+  String get timerPickerHourLabelFew => r'sata';
 
   @override
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'sat';
+  String get timerPickerHourLabelOne => r'sat';
 
   @override
-  String get timerPickerHourLabelOther => 'sati';
+  String get timerPickerHourLabelOther => r'sati';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -5370,16 +5370,16 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'min';
+  String get timerPickerMinuteLabelFew => r'min';
 
   @override
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -5388,16 +5388,16 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 's';
+  String get timerPickerSecondLabelFew => r's';
 
   @override
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -5406,7 +5406,7 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Danas';
+  String get todayLabel => r'Danas';
 }
 
 /// The translations for Hungarian (`hu`).
@@ -5437,22 +5437,22 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Értesítés';
+  String get alertDialogLabel => r'Értesítés';
 
   @override
-  String get anteMeridiemAbbreviation => 'de.';
+  String get anteMeridiemAbbreviation => r'de.';
 
   @override
-  String get copyButtonLabel => 'Másolás';
+  String get copyButtonLabel => r'Másolás';
 
   @override
-  String get cutButtonLabel => 'Kivágás';
+  String get cutButtonLabel => r'Kivágás';
 
   @override
-  String get datePickerDateOrderString => 'ymd';
+  String get datePickerDateOrderString => r'ymd';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_dayPeriod_time';
+  String get datePickerDateTimeOrderString => r'date_dayPeriod_time';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -5479,7 +5479,7 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 perc';
+  String get datePickerMinuteSemanticsLabelOne => r'1 perc';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute perc';
@@ -5491,13 +5491,13 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Beillesztés';
+  String get pasteButtonLabel => r'Beillesztés';
 
   @override
-  String get postMeridiemAbbreviation => 'du.';
+  String get postMeridiemAbbreviation => r'du.';
 
   @override
-  String get selectAllButtonLabel => 'Összes kijelölése';
+  String get selectAllButtonLabel => r'Összes kijelölése';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5506,10 +5506,10 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'óra';
+  String get timerPickerHourLabelOne => r'óra';
 
   @override
-  String get timerPickerHourLabelOther => 'óra';
+  String get timerPickerHourLabelOther => r'óra';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -5524,10 +5524,10 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'perc';
+  String get timerPickerMinuteLabelOne => r'perc';
 
   @override
-  String get timerPickerMinuteLabelOther => 'perc';
+  String get timerPickerMinuteLabelOther => r'perc';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -5542,10 +5542,10 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'mp';
+  String get timerPickerSecondLabelOne => r'mp';
 
   @override
-  String get timerPickerSecondLabelOther => 'mp';
+  String get timerPickerSecondLabelOther => r'mp';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -5554,7 +5554,7 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Ma';
+  String get todayLabel => r'Ma';
 }
 
 /// The translations for Armenian (`hy`).
@@ -5585,22 +5585,22 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Ծանուցում';
+  String get alertDialogLabel => r'Ծանուցում';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Պատճենել';
+  String get copyButtonLabel => r'Պատճենել';
 
   @override
-  String get cutButtonLabel => 'Կտրել';
+  String get cutButtonLabel => r'Կտրել';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -5627,7 +5627,7 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 րոպե';
+  String get datePickerMinuteSemanticsLabelOne => r'1 րոպե';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute րոպե';
@@ -5639,13 +5639,13 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Տեղադրել';
+  String get pasteButtonLabel => r'Տեղադրել';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Նշել բոլորը';
+  String get selectAllButtonLabel => r'Նշել բոլորը';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5654,10 +5654,10 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ժամ';
+  String get timerPickerHourLabelOne => r'ժամ';
 
   @override
-  String get timerPickerHourLabelOther => 'ժամ';
+  String get timerPickerHourLabelOther => r'ժամ';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -5672,10 +5672,10 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'րոպե';
+  String get timerPickerMinuteLabelOne => r'րոպե';
 
   @override
-  String get timerPickerMinuteLabelOther => 'րոպե';
+  String get timerPickerMinuteLabelOther => r'րոպե';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -5690,10 +5690,10 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'վրկ';
+  String get timerPickerSecondLabelOne => r'վրկ';
 
   @override
-  String get timerPickerSecondLabelOther => 'վրկ';
+  String get timerPickerSecondLabelOther => r'վրկ';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -5702,7 +5702,7 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Այսօր';
+  String get todayLabel => r'Այսօր';
 }
 
 /// The translations for Indonesian (`id`).
@@ -5733,22 +5733,22 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Notifikasi';
+  String get alertDialogLabel => r'Notifikasi';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Salin';
+  String get copyButtonLabel => r'Salin';
 
   @override
-  String get cutButtonLabel => 'Potong';
+  String get cutButtonLabel => r'Potong';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -5775,7 +5775,7 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 menit';
+  String get datePickerMinuteSemanticsLabelOne => r'1 menit';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute menit';
@@ -5787,13 +5787,13 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Tempel';
+  String get pasteButtonLabel => r'Tempel';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Pilih Semua';
+  String get selectAllButtonLabel => r'Pilih Semua';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5802,10 +5802,10 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'jam';
+  String get timerPickerHourLabelOne => r'jam';
 
   @override
-  String get timerPickerHourLabelOther => 'jam';
+  String get timerPickerHourLabelOther => r'jam';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -5820,10 +5820,10 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'mnt.';
+  String get timerPickerMinuteLabelOne => r'mnt.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'mnt.';
+  String get timerPickerMinuteLabelOther => r'mnt.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -5838,10 +5838,10 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'dtk.';
+  String get timerPickerSecondLabelOne => r'dtk.';
 
   @override
-  String get timerPickerSecondLabelOther => 'dtk.';
+  String get timerPickerSecondLabelOther => r'dtk.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -5850,7 +5850,7 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Hari ini';
+  String get todayLabel => r'Hari ini';
 }
 
 /// The translations for Icelandic (`is`).
@@ -5881,22 +5881,22 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Tilkynning';
+  String get alertDialogLabel => r'Tilkynning';
 
   @override
-  String get anteMeridiemAbbreviation => 'f.h.';
+  String get anteMeridiemAbbreviation => r'f.h.';
 
   @override
-  String get copyButtonLabel => 'Afrita';
+  String get copyButtonLabel => r'Afrita';
 
   @override
-  String get cutButtonLabel => 'Klippa';
+  String get cutButtonLabel => r'Klippa';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -5923,7 +5923,7 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 mínúta';
+  String get datePickerMinuteSemanticsLabelOne => r'1 mínúta';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute mínútur';
@@ -5935,13 +5935,13 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Líma';
+  String get pasteButtonLabel => r'Líma';
 
   @override
-  String get postMeridiemAbbreviation => 'e.h.';
+  String get postMeridiemAbbreviation => r'e.h.';
 
   @override
-  String get selectAllButtonLabel => 'Velja allt';
+  String get selectAllButtonLabel => r'Velja allt';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -5950,10 +5950,10 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'klukkustund';
+  String get timerPickerHourLabelOne => r'klukkustund';
 
   @override
-  String get timerPickerHourLabelOther => 'klukkustundir';
+  String get timerPickerHourLabelOther => r'klukkustundir';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -5968,10 +5968,10 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'mín.';
+  String get timerPickerMinuteLabelOne => r'mín.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'mín.';
+  String get timerPickerMinuteLabelOther => r'mín.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -5986,10 +5986,10 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sek.';
+  String get timerPickerSecondLabelOne => r'sek.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sek.';
+  String get timerPickerSecondLabelOther => r'sek.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -5998,7 +5998,7 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Í dag';
+  String get todayLabel => r'Í dag';
 }
 
 /// The translations for Italian (`it`).
@@ -6029,22 +6029,22 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Avviso';
+  String get alertDialogLabel => r'Avviso';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Copia';
+  String get copyButtonLabel => r'Copia';
 
   @override
-  String get cutButtonLabel => 'Taglia';
+  String get cutButtonLabel => r'Taglia';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -6071,7 +6071,7 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuto';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuto';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuti';
@@ -6083,13 +6083,13 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Incolla';
+  String get pasteButtonLabel => r'Incolla';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Seleziona tutto';
+  String get selectAllButtonLabel => r'Seleziona tutto';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6098,10 +6098,10 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ora';
+  String get timerPickerHourLabelOne => r'ora';
 
   @override
-  String get timerPickerHourLabelOther => 'ore';
+  String get timerPickerHourLabelOther => r'ore';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -6116,10 +6116,10 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -6134,10 +6134,10 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sec.';
+  String get timerPickerSecondLabelOne => r'sec.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sec.';
+  String get timerPickerSecondLabelOther => r'sec.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -6146,7 +6146,7 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Oggi';
+  String get todayLabel => r'Oggi';
 }
 
 /// The translations for Japanese (`ja`).
@@ -6177,22 +6177,22 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => '通知';
+  String get alertDialogLabel => r'通知';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'コピー';
+  String get copyButtonLabel => r'コピー';
 
   @override
-  String get cutButtonLabel => '切り取り';
+  String get cutButtonLabel => r'切り取り';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -6219,7 +6219,7 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1分';
+  String get datePickerMinuteSemanticsLabelOne => r'1分';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute分';
@@ -6231,13 +6231,13 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => '貼り付け';
+  String get pasteButtonLabel => r'貼り付け';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'すべて選択';
+  String get selectAllButtonLabel => r'すべて選択';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6246,10 +6246,10 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => '時間';
+  String get timerPickerHourLabelOne => r'時間';
 
   @override
-  String get timerPickerHourLabelOther => '時間';
+  String get timerPickerHourLabelOther => r'時間';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -6264,10 +6264,10 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => '分';
+  String get timerPickerMinuteLabelOne => r'分';
 
   @override
-  String get timerPickerMinuteLabelOther => '分';
+  String get timerPickerMinuteLabelOther => r'分';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -6282,10 +6282,10 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => '秒';
+  String get timerPickerSecondLabelOne => r'秒';
 
   @override
-  String get timerPickerSecondLabelOther => '秒';
+  String get timerPickerSecondLabelOther => r'秒';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -6294,7 +6294,7 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => '今日';
+  String get todayLabel => r'今日';
 }
 
 /// The translations for Georgian (`ka`).
@@ -6325,22 +6325,22 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'გაფრთხილება';
+  String get alertDialogLabel => r'გაფრთხილება';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'კოპირება';
+  String get copyButtonLabel => r'კოპირება';
 
   @override
-  String get cutButtonLabel => 'ამოჭრა';
+  String get cutButtonLabel => r'ამოჭრა';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_dayPeriod_time';
+  String get datePickerDateTimeOrderString => r'date_dayPeriod_time';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -6367,7 +6367,7 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 წუთი';
+  String get datePickerMinuteSemanticsLabelOne => r'1 წუთი';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute წუთი';
@@ -6379,13 +6379,13 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'ჩასმა';
+  String get pasteButtonLabel => r'ჩასმა';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'ყველას არჩევა';
+  String get selectAllButtonLabel => r'ყველას არჩევა';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6394,10 +6394,10 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'საათი';
+  String get timerPickerHourLabelOne => r'საათი';
 
   @override
-  String get timerPickerHourLabelOther => 'საათი';
+  String get timerPickerHourLabelOther => r'საათი';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -6412,10 +6412,10 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'წთ';
+  String get timerPickerMinuteLabelOne => r'წთ';
 
   @override
-  String get timerPickerMinuteLabelOther => 'წთ';
+  String get timerPickerMinuteLabelOther => r'წთ';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -6430,10 +6430,10 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'წმ';
+  String get timerPickerSecondLabelOne => r'წმ';
 
   @override
-  String get timerPickerSecondLabelOther => 'წმ';
+  String get timerPickerSecondLabelOther => r'წმ';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -6442,7 +6442,7 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'დღეს';
+  String get todayLabel => r'დღეს';
 }
 
 /// The translations for Kazakh (`kk`).
@@ -6473,22 +6473,22 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Дабыл';
+  String get alertDialogLabel => r'Дабыл';
 
   @override
-  String get anteMeridiemAbbreviation => 'түстен кейін';
+  String get anteMeridiemAbbreviation => r'түстен кейін';
 
   @override
-  String get copyButtonLabel => 'Көшіру';
+  String get copyButtonLabel => r'Көшіру';
 
   @override
-  String get cutButtonLabel => 'Қию';
+  String get cutButtonLabel => r'Қию';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -6515,7 +6515,7 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 минут';
+  String get datePickerMinuteSemanticsLabelOne => r'1 минут';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute минут';
@@ -6527,13 +6527,13 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Қою';
+  String get pasteButtonLabel => r'Қою';
 
   @override
-  String get postMeridiemAbbreviation => 'түстен кейін';
+  String get postMeridiemAbbreviation => r'түстен кейін';
 
   @override
-  String get selectAllButtonLabel => 'Барлығын таңдау';
+  String get selectAllButtonLabel => r'Барлығын таңдау';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6542,10 +6542,10 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'сағат';
+  String get timerPickerHourLabelOne => r'сағат';
 
   @override
-  String get timerPickerHourLabelOther => 'сағат';
+  String get timerPickerHourLabelOther => r'сағат';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -6560,10 +6560,10 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'мин';
+  String get timerPickerMinuteLabelOne => r'мин';
 
   @override
-  String get timerPickerMinuteLabelOther => 'мин';
+  String get timerPickerMinuteLabelOther => r'мин';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -6578,10 +6578,10 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'сек';
+  String get timerPickerSecondLabelOne => r'сек';
 
   @override
-  String get timerPickerSecondLabelOther => 'сек';
+  String get timerPickerSecondLabelOther => r'сек';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -6590,7 +6590,7 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Бүгін';
+  String get todayLabel => r'Бүгін';
 }
 
 /// The translations for Khmer Central Khmer (`km`).
@@ -6621,22 +6621,22 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'ជូនដំណឹង';
+  String get alertDialogLabel => r'ជូនដំណឹង';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'ចម្លង';
+  String get copyButtonLabel => r'ចម្លង';
 
   @override
-  String get cutButtonLabel => 'កាត់';
+  String get cutButtonLabel => r'កាត់';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -6663,7 +6663,7 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 នាទី';
+  String get datePickerMinuteSemanticsLabelOne => r'1 នាទី';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute នាទី';
@@ -6675,13 +6675,13 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'ដាក់​ចូល';
+  String get pasteButtonLabel => r'ដាក់​ចូល';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'ជ្រើសរើស​ទាំងអស់';
+  String get selectAllButtonLabel => r'ជ្រើសរើស​ទាំងអស់';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6690,10 +6690,10 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ម៉ោង';
+  String get timerPickerHourLabelOne => r'ម៉ោង';
 
   @override
-  String get timerPickerHourLabelOther => 'ម៉ោង';
+  String get timerPickerHourLabelOther => r'ម៉ោង';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -6708,10 +6708,10 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'នាទី';
+  String get timerPickerMinuteLabelOne => r'នាទី';
 
   @override
-  String get timerPickerMinuteLabelOther => 'នាទី';
+  String get timerPickerMinuteLabelOther => r'នាទី';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -6726,10 +6726,10 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'វិនាទី';
+  String get timerPickerSecondLabelOne => r'វិនាទី';
 
   @override
-  String get timerPickerSecondLabelOther => 'វិនាទី';
+  String get timerPickerSecondLabelOther => r'វិនាទី';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -6738,7 +6738,7 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'ថ្ងៃនេះ';
+  String get todayLabel => r'ថ្ងៃនេះ';
 }
 
 /// The translations for Kannada (`kn`).
@@ -6781,10 +6781,10 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -6917,22 +6917,22 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => '알림';
+  String get alertDialogLabel => r'알림';
 
   @override
-  String get anteMeridiemAbbreviation => '오전';
+  String get anteMeridiemAbbreviation => r'오전';
 
   @override
-  String get copyButtonLabel => '복사';
+  String get copyButtonLabel => r'복사';
 
   @override
-  String get cutButtonLabel => '잘라냄';
+  String get cutButtonLabel => r'잘라냄';
 
   @override
-  String get datePickerDateOrderString => 'ymd';
+  String get datePickerDateOrderString => r'ymd';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -6959,7 +6959,7 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1분';
+  String get datePickerMinuteSemanticsLabelOne => r'1분';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute분';
@@ -6971,13 +6971,13 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => '붙여넣기';
+  String get pasteButtonLabel => r'붙여넣기';
 
   @override
-  String get postMeridiemAbbreviation => '오후';
+  String get postMeridiemAbbreviation => r'오후';
 
   @override
-  String get selectAllButtonLabel => '전체 선택';
+  String get selectAllButtonLabel => r'전체 선택';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -6986,10 +6986,10 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => '시간';
+  String get timerPickerHourLabelOne => r'시간';
 
   @override
-  String get timerPickerHourLabelOther => '시간';
+  String get timerPickerHourLabelOther => r'시간';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -7004,10 +7004,10 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => '분';
+  String get timerPickerMinuteLabelOne => r'분';
 
   @override
-  String get timerPickerMinuteLabelOther => '분';
+  String get timerPickerMinuteLabelOther => r'분';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -7022,10 +7022,10 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => '초';
+  String get timerPickerSecondLabelOne => r'초';
 
   @override
-  String get timerPickerSecondLabelOther => '초';
+  String get timerPickerSecondLabelOther => r'초';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -7034,7 +7034,7 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => '오늘';
+  String get todayLabel => r'오늘';
 }
 
 /// The translations for Kirghiz Kyrgyz (`ky`).
@@ -7065,22 +7065,22 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Эскертүү';
+  String get alertDialogLabel => r'Эскертүү';
 
   @override
-  String get anteMeridiemAbbreviation => 'түшкө чейин';
+  String get anteMeridiemAbbreviation => r'түшкө чейин';
 
   @override
-  String get copyButtonLabel => 'Көчүрүү';
+  String get copyButtonLabel => r'Көчүрүү';
 
   @override
-  String get cutButtonLabel => 'Кесүү';
+  String get cutButtonLabel => r'Кесүү';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -7107,7 +7107,7 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 мүнөт';
+  String get datePickerMinuteSemanticsLabelOne => r'1 мүнөт';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute мүнөт';
@@ -7119,13 +7119,13 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Чаптоо';
+  String get pasteButtonLabel => r'Чаптоо';
 
   @override
-  String get postMeridiemAbbreviation => 'түштөн кийин';
+  String get postMeridiemAbbreviation => r'түштөн кийин';
 
   @override
-  String get selectAllButtonLabel => 'Баарын тандоо';
+  String get selectAllButtonLabel => r'Баарын тандоо';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7134,10 +7134,10 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'саат';
+  String get timerPickerHourLabelOne => r'саат';
 
   @override
-  String get timerPickerHourLabelOther => 'саат';
+  String get timerPickerHourLabelOther => r'саат';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -7152,10 +7152,10 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'мүн.';
+  String get timerPickerMinuteLabelOne => r'мүн.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'мүн.';
+  String get timerPickerMinuteLabelOther => r'мүн.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -7170,10 +7170,10 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'сек.';
+  String get timerPickerSecondLabelOne => r'сек.';
 
   @override
-  String get timerPickerSecondLabelOther => 'сек.';
+  String get timerPickerSecondLabelOther => r'сек.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -7182,7 +7182,7 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Бүгүн';
+  String get todayLabel => r'Бүгүн';
 }
 
 /// The translations for Lao (`lo`).
@@ -7213,22 +7213,22 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'ການເຕືອນ';
+  String get alertDialogLabel => r'ການເຕືອນ';
 
   @override
-  String get anteMeridiemAbbreviation => 'ກ່ອນທ່ຽງ';
+  String get anteMeridiemAbbreviation => r'ກ່ອນທ່ຽງ';
 
   @override
-  String get copyButtonLabel => 'ສຳເນົາ';
+  String get copyButtonLabel => r'ສຳເນົາ';
 
   @override
-  String get cutButtonLabel => 'ຕັດ';
+  String get cutButtonLabel => r'ຕັດ';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -7255,7 +7255,7 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 ນາທີ';
+  String get datePickerMinuteSemanticsLabelOne => r'1 ນາທີ';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute ນາທີ';
@@ -7267,13 +7267,13 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'ວາງ';
+  String get pasteButtonLabel => r'ວາງ';
 
   @override
-  String get postMeridiemAbbreviation => 'ຫຼັງທ່ຽງ';
+  String get postMeridiemAbbreviation => r'ຫຼັງທ່ຽງ';
 
   @override
-  String get selectAllButtonLabel => 'ເລືອກທັງໝົດ';
+  String get selectAllButtonLabel => r'ເລືອກທັງໝົດ';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7282,10 +7282,10 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ຊົ່ວໂມງ';
+  String get timerPickerHourLabelOne => r'ຊົ່ວໂມງ';
 
   @override
-  String get timerPickerHourLabelOther => 'ຊົ່ວໂມງ';
+  String get timerPickerHourLabelOther => r'ຊົ່ວໂມງ';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -7300,10 +7300,10 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'ນທ.';
+  String get timerPickerMinuteLabelOne => r'ນທ.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'ນທ.';
+  String get timerPickerMinuteLabelOther => r'ນທ.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -7318,10 +7318,10 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'ວິ.';
+  String get timerPickerSecondLabelOne => r'ວິ.';
 
   @override
-  String get timerPickerSecondLabelOther => 'ວິ.';
+  String get timerPickerSecondLabelOther => r'ວິ.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -7330,7 +7330,7 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'ມື້ນີ້';
+  String get todayLabel => r'ມື້ນີ້';
 }
 
 /// The translations for Lithuanian (`lt`).
@@ -7361,22 +7361,22 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Įspėjimas';
+  String get alertDialogLabel => r'Įspėjimas';
 
   @override
-  String get anteMeridiemAbbreviation => 'priešpiet';
+  String get anteMeridiemAbbreviation => r'priešpiet';
 
   @override
-  String get copyButtonLabel => 'Kopijuoti';
+  String get copyButtonLabel => r'Kopijuoti';
 
   @override
-  String get cutButtonLabel => 'Iškirpti';
+  String get cutButtonLabel => r'Iškirpti';
 
   @override
-  String get datePickerDateOrderString => 'ymd';
+  String get datePickerDateOrderString => r'ymd';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour val.';
@@ -7403,7 +7403,7 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => r'$minute min.';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 min.';
+  String get datePickerMinuteSemanticsLabelOne => r'1 min.';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute min.';
@@ -7415,25 +7415,25 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Įklijuoti';
+  String get pasteButtonLabel => r'Įklijuoti';
 
   @override
-  String get postMeridiemAbbreviation => 'popiet';
+  String get postMeridiemAbbreviation => r'popiet';
 
   @override
-  String get selectAllButtonLabel => 'Pasirinkti viską';
+  String get selectAllButtonLabel => r'Pasirinkti viską';
 
   @override
-  String get timerPickerHourLabelFew => 'val.';
+  String get timerPickerHourLabelFew => r'val.';
 
   @override
-  String get timerPickerHourLabelMany => 'val.';
+  String get timerPickerHourLabelMany => r'val.';
 
   @override
-  String get timerPickerHourLabelOne => 'val.';
+  String get timerPickerHourLabelOne => r'val.';
 
   @override
-  String get timerPickerHourLabelOther => 'val.';
+  String get timerPickerHourLabelOther => r'val.';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -7442,16 +7442,16 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'min.';
+  String get timerPickerMinuteLabelFew => r'min.';
 
   @override
-  String get timerPickerMinuteLabelMany => 'min.';
+  String get timerPickerMinuteLabelMany => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -7460,16 +7460,16 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 'sek.';
+  String get timerPickerSecondLabelFew => r'sek.';
 
   @override
-  String get timerPickerSecondLabelMany => 'sek.';
+  String get timerPickerSecondLabelMany => r'sek.';
 
   @override
-  String get timerPickerSecondLabelOne => 'sek.';
+  String get timerPickerSecondLabelOne => r'sek.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sek.';
+  String get timerPickerSecondLabelOther => r'sek.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -7478,7 +7478,7 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Šiandien';
+  String get todayLabel => r'Šiandien';
 }
 
 /// The translations for Latvian (`lv`).
@@ -7509,22 +7509,22 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Brīdinājums';
+  String get alertDialogLabel => r'Brīdinājums';
 
   @override
-  String get anteMeridiemAbbreviation => 'priekšpusdienā';
+  String get anteMeridiemAbbreviation => r'priekšpusdienā';
 
   @override
-  String get copyButtonLabel => 'Kopēt';
+  String get copyButtonLabel => r'Kopēt';
 
   @override
-  String get cutButtonLabel => 'Izgriezt';
+  String get cutButtonLabel => r'Izgriezt';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -7551,7 +7551,7 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minūte';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minūte';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minūtes';
@@ -7563,13 +7563,13 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => r'$minute minūtes';
 
   @override
-  String get pasteButtonLabel => 'Ielīmēt';
+  String get pasteButtonLabel => r'Ielīmēt';
 
   @override
-  String get postMeridiemAbbreviation => 'pēcpusdienā';
+  String get postMeridiemAbbreviation => r'pēcpusdienā';
 
   @override
-  String get selectAllButtonLabel => 'Atlasīt visu';
+  String get selectAllButtonLabel => r'Atlasīt visu';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7578,16 +7578,16 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'h';
+  String get timerPickerHourLabelOne => r'h';
 
   @override
-  String get timerPickerHourLabelOther => 'h';
+  String get timerPickerHourLabelOther => r'h';
 
   @override
   String get timerPickerHourLabelTwo => null;
 
   @override
-  String get timerPickerHourLabelZero => 'h';
+  String get timerPickerHourLabelZero => r'h';
 
   @override
   String get timerPickerMinuteLabelFew => null;
@@ -7596,16 +7596,16 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
 
   @override
-  String get timerPickerMinuteLabelZero => 'min';
+  String get timerPickerMinuteLabelZero => r'min';
 
   @override
   String get timerPickerSecondLabelFew => null;
@@ -7614,19 +7614,19 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
 
   @override
-  String get timerPickerSecondLabelZero => 's';
+  String get timerPickerSecondLabelZero => r's';
 
   @override
-  String get todayLabel => 'Šodien';
+  String get todayLabel => r'Šodien';
 }
 
 /// The translations for Macedonian (`mk`).
@@ -7657,22 +7657,22 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Предупредување';
+  String get alertDialogLabel => r'Предупредување';
 
   @override
-  String get anteMeridiemAbbreviation => 'ПРЕТПЛАДНЕ';
+  String get anteMeridiemAbbreviation => r'ПРЕТПЛАДНЕ';
 
   @override
-  String get copyButtonLabel => 'Копирај';
+  String get copyButtonLabel => r'Копирај';
 
   @override
-  String get cutButtonLabel => 'Исечи';
+  String get cutButtonLabel => r'Исечи';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -7699,7 +7699,7 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 минута';
+  String get datePickerMinuteSemanticsLabelOne => r'1 минута';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute минути';
@@ -7711,13 +7711,13 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Залепи';
+  String get pasteButtonLabel => r'Залепи';
 
   @override
-  String get postMeridiemAbbreviation => 'ПОПЛАДНЕ';
+  String get postMeridiemAbbreviation => r'ПОПЛАДНЕ';
 
   @override
-  String get selectAllButtonLabel => 'Избери ги сите';
+  String get selectAllButtonLabel => r'Избери ги сите';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7726,10 +7726,10 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'час';
+  String get timerPickerHourLabelOne => r'час';
 
   @override
-  String get timerPickerHourLabelOther => 'часа';
+  String get timerPickerHourLabelOther => r'часа';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -7744,10 +7744,10 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'мин.';
+  String get timerPickerMinuteLabelOne => r'мин.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'мин.';
+  String get timerPickerMinuteLabelOther => r'мин.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -7762,10 +7762,10 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'сек.';
+  String get timerPickerSecondLabelOne => r'сек.';
 
   @override
-  String get timerPickerSecondLabelOther => 'сек.';
+  String get timerPickerSecondLabelOther => r'сек.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -7774,7 +7774,7 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Денес';
+  String get todayLabel => r'Денес';
 }
 
 /// The translations for Malayalam (`ml`).
@@ -7805,22 +7805,22 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'മുന്നറിയിപ്പ്';
+  String get alertDialogLabel => r'മുന്നറിയിപ്പ്';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'പകർത്തുക';
+  String get copyButtonLabel => r'പകർത്തുക';
 
   @override
-  String get cutButtonLabel => 'മുറിക്കുക';
+  String get cutButtonLabel => r'മുറിക്കുക';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -7847,7 +7847,7 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => 'ഒരു മിനിറ്റ്';
+  String get datePickerMinuteSemanticsLabelOne => r'ഒരു മിനിറ്റ്';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute മിനിറ്റ്';
@@ -7859,13 +7859,13 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'ഒട്ടിക്കുക';
+  String get pasteButtonLabel => r'ഒട്ടിക്കുക';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
+  String get selectAllButtonLabel => r'എല്ലാം തിരഞ്ഞെടുക്കുക';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -7874,10 +7874,10 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'മണിക്കൂർ';
+  String get timerPickerHourLabelOne => r'മണിക്കൂർ';
 
   @override
-  String get timerPickerHourLabelOther => 'മണിക്കൂർ';
+  String get timerPickerHourLabelOther => r'മണിക്കൂർ';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -7892,10 +7892,10 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'മിനിറ്റ്';
+  String get timerPickerMinuteLabelOne => r'മിനിറ്റ്';
 
   @override
-  String get timerPickerMinuteLabelOther => 'മിനിറ്റ്';
+  String get timerPickerMinuteLabelOther => r'മിനിറ്റ്';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -7910,10 +7910,10 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'സെക്കൻഡ്';
+  String get timerPickerSecondLabelOne => r'സെക്കൻഡ്';
 
   @override
-  String get timerPickerSecondLabelOther => 'സെക്കൻഡ്';
+  String get timerPickerSecondLabelOther => r'സെക്കൻഡ്';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -7922,7 +7922,7 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'ഇന്ന്';
+  String get todayLabel => r'ഇന്ന്';
 }
 
 /// The translations for Mongolian (`mn`).
@@ -7953,22 +7953,22 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Сэрэмжлүүлэг';
+  String get alertDialogLabel => r'Сэрэмжлүүлэг';
 
   @override
-  String get anteMeridiemAbbreviation => 'ӨГЛӨӨ';
+  String get anteMeridiemAbbreviation => r'ӨГЛӨӨ';
 
   @override
-  String get copyButtonLabel => 'Хуулах';
+  String get copyButtonLabel => r'Хуулах';
 
   @override
-  String get cutButtonLabel => 'Таслах';
+  String get cutButtonLabel => r'Таслах';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -7995,7 +7995,7 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 минут';
+  String get datePickerMinuteSemanticsLabelOne => r'1 минут';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute минут';
@@ -8007,13 +8007,13 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Буулгах';
+  String get pasteButtonLabel => r'Буулгах';
 
   @override
-  String get postMeridiemAbbreviation => 'ОРОЙ';
+  String get postMeridiemAbbreviation => r'ОРОЙ';
 
   @override
-  String get selectAllButtonLabel => 'Бүгдийг сонгох';
+  String get selectAllButtonLabel => r'Бүгдийг сонгох';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8022,10 +8022,10 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'цаг';
+  String get timerPickerHourLabelOne => r'цаг';
 
   @override
-  String get timerPickerHourLabelOther => 'цаг';
+  String get timerPickerHourLabelOther => r'цаг';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -8040,10 +8040,10 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'минут.';
+  String get timerPickerMinuteLabelOne => r'минут.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'минут.';
+  String get timerPickerMinuteLabelOther => r'минут.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -8058,10 +8058,10 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'секунд.';
+  String get timerPickerSecondLabelOne => r'секунд.';
 
   @override
-  String get timerPickerSecondLabelOther => 'секунд.';
+  String get timerPickerSecondLabelOther => r'секунд.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -8070,7 +8070,7 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Өнөөдөр';
+  String get todayLabel => r'Өнөөдөр';
 }
 
 /// The translations for Marathi (`mr`).
@@ -8101,22 +8101,22 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'सूचना';
+  String get alertDialogLabel => r'सूचना';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'कॉपी करा';
+  String get copyButtonLabel => r'कॉपी करा';
 
   @override
-  String get cutButtonLabel => 'कट करा';
+  String get cutButtonLabel => r'कट करा';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -8143,7 +8143,7 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => 'एक मिनिट';
+  String get datePickerMinuteSemanticsLabelOne => r'एक मिनिट';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute मिनिटे';
@@ -8155,13 +8155,13 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'पेस्ट करा';
+  String get pasteButtonLabel => r'पेस्ट करा';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'सर्व निवडा';
+  String get selectAllButtonLabel => r'सर्व निवडा';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8170,10 +8170,10 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'तास';
+  String get timerPickerHourLabelOne => r'तास';
 
   @override
-  String get timerPickerHourLabelOther => 'तास';
+  String get timerPickerHourLabelOther => r'तास';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -8188,10 +8188,10 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'मि.';
+  String get timerPickerMinuteLabelOne => r'मि.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'मि.';
+  String get timerPickerMinuteLabelOther => r'मि.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -8206,10 +8206,10 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'से.';
+  String get timerPickerSecondLabelOne => r'से.';
 
   @override
-  String get timerPickerSecondLabelOther => 'से.';
+  String get timerPickerSecondLabelOther => r'से.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -8218,7 +8218,7 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'आज';
+  String get todayLabel => r'आज';
 }
 
 /// The translations for Malay (`ms`).
@@ -8249,22 +8249,22 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Makluman';
+  String get alertDialogLabel => r'Makluman';
 
   @override
-  String get anteMeridiemAbbreviation => 'PG';
+  String get anteMeridiemAbbreviation => r'PG';
 
   @override
-  String get copyButtonLabel => 'Salin';
+  String get copyButtonLabel => r'Salin';
 
   @override
-  String get cutButtonLabel => 'Potong';
+  String get cutButtonLabel => r'Potong';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -8291,7 +8291,7 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minit';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minit';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minit';
@@ -8303,13 +8303,13 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Tampal';
+  String get pasteButtonLabel => r'Tampal';
 
   @override
-  String get postMeridiemAbbreviation => 'PTG';
+  String get postMeridiemAbbreviation => r'PTG';
 
   @override
-  String get selectAllButtonLabel => 'Pilih Semua';
+  String get selectAllButtonLabel => r'Pilih Semua';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8318,10 +8318,10 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'jam';
+  String get timerPickerHourLabelOne => r'jam';
 
   @override
-  String get timerPickerHourLabelOther => 'jam';
+  String get timerPickerHourLabelOther => r'jam';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -8336,10 +8336,10 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'minit';
+  String get timerPickerMinuteLabelOne => r'minit';
 
   @override
-  String get timerPickerMinuteLabelOther => 'minit';
+  String get timerPickerMinuteLabelOther => r'minit';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -8354,10 +8354,10 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'saat';
+  String get timerPickerSecondLabelOne => r'saat';
 
   @override
-  String get timerPickerSecondLabelOther => 'saat';
+  String get timerPickerSecondLabelOther => r'saat';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -8366,7 +8366,7 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Hari ini';
+  String get todayLabel => r'Hari ini';
 }
 
 /// The translations for Burmese (`my`).
@@ -8397,22 +8397,22 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'သတိပေးချက်';
+  String get alertDialogLabel => r'သတိပေးချက်';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'မိတ္တူကူးရန်';
+  String get copyButtonLabel => r'မိတ္တူကူးရန်';
 
   @override
-  String get cutButtonLabel => 'ဖြတ်ယူရန်';
+  String get cutButtonLabel => r'ဖြတ်ယူရန်';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -8439,7 +8439,7 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '၁ မိနစ်';
+  String get datePickerMinuteSemanticsLabelOne => r'၁ မိနစ်';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute မိနစ်';
@@ -8451,13 +8451,13 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'ကူးထည့်ရန်';
+  String get pasteButtonLabel => r'ကူးထည့်ရန်';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'အားလုံး ရွေးရန်';
+  String get selectAllButtonLabel => r'အားလုံး ရွေးရန်';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8466,10 +8466,10 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'နာရီ';
+  String get timerPickerHourLabelOne => r'နာရီ';
 
   @override
-  String get timerPickerHourLabelOther => 'နာရီ';
+  String get timerPickerHourLabelOther => r'နာရီ';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -8484,10 +8484,10 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'မိနစ်';
+  String get timerPickerMinuteLabelOne => r'မိနစ်';
 
   @override
-  String get timerPickerMinuteLabelOther => 'မိနစ်';
+  String get timerPickerMinuteLabelOther => r'မိနစ်';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -8502,10 +8502,10 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'စက္ကန့်';
+  String get timerPickerSecondLabelOne => r'စက္ကန့်';
 
   @override
-  String get timerPickerSecondLabelOther => 'စက္ကန့်';
+  String get timerPickerSecondLabelOther => r'စက္ကန့်';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -8514,7 +8514,7 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'ယနေ့';
+  String get todayLabel => r'ယနေ့';
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
@@ -8545,22 +8545,22 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Varsel';
+  String get alertDialogLabel => r'Varsel';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopiér';
+  String get copyButtonLabel => r'Kopiér';
 
   @override
-  String get cutButtonLabel => 'Klipp ut';
+  String get cutButtonLabel => r'Klipp ut';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -8587,7 +8587,7 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minutt';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minutt';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minutter';
@@ -8599,13 +8599,13 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Lim inn';
+  String get pasteButtonLabel => r'Lim inn';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Velg alle';
+  String get selectAllButtonLabel => r'Velg alle';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8614,10 +8614,10 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'time';
+  String get timerPickerHourLabelOne => r'time';
 
   @override
-  String get timerPickerHourLabelOther => 'timer';
+  String get timerPickerHourLabelOther => r'timer';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -8632,10 +8632,10 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -8650,10 +8650,10 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sek.';
+  String get timerPickerSecondLabelOne => r'sek.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sek.';
+  String get timerPickerSecondLabelOther => r'sek.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -8662,7 +8662,7 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'I dag';
+  String get todayLabel => r'I dag';
 }
 
 /// The translations for Nepali (`ne`).
@@ -8693,22 +8693,22 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'अलर्ट';
+  String get alertDialogLabel => r'अलर्ट';
 
   @override
-  String get anteMeridiemAbbreviation => 'पूर्वाह्न';
+  String get anteMeridiemAbbreviation => r'पूर्वाह्न';
 
   @override
-  String get copyButtonLabel => 'प्रतिलिपि गर्नुहोस्';
+  String get copyButtonLabel => r'प्रतिलिपि गर्नुहोस्';
 
   @override
-  String get cutButtonLabel => 'काट्नुहोस्';
+  String get cutButtonLabel => r'काट्नुहोस्';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -8735,7 +8735,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '१ मिनेट';
+  String get datePickerMinuteSemanticsLabelOne => r'१ मिनेट';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute मिनेट';
@@ -8747,13 +8747,13 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'टाँस्नुहोस्';
+  String get pasteButtonLabel => r'टाँस्नुहोस्';
 
   @override
-  String get postMeridiemAbbreviation => 'अपराह्न';
+  String get postMeridiemAbbreviation => r'अपराह्न';
 
   @override
-  String get selectAllButtonLabel => 'सबै चयन गर्नुहोस्';
+  String get selectAllButtonLabel => r'सबै चयन गर्नुहोस्';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8762,10 +8762,10 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'घन्टा';
+  String get timerPickerHourLabelOne => r'घन्टा';
 
   @override
-  String get timerPickerHourLabelOther => 'घन्टा';
+  String get timerPickerHourLabelOther => r'घन्टा';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -8780,10 +8780,10 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'मिनेट';
+  String get timerPickerMinuteLabelOne => r'मिनेट';
 
   @override
-  String get timerPickerMinuteLabelOther => 'मिनेट';
+  String get timerPickerMinuteLabelOther => r'मिनेट';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -8798,10 +8798,10 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'सेकेन्ड';
+  String get timerPickerSecondLabelOne => r'सेकेन्ड';
 
   @override
-  String get timerPickerSecondLabelOther => 'सेकेन्ड';
+  String get timerPickerSecondLabelOther => r'सेकेन्ड';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -8810,7 +8810,7 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'आज';
+  String get todayLabel => r'आज';
 }
 
 /// The translations for Dutch Flemish (`nl`).
@@ -8841,22 +8841,22 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Melding';
+  String get alertDialogLabel => r'Melding';
 
   @override
-  String get anteMeridiemAbbreviation => 'am';
+  String get anteMeridiemAbbreviation => r'am';
 
   @override
-  String get copyButtonLabel => 'Kopiëren';
+  String get copyButtonLabel => r'Kopiëren';
 
   @override
-  String get cutButtonLabel => 'Knippen';
+  String get cutButtonLabel => r'Knippen';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -8883,7 +8883,7 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuut';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuut';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuten';
@@ -8895,13 +8895,13 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Plakken';
+  String get pasteButtonLabel => r'Plakken';
 
   @override
-  String get postMeridiemAbbreviation => 'pm';
+  String get postMeridiemAbbreviation => r'pm';
 
   @override
-  String get selectAllButtonLabel => 'Alles selecteren';
+  String get selectAllButtonLabel => r'Alles selecteren';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -8910,10 +8910,10 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'uur';
+  String get timerPickerHourLabelOne => r'uur';
 
   @override
-  String get timerPickerHourLabelOther => 'uur';
+  String get timerPickerHourLabelOther => r'uur';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -8928,10 +8928,10 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -8946,10 +8946,10 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sec.';
+  String get timerPickerSecondLabelOne => r'sec.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sec.';
+  String get timerPickerSecondLabelOther => r'sec.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -8958,7 +8958,7 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Vandaag';
+  String get todayLabel => r'Vandaag';
 }
 
 /// The translations for Oriya (`or`).
@@ -8989,22 +8989,22 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'ଆଲର୍ଟ';
+  String get alertDialogLabel => r'ଆଲର୍ଟ';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'କପି କରନ୍ତୁ';
+  String get copyButtonLabel => r'କପି କରନ୍ତୁ';
 
   @override
-  String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
+  String get cutButtonLabel => r'କଟ୍ କରନ୍ତୁ';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -9031,7 +9031,7 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 ମିନିଟ୍';
+  String get datePickerMinuteSemanticsLabelOne => r'1 ମିନିଟ୍';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute ମିନିଟ୍';
@@ -9043,13 +9043,13 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'ପେଷ୍ଟ କରନ୍ତୁ';
+  String get pasteButtonLabel => r'ପେଷ୍ଟ କରନ୍ତୁ';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'ସମସ୍ତ ଚୟନ କରନ୍ତୁ';
+  String get selectAllButtonLabel => r'ସମସ୍ତ ଚୟନ କରନ୍ତୁ';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9058,10 +9058,10 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ଘଣ୍ଟା';
+  String get timerPickerHourLabelOne => r'ଘଣ୍ଟା';
 
   @override
-  String get timerPickerHourLabelOther => 'ଘଣ୍ଟା';
+  String get timerPickerHourLabelOther => r'ଘଣ୍ଟା';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -9076,10 +9076,10 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'ମିନିଟ୍';
+  String get timerPickerMinuteLabelOne => r'ମିନିଟ୍';
 
   @override
-  String get timerPickerMinuteLabelOther => 'ମିନିଟ୍';
+  String get timerPickerMinuteLabelOther => r'ମିନିଟ୍';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -9094,10 +9094,10 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'ସେକେଣ୍ଡ';
+  String get timerPickerSecondLabelOne => r'ସେକେଣ୍ଡ';
 
   @override
-  String get timerPickerSecondLabelOther => 'ସେକେଣ୍ଡ';
+  String get timerPickerSecondLabelOther => r'ସେକେଣ୍ଡ';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -9106,7 +9106,7 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'ଆଜି';
+  String get todayLabel => r'ଆଜି';
 }
 
 /// The translations for Panjabi Punjabi (`pa`).
@@ -9137,22 +9137,22 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'ਸੁਚੇਤਨਾ';
+  String get alertDialogLabel => r'ਸੁਚੇਤਨਾ';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'ਕਾਪੀ ਕਰੋ';
+  String get copyButtonLabel => r'ਕਾਪੀ ਕਰੋ';
 
   @override
-  String get cutButtonLabel => 'ਕੱਟ ਕਰੋ';
+  String get cutButtonLabel => r'ਕੱਟ ਕਰੋ';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -9179,7 +9179,7 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 ਮਿੰਟ';
+  String get datePickerMinuteSemanticsLabelOne => r'1 ਮਿੰਟ';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute ਮਿੰਟ';
@@ -9191,13 +9191,13 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'ਪੇਸਟ ਕਰੋ';
+  String get pasteButtonLabel => r'ਪੇਸਟ ਕਰੋ';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'ਸਭ ਚੁਣੋ';
+  String get selectAllButtonLabel => r'ਸਭ ਚੁਣੋ';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9206,10 +9206,10 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ਘੰਟਾ';
+  String get timerPickerHourLabelOne => r'ਘੰਟਾ';
 
   @override
-  String get timerPickerHourLabelOther => 'ਘੰਟੇ';
+  String get timerPickerHourLabelOther => r'ਘੰਟੇ';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -9224,10 +9224,10 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'ਮਿੰ.';
+  String get timerPickerMinuteLabelOne => r'ਮਿੰ.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'ਮਿੰ.';
+  String get timerPickerMinuteLabelOther => r'ਮਿੰ.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -9242,10 +9242,10 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'ਸਕਿੰ.';
+  String get timerPickerSecondLabelOne => r'ਸਕਿੰ.';
 
   @override
-  String get timerPickerSecondLabelOther => 'ਸਕਿੰ.';
+  String get timerPickerSecondLabelOther => r'ਸਕਿੰ.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -9254,7 +9254,7 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'ਅੱਜ';
+  String get todayLabel => r'ਅੱਜ';
 }
 
 /// The translations for Polish (`pl`).
@@ -9285,22 +9285,22 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alert';
+  String get alertDialogLabel => r'Alert';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopiuj';
+  String get copyButtonLabel => r'Kopiuj';
 
   @override
-  String get cutButtonLabel => 'Wytnij';
+  String get cutButtonLabel => r'Wytnij';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour';
@@ -9327,7 +9327,7 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => r'$minute minut';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuta';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuta';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuty';
@@ -9339,25 +9339,25 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Wklej';
+  String get pasteButtonLabel => r'Wklej';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Wybierz wszystkie';
+  String get selectAllButtonLabel => r'Wybierz wszystkie';
 
   @override
-  String get timerPickerHourLabelFew => 'godziny';
+  String get timerPickerHourLabelFew => r'godziny';
 
   @override
-  String get timerPickerHourLabelMany => 'godzin';
+  String get timerPickerHourLabelMany => r'godzin';
 
   @override
-  String get timerPickerHourLabelOne => 'godzina';
+  String get timerPickerHourLabelOne => r'godzina';
 
   @override
-  String get timerPickerHourLabelOther => 'godziny';
+  String get timerPickerHourLabelOther => r'godziny';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -9366,16 +9366,16 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'min';
+  String get timerPickerMinuteLabelFew => r'min';
 
   @override
-  String get timerPickerMinuteLabelMany => 'min';
+  String get timerPickerMinuteLabelMany => r'min';
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -9384,16 +9384,16 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 's';
+  String get timerPickerSecondLabelFew => r's';
 
   @override
-  String get timerPickerSecondLabelMany => 's';
+  String get timerPickerSecondLabelMany => r's';
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -9402,7 +9402,7 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Dziś';
+  String get todayLabel => r'Dziś';
 }
 
 /// The translations for Portuguese (`pt`).
@@ -9433,22 +9433,22 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alerta';
+  String get alertDialogLabel => r'Alerta';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Copiar';
+  String get copyButtonLabel => r'Copiar';
 
   @override
-  String get cutButtonLabel => 'Cortar';
+  String get cutButtonLabel => r'Cortar';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -9475,7 +9475,7 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuto';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuto';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minutos';
@@ -9487,13 +9487,13 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Colar';
+  String get pasteButtonLabel => r'Colar';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Selecionar Tudo';
+  String get selectAllButtonLabel => r'Selecionar Tudo';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9502,10 +9502,10 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'hora';
+  String get timerPickerHourLabelOne => r'hora';
 
   @override
-  String get timerPickerHourLabelOther => 'horas';
+  String get timerPickerHourLabelOther => r'horas';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -9520,10 +9520,10 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -9538,10 +9538,10 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -9550,7 +9550,7 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Hoje';
+  String get todayLabel => r'Hoje';
 }
 
 /// The translations for Portuguese, as used in Portugal (`pt_PT`).
@@ -9584,13 +9584,13 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
   String get datePickerHourSemanticsLabelOther => r'$hour hora';
 
   @override
-  String get timerPickerSecondLabelOne => 'seg';
+  String get timerPickerSecondLabelOne => r'seg';
 
   @override
-  String get timerPickerSecondLabelOther => 'seg';
+  String get timerPickerSecondLabelOther => r'seg';
 
   @override
-  String get selectAllButtonLabel => 'Selecionar tudo';
+  String get selectAllButtonLabel => r'Selecionar tudo';
 }
 
 /// The translations for Romanian Moldavian Moldovan (`ro`).
@@ -9621,22 +9621,22 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alertă';
+  String get alertDialogLabel => r'Alertă';
 
   @override
-  String get anteMeridiemAbbreviation => 'a.m.';
+  String get anteMeridiemAbbreviation => r'a.m.';
 
   @override
-  String get copyButtonLabel => 'Copiați';
+  String get copyButtonLabel => r'Copiați';
 
   @override
-  String get cutButtonLabel => 'Decupați';
+  String get cutButtonLabel => r'Decupați';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'Ora $hour';
@@ -9663,7 +9663,7 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minut';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minut';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute de minute';
@@ -9675,25 +9675,25 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Inserați';
+  String get pasteButtonLabel => r'Inserați';
 
   @override
-  String get postMeridiemAbbreviation => 'p.m.';
+  String get postMeridiemAbbreviation => r'p.m.';
 
   @override
-  String get selectAllButtonLabel => 'Selectați-le pe toate';
+  String get selectAllButtonLabel => r'Selectați-le pe toate';
 
   @override
-  String get timerPickerHourLabelFew => 'ore';
+  String get timerPickerHourLabelFew => r'ore';
 
   @override
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'oră';
+  String get timerPickerHourLabelOne => r'oră';
 
   @override
-  String get timerPickerHourLabelOther => 'de ore';
+  String get timerPickerHourLabelOther => r'de ore';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -9702,16 +9702,16 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'min.';
+  String get timerPickerMinuteLabelFew => r'min.';
 
   @override
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -9720,16 +9720,16 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 'sec.';
+  String get timerPickerSecondLabelFew => r'sec.';
 
   @override
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sec.';
+  String get timerPickerSecondLabelOne => r'sec.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sec.';
+  String get timerPickerSecondLabelOther => r'sec.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -9738,7 +9738,7 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Azi';
+  String get todayLabel => r'Azi';
 }
 
 /// The translations for Russian (`ru`).
@@ -9769,22 +9769,22 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Оповещение';
+  String get alertDialogLabel => r'Оповещение';
 
   @override
-  String get anteMeridiemAbbreviation => 'АМ';
+  String get anteMeridiemAbbreviation => r'АМ';
 
   @override
-  String get copyButtonLabel => 'Копировать';
+  String get copyButtonLabel => r'Копировать';
 
   @override
-  String get cutButtonLabel => 'Вырезать';
+  String get cutButtonLabel => r'Вырезать';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour часа';
@@ -9811,7 +9811,7 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => r'$minute минут';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 минута';
+  String get datePickerMinuteSemanticsLabelOne => r'1 минута';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute минуты';
@@ -9823,25 +9823,25 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Вставить';
+  String get pasteButtonLabel => r'Вставить';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Выбрать все';
+  String get selectAllButtonLabel => r'Выбрать все';
 
   @override
-  String get timerPickerHourLabelFew => 'часа';
+  String get timerPickerHourLabelFew => r'часа';
 
   @override
-  String get timerPickerHourLabelMany => 'часов';
+  String get timerPickerHourLabelMany => r'часов';
 
   @override
-  String get timerPickerHourLabelOne => 'час';
+  String get timerPickerHourLabelOne => r'час';
 
   @override
-  String get timerPickerHourLabelOther => 'часа';
+  String get timerPickerHourLabelOther => r'часа';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -9850,16 +9850,16 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'мин.';
+  String get timerPickerMinuteLabelFew => r'мин.';
 
   @override
-  String get timerPickerMinuteLabelMany => 'мин.';
+  String get timerPickerMinuteLabelMany => r'мин.';
 
   @override
-  String get timerPickerMinuteLabelOne => 'мин.';
+  String get timerPickerMinuteLabelOne => r'мин.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'мин.';
+  String get timerPickerMinuteLabelOther => r'мин.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -9868,16 +9868,16 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 'сек.';
+  String get timerPickerSecondLabelFew => r'сек.';
 
   @override
-  String get timerPickerSecondLabelMany => 'сек.';
+  String get timerPickerSecondLabelMany => r'сек.';
 
   @override
-  String get timerPickerSecondLabelOne => 'сек.';
+  String get timerPickerSecondLabelOne => r'сек.';
 
   @override
-  String get timerPickerSecondLabelOther => 'сек.';
+  String get timerPickerSecondLabelOther => r'сек.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -9886,7 +9886,7 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Сегодня';
+  String get todayLabel => r'Сегодня';
 }
 
 /// The translations for Sinhala Sinhalese (`si`).
@@ -9917,22 +9917,22 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'ඇඟවීම';
+  String get alertDialogLabel => r'ඇඟවීම';
 
   @override
-  String get anteMeridiemAbbreviation => 'පෙ.ව.';
+  String get anteMeridiemAbbreviation => r'පෙ.ව.';
 
   @override
-  String get copyButtonLabel => 'පිටපත් කරන්න';
+  String get copyButtonLabel => r'පිටපත් කරන්න';
 
   @override
-  String get cutButtonLabel => 'කපන්න';
+  String get cutButtonLabel => r'කපන්න';
 
   @override
-  String get datePickerDateOrderString => 'ymd';
+  String get datePickerDateOrderString => r'ymd';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_dayPeriod_time';
+  String get datePickerDateTimeOrderString => r'date_dayPeriod_time';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -9959,7 +9959,7 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => 'මිනිත්තු 1';
+  String get datePickerMinuteSemanticsLabelOne => r'මිනිත්තු 1';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'මිනිත්තු $minute';
@@ -9971,13 +9971,13 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'අලවන්න';
+  String get pasteButtonLabel => r'අලවන්න';
 
   @override
-  String get postMeridiemAbbreviation => 'ප.ව.';
+  String get postMeridiemAbbreviation => r'ප.ව.';
 
   @override
-  String get selectAllButtonLabel => 'සියල්ල තෝරන්න';
+  String get selectAllButtonLabel => r'සියල්ල තෝරන්න';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -9986,10 +9986,10 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'පැය';
+  String get timerPickerHourLabelOne => r'පැය';
 
   @override
-  String get timerPickerHourLabelOther => 'පැය';
+  String get timerPickerHourLabelOther => r'පැය';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -10004,10 +10004,10 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'මිනි.';
+  String get timerPickerMinuteLabelOne => r'මිනි.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'මිනි.';
+  String get timerPickerMinuteLabelOther => r'මිනි.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -10022,10 +10022,10 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'තත්.';
+  String get timerPickerSecondLabelOne => r'තත්.';
 
   @override
-  String get timerPickerSecondLabelOther => 'තත්.';
+  String get timerPickerSecondLabelOther => r'තත්.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -10034,7 +10034,7 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'අද';
+  String get todayLabel => r'අද';
 }
 
 /// The translations for Slovak (`sk`).
@@ -10065,22 +10065,22 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Upozornenie';
+  String get alertDialogLabel => r'Upozornenie';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopírovať';
+  String get copyButtonLabel => r'Kopírovať';
 
   @override
-  String get cutButtonLabel => 'Vystrihnúť';
+  String get cutButtonLabel => r'Vystrihnúť';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour hodiny';
@@ -10107,7 +10107,7 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => r'$minute minúty';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minúta';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minúta';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minút';
@@ -10119,25 +10119,25 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Prilepiť';
+  String get pasteButtonLabel => r'Prilepiť';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Vybrať všetko';
+  String get selectAllButtonLabel => r'Vybrať všetko';
 
   @override
-  String get timerPickerHourLabelFew => 'hodiny';
+  String get timerPickerHourLabelFew => r'hodiny';
 
   @override
-  String get timerPickerHourLabelMany => 'hodiny';
+  String get timerPickerHourLabelMany => r'hodiny';
 
   @override
-  String get timerPickerHourLabelOne => 'hodina';
+  String get timerPickerHourLabelOne => r'hodina';
 
   @override
-  String get timerPickerHourLabelOther => 'hodín';
+  String get timerPickerHourLabelOther => r'hodín';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -10146,16 +10146,16 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'min';
+  String get timerPickerMinuteLabelFew => r'min';
 
   @override
-  String get timerPickerMinuteLabelMany => 'min';
+  String get timerPickerMinuteLabelMany => r'min';
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -10164,16 +10164,16 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 's';
+  String get timerPickerSecondLabelFew => r's';
 
   @override
-  String get timerPickerSecondLabelMany => 's';
+  String get timerPickerSecondLabelMany => r's';
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -10182,7 +10182,7 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Dnes';
+  String get todayLabel => r'Dnes';
 }
 
 /// The translations for Slovenian (`sl`).
@@ -10213,22 +10213,22 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Opozorilo';
+  String get alertDialogLabel => r'Opozorilo';
 
   @override
-  String get anteMeridiemAbbreviation => 'DOP.';
+  String get anteMeridiemAbbreviation => r'DOP.';
 
   @override
-  String get copyButtonLabel => 'Kopiraj';
+  String get copyButtonLabel => r'Kopiraj';
 
   @override
-  String get cutButtonLabel => 'Izreži';
+  String get cutButtonLabel => r'Izreži';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour';
@@ -10255,7 +10255,7 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuta';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuta';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minut';
@@ -10267,70 +10267,70 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Prilepi';
+  String get pasteButtonLabel => r'Prilepi';
 
   @override
-  String get postMeridiemAbbreviation => 'POP.';
+  String get postMeridiemAbbreviation => r'POP.';
 
   @override
-  String get selectAllButtonLabel => 'Izberi vse';
+  String get selectAllButtonLabel => r'Izberi vse';
 
   @override
-  String get timerPickerHourLabelFew => 'ure';
+  String get timerPickerHourLabelFew => r'ure';
 
   @override
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ura';
+  String get timerPickerHourLabelOne => r'ura';
 
   @override
-  String get timerPickerHourLabelOther => 'ure';
+  String get timerPickerHourLabelOther => r'ure';
 
   @override
-  String get timerPickerHourLabelTwo => 'ure';
+  String get timerPickerHourLabelTwo => r'ure';
 
   @override
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'min';
+  String get timerPickerMinuteLabelFew => r'min';
 
   @override
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
-  String get timerPickerMinuteLabelTwo => 'min';
+  String get timerPickerMinuteLabelTwo => r'min';
 
   @override
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 's';
+  String get timerPickerSecondLabelFew => r's';
 
   @override
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 's';
+  String get timerPickerSecondLabelOne => r's';
 
   @override
-  String get timerPickerSecondLabelOther => 's';
+  String get timerPickerSecondLabelOther => r's';
 
   @override
-  String get timerPickerSecondLabelTwo => 's';
+  String get timerPickerSecondLabelTwo => r's';
 
   @override
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Danes';
+  String get todayLabel => r'Danes';
 }
 
 /// The translations for Albanian (`sq`).
@@ -10361,22 +10361,22 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Sinjalizim';
+  String get alertDialogLabel => r'Sinjalizim';
 
   @override
-  String get anteMeridiemAbbreviation => 'paradite';
+  String get anteMeridiemAbbreviation => r'paradite';
 
   @override
-  String get copyButtonLabel => 'Kopjo';
+  String get copyButtonLabel => r'Kopjo';
 
   @override
-  String get cutButtonLabel => 'Prit';
+  String get cutButtonLabel => r'Prit';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -10403,7 +10403,7 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minutë';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minutë';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuta';
@@ -10415,13 +10415,13 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Ngjit';
+  String get pasteButtonLabel => r'Ngjit';
 
   @override
-  String get postMeridiemAbbreviation => 'pasdite';
+  String get postMeridiemAbbreviation => r'pasdite';
 
   @override
-  String get selectAllButtonLabel => 'Zgjidhi të gjitha';
+  String get selectAllButtonLabel => r'Zgjidhi të gjitha';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -10430,10 +10430,10 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'orë';
+  String get timerPickerHourLabelOne => r'orë';
 
   @override
-  String get timerPickerHourLabelOther => 'orë';
+  String get timerPickerHourLabelOther => r'orë';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -10448,10 +10448,10 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min.';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -10466,10 +10466,10 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sek.';
+  String get timerPickerSecondLabelOne => r'sek.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sek.';
+  String get timerPickerSecondLabelOther => r'sek.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -10478,7 +10478,7 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Sot';
+  String get todayLabel => r'Sot';
 }
 
 /// The translations for Serbian (`sr`).
@@ -10509,22 +10509,22 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Обавештење';
+  String get alertDialogLabel => r'Обавештење';
 
   @override
-  String get anteMeridiemAbbreviation => 'пре подне';
+  String get anteMeridiemAbbreviation => r'пре подне';
 
   @override
-  String get copyButtonLabel => 'Копирај';
+  String get copyButtonLabel => r'Копирај';
 
   @override
-  String get cutButtonLabel => 'Исеци';
+  String get cutButtonLabel => r'Исеци';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour сата';
@@ -10551,7 +10551,7 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 минут';
+  String get datePickerMinuteSemanticsLabelOne => r'1 минут';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute минута';
@@ -10563,25 +10563,25 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Налепи';
+  String get pasteButtonLabel => r'Налепи';
 
   @override
-  String get postMeridiemAbbreviation => 'по подне';
+  String get postMeridiemAbbreviation => r'по подне';
 
   @override
-  String get selectAllButtonLabel => 'Изабери све';
+  String get selectAllButtonLabel => r'Изабери све';
 
   @override
-  String get timerPickerHourLabelFew => 'сата';
+  String get timerPickerHourLabelFew => r'сата';
 
   @override
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'сат';
+  String get timerPickerHourLabelOne => r'сат';
 
   @override
-  String get timerPickerHourLabelOther => 'сати';
+  String get timerPickerHourLabelOther => r'сати';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -10590,16 +10590,16 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'мин';
+  String get timerPickerMinuteLabelFew => r'мин';
 
   @override
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'мин';
+  String get timerPickerMinuteLabelOne => r'мин';
 
   @override
-  String get timerPickerMinuteLabelOther => 'мин';
+  String get timerPickerMinuteLabelOther => r'мин';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -10608,16 +10608,16 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 'сек';
+  String get timerPickerSecondLabelFew => r'сек';
 
   @override
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'сек';
+  String get timerPickerSecondLabelOne => r'сек';
 
   @override
-  String get timerPickerSecondLabelOther => 'сек';
+  String get timerPickerSecondLabelOther => r'сек';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -10626,7 +10626,7 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Данас';
+  String get todayLabel => r'Данас';
 }
 
 /// The translations for Serbian, using the Cyrillic script (`sr_Cyrl`).
@@ -10685,16 +10685,16 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   );
 
   @override
-  String get alertDialogLabel => 'Obaveštenje';
+  String get alertDialogLabel => r'Obaveštenje';
 
   @override
-  String get anteMeridiemAbbreviation => 'pre podne';
+  String get anteMeridiemAbbreviation => r'pre podne';
 
   @override
-  String get copyButtonLabel => 'Kopiraj';
+  String get copyButtonLabel => r'Kopiraj';
 
   @override
-  String get cutButtonLabel => 'Iseci';
+  String get cutButtonLabel => r'Iseci';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour sata';
@@ -10709,49 +10709,49 @@ class CupertinoLocalizationSrLatn extends CupertinoLocalizationSr {
   String get datePickerMinuteSemanticsLabelFew => r'$minute minuta';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minut';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minut';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuta';
 
   @override
-  String get pasteButtonLabel => 'Nalepi';
+  String get pasteButtonLabel => r'Nalepi';
 
   @override
-  String get postMeridiemAbbreviation => 'po podne';
+  String get postMeridiemAbbreviation => r'po podne';
 
   @override
-  String get selectAllButtonLabel => 'Izaberi sve';
+  String get selectAllButtonLabel => r'Izaberi sve';
 
   @override
-  String get timerPickerHourLabelFew => 'sata';
+  String get timerPickerHourLabelFew => r'sata';
 
   @override
-  String get timerPickerHourLabelOne => 'sat';
+  String get timerPickerHourLabelOne => r'sat';
 
   @override
-  String get timerPickerHourLabelOther => 'sati';
+  String get timerPickerHourLabelOther => r'sati';
 
   @override
-  String get timerPickerMinuteLabelFew => 'min';
+  String get timerPickerMinuteLabelFew => r'min';
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
-  String get timerPickerSecondLabelFew => 'sek';
+  String get timerPickerSecondLabelFew => r'sek';
 
   @override
-  String get timerPickerSecondLabelOne => 'sek';
+  String get timerPickerSecondLabelOne => r'sek';
 
   @override
-  String get timerPickerSecondLabelOther => 'sek';
+  String get timerPickerSecondLabelOther => r'sek';
 
   @override
-  String get todayLabel => 'Danas';
+  String get todayLabel => r'Danas';
 }
 
 /// The translations for Swedish (`sv`).
@@ -10782,22 +10782,22 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Varning';
+  String get alertDialogLabel => r'Varning';
 
   @override
-  String get anteMeridiemAbbreviation => 'FM';
+  String get anteMeridiemAbbreviation => r'FM';
 
   @override
-  String get copyButtonLabel => 'Kopiera';
+  String get copyButtonLabel => r'Kopiera';
 
   @override
-  String get cutButtonLabel => 'Klipp ut';
+  String get cutButtonLabel => r'Klipp ut';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -10824,7 +10824,7 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minut';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minut';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute minuter';
@@ -10836,13 +10836,13 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Klistra in';
+  String get pasteButtonLabel => r'Klistra in';
 
   @override
-  String get postMeridiemAbbreviation => 'EM';
+  String get postMeridiemAbbreviation => r'EM';
 
   @override
-  String get selectAllButtonLabel => 'Markera alla';
+  String get selectAllButtonLabel => r'Markera alla';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -10851,10 +10851,10 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'timme';
+  String get timerPickerHourLabelOne => r'timme';
 
   @override
-  String get timerPickerHourLabelOther => 'timmar';
+  String get timerPickerHourLabelOther => r'timmar';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -10869,10 +10869,10 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => 'min';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -10887,10 +10887,10 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sek';
+  String get timerPickerSecondLabelOne => r'sek';
 
   @override
-  String get timerPickerSecondLabelOther => 'sek';
+  String get timerPickerSecondLabelOther => r'sek';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -10899,7 +10899,7 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'I dag';
+  String get todayLabel => r'I dag';
 }
 
 /// The translations for Swahili (`sw`).
@@ -10930,22 +10930,22 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Arifa';
+  String get alertDialogLabel => r'Arifa';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Nakili';
+  String get copyButtonLabel => r'Nakili';
 
   @override
-  String get cutButtonLabel => 'Kata';
+  String get cutButtonLabel => r'Kata';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -10972,7 +10972,7 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => 'Dakika 1';
+  String get datePickerMinuteSemanticsLabelOne => r'Dakika 1';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'Dakika $minute';
@@ -10984,13 +10984,13 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Bandika';
+  String get pasteButtonLabel => r'Bandika';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Teua Zote';
+  String get selectAllButtonLabel => r'Teua Zote';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -10999,10 +10999,10 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'saa';
+  String get timerPickerHourLabelOne => r'saa';
 
   @override
-  String get timerPickerHourLabelOther => 'saa';
+  String get timerPickerHourLabelOther => r'saa';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -11017,10 +11017,10 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'dakika';
+  String get timerPickerMinuteLabelOne => r'dakika';
 
   @override
-  String get timerPickerMinuteLabelOther => 'dakika';
+  String get timerPickerMinuteLabelOther => r'dakika';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -11035,10 +11035,10 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sekunde';
+  String get timerPickerSecondLabelOne => r'sekunde';
 
   @override
-  String get timerPickerSecondLabelOther => 'sekunde';
+  String get timerPickerSecondLabelOther => r'sekunde';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -11047,7 +11047,7 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Leo';
+  String get todayLabel => r'Leo';
 }
 
 /// The translations for Tamil (`ta`).
@@ -11078,22 +11078,22 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'விழிப்பூட்டல்';
+  String get alertDialogLabel => r'விழிப்பூட்டல்';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'நகலெடு';
+  String get copyButtonLabel => r'நகலெடு';
 
   @override
-  String get cutButtonLabel => 'வெட்டு';
+  String get cutButtonLabel => r'வெட்டு';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -11120,7 +11120,7 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 நிமிடம்';
+  String get datePickerMinuteSemanticsLabelOne => r'1 நிமிடம்';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute நிமிடங்கள்';
@@ -11132,13 +11132,13 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'ஒட்டு';
+  String get pasteButtonLabel => r'ஒட்டு';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'எல்லாம் தேர்ந்தெடு';
+  String get selectAllButtonLabel => r'எல்லாம் தேர்ந்தெடு';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11147,10 +11147,10 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'மணிநேரம்';
+  String get timerPickerHourLabelOne => r'மணிநேரம்';
 
   @override
-  String get timerPickerHourLabelOther => 'மணிநேரம்';
+  String get timerPickerHourLabelOther => r'மணிநேரம்';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -11165,10 +11165,10 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'நிமி.';
+  String get timerPickerMinuteLabelOne => r'நிமி.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'நிமி.';
+  String get timerPickerMinuteLabelOther => r'நிமி.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -11183,10 +11183,10 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'வி.';
+  String get timerPickerSecondLabelOne => r'வி.';
 
   @override
-  String get timerPickerSecondLabelOther => 'வி.';
+  String get timerPickerSecondLabelOther => r'வி.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -11195,7 +11195,7 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'இன்று';
+  String get todayLabel => r'இன்று';
 }
 
 /// The translations for Telugu (`te`).
@@ -11226,22 +11226,22 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'అలర్ట్';
+  String get alertDialogLabel => r'అలర్ట్';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'కాపీ చేయి';
+  String get copyButtonLabel => r'కాపీ చేయి';
 
   @override
-  String get cutButtonLabel => 'కత్తిరించు';
+  String get cutButtonLabel => r'కత్తిరించు';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -11268,7 +11268,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 నిమిషం';
+  String get datePickerMinuteSemanticsLabelOne => r'1 నిమిషం';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute నిమిషాలు';
@@ -11280,13 +11280,13 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'అతికించు';
+  String get pasteButtonLabel => r'అతికించు';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
+  String get selectAllButtonLabel => r'అన్నింటినీ ఎంచుకోండి';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11295,10 +11295,10 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'గంట';
+  String get timerPickerHourLabelOne => r'గంట';
 
   @override
-  String get timerPickerHourLabelOther => 'గంటలు';
+  String get timerPickerHourLabelOther => r'గంటలు';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -11313,10 +11313,10 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'నిమి.';
+  String get timerPickerMinuteLabelOne => r'నిమి.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'నిమి.';
+  String get timerPickerMinuteLabelOther => r'నిమి.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -11331,10 +11331,10 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'సెకన్లు.';
+  String get timerPickerSecondLabelOne => r'సెకన్లు.';
 
   @override
-  String get timerPickerSecondLabelOther => 'సెకన్లు.';
+  String get timerPickerSecondLabelOther => r'సెకన్లు.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -11343,7 +11343,7 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'ఈరోజు';
+  String get todayLabel => r'ఈరోజు';
 }
 
 /// The translations for Thai (`th`).
@@ -11374,22 +11374,22 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'การแจ้งเตือน';
+  String get alertDialogLabel => r'การแจ้งเตือน';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'คัดลอก';
+  String get copyButtonLabel => r'คัดลอก';
 
   @override
-  String get cutButtonLabel => 'ตัด';
+  String get cutButtonLabel => r'ตัด';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -11416,7 +11416,7 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 นาที';
+  String get datePickerMinuteSemanticsLabelOne => r'1 นาที';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute นาที';
@@ -11428,13 +11428,13 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'วาง';
+  String get pasteButtonLabel => r'วาง';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'เลือกทั้งหมด';
+  String get selectAllButtonLabel => r'เลือกทั้งหมด';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11443,10 +11443,10 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ชั่วโมง';
+  String get timerPickerHourLabelOne => r'ชั่วโมง';
 
   @override
-  String get timerPickerHourLabelOther => 'ชั่วโมง';
+  String get timerPickerHourLabelOther => r'ชั่วโมง';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -11461,10 +11461,10 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'นาที';
+  String get timerPickerMinuteLabelOne => r'นาที';
 
   @override
-  String get timerPickerMinuteLabelOther => 'นาที';
+  String get timerPickerMinuteLabelOther => r'นาที';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -11479,10 +11479,10 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'วินาที';
+  String get timerPickerSecondLabelOne => r'วินาที';
 
   @override
-  String get timerPickerSecondLabelOther => 'วินาที';
+  String get timerPickerSecondLabelOther => r'วินาที';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -11491,7 +11491,7 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'วันนี้';
+  String get todayLabel => r'วันนี้';
 }
 
 /// The translations for Tagalog (`tl`).
@@ -11522,22 +11522,22 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Alerto';
+  String get alertDialogLabel => r'Alerto';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopyahin';
+  String get copyButtonLabel => r'Kopyahin';
 
   @override
-  String get cutButtonLabel => 'I-cut';
+  String get cutButtonLabel => r'I-cut';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -11564,7 +11564,7 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minuto';
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuto';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute na minuto';
@@ -11576,13 +11576,13 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'I-paste';
+  String get pasteButtonLabel => r'I-paste';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Piliin Lahat';
+  String get selectAllButtonLabel => r'Piliin Lahat';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11591,10 +11591,10 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'oras';
+  String get timerPickerHourLabelOne => r'oras';
 
   @override
-  String get timerPickerHourLabelOther => 'na oras';
+  String get timerPickerHourLabelOther => r'na oras';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -11609,10 +11609,10 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'min.';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'na min.';
+  String get timerPickerMinuteLabelOther => r'na min.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -11627,10 +11627,10 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'seg.';
+  String get timerPickerSecondLabelOne => r'seg.';
 
   @override
-  String get timerPickerSecondLabelOther => 'na seg.';
+  String get timerPickerSecondLabelOther => r'na seg.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -11639,7 +11639,7 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Ngayon';
+  String get todayLabel => r'Ngayon';
 }
 
 /// The translations for Turkish (`tr`).
@@ -11670,22 +11670,22 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Uyarı';
+  String get alertDialogLabel => r'Uyarı';
 
   @override
-  String get anteMeridiemAbbreviation => 'ÖÖ';
+  String get anteMeridiemAbbreviation => r'ÖÖ';
 
   @override
-  String get copyButtonLabel => 'Kopyala';
+  String get copyButtonLabel => r'Kopyala';
 
   @override
-  String get cutButtonLabel => 'Kes';
+  String get cutButtonLabel => r'Kes';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -11712,7 +11712,7 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 dakika';
+  String get datePickerMinuteSemanticsLabelOne => r'1 dakika';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute dakika';
@@ -11724,13 +11724,13 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Yapıştır';
+  String get pasteButtonLabel => r'Yapıştır';
 
   @override
-  String get postMeridiemAbbreviation => 'ÖS';
+  String get postMeridiemAbbreviation => r'ÖS';
 
   @override
-  String get selectAllButtonLabel => 'Tümünü Seç';
+  String get selectAllButtonLabel => r'Tümünü Seç';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -11739,10 +11739,10 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'saat';
+  String get timerPickerHourLabelOne => r'saat';
 
   @override
-  String get timerPickerHourLabelOther => 'saat';
+  String get timerPickerHourLabelOther => r'saat';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -11757,10 +11757,10 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'dk.';
+  String get timerPickerMinuteLabelOne => r'dk.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'dk.';
+  String get timerPickerMinuteLabelOther => r'dk.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -11775,10 +11775,10 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'sn.';
+  String get timerPickerSecondLabelOne => r'sn.';
 
   @override
-  String get timerPickerSecondLabelOther => 'sn.';
+  String get timerPickerSecondLabelOther => r'sn.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -11787,7 +11787,7 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Bugün';
+  String get todayLabel => r'Bugün';
 }
 
 /// The translations for Ukrainian (`uk`).
@@ -11818,22 +11818,22 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Сповіщення';
+  String get alertDialogLabel => r'Сповіщення';
 
   @override
-  String get anteMeridiemAbbreviation => 'дп';
+  String get anteMeridiemAbbreviation => r'дп';
 
   @override
-  String get copyButtonLabel => 'Копіювати';
+  String get copyButtonLabel => r'Копіювати';
 
   @override
-  String get cutButtonLabel => 'Вирізати';
+  String get cutButtonLabel => r'Вирізати';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => r'$hour години';
@@ -11860,7 +11860,7 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => r'$minute хвилин';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 хвилина';
+  String get datePickerMinuteSemanticsLabelOne => r'1 хвилина';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute хвилини';
@@ -11872,25 +11872,25 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Вставити';
+  String get pasteButtonLabel => r'Вставити';
 
   @override
-  String get postMeridiemAbbreviation => 'пп';
+  String get postMeridiemAbbreviation => r'пп';
 
   @override
-  String get selectAllButtonLabel => 'Вибрати все';
+  String get selectAllButtonLabel => r'Вибрати все';
 
   @override
-  String get timerPickerHourLabelFew => 'години';
+  String get timerPickerHourLabelFew => r'години';
 
   @override
-  String get timerPickerHourLabelMany => 'годин';
+  String get timerPickerHourLabelMany => r'годин';
 
   @override
-  String get timerPickerHourLabelOne => 'година';
+  String get timerPickerHourLabelOne => r'година';
 
   @override
-  String get timerPickerHourLabelOther => 'години';
+  String get timerPickerHourLabelOther => r'години';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -11899,16 +11899,16 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelZero => null;
 
   @override
-  String get timerPickerMinuteLabelFew => 'хв';
+  String get timerPickerMinuteLabelFew => r'хв';
 
   @override
-  String get timerPickerMinuteLabelMany => 'хв';
+  String get timerPickerMinuteLabelMany => r'хв';
 
   @override
-  String get timerPickerMinuteLabelOne => 'хв';
+  String get timerPickerMinuteLabelOne => r'хв';
 
   @override
-  String get timerPickerMinuteLabelOther => 'хв';
+  String get timerPickerMinuteLabelOther => r'хв';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -11917,16 +11917,16 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelZero => null;
 
   @override
-  String get timerPickerSecondLabelFew => 'с';
+  String get timerPickerSecondLabelFew => r'с';
 
   @override
-  String get timerPickerSecondLabelMany => 'с';
+  String get timerPickerSecondLabelMany => r'с';
 
   @override
-  String get timerPickerSecondLabelOne => 'с';
+  String get timerPickerSecondLabelOne => r'с';
 
   @override
-  String get timerPickerSecondLabelOther => 'с';
+  String get timerPickerSecondLabelOther => r'с';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -11935,7 +11935,7 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Сьогодні';
+  String get todayLabel => r'Сьогодні';
 }
 
 /// The translations for Urdu (`ur`).
@@ -11966,22 +11966,22 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'الرٹ';
+  String get alertDialogLabel => r'الرٹ';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'کاپی کریں';
+  String get copyButtonLabel => r'کاپی کریں';
 
   @override
-  String get cutButtonLabel => 'کٹ کریں';
+  String get cutButtonLabel => r'کٹ کریں';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -12008,7 +12008,7 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 منٹ';
+  String get datePickerMinuteSemanticsLabelOne => r'1 منٹ';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute منٹس';
@@ -12020,13 +12020,13 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'پیسٹ کریں';
+  String get pasteButtonLabel => r'پیسٹ کریں';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'سبھی منتخب کریں';
+  String get selectAllButtonLabel => r'سبھی منتخب کریں';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12035,10 +12035,10 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'گھنٹہ';
+  String get timerPickerHourLabelOne => r'گھنٹہ';
 
   @override
-  String get timerPickerHourLabelOther => 'گھنٹے';
+  String get timerPickerHourLabelOther => r'گھنٹے';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -12053,10 +12053,10 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'منٹ۔';
+  String get timerPickerMinuteLabelOne => r'منٹ۔';
 
   @override
-  String get timerPickerMinuteLabelOther => 'منٹ۔';
+  String get timerPickerMinuteLabelOther => r'منٹ۔';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -12071,10 +12071,10 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'سیکنڈ۔';
+  String get timerPickerSecondLabelOne => r'سیکنڈ۔';
 
   @override
-  String get timerPickerSecondLabelOther => 'سیکنڈ۔';
+  String get timerPickerSecondLabelOther => r'سیکنڈ۔';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -12083,7 +12083,7 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'آج';
+  String get todayLabel => r'آج';
 }
 
 /// The translations for Uzbek (`uz`).
@@ -12114,22 +12114,22 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Ogohlantirish';
+  String get alertDialogLabel => r'Ogohlantirish';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Nusxa olish';
+  String get copyButtonLabel => r'Nusxa olish';
 
   @override
-  String get cutButtonLabel => 'Kesib olish';
+  String get cutButtonLabel => r'Kesib olish';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -12156,7 +12156,7 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 daqiqa';
+  String get datePickerMinuteSemanticsLabelOne => r'1 daqiqa';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute daqiqa';
@@ -12168,13 +12168,13 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Joylash';
+  String get pasteButtonLabel => r'Joylash';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Barchasini tanlash';
+  String get selectAllButtonLabel => r'Barchasini tanlash';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12183,10 +12183,10 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'soat';
+  String get timerPickerHourLabelOne => r'soat';
 
   @override
-  String get timerPickerHourLabelOther => 'soat';
+  String get timerPickerHourLabelOther => r'soat';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -12201,10 +12201,10 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'daqiqa';
+  String get timerPickerMinuteLabelOne => r'daqiqa';
 
   @override
-  String get timerPickerMinuteLabelOther => 'daqiqa';
+  String get timerPickerMinuteLabelOther => r'daqiqa';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -12219,10 +12219,10 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'soniya';
+  String get timerPickerSecondLabelOne => r'soniya';
 
   @override
-  String get timerPickerSecondLabelOther => 'soniya';
+  String get timerPickerSecondLabelOther => r'soniya';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -12231,7 +12231,7 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Bugun';
+  String get todayLabel => r'Bugun';
 }
 
 /// The translations for Vietnamese (`vi`).
@@ -12262,22 +12262,22 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Thông báo';
+  String get alertDialogLabel => r'Thông báo';
 
   @override
-  String get anteMeridiemAbbreviation => 'SÁNG';
+  String get anteMeridiemAbbreviation => r'SÁNG';
 
   @override
-  String get copyButtonLabel => 'Sao chép';
+  String get copyButtonLabel => r'Sao chép';
 
   @override
-  String get cutButtonLabel => 'Cắt';
+  String get cutButtonLabel => r'Cắt';
 
   @override
-  String get datePickerDateOrderString => 'dmy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -12304,7 +12304,7 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 phút';
+  String get datePickerMinuteSemanticsLabelOne => r'1 phút';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute phút';
@@ -12316,13 +12316,13 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Dán';
+  String get pasteButtonLabel => r'Dán';
 
   @override
-  String get postMeridiemAbbreviation => 'CHIỀU';
+  String get postMeridiemAbbreviation => r'CHIỀU';
 
   @override
-  String get selectAllButtonLabel => 'Chọn tất cả';
+  String get selectAllButtonLabel => r'Chọn tất cả';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12331,10 +12331,10 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'giờ';
+  String get timerPickerHourLabelOne => r'giờ';
 
   @override
-  String get timerPickerHourLabelOther => 'giờ';
+  String get timerPickerHourLabelOther => r'giờ';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -12349,10 +12349,10 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'phút';
+  String get timerPickerMinuteLabelOne => r'phút';
 
   @override
-  String get timerPickerMinuteLabelOther => 'phút';
+  String get timerPickerMinuteLabelOther => r'phút';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -12367,10 +12367,10 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'giây';
+  String get timerPickerSecondLabelOne => r'giây';
 
   @override
-  String get timerPickerSecondLabelOther => 'giây';
+  String get timerPickerSecondLabelOther => r'giây';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -12379,7 +12379,7 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Hôm nay';
+  String get todayLabel => r'Hôm nay';
 }
 
 /// The translations for Chinese (`zh`).
@@ -12410,22 +12410,22 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => '提醒';
+  String get alertDialogLabel => r'提醒';
 
   @override
-  String get anteMeridiemAbbreviation => '上午';
+  String get anteMeridiemAbbreviation => r'上午';
 
   @override
-  String get copyButtonLabel => '复制';
+  String get copyButtonLabel => r'复制';
 
   @override
-  String get cutButtonLabel => '剪切';
+  String get cutButtonLabel => r'剪切';
 
   @override
-  String get datePickerDateOrderString => 'ymd';
+  String get datePickerDateOrderString => r'ymd';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -12452,7 +12452,7 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 分钟';
+  String get datePickerMinuteSemanticsLabelOne => r'1 分钟';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute 分钟';
@@ -12464,13 +12464,13 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => '粘贴';
+  String get pasteButtonLabel => r'粘贴';
 
   @override
-  String get postMeridiemAbbreviation => '下午';
+  String get postMeridiemAbbreviation => r'下午';
 
   @override
-  String get selectAllButtonLabel => '全选';
+  String get selectAllButtonLabel => r'全选';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12479,10 +12479,10 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => '小时';
+  String get timerPickerHourLabelOne => r'小时';
 
   @override
-  String get timerPickerHourLabelOther => '小时';
+  String get timerPickerHourLabelOther => r'小时';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -12497,10 +12497,10 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => '分钟';
+  String get timerPickerMinuteLabelOne => r'分钟';
 
   @override
-  String get timerPickerMinuteLabelOther => '分钟';
+  String get timerPickerMinuteLabelOther => r'分钟';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -12515,10 +12515,10 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => '秒';
+  String get timerPickerSecondLabelOne => r'秒';
 
   @override
-  String get timerPickerSecondLabelOther => '秒';
+  String get timerPickerSecondLabelOther => r'秒';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -12527,7 +12527,7 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => '今天';
+  String get todayLabel => r'今天';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -12586,16 +12586,16 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   );
 
   @override
-  String get alertDialogLabel => '通知';
+  String get alertDialogLabel => r'通知';
 
   @override
-  String get copyButtonLabel => '複製';
+  String get copyButtonLabel => r'複製';
 
   @override
-  String get cutButtonLabel => '剪下';
+  String get cutButtonLabel => r'剪下';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_dayPeriod_time';
+  String get datePickerDateTimeOrderString => r'date_dayPeriod_time';
 
   @override
   String get datePickerHourSemanticsLabelOne => r'$hour 點';
@@ -12604,28 +12604,28 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get datePickerHourSemanticsLabelOther => r'$hour 點';
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 分鐘';
+  String get datePickerMinuteSemanticsLabelOne => r'1 分鐘';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute 分鐘';
 
   @override
-  String get pasteButtonLabel => '貼上';
+  String get pasteButtonLabel => r'貼上';
 
   @override
-  String get selectAllButtonLabel => '全選';
+  String get selectAllButtonLabel => r'全選';
 
   @override
-  String get timerPickerHourLabelOne => '小時';
+  String get timerPickerHourLabelOne => r'小時';
 
   @override
-  String get timerPickerHourLabelOther => '小時';
+  String get timerPickerHourLabelOther => r'小時';
 
   @override
-  String get timerPickerMinuteLabelOne => '分鐘';
+  String get timerPickerMinuteLabelOne => r'分鐘';
 
   @override
-  String get timerPickerMinuteLabelOther => '分鐘';
+  String get timerPickerMinuteLabelOther => r'分鐘';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -12684,22 +12684,22 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
   );
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 分';
+  String get datePickerMinuteSemanticsLabelOne => r'1 分';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute 分';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
-  String get alertDialogLabel => '快訊';
+  String get alertDialogLabel => r'快訊';
 
   @override
-  String get timerPickerMinuteLabelOne => '分';
+  String get timerPickerMinuteLabelOne => r'分';
 
   @override
-  String get timerPickerMinuteLabelOther => '分';
+  String get timerPickerMinuteLabelOther => r'分';
 }
 
 /// The translations for Zulu (`zu`).
@@ -12730,22 +12730,22 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   );
 
   @override
-  String get alertDialogLabel => 'Isexwayiso';
+  String get alertDialogLabel => r'Isexwayiso';
 
   @override
-  String get anteMeridiemAbbreviation => 'AM';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get copyButtonLabel => 'Kopisha';
+  String get copyButtonLabel => r'Kopisha';
 
   @override
-  String get cutButtonLabel => 'Sika';
+  String get cutButtonLabel => r'Sika';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
+  String get datePickerDateOrderString => r'mdy';
 
   @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
   String get datePickerHourSemanticsLabelFew => null;
@@ -12772,7 +12772,7 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelMany => null;
 
   @override
-  String get datePickerMinuteSemanticsLabelOne => '1 iminithi';
+  String get datePickerMinuteSemanticsLabelOne => r'1 iminithi';
 
   @override
   String get datePickerMinuteSemanticsLabelOther => r'$minute amaminithi';
@@ -12784,13 +12784,13 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => 'Namathisela';
+  String get pasteButtonLabel => r'Namathisela';
 
   @override
-  String get postMeridiemAbbreviation => 'PM';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get selectAllButtonLabel => 'Khetha konke';
+  String get selectAllButtonLabel => r'Khetha konke';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -12799,10 +12799,10 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelMany => null;
 
   @override
-  String get timerPickerHourLabelOne => 'ihora';
+  String get timerPickerHourLabelOne => r'ihora';
 
   @override
-  String get timerPickerHourLabelOther => 'amahora';
+  String get timerPickerHourLabelOther => r'amahora';
 
   @override
   String get timerPickerHourLabelTwo => null;
@@ -12817,10 +12817,10 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get timerPickerMinuteLabelMany => null;
 
   @override
-  String get timerPickerMinuteLabelOne => 'iminithi.';
+  String get timerPickerMinuteLabelOne => r'iminithi.';
 
   @override
-  String get timerPickerMinuteLabelOther => 'iminithi.';
+  String get timerPickerMinuteLabelOther => r'iminithi.';
 
   @override
   String get timerPickerMinuteLabelTwo => null;
@@ -12835,10 +12835,10 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelMany => null;
 
   @override
-  String get timerPickerSecondLabelOne => 'isekhondi.';
+  String get timerPickerSecondLabelOne => r'isekhondi.';
 
   @override
-  String get timerPickerSecondLabelOther => 'isekhondi.';
+  String get timerPickerSecondLabelOther => r'isekhondi.';
 
   @override
   String get timerPickerSecondLabelTwo => null;
@@ -12847,7 +12847,7 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => 'Namuhla';
+  String get todayLabel => r'Namuhla';
 }
 
 /// The set of supported languages, as language code strings.

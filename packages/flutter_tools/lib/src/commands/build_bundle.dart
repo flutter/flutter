@@ -1,14 +1,14 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
@@ -82,7 +82,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
-    final String projectDir = globals.fs.file(targetFile).parent.parent.path;
+    final String projectDir = fs.file(targetFile).parent.parent.path;
     final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
     if (futterProject == null) {
       return const <CustomDimensions, String>{};
@@ -139,6 +139,6 @@ class BuildBundleCommand extends BuildSubCommand {
       fileSystemScheme: stringArg('filesystem-scheme'),
       fileSystemRoots: stringsArg('filesystem-root'),
     );
-    return FlutterCommandResult.success();
+    return null;
   }
 }

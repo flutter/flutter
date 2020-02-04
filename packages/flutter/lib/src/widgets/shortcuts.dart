@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,9 +25,9 @@ import 'inherited_notifier.dart';
 ///
 /// See also:
 ///
-///  * [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
+///  - [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
 ///    define its key map.
-class KeySet<T extends KeyboardKey> {
+class KeySet<T extends KeyboardKey> extends Diagnosticable {
   /// A constructor for making a [KeySet] of up to four keys.
   ///
   /// If you need a set of more than four keys, use [KeySet.fromSet].
@@ -89,13 +89,19 @@ class KeySet<T extends KeyboardKey> {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is KeySet<T>
-        && setEquals<T>(other._keys, _keys);
+    final KeySet<T> typedOther = other;
+    return setEquals<T>(_keys, typedOther._keys);
   }
 
   @override
   int get hashCode {
     return hashList(_keys);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Set<T>>('keys', _keys));
   }
 }
 
@@ -110,7 +116,7 @@ class KeySet<T extends KeyboardKey> {
 /// This is a thin wrapper around a [Set], but changes the equality comparison
 /// from an identity comparison to a contents comparison so that non-identical
 /// sets with the same keys in them will compare as equal.
-class LogicalKeySet extends KeySet<LogicalKeyboardKey> with DiagnosticableMixin implements Diagnosticable {
+class LogicalKeySet extends KeySet<LogicalKeyboardKey> {
   /// A constructor for making a [LogicalKeySet] of up to four keys.
   ///
   /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
@@ -130,78 +136,13 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with DiagnosticableMixin 
   ///
   /// The `keys` must not be null.
   LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys) : super.fromSet(keys);
-
-  static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.alt,
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.meta,
-    LogicalKeyboardKey.shift,
-  };
-
-  /// Returns a description of the key set that is short and readable.
-  ///
-  /// Intended to be used in debug mode for logging purposes.
-  String debugDescribeKeys() {
-    final List<LogicalKeyboardKey> sortedKeys = keys.toList()..sort(
-            (LogicalKeyboardKey a, LogicalKeyboardKey b) {
-          // Put the modifiers first. If it has a synonym, then it's something
-          // like shiftLeft, altRight, etc.
-          final bool aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
-          final bool bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
-          if (aIsModifier && !bIsModifier) {
-            return -1;
-          } else if (bIsModifier && !aIsModifier) {
-            return 1;
-          }
-          return a.debugName.compareTo(b.debugName);
-        }
-    );
-    return sortedKeys.map<String>((LogicalKeyboardKey key) => key.debugName.toString()).join(' + ');
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keys', _keys, description: debugDescribeKeys()));
-  }
-}
-
-/// Diagnostics property which handles formatting a `Map<LogicalKeySet, Intent>`
-/// (the same type as the [Shortcuts.shortcuts] property) so that it is human-readable.
-class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>> {
-  /// Create a diagnostics property for `Map<LogicalKeySet, Intent>` objects,
-  /// which are the same type as the [Shortcuts.shortcuts] property.
-  ///
-  /// The [showName] and [level] arguments must not be null.
-  ShortcutMapProperty(
-    String name,
-    Map<LogicalKeySet, Intent> value, {
-    bool showName = true,
-    Object defaultValue = kNoDefaultValue,
-    DiagnosticLevel level = DiagnosticLevel.info,
-    String description,
-  }) : assert(showName != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         showName: showName,
-         defaultValue: defaultValue,
-         level: level,
-         description: description,
-       );
-
-  @override
-  String valueToString({ TextTreeConfiguration parentConfiguration }) {
-    return '{${value.keys.map<String>((LogicalKeySet keySet) => '{${keySet.debugDescribeKeys()}}: ${value[keySet]}').join(', ')}}';
-  }
 }
 
 /// A manager of keyboard shortcut bindings.
 ///
 /// A [ShortcutManager] is obtained by calling [Shortcuts.of] on the context of
 /// the widget that you want to find a manager for.
-class ShortcutManager extends ChangeNotifier with DiagnosticableMixin implements Diagnosticable {
+class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
   /// Constructs a [ShortcutManager].
   ///
   /// The [shortcuts] argument must not  be null.
@@ -255,7 +196,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin implements
       // have synonyms in the map.  This is for things like left and right shift
       // keys mapping to just the "shift" pseudo-key.
       final Set<LogicalKeyboardKey> pseudoKeys = <LogicalKeyboardKey>{};
-      for (final LogicalKeyboardKey setKey in keySet.keys) {
+      for (LogicalKeyboardKey setKey in keySet.keys) {
         final Set<LogicalKeyboardKey> synonyms = setKey.synonyms;
         if (synonyms.isNotEmpty) {
           // There currently aren't any synonyms that match more than one key.
@@ -290,9 +231,9 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin implements
 ///
 /// See also:
 ///
-///  * [Intent], a class for containing a description of a user action to be
-///    invoked.
-///  * [Action], a class for defining an invocation of a user action.
+///   * [Intent], a class for containing a description of a user
+///     action to be invoked.
+///   * [Action], a class for defining an invocation of a user action.
 class Shortcuts extends StatefulWidget {
   /// Creates a ActionManager object.
   ///
@@ -302,7 +243,6 @@ class Shortcuts extends StatefulWidget {
     this.manager,
     this.shortcuts,
     this.child,
-    this.debugLabel,
   }) : super(key: key);
 
   /// The [ShortcutManager] that will manage the mapping between key
@@ -327,15 +267,6 @@ class Shortcuts extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
-
-  /// The debug label that is printed for this node when logged.
-  ///
-  /// If this label is set, then it will be displayed instead of the shortcut
-  /// map when logged.
-  ///
-  /// This allows simplifying the diagnostic output to avoid cluttering it
-  /// unnecessarily with the default shortcut map.
-  final String debugLabel;
 
   /// Returns the [ActionDispatcher] that most tightly encloses the given
   /// [BuildContext].
@@ -368,8 +299,8 @@ class Shortcuts extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager, defaultValue: null));
-    properties.add(ShortcutMapProperty('shortcuts', shortcuts, description: debugLabel?.isNotEmpty ?? false ? debugLabel : null));
+    properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager));
+    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', shortcuts));
   }
 }
 

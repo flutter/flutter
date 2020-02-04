@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/shell_completion.dart';
 import 'package:process/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -49,8 +48,8 @@ void main() {
       await createTestCommandRunner(command).run(
         <String>['bash-completion', outputFile],
       );
-      expect(globals.fs.isFileSync(outputFile), isTrue);
-      expect(globals.fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
+      expect(fs.isFileSync(outputFile), isTrue);
+      expect(fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -60,7 +59,7 @@ void main() {
     testUsingContext("won't overwrite existing output file ", () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       const String outputFile = 'bash-setup.sh';
-      globals.fs.file(outputFile).createSync();
+      fs.file(outputFile).createSync();
       try {
         await createTestCommandRunner(command).run(
           <String>['bash-completion', outputFile],
@@ -70,8 +69,8 @@ void main() {
         expect(error.exitCode ?? 1, 1);
         expect(error.message, contains('Use --overwrite'));
       }
-      expect(globals.fs.isFileSync(outputFile), isTrue);
-      expect(globals.fs.file(outputFile).readAsStringSync(), isEmpty);
+      expect(fs.isFileSync(outputFile), isTrue);
+      expect(fs.file(outputFile).readAsStringSync(), isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -81,12 +80,12 @@ void main() {
     testUsingContext('will overwrite existing output file if given --overwrite', () async {
       final ShellCompletionCommand command = ShellCompletionCommand();
       const String outputFile = 'bash-setup.sh';
-      globals.fs.file(outputFile).createSync();
+      fs.file(outputFile).createSync();
       await createTestCommandRunner(command).run(
         <String>['bash-completion', '--overwrite', outputFile],
       );
-      expect(globals.fs.isFileSync(outputFile), isTrue);
-      expect(globals.fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
+      expect(fs.isFileSync(outputFile), isTrue);
+      expect(fs.file(outputFile).readAsStringSync(), contains('__flutter_completion'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),

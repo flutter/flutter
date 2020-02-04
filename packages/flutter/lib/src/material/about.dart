@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,7 +33,7 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool snippet --template=stateless_widget_material}
 ///
 /// This sample shows two ways to open [AboutDialog]. The first one
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
@@ -41,7 +41,7 @@ import 'theme.dart';
 /// ```dart
 ///
 ///  Widget build(BuildContext context) {
-///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2;
+///    final TextStyle textStyle = Theme.of(context).textTheme.body1;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
 ///      SizedBox(height: 24),
 ///      RichText(
@@ -78,7 +78,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2014 The Flutter Authors',
+///              applicationLegalese: '© 2019 The Chromium Authors',
 ///              aboutBoxChildren: aboutBoxChildren,
 ///            ),
 ///          ),
@@ -93,7 +93,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2014 The Flutter Authors',
+///              applicationLegalese: '© 2019 The Chromium Authors',
 ///              children: aboutBoxChildren,
 ///            );
 ///          },
@@ -362,29 +362,31 @@ class AboutDialog extends StatelessWidget {
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget icon = applicationIcon ?? _defaultApplicationIcon(context);
     return AlertDialog(
-      content: ListBody(
-        children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: ListBody(
-                    children: <Widget>[
-                      Text(name, style: Theme.of(context).textTheme.headline5),
-                      Text(version, style: Theme.of(context).textTheme.bodyText2),
-                      Container(height: 18.0),
-                      Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
-                    ],
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: ListBody(
+                      children: <Widget>[
+                        Text(name, style: Theme.of(context).textTheme.headline),
+                        Text(version, style: Theme.of(context).textTheme.body1),
+                        Container(height: 18.0),
+                        Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          ...?children,
-        ],
+              ],
+            ),
+            ...?children,
+          ],
+        ),
       ),
       actions: <Widget>[
         FlatButton(
@@ -406,7 +408,6 @@ class AboutDialog extends StatelessWidget {
           },
         ),
       ],
-      scrollable: true,
     );
   }
 }
@@ -487,7 +488,7 @@ class _LicensePageState extends State<LicensePage> {
       debugFlowId = flow.id;
       return true;
     }());
-    await for (final LicenseEntry license in LicenseRegistry.licenses) {
+    await for (LicenseEntry license in LicenseRegistry.licenses) {
       if (!mounted) {
         return;
       }
@@ -522,7 +523,7 @@ class _LicensePageState extends State<LicensePage> {
             textAlign: TextAlign.center,
           ),
         ));
-        for (final LicenseParagraph paragraph in paragraphs) {
+        for (LicenseParagraph paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
             _licenses.add(Padding(
               padding: const EdgeInsets.only(top: 16.0),
@@ -575,13 +576,13 @@ class _LicensePageState extends State<LicensePage> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
                 children: <Widget>[
-                  Text(name, style: Theme.of(context).textTheme.headline5, textAlign: TextAlign.center),
+                  Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
                   if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
-                  Text(version, style: Theme.of(context).textTheme.bodyText2, textAlign: TextAlign.center),
+                  Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
                   Container(height: 18.0),
                   Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
                   Container(height: 18.0),
-                  Text('Powered by Flutter', style: Theme.of(context).textTheme.bodyText2, textAlign: TextAlign.center),
+                  Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
                   Container(height: 24.0),
                   ..._licenses,
                   if (!_loaded)

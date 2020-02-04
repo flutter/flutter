@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,14 +19,14 @@ const String _kSecondIsolateName = 'second isolate name';
 
 void main() {
   task(() async {
-    final AndroidDevice device = await devices.workingDevice as AndroidDevice;
+    final AndroidDevice device = await devices.workingDevice;
     await device.unlock();
 
     section('Compile and run the tester app');
     Completer<void> firstNameFound = Completer<void>();
     Completer<void> secondNameFound = Completer<void>();
     final Process runProcess = await _run(device: device, command:
-        <String>['run', '--disable-service-auth-codes', '--no-fast-start'], stdoutListener: (String line) {
+        <String>['run', '--disable-service-auth-codes'], stdoutListener: (String line) {
       if (line.contains(_kFirstIsolateName)) {
         firstNameFound.complete();
       } else if (line.contains(_kSecondIsolateName)) {
@@ -51,7 +51,7 @@ void main() {
     print('Extracted observatory port: $observatoryUri');
     final Process attachProcess =
       await _run(device: device, command: <String>['attach', '--debug-uri',
-          observatoryUri, '--isolate-filter', _kSecondIsolateName], stdoutListener: (String line) {
+          observatoryUri, '--isolate-filter', '$_kSecondIsolateName'], stdoutListener: (String line) {
         if (line.contains(_kFirstIsolateName)) {
           firstNameFound.complete();
         } else if (line.contains(_kSecondIsolateName)) {

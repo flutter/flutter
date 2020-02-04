@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -219,7 +219,8 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _actionMap = <LocalKey, ActionFactory>{
-      ActivateAction.key: _createAction,
+      SelectAction.key: _createAction,
+      if (!kIsWeb) ActivateAction.key: _createAction,
     };
   }
 
@@ -233,7 +234,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
 
   Action _createAction() {
     return CallbackAction(
-      ActivateAction.key,
+      SelectAction.key,
       onInvoke: _actionHandler,
     );
   }
@@ -334,7 +335,6 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
           value: widget.value,
           onChanged: widget.onChanged,
           activeColor: widget.activeColor,
-          trackColor: widget.inactiveTrackColor
         ),
       ),
     );
@@ -354,7 +354,6 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
           case TargetPlatform.fuchsia:
             return buildMaterialSwitch(context);
           case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
             return buildCupertinoSwitch(context);
         }
       }

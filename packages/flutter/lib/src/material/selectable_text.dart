@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -48,7 +48,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   _SelectableTextSelectionGestureDetectorBuilder({
     @required _SelectableTextState state,
   }) : _state = state,
-       super(delegate: state);
+      super(delegate: state);
 
   final _SelectableTextState _state;
 
@@ -70,7 +70,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
@@ -94,7 +93,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
           renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
           break;
         case TargetPlatform.android:
@@ -112,7 +110,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
@@ -143,7 +140,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// SelectableText(
@@ -159,7 +156,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// that follows displays "Hello beautiful world" with different styles
 /// for each word.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// const SelectableText.rich(
@@ -201,10 +198,10 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
-    this.textScaleFactor,
     this.showCursor = false,
     this.autofocus = false,
     ToolbarOptions toolbarOptions,
+    this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
     this.cursorRadius,
@@ -218,6 +215,11 @@ class SelectableText extends StatefulWidget {
         assert(autofocus != null),
         assert(dragStartBehavior != null),
         assert(maxLines == null || maxLines > 0),
+        assert(minLines == null || minLines > 0),
+        assert(
+          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+          'minLines can\'t be greater than maxLines',
+        ),
         assert(
           data != null,
           'A non-null String must be provided to a SelectableText widget.',
@@ -244,10 +246,10 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
-    this.textScaleFactor,
     this.showCursor = false,
     this.autofocus = false,
     ToolbarOptions toolbarOptions,
+    this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
     this.cursorRadius,
@@ -261,6 +263,11 @@ class SelectableText extends StatefulWidget {
     assert(autofocus != null),
     assert(dragStartBehavior != null),
     assert(maxLines == null || maxLines > 0),
+    assert(minLines == null || minLines > 0),
+    assert(
+      (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+      'minLines can\'t be greater than maxLines',
+    ),
     assert(
       textSpan != null,
       'A non-null TextSpan must be provided to a SelectableText.rich widget.',
@@ -323,11 +330,11 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textDirection}
   final TextDirection textDirection;
 
-  /// {@macro flutter.widgets.editableText.textScaleFactor}
-  final double textScaleFactor;
-
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
+
+  /// {@macro flutter.widgets.editableText.minLines}
+  final int minLines;
 
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
@@ -381,7 +388,7 @@ class SelectableText extends StatefulWidget {
   /// selectable text's internal gesture detector, use a [Listener].
   final GestureTapCallback onTap;
 
-  /// {@macro flutter.widgets.editableText.scrollPhysics}
+  /// {@macro flutter.widgets.edtiableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
@@ -398,10 +405,10 @@ class SelectableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('showCursor', showCursor, defaultValue: false));
+    properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
@@ -471,7 +478,6 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.longPress) {
           _editableText?.bringIntoView(selection.base);
         }
@@ -539,7 +545,6 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
     switch (themeData.platform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
@@ -578,10 +583,10 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         strutStyle: widget.strutStyle ?? StrutStyle.disabled,
         textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
         textDirection: widget.textDirection,
-        textScaleFactor: widget.textScaleFactor,
         autofocus: widget.autofocus,
         forceLine: false,
         toolbarOptions: widget.toolbarOptions,
+        minLines: widget.minLines,
         maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
         selectionColor: themeData.textSelectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,

@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -150,7 +150,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 /// See also:
 ///
-///  * [isSingleButton], which checks if a `buttons` contains exactly one button.
+///   * [isSingleButton], which checks if a `buttons` contains exactly one button.
 int smallestButton(int buttons) => buttons & (-buttons);
 
 /// Returns whether `buttons` contains one and only one button.
@@ -170,8 +170,8 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///
 /// See also:
 ///
-///  * [smallestButton], which returns the button in a `buttons` bit field with
-///    the smallest integer button.
+///   * [smallestButton], which returns the button in a `buttons` bit field with
+///     the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
 /// Base class for touch, stylus, or mouse events.
@@ -257,10 +257,11 @@ abstract class PointerEvent extends Diagnosticable {
   /// system according to [transform].
   ///
   /// If this event has not been transformed, [position] is returned as-is.
+  ///
   /// See also:
   ///
-  ///  * [position], which is the position in the global coordinate system of
-  ///    the screen.
+  ///  * [globalPosition], which is the position in the global coordinate
+  ///    system of the screen.
   final Offset localPosition;
 
   /// Distance in logical pixels that the pointer moved since the last
@@ -419,7 +420,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// Set if the event was synthesized by Flutter.
   ///
   /// We occasionally synthesize PointerEvents that aren't exact translations
-  /// of [PointerData] from the engine to cover small cross-OS discrepancies
+  /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.
   ///
   /// For instance, on end events, Android always drops any location changes
@@ -631,7 +632,7 @@ class PointerAddedEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original as PointerAddedEvent ?? this,
+      original: original ?? this,
     );
   }
 }
@@ -693,7 +694,7 @@ class PointerRemovedEvent extends PointerEvent {
       radiusMin: radiusMin,
       radiusMax: radiusMax,
       transform: transform,
-      original: original as PointerRemovedEvent ?? this,
+      original: original ?? this,
     );
   }
 }
@@ -798,7 +799,7 @@ class PointerHoverEvent extends PointerEvent {
       tilt: tilt,
       synthesized: synthesized,
       transform: transform,
-      original: original as PointerHoverEvent ?? this,
+      original: original ?? this,
     );
   }
 }
@@ -906,7 +907,7 @@ class PointerEnterEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original as PointerEnterEvent,
+    original: event?.original,
   );
 
   @override
@@ -944,7 +945,7 @@ class PointerEnterEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original as PointerEnterEvent ?? this,
+      original: original ?? this,
     );
   }
 }
@@ -1052,7 +1053,7 @@ class PointerExitEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original as PointerExitEvent,
+    original: event?.original,
   );
 
   @override
@@ -1090,7 +1091,7 @@ class PointerExitEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original as PointerExitEvent ?? this,
+      original: original ?? this,
     );
   }
 }
@@ -1174,7 +1175,7 @@ class PointerDownEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original as PointerDownEvent ?? this,
+      original: original ?? this,
     );
   }
 }
@@ -1283,7 +1284,7 @@ class PointerMoveEvent extends PointerEvent {
       platformData: platformData,
       synthesized: synthesized,
       transform: transform,
-      original: original as PointerMoveEvent ?? this,
+      original: original ?? this,
     );
   }
 }
@@ -1371,7 +1372,7 @@ class PointerUpEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original as PointerUpEvent ?? this,
+      original: original ?? this,
     );
   }
 }
@@ -1453,7 +1454,7 @@ class PointerScrollEvent extends PointerSignalEvent {
       localPosition: PointerEvent.transformPosition(transform, position),
       scrollDelta: scrollDelta,
       transform: transform,
-      original: original as PointerScrollEvent ?? this,
+      original: original ?? this,
     );
   }
 
@@ -1543,7 +1544,7 @@ class PointerCancelEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original as PointerCancelEvent ?? this,
+      original: original ?? this,
     );
   }
 }

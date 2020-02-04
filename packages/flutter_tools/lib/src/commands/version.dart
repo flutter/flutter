@@ -1,23 +1,23 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals.dart' as globals;
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
   VersionCommand() : super() {
-    usesPubOption(hide: true);
     argParser.addFlag('force',
       abbr: 'f',
       help: 'Force switch to older Flutter versions that do not include a version command',
@@ -56,12 +56,12 @@ class VersionCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<String> tags = await getTags();
     if (argResults.rest.isEmpty) {
-      tags.forEach(globals.printStatus);
+      tags.forEach(printStatus);
       return const FlutterCommandResult(ExitStatus.success);
     }
     final String version = argResults.rest[0].replaceFirst('v', '');
     if (!tags.contains('v$version')) {
-      globals.printError('There is no version: $version');
+      printError('There is no version: $version');
     }
 
     // check min supported version
@@ -73,9 +73,9 @@ class VersionCommand extends FlutterCommand {
     bool withForce = false;
     if (targetVersion < minSupportedVersion) {
       if (!boolArg('force')) {
-        globals.printError(
-          'Version command is not supported in $targetVersion and it is supported since version $minSupportedVersion '
-          'which means if you switch to version $minSupportedVersion then you can not use version command. '
+        printError(
+          'Version command is not supported in $targetVersion and it is supported since version $minSupportedVersion'
+          'which means if you switch to version $minSupportedVersion then you can not use version command.'
           'If you really want to switch to version $targetVersion, please use `--force` flag: `flutter version --force $targetVersion`.'
         );
         return const FlutterCommandResult(ExitStatus.success);
@@ -95,16 +95,16 @@ class VersionCommand extends FlutterCommand {
 
     final FlutterVersion flutterVersion = FlutterVersion();
 
-    globals.printStatus('Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}');
+    printStatus('Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}');
 
     // Check for and download any engine and pkg/ updates.
     // We run the 'flutter' shell script re-entrantly here
     // so that it will download the updated Dart and so forth
     // if necessary.
-    globals.printStatus('');
-    globals.printStatus('Downloading engine...');
+    printStatus('');
+    printStatus('Downloading engine...');
     int code = await processUtils.stream(<String>[
-      globals.fs.path.join('bin', 'flutter'),
+      fs.path.join('bin', 'flutter'),
       '--no-color',
       'precache',
     ], workingDirectory: Cache.flutterRoot, allowReentrantFlutter: true);
@@ -113,12 +113,12 @@ class VersionCommand extends FlutterCommand {
       throwToolExit(null, exitCode: code);
     }
 
-    globals.printStatus('');
-    globals.printStatus(flutterVersion.toString());
+    printStatus('');
+    printStatus(flutterVersion.toString());
 
     final String projectRoot = findProjectRoot();
-    if (projectRoot != null && shouldRunPub) {
-      globals.printStatus('');
+    if (projectRoot != null) {
+      printStatus('');
       await pub.get(
         context: PubContext.pubUpgrade,
         directory: projectRoot,
@@ -128,11 +128,11 @@ class VersionCommand extends FlutterCommand {
     }
 
     // Run a doctor check in case system requirements have changed.
-    globals.printStatus('');
-    globals.printStatus('Running flutter doctor...');
+    printStatus('');
+    printStatus('Running flutter doctor...');
     code = await processUtils.stream(
       <String>[
-        globals.fs.path.join('bin', 'flutter'),
+        fs.path.join('bin', 'flutter'),
         'doctor',
       ],
       workingDirectory: Cache.flutterRoot,
@@ -143,6 +143,6 @@ class VersionCommand extends FlutterCommand {
       throwToolExit(null, exitCode: code);
     }
 
-    return FlutterCommandResult.success();
+    return const FlutterCommandResult(ExitStatus.success);
   }
 }

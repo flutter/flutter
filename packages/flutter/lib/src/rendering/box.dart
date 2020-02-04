@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -90,10 +90,7 @@ class BoxConstraints extends Constraints {
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
     this.maxHeight = double.infinity,
-  }) : assert (minWidth != null),
-       assert (maxWidth != null),
-       assert (minHeight != null),
-       assert (maxHeight != null);
+  });
 
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)
@@ -213,10 +210,10 @@ class BoxConstraints extends Constraints {
   /// as close as possible to the original constraints.
   BoxConstraints enforce(BoxConstraints constraints) {
     return BoxConstraints(
-      minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth) as double,
-      maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth) as double,
-      minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight) as double,
-      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight) as double,
+      minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
+      maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
+      minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight),
+      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight),
     );
   }
 
@@ -224,12 +221,10 @@ class BoxConstraints extends Constraints {
   /// the given width and height as possible while still respecting the original
   /// box constraints.
   BoxConstraints tighten({ double width, double height }) {
-    return BoxConstraints(
-      minWidth: width == null ? minWidth : width.clamp(minWidth, maxWidth) as double,
-      maxWidth: width == null ? maxWidth : width.clamp(minWidth, maxWidth) as double,
-      minHeight: height == null ? minHeight : height.clamp(minHeight, maxHeight) as double,
-      maxHeight: height == null ? maxHeight : height.clamp(minHeight, maxHeight) as double,
-    );
+    return BoxConstraints(minWidth: width == null ? minWidth : width.clamp(minWidth, maxWidth),
+                              maxWidth: width == null ? maxWidth : width.clamp(minWidth, maxWidth),
+                              minHeight: height == null ? minHeight : height.clamp(minHeight, maxHeight),
+                              maxHeight: height == null ? maxHeight : height.clamp(minHeight, maxHeight));
   }
 
   /// A box constraints with the width and height constraints flipped.
@@ -254,14 +249,14 @@ class BoxConstraints extends Constraints {
   /// possible to the given width.
   double constrainWidth([ double width = double.infinity ]) {
     assert(debugAssertIsValid());
-    return width.clamp(minWidth, maxWidth) as double;
+    return width.clamp(minWidth, maxWidth);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as
   /// possible to the given height.
   double constrainHeight([ double height = double.infinity ]) {
     assert(debugAssertIsValid());
-    return height.clamp(minHeight, maxHeight) as double;
+    return height.clamp(minHeight, maxHeight);
   }
 
   Size _debugPropagateDebugSize(Size size, Size result) {
@@ -276,10 +271,8 @@ class BoxConstraints extends Constraints {
   /// Returns the size that both satisfies the constraints and is as close as
   /// possible to the given size.
   ///
-  /// See also:
-  ///
-  ///  * [constrainDimensions], which applies the same algorithm to
-  ///    separately provided widths and heights.
+  /// See also [constrainDimensions], which applies the same algorithm to
+  /// separately provided widths and heights.
   Size constrain(Size size) {
     Size result = Size(constrainWidth(size.width), constrainHeight(size.height));
     assert(() {
@@ -584,18 +577,18 @@ class BoxConstraints extends Constraints {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     assert(debugAssertIsValid());
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    assert(other is BoxConstraints && other.debugAssertIsValid());
-    return other is BoxConstraints
-        && other.minWidth == minWidth
-        && other.maxWidth == maxWidth
-        && other.minHeight == minHeight
-        && other.maxHeight == maxHeight;
+    final BoxConstraints typedOther = other;
+    assert(typedOther.debugAssertIsValid());
+    return minWidth == typedOther.minWidth &&
+           maxWidth == typedOther.maxWidth &&
+           minHeight == typedOther.minHeight &&
+           maxHeight == typedOther.maxHeight;
   }
 
   @override
@@ -686,7 +679,7 @@ class BoxHitTestResult extends HitTestResult {
   /// the child speaks a different hit test protocol then the parent and the
   /// position is not required to do the actual hit testing in that protocol.
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   /// This method is used in [RenderBox.hitTestChildren] when the child and
   /// parent don't share the same origin.
   ///
@@ -823,7 +816,7 @@ class BoxHitTestEntry extends HitTestEntry {
       super(target);
 
   @override
-  RenderBox get target => super.target as RenderBox;
+  RenderBox get target => super.target;
 
   /// The position of the hit test in the local coordinates of [target].
   final Offset localPosition;
@@ -858,10 +851,12 @@ class _IntrinsicDimensionsCacheEntry {
   final double argument;
 
   @override
-  bool operator ==(Object other) {
-    return other is _IntrinsicDimensionsCacheEntry
-        && other.dimension == dimension
-        && other.argument == argument;
+  bool operator ==(dynamic other) {
+    if (other is! _IntrinsicDimensionsCacheEntry)
+      return false;
+    final _IntrinsicDimensionsCacheEntry typedOther = other;
+    return dimension == typedOther.dimension &&
+           argument == typedOther.argument;
   }
 
   @override
@@ -1316,7 +1311,8 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive as it can result in O(N^2) behavior.
+  /// Calling this function is expensive and as it can result in O(N^2)
+  /// behavior.
   ///
   /// Do not override this method. Instead, implement [computeMinIntrinsicWidth].
   @mustCallSuper
@@ -1455,7 +1451,8 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive as it can result in O(N^2) behavior.
+  /// Calling this function is expensive and as it can result in O(N^2)
+  /// behavior.
   ///
   /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicWidth].
@@ -1514,9 +1511,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also:
-  ///
-  ///  * [computeMinIntrinsicWidth], which has usage examples.
+  /// See also examples in the definition of [computeMinIntrinsicWidth].
   @protected
   double computeMaxIntrinsicWidth(double height) {
     return 0.0;
@@ -1534,7 +1529,8 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive as it can result in O(N^2) behavior.
+  /// Calling this function is expensive and as it can result in O(N^2)
+  /// behavior.
   ///
   /// Do not override this method. Instead, implement
   /// [computeMinIntrinsicHeight].
@@ -1589,9 +1585,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also:
-  ///
-  ///  * [computeMinIntrinsicWidth], which has usage examples.
+  /// See also examples in the definition of [computeMinIntrinsicWidth].
   @protected
   double computeMinIntrinsicHeight(double width) {
     return 0.0;
@@ -1610,7 +1604,8 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive as it can result in O(N^2) behavior.
+  /// Calling this function is expensive and as it can result in O(N^2)
+  /// behavior.
   ///
   /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicHeight].
@@ -1669,9 +1664,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also:
-  ///
-  ///  * [computeMinIntrinsicWidth], which has usage examples.
+  /// See also examples in the definition of [computeMinIntrinsicWidth].
   @protected
   double computeMaxIntrinsicHeight(double width) {
     return 0.0;
@@ -1693,8 +1686,8 @@ abstract class RenderBox extends RenderObject {
   Size get size {
     assert(hasSize, 'RenderBox was not laid out: ${toString()}');
     assert(() {
-      final Size _size = this._size;
       if (_size is _DebugSize) {
+        final _DebugSize _size = this._size;
         assert(_size._owner == this);
         if (RenderObject.debugActiveLayout != null) {
           // We are always allowed to access our own size (for print debugging
@@ -1857,7 +1850,7 @@ abstract class RenderBox extends RenderObject {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
     assert(() {
-      final RenderObject parent = this.parent as RenderObject;
+      final RenderObject parent = this.parent;
       if (owner.debugDoingLayout)
         return (RenderObject.debugActiveLayout == parent) && parent.debugDoingThisLayout;
       if (owner.debugDoingPaint)
@@ -1920,7 +1913,7 @@ abstract class RenderBox extends RenderObject {
 
   /// The box constraints most recently received from the parent.
   @override
-  BoxConstraints get constraints => super.constraints as BoxConstraints;
+  BoxConstraints get constraints => super.constraints;
 
   @override
   void debugAssertDoesMeetConstraints() {
@@ -1953,14 +1946,14 @@ abstract class RenderBox extends RenderObject {
         if (!constraints.hasBoundedWidth) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
-            node = node.parent as RenderBox;
+            node = node.parent;
 
           information.add(node.describeForError('The nearest ancestor providing an unbounded width constraint is'));
         }
         if (!constraints.hasBoundedHeight) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
-            node = node.parent as RenderBox;
+            node = node.parent;
 
           information.add(node.describeForError('The nearest ancestor providing an unbounded height constraint is'));
         }
@@ -2215,7 +2208,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    final BoxParentData childParentData = child.parentData as BoxParentData;
+    final BoxParentData childParentData = child.parentData;
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
   }
@@ -2441,7 +2434,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     assert(!debugNeedsLayout);
     ChildType child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData;
       final double result = child.getDistanceToActualBaseline(baseline);
       if (result != null)
         return result + childParentData.offset.dy;
@@ -2459,7 +2452,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     double result;
     ChildType child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData;
       double candidate = child.getDistanceToActualBaseline(baseline);
       if (candidate != null) {
         candidate += childParentData.offset.dy;
@@ -2486,7 +2479,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -2511,7 +2504,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   void defaultPaint(PaintingContext context, Offset offset) {
     ChildType child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
+      final ParentDataType childParentData = child.parentData;
       context.paintChild(child, childParentData.offset + offset);
       child = childParentData.nextSibling;
     }
@@ -2526,8 +2519,8 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     final List<ChildType> result = <ChildType>[];
     RenderBox child = firstChild;
     while (child != null) {
-      final ParentDataType childParentData = child.parentData as ParentDataType;
-      result.add(child as ChildType);
+      final ParentDataType childParentData = child.parentData;
+      result.add(child);
       child = childParentData.nextSibling;
     }
     return result;

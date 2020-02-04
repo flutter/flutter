@@ -1,11 +1,12 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
@@ -142,7 +143,6 @@ class TextPainter {
     Locale locale,
     StrutStyle strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -156,8 +156,7 @@ class TextPainter {
        _ellipsis = ellipsis,
        _locale = locale,
        _strutStyle = strutStyle,
-       _textWidthBasis = textWidthBasis,
-       _textHeightBehavior = textHeightBehavior;
+       _textWidthBasis = textWidthBasis;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -171,8 +170,6 @@ class TextPainter {
   void markNeedsLayout() {
     _paragraph = null;
     _needsLayout = true;
-    _previousCaretPosition = null;
-    _previousCaretPrototype = null;
   }
 
   /// The (potentially styled) text to paint.
@@ -342,16 +339,6 @@ class TextPainter {
     markNeedsLayout();
   }
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
-  ui.TextHeightBehavior get textHeightBehavior => _textHeightBehavior;
-  ui.TextHeightBehavior _textHeightBehavior;
-  set textHeightBehavior(ui.TextHeightBehavior value) {
-    assert(value != null);
-    if (_textHeightBehavior == value)
-      return;
-    _textHeightBehavior = value;
-    markNeedsLayout();
-  }
 
   ui.Paragraph _layoutTemplate;
 
@@ -411,7 +398,6 @@ class TextPainter {
       textDirection: textDirection ?? defaultTextDirection,
       textScaleFactor: textScaleFactor,
       maxLines: _maxLines,
-      textHeightBehavior: _textHeightBehavior,
       ellipsis: _ellipsis,
       locale: _locale,
       strutStyle: _strutStyle,
@@ -419,7 +405,6 @@ class TextPainter {
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
       maxLines: maxLines,
-      textHeightBehavior: _textHeightBehavior,
       ellipsis: ellipsis,
       locale: locale,
     );
@@ -564,7 +549,7 @@ class TextPainter {
     _lastMaxWidth = maxWidth;
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
-      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
+      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth);
       if (newWidth != width) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
       }
@@ -834,9 +819,14 @@ class TextPainter {
     return _paragraph.getWordBoundary(position);
   }
 
-  /// Returns the text range of the line at the given offset.
+  /// Returns the [TextRange] of the line at the given [TextPosition].
   ///
-  /// The newline, if any, is included in the range.
+  /// The newline, if any, is returned as part of the range.
+  ///
+  /// Not valid until after layout.
+  ///
+  /// This can potentially be expensive, since it needs to compute the full
+  /// layout before it is available.
   TextRange getLineBoundary(TextPosition position) {
     assert(!_needsLayout);
     return _paragraph.getLineBoundary(position);

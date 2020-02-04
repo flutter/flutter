@@ -1,9 +1,9 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../base/process.dart';
-import '../globals.dart' as globals;
+import '../globals.dart';
 
 import 'fuchsia_device.dart';
 
@@ -23,10 +23,10 @@ class FuchsiaTilesCtl {
     final FuchsiaTilesCtl tilesCtl = fuchsiaDeviceTools.tilesCtl;
     final Map<int, String> runningApps = await tilesCtl.list(device);
     if (runningApps == null) {
-      globals.printTrace('tiles_ctl is not running');
+      printTrace('tiles_ctl is not running');
       return -1;
     }
-    for (final MapEntry<int, String> entry in runningApps.entries) {
+    for (MapEntry<int, String> entry in runningApps.entries) {
       if (entry.value.contains('$appName#meta')) {
         return entry.key;
       }
@@ -70,7 +70,7 @@ class FuchsiaTilesCtl {
       return null;
     }
     // Find lines beginning with 'Tile'
-    for (final String line in result.stdout.split('\n')) {
+    for (String line in result.stdout.split('\n')) {
       final List<String> words = line.split(' ');
       if (words.isNotEmpty && words[0] == 'Tile') {
         final int key = int.tryParse(words[2]);

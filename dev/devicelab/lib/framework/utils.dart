@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -63,7 +63,7 @@ class HealthCheckResult {
     if (details != null && details.trim().isNotEmpty) {
       buf.writeln();
       // Indent details by 4 spaces
-      for (final String line in details.trim().split('\n')) {
+      for (String line in details.trim().split('\n')) {
         buf.writeln('    $line');
       }
     }
@@ -119,7 +119,7 @@ void recursiveCopy(Directory source, Directory target) {
   if (!target.existsSync())
     target.createSync();
 
-  for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
+  for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
     if (entity is Directory && !entity.path.contains('.dart_tool'))
       recursiveCopy(entity, Directory(path.join(target.path, name)));
@@ -186,7 +186,7 @@ void section(String title) {
 Future<String> getDartVersion() async {
   // The Dart VM returns the version text to stderr.
   final ProcessResult result = _processManager.runSync(<String>[dartBin, '--version']);
-  String version = (result.stderr as String).trim();
+  String version = result.stderr.trim();
 
   // Convert:
   //   Dart VM version: 1.17.0-dev.2.0 (Tue May  3 12:14:52 2016) on "macos_x64"
@@ -286,7 +286,7 @@ Future<void> forceQuitRunningProcesses() async {
   await Future<void>.delayed(const Duration(seconds: 1));
 
   // Whatever's left, kill it.
-  for (final ProcessInfo p in _runningProcesses) {
+  for (ProcessInfo p in _runningProcesses) {
     print('Force-quitting process:\n$p');
     if (!p.process.kill()) {
       print('Failed to force quit process');
@@ -304,20 +304,7 @@ Future<int> exec(
   String workingDirectory,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
-  await forwardStandardStreams(process);
-  final int exitCode = await process.exitCode;
 
-  if (exitCode != 0 && !canFail)
-    fail('Executable "$executable" failed with exit code $exitCode.');
-
-  return exitCode;
-}
-
-/// Forwards standard out and standard error from [process] to this process'
-/// respective outputs.
-///
-/// Returns a future that completes when both out and error streams a closed.
-Future<void> forwardStandardStreams(Process process) {
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
   process.stdout
@@ -333,7 +320,13 @@ Future<void> forwardStandardStreams(Process process) {
         print('stderr: $line');
       }, onDone: () { stderrDone.complete(); });
 
-  return Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
+  final int exitCode = await process.exitCode;
+
+  if (exitCode != 0 && !canFail)
+    fail('Executable "$executable" failed with exit code $exitCode.');
+
+  return exitCode;
 }
 
 /// Executes a command and returns its standard output as a String.
@@ -472,7 +465,7 @@ String requireEnvVar(String name) {
 T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
   if (!map.containsKey(propertyName))
     fail('Configuration property not found: $propertyName');
-  final T result = map[propertyName] as T;
+  final T result = map[propertyName];
   return result;
 }
 
@@ -578,7 +571,7 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
     return null;
   }
 
-  final String token = args['cloud-auth-token'] as String;
+  final String token = args['cloud-auth-token'];
   if (token == null) {
     stderr.writeln('Required option --cloud-auth-token not found');
     return null;
@@ -630,20 +623,20 @@ Uri parseServiceUri(String line, {
 /// Checks that the file exists, otherwise throws a [FileSystemException].
 void checkFileExists(String file) {
   if (!exists(File(file))) {
-    throw FileSystemException('Expected file to exist.', file);
+    throw FileSystemException('Expected file to exit.', file);
   }
 }
 
 /// Checks that the file does not exists, otherwise throws a [FileSystemException].
 void checkFileNotExists(String file) {
   if (exists(File(file))) {
-    throw FileSystemException('Expected file to not exist.', file);
+    throw FileSystemException('Expected file to exit.', file);
   }
 }
 
 /// Check that `collection` contains all entries in `values`.
 void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
-  for (final T value in values) {
+  for (T value in values) {
     if (!collection.contains(value)) {
       throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
     }
@@ -652,7 +645,7 @@ void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
 
 /// Check that `collection` does not contain any entries in `values`
 void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
-  for (final T value in values) {
+  for (T value in values) {
     if (collection.contains(value)) {
       throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
     }
@@ -663,7 +656,7 @@ void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection
 /// [Pattern]s, otherwise throws a [TaskResult].
 void checkFileContains(List<Pattern> patterns, String filePath) {
   final String fileContent = File(filePath).readAsStringSync();
-  for (final Pattern pattern in patterns) {
+  for (Pattern pattern in patterns) {
     if (!fileContent.contains(pattern)) {
       throw TaskResult.failure(
         'Expected to find `$pattern` in `$filePath` '

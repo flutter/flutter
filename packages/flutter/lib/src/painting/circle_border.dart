@@ -1,10 +1,8 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-
-import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'borders.dart';
@@ -83,11 +81,11 @@ class CircleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+  bool operator ==(dynamic other) {
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is CircleBorder
-        && other.side == side;
+    final CircleBorder typedOther = other;
+    return side == typedOther.side;
   }
 
   @override
@@ -95,6 +93,6 @@ class CircleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'CircleBorder')}($side)';
+    return '$runtimeType($side)';
   }
 }

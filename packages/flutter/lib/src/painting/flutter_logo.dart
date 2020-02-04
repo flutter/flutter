@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -171,7 +171,7 @@ class FlutterLogoDecoration extends Decoration {
       t < 0.5 ? a.style : b.style,
       EdgeInsets.lerp(a.margin, b.margin, t),
       a._position + (b._position - a._position) * t,
-      (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0) as double,
+      (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0),
     );
   }
 
@@ -180,9 +180,9 @@ class FlutterLogoDecoration extends Decoration {
     assert(debugAssertIsValid());
     if (a == null || a is FlutterLogoDecoration) {
       assert(a == null || a.debugAssertIsValid());
-      return FlutterLogoDecoration.lerp(a as FlutterLogoDecoration, this, t);
+      return FlutterLogoDecoration.lerp(a, this, t);
     }
-    return super.lerpFrom(a, t) as FlutterLogoDecoration;
+    return super.lerpFrom(a, t);
   }
 
   @override
@@ -190,9 +190,9 @@ class FlutterLogoDecoration extends Decoration {
     assert(debugAssertIsValid());
     if (b == null || b is FlutterLogoDecoration) {
       assert(b == null || b.debugAssertIsValid());
-      return FlutterLogoDecoration.lerp(this, b as FlutterLogoDecoration, t);
+      return FlutterLogoDecoration.lerp(this, b, t);
     }
-    return super.lerpTo(b, t) as FlutterLogoDecoration;
+    return super.lerpTo(b, t);
   }
 
   @override
@@ -206,16 +206,18 @@ class FlutterLogoDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     assert(debugAssertIsValid());
     if (identical(this, other))
       return true;
-    return other is FlutterLogoDecoration
-        && other.lightColor == lightColor
-        && other.darkColor == darkColor
-        && other.textColor == textColor
-        && other._position == _position
-        && other._opacity == _opacity;
+    if (other is! FlutterLogoDecoration)
+      return false;
+    final FlutterLogoDecoration typedOther = other;
+    return lightColor == typedOther.lightColor
+        && darkColor == typedOther.darkColor
+        && textColor == typedOther.textColor
+        && _position == typedOther._position
+        && _opacity == typedOther._opacity;
   }
 
   @override

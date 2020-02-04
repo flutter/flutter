@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,10 +14,7 @@ ScrollController _controller = ScrollController(
 );
 
 class ThePositiveNumbers extends StatelessWidget {
-  const ThePositiveNumbers({
-    Key key,
-    @required this.from,
-  }) : super(key: key);
+  const ThePositiveNumbers({@required this.from});
   final int from;
   @override
   Widget build(BuildContext context) {

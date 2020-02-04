@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,12 +38,12 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   @override
   ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as NetworkImage, decode),
+      codec: _loadAsync(key, decode),
       scale: key.scale,
       informationCollector: () {
         return <DiagnosticsNode>[
           DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-          DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+          DiagnosticsProperty<NetworkImage>('Image key', key),
         ];
       },
     );
@@ -55,28 +55,27 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   // Web does not support decoding network images to a specified size. The decode parameter
   // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
   // directly in place of the typical `instantiateImageCodec` method.
-  Future<ui.Codec> _loadAsync(NetworkImage key, image_provider.DecoderCallback decode) {
+  Future<ui.Codec> _loadAsync(NetworkImage key, image_provider.DecoderCallback decode) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
     // This API only exists in the web engine implementation and is not
     // contained in the analyzer summary for Flutter.
-    return ui.webOnlyInstantiateImageCodecFromUrl(resolved) as Future<ui.Codec>; // ignore: undefined_function
+    return ui.webOnlyInstantiateImageCodecFromUrl(resolved); // ignore: undefined_function
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NetworkImage
-        && other.url == url
-        && other.scale == scale;
+    final NetworkImage typedOther = other;
+    return url == typedOther.url && scale == typedOther.scale;
   }
 
   @override
   int get hashCode => ui.hashValues(url, scale);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
+  String toString() => '$runtimeType("$url", scale: $scale)';
 }

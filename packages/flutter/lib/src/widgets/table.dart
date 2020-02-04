@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -240,10 +240,10 @@ class _TableElement extends RenderObjectElement {
   _TableElement(Table widget) : super(widget);
 
   @override
-  Table get widget => super.widget as Table;
+  Table get widget => super.widget;
 
   @override
-  RenderTable get renderObject => super.renderObject as RenderTable;
+  RenderTable get renderObject => super.renderObject;
 
   // This class ignores the child's slot entirely.
   // Instead of doing incremental updates to the child list, it replaces the entire list each frame.
@@ -276,7 +276,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void removeChildRenderObject(RenderObject child) {
-    final TableCellParentData childParentData = child.parentData as TableCellParentData;
+    final TableCellParentData childParentData = child.parentData;
     renderObject.setChild(childParentData.x, childParentData.y, null);
   }
 
@@ -285,7 +285,7 @@ class _TableElement extends RenderObjectElement {
   @override
   void update(Table newWidget) {
     final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
-    for (final _TableElementRow row in _children) {
+    for (_TableElementRow row in _children) {
       if (row.key != null) {
         oldKeyedRows[row.key] = row.children;
       }
@@ -293,7 +293,7 @@ class _TableElement extends RenderObjectElement {
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = <List<Element>>{};
-    for (final TableRow row in newWidget.children) {
+    for (TableRow row in newWidget.children) {
       List<Element> oldChildren;
       if (row.key != null && oldKeyedRows.containsKey(row.key)) {
         oldChildren = oldKeyedRows[row.key];
@@ -310,7 +310,7 @@ class _TableElement extends RenderObjectElement {
     }
     while (oldUnkeyedRows.moveNext())
       updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
-    for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
+    for (List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
       updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
 
     _children = newChildren;
@@ -326,7 +326,7 @@ class _TableElement extends RenderObjectElement {
       _children.isNotEmpty ? _children[0].children.length : 0,
       _children.expand<RenderBox>((_TableElementRow row) {
         return row.children.map<RenderBox>((Element child) {
-          final RenderBox box = child.renderObject as RenderBox;
+          final RenderBox box = child.renderObject;
           return box;
         });
       }).toList(),
@@ -335,7 +335,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    for (final Element child in _children.expand<Element>((_TableElementRow row) => row.children)) {
+    for (Element child in _children.expand<Element>((_TableElementRow row) => row.children)) {
       if (!_forgottenChildren.contains(child))
         visitor(child);
     }
@@ -344,7 +344,6 @@ class _TableElement extends RenderObjectElement {
   @override
   bool forgetChild(Element child) {
     _forgottenChildren.add(child);
-    super.forgetChild(child);
     return true;
   }
 }
@@ -355,7 +354,7 @@ class _TableElement extends RenderObjectElement {
 /// the [TableCell] widget to its enclosing [Table] must contain only
 /// [TableRow]s, [StatelessWidget]s, or [StatefulWidget]s (not
 /// other kinds of widgets, like [RenderObjectWidget]s).
-class TableCell extends ParentDataWidget<TableCellParentData> {
+class TableCell extends ParentDataWidget<Table> {
   /// Creates a widget that controls how a child of a [Table] is aligned.
   const TableCell({
     Key key,
@@ -368,7 +367,7 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final TableCellParentData parentData = renderObject.parentData as TableCellParentData;
+    final TableCellParentData parentData = renderObject.parentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
       final AbstractNode targetParent = renderObject.parent;
@@ -376,9 +375,6 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
         targetParent.markNeedsLayout();
     }
   }
-
-  @override
-  Type get debugTypicalAncestorWidgetClass => Table;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

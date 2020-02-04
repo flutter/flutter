@@ -1,18 +1,19 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/io.dart';
-
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -40,13 +41,14 @@ void main() {
     when(mockProcessManager.canRun(any)).thenReturn(true);
     when(mockProcessManager.start(any)).thenAnswer(
         (Invocation invocation) {
-          latestCommand = invocation.positionalArguments.first as List<String>;
+          latestCommand = invocation.positionalArguments.first;
           return Future<Process>.value(mockFrontendServer);
         });
     when(mockFrontendServer.exitCode).thenAnswer((_) async => 0);
   });
 
   testUsingContext('batch compile single dart successful compilation', () async {
+    final BufferLogger bufferLogger = logger;
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
           Future<List<int>>.value(utf8.encode(
@@ -62,12 +64,8 @@ void main() {
     );
 
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
+    expect(bufferLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
-    final VerificationResult argVerification = verify(mockProcessManager.start(captureAny));
-    expect(argVerification.captured.single, containsAll(<String>[
-      '-Ddart.developer.causal_async_stacks=true',
-    ]));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
@@ -98,7 +96,6 @@ void main() {
       '-Ddart.vm.profile=true',
       '-Ddart.vm.product=false',
       '--bytecode-options=source-positions',
-      '-Ddart.developer.causal_async_stacks=false',
     ]));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -131,7 +128,6 @@ void main() {
       '-Ddart.vm.profile=false',
       '-Ddart.vm.product=true',
       '--bytecode-options=source-positions',
-      '-Ddart.developer.causal_async_stacks=false',
     ]));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -140,6 +136,7 @@ void main() {
   });
 
   testUsingContext('batch compile single dart failed compilation', () async {
+    final BufferLogger bufferLogger = logger;
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
           Future<List<int>>.value(utf8.encode(
@@ -155,7 +152,7 @@ void main() {
     );
 
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
+    expect(bufferLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
     expect(output, equals(null));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -165,6 +162,7 @@ void main() {
 
   testUsingContext('batch compile single dart abnormal compiler termination', () async {
     when(mockFrontendServer.exitCode).thenAnswer((_) async => 255);
+    final BufferLogger bufferLogger = logger;
 
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
@@ -181,7 +179,7 @@ void main() {
       dartDefines: const <String>[],
     );
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
+    expect(bufferLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
     expect(output, equals(null));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,

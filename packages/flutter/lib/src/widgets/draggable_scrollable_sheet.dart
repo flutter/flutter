@@ -1,8 +1,7 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
@@ -55,7 +54,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// This is a sample widget which shows a [ListView] that has 25 [ListTile]s.
 /// It starts out as taking up half the body of the [Scaffold], and can be
@@ -261,7 +260,7 @@ class _DraggableSheetExtent {
 
   set currentExtent(double value) {
     assert(value != null);
-    _currentExtent.value = value.clamp(minExtent, maxExtent) as double;
+    _currentExtent.value = value.clamp(minExtent, maxExtent);
   }
   double get currentExtent => _currentExtent.value;
 
@@ -476,7 +475,7 @@ class _DraggableScrollableSheetScrollPosition
     );
 
     final AnimationController ballisticController = AnimationController.unbounded(
-      debugLabel: objectRuntimeType(this, '_DraggableScrollableSheetPosition'),
+      debugLabel: '$runtimeType',
       vsync: context.vsync,
     );
     double lastDelta = 0;
@@ -600,7 +599,7 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
       return false;
     }
     assert(widget is _InheritedResetNotifier);
-    final _InheritedResetNotifier inheritedNotifier = widget as _InheritedResetNotifier;
+    final _InheritedResetNotifier inheritedNotifier = widget;
     final bool wasCalled = inheritedNotifier.notifier._wasCalled;
     inheritedNotifier.notifier._wasCalled = false;
     return wasCalled;

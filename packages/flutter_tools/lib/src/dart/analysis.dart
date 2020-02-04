@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,11 +6,15 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import '../base/common.dart';
+import '../base/file_system.dart' hide IOSink;
+import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
+import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+import '../globals.dart';
 
 class AnalysisServer {
   AnalysisServer(this.sdkPath, this.directories);
@@ -29,9 +33,9 @@ class AnalysisServer {
 
   Future<void> start() async {
     final String snapshot =
-        globals.fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
+        fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
     final List<String> command = <String>[
-      globals.fs.path.join(sdkPath, 'bin', 'dart'),
+      fs.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
@@ -39,14 +43,14 @@ class AnalysisServer {
       sdkPath,
     ];
 
-    globals.printTrace('dart ${command.skip(1).join(' ')}');
-    _process = await globals.processManager.start(command);
+    printTrace('dart ${command.skip(1).join(' ')}');
+    _process = await processManager.start(command);
     // This callback hookup can't throw.
     unawaited(_process.exitCode.whenComplete(() => _process = null));
 
     final Stream<String> errorStream =
         _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
-    errorStream.listen(globals.printError);
+    errorStream.listen(printError);
 
     final Stream<String> inStream =
         _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
@@ -73,11 +77,11 @@ class AnalysisServer {
       'params': params,
     });
     _process.stdin.writeln(message);
-    globals.printTrace('==> $message');
+    printTrace('==> $message');
   }
 
   void _handleServerResponse(String line) {
-    globals.printTrace('<== $line');
+    printTrace('<== $line');
 
     final dynamic response = json.decode(line);
 
@@ -98,10 +102,10 @@ class AnalysisServer {
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
         final Map<String, dynamic> error = castStringKeyedMap(response['error']);
-        globals.printError(
+        printError(
             'Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {
-          globals.printError(error['stackTrace'] as String);
+          printError(error['stackTrace'] as String);
         }
       }
     }
@@ -117,9 +121,9 @@ class AnalysisServer {
 
   void _handleServerError(Map<String, dynamic> error) {
     // Fields are 'isFatal', 'message', and 'stackTrace'.
-    globals.printError('Error from the analysis server: ${error['message']}');
+    printError('Error from the analysis server: ${error['message']}');
     if (error['stackTrace'] != null) {
-      globals.printError(error['stackTrace'] as String);
+      printError(error['stackTrace'] as String);
     }
     _didServerErrorOccur = true;
   }
@@ -160,7 +164,7 @@ class AnalysisError implements Comparable<AnalysisError> {
     'ERROR': _AnalysisSeverity.error,
   };
 
-  static final String _separator = globals.platform.isWindows ? '-' : '•';
+  static final String _separator = platform.isWindows ? '-' : '•';
 
   // "severity":"INFO","type":"TODO","location":{
   //   "file":"/Users/.../lib/test.dart","offset":362,"length":72,"startLine":15,"startColumn":4
@@ -171,9 +175,9 @@ class AnalysisError implements Comparable<AnalysisError> {
   String get colorSeverity {
     switch(_severityLevel) {
       case _AnalysisSeverity.error:
-        return globals.terminal.color(severity, TerminalColor.red);
+        return terminal.color(severity, TerminalColor.red);
       case _AnalysisSeverity.warning:
-        return globals.terminal.color(severity, TerminalColor.yellow);
+        return terminal.color(severity, TerminalColor.yellow);
       case _AnalysisSeverity.info:
       case _AnalysisSeverity.none:
         return severity;
@@ -224,7 +228,7 @@ class AnalysisError implements Comparable<AnalysisError> {
     final String padding = ' ' * math.max(0, 7 - severity.length);
     return '$padding${colorSeverity.toLowerCase()} $_separator '
         '$messageSentenceFragment $_separator '
-        '${globals.fs.path.relative(file)}:$startLine:$startColumn $_separator '
+        '${fs.path.relative(file)}:$startLine:$startColumn $_separator '
         '$code';
   }
 

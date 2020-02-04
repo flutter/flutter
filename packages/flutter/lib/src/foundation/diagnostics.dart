@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'object.dart';
 
 // Examples can assume:
 // int rows, columns;
@@ -159,7 +158,6 @@ enum DiagnosticsTreeStyle {
   /// the following line.
   ///
   /// See also:
-  ///
   ///  * [singleLine], which displays the same information but keeps the
   ///    property and value on the same line.
   errorProperty,
@@ -168,8 +166,8 @@ enum DiagnosticsTreeStyle {
   ///
   /// See also:
   ///
-  ///  * [DebugOverflowIndicatorMixin], which uses this style to display just
-  ///    the immediate children of a node.
+  ///  * [DebugOverflowIndicator], which uses this style to display just the
+  ///    immediate children of a node.
   shallow,
 
   /// Render only the children of a node truncating before the tree becomes too
@@ -328,6 +326,9 @@ class TextTreeConfiguration {
 
   /// Mandatory string to add after the properties of a node regardless of
   /// whether the node has any properties.
+  ///
+  /// See [headerLineTextConfiguration] for an example of using this field to
+  /// add a colon at the end of the header line.
   final String mandatoryAfterProperties;
 
   /// Property separator to add between properties.
@@ -514,7 +515,7 @@ final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
 ///    ╚═══════════
 /// ```
 ///
-/// See also:
+/// /// See also:
 ///
 ///  * [DiagnosticsTreeStyle.transition], uses this style for ASCII art display.
 final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
@@ -844,7 +845,7 @@ class _PrefixedStringBuilder {
     );
     int i = 0;
     final int length = lines.length;
-    for (final String line in lines) {
+    for (String line in lines) {
       i++;
       _writeLine(
         line,
@@ -1060,7 +1061,7 @@ bool _isSingleLine(DiagnosticsTreeStyle style) {
 ///
 /// See also:
 ///
-///  * [DiagnosticsNode.toStringDeep], which uses a [TextTreeRenderer] to return a
+/// * [DiagnosticsNode.toStringDeep], which uses a [TextRender] to return a
 ///    string representation of this node and its descendants.
 class TextTreeRenderer {
   /// Creates a [TextTreeRenderer] object with the given arguments specifying
@@ -1133,7 +1134,7 @@ class TextTreeRenderer {
       const int maxLines = 25;
       int lines = 0;
       void visitor(DiagnosticsNode node) {
-        for (final DiagnosticsNode child in node.getChildren()) {
+        for (DiagnosticsNode child in node.getChildren()) {
           if (lines < maxLines) {
             depth += 1;
             descendants.add('$prefixOtherLines${"  " * depth}$child');
@@ -1277,7 +1278,7 @@ class TextTreeRenderer {
         // with cases where a single line properties output may not have single
         // linebreak.
         final String propertyRender = render(property,
-          prefixLineOne: propertyStyle.prefixLineOne,
+          prefixLineOne: '${propertyStyle.prefixLineOne}',
           prefixOtherLines: '${propertyStyle.childLinkSpace}${propertyStyle.prefixOtherLines}',
           parentConfiguration: config,
         );
@@ -1306,7 +1307,7 @@ class TextTreeRenderer {
     if (!config.lineBreakProperties)
       builder.write(config.lineBreak);
 
-    final String prefixChildren = config.bodyIndent;
+    final String prefixChildren = '${config.bodyIndent}';
     final String prefixChildrenRaw = '$prefixOtherLines$prefixChildren';
     if (children.isEmpty &&
         config.addBlankLineIfNoChildren &&
@@ -1631,7 +1632,6 @@ abstract class DiagnosticsNode {
       return toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
 
     final String description = toDescription(parentConfiguration: parentConfiguration);
-    assert(description != null);
 
     if (name == null || name.isEmpty || !showName)
       return description;
@@ -1717,7 +1717,7 @@ abstract class DiagnosticsNode {
 
 /// Debugging message displayed like a property.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// The following two properties are better expressed using this
 /// [MessageProperty] class, rather than [StringProperty], as the intent is to
@@ -1729,7 +1729,7 @@ abstract class DiagnosticsNode {
 /// var usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
 /// ```
 /// {@end-tool}
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// On the other hand, [StringProperty] is better suited when the property has a
 /// concrete value that is a string:
@@ -2056,7 +2056,7 @@ class PercentProperty extends DoubleProperty {
 /// when `visible` is false and nothing when visible is true, in contrast to
 /// `visible: true` or `visible: false`.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// FlagProperty(
@@ -2066,7 +2066,7 @@ class PercentProperty extends DoubleProperty {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// [FlagProperty] should also be used instead of [DiagnosticsProperty<bool>]
 /// if showing the bool value would not clearly indicate the meaning of the
@@ -2510,7 +2510,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
   // For a null value, it is omitted unless `includeEmtpy` is true and
   // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues() sync* {
-    for (final MapEntry<String, T> entry in value.entries) {
+    for (MapEntry<String, T> entry in value.entries) {
       if (entry.value != null) {
         yield entry.key;
       }
@@ -2640,7 +2640,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final T v = value;
     List<Map<String, Object>> properties;
-    if (delegate.expandPropertyValues && delegate.includeProperties && v is DiagnosticableMixin && getProperties().isEmpty) {
+    if (delegate.expandPropertyValues && delegate.includeProperties && v is Diagnosticable && getProperties().isEmpty) {
       // Exclude children for expanded nodes to avoid cycles.
       delegate = delegate.copyWith(subtreeDepth: 0, includeProperties: false);
       properties = DiagnosticsNode.toJsonList(
@@ -2666,7 +2666,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       json['exception'] = exception.toString();
     json['propertyType'] = propertyType.toString();
     json['defaultLevel'] = describeEnum(_defaultLevel);
-    if (value is DiagnosticableMixin || value is DiagnosticsNode)
+    if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     if (v is num)
       // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
@@ -2846,7 +2846,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       if (object is DiagnosticsNode) {
         return object.getProperties();
       }
-      if (object is DiagnosticableMixin) {
+      if (object is Diagnosticable) {
         return object.toDiagnosticsNode(style: style).getProperties();
       }
     }
@@ -2860,7 +2860,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       if (object is DiagnosticsNode) {
         return object.getChildren();
       }
-      if (object is DiagnosticableMixin) {
+      if (object is Diagnosticable) {
         return object.toDiagnosticsNode(style: style).getChildren();
       }
     }
@@ -2870,8 +2870,8 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 
 /// [DiagnosticsNode] that lazily calls the associated [Diagnosticable] [value]
 /// to implement [getChildren] and [getProperties].
-class DiagnosticableNode<T extends DiagnosticableMixin> extends DiagnosticsNode {
-  /// Create a diagnostics describing a [DiagnosticableMixin] value.
+class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
+  /// Create a diagnostics describing a [Diagnosticable] value.
   ///
   /// The [value] argument must not be null.
   DiagnosticableNode({
@@ -2963,14 +2963,14 @@ String shortHash(Object object) {
 ///    distinguish instances of the same class (hash collisions are
 ///    possible, but rare enough that its use in debug output is useful).
 ///  * [Object.runtimeType], the [Type] of an object.
-String describeIdentity(Object object) => '${objectRuntimeType(object, '<optimized out>')}#${shortHash(object)}';
+String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(object)}';
 
 // This method exists as a workaround for https://github.com/dart-lang/sdk/issues/30021
 /// Returns a short description of an enum value.
 ///
 /// Strips off the enum class name from the `enumEntry.toString()`.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// enum Day {
@@ -2991,7 +2991,7 @@ String describeEnum(Object enumEntry) {
 }
 
 /// Builder to accumulate properties and configuration used to assemble a
-/// [DiagnosticsNode] from a [DiagnosticableMixin] object.
+/// [DiagnosticsNode] from a [Diagnosticable] object.
 class DiagnosticPropertiesBuilder {
   /// Creates a [DiagnosticPropertiesBuilder] with [properties] initialize to
   /// an empty array.
@@ -3053,8 +3053,10 @@ abstract class Diagnosticable with DiagnosticableMixin {
   const Diagnosticable();
 }
 
-/// A mixin class for providing string and [DiagnosticsNode] debug
-/// representations describing the properties of an object.
+/// A mixin class that provides the implementation for [Diagnosticable].
+///
+/// This mixin can be used to add diagnostics to a class which already has an
+/// base class.
 ///
 /// The string debug representation is generated from the intermediate
 /// [DiagnosticsNode] representation. The [DiagnosticsNode] representation is
@@ -3106,7 +3108,7 @@ mixin DiagnosticableMixin {
   /// relationship between the parent and the node. For example, pass
   /// [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return DiagnosticableNode<DiagnosticableMixin>(
+    return DiagnosticableNode<Diagnosticable>(
       name: name,
       value: this,
       style: style,
@@ -3188,7 +3190,7 @@ mixin DiagnosticableMixin {
   /// `toString` method implementation works fine using [DiagnosticsProperty]
   /// directly.
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   ///
   /// This example shows best practices for implementing [debugFillProperties]
   /// illustrating use of all common [DiagnosticsProperty] subclasses and all
@@ -3336,8 +3338,8 @@ mixin DiagnosticableMixin {
 /// See also:
 ///
 ///  * [DiagnosticableTreeMixin], a mixin that implements this class.
-///  * [DiagnosticableMixin], which should be used instead of this class to
-///    provide diagnostics for objects without children.
+///  * [Diagnosticable], which should be used instead of this class to provide
+///    diagnostics for objects without children.
 abstract class DiagnosticableTree extends Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -3641,7 +3643,7 @@ abstract class DiagnosticsSerializationDelegate {
   ///    will be included.
   bool get includeProperties;
 
-  /// Whether properties that have a [DiagnosticableMixin] as value should be
+  /// Whether properties that have a [Diagnosticable] as value should be
   /// expanded.
   bool get expandPropertyValues;
 

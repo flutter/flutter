@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,8 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'input_decorator.dart';
 import 'text_field.dart';
 import 'theme.dart';
-
-export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 
 /// A [FormField] that contains a [TextField].
 ///
@@ -36,7 +34,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
 ///
@@ -100,8 +98,6 @@ class TextFormField extends FormField<String> {
     bool showCursor,
     bool obscureText = false,
     bool autocorrect = true,
-    SmartDashesType smartDashesType,
-    SmartQuotesType smartQuotesType,
     bool enableSuggestions = true,
     bool autovalidate = false,
     bool maxLengthEnforced = true,
@@ -124,7 +120,6 @@ class TextFormField extends FormField<String> {
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool enableInteractiveSelection = true,
     InputCounterWidgetBuilder buildCounter,
-    ScrollPhysics scrollPhysics,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -157,7 +152,7 @@ class TextFormField extends FormField<String> {
     autovalidate: autovalidate,
     enabled: enabled,
     builder: (FormFieldState<String> field) {
-      final _TextFormFieldState state = field as _TextFormFieldState;
+      final _TextFormFieldState state = field;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
         .applyDefaults(Theme.of(field.context).inputDecorationTheme);
       void onChangedHandler(String value) {
@@ -184,8 +179,6 @@ class TextFormField extends FormField<String> {
         showCursor: showCursor,
         obscureText: obscureText,
         autocorrect: autocorrect,
-        smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
         enableSuggestions: enableSuggestions,
         maxLengthEnforced: maxLengthEnforced,
         maxLines: maxLines,
@@ -202,7 +195,6 @@ class TextFormField extends FormField<String> {
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
         scrollPadding: scrollPadding,
-        scrollPhysics: scrollPhysics,
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: enableInteractiveSelection,
         buildCounter: buildCounter,
@@ -226,7 +218,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   @override
-  TextFormField get widget => super.widget as TextFormField;
+  TextFormField get widget => super.widget;
 
   @override
   void initState() {

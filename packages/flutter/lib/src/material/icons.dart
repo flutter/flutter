@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,9 +21,9 @@ import 'package:flutter/widgets.dart';
 ///   uses-material-design: true
 /// ```
 ///
-/// {@tool snippet}
+/// {@tool sample}
 /// This example shows how to create a [Row] of [Icon]s in different colors and
-/// sizes. The first [Icon] uses a [Icon.semanticLabel] to announce in accessibility
+/// sizes. The first [Icon] uses a [semanticLabel] to announce in accessibility
 /// modes like TalkBack and VoiceOver.
 ///
 /// ![A row of icons representing a pink heart, a green musical note, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
@@ -59,9 +59,6 @@ import 'package:flutter/widgets.dart';
 ///  * [IconButton]
 ///  * <https://design.google.com/icons/>
 class Icons {
-  // This class is not meant to be instatiated or extended; this constructor
-  // prevents instantiation and extension.
-  // ignore: unused_element
   Icons._();
 
   // Generated code: do not hand-edit.

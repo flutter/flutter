@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -175,6 +175,11 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   @override
   String get barrierLabel => null;
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    return previousRoute is CupertinoPageRoute;
+  }
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
@@ -716,16 +721,16 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
 
   @override
   _CupertinoEdgeShadowDecoration lerpFrom(Decoration a, double t) {
-    if (a is _CupertinoEdgeShadowDecoration)
-      return _CupertinoEdgeShadowDecoration.lerp(a, this, t);
-    return _CupertinoEdgeShadowDecoration.lerp(null, this, t);
+    if (a is! _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(null, this, t);
+    return _CupertinoEdgeShadowDecoration.lerp(a, this, t);
   }
 
   @override
   _CupertinoEdgeShadowDecoration lerpTo(Decoration b, double t) {
-    if (b is _CupertinoEdgeShadowDecoration)
-      return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
-    return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
+    if (b is! _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
+    return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
   }
 
   @override
@@ -734,11 +739,11 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+  bool operator ==(dynamic other) {
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is _CupertinoEdgeShadowDecoration
-        && other.edgeGradient == edgeGradient;
+    final _CupertinoEdgeShadowDecoration typedOther = other;
+    return edgeGradient == typedOther.edgeGradient;
   }
 
   @override
@@ -792,18 +797,14 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     this.barrierColor,
     this.barrierLabel,
     this.builder,
-    bool semanticsDismissible,
     ImageFilter filter,
     RouteSettings settings,
   }) : super(
          filter: filter,
          settings: settings,
-       ) {
-    _semanticsDismissible = semanticsDismissible;
-  }
+       );
 
   final WidgetBuilder builder;
-  bool _semanticsDismissible;
 
   @override
   final String barrierLabel;
@@ -815,7 +816,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  bool get semanticsDismissible => _semanticsDismissible ?? false;
+  bool get semanticsDismissible => false;
 
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
@@ -875,9 +876,6 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// popup to the [Navigator] furthest from or nearest to the given `context`. It
 /// is `false` by default.
 ///
-/// The `semanticsDismissble` argument is used to determine whether the
-/// semantics of the modal barrier are included in the semantics tree.
-///
 /// The `builder` argument typically builds a [CupertinoActionSheet] widget.
 /// Content below the widget is dimmed with a [ModalBarrier]. The widget built
 /// by the `builder` does not share a context with the location that
@@ -890,15 +888,14 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///
-///  * [CupertinoActionSheet], which is the widget usually returned by the
-///    `builder` argument to [showCupertinoModalPopup].
+///  * [ActionSheet], which is the widget usually returned by the `builder`
+///    argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
 Future<T> showCupertinoModalPopup<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   ImageFilter filter,
   bool useRootNavigator = true,
-  bool semanticsDismissible,
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
@@ -907,7 +904,6 @@ Future<T> showCupertinoModalPopup<T>({
       barrierLabel: 'Dismiss',
       builder: builder,
       filter: filter,
-      semanticsDismissible: semanticsDismissible,
     ),
   );
 }

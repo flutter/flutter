@@ -23,18 +23,32 @@ assignees: ''
 
 ## Steps to Reproduce
 
-<!-- You must include full steps to reproduce so that we can reproduce the problem. -->
+<!--
+     Please tell us exactly how to reproduce the problem you are running into.
 
-1. Run `flutter create bug`.
-2. Update the files as follows: ... <!-- include every file that is different from the template app! -->
-3. ... <!-- describe how to reproduce the problem -->
+     Please attach a small application (ideally just one main.dart file) that
+     reproduces the problem. You could use https://gist.github.com/ for this.
 
-**Expected results:** <!-- what did you want to see? -->
+     If the problem is with your application's rendering, then please attach
+     a screenshot and explain what the problem is.
+-->
 
-**Actual results:** <!-- what did you see? -->
+1. ...
+2. ...
+3. ...
 
-<details>
-  <summary>Logs</summary>
+<!--
+     Please tell us which target platform(s) the problem occurs (Android / iOS / Web / macOS / Linux / Windows)
+     Which target OS version, for Web, browser, is the test system running?
+     Does the problem occur on emulator/simulator as well as on physical devices?
+-->
+
+**Target Platform:**
+**Target OS version/browser:**
+**Devices:**
+
+
+## Logs
 
 <!--
       Run your application with `flutter run --verbose` and attach all the
@@ -58,5 +72,3 @@ assignees: ''
 
 ```
 ```
-
-</details>

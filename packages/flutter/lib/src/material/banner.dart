@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -57,7 +57,7 @@ class MaterialBanner extends StatelessWidget {
   /// Style for the text in the [content] of the [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
-  /// also `null`, [ThemeData.textTheme.bodyText2] is used.
+  /// also `null`, [ThemeData.textTheme.body1] is used.
   final TextStyle contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
@@ -128,7 +128,7 @@ class MaterialBanner extends StatelessWidget {
         ?? theme.colorScheme.surface;
     final TextStyle textStyle = contentTextStyle
         ?? bannerTheme.contentTextStyle
-        ?? theme.textTheme.bodyText2;
+        ?? theme.textTheme.body1;
 
     return Container(
       color: backgroundColor,

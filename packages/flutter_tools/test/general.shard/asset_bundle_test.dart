@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,10 +9,11 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -28,7 +29,7 @@ void main() {
 
     setUp(() async {
       testFileSystem = MemoryFileSystem(
-        style: globals.platform.isWindows
+        style: platform.isWindows
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
@@ -45,7 +46,7 @@ void main() {
     });
 
     testUsingContext('empty pubspec', () async {
-      globals.fs.file('pubspec.yaml')
+      fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync('');
 
@@ -63,9 +64,9 @@ void main() {
     });
 
     testUsingContext('wildcard directories are updated when filesystem changes', () async {
-      final File packageFile = globals.fs.file('.packages')..createSync();
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
-      globals.fs.file('pubspec.yaml')
+      final File packageFile = fs.file('.packages')..createSync();
+      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 name: example
@@ -84,7 +85,7 @@ flutter:
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
 
       // Simulate modifying the files by updating the filestat time manually.
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'fizz.txt'))
+      fs.file(fs.path.join('assets', 'foo', 'fizz.txt'))
         ..createSync(recursive: true)
         ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
@@ -103,8 +104,8 @@ flutter:
     });
 
     testUsingContext('handle removal of wildcard directories', () async {
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
-      final File pubspec = globals.fs.file('pubspec.yaml')
+      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      final File pubspec = fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 name: example
@@ -112,7 +113,7 @@ flutter:
   assets:
     - assets/foo/
 ''');
-      globals.fs.file('.packages').createSync();
+      fs.file('.packages').createSync();
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       // Expected assets:
@@ -125,15 +126,15 @@ flutter:
 
       // Delete the wildcard directory and update pubspec file.
       final DateTime modifiedTime = pubspec.lastModifiedSync().add(const Duration(hours: 1));
-      globals.fs.directory(globals.fs.path.join('assets', 'foo')).deleteSync(recursive: true);
-      globals.fs.file('pubspec.yaml')
+      fs.directory(fs.path.join('assets', 'foo')).deleteSync(recursive: true);
+      fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 name: example''')
         ..setLastModifiedSync(modifiedTime);
 
       // touch .packages to make sure its change time is after pubspec.yaml's
-      globals.fs.file('.packages')
+      fs.file('.packages')
         ..setLastModifiedSync(modifiedTime);
 
       // Even though the previous file was removed, it is left in the
@@ -154,11 +155,11 @@ name: example''')
 
     // https://github.com/flutter/flutter/issues/42723
     testUsingContext('Test regression for mistyped file', () async {
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
       // Create a directory in the same path to test that we're only looking at File
       // objects.
-      globals.fs.directory(globals.fs.path.join('assets', 'foo', 'bar')).createSync();
-      globals.fs.file('pubspec.yaml')
+      fs.directory(fs.path.join('assets', 'foo', 'bar')).createSync();
+      fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 name: example
@@ -166,7 +167,7 @@ flutter:
   assets:
     - assets/foo/
 ''');
-      globals.fs.file('.packages').createSync();
+      fs.file('.packages').createSync();
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       // Expected assets:
@@ -182,16 +183,18 @@ flutter:
     });
   });
 
-  testUsingContext('Failed directory delete shows message', () async {
+  test('Failed directory delete shows message', () async {
     final MockDirectory mockDirectory = MockDirectory();
+    final BufferLogger bufferLogger = BufferLogger();
     when(mockDirectory.existsSync()).thenReturn(true);
     when(mockDirectory.deleteSync(recursive: true)).thenThrow(const FileSystemException('ABCD'));
 
-    await writeBundle(mockDirectory, <String, DevFSContent>{}, loggerOverride: testLogger);
+    await writeBundle(mockDirectory, <String, DevFSContent>{}, loggerOverride: bufferLogger);
 
     verify(mockDirectory.createSync(recursive: true)).called(1);
-    expect(testLogger.errorText, contains('ABCD'));
+    expect(bufferLogger.errorText, contains('ABCD'));
   });
 }
 
 class MockDirectory extends Mock implements Directory {}
+

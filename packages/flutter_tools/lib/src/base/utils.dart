@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,11 +6,63 @@ import 'dart:async';
 import 'dart:math' show Random, max;
 
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 
 import '../convert.dart';
+import 'context.dart';
 import 'file_system.dart';
+import 'io.dart' as io;
+import 'platform.dart';
 import 'terminal.dart';
+
+const BotDetector _kBotDetector = BotDetector();
+
+class BotDetector {
+  const BotDetector();
+
+  bool get isRunningOnBot {
+    if (
+        // Explicitly stated to not be a bot.
+        platform.environment['BOT'] == 'false'
+
+        // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
+        || platform.environment.containsKey('FLUTTER_HOST')
+        // When set, GA logs to a local file (normally for tests) so we don't need to filter.
+        || platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
+    ) {
+      return false;
+    }
+
+    return platform.environment['BOT'] == 'true'
+
+        // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+        || platform.environment['TRAVIS'] == 'true'
+        || platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
+        || platform.environment.containsKey('CI') // Travis and AppVeyor
+
+        // https://www.appveyor.com/docs/environment-variables/
+        || platform.environment.containsKey('APPVEYOR')
+
+        // https://cirrus-ci.org/guide/writing-tasks/#environment-variables
+        || platform.environment.containsKey('CIRRUS_CI')
+
+        // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+        || (platform.environment.containsKey('AWS_REGION') &&
+            platform.environment.containsKey('CODEBUILD_INITIATOR'))
+
+        // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
+        || platform.environment.containsKey('JENKINS_URL')
+
+        // Properties on Flutter's Chrome Infra bots.
+        || platform.environment['CHROME_HEADLESS'] == '1'
+        || platform.environment.containsKey('BUILDBOT_BUILDERNAME')
+        || platform.environment.containsKey('SWARMING_TASK_ID');
+  }
+}
+
+bool get isRunningOnBot {
+  final BotDetector botDetector = context.get<BotDetector>() ?? _kBotDetector;
+  return botDetector.isRunningOnBot;
+}
 
 /// Convert `foo_bar` to `fooBar`.
 String camelCase(String str) {
@@ -49,8 +101,27 @@ String getEnumName(dynamic enumItem) {
   return index == -1 ? name : name.substring(index + 1);
 }
 
+File getUniqueFile(Directory dir, String baseName, String ext) {
+  final FileSystem fs = dir.fileSystem;
+  int i = 1;
+
+  while (true) {
+    final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
+    final File file = fs.file(fs.path.join(dir.path, name));
+    if (!file.existsSync()) {
+      return file;
+    }
+    i++;
+  }
+}
+
 String toPrettyJson(Object jsonable) {
   return const JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
+}
+
+/// Return a String - with units - for the size in MB of the given number of bytes.
+String getSizeAsMB(int bytesLength) {
+  return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
 final NumberFormat kSecondsFormat = NumberFormat('0.0');
@@ -65,9 +136,11 @@ String getElapsedAsMilliseconds(Duration duration) {
   return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
 }
 
-/// Return a String - with units - for the size in MB of the given number of bytes.
-String getSizeAsMB(int bytesLength) {
-  return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
+/// Return a relative path if [fullPath] is contained by the cwd, else return an
+/// absolute path.
+String getDisplayPath(String fullPath) {
+  final String cwd = fs.currentDirectory.path + fs.path.separator;
+  return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
 }
 
 /// A class to maintain a list of items, fire events when items are added or
@@ -246,7 +319,7 @@ String wrapText(String text, { int columnWidth, int hangingIndent, int indent, b
   hangingIndent ??= 0;
   final List<String> splitText = text.split('\n');
   final List<String> result = <String>[];
-  for (final String line in splitText) {
+  for (String line in splitText) {
     String trimmedText = line.trimLeft();
     final String leadingWhitespace = line.substring(0, line.length - trimmedText.length);
     List<String> notIndented;
@@ -292,6 +365,13 @@ String wrapText(String text, { int columnWidth, int hangingIndent, int indent, b
   return result.join('\n');
 }
 
+void writePidFile(String pidFile) {
+  if (pidFile != null) {
+    // Write our pid to the file.
+    fs.file(pidFile).writeAsStringSync(io.pid.toString());
+  }
+}
+
 // Used to represent a run of ANSI control sequences next to a visible
 // character.
 class _AnsiRun {
@@ -315,7 +395,7 @@ class _AnsiRun {
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
-List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, @required bool shouldWrap }) {
+List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, bool shouldWrap }) {
   if (text == null || text.isEmpty) {
     return <String>[''];
   }
@@ -353,7 +433,7 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, @re
     final RegExp characterOrCode = RegExp('(\u001b\[[0-9;]*m|.)', multiLine: true);
     List<_AnsiRun> result = <_AnsiRun>[];
     final StringBuffer current = StringBuffer();
-    for (final Match match in characterOrCode.allMatches(input)) {
+    for (Match match in characterOrCode.allMatches(input)) {
       current.write(match[0]);
       if (match[0].length < 4) {
         // This is a regular character, write it out.
@@ -381,7 +461,7 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, @re
 
   final List<String> result = <String>[];
   final int effectiveLength = max(columnWidth - start, kMinColumnWidth);
-  for (final String line in text.split('\n')) {
+  for (String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
     // add it and move on.
     if (line.length <= effectiveLength || !shouldWrap) {

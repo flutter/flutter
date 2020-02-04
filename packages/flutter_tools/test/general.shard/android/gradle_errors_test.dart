@@ -1,18 +1,18 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/gradle_errors.dart';
+
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -57,7 +57,8 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.errorText,
         contains(
           'Gradle threw an error while trying to update itself. '
           'Retrying the update...'
@@ -85,7 +86,8 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.errorText,
         contains(
           'Gradle threw an error while trying to update itself. '
           'Retrying the update...'
@@ -104,7 +106,8 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.errorText,
         contains(
           'Gradle threw an error while trying to update itself. '
           'Retrying the update...'
@@ -139,7 +142,8 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.errorText,
         contains(
           'Gradle threw an error while trying to update itself. '
           'Retrying the update...'
@@ -166,7 +170,8 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.errorText,
         contains(
           'Gradle threw an error while trying to update itself. '
           'Retrying the update...'
@@ -204,7 +209,8 @@ Exception in thread "main" java.net.SocketException: Connection reset
       expect(testErrorMessage(errorMessage, networkErrorHandler), isTrue);
       expect(await networkErrorHandler.handler(), equals(GradleBuildStatus.retry));
 
-      expect(testLogger.errorText,
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.errorText,
         contains(
           'Gradle threw an error while trying to update itself. '
           'Retrying the update...'
@@ -222,12 +228,13 @@ Command: /home/android/gradlew assembleRelease
       expect(testErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
       expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.exit));
 
+      final BufferLogger logger = context.get<Logger>();
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Gradle does not have execution permission.'),
       );
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           'You should change the ownership of the project directory to your user, '
           'or move the project to a directory with execute permissions.'
@@ -286,7 +293,7 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('handler - plugins and no AndroidX', () async {
-      globals.fs.file('.flutter-plugins').createSync(recursive: true);
+      fs.file('.flutter-plugins').createSync(recursive: true);
 
       final GradleBuildStatus status = await androidXFailureHandler
         .handler(
@@ -295,7 +302,8 @@ Command: /home/android/gradlew assembleRelease
           usesAndroidX: false,
         );
 
-      expect(testLogger.statusText,
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.statusText,
         contains(
           'AndroidX incompatibilities may have caused this build to fail. '
           'Please migrate your app to AndroidX. See https://goo.gl/CP92wY.'
@@ -318,7 +326,7 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('handler - plugins, AndroidX, and AAR', () async {
-      globals.fs.file('.flutter-plugins').createSync(recursive: true);
+      fs.file('.flutter-plugins').createSync(recursive: true);
 
       final GradleBuildStatus status = await androidXFailureHandler.handler(
         line: '',
@@ -344,7 +352,7 @@ Command: /home/android/gradlew assembleRelease
     });
 
     testUsingContext('handler - plugins, AndroidX, and no AAR', () async {
-      globals.fs.file('.flutter-plugins').createSync(recursive: true);
+      fs.file('.flutter-plugins').createSync(recursive: true);
 
       final GradleBuildStatus status = await androidXFailureHandler.handler(
         line: '',
@@ -353,7 +361,8 @@ Command: /home/android/gradlew assembleRelease
         shouldBuildPluginAsAar: false,
       );
 
-      expect(testLogger.statusText,
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.statusText,
         contains(
           'The built failed likely due to AndroidX incompatibilities in a plugin. '
           'The tool is about to try using Jetfier to solve the incompatibility.'
@@ -387,12 +396,13 @@ Command: /home/android/gradlew assembleRelease
     testUsingContext('handler', () async {
       expect(await permissionDeniedErrorHandler.handler(), equals(GradleBuildStatus.exit));
 
+      final BufferLogger logger = context.get<Logger>();
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Gradle does not have execution permission.'),
       );
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           'You should change the ownership of the project directory to your user, '
           'or move the project to a directory with execute permissions.'
@@ -417,8 +427,9 @@ Command: /home/android/gradlew assembleRelease
         project: FlutterProject.current(),
       );
 
+      final BufferLogger logger = context.get<Logger>();
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           'Unable to download needed Android SDK components, as the '
           'following licenses have not been accepted:\n'
@@ -497,15 +508,16 @@ assembleFooTest
         project: FlutterProject.current(),
       );
 
+      final BufferLogger logger = context.get<Logger>();
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           'Gradle project does not define a task suitable '
           'for the requested build.'
         )
       );
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           'The android/app/build.gradle file defines product '
           'flavors: flavor1, flavor_2 '
@@ -545,15 +557,16 @@ assembleProfile
         project: FlutterProject.current(),
       );
 
+      final BufferLogger logger = context.get<Logger>();
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           'Gradle project does not define a task suitable '
           'for the requested build.'
         )
       );
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           'The android/app/build.gradle file does not define any custom product flavors. '
           'You cannot use the --flavor option.'

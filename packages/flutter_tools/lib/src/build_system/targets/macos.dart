@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,8 +7,10 @@ import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
+import '../../base/process_manager.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals;
+import '../../globals.dart';
+import '../../macos/xcode.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -74,14 +76,14 @@ abstract class UnpackMacOS extends Target {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final String basePath = globals.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
+    final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
     final Directory targetDirectory = environment
       .outputDir
       .childDirectory('FlutterMacOS.framework');
     if (targetDirectory.existsSync()) {
       targetDirectory.deleteSync(recursive: true);
     }
-    final ProcessResult result = await globals.processManager
+    final ProcessResult result = await processManager
         .run(<String>['cp', '-R', basePath, targetDirectory.path]);
     if (result.exitCode != 0) {
       throw Exception(
@@ -147,14 +149,14 @@ class DebugMacOSFramework extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final File outputFile = globals.fs.file(globals.fs.path.join(
+    final File outputFile = fs.file(fs.path.join(
         environment.buildDir.path, 'App.framework', 'App'));
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
         ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
-    final RunResult result = await globals.xcode.clang(<String>[
+    final RunResult result = await xcode.clang(<String>[
       '-x',
       'c',
       debugApp.path,
@@ -322,13 +324,13 @@ abstract class MacOSBundleFlutterAssets extends Target {
       }
       // Copy precompiled runtimes.
       try {
-        final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData,
+        final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData,
             platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
-        final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData,
+        final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData,
             platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
-        globals.fs.file(vmSnapshotData).copySync(
+        fs.file(vmSnapshotData).copySync(
             assetDirectory.childFile('vm_snapshot_data').path);
-        globals.fs.file(isolateSnapshotData).copySync(
+        fs.file(isolateSnapshotData).copySync(
             assetDirectory.childFile('isolate_snapshot_data').path);
       } catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
@@ -341,7 +343,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       final Link currentVersion = outputDirectory.parent
           .childLink('Current');
       if (!currentVersion.existsSync()) {
-        final String linkPath = globals.fs.path.relative(outputDirectory.path,
+        final String linkPath = fs.path.relative(outputDirectory.path,
             from: outputDirectory.parent.path);
         currentVersion.createSync(linkPath);
       }
@@ -349,7 +351,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       final Link currentResources = frameworkRootDirectory
           .childLink('Resources');
       if (!currentResources.existsSync()) {
-        final String linkPath = globals.fs.path.relative(globals.fs.path.join(currentVersion.path, 'Resources'),
+        final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'Resources'),
             from: frameworkRootDirectory.path);
         currentResources.createSync(linkPath);
       }
@@ -357,7 +359,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       final Link currentFramework = frameworkRootDirectory
           .childLink('App');
       if (!currentFramework.existsSync()) {
-        final String linkPath = globals.fs.path.relative(globals.fs.path.join(currentVersion.path, 'App'),
+        final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'App'),
             from: frameworkRootDirectory.path);
         currentFramework.createSync(linkPath);
       }

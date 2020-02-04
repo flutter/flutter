@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -57,13 +57,10 @@ class Viewport extends MultiChildRenderObjectWidget {
     @required this.offset,
     this.center,
     this.cacheExtent,
-    this.cacheExtentStyle = CacheExtentStyle.pixel,
     List<Widget> slivers = const <Widget>[],
   }) : assert(offset != null),
        assert(slivers != null),
        assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
-       assert(cacheExtentStyle != null),
-       assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        super(key: key, children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
@@ -115,9 +112,6 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// {@macro flutter.rendering.viewport.cacheExtent}
   final double cacheExtent;
 
-  /// {@macro flutter.rendering.viewport.cacheExtentStyle}
-  final CacheExtentStyle cacheExtentStyle;
-
   /// Given a [BuildContext] and an [AxisDirection], determine the correct cross
   /// axis direction.
   ///
@@ -146,7 +140,6 @@ class Viewport extends MultiChildRenderObjectWidget {
       anchor: anchor,
       offset: offset,
       cacheExtent: cacheExtent,
-      cacheExtentStyle: cacheExtentStyle,
     );
   }
 
@@ -157,8 +150,7 @@ class Viewport extends MultiChildRenderObjectWidget {
       ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..anchor = anchor
       ..offset = offset
-      ..cacheExtent = cacheExtent
-      ..cacheExtentStyle = cacheExtentStyle;
+      ..cacheExtent = cacheExtent;
   }
 
   @override
@@ -176,8 +168,6 @@ class Viewport extends MultiChildRenderObjectWidget {
     } else if (children.isNotEmpty && children.first.key != null) {
       properties.add(DiagnosticsProperty<Key>('center', children.first.key, tooltip: 'implicit'));
     }
-    properties.add(DiagnosticsProperty<double>('cacheExtent', cacheExtent));
-    properties.add(DiagnosticsProperty<CacheExtentStyle>('cacheExtentStyle', cacheExtentStyle));
   }
 }
 
@@ -186,10 +176,10 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   _ViewportElement(Viewport widget) : super(widget);
 
   @override
-  Viewport get widget => super.widget as Viewport;
+  Viewport get widget => super.widget;
 
   @override
-  RenderViewport get renderObject => super.renderObject as RenderViewport;
+  RenderViewport get renderObject => super.renderObject;
 
   @override
   void mount(Element parent, dynamic newSlot) {
@@ -208,9 +198,9 @@ class _ViewportElement extends MultiChildRenderObjectElement {
     if (widget.center != null) {
       renderObject.center = children.singleWhere(
         (Element element) => element.widget.key == widget.center
-      ).renderObject as RenderSliver;
+      ).renderObject;
     } else if (children.isNotEmpty) {
-      renderObject.center = children.first.renderObject as RenderSliver;
+      renderObject.center = children.first.renderObject;
     } else {
       renderObject.center = null;
     }
@@ -219,7 +209,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     children.where((Element e) {
-      final RenderSliver renderSliver = e.renderObject as RenderSliver;
+      final RenderSliver renderSliver = e.renderObject;
       return renderSliver.geometry.visible;
     }).forEach(visitor);
   }

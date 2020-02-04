@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -191,7 +191,7 @@ Future<String> getAndroidManifest(String apk) async {
  /// Checks that the classes are contained in the APK, throws otherwise.
 Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
   final ApkExtractor extractor = ApkExtractor(apk);
-  for (final String className in classes) {
+  for (String className in classes) {
     if (!(await extractor.containsClass(className))) {
       throw Exception('APK doesn\'t contain class `$className`.');
     }

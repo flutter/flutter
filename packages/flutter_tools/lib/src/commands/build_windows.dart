@@ -1,14 +1,14 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import '../windows/build_windows.dart';
@@ -25,11 +25,12 @@ class BuildWindowsCommand extends BuildSubCommand {
   final String name = 'windows';
 
   @override
-  bool get hidden => !featureFlags.isWindowsEnabled || !globals.platform.isWindows;
+  bool get hidden => !featureFlags.isWindowsEnabled || !platform.isWindows;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.windows,
+    DevelopmentArtifact.universal,
   };
 
   @override
@@ -43,10 +44,13 @@ class BuildWindowsCommand extends BuildSubCommand {
     if (!featureFlags.isWindowsEnabled) {
       throwToolExit('"build windows" is not currently supported.');
     }
-    if (!globals.platform.isWindows) {
+    if (!platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
+    if (!flutterProject.windows.existsSync()) {
+      throwToolExit('No Windows desktop project configured.');
+    }
     await buildWindows(flutterProject.windows, buildInfo, target: targetFile);
-    return FlutterCommandResult.success();
+    return null;
   }
 }

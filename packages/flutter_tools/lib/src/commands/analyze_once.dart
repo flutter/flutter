@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,7 +13,7 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../dart/sdk.dart' as sdk;
-import '../globals.dart' as globals;
+import '../globals.dart';
 import 'analyze.dart';
 import 'analyze_base.dart';
 
@@ -35,14 +35,14 @@ class AnalyzeOnce extends AnalyzeBase {
   @override
   Future<void> analyze() async {
     final String currentDirectory =
-        (workingDirectory ?? globals.fs.currentDirectory).path;
+        (workingDirectory ?? fs.currentDirectory).path;
 
     // find directories from argResults.rest
     final Set<String> directories = Set<String>.from(argResults.rest
-        .map<String>((String path) => globals.fs.path.canonicalize(path)));
+        .map<String>((String path) => fs.path.canonicalize(path)));
     if (directories.isNotEmpty) {
-      for (final String directory in directories) {
-        final FileSystemEntityType type = globals.fs.typeSync(directory);
+      for (String directory in directories) {
+        final FileSystemEntityType type = fs.typeSync(directory);
 
         if (type == FileSystemEntityType.notFound) {
           throwToolExit("'$directory' does not exist");
@@ -108,9 +108,9 @@ class AnalyzeOnce extends AnalyzeBase {
     final Stopwatch timer = Stopwatch()..start();
     final String message = directories.length > 1
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
-        : globals.fs.path.basename(directories.first);
+        : fs.path.basename(directories.first);
     final Status progress = argResults['preamble'] as bool
-        ? globals.logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
+        ? logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
         : null;
 
     await analysisCompleter.future;
@@ -135,11 +135,11 @@ class AnalyzeOnce extends AnalyzeBase {
 
     // report errors
     if (errors.isNotEmpty && (argResults['preamble'] as bool)) {
-      globals.printStatus('');
+      printStatus('');
     }
     errors.sort();
-    for (final AnalysisError error in errors) {
-      globals.printStatus(error.toString(), hangingIndent: 7);
+    for (AnalysisError error in errors) {
+      printStatus(error.toString(), hangingIndent: 7);
     }
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
@@ -154,7 +154,7 @@ class AnalyzeOnce extends AnalyzeBase {
     // We consider any level of error to be an error exit (we don't report different levels).
     if (errors.isNotEmpty) {
       final int errorCount = errors.length;
-      globals.printStatus('');
+      printStatus('');
       if (undocumentedMembers > 0) {
         throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
       } else {
@@ -168,9 +168,9 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (argResults['congratulate'] as bool) {
       if (undocumentedMembers > 0) {
-        globals.printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
+        printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
       } else {
-        globals.printStatus('No issues found! (ran in ${seconds}s)');
+        printStatus('No issues found! (ran in ${seconds}s)');
       }
     }
   }

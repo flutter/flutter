@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -325,12 +325,6 @@ void main() {
 
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
-
-    await tester.pumpWidget(build(TargetPlatform.macOS));
-    await tester.pumpAndSettle(); // Run theme change animation.
-
-    expect(find.byIcon(Icons.more_vert), findsNothing);
-    expect(find.byIcon(Icons.more_horiz), findsOneWidget);
   });
 
   group('PopupMenuButton with Icon', () {
@@ -351,7 +345,7 @@ void main() {
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
         );
-      }, throwsAssertionError);
+      }, throwsA(isInstanceOf<AssertionError>()));
     });
 
     testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {
@@ -797,7 +791,7 @@ void main() {
                   onPressed: () {
                     // Ensure showMenu throws an assertion without a position
                     expect(() {
-                      // ignore: missing_required_param
+                      // ignore: missing_required_param_with_details
                       showMenu<int>(
                         context: context,
                         items: <PopupMenuItem<int>>[
@@ -916,7 +910,7 @@ void main() {
             textDirection: textDirection,
             child: PopupMenuTheme(
               data: PopupMenuTheme.of(context).copyWith(
-                textStyle: Theme.of(context).textTheme.subtitle1.copyWith(fontSize: fontSize),
+                textStyle: Theme.of(context).textTheme.subhead.copyWith(fontSize: fontSize),
               ),
               child: child,
             ),
@@ -1200,15 +1194,9 @@ void main() {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({
-    Key key,
-    this.textDirection,
-    this.child,
-  }) : super(key: key);
-
+  const TestApp({ this.textDirection, this.child });
   final TextDirection textDirection;
   final Widget child;
-
   @override
   _TestAppState createState() => _TestAppState();
 }

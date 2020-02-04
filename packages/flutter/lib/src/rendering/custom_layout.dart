@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,15 +29,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// given the previous instance.
 ///
 /// Override [getSize] to control the overall size of the layout. The size of
-/// the layout cannot depend on layout properties of the children. This was
-/// a design decision to simplify the delegate implementations: This way,
-/// the delegate implementations do not have to also handle various intrinsic
-/// sizing functions if the parent's size depended on the children.
-/// If you want to build a custom layout where you define the size of that widget
-/// based on its children, then you will have to create a custom render object.
-/// See [MultiChildRenderObjectWidget] with [ContainerRenderObjectMixin] and
-/// [RenderBoxContainerDefaultsMixin] to get started or [RenderStack] for an
-/// example implementation.
+/// the layout cannot depend on layout properties of the children.
 ///
 /// Override [performLayout] to size and position the children. An
 /// implementation of [performLayout] must call [layoutChild] exactly once for
@@ -59,7 +51,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// identifies it to the delegate. The [LayoutId.id] needs to be unique among
 /// the children that the [CustomMultiChildLayout] manages.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// Below is an example implementation of [performLayout] that causes one widget
 /// (the follower) to be the same size as another (the leader):
@@ -194,12 +186,12 @@ abstract class MultiChildLayoutDelegate {
       }
       return true;
     }());
-    final MultiChildLayoutParentData childParentData = child.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData childParentData = child.parentData;
     childParentData.offset = offset;
   }
 
   DiagnosticsNode _debugDescribeChild(RenderBox child) {
-    final MultiChildLayoutParentData childParentData = child.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData childParentData = child.parentData;
     return DiagnosticsProperty<RenderBox>('${childParentData.id}', child);
   }
 
@@ -220,7 +212,7 @@ abstract class MultiChildLayoutDelegate {
       _idToChild = <Object, RenderBox>{};
       RenderBox child = firstChild;
       while (child != null) {
-        final MultiChildLayoutParentData childParentData = child.parentData as MultiChildLayoutParentData;
+        final MultiChildLayoutParentData childParentData = child.parentData;
         assert(() {
           if (childParentData.id == null) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -294,7 +286,7 @@ abstract class MultiChildLayoutDelegate {
   ///
   /// By default, returns the [runtimeType] of the class.
   @override
-  String toString() => objectRuntimeType(this, 'MultiChildLayoutDelegate');
+  String toString() => '$runtimeType';
 }
 
 /// Defers the layout of multiple children to a delegate.

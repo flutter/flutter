@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,7 +38,7 @@ void main() {
   test('Velocity tracker gives expected results', () {
     final VelocityTracker tracker = VelocityTracker();
     int i = 0;
-    for (final PointerEvent event in velocityEventData) {
+    for (PointerEvent event in velocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
         tracker.addPosition(event.timeStamp, event.position);
       if (event is PointerUpEvent) {
@@ -63,7 +63,7 @@ void main() {
   test('Interrupted velocity estimation', () {
     // Regression test for https://github.com/flutter/flutter/pull/7510
     final VelocityTracker tracker = VelocityTracker();
-    for (final PointerEvent event in interruptedVelocityEventData) {
+    for (PointerEvent event in interruptedVelocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
         tracker.addPosition(event.timeStamp, event.position);
       if (event is PointerUpEvent) {

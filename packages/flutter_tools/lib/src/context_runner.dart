@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,11 +17,12 @@ import 'base/context.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/signals.dart';
-import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
+import 'base/utils.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -34,7 +35,6 @@ import 'features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
-import 'globals.dart' as globals;
 import 'ios/devices.dart' show IOSDeploy;
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -72,28 +72,15 @@ Future<T> runInContext<T>(
       AndroidValidator: () => AndroidValidator(),
       AndroidWorkflow: () => AndroidWorkflow(),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
-      Artifacts: () => CachedArtifacts(
-        fileSystem: globals.fs,
-        cache: globals.cache,
-        platform: globals.platform,
-      ),
+      Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
+      BotDetector: () => const BotDetector(),
       BuildSystem: () => const BuildSystem(),
-      Cache: () => Cache(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-      ),
+      Cache: () => Cache(),
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
-      Config: () => Config(
-        file: globals.fs.file(globals.fs.path.join(
-          globals.fsUtils.userHomePath,
-          Config.kFlutterSettings,
-        )),
-        logger: globals.logger,
-      ),
+      Config: () => Config(),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
@@ -114,37 +101,14 @@ Future<T> runInContext<T>(
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
-      Logger: () => globals.platform.isWindows
-        ? WindowsStdoutLogger(
-            terminal: globals.terminal,
-            stdio: globals.stdio,
-            outputPreferences: outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
-            platform: globals.platform,
-          )
-        : StdoutLogger(
-            terminal: globals.terminal,
-            stdio: globals.stdio,
-            outputPreferences: outputPreferences,
-            timeoutConfiguration: timeoutConfiguration,
-            platform: globals.platform,
-          ),
+      Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
-      OperatingSystemUtils: () => OperatingSystemUtils(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-        processManager: globals.processManager,
-      ),
+      OperatingSystemUtils: () => OperatingSystemUtils(),
       PersistentToolState: () => PersistentToolState(),
       ProcessInfo: () => ProcessInfo(),
-      ProcessUtils: () => ProcessUtils(
-        processManager: globals.processManager,
-        logger: globals.logger,
-      ),
+      ProcessUtils: () => ProcessUtils(),
       Pub: () => const Pub(),
-      ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),
@@ -156,20 +120,8 @@ Future<T> runInContext<T>(
       VisualStudioValidator: () => const VisualStudioValidator(),
       WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
-      Xcode: () => Xcode(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
-      ),
-      XcodeProjectInterpreter: () => XcodeProjectInterpreter(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
-        terminal: globals.terminal,
-      ),
+      Xcode: () => Xcode(),
+      XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
       XcodeValidator: () => const XcodeValidator(),
     },
   );

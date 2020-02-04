@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,8 +13,6 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -39,10 +37,10 @@ void main() {
     final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
       ..operatingSystem = 'macos';
     MockProcessManager mockProcessManager;
-    final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
-    final String ideviceIdPath = globals.fs.path.join(libimobiledevicePath, 'idevice_id');
-    final String ideviceInfoPath = globals.fs.path.join(libimobiledevicePath, 'ideviceinfo');
-    final String idevicescreenshotPath = globals.fs.path.join(libimobiledevicePath, 'idevicescreenshot');
+    final String libimobiledevicePath = fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
+    final String ideviceIdPath = fs.path.join(libimobiledevicePath, 'idevice_id');
+    final String ideviceInfoPath = fs.path.join(libimobiledevicePath, 'ideviceinfo');
+    final String idevicescreenshotPath = fs.path.join(libimobiledevicePath, 'idevicescreenshot');
     MockArtifacts mockArtifacts;
     MockCache mockCache;
 
@@ -60,7 +58,7 @@ void main() {
       when(mockProcessManager.runSync(
         <String>[ideviceIdPath, '-h'], environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(123, 1, '', ''));
-      expect(await globals.iMobileDevice.isWorking, false);
+      expect(await iMobileDevice.isWorking, false);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Artifacts: () => mockArtifacts,
@@ -71,7 +69,7 @@ void main() {
         <String>[ideviceIdPath, '-l'],
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
       )).thenThrow(ProcessException(ideviceIdPath, <String>['-l']));
-      expect(() async => await globals.iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
+      expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -83,7 +81,7 @@ void main() {
         <String>[ideviceIdPath, '-l'],
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
       )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', 'Sad today')));
-      expect(() async => await globals.iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
+      expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -95,7 +93,7 @@ void main() {
         <String>[ideviceIdPath, '-l'],
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
       )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'foo', '')));
-      expect(await globals.iMobileDevice.getAvailableDeviceIDs(), 'foo');
+      expect(await iMobileDevice.getAvailableDeviceIDs(), 'foo');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -108,7 +106,7 @@ void main() {
         <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
       )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
-      expect(() async => await globals.iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotFoundError>()));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotFoundError>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -129,7 +127,7 @@ void main() {
         );
         return Future<ProcessResult>.value(result);
       });
-      expect(() async => await globals.iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotTrustedError>()));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -150,7 +148,7 @@ void main() {
         );
         return Future<ProcessResult>.value(result);
       });
-      expect(() async => await globals.iMobileDevice.getInfoForDevice('foo', 'bar'), throwsToolExit());
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsToolExit());
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -171,7 +169,7 @@ void main() {
         );
         return Future<ProcessResult>.value(result);
       });
-      expect(() async => await globals.iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotTrustedError>()));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -179,7 +177,7 @@ void main() {
     });
 
     group('screenshot', () {
-      final String outputPath = globals.fs.path.join('some', 'test', 'path', 'image.png');
+      final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
       MockProcessManager mockProcessManager;
       MockFile mockOutputFile;
 
@@ -198,7 +196,7 @@ void main() {
             workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
-        expect(() async => await globals.iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
+        expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         Platform: () => osx,
@@ -210,7 +208,7 @@ void main() {
         when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
-        await globals.iMobileDevice.takeScreenshot(mockOutputFile);
+        await iMobileDevice.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,

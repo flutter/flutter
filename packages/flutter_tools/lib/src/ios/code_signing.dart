@@ -1,7 +1,6 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'dart:async';
 
 import 'package:quiver/strings.dart';
@@ -10,8 +9,9 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../convert.dart' show utf8;
-import '../globals.dart' as globals;
+import '../globals.dart';
 
 /// User message when no development certificates are found in the keychain.
 ///
@@ -69,9 +69,7 @@ const String fixWithDevelopmentTeamInstruction = '''
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
-  3- Make sure a 'Development Team' is selected.\u0020
-     - For Xcode 10, look under General > Signing > Team.
-     - For Xcode 11 and newer, look under Signing & Capabilities > Team.
+  3- In the 'General' tab, make sure a 'Development Team' is selected.\u0020
      You may need to:
          - Log in with your Apple ID in Xcode first
          - Ensure you have a valid unique Bundle ID
@@ -105,7 +103,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   // If the user already has it set in the project build settings itself,
   // continue with that.
   if (isNotEmpty(buildSettings['DEVELOPMENT_TEAM'])) {
-    globals.printStatus(
+    printStatus(
       'Automatically signing iOS for device deployment using specified development '
       'team in Xcode project: ${buildSettings['DEVELOPMENT_TEAM']}'
     );
@@ -133,7 +131,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
       throwOnError: true,
     )).stdout.trim();
   } on ProcessException catch (error) {
-    globals.printTrace('Unexpected failure from find-identity: $error.');
+    printTrace('Unexpected failure from find-identity: $error.');
     return null;
   }
 
@@ -155,7 +153,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
     return null;
   }
 
-  globals.printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
+  printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
 
   final String signingCertificateId =
       _securityFindIdentityCertificateCnExtractionPattern
@@ -174,7 +172,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
       throwOnError: true,
     )).stdout.trim();
   } on ProcessException catch (error) {
-    globals.printTrace('Couldn\'t find the certificate: $error.');
+    printTrace('Couldn\'t find the certificate: $error.');
     return null;
   }
 
@@ -201,7 +199,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
 Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) async {
   // The user has no valid code signing identities.
   if (validCodeSigningIdentities.isEmpty) {
-    globals.printError(noCertificatesInstruction, emphasis: true);
+    printError(noCertificatesInstruction, emphasis: true);
     throwToolExit('No development certificates available to code sign app for device deployment');
   }
 
@@ -210,48 +208,47 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
   }
 
   if (validCodeSigningIdentities.length > 1) {
-    final String savedCertChoice = globals.config.getValue('ios-signing-cert') as String;
+    final String savedCertChoice = config.getValue('ios-signing-cert') as String;
 
     if (savedCertChoice != null) {
       if (validCodeSigningIdentities.contains(savedCertChoice)) {
-        globals.printStatus('Found saved certificate choice "$savedCertChoice". To clear, use "flutter config".');
+        printStatus('Found saved certificate choice "$savedCertChoice". To clear, use "flutter config".');
         return savedCertChoice;
       } else {
-        globals.printError('Saved signing certificate "$savedCertChoice" is not a valid development certificate');
+        printError('Saved signing certificate "$savedCertChoice" is not a valid development certificate');
       }
     }
 
     // If terminal UI can't be used, just attempt with the first valid certificate
     // since we can't ask the user.
-    if (!globals.terminal.usesTerminalUi) {
+    if (!terminal.usesTerminalUi) {
       return validCodeSigningIdentities.first;
     }
 
     final int count = validCodeSigningIdentities.length;
-    globals.printStatus(
+    printStatus(
       'Multiple valid development certificates available (your choice will be saved):',
       emphasis: true,
     );
     for (int i=0; i<count; i++) {
-      globals.printStatus('  ${i+1}) ${validCodeSigningIdentities[i]}', emphasis: true);
+      printStatus('  ${i+1}) ${validCodeSigningIdentities[i]}', emphasis: true);
     }
-    globals.printStatus('  a) Abort', emphasis: true);
+    printStatus('  a) Abort', emphasis: true);
 
-    final String choice = await globals.terminal.promptForCharInput(
+    final String choice = await terminal.promptForCharInput(
       List<String>.generate(count, (int number) => '${number + 1}')
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
       displayAcceptedCharacters: true,
       defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
-      logger: globals.logger,
     );
 
     if (choice == 'a') {
       throwToolExit('Aborted. Code signing is required to build a deployable iOS app.');
     } else {
       final String selectedCert = validCodeSigningIdentities[int.parse(choice) - 1];
-      globals.printStatus('Certificate choice "$selectedCert" saved');
-      globals.config.setValue('ios-signing-cert', selectedCert);
+      printStatus('Certificate choice "$selectedCert" saved');
+      config.setValue('ios-signing-cert', selectedCert);
       return selectedCert;
     }
   }

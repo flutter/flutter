@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'android/android_sdk.dart';
 import 'base/context.dart';
 import 'base/process.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
+import 'globals.dart';
 import 'ios/ios_emulators.dart';
 
 EmulatorManager get emulatorManager => context.get<EmulatorManager>();
@@ -228,12 +228,14 @@ abstract class Emulator {
   int get hashCode => id.hashCode;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other)) {
       return true;
     }
-    return other is Emulator
-        && other.id == id;
+    if (other is! Emulator) {
+      return false;
+    }
+    return id == other.id;
   }
 
   Future<void> launch();
@@ -248,7 +250,7 @@ abstract class Emulator {
 
     // Extract emulators information
     final List<List<String>> table = <List<String>>[
-      for (final Emulator emulator in emulators)
+      for (Emulator emulator in emulators)
         <String>[
           emulator.id ?? '',
           emulator.name ?? '',
@@ -260,7 +262,7 @@ abstract class Emulator {
     // Calculate column widths
     final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (final List<String> row in table) {
+    for (List<String> row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
@@ -278,7 +280,7 @@ abstract class Emulator {
   }
 
   static void printEmulators(List<Emulator> emulators) {
-    descriptions(emulators).forEach(globals.printStatus);
+    descriptions(emulators).forEach(printStatus);
   }
 }
 

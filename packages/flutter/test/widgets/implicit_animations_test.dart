@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,7 +42,7 @@ void main() {
       begin: const BoxDecoration(color: Color(0xFF00FF00)),
       end: const BoxDecoration(color: Color(0xFFFFFF00)),
     );
-    final BoxDecoration result = tween.lerp(0.25) as BoxDecoration;
+    final BoxDecoration result = tween.lerp(0.25);
     expect(result.color, const Color(0xFF3FFF00));
   });
 
@@ -69,11 +69,7 @@ void main() {
 
   testWidgets('AnimatedContainer onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestAnimatedContainerWidgetState(),
-      )
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedContainerWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -90,11 +86,7 @@ void main() {
 
   testWidgets('AnimatedPadding onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestAnimatedPaddingWidgetState(),
-      )
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedPaddingWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -111,11 +103,7 @@ void main() {
 
   testWidgets('AnimatedAlign onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestAnimatedAlignWidgetState(),
-      )
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedAlignWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -132,11 +120,7 @@ void main() {
 
   testWidgets('AnimatedPositioned onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestAnimatedPositionedWidgetState(),
-      )
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedPositionedWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -153,11 +137,7 @@ void main() {
 
   testWidgets('AnimatedPositionedDirectional onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestAnimatedPositionedDirectionalWidgetState(),
-      )
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedPositionedDirectionalWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -174,58 +154,7 @@ void main() {
 
   testWidgets('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestAnimatedOpacityWidgetState(),
-      )
-    ));
-
-    final Finder widgetFinder = find.byKey(switchKey);
-
-    await tester.tap(widgetFinder);
-    await tester.pump();
-    expect(mockOnEndFunction.called, 0);
-    await tester.pump(animationDuration);
-    expect(mockOnEndFunction.called, 0);
-    await tester.pump(additionalDelay);
-    expect(mockOnEndFunction.called, 1);
-  });
-
-  testWidgets('AnimatedOpacity transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        switchKey: switchKey,
-        state: _TestAnimatedOpacityWidgetState(),
-      )
-    ));
-
-    final Finder switchFinder = find.byKey(switchKey);
-    final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(FadeTransition),
-      ).first,
-    );
-
-    await tester.tap(switchFinder);
-    await tester.pump();
-    expect(opacityWidget.opacity.value, equals(0.0));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(opacityWidget.opacity.value, equals(0.5));
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(opacityWidget.opacity.value, equals(0.75));
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(opacityWidget.opacity.value, equals(1.0));
-  });
-
-
-  testWidgets('SliverAnimatedOpacity onEnd callback test', (WidgetTester tester) async {
-    await tester.pumpWidget(TestAnimatedWidget(
-      callback: mockOnEndFunction,
-      switchKey: switchKey,
-      state: _TestSliverAnimatedOpacityWidgetState(),
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedOpacityWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -238,43 +167,11 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
-  });
-
-  testWidgets('SliverAnimatedOpacity transition test', (WidgetTester tester) async {
-    await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        switchKey: switchKey,
-        state: _TestSliverAnimatedOpacityWidgetState(),
-      )
-    ));
-
-    final Finder switchFinder = find.byKey(switchKey);
-    final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
-      find.ancestor(
-        of: find.byType(Placeholder),
-        matching: find.byType(SliverFadeTransition),
-      ).first,
-    );
-
-    await tester.tap(switchFinder);
-    await tester.pump();
-    expect(opacityWidget.opacity.value, equals(0.0));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(opacityWidget.opacity.value, equals(0.5));
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(opacityWidget.opacity.value, equals(0.75));
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(opacityWidget.opacity.value, equals(1.0));
   });
 
   testWidgets('AnimatedDefaultTextStyle onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestAnimatedDefaultTextStyleWidgetState(),
-      )
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedDefaultTextStyleWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -291,11 +188,7 @@ void main() {
 
   testWidgets('AnimatedPhysicalModel onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestAnimatedPhysicalModelWidgetState(),
-      )
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedPhysicalModelWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -312,11 +205,7 @@ void main() {
 
   testWidgets('TweenAnimationBuilder onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestTweenAnimationBuilderWidgetState(),
-      )
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestTweenAnimationBuilderWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -333,11 +222,7 @@ void main() {
 
   testWidgets('AnimatedTheme onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
-      child: TestAnimatedWidget(
-        callback: mockOnEndFunction,
-        switchKey: switchKey,
-        state: _TestAnimatedThemeWidgetState(),
-      )
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedThemeWidgetState(),)
     ));
 
     final Finder widgetFinder = find.byKey(switchKey);
@@ -363,12 +248,7 @@ Widget wrap({Widget child}) {
 }
 
 class TestAnimatedWidget extends StatefulWidget {
-  const TestAnimatedWidget({
-    Key key,
-    this.callback,
-    this.switchKey,
-    this.state,
-  }) : super(key: key);
+  const TestAnimatedWidget({this.callback, this.switchKey, this.state});
   @required
   final VoidCallback callback;
   @required
@@ -475,42 +355,7 @@ class _TestAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
       child: child,
       duration: duration,
       onEnd: widget.callback,
-      opacity: toggle ? 1.0 : 0.0,
-    );
-  }
-}
-
-class _TestSliverAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
-  @override
-  Widget getAnimatedWidget() {
-    return SliverAnimatedOpacity(
-      sliver: SliverToBoxAdapter(child: child),
-      duration: duration,
-      onEnd: widget.callback,
-      opacity: toggle ? 1.0 : 0.0,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final Widget animatedWidget = getAnimatedWidget();
-
-    return Material(
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: CustomScrollView(
-          slivers: <Widget>[
-            animatedWidget,
-            SliverToBoxAdapter(
-              child: Switch(
-                key: widget.switchKey,
-                value: toggle,
-                onChanged: onChanged,
-              ),
-            ),
-          ],
-        ),
-      ),
+      opacity: toggle ? 0.1 : 0.9,
     );
   }
 }
@@ -519,12 +364,12 @@ class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState 
   @override
   Widget getAnimatedWidget() {
     return AnimatedDefaultTextStyle(
-      child: child,
-      duration: duration,
-      onEnd: widget.callback,
-      style: toggle
-        ? const TextStyle(fontStyle: FontStyle.italic)
-        : const TextStyle(fontStyle: FontStyle.normal));
+        child: child,
+        duration: duration,
+        onEnd: widget.callback,
+        style: toggle
+            ? const TextStyle(fontStyle: FontStyle.italic)
+            : const TextStyle(fontStyle: FontStyle.normal));
   }
 }
 
@@ -547,17 +392,17 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return TweenAnimationBuilder<double>(
-      child: child,
-      tween: Tween<double>(begin: 1, end: 2),
-      duration: duration,
-      onEnd: widget.callback,
-      builder: (BuildContext context, double size, Widget child) {
-        return Container(
-          child: child,
-          width: size,
-          height: size,
-        );
-      },
+        child: child,
+        tween: Tween<double>(begin: 1, end: 2),
+        duration: duration,
+        onEnd: widget.callback,
+        builder: (BuildContext context, double size, Widget child) {
+          return Container(
+            child: child,
+            width: size,
+            height: size,
+          );
+        },
     );
   }
 }

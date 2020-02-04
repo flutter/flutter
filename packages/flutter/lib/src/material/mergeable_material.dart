@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -164,10 +164,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     _children = List<MergeableMaterialItem>.from(widget.children);
 
     for (int i = 0; i < _children.length; i += 1) {
-      final MergeableMaterialItem child = _children[i];
-      if (child is MaterialGap) {
-        _initGap(child);
-        _animationTuples[child.key].controller.value = 1.0; // Gaps are initially full-sized.
+      if (_children[i] is MaterialGap) {
+        _initGap(_children[i]);
+        _animationTuples[_children[i].key].controller.value = 1.0; // Gaps are initially full-sized.
       }
     }
     assert(_debugGapsAreValid(_children));
@@ -204,7 +203,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
   @override
   void dispose() {
-    for (final MergeableMaterialItem child in _children) {
+    for (MergeableMaterialItem child in _children) {
       if (child is MaterialGap)
         _animationTuples[child.key].controller.dispose();
     }
@@ -324,9 +323,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               double gapSizeSum = 0.0;
 
               while (startOld < j) {
-                final MergeableMaterialItem child = _children[startOld];
-                if (child is MaterialGap) {
-                  final MaterialGap gap = child;
+                if (_children[startOld] is MaterialGap) {
+                  final MaterialGap gap = _children[startOld];
                   gapSizeSum += gap.size;
                 }
 
@@ -366,19 +364,21 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               double gapSizeSum = 0.0;
 
               for (int k = startNew; k < i; k += 1) {
-                final MergeableMaterialItem newChild = newChildren[k];
-                if (newChild is MaterialGap) {
-                  gapSizeSum += newChild.size;
+                if (newChildren[k] is MaterialGap) {
+                  final MaterialGap gap = newChildren[k];
+                  gapSizeSum += gap.size;
                 }
               }
 
               // All gaps get proportional sizes of the original gap and they will
               // animate to their actual size.
               for (int k = startNew; k < i; k += 1) {
-                final MergeableMaterialItem newChild = newChildren[k];
-                if (newChild is MaterialGap) {
-                  _animationTuples[newChild.key].gapStart = gapSize * newChild.size / gapSizeSum;
-                  _animationTuples[newChild.key].controller
+                if (newChildren[k] is MaterialGap) {
+                  final MaterialGap gap = newChildren[k];
+
+                  _animationTuples[gap.key].gapStart = gapSize * gap.size /
+                      gapSizeSum;
+                  _animationTuples[gap.key].controller
                     ..value = 0.0
                     ..forward();
                 }
@@ -387,12 +387,11 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           } else {
             // Grow gaps.
             for (int k = 0; k < newLength; k += 1) {
-              final MergeableMaterialItem newChild = newChildren[startNew + k];
+              _insertChild(startOld + k, newChildren[startNew + k]);
 
-              _insertChild(startOld + k, newChild);
-
-              if (newChild is MaterialGap) {
-                _animationTuples[newChild.key].controller.forward();
+              if (newChildren[startNew + k] is MaterialGap) {
+                final MaterialGap gap = newChildren[startNew + k];
+                _animationTuples[gap.key].controller.forward();
               }
             }
 
@@ -405,9 +404,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             double gapSizeSum = 0.0;
 
             while (startOld < j) {
-              final MergeableMaterialItem child = _children[startOld];
-              if (child is MaterialGap) {
-                gapSizeSum += child.size;
+              if (_children[startOld] is MaterialGap) {
+                final MaterialGap gap = _children[startOld];
+                gapSizeSum += gap.size;
               }
 
               _removeChild(startOld);
@@ -429,7 +428,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             }
           } else if (oldLength == 1) {
             // Shrink gap.
-            final MaterialGap gap = _children[startOld] as MaterialGap;
+            final MaterialGap gap = _children[startOld];
             _animationTuples[gap.key].gapStart = 0.0;
             _animationTuples[gap.key].controller.reverse();
           }
@@ -499,7 +498,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   double _getGapSize(int index) {
-    final MaterialGap gap = _children[index] as MaterialGap;
+    final MaterialGap gap = _children[index];
 
     return lerpDouble(
       _animationTuples[gap.key].gapStart,
@@ -549,7 +548,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           ),
         );
       } else {
-        final MaterialSlice slice = _children[i] as MaterialSlice;
+        final MaterialSlice slice = _children[i];
         Widget child = slice.child;
 
         if (widget.hasDividers) {
@@ -631,9 +630,11 @@ class _MergeableMaterialSliceKey extends GlobalKey {
   final LocalKey value;
 
   @override
-  bool operator ==(Object other) {
-    return other is _MergeableMaterialSliceKey
-        && other.value == value;
+  bool operator ==(dynamic other) {
+    if (other is! _MergeableMaterialSliceKey)
+      return false;
+    final _MergeableMaterialSliceKey typedOther = other;
+    return value == typedOther.value;
   }
 
   @override
@@ -670,7 +671,7 @@ class _MergeableMaterialListBody extends ListBody {
 
   @override
   void updateRenderObject(BuildContext context, RenderListBody renderObject) {
-    final _RenderMergeableMaterialListBody materialRenderListBody = renderObject as _RenderMergeableMaterialListBody;
+    final _RenderMergeableMaterialListBody materialRenderListBody = renderObject;
     materialRenderListBody
       ..axisDirection = _getDirection(context)
       ..boxShadows = boxShadows;
@@ -687,7 +688,7 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
   List<BoxShadow> boxShadows;
 
   void _paintShadows(Canvas canvas, Rect rect) {
-    for (final BoxShadow boxShadow in boxShadows) {
+    for (BoxShadow boxShadow in boxShadows) {
       final Paint paint = boxShadow.toPaint();
       // TODO(dragostis): Right now, we are only interpolating the border radii
       // of the visible Material slices, not the shadows; they are not getting
@@ -704,7 +705,7 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
     int i = 0;
 
     while (child != null) {
-      final ListBodyParentData childParentData = child.parentData as ListBodyParentData;
+      final ListBodyParentData childParentData = child.parentData;
       final Rect rect = (childParentData.offset + offset) & child.size;
       if (i % 2 == 0)
         _paintShadows(context.canvas, rect);

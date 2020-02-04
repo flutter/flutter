@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,16 +45,11 @@ Future<void> main() async {
 
   final StackTrace sampleStack = await getSampleStack();
 
-  setUp(() async {
+  test('Error reporting - pretest', () async {
     expect(debugPrint, equals(debugPrintThrottled));
     debugPrint = (String message, { int wrapWidth }) {
       console.add(message);
     };
-  });
-
-  tearDown(() async {
-    expect(console, isEmpty);
-    debugPrint = debugPrintThrottled;
   });
 
   test('Error reporting - assert with message', () async {
@@ -76,12 +71,17 @@ Future<void> main() async {
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
       'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
       '\n'
+      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
+      'more information in this error message to help you determine and fix the underlying cause\\.\n'
+      'In either case, please report this assertion by filing a bug on GitHub:\n'
+      '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
+      '\n'
       'When the exception was thrown, this was the stack:\n'
       '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '#2      getSampleStack \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '#3      main \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
-      '\\(elided [0-9]+ frames from class _RawReceivePortImpl and dart:async\\)\n'
+      '\\(elided [0-9]+ frames from package dart:async\\)\n'
       '\n'
       'line 1 of extra information\n'
       'line 2 of extra information\n'
@@ -111,6 +111,11 @@ Future<void> main() async {
       'word word word word word word word word word word word word word word word word word word word word\n'
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
       'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
+      '\n'
+      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
+      'more information in this error message to help you determine and fix the underlying cause\\.\n'
+      'In either case, please report this assertion by filing a bug on GitHub:\n'
+      '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
     ));
     console.clear();
@@ -148,12 +153,17 @@ Future<void> main() async {
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':[\n ]'
       'Failed[\n ]assertion:[\n ]line[\n ][0-9]+[\n ]pos[\n ][0-9]+:[\n ]\'false\':[\n ]is[\n ]not[\n ]true\\.\n'
       '\n'
+      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
+      'more information in this error message to help you determine and fix the underlying cause\\.\n'
+      'In either case, please report this assertion by filing a bug on GitHub:\n'
+      '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
+      '\n'
       'When the exception was thrown, this was the stack:\n'
       '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '#2      getSampleStack \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '#3      main \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
       '(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
-      '\\(elided [0-9]+ frames from class _RawReceivePortImpl and dart:async\\)\n'
+      '\\(elided [0-9]+ frames from package dart:async\\)\n'
       '\n'
       'line 1 of extra information\n'
       'line 2 of extra information\n'
@@ -208,5 +218,10 @@ Future<void> main() async {
     expect(console.join('\n'), 'Another exception was thrown: hello again');
     console.clear();
     FlutterError.resetErrorCount();
+  });
+
+  test('Error reporting - posttest', () async {
+    expect(console, isEmpty);
+    debugPrint = debugPrintThrottled;
   });
 }

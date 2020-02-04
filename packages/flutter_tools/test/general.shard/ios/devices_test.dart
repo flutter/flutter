@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,8 +24,6 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -80,11 +78,11 @@ void main() {
       Platform: () => macPlatform,
     });
 
-    for (final Platform platform in unsupportedPlatforms) {
+    for (Platform platform in unsupportedPlatforms) {
       testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
           () { IOSDevice('device-123'); },
-          throwsAssertionError,
+          throwsA(isInstanceOf<AssertionError>()),
         );
       }, overrides: <Type, Generator>{
         Platform: () => platform,
@@ -113,7 +111,7 @@ void main() {
 
       IOSDeviceLogReader createLogReader(
           IOSDevice device,
-          IOSApp appPackage,
+          ApplicationPackage appPackage,
           Process process) {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader(device, appPackage);
         logReader.idevicesyslogProcess = process;
@@ -140,7 +138,7 @@ void main() {
         device.setLogReader(appPackage2, logReader2);
         device.portForwarder = portForwarder;
 
-        await device.dispose();
+        device.dispose();
 
         verify(mockProcess1.kill());
         verify(mockProcess2.kill());
@@ -195,7 +193,7 @@ void main() {
         mockIosDeploy = MockIOSDeploy();
         mockUsage = MockUsage();
 
-        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
         projectDir = tempDir.childDirectory('flutter_project');
 
         when(
@@ -249,16 +247,6 @@ void main() {
         tryToDelete(tempDir);
 
         Cache.enableLocking();
-      });
-
-      testUsingContext('disposing device disposes the portForwarder', () async {
-        final IOSDevice device = IOSDevice('123');
-        device.portForwarder = mockPortForwarder;
-        device.setLogReader(mockApp, mockLogReader);
-        await device.dispose();
-        verify(mockPortForwarder.dispose()).called(1);
-      }, overrides: <Type, Generator>{
-        Platform: () => macPlatform,
       });
 
       testUsingContext('returns failed if the IOSDevice is not found', () async {
@@ -412,7 +400,7 @@ void main() {
         Usage: () => mockUsage,
       });
 
-      testUsingContext('succeeds in release mode', () async {
+      testUsingContext(' succeeds in release mode', () async {
         final IOSDevice device = IOSDevice('123');
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
@@ -430,7 +418,7 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
-      testUsingContext('succeeds with --cache-sksl', () async {
+      testUsingContext(' succeeds with --cache-sksl', () async {
         final IOSDevice device = IOSDevice('123');
         device.setLogReader(mockApp, mockLogReader);
         final Uri uri = Uri(
@@ -448,7 +436,7 @@ void main() {
           bundlePath: anyNamed('bundlePath'),
           launchArguments: anyNamed('launchArguments'),
         )).thenAnswer((Invocation inv) {
-          args = inv.namedArguments[const Symbol('launchArguments')] as List<String>;
+          args = inv.namedArguments[const Symbol('launchArguments')];
           return Future<int>.value(0);
         });
 
@@ -474,62 +462,16 @@ void main() {
         IOSDeploy: () => mockIosDeploy,
       });
 
-      testUsingContext('succeeds with --device-vmservice-port', () async {
-        final IOSDevice device = IOSDevice('123');
-        device.setLogReader(mockApp, mockLogReader);
-        final Uri uri = Uri(
-          scheme: 'http',
-          host: '127.0.0.1',
-          port: 1234,
-          path: 'observatory',
-        );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
-            .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
-
-        List<String> args;
-        when(mockIosDeploy.runApp(
-          deviceId: anyNamed('deviceId'),
-          bundlePath: anyNamed('bundlePath'),
-          launchArguments: anyNamed('launchArguments'),
-        )).thenAnswer((Invocation inv) {
-          args = inv.namedArguments[const Symbol('launchArguments')] as List<String>;
-          return Future<int>.value(0);
-        });
-
-        final LaunchResult launchResult = await device.startApp(mockApp,
-          prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(
-            const BuildInfo(BuildMode.debug, null),
-            deviceVmServicePort: 8181,
-          ),
-          platformArgs: <String, dynamic>{},
-        );
-        expect(launchResult.started, isTrue);
-        expect(args, contains('--observatory-port=8181'));
-        expect(await device.stopApp(mockApp), isFalse);
-      }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
-        Cache: () => mockCache,
-        FileSystem: () => mockFileSystem,
-        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
-        Platform: () => macPlatform,
-        ProcessManager: () => mockProcessManager,
-        Usage: () => mockUsage,
-        IOSDeploy: () => mockIosDeploy,
-      });
-
-      void testNonPrebuilt(
-        String name, {
+      void testNonPrebuilt({
         @required bool showBuildSettingsFlakes,
-        void Function() additionalSetup,
-        void Function() additionalExpectations,
       }) {
-        testUsingContext('non-prebuilt succeeds in debug mode $name', () async {
+        const String name = ' non-prebuilt succeeds in debug mode';
+        testUsingContext(name + ' flaky: $showBuildSettingsFlakes', () async {
           final Directory targetBuildDir =
               projectDir.childDirectory('build/ios/iphoneos/Debug-arm64');
 
           // The -showBuildSettings calls have a timeout and so go through
-          // globals.processManager.start().
+          // processManager.start().
           mockProcessManager.processFactory = flakyProcessFactory(
             flakes: showBuildSettingsFlakes ? 1 : 0,
             delay: const Duration(seconds: 62),
@@ -583,10 +525,6 @@ void main() {
             projectDir.path,
           ]);
 
-          if (additionalSetup != null) {
-            additionalSetup();
-          }
-
           final IOSApp app = await AbsoluteBuildableIOSApp.fromProject(
             FlutterProject.fromDirectory(projectDir).ios);
           final IOSDevice device = IOSDevice('123');
@@ -612,10 +550,6 @@ void main() {
           expect(launchResult.started, isTrue);
           expect(launchResult.hasObservatory, isFalse);
           expect(await device.stopApp(mockApp), isFalse);
-
-          if (additionalExpectations != null) {
-            additionalExpectations();
-          }
         }, overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeIosDoctorProvider(),
           IMobileDevice: () => mockIMobileDevice,
@@ -625,44 +559,8 @@ void main() {
         });
       }
 
-      testNonPrebuilt('flaky: false', showBuildSettingsFlakes: false);
-      testNonPrebuilt('flaky: true', showBuildSettingsFlakes: true);
-      testNonPrebuilt('with concurrent build failiure',
-        showBuildSettingsFlakes: false,
-        additionalSetup: () {
-          int callCount = 0;
-          when(mockProcessManager.run(
-            argThat(allOf(
-              contains('xcodebuild'),
-              contains('-configuration'),
-              contains('Debug'),
-            )),
-            workingDirectory: anyNamed('workingDirectory'),
-            environment: anyNamed('environment'),
-          )).thenAnswer((Invocation inv) {
-            // Succeed after 2 calls.
-            if (++callCount > 2) {
-              return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
-            }
-            // Otherwise fail with the Xcode concurrent error.
-            return Future<ProcessResult>.value(ProcessResult(
-              0,
-              1,
-              '''
-                "/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
-                database is locked
-                Possibly there are two concurrent builds running in the same filesystem location.
-                ''',
-              '',
-            ));
-          });
-        },
-        additionalExpectations: () {
-          expect(testLogger.statusText, contains('will retry in 2 seconds'));
-          expect(testLogger.statusText, contains('will retry in 4 seconds'));
-          expect(testLogger.statusText, contains('Xcode build done.'));
-        },
-      );
+      testNonPrebuilt(showBuildSettingsFlakes: false);
+      testNonPrebuilt(showBuildSettingsFlakes: true);
     });
 
     group('Process calls', () {
@@ -770,8 +668,8 @@ void main() {
     });
 
     testUsingContext('returns no devices if none are attached', () async {
-      when(globals.iMobileDevice.isInstalled).thenReturn(true);
-      when(globals.iMobileDevice.getAvailableDeviceIDs())
+      when(iMobileDevice.isInstalled).thenReturn(true);
+      when(iMobileDevice.getAvailableDeviceIDs())
           .thenAnswer((Invocation invocation) => Future<String>.value(''));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, isEmpty);
@@ -781,14 +679,14 @@ void main() {
     });
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
-    for (final Platform platform in unsupportedPlatforms) {
+    for (Platform platform in unsupportedPlatforms) {
       testUsingContext('throws Unsupported Operation exception on ${platform.operatingSystem}', () async {
-        when(globals.iMobileDevice.isInstalled).thenReturn(false);
-        when(globals.iMobileDevice.getAvailableDeviceIDs())
+        when(iMobileDevice.isInstalled).thenReturn(false);
+        when(iMobileDevice.getAvailableDeviceIDs())
             .thenAnswer((Invocation invocation) => Future<String>.value(''));
         expect(
             () async { await IOSDevice.getAttachedDevices(); },
-            throwsA(isA<UnsupportedError>()),
+            throwsA(isInstanceOf<UnsupportedError>()),
         );
       }, overrides: <Type, Generator>{
         IMobileDevice: () => mockIMobileDevice,
@@ -797,19 +695,19 @@ void main() {
     }
 
     testUsingContext('returns attached devices', () async {
-      when(globals.iMobileDevice.isInstalled).thenReturn(true);
-      when(globals.iMobileDevice.getAvailableDeviceIDs())
+      when(iMobileDevice.isInstalled).thenReturn(true);
+      when(iMobileDevice.getAvailableDeviceIDs())
           .thenAnswer((Invocation invocation) => Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
-      when(globals.iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('La tele me regarde'));
-      when(globals.iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
           .thenAnswer((_) => Future<String>.value('10.3.2'));
-      when(globals.iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('Puits sans fond'));
-      when(globals.iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
           .thenAnswer((_) => Future<String>.value('11.0'));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(2));
@@ -823,15 +721,15 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     });
 
     testUsingContext('returns attached devices and ignores devices that cannot be found by ideviceinfo', () async {
-      when(globals.iMobileDevice.isInstalled).thenReturn(true);
-      when(globals.iMobileDevice.getAvailableDeviceIDs())
+      when(iMobileDevice.isInstalled).thenReturn(true);
+      when(iMobileDevice.getAvailableDeviceIDs())
           .thenAnswer((Invocation invocation) => Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
-      when(globals.iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('La tele me regarde'));
-      when(globals.iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
           .thenThrow(const IOSDeviceNotFoundError('Device not found'));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(1));
@@ -921,7 +819,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
   });
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
-    globals.fs.file('pubspec.yaml')
+    fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
 name: example
@@ -929,7 +827,7 @@ name: example
 flutter:
   module: {}
 ''');
-    globals.fs.file('.packages').createSync();
+    fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
@@ -939,9 +837,9 @@ flutter:
     Platform: () => macPlatform,
   });
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
-    globals.fs.directory('ios').createSync();
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.directory('ios').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
@@ -952,8 +850,8 @@ flutter:
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSDevice('test').isSupportedForProject(flutterProject), false);
@@ -975,7 +873,7 @@ class AbsoluteBuildableIOSApp extends BuildableIOSApp {
 
   @override
   String get deviceBundlePath =>
-      globals.fs.path.join(project.parent.directory.path, 'build', 'ios', 'iphoneos', name);
+      fs.path.join(project.parent.directory.path, 'build', 'ios', 'iphoneos', name);
 
 }
 

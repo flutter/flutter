@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,8 +17,8 @@ import 'theme.dart';
 
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
-/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
-/// text style, which is a little smaller than the theme's [TextTheme.subtitle1]
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.body2]
+/// text style, which is a little smaller than the theme's [TextTheme.subhead]
 /// text style, which is used by default.
 enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
@@ -195,7 +195,7 @@ enum ListTileControlAffinity {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// This example uses a [ListView] to demonstrate different configurations of
 /// [ListTile]s in [Card]s.
@@ -254,7 +254,7 @@ enum ListTileControlAffinity {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// Tiles can be much more elaborate. Here is a tile which can be tapped, but
 /// which is disabled when the `_act` variable is not 2. When the tile is
@@ -285,7 +285,7 @@ enum ListTileControlAffinity {
 /// that are large enough, but it is up to the developer to ensure that
 /// their widgets follow the Material spec.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// Here is an example of a one-line, non-[dense] ListTile with a
 /// tappable leading widget that adheres to accessibility requirements and
@@ -317,7 +317,7 @@ enum ListTileControlAffinity {
 /// you're looking for, it's easy to create custom list items with a
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// Here is an example of a custom list item that resembles a Youtube related
 /// video list item created with [Expanded] and [Container] widgets.
@@ -438,7 +438,7 @@ enum ListTileControlAffinity {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
@@ -806,14 +806,14 @@ class ListTile extends StatelessWidget {
     if (tileTheme != null) {
       switch (tileTheme.style) {
         case ListTileStyle.drawer:
-          style = theme.textTheme.bodyText1;
+          style = theme.textTheme.body2;
           break;
         case ListTileStyle.list:
-          style = theme.textTheme.subtitle1;
+          style = theme.textTheme.subhead;
           break;
       }
     } else {
-      style = theme.textTheme.subtitle1;
+      style = theme.textTheme.subhead;
     }
     final Color color = _textColor(theme, tileTheme, style.color);
     return _isDenseLayout(tileTheme)
@@ -822,7 +822,7 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
-    final TextStyle style = theme.textTheme.bodyText2;
+    final TextStyle style = theme.textTheme.body1;
     final Color color = _textColor(theme, tileTheme, theme.textTheme.caption.color);
     return _isDenseLayout(tileTheme)
       ? style.copyWith(color: color, fontSize: 12.0)
@@ -975,10 +975,10 @@ class _ListTileElement extends RenderObjectElement {
   final Map<Element, _ListTileSlot> childToSlot = <Element, _ListTileSlot>{};
 
   @override
-  _ListTile get widget => super.widget as _ListTile;
+  _ListTile get widget => super.widget;
 
   @override
-  _RenderListTile get renderObject => super.renderObject as _RenderListTile;
+  _RenderListTile get renderObject => super.renderObject;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -992,7 +992,6 @@ class _ListTileElement extends RenderObjectElement {
     final _ListTileSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
-    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _ListTileSlot slot) {
@@ -1040,7 +1039,7 @@ class _ListTileElement extends RenderObjectElement {
     _updateChild(widget.trailing, _ListTileSlot.trailing);
   }
 
-  void _updateRenderObject(RenderBox child, _ListTileSlot slot) {
+  void _updateRenderObject(RenderObject child, _ListTileSlot slot) {
     switch (slot) {
       case _ListTileSlot.leading:
         renderObject.leading = child;
@@ -1061,8 +1060,8 @@ class _ListTileElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
     assert(slotValue is _ListTileSlot);
-    final _ListTileSlot slot = slotValue as _ListTileSlot;
-    _updateRenderObject(child as RenderBox, slot);
+    final _ListTileSlot slot = slotValue;
+    _updateRenderObject(child, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
   }
@@ -1210,14 +1209,14 @@ class _RenderListTile extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (final RenderBox child in _children)
+    for (RenderBox child in _children)
       child.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    for (final RenderBox child in _children)
+    for (RenderBox child in _children)
       child.detach();
   }
 
@@ -1304,7 +1303,7 @@ class _RenderListTile extends RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(title != null);
-    final BoxParentData parentData = title.parentData as BoxParentData;
+    final BoxParentData parentData = title.parentData;
     return parentData.offset.dy + title.getDistanceToActualBaseline(baseline);
   }
 
@@ -1320,7 +1319,7 @@ class _RenderListTile extends RenderBox {
   }
 
   static void _positionBox(RenderBox box, Offset offset) {
-    final BoxParentData parentData = box.parentData as BoxParentData;
+    final BoxParentData parentData = box.parentData;
     parentData.offset = offset;
   }
 
@@ -1464,7 +1463,7 @@ class _RenderListTile extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox child) {
       if (child != null) {
-        final BoxParentData parentData = child.parentData as BoxParentData;
+        final BoxParentData parentData = child.parentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1480,8 +1479,8 @@ class _RenderListTile extends RenderBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
-    for (final RenderBox child in _children) {
-      final BoxParentData parentData = child.parentData as BoxParentData;
+    for (RenderBox child in _children) {
+      final BoxParentData parentData = child.parentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,21 +27,12 @@ import 'typography.dart';
 //
 // 4. Update the flutter_localizations package. To add a new string to the
 //    flutter_localizations package, you must first add it to the English
-//    translations (lib/src/l10n/material_en.arb), including a description.
-//
-//    Then you need to add  new `TBD` entries for the string to all of the other
-//    language locale files by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_missing_localizations.dart
-//    ```
-//
-//    Finally you need to re-generate lib/src/l10n/localizations.dart by running:
-//    ```
-//    dart dev/tools/localization/bin/gen_localizations.dart --overwrite
-//    ```
-//
-//    There is a README file with further information in the lib/src/l10n/
-//    directory.
+//    translations (lib/src/l10n/material_en.arb), including a description, then
+//    you must add it to every other language (all the other *.arb files in that
+//    same directory), listing the translation as `TBD`. After that you have to
+//    re-generate lib/src/l10n/localizations.dart by running
+//    `dart dev/tools/localization/gen_localizations.dart --overwrite`. There is
+//    a README file with further information in the lib/src/l10n/ directory.
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
@@ -186,7 +177,7 @@ abstract class MaterialLocalizations {
   /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
   /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
-  /// the [Typography.geometryThemeFor] method in terms of the
+  /// the static [MaterialTextGeometry.localizedFor] method in terms of the
   /// three language categories defined in https://material.io/go/design-typography.
   ///
   /// Generally speaking, font sizes for [ScriptCategory.tall] and
@@ -362,7 +353,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 ///
 ///  * [GlobalMaterialLocalizations], which provides material localizations for
 ///    many languages.
-///  * [MaterialApp.localizationsDelegates], which automatically includes
+///  * [MaterialApp.delegates], which automatically includes
 ///    [DefaultMaterialLocalizations.delegate] by default.
 class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings

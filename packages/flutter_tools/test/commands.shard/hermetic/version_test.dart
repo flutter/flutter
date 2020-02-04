@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/version.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -26,100 +27,65 @@ void main() {
 
     testUsingContext('version ls', () async {
       final VersionCommand command = VersionCommand();
-      await createTestCommandRunner(command).run(<String>[
-        'version',
-        '--no-pub',
-      ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n'));
+      await createTestCommandRunner(command).run(<String>['version']);
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n' ''));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('version switch', () async {
       const String version = '10.0.0';
       final VersionCommand command = VersionCommand();
-      await createTestCommandRunner(command).run(<String>[
-        'version',
-        '--no-pub',
-        version,
-      ]);
+      final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', version]);
+      await Future.wait<void>(<Future<void>>[runCommand]);
       expect(testLogger.statusText, contains('Switching Flutter to version $version'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
-    });
-
-    testUsingContext('version switch, latest commit query fails', () async {
-      const String version = '10.0.0';
-      final VersionCommand command = VersionCommand();
-      await createTestCommandRunner(command).run(<String>[
-        'version',
-        '--no-pub',
-        version,
-      ]);
-      expect(testLogger.errorText, contains('git failed'));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => MockProcessManager(latestCommitFails: true),
-    });
-
-    testUsingContext('latest commit is parsable when query fails', () {
-      final FlutterVersion flutterVersion = FlutterVersion();
-      expect(
-        () => DateTime.parse(flutterVersion.frameworkCommitDate),
-        returnsNormally,
-      );
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => MockProcessManager(latestCommitFails: true),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('switch to not supported version without force', () async {
       const String version = '1.1.5';
       final VersionCommand command = VersionCommand();
-      await createTestCommandRunner(command).run(<String>[
-        'version',
-        '--no-pub',
-        version,
-      ]);
+      final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', version]);
+      await Future.wait<void>(<Future<void>>[runCommand]);
       expect(testLogger.errorText, contains('Version command is not supported in'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('switch to not supported version with force', () async {
       const String version = '1.1.5';
       final VersionCommand command = VersionCommand();
-      await createTestCommandRunner(command).run(<String>[
-        'version',
-        '--no-pub',
-        '--force',
-        version,
-      ]);
+      final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', '--force', version]);
+      await Future.wait<void>(<Future<void>>[runCommand]);
       expect(testLogger.statusText, contains('Switching Flutter to version $version with force'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('tool exit on confusing version', () async {
       const String version = 'master';
       final VersionCommand command = VersionCommand();
-      expect(() async =>
-        await createTestCommandRunner(command).run(<String>[
-          'version',
-          '--no-pub',
-          version,
-        ]),
-        throwsToolExit(),
-      );
+      final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', version]);
+      expect(() async => await Future.wait<void>(<Future<void>>[runCommand]),
+             throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('exit tool if can\'t get the tags', () async {
       final VersionCommand command = VersionCommand();
+
       try {
         await command.getTags();
         fail('ToolExit expected');
       } catch(e) {
-        expect(e, isA<ToolExit>());
+        expect(e, isInstanceOf<ToolExit>());
       }
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(failGitTag: true),
@@ -128,15 +94,11 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {
-  MockProcessManager({
-    this.failGitTag = false,
-    this.latestCommitFails = false,
-  });
+  MockProcessManager({ this.failGitTag = false });
 
   String version = '';
 
-  final bool failGitTag;
-  final bool latestCommitFails;
+  bool failGitTag;
 
   @override
   Future<ProcessResult> run(
@@ -155,7 +117,7 @@ class MockProcessManager extends Mock implements ProcessManager {
       return ProcessResult(0, 0, 'v10.0.0\r\nv20.0.0', '');
     }
     if (command[0] == 'git' && command[1] == 'checkout') {
-      version = command[2] as String;
+      version = command[2];
     }
     return ProcessResult(0, 0, '', '');
   }
@@ -179,14 +141,6 @@ class MockProcessManager extends Mock implements ProcessManager {
       if (version.isNotEmpty) {
         return ProcessResult(0, 0, '$version-0-g00000000', '');
       }
-    }
-    final List<String> commitDateCommand = <String>[
-      '-n', '1',
-      '--pretty=format:%ad',
-      '--date=iso',
-    ];
-    if (latestCommitFails && commandStr == FlutterVersion.gitLog(commitDateCommand).join(' ')) {
-      return ProcessResult(0, -9, '', 'git failed');
     }
     return ProcessResult(0, 0, '', '');
   }

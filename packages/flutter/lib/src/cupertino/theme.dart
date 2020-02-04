@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -71,22 +71,17 @@ class CupertinoTheme extends StatelessWidget {
     return (inheritedTheme?.theme?.data ?? const CupertinoThemeData()).resolveFrom(context, nullOk: true);
   }
 
-  /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
-  /// on the value of [CupertinoThemeData.brightness] in the given [context].
+  /// Retrieves the [Brightness] value from the closest ancestor [CupertinoTheme]
+  /// widget.
   ///
-  /// If no [CupertinoTheme] can be found in the given [context], or its `brightness`
-  /// is null, it will fall back to [MediaQueryData.brightness].
+  /// If no [CupertinoTheme] ancestor with an explicit brightness value could be
+  /// found, this method will resort to the closest ancestor [MediaQuery] widget.
   ///
-  /// Throws an exception if no valid [CupertinoTheme] or [MediaQuery] widgets
-  /// exist in the ancestry tree, unless [nullOk] is set to true.
-  ///
-  /// See also:
-  ///
-  /// * [CupertinoThemeData.brightness], the property takes precedence over
-  ///   [MediaQueryData.platformBrightness] for descendant Cupertino widgets.
+  /// Throws an exception if no such [CupertinoTheme] or [MediaQuery] widgets exist
+  /// in the ancestry tree, unless [nullOk] is set to true.
   static Brightness brightnessOf(BuildContext context, { bool nullOk = false }) {
     final _InheritedCupertinoTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return inheritedTheme?.theme?.data?.brightness ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness;
+    return inheritedTheme?.theme?.data?._brightness ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness;
   }
 
   /// The widget below this widget in the tree.
@@ -186,7 +181,7 @@ class CupertinoThemeData extends Diagnosticable {
   );
 
   const CupertinoThemeData._rawWithDefaults(
-    this.brightness,
+    this._brightness,
     this._primaryColor,
     this._primaryContrastingColor,
     this._textTheme,
@@ -197,23 +192,20 @@ class CupertinoThemeData extends Diagnosticable {
 
   final _CupertinoThemeDefaults _defaults;
 
-  /// The brightness override for Cupertino descendants.
+  /// The general brightness theme of the [CupertinoThemeData].
   ///
-  /// Defaults to null. If a non-null [Brightness] is specified, the value will
-  /// take precedence over the ambient [MediaQueryData.platformBrightness], when
-  /// determining the brightness of descendant Cupertino widgets.
+  /// Overrides the ambient [MediaQueryData.platformBrightness] when specified.
+  /// Defaults to [Brightness.light].
   ///
   /// If coming from a Material [Theme] and unspecified, [brightness] will be
   /// derived from the Material [ThemeData]'s `brightness`.
   ///
   /// See also:
   ///
-  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///    [brightness] to its Material [Theme] parent if it's unspecified.
-  ///
-  ///  * [CupertinoTheme.brightnessOf], a method used to retrieve the overall
-  ///    [Brightness] from a [BuildContext], for Cupertino widgets.
-  final Brightness brightness;
+  /// * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///   [brightness] to its Material [Theme] parent if it's unspecified.
+  Brightness get brightness => _brightness ?? Brightness.light;
+  final Brightness _brightness;
 
   /// A color used on interactive elements of the theme.
   ///
@@ -228,8 +220,8 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///    [primaryColor] to its Material [Theme] parent if it's unspecified.
+  /// * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///   [primaryColor] to its Material [Theme] parent if it's unspecified.
   Color get primaryColor => _primaryColor ?? _defaults.primaryColor;
   final Color _primaryColor;
 
@@ -243,8 +235,8 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///    [primaryContrastingColor] to its Material [Theme] parent if it's unspecified.
+  /// * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///   [primaryContrastingColor] to its Material [Theme] parent if it's unspecified.
   Color get primaryContrastingColor => _primaryContrastingColor ?? _defaults.primaryContrastingColor;
   final Color _primaryContrastingColor;
 
@@ -276,7 +268,7 @@ class CupertinoThemeData extends Diagnosticable {
   /// theme properties instead of iOS defaults.
   CupertinoThemeData noDefault() {
     return _NoDefaultCupertinoThemeData(
-      brightness,
+      _brightness,
       _primaryColor,
       _primaryContrastingColor,
       _textTheme,
@@ -295,7 +287,7 @@ class CupertinoThemeData extends Diagnosticable {
     Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     return CupertinoThemeData._rawWithDefaults(
-      brightness,
+      _brightness,
       convertColor(_primaryColor),
       convertColor(_primaryContrastingColor),
       _textTheme?.resolveFrom(context, nullOk: nullOk),
@@ -321,7 +313,7 @@ class CupertinoThemeData extends Diagnosticable {
     Color scaffoldBackgroundColor,
   }) {
     return CupertinoThemeData._rawWithDefaults(
-      brightness ?? this.brightness,
+      brightness ?? _brightness,
       primaryColor ?? _primaryColor,
       primaryContrastingColor ?? _primaryContrastingColor,
       textTheme ?? _textTheme,
@@ -335,7 +327,7 @@ class CupertinoThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const CupertinoThemeData defaultData = CupertinoThemeData();
-    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
     properties.add(createCupertinoColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
     properties.add(createCupertinoColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
     properties.add(createCupertinoColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
@@ -346,7 +338,7 @@ class CupertinoThemeData extends Diagnosticable {
 
 class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
   const _NoDefaultCupertinoThemeData(
-    Brightness brightness,
+    this.brightness,
     this.primaryColor,
     this.primaryContrastingColor,
     this.textTheme,
@@ -362,6 +354,8 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
         null,
       );
 
+  @override
+  final Brightness brightness;
   @override
   final Color primaryColor;
   @override

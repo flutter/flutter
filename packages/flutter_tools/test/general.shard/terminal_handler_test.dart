@@ -1,11 +1,13 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
-
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
@@ -121,7 +123,9 @@ void main() {
 
       await terminalHandler.processTerminalInput('l');
 
-      expect(testLogger.statusText, contains('Connected views:\n'));
+      final BufferLogger bufferLogger = logger;
+
+      expect(bufferLogger.statusText, contains('Connected views:\n'));
     });
 
     testUsingContext('L - debugDumpLayerTree with service protocol', () async {
@@ -238,7 +242,9 @@ void main() {
 
       verify(mockResidentRunner.restart(fullRestart: false)).called(1);
 
-      expect(testLogger.statusText, contains('Try again after fixing the above error(s).'));
+      final BufferLogger bufferLogger = logger;
+
+      expect(bufferLogger.statusText, contains('Try again after fixing the above error(s).'));
     });
 
     testUsingContext('r - hotReload supported and fails fatally', () async {
@@ -248,7 +254,7 @@ void main() {
         .thenAnswer((Invocation invocation) async {
           return OperationResult(1, 'fail', fatal: true);
         });
-      expect(terminalHandler.processTerminalInput('r'), throwsToolExit());
+      expect(terminalHandler.processTerminalInput('r'), throwsA(isInstanceOf<ToolExit>()));
     });
 
     testUsingContext('r - hotReload unsupported', () async {
@@ -281,7 +287,9 @@ void main() {
 
       verify(mockResidentRunner.restart(fullRestart: true)).called(1);
 
-      expect(testLogger.statusText, contains('Try again after fixing the above error(s).'));
+      final BufferLogger bufferLogger = logger;
+
+      expect(bufferLogger.statusText, contains('Try again after fixing the above error(s).'));
     });
 
     testUsingContext('R - hotRestart supported and fails fatally', () async {
@@ -291,7 +299,7 @@ void main() {
         .thenAnswer((Invocation invocation) async {
           return OperationResult(1, 'fail', fatal: true);
         });
-      expect(() => terminalHandler.processTerminalInput('R'), throwsToolExit());
+      expect(() => terminalHandler.processTerminalInput('R'), throwsA(isInstanceOf<ToolExit>()));
     });
 
     testUsingContext('R - hot restart unsupported', () async {

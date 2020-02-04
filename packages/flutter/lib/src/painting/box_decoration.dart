@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,7 +33,7 @@ import 'image_provider.dart';
 ///
 /// The [border] paints over the body; the [boxShadow], naturally, paints below it.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// The following applies a [BoxDecoration] to a [Container] widget to draw an
 /// [image] of an owl with a thick black [border] and rounded corners.
@@ -213,21 +213,6 @@ class BoxDecoration extends Decoration {
   @override
   EdgeInsetsGeometry get padding => border?.dimensions;
 
-  @override
-  Path getClipPath(Rect rect, TextDirection textDirection) {
-    Path clipPath;
-    switch (shape) {
-      case BoxShape.circle:
-        clipPath = Path()..addOval(rect);
-        break;
-      case BoxShape.rectangle:
-        if (borderRadius != null)
-          clipPath = Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
-        break;
-    }
-    return clipPath;
-  }
-
   /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {
     return BoxDecoration(
@@ -250,7 +235,7 @@ class BoxDecoration extends Decoration {
       return scale(t);
     if (a is BoxDecoration)
       return BoxDecoration.lerp(a, this, t);
-    return super.lerpFrom(a, t) as BoxDecoration;
+    return super.lerpFrom(a, t);
   }
 
   @override
@@ -259,7 +244,7 @@ class BoxDecoration extends Decoration {
       return scale(1.0 - t);
     if (b is BoxDecoration)
       return BoxDecoration.lerp(this, b, t);
-    return super.lerpTo(b, t) as BoxDecoration;
+    return super.lerpTo(b, t);
   }
 
   /// Linearly interpolate between two box decorations.
@@ -309,19 +294,19 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is BoxDecoration
-        && other.color == color
-        && other.image == image
-        && other.border == border
-        && other.borderRadius == borderRadius
-        && other.boxShadow == boxShadow
-        && other.gradient == gradient
-        && other.shape == shape;
+    final BoxDecoration typedOther = other;
+    return color == typedOther.color &&
+           image == typedOther.image &&
+           border == typedOther.border &&
+           borderRadius == typedOther.borderRadius &&
+           boxShadow == typedOther.boxShadow &&
+           gradient == typedOther.gradient &&
+           shape == typedOther.shape;
   }
 
   @override
@@ -433,7 +418,7 @@ class _BoxDecorationPainter extends BoxPainter {
   void _paintShadows(Canvas canvas, Rect rect, TextDirection textDirection) {
     if (_decoration.boxShadow == null)
       return;
-    for (final BoxShadow boxShadow in _decoration.boxShadow) {
+    for (BoxShadow boxShadow in _decoration.boxShadow) {
       final Paint paint = boxShadow.toPaint();
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
       _paintBox(canvas, bounds, paint, textDirection);
@@ -483,7 +468,7 @@ class _BoxDecorationPainter extends BoxPainter {
       canvas,
       rect,
       shape: _decoration.shape,
-      borderRadius: _decoration.borderRadius as BorderRadius,
+      borderRadius: _decoration.borderRadius,
       textDirection: configuration.textDirection,
     );
   }

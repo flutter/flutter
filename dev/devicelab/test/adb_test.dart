@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -138,10 +138,11 @@ class CommandArgs {
   bool operator==(Object other) {
     if (other.runtimeType != CommandArgs)
       return false;
-    return other is CommandArgs
-        && other.command == command
-        && const ListEquality<String>().equals(other.arguments, arguments)
-        && const MapEquality<String, String>().equals(other.environment, environment);
+
+    final CommandArgs otherCmd = other;
+    return otherCmd.command == command &&
+      const ListEquality<String>().equals(otherCmd.arguments, arguments) &&
+      const MapEquality<String, String>().equals(otherCmd.environment, environment);
   }
 
   @override

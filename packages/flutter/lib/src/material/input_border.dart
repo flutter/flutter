@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -235,13 +235,13 @@ class UnderlineInputBorder extends InputBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is InputBorder
-        && other.borderSide == borderSide;
+    final InputBorder typedOther = other;
+    return typedOther.borderSide == borderSide;
   }
 
   @override
@@ -492,15 +492,15 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is OutlineInputBorder
-        && other.borderSide == borderSide
-        && other.borderRadius == borderRadius
-        && other.gapPadding == gapPadding;
+    final OutlineInputBorder typedOther = other;
+    return typedOther.borderSide == borderSide
+        && typedOther.borderRadius == borderRadius
+        && typedOther.gapPadding == gapPadding;
   }
 
   @override

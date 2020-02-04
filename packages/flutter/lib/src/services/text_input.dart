@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,54 +26,6 @@ export 'dart:ui' show TextAffinity;
 
 // Whether we're compiled to JavaScript in a web browser.
 const bool _kIsBrowser = identical(0, 0.0);
-
-/// Indicates how to handle the intelligent replacement of dashes in text input.
-///
-/// See also:
-///
-///  * [TextField.smartDashesType]
-///  * [TextFormField.smartDashesType]
-///  * [CupertinoTextField.smartDashesType]
-///  * [EditableText.smartDashesType]
-///  * [SmartQuotesType]
-///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
-enum SmartDashesType {
-  /// Smart dashes is disabled.
-  ///
-  /// This corresponds to the
-  /// ["no" value of UITextSmartDashesType](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/no).
-  disabled,
-
-  /// Smart dashes is enabled.
-  ///
-  /// This corresponds to the
-  /// ["yes" value of UITextSmartDashesType](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/yes).
-  enabled,
-}
-
-/// Indicates how to handle the intelligent replacement of quotes in text input.
-///
-/// See also:
-///
-///  * [TextField.smartQuotesType]
-///  * [TextFormField.smartQuotesType]
-///  * [CupertinoTextField.smartQuotesType]
-///  * [EditableText.smartQuotesType]
-///  * [SmartDashesType]
-///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
-enum SmartQuotesType {
-  /// Smart quotes is disabled.
-  ///
-  /// This corresponds to the
-  /// ["no" value of UITextSmartQuotesType](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/no).
-  disabled,
-
-  /// Smart quotes is enabled.
-  ///
-  /// This corresponds to the
-  /// ["yes" value of UITextSmartQuotesType](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/yes).
-  enabled,
-}
 
 /// The type of information for which to optimize the text input control.
 ///
@@ -182,18 +134,20 @@ class TextInputType {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'TextInputType')}('
+    return '$runtimeType('
         'name: $_name, '
         'signed: $signed, '
         'decimal: $decimal)';
   }
 
   @override
-  bool operator ==(Object other) {
-    return other is TextInputType
-        && other.index == index
-        && other.signed == signed
-        && other.decimal == decimal;
+  bool operator ==(dynamic other) {
+    if (other is! TextInputType)
+      return false;
+    final TextInputType typedOther = other;
+    return typedOther.index == index
+        && typedOther.signed == signed
+        && typedOther.decimal == decimal;
   }
 
   @override
@@ -433,8 +387,6 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.obscureText = false,
     this.autocorrect = true,
-    SmartDashesType smartDashesType,
-    SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
@@ -442,8 +394,6 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
   }) : assert(inputType != null),
        assert(obscureText != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
@@ -463,56 +413,6 @@ class TextInputConfiguration {
   /// Defaults to true.
   final bool autocorrect;
 
-  /// {@template flutter.services.textInput.smartDashesType}
-  /// Whether to allow the platform to automatically format dashes.
-  ///
-  /// This flag only affects iOS versions 11 and above. It sets
-  /// [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc)
-  /// in the engine. When true, it passes
-  /// [`UITextSmartDashesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeyes?language=objc),
-  /// and when false, it passes
-  /// [`UITextSmartDashesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeno?language=objc).
-  ///
-  /// As an example of what this does, two consecutive hyphen characters will be
-  /// automatically replaced with one en dash, and three consecutive hyphens
-  /// will become one em dash.
-  ///
-  /// Defaults to true, unless [obscureText] is true, when it defaults to false.
-  /// This is to avoid the problem where password fields receive autoformatted
-  /// characters.
-  ///
-  /// See also:
-  ///
-  ///  * [smartQuotesType]
-  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
-  /// {@endtemplate}
-  final SmartDashesType smartDashesType;
-
-  /// {@template flutter.services.textInput.smartQuotesType}
-  /// Whether to allow the platform to automatically format quotes.
-  ///
-  /// This flag only affects iOS. It sets
-  /// [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc)
-  /// in the engine. When true, it passes
-  /// [`UITextSmartQuotesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeyes?language=objc),
-  /// and when false, it passes
-  /// [`UITextSmartQuotesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeno?language=objc).
-  ///
-  /// As an example of what this does, a standard vertical double quote
-  /// character will be automatically replaced by a left or right double quote
-  /// depending on its position in a word.
-  ///
-  /// Defaults to true, unless [obscureText] is true, when it defaults to false.
-  /// This is to avoid the problem where password fields receive autoformatted
-  /// characters.
-  ///
-  /// See also:
-  ///
-  ///  * [smartDashesType]
-  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
-  /// {@endtemplate}
-  final SmartQuotesType smartQuotesType;
-
   /// {@template flutter.services.textInput.enableSuggestions}
   /// Whether to show input suggestions as the user types.
   ///
@@ -523,7 +423,6 @@ class TextInputConfiguration {
   /// Defaults to true. Cannot be null.
   ///
   /// See also:
-  ///
   ///  * <https://developer.android.com/reference/android/text/InputType.html#TYPE_TEXT_FLAG_NO_SUGGESTIONS>
   /// {@endtemplate}
   final bool enableSuggestions;
@@ -557,8 +456,6 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
-      'smartDashesType': smartDashesType.index.toString(),
-      'smartQuotesType': smartQuotesType.index.toString(),
       'enableSuggestions': enableSuggestions,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
@@ -575,6 +472,9 @@ TextAffinity _toTextAffinity(String affinity) {
     case 'TextAffinity.upstream':
       return TextAffinity.upstream;
   }
+  // Null affinity indicates that the platform did not provide a valid
+  // affinity. Set it to null here to allow the framework to supply
+  // a fallback affinity.
   return null;
 }
 
@@ -632,16 +532,16 @@ class TextEditingValue {
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
     return TextEditingValue(
-      text: encoded['text'] as String,
+      text: encoded['text'],
       selection: TextSelection(
-        baseOffset: encoded['selectionBase'] as int ?? -1,
-        extentOffset: encoded['selectionExtent'] as int ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity'] as String) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] as bool ?? false,
+        baseOffset: encoded['selectionBase'] ?? -1,
+        extentOffset: encoded['selectionExtent'] ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity']),
+        isDirectional: encoded['selectionIsDirectional'] ?? false,
       ),
       composing: TextRange(
-        start: encoded['composingBase'] as int ?? -1,
-        end: encoded['composingExtent'] as int ?? -1,
+        start: encoded['composingBase'] ?? -1,
+        end: encoded['composingExtent'] ?? -1,
       ),
     );
   }
@@ -685,16 +585,18 @@ class TextEditingValue {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
+  String toString() => '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    return other is TextEditingValue
-        && other.text == text
-        && other.selection == selection
-        && other.composing == composing;
+    if (other is! TextEditingValue)
+      return false;
+    final TextEditingValue typedOther = other;
+    return typedOther.text == text
+        && typedOther.selection == selection
+        && typedOther.composing == composing;
   }
 
   @override
@@ -752,9 +654,6 @@ abstract class TextInputClient {
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
-
-  /// The current state of the [TextEditingValue] held by this client.
-  TextEditingValue get currentTextEditingValue;
 
   /// Platform notified framework of closed connection.
   ///
@@ -924,9 +823,7 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(state != null, 'You must provide a state to set a new editing point.');
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
-  final Offset offset = state == FloatingCursorDragState.Update
-    ? Offset(encoded['X'] as double, encoded['Y'] as double)
-    : const Offset(0, 0);
+  final Offset offset = state == FloatingCursorDragState.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
@@ -1039,6 +936,7 @@ class TextInput {
 
   TextInputConnection _currentConnection;
   TextInputConfiguration _currentConfiguration;
+  TextEditingValue _currentTextEditingValue;
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     if (_currentConnection == null)
@@ -1050,30 +948,27 @@ class TextInput {
     if (method == 'TextInputClient.requestExistingInputState') {
       assert(_currentConnection._client != null);
       _attach(_currentConnection, _currentConfiguration);
-      final TextEditingValue editingValue = _currentConnection._client.currentTextEditingValue;
-      if (editingValue != null) {
-        _setEditingState(editingValue);
+      // This will be null if we've never had a call to [_setEditingState].
+      if (_currentTextEditingValue != null) {
+        _setEditingState(_currentTextEditingValue);
       }
       return;
     }
 
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
-    final int client = args[0] as int;
+    final List<dynamic> args = methodCall.arguments;
+    final int client = args[0];
     // The incoming message was for a different client.
     if (client != _currentConnection._id)
       return;
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
+        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
         break;
       case 'TextInputClient.performAction':
-        _currentConnection._client.performAction(_toTextInputAction(args[1] as String));
+        _currentConnection._client.performAction(_toTextInputAction(args[1]));
         break;
       case 'TextInputClient.updateFloatingCursor':
-        _currentConnection._client.updateFloatingCursor(_toTextPoint(
-          _toTextCursorAction(args[1] as String),
-          args[2] as Map<String, dynamic>,
-        ));
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
         break;
       case 'TextInputClient.onConnectionClosed':
         _currentConnection._client.connectionClosed();
@@ -1112,6 +1007,7 @@ class TextInput {
       'TextInput.setEditingState',
       value.toJSON(),
     );
+    _currentTextEditingValue = value;
   }
 
   void _show() {

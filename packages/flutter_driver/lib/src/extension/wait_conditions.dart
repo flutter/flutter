@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -132,13 +132,13 @@ class _InternalNoPendingPlatformMessagesCondition implements WaitCondition {
 
   @override
   bool get condition {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     return binaryMessenger.pendingMessageCount == 0;
   }
 
   @override
   Future<void> wait() async {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     while (!condition) {
       await binaryMessenger.platformMessagesFinished;
     }
@@ -163,7 +163,7 @@ class _InternalCombinedCondition implements WaitCondition {
     assert(condition != null);
     if (condition.conditionName != 'CombinedCondition')
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
-    final CombinedCondition combinedCondition = condition as CombinedCondition;
+    final CombinedCondition combinedCondition = condition;
     if (combinedCondition.conditions == null) {
       return const _InternalCombinedCondition(<WaitCondition>[]);
     }
@@ -185,7 +185,7 @@ class _InternalCombinedCondition implements WaitCondition {
   @override
   Future<void> wait() async {
     while (!condition) {
-      for (final WaitCondition condition in conditions) {
+      for (WaitCondition condition in conditions) {
         assert (condition != null);
         await condition.wait();
       }

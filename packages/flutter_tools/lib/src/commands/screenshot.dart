@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,9 +6,10 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -32,7 +33,7 @@ class ScreenshotCommand extends FlutterCommand {
       valueHelp: 'URI',
       help: 'The observatory URI to connect to.\n'
           'This is required when --$_kType is "$_kSkiaType" or "$_kRasterizerType".\n'
-          'To find the observatory URI, use "flutter run" and look for '
+          'To find the observatory URI, use "flutter run" and look for'
           '"An Observatory ... is available at" in the output.',
     );
     argParser.addOption(
@@ -90,30 +91,26 @@ class ScreenshotCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     File outputFile;
     if (argResults.wasParsed(_kOut)) {
-      outputFile = globals.fs.file(stringArg(_kOut));
+      outputFile = fs.file(stringArg(_kOut));
     }
 
     switch (stringArg(_kType)) {
       case _kDeviceType:
         await runScreenshot(outputFile);
-        return FlutterCommandResult.success();
+        return null;
       case _kSkiaType:
         await runSkia(outputFile);
-        return FlutterCommandResult.success();
+        return null;
       case _kRasterizerType:
         await runRasterizer(outputFile);
-        return FlutterCommandResult.success();
+        return null;
     }
 
-    return FlutterCommandResult.success();
+    return null;
   }
 
   Future<void> runScreenshot(File outputFile) async {
-    outputFile ??= globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
-      'flutter',
-      'png',
-    );
+    outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       await device.takeScreenshot(outputFile);
     } catch (error) {
@@ -124,11 +121,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<void> runSkia(File outputFile) async {
     final Map<String, dynamic> skp = await _invokeVmServiceRpc('_flutter.screenshotSkp');
-    outputFile ??= globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
-      'flutter',
-      'skp',
-    );
+    outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(skp['skp'] as String));
     await sink.close();
@@ -138,11 +131,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<void> runRasterizer(File outputFile) async {
     final Map<String, dynamic> response = await _invokeVmServiceRpc('_flutter.screenshot');
-    outputFile ??= globals.fsUtils.getUniqueFile(
-      globals.fs.currentDirectory,
-      'flutter',
-      'png',
-    );
+    outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(response['screenshot'] as String));
     await sink.close();
@@ -170,6 +159,6 @@ class ScreenshotCommand extends FlutterCommand {
 
   void _showOutputFileInfo(File outputFile) {
     final int sizeKB = (outputFile.lengthSync()) ~/ 1024;
-    globals.printStatus('Screenshot written to ${globals.fs.path.relative(outputFile.path)} (${sizeKB}kB).');
+    printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
 }

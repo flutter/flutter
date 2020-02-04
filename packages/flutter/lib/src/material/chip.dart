@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -63,8 +63,7 @@ const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 ///  * <https://material.io/design/components/chips.html>
 abstract class ChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
+  // extended directly.
   factory ChipAttributes._() => null;
 
   /// The primary content of the chip.
@@ -79,8 +78,6 @@ abstract class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
-  /// If null, the value of the [ChipTheme]'s [ChipThemeData.labelStyle] is used.
-  //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
   ///
@@ -119,18 +116,6 @@ abstract class ChipAttributes {
   ///
   /// Defaults to 4 logical pixels on all sides.
   EdgeInsetsGeometry get padding;
-
-  /// Defines how compact the chip's layout will be.
-  ///
-  /// Chips are unaffected by horizontal density changes.
-  ///
-  /// {@macro flutter.material.themedata.visualDensity}
-  ///
-  /// See also:
-  ///
-  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
-  ///    within a [Theme].
-  VisualDensity get visualDensity;
 
   /// The padding around the [label] widget.
   ///
@@ -175,8 +160,7 @@ abstract class ChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class DeletableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
+  // extended directly.
   factory DeletableChipAttributes._() => null;
 
   /// The icon displayed when [onDeleted] is set.
@@ -192,7 +176,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// {@tool snippet --template=stateful_widget_scaffold_center}
   ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
@@ -218,7 +202,7 @@ abstract class DeletableChipAttributes {
   ///   ];
   ///
   ///   Iterable<Widget> get actorWidgets sync* {
-  ///     for (final Actor actor in _cast) {
+  ///     for (Actor actor in _cast) {
   ///       yield Padding(
   ///         padding: const EdgeInsets.all(4.0),
   ///         child: Chip(
@@ -277,8 +261,7 @@ abstract class DeletableChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class CheckmarkableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
+  // extended directly.
   factory CheckmarkableChipAttributes._() => null;
 
   /// Whether or not to show a check mark when [selected] is true.
@@ -312,8 +295,7 @@ abstract class CheckmarkableChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class SelectableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
+  // extended directly.
   factory SelectableChipAttributes._() => null;
 
   /// Whether or not this chip is selected.
@@ -341,7 +323,7 @@ abstract class SelectableChipAttributes {
   /// The [onSelected] and [TappableChipAttributes.onPressed] callbacks must not
   /// both be specified at the same time.
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   ///
   /// A [StatefulWidget] that illustrates use of onSelected in an [InputChip].
   ///
@@ -421,8 +403,7 @@ abstract class SelectableChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class DisabledChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
+  // extended directly.
   factory DisabledChipAttributes._() => null;
 
   /// Whether or not this chip is enabled for input.
@@ -469,8 +450,7 @@ abstract class DisabledChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class TappableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
+  // extended directly.
   factory TappableChipAttributes._() => null;
 
   /// Called when the user taps the chip.
@@ -479,7 +459,7 @@ abstract class TappableChipAttributes {
   /// taps on the label or avatar parts of the chip. If [onPressed] is null,
   /// then the chip will be disabled.
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
@@ -525,7 +505,7 @@ abstract class TappableChipAttributes {
 /// [MaterialApp] and [Scaffold]. The [label] and [clipBehavior] arguments must
 /// not be null.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// Chip(
@@ -572,7 +552,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
-    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -602,8 +581,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
-  @override
-  final VisualDensity visualDensity;
   @override
   final Widget deleteIcon;
   @override
@@ -638,7 +615,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       autofocus: autofocus,
       backgroundColor: backgroundColor,
       padding: padding,
-      visualDensity: visualDensity,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
@@ -665,7 +641,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * In a horizontally scrollable list, like a [ListView] whose
 ///    scrollDirection is [Axis.horizontal].
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// InputChip(
@@ -733,7 +709,6 @@ class InputChip extends StatelessWidget
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
-    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -795,8 +770,6 @@ class InputChip extends StatelessWidget
   @override
   final EdgeInsetsGeometry padding;
   @override
-  final VisualDensity visualDensity;
-  @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
@@ -837,7 +810,6 @@ class InputChip extends StatelessWidget
       autofocus: autofocus,
       backgroundColor: backgroundColor,
       padding: padding,
-      visualDensity: visualDensity,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
@@ -858,7 +830,7 @@ class InputChip extends StatelessWidget
 /// Requires one of its ancestors to be a [Material] widget. The [selected] and
 /// [label] arguments must not be null.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
@@ -932,7 +904,6 @@ class ChoiceChip extends StatelessWidget
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
-    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -979,8 +950,6 @@ class ChoiceChip extends StatelessWidget
   @override
   final EdgeInsetsGeometry padding;
   @override
-  final VisualDensity visualDensity;
-  @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
@@ -1017,7 +986,6 @@ class ChoiceChip extends StatelessWidget
       selectedColor: selectedColor ?? chipTheme.secondarySelectedColor,
       backgroundColor: backgroundColor,
       padding: padding,
-      visualDensity: visualDensity,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
@@ -1038,7 +1006,7 @@ class ChoiceChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// class ActorFilterEntry {
@@ -1062,7 +1030,7 @@ class ChoiceChip extends StatelessWidget
 ///   List<String> _filters = <String>[];
 ///
 ///   Iterable<Widget> get actorWidgets sync* {
-///     for (final ActorFilterEntry actor in _cast) {
+///     for (ActorFilterEntry actor in _cast) {
 ///       yield Padding(
 ///         padding: const EdgeInsets.all(4.0),
 ///         child: FilterChip(
@@ -1143,7 +1111,6 @@ class FilterChip extends StatelessWidget
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
-    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -1192,8 +1159,6 @@ class FilterChip extends StatelessWidget
   @override
   final EdgeInsetsGeometry padding;
   @override
-  final VisualDensity visualDensity;
-  @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
@@ -1231,7 +1196,6 @@ class FilterChip extends StatelessWidget
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       padding: padding,
-      visualDensity: visualDensity,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
@@ -1263,7 +1227,7 @@ class FilterChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// ActionChip(
@@ -1312,7 +1276,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
-    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -1355,8 +1318,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   final EdgeInsetsGeometry padding;
   @override
-  final VisualDensity visualDensity;
-  @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
@@ -1379,7 +1340,6 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       focusNode: focusNode,
       autofocus: autofocus,
       padding: padding,
-      visualDensity: visualDensity,
       labelPadding: labelPadding,
       isEnabled: true,
       materialTapTargetSize: materialTapTargetSize,
@@ -1442,7 +1402,6 @@ class RawChip extends StatefulWidget
     @required this.label,
     this.labelStyle,
     this.padding,
-    this.visualDensity,
     this.labelPadding,
     Widget deleteIcon,
     this.onDeleted,
@@ -1524,8 +1483,6 @@ class RawChip extends StatefulWidget
   @override
   final EdgeInsetsGeometry padding;
   @override
-  final VisualDensity visualDensity;
-  @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
@@ -1538,7 +1495,7 @@ class RawChip extends StatefulWidget
   @override
   final Color checkmarkColor;
   @override
-  final ShapeBorder avatarBorder;
+  final CircleBorder avatarBorder;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -1784,27 +1741,23 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     if (!hasDeleteButton) {
       return null;
     }
-    return Semantics(
-      container: true,
-      button: true,
-      child: _wrapWithTooltip(
-        widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
-        widget.onDeleted,
-        GestureDetector(
-          key: deleteIconKey,
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.isEnabled
+    return _wrapWithTooltip(
+      widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
+      widget.onDeleted,
+      GestureDetector(
+        key: deleteIconKey,
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.isEnabled
             ? () {
                 Feedback.forTap(context);
                 widget.onDeleted();
             }
             : null,
-          child: IconTheme(
-            data: theme.iconTheme.copyWith(
-              color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
-            ),
-            child: widget.deleteIcon,
+        child: IconTheme(
+          data: theme.iconTheme.copyWith(
+            color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
           ),
+          child: widget.deleteIcon,
         ),
       ),
     );
@@ -1893,7 +1846,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                 ),
                 brightness: chipTheme.brightness,
                 padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
-                visualDensity: widget.visualDensity ?? theme.visualDensity,
                 labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
                 showAvatar: hasAvatar,
                 showCheckmark: showCheckmark,
@@ -1913,10 +1865,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       ),
     );
     BoxConstraints constraints;
-    final Offset densityAdjustment = (widget.visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        constraints = BoxConstraints(minHeight: kMinInteractiveDimension + densityAdjustment.dy);
+        constraints = const BoxConstraints(minHeight: kMinInteractiveDimension);
         break;
       case MaterialTapTargetSize.shrinkWrap:
         constraints = const BoxConstraints();
@@ -2055,10 +2006,10 @@ class _RenderChipElement extends RenderObjectElement {
   final Map<Element, _ChipSlot> childToSlot = <Element, _ChipSlot>{};
 
   @override
-  _ChipRenderWidget get widget => super.widget as _ChipRenderWidget;
+  _ChipRenderWidget get widget => super.widget;
 
   @override
-  _RenderChip get renderObject => super.renderObject as _RenderChip;
+  _RenderChip get renderObject => super.renderObject;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -2072,7 +2023,6 @@ class _RenderChipElement extends RenderObjectElement {
     final _ChipSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
-    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _ChipSlot slot) {
@@ -2121,13 +2071,13 @@ class _RenderChipElement extends RenderObjectElement {
   void _updateRenderObject(RenderObject child, _ChipSlot slot) {
     switch (slot) {
       case _ChipSlot.avatar:
-        renderObject.avatar = child as RenderBox;
+        renderObject.avatar = child;
         break;
       case _ChipSlot.label:
-        renderObject.label = child as RenderBox;
+        renderObject.label = child;
         break;
       case _ChipSlot.deleteIcon:
-        renderObject.deleteIcon = child as RenderBox;
+        renderObject.deleteIcon = child;
         break;
     }
   }
@@ -2136,7 +2086,7 @@ class _RenderChipElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
     assert(slotValue is _ChipSlot);
-    final _ChipSlot slot = slotValue as _ChipSlot;
+    final _ChipSlot slot = slotValue;
     _updateRenderObject(child, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
@@ -2164,7 +2114,6 @@ class _ChipRenderTheme {
     @required this.deleteIcon,
     @required this.brightness,
     @required this.padding,
-    @required this.visualDensity,
     @required this.labelPadding,
     @required this.showAvatar,
     @required this.showCheckmark,
@@ -2177,7 +2126,6 @@ class _ChipRenderTheme {
   final Widget deleteIcon;
   final Brightness brightness;
   final EdgeInsets padding;
-  final VisualDensity visualDensity;
   final EdgeInsets labelPadding;
   final bool showAvatar;
   final bool showCheckmark;
@@ -2185,24 +2133,24 @@ class _ChipRenderTheme {
   final bool canTapBody;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _ChipRenderTheme
-        && other.avatar == avatar
-        && other.label == label
-        && other.deleteIcon == deleteIcon
-        && other.brightness == brightness
-        && other.padding == padding
-        && other.labelPadding == labelPadding
-        && other.showAvatar == showAvatar
-        && other.showCheckmark == showCheckmark
-        && other.checkmarkColor == checkmarkColor
-        && other.canTapBody == canTapBody;
+    final _ChipRenderTheme typedOther = other;
+    return typedOther.avatar == avatar
+        && typedOther.label == label
+        && typedOther.deleteIcon == deleteIcon
+        && typedOther.brightness == brightness
+        && typedOther.padding == padding
+        && typedOther.labelPadding == labelPadding
+        && typedOther.showAvatar == showAvatar
+        && typedOther.showCheckmark == showCheckmark
+        && typedOther.checkmarkColor == checkmarkColor
+        && typedOther.canTapBody == canTapBody;
   }
 
   @override
@@ -2327,7 +2275,7 @@ class _RenderChip extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (final RenderBox child in _children) {
+    for (RenderBox child in _children) {
       child.attach(owner);
     }
   }
@@ -2335,7 +2283,7 @@ class _RenderChip extends RenderBox {
   @override
   void detach() {
     super.detach();
-    for (final RenderBox child in _children) {
+    for (RenderBox child in _children) {
       child.detach();
     }
   }
@@ -2384,7 +2332,7 @@ class _RenderChip extends RenderBox {
 
   static Rect _boxRect(RenderBox box) => box == null ? Rect.zero : _boxParentData(box).offset & box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData;
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -2544,7 +2492,6 @@ class _RenderChip extends RenderBox {
   void performLayout() {
     final BoxConstraints contentConstraints = constraints.loosen();
     // Find out the height of the label within the constraints.
-    final Offset densityAdjustment = Offset(0.0, theme.visualDensity.baseSizeAdjustment.dy / 2.0);
     label.layout(contentConstraints, parentUsesSize: true);
     final double contentSize = math.max(
       _kChipHeight - theme.padding.vertical + theme.labelPadding.vertical,
@@ -2560,7 +2507,7 @@ class _RenderChip extends RenderBox {
     final Size overallSize = Size(
       avatarSize.width + labelSize.width + deleteIconSize.width,
       contentSize,
-    ) + densityAdjustment;
+    );
 
     // Now we have all of the dimensions. Place the children where they belong.
 
@@ -2572,10 +2519,10 @@ class _RenderChip extends RenderBox {
       Offset boxOffset;
       switch (textDirection) {
         case TextDirection.rtl:
-          boxOffset = Offset(x - boxSize.width, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
+          boxOffset = Offset(x - boxSize.width, (contentSize - boxSize.height) / 2.0);
           break;
         case TextDirection.ltr:
-          boxOffset = Offset(x, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
+          boxOffset = Offset(x, (contentSize - boxSize.height) / 2.0);
           break;
       }
       return boxOffset;
@@ -2906,7 +2853,7 @@ class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
 
     if (tapIsOnDeleteIcon) {
       final RenderBox currentBox = referenceBox;
-      referenceBox = deleteIconKey.currentContext.findRenderObject() as RenderBox;
+      referenceBox = deleteIconKey.currentContext.findRenderObject();
       position = referenceBox.globalToLocal(currentBox.localToGlobal(position));
       containedInkWell = false;
     }
@@ -2948,3 +2895,4 @@ bool _tapIsOnDeleteIcon({
   }
   return tapIsOnDeleteIcon;
 }
+

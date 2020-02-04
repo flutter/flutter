@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -127,7 +127,7 @@ void main() {
     );
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception as FlutterError;
+    final FlutterError error = exception;
     expect(error.toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   Cannot call paintChild twice for the same child.\n'
@@ -148,11 +148,11 @@ void main() {
       ),
     );
     ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;
-    while (layer != null && layer is! OpacityLayer)
-      layer = layer.firstChild as ContainerLayer;
-    expect(layer, isA<OpacityLayer>());
-    final OpacityLayer opacityLayer = layer as OpacityLayer;
+    while (layer != null && !(layer is OpacityLayer))
+      layer = layer.firstChild;
+    expect(layer, isInstanceOf<OpacityLayer>());
+    final OpacityLayer opacityLayer = layer;
     expect(opacityLayer.alpha, equals(opacity * 255));
-    expect(layer.firstChild, isA<TransformLayer>());
+    expect(layer.firstChild, isInstanceOf<TransformLayer>());
   });
 }

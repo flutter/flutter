@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'base/io.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
+import 'globals.dart';
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -117,20 +117,20 @@ class ProtocolDiscovery {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
-      globals.printTrace('skipping potential observatory $uri due to device port mismatch');
+      printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
     _uriStreamController.add(uri);
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
-    globals.printTrace('$serviceName URL on device: $deviceUri');
+    printTrace('$serviceName URL on device: $deviceUri');
     Uri hostUri = deviceUri;
 
     if (portForwarder != null) {
       final int actualDevicePort = deviceUri.port;
       final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      globals.printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
@@ -157,8 +157,8 @@ class _BufferedStreamController<T> {
 
   StreamController<T> get _streamController {
     _streamControllerInstance ??= StreamController<T>.broadcast(onListen: () {
-      for (final dynamic event in _events) {
-        assert(T is! List);
+      for (dynamic event in _events) {
+        assert(!(T is List));
         if (event is T) {
           _streamControllerInstance.add(event);
         } else {

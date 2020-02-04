@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,7 +43,7 @@ class DragDownDetails {
   final Offset localPosition;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'DragDownDetails')}($globalPosition)';
+  String toString() => '$runtimeType($globalPosition)';
 }
 
 /// Signature for when a pointer has contacted the screen and might begin to
@@ -100,7 +100,7 @@ class DragStartDetails {
   // instead).
 
   @override
-  String toString() => '${objectRuntimeType(this, 'DragStartDetails')}($globalPosition)';
+  String toString() => '$runtimeType($globalPosition)';
 }
 
 /// Signature for when a pointer has contacted the screen and has begun to move.
@@ -184,7 +184,7 @@ class DragUpdateDetails {
   final Offset localPosition;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'DragUpdateDetails')}($delta)';
+  String toString() => '$runtimeType($delta)';
 }
 
 /// Signature for when a pointer that is in contact with the screen and moving
@@ -234,5 +234,5 @@ class DragEndDetails {
   final double primaryVelocity;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'DragEndDetails')}($velocity)';
+  String toString() => '$runtimeType($velocity)';
 }

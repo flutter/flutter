@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -158,12 +158,12 @@ void main(List<String> args) {
   argParser.addFlag(kOptionDryRun, defaultsTo: false);
   final ArgResults argResults = argParser.parse(args);
 
-  final File iconFile = File(path.absolute(argResults[kOptionIconsPath] as String));
+  final File iconFile = File(path.absolute(argResults[kOptionIconsPath]));
   if (!iconFile.existsSync()) {
     stderr.writeln('Icons file not found: ${iconFile.path}');
     exit(1);
   }
-  final File codepointsFile = File(path.absolute(argResults[kOptionCodepointsPath] as String));
+  final File codepointsFile = File(path.absolute(argResults[kOptionCodepointsPath]));
   if (!codepointsFile.existsSync()) {
     stderr.writeln('Codepoints file not found: ${codepointsFile.path}');
     exit(1);
@@ -173,7 +173,7 @@ void main(List<String> args) {
   final String codepointData = codepointsFile.readAsStringSync();
   final String newIconData = regenerateIconsFile(iconData, codepointData);
 
-  if (argResults[kOptionDryRun] as bool)
+  if (argResults[kOptionDryRun])
     stdout.writeln(newIconData);
   else
     iconFile.writeAsStringSync(newIconData);
@@ -182,7 +182,7 @@ void main(List<String> args) {
 String regenerateIconsFile(String iconData, String codepointData) {
   final StringBuffer buf = StringBuffer();
   bool generating = false;
-  for (final String line in LineSplitter.split(iconData)) {
+  for (String line in LineSplitter.split(iconData)) {
     if (!generating)
       buf.writeln(line);
     if (line.contains(kBeginGeneratedMark)) {

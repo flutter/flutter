@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,7 +29,7 @@ enum BorderStyle {
 /// Note that setting [BorderSide.width] to 0.0 will result in hairline
 /// rendering. A more involved explanation is present in [BorderSide.width].
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
 /// a [BoxDecoration] and a [Border], to decorate some [Text]. In this example,
@@ -252,22 +252,22 @@ class BorderSide {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is BorderSide
-        && other.color == color
-        && other.width == width
-        && other.style == style;
+    final BorderSide typedOther = other;
+    return color == typedOther.color &&
+           width == typedOther.width &&
+           style == typedOther.style;
   }
 
   @override
   int get hashCode => hashValues(color, width, style);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'BorderSide')}($color, ${width.toStringAsFixed(1)}, $style)';
+  String toString() => '$runtimeType($color, ${width.toStringAsFixed(1)}, $style)';
 }
 
 /// Base class for shape outlines.
@@ -488,7 +488,7 @@ abstract class ShapeBorder {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'ShapeBorder')}()';
+    return '$runtimeType()';
   }
 }
 
@@ -603,20 +603,28 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
-    for (final ShapeBorder border in borders) {
+    for (ShapeBorder border in borders) {
       border.paint(canvas, rect, textDirection: textDirection);
       rect = border.dimensions.resolve(textDirection).deflateRect(rect);
     }
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is _CompoundBorder
-        && listEquals<ShapeBorder>(other.borders, borders);
+    final _CompoundBorder typedOther = other;
+    if (borders == typedOther.borders)
+      return true;
+    if (borders.length != typedOther.borders.length)
+      return false;
+    for (int index = 0; index < borders.length; index += 1) {
+      if (borders[index] != typedOther.borders[index])
+        return false;
+    }
+    return true;
   }
 
   @override

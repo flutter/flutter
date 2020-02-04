@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,17 +12,13 @@ import 'package:flutter/scheduler.dart';
 
 int seed = 0;
 
-// Sets a platform override for desktop to avoid exceptions. See
-// https://flutter.dev/desktop#target-platform-override for more info.
-// TODO(gspencergoog): Remove once TargetPlatform includes all desktop platforms.
-void _enablePlatformOverrideForDesktop() {
-  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+void main() {
+  if (!kIsWeb && Platform.isMacOS) {
+    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
+    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
-}
 
-void main() {
-  _enablePlatformOverrideForDesktop();
   runApp(MaterialApp(
     title: 'Text tester',
     home: const Home(),
@@ -156,7 +152,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child as TextSpan))?.toList() ?? <TextSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child))?.toList() ?? <InlineSpan>[]),
     );
   }
 
@@ -343,7 +339,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     if (node.children == null || node.children.isEmpty)
       return 0;
     int result = 0;
-    for (final TextSpan child in node.children.cast<TextSpan>())
+    for (TextSpan child in node.children)
       result = math.max(result, depthOf(child));
     return result;
   }
@@ -582,7 +578,7 @@ class _UnderlinesState extends State<Underlines> {
                 child: ListBody(
                   children: <Widget>[
                     _wrap(null),
-                    for (final TextDecorationStyle style in TextDecorationStyle.values) _wrap(style),
+                    for (TextDecorationStyle style in TextDecorationStyle.values) _wrap(style),
                   ],
                 ),
               ),
@@ -675,7 +671,7 @@ class _FallbackState extends State<Fallback> {
                   child: IntrinsicWidth(
                     child: ListBody(
                       children: <Widget>[
-                        for (final String font in androidFonts)
+                        for (String font in androidFonts)
                           Text(
                             multiScript,
                             style: style.copyWith(

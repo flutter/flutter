@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -100,7 +100,7 @@ class ExampleDragSource extends StatelessWidget {
       size *= kHeavyMultiplier;
 
     final Widget contents = DefaultTextStyle(
-      style: Theme.of(context).textTheme.bodyText2,
+      style: Theme.of(context).textTheme.body1,
       textAlign: TextAlign.center,
       child: Dot(
         color: color,
@@ -188,7 +188,7 @@ class MovableBall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget ball = DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.bodyText2,
+      style: Theme.of(context).primaryTextTheme.body1,
       textAlign: TextAlign.center,
       child: Dot(
         key: kBallKey,
@@ -296,17 +296,13 @@ class DragAndDropAppState extends State<DragAndDropApp> {
   }
 }
 
-// Sets a platform override for desktop to avoid exceptions. See
-// https://flutter.dev/desktop#target-platform-override for more info.
-// TODO(gspencergoog): Remove once TargetPlatform includes all desktop platforms.
-void _enablePlatformOverrideForDesktop() {
-  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+void main() {
+  if (!kIsWeb && Platform.isMacOS) {
+    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
+    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
-}
 
-void main() {
-  _enablePlatformOverrideForDesktop();
   runApp(MaterialApp(
     title: 'Drag and Drop Flutter Demo',
     home: DragAndDropApp(),

@@ -1,0 +1,10 @@
+include: ../analysis_options.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+
+linter:
+  rules:
+    avoid_as: false # Disabled so we can gradually migrate to no implicit dynamic.

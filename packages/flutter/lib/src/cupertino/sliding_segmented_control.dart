@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -118,8 +118,6 @@ class _FontWeightTween extends Tween<FontWeight> {
 ///
 /// See also:
 ///
-///  * [CupertinoSlidingSegmentedControl], a segmented control widget in the
-///    style introduced in iOS 13.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
 class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
@@ -180,7 +178,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// the parent [StatefulWidget] using the [State.setState] method, so that
   /// the parent gets rebuilt; for example:
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
@@ -303,7 +301,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       vsync: this,
     );
 
-    for (final T currentKey in widget.children.keys) {
+    for (T currentKey in widget.children.keys) {
       _highlightControllers[currentKey] = _createHighlightAnimationController(
         isCompleted: currentKey == widget.groupValue,  // Highlight the current selection.
       );
@@ -316,7 +314,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     super.didUpdateWidget(oldWidget);
 
     // Update animation controllers.
-    for (final T oldKey in oldWidget.children.keys) {
+    for (T oldKey in oldWidget.children.keys) {
       if (!widget.children.containsKey(oldKey)) {
         _highlightControllers[oldKey].dispose();
         _pressControllers[oldKey].dispose();
@@ -326,7 +324,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       }
     }
 
-    for (final T newKey in widget.children.keys) {
+    for (T newKey in widget.children.keys) {
       if (!_highlightControllers.keys.contains(newKey)) {
         _highlightControllers[newKey] = _createHighlightAnimationController();
         _pressControllers[newKey] = _createFadeoutAnimationController();
@@ -338,11 +336,11 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 
   @override
   void dispose() {
-    for (final AnimationController animationController in _highlightControllers.values) {
+    for (AnimationController animationController in _highlightControllers.values) {
       animationController.dispose();
     }
 
-    for (final AnimationController animationController in _pressControllers.values) {
+    for (AnimationController animationController in _pressControllers.values) {
       animationController.dispose();
     }
 
@@ -415,7 +413,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       ]),
       builder: (BuildContext context, Widget child) {
         final List<Widget> children = <Widget>[];
-        for (final T currentKey in keys) {
+        for (T currentKey in keys) {
           final TextStyle textStyle = DefaultTextStyle.of(context).style.copyWith(
             fontWeight: _highlightTween.evaluate(_highlightControllers[currentKey]),
           );
@@ -688,9 +686,9 @@ class _RenderSegmentedControl<T> extends RenderBox
     return childCount == 0
       ? null
       // This assumes all children have the same width.
-      : ((location.dx / (size.width / childCount))
+      : (location.dx / (size.width / childCount))
         .floor()
-        .clamp(0, childCount - 1) as int);
+        .clamp(0, childCount - 1);
   }
 
   void _onTapUp(TapUpDetails details) {
@@ -763,8 +761,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     RenderBox child = firstChild;
     double maxMinChildWidth = 0;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final double childWidth = child.getMinIntrinsicWidth(height);
       maxMinChildWidth = math.max(maxMinChildWidth, childWidth);
       child = childParentData.nextSibling;
@@ -777,8 +774,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     RenderBox child = firstChild;
     double maxMaxChildWidth = 0;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final double childWidth = child.getMaxIntrinsicWidth(height);
       maxMaxChildWidth = math.max(maxMaxChildWidth, childWidth);
       child = childParentData.nextSibling;
@@ -791,8 +787,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     RenderBox child = firstChild;
     double maxMinChildHeight = 0;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final double childHeight = child.getMinIntrinsicHeight(width);
       maxMinChildHeight = math.max(maxMinChildHeight, childHeight);
       child = childParentData.nextSibling;
@@ -805,8 +800,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     RenderBox child = firstChild;
     double maxMaxChildHeight = 0;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final double childHeight = child.getMaxIntrinsicHeight(width);
       maxMaxChildHeight = math.max(maxMaxChildHeight, childHeight);
       child = childParentData.nextSibling;
@@ -831,7 +825,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     double childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
     double maxHeight = _kMinSegmentedControlHeight;
 
-    for (final RenderBox child in getChildrenAsList()) {
+    for (RenderBox child in getChildrenAsList()) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding);
     }
 
@@ -865,8 +859,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     child = firstChild;
 
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final Offset childOffset = Offset(start, 0);
       childParentData.offset = childOffset;
       start += child.size.width + _kSeparatorWidth + _kSeparatorInset.horizontal;
@@ -895,8 +888,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
       final RenderBox selectedChild = children[highlightedIndex];
 
-      final _SegmentedControlContainerBoxParentData childParentData =
-        selectedChild.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = selectedChild.parentData;
       final Rect unscaledThumbTargetRect = _kThumbInsets.inflateRect(childParentData.offset & selectedChild.size);
 
       // Update related Tweens before animation update phase.
@@ -956,8 +948,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   // Paint the separator to the right of the given child.
   void _paintSeparator(PaintingContext context, Offset offset, RenderBox child) {
     assert(child != null);
-    final _SegmentedControlContainerBoxParentData childParentData =
-      child.parentData as _SegmentedControlContainerBoxParentData;
+    final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
 
     final Paint paint = Paint();
 
@@ -979,8 +970,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox child, int childIndex) {
     assert(child != null);
-    final _SegmentedControlContainerBoxParentData childParentData =
-      child.parentData as _SegmentedControlContainerBoxParentData;
+    final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
@@ -1001,7 +991,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     final RRect thumbRRect = RRect.fromRectAndRadius(thumbRect.shift(offset), _kThumbRadius);
 
-    for (final BoxShadow shadow in thumbShadow) {
+    for (BoxShadow shadow in thumbShadow) {
       context.canvas.drawRRect(thumbRRect.shift(shadow.offset), shadow.toPaint());
     }
 
@@ -1021,8 +1011,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     assert(position != null);
     RenderBox child = lastChild;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       if ((childParentData.offset & child.size).contains(position)) {
         final Offset center = (Offset.zero & child.size).center;
         return result.addWithRawTransform(

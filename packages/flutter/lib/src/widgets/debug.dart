@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,10 +29,7 @@ import 'table.dart';
 /// Observatory rather than getting it in the console (where it can be
 /// overwhelming), consider [debugProfileBuildsEnabled].
 ///
-/// See also:
-///
-///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
-///    to generate a frame.
+/// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintRebuildDirtyWidgets = false;
 
 /// Signature for [debugOnRebuildDirtyWidget] implementations.
@@ -65,10 +62,7 @@ RebuildDirtyWidgetCallback debugOnRebuildDirtyWidget;
 /// triggered by the initial mounting of a widget tree (e.g. in a call to
 /// [runApp]) from the regular builds triggered by the pipeline.
 ///
-/// See also:
-///
-///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
-///    to generate a frame.
+/// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintBuildScope = false;
 
 /// Log the call stacks that mark widgets as needing to be rebuilt.
@@ -96,11 +90,9 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 /// optimize your app, see https://flutter.dev/docs/testing/debugging#tracing-any-dart-code-performance
 /// and https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md
 ///
-/// See also:
-///
-///  * [debugProfilePaintsEnabled], which does something similar but for
-///    painting, and [debugPrintRebuildDirtyWidgets], which does something similar
-///    but reporting the builds to the console.
+/// See also [debugProfilePaintsEnabled], which does something similar but for
+/// painting, and [debugPrintRebuildDirtyWidgets], which does something similar
+/// but reporting the builds to the console.
 bool debugProfileBuildsEnabled = false;
 
 /// Show banners for deprecated widgets.
@@ -108,7 +100,7 @@ bool debugHighlightDeprecatedWidgets = false;
 
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
-  for (final Widget widget in widgets) {
+  for (Widget widget in widgets) {
     assert(widget != null);
     if (widget.key == null)
       continue;
@@ -315,7 +307,7 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary(reason)]);
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('$reason')]);
     }
     return true;
   }());

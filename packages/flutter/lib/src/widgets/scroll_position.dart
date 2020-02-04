@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -381,7 +381,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void restoreScrollOffset() {
     if (pixels == null) {
-      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext) as double;
+      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext);
       if (value != null)
         correctPixels(value);
     }
@@ -526,8 +526,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// See also:
   ///
-  ///  * [ScrollPositionAlignmentPolicy] for the way in which `alignment` is
-  ///    applied, and the way the given `object` is aligned.
+  /// * [ScrollPositionAlignmentPolicy] for the way in which `alignment` is
+  ///   applied, and the way the given `object` is aligned.
   Future<void> ensureVisible(
     RenderObject object, {
     double alignment = 0.0,
@@ -543,16 +543,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     double target;
     switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
-        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent) as double;
+        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent) as double;
+        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent);
         if (target < pixels) {
           target = pixels;
         }
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent) as double;
+        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent);
         if (target > pixels) {
           target = pixels;
         }
@@ -641,7 +641,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(clamp != null);
 
     if (clamp)
-      to = to.clamp(minScrollExtent, maxScrollExtent) as double;
+      to = to.clamp(minScrollExtent, maxScrollExtent);
 
     return super.moveTo(to, duration: duration, curve: curve);
   }
@@ -739,23 +739,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Subclasses should call this function when they change [userScrollDirection].
   void didUpdateScrollDirection(ScrollDirection direction) {
     UserScrollNotification(metrics: copyWith(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
-  }
-
-  /// Provides a heuristic to determine if expensive frame-bound tasks should be
-  /// deferred.
-  ///
-  /// The actual work of this is delegated to the [physics] via
-  /// [ScrollPhysics.recommendDeferredScrolling] called with the current
-  /// [activity]'s [ScrollActivity.velocity].
-  ///
-  /// Returning true from this method indicates that the [ScrollPhysics]
-  /// evaluate the current scroll velocity to be great enough that expensive
-  /// operations impacting the UI should be deferred.
-  bool recommendDeferredLoading(BuildContext context) {
-    assert(context != null);
-    assert(activity != null);
-    assert(activity.velocity != null);
-    return physics.recommendDeferredLoading(activity.velocity, copyWith(), context);
   }
 
   @override

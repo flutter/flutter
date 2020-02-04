@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,9 +6,10 @@ import 'dart:async';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../globals.dart' as globals;
+import '../globals.dart';
 import '../ios/mac.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
@@ -42,6 +43,7 @@ class BuildIOSCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
     DevelopmentArtifact.iOS,
   };
 
@@ -50,7 +52,7 @@ class BuildIOSCommand extends BuildSubCommand {
     final bool forSimulator = boolArg('simulator');
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
-    if (!globals.platform.isMacOS) {
+    if (!platform.isMacOS) {
       throwToolExit('Building for iOS is only supported on the Mac.');
     }
 
@@ -63,7 +65,7 @@ class BuildIOSCommand extends BuildSubCommand {
     final bool shouldCodesign = boolArg('codesign');
 
     if (!forSimulator && !shouldCodesign) {
-      globals.printStatus('Warning: Building for device with codesigning disabled. You will '
+      printStatus('Warning: Building for device with codesigning disabled. You will '
         'have to manually codesign before deploying to device.');
     }
     final BuildInfo buildInfo = getBuildInfo();
@@ -73,8 +75,8 @@ class BuildIOSCommand extends BuildSubCommand {
 
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
-    final String typeName = globals.artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
-    globals.printStatus('Building $app for $logTarget ($typeName)...');
+    final String typeName = artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    printStatus('Building $app for $logTarget ($typeName)...');
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
@@ -89,9 +91,9 @@ class BuildIOSCommand extends BuildSubCommand {
     }
 
     if (result.output != null) {
-      globals.printStatus('Built ${result.output}.');
+      printStatus('Built ${result.output}.');
     }
 
-    return FlutterCommandResult.success();
+    return null;
   }
 }

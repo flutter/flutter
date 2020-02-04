@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(const ListTile());
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception as FlutterError;
+    final FlutterError error = exception;
     expect(error.diagnostics.length, 5);
     expect(error.diagnostics[2].level, DiagnosticLevel.hint);
     expect(
@@ -22,8 +22,8 @@ void main() {
         'Card, Dialog, Drawer, or Scaffold.\n',
       ),
     );
-    expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
-    expect(error.diagnostics[4], isA<DiagnosticsBlock>());
+    expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics[4], isInstanceOf<DiagnosticsBlock>());
     expect(error.toStringDeep(),
       'FlutterError\n'
       '   No Material widget found.\n'
@@ -49,7 +49,7 @@ void main() {
     await tester.pumpWidget(const BackButton());
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception as FlutterError;
+    final FlutterError error = exception;
     expect(error.diagnostics.length, 6);
     expect(error.diagnostics[3].level, DiagnosticLevel.hint);
     expect(
@@ -60,15 +60,15 @@ void main() {
         'add a Localization widget with a MaterialLocalizations delegate.\n',
       ),
     );
-    expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
-    expect(error.diagnostics[5], isA<DiagnosticsBlock>());
+    expect(error.diagnostics[4], isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics[5], isInstanceOf<DiagnosticsBlock>());
     expect(error.toStringDeep(),
       'FlutterError\n'
       '   No MaterialLocalizations found.\n'
       '   BackButton widgets require MaterialLocalizations to be provided\n'
       '   by a Localizations widget ancestor.\n'
       '   Localizations are used to generate many different messages,\n'
-      '   labels, and abbreviations which are used by the material library.\n'
+      '   labels,and abbreviations which are used by the material library.\n'
       '   To introduce a MaterialLocalizations, either use a MaterialApp at\n'
       '   the root of your application to include them automatically, or\n'
       '   add a Localization widget with a MaterialLocalizations delegate.\n'
@@ -95,10 +95,10 @@ void main() {
     );
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception as FlutterError;
+    final FlutterError error = exception;
     expect(error.diagnostics.length, 5);
-    expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
-    expect(error.diagnostics[3], isA<DiagnosticsBlock>());
+    expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics[3], isInstanceOf<DiagnosticsBlock>());
     expect(error.diagnostics[4].level, DiagnosticLevel.hint);
     expect(
       error.diagnostics[4].toStringDeep(),
@@ -132,8 +132,8 @@ void main() {
       '     Offstage\n'
       '     _ModalScopeStatus\n'
       '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#969b7]\n'
-      '     TickerMode\n'
-      '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#545d0]\n'
+      '     _OverlayEntry-[LabeledGlobalKey<_OverlayEntryState>#7a3ae]\n'
+      '     Stack\n'
       '     _Theatre\n'
       '     Overlay-[LabeledGlobalKey<OverlayState>#31a52]\n'
       '     _FocusMarker\n'

@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,7 @@ import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals;
+import '../../globals.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -31,12 +31,9 @@ abstract class AndroidAssetBundle extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  List<String> get depfiles => <String>[
-    if (_copyAssets)
-      'flutter_assets.d',
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
   ];
-
-  bool get _copyAssets => true;
 
   @override
   Future<void> build(Environment environment) async {
@@ -50,19 +47,17 @@ abstract class AndroidAssetBundle extends Target {
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
-      final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
-      final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
-      globals.fs.file(vmSnapshotData)
+      fs.file(vmSnapshotData)
           .copySync(outputDirectory.childFile('vm_snapshot_data').path);
-      globals.fs.file(isolateSnapshotData)
+      fs.file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
-    if (_copyAssets) {
-      final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
-      assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
-    }
+    final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
+    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 
   @override
@@ -93,17 +88,6 @@ class DebugAndroidApplication extends AndroidAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
   ];
-}
-
-/// A minimal android application that does not include assets.
-class FastStartAndroidApplication extends DebugAndroidApplication {
-  const FastStartAndroidApplication();
-
-  @override
-  String get name => 'faststart_android_application';
-
-  @override
-  bool get _copyAssets => false;
 }
 
 /// An implementation of [AndroidAssetBundle] that only includes assets.
@@ -208,8 +192,6 @@ class AndroidAot extends AotElfBase {
     if (!output.existsSync()) {
       output.createSync(recursive: true);
     }
-    final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
-      ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
@@ -218,7 +200,6 @@ class AndroidAot extends AotElfBase {
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: output.path,
       bitcode: false,
-      extraGenSnapshotOptions: extraGenSnapshotOptions,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -227,12 +208,12 @@ class AndroidAot extends AotElfBase {
 }
 
 // AndroidAot instances used by the bundle rules below.
-const AndroidAot androidArmProfile = AndroidAot(TargetPlatform.android_arm,  BuildMode.profile);
-const AndroidAot androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
-const AndroidAot androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
-const AndroidAot androidArmRelease = AndroidAot(TargetPlatform.android_arm,  BuildMode.release);
-const AndroidAot androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-const AndroidAot androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
+const Target androidArmProfile = AndroidAot(TargetPlatform.android_arm,  BuildMode.profile);
+const Target androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
+const Target androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
+const Target androidArmRelease = AndroidAot(TargetPlatform.android_arm,  BuildMode.release);
+const Target androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+const Target androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
 
 /// A rule paired with [AndroidAot] that copies the produced so files into the output directory.
 class AndroidAotBundle extends Target {
@@ -290,3 +271,4 @@ const Target androidx64ProfileBundle = AndroidAotBundle(androidx64Profile);
 const Target androidArmReleaseBundle = AndroidAotBundle(androidArmRelease);
 const Target androidArm64ReleaseBundle = AndroidAotBundle(androidArm64Release);
 const Target androidx64ReleaseBundle = AndroidAotBundle(androidx64Release);
+

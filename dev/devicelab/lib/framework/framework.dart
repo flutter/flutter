@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -179,12 +179,12 @@ class TaskResult {
         message = 'success' {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
-      for (final String key in benchmarkScoreKeys) {
+      for (String key in benchmarkScoreKeys) {
         if (!data.containsKey(key)) {
-          throw 'Invalid benchmark score key "$key". It does not exist in task '
+          throw 'Invalid Golem score key "$key". It does not exist in task '
               'result data ${prettyJson.convert(data)}';
         } else if (data[key] is! num) {
-          throw 'Invalid benchmark score for key "$key". It is expected to be a num '
+          throw 'Invalid Golem score for key "$key". It is expected to be a num '
               'but was ${data[key].runtimeType}: ${prettyJson.convert(data[key])}';
         }
       }
@@ -194,10 +194,8 @@ class TaskResult {
   /// Constructs a successful result using JSON data stored in a file.
   factory TaskResult.successFromFile(File file,
       {List<String> benchmarkScoreKeys}) {
-    return TaskResult.success(
-      json.decode(file.readAsStringSync()) as Map<String, dynamic>,
-      benchmarkScoreKeys: benchmarkScoreKeys,
-    );
+    return TaskResult.success(json.decode(file.readAsStringSync()),
+        benchmarkScoreKeys: benchmarkScoreKeys);
   }
 
   /// Constructs an unsuccessful result.
@@ -212,9 +210,17 @@ class TaskResult {
   /// Task-specific JSON data
   final Map<String, dynamic> data;
 
-  /// Keys in [data] that store scores that will be submitted to Cocoon.
+  /// Keys in [data] that store scores that will be submitted to Golem.
   ///
-  /// Each key is also part of a benchmark's name tracked by Cocoon.
+  /// Each key is also part of a benchmark's name tracked by Golem.
+  /// A benchmark name is computed by combining [Task.name] with a key
+  /// separated by a dot. For example, if a task's name is
+  /// `"complex_layout__start_up"` and score key is
+  /// `"engineEnterTimestampMicros"`, the score will be submitted to Golem under
+  /// `"complex_layout__start_up.engineEnterTimestampMicros"`.
+  ///
+  /// This convention reduces the amount of configuration that needs to be done
+  /// to submit benchmark scores to Golem.
   final List<String> benchmarkScoreKeys;
 
   /// Whether the task failed.

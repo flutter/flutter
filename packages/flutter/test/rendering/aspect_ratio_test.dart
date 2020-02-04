@@ -1,11 +1,10 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
-
+import '../flutter_test_alternative.dart';
 import 'rendering_tester.dart';
 
 void main() {
@@ -114,7 +113,7 @@ void main() {
       errors.addAll(renderer.takeAllFlutterErrorDetails());
     });
     expect(errors, hasLength(2));
-    expect(errors.first.exception, isFlutterError);
+    expect(errors.first.exception, isA<FlutterError>());
     expect(errors.first.exception.toStringDeep(),
       'FlutterError\n'
       '   RenderAspectRatio has unbounded constraints.\n'

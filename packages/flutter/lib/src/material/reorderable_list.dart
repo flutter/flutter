@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,7 +27,7 @@ import 'material_localizations.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
@@ -58,7 +58,6 @@ class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
   ReorderableListView({
-    Key key,
     this.header,
     @required this.children,
     @required this.onReorder,
@@ -71,8 +70,7 @@ class ReorderableListView extends StatefulWidget {
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
-       ),
-       super(key: key);
+       );
 
   /// A non-reorderable header widget to show before the list.
   ///
@@ -532,7 +530,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           return _dragging == toAccept && toAccept != toWrap.key;
         },
         onAccept: (Key accepted) { },
-        onLeave: (Object leaving) { },
+        onLeave: (Key leaving) { },
       );
     });
   }

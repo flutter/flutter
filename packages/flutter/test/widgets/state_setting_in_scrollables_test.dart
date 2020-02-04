@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class Foo extends StatefulWidget {
-  const Foo({ Key key }) : super(key: key);
   @override
   FooState createState() => FooState();
 }
@@ -81,7 +80,7 @@ class FooScrollBehavior extends ScrollBehavior {
 void main() {
   testWidgets('Can animate scroll after setState', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: Foo(),
       ),

@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,10 +31,10 @@ class ComponentDemoTabData {
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    return other is ComponentDemoTabData
-        && other.tabName == tabName
-        && other.description == description
-        && other.documentationUrl == documentationUrl;
+    final ComponentDemoTabData typedOther = other;
+    return typedOther.tabName == tabName
+        && typedOther.description == description
+        && typedOther.documentationUrl == documentationUrl;
   }
 
   @override
@@ -133,7 +133,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(demo.description,
-                      style: Theme.of(context).textTheme.subtitle1,
+                      style: Theme.of(context).textTheme.subhead,
                     ),
                   ),
                   Expanded(child: demo.demoWidget),

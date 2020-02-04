@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,10 +11,10 @@ import 'package:path/path.dart' as path;
 enum SnippetType {
   /// Produces a snippet that includes the code interpolated into an application
   /// template.
-  sample,
+  application,
 
   /// Produces a nicely formatted sample code, but no application.
-  snippet,
+  sample,
 }
 
 /// Return the name of an enum item.
@@ -69,7 +69,7 @@ class Configuration {
 
   /// Gets the skeleton file to use for the given [SnippetType] and DartPad preference.
   File getHtmlSkeletonFile(SnippetType type, {bool showDartPad = false}) {
-    assert(!showDartPad || type == SnippetType.sample,
+    assert(!showDartPad || type == SnippetType.application,
         'Only application snippets work with dartpad.');
     final String filename =
         '${showDartPad ? 'dartpad-' : ''}${getEnumName(type)}.html';

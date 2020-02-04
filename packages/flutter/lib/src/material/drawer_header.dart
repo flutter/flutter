@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -91,7 +91,7 @@ class DrawerHeader extends StatelessWidget {
         duration: duration,
         curve: curve,
         child: child == null ? null : DefaultTextStyle(
-          style: theme.textTheme.bodyText1,
+          style: theme.textTheme.body2,
           child: MediaQuery.removePadding(
             context: context,
             removeTop: true,

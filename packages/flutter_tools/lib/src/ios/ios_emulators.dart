@@ -1,19 +1,21 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../globals.dart' as globals;
+import '../globals.dart';
+import '../macos/xcode.dart';
 import 'ios_workflow.dart';
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
   @override
-  bool get supportsPlatform => globals.platform.isMacOS;
+  bool get supportsPlatform => platform.isMacOS;
 
   @override
   bool get canListAnything => iosWorkflow.canListEmulators;
@@ -44,12 +46,12 @@ class IOSEmulator extends Emulator {
         'open',
         ...additionalArgs,
         '-a',
-        globals.xcode.getSimulatorPath(),
+        xcode.getSimulatorPath(),
       ];
 
       final RunResult launchResult = await processUtils.run(args);
       if (launchResult.exitCode != 0) {
-        globals.printError('$launchResult');
+        printError('$launchResult');
         return false;
       }
       return true;
@@ -68,7 +70,7 @@ class IOSEmulator extends Emulator {
 
 /// Return the list of iOS Simulators (there can only be zero or one).
 List<IOSEmulator> getEmulators() {
-  final String simulatorPath = globals.xcode.getSimulatorPath();
+  final String simulatorPath = xcode.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }

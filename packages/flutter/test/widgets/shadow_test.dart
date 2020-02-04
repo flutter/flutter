@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,10 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  tearDown(() {
-    debugDisableShadows = true;
-  });
-
   testWidgets('Shadows on BoxDecoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
@@ -37,7 +33,7 @@ void main() {
       matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
     );
     debugDisableShadows = true;
-  });
+  }, skip: isBrowser);
 
   testWidgets('Shadows on ShapeDecoration', (WidgetTester tester) async {
     debugDisableShadows = false;
@@ -56,7 +52,7 @@ void main() {
         ),
       );
     }
-    for (final int elevation in kElevationToShadow.keys) {
+    for (int elevation in kElevationToShadow.keys) {
       await tester.pumpWidget(build(elevation));
       await expectLater(
         find.byType(Container),
@@ -97,7 +93,7 @@ void main() {
       matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
     );
     debugDisableShadows = true;
-  });
+  }, skip: isBrowser);
 
   testWidgets('Shadows with PhysicalShape', (WidgetTester tester) async {
     debugDisableShadows = false;
@@ -120,7 +116,7 @@ void main() {
         ),
       );
     }
-    for (final int elevation in kElevationToShadow.keys) {
+    for (int elevation in kElevationToShadow.keys) {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),

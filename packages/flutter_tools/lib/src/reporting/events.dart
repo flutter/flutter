@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -139,9 +139,9 @@ class BuildEvent extends UsageEvent {
     // category
     'build',
     // parameter
-    FlutterCommand.current == null
-      ? 'unspecified'
-      : FlutterCommand.current.name,
+    FlutterCommand.current == null ?
+      'unspecified' :
+      '${FlutterCommand.current.name}',
     label: label,
   );
 
@@ -171,9 +171,7 @@ class BuildEvent extends UsageEvent {
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
   CommandResultEvent(String commandPath, FlutterCommandResult result)
-      : assert(commandPath != null),
-        assert(result != null),
-        super(commandPath, result.toString());
+      : super(commandPath, result?.toString() ?? 'unspecified');
 
   @override
   void send() {
@@ -197,7 +195,7 @@ class CommandResultEvent extends UsageEvent {
       );
     } catch (error) {
       // If grabbing the maxRss fails for some reason, just don't send an event.
-      globals.printTrace('Querying maxRss failed with error: $error');
+      printTrace('Querying maxRss failed with error: $error');
     }
   }
 }

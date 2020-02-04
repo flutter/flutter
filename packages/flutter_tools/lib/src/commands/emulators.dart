@@ -1,14 +1,15 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../doctor.dart';
 import '../emulator.dart';
-import '../globals.dart' as globals;
+import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class EmulatorsCommand extends FlutterCommand {
@@ -37,7 +38,7 @@ class EmulatorsCommand extends FlutterCommand {
       throwToolExit(
           'Unable to find any emulator sources. Please ensure you have some\n'
               'Android AVD images ' +
-              (globals.platform.isMacOS ? 'or an iOS Simulator ' : '') +
+              (platform.isMacOS ? 'or an iOS Simulator ' : '') +
               'available.',
           exitCode: 1);
     }
@@ -54,7 +55,7 @@ class EmulatorsCommand extends FlutterCommand {
       await _listEmulators(searchText);
     }
 
-    return FlutterCommandResult.success();
+    return null;
   }
 
   Future<void> _launchEmulator(String id) async {
@@ -62,14 +63,23 @@ class EmulatorsCommand extends FlutterCommand {
         await emulatorManager.getEmulatorsMatching(id);
 
     if (emulators.isEmpty) {
-      globals.printStatus("No emulator found that matches '$id'.");
+      printStatus("No emulator found that matches '$id'.");
     } else if (emulators.length > 1) {
       _printEmulatorList(
         emulators,
         "More than one emulator matches '$id':",
       );
     } else {
-      await emulators.first.launch();
+      try {
+        await emulators.first.launch();
+      }
+      catch (e) {
+        if (e is String) {
+          printError(e);
+        } else {
+          rethrow;
+        }
+      }
     }
   }
 
@@ -78,10 +88,10 @@ class EmulatorsCommand extends FlutterCommand {
         await emulatorManager.createEmulator(name: name);
 
     if (createResult.success) {
-      globals.printStatus("Emulator '${createResult.emulatorName}' created successfully.");
+      printStatus("Emulator '${createResult.emulatorName}' created successfully.");
     } else {
-      globals.printStatus("Failed to create emulator '${createResult.emulatorName}'.\n");
-      globals.printStatus(createResult.error.trim());
+      printStatus("Failed to create emulator '${createResult.emulatorName}'.\n");
+      printStatus(createResult.error.trim());
       _printAdditionalInfo();
     }
   }
@@ -92,7 +102,7 @@ class EmulatorsCommand extends FlutterCommand {
         : await emulatorManager.getEmulatorsMatching(searchText);
 
     if (emulators.isEmpty) {
-      globals.printStatus('No emulators available.');
+      printStatus('No emulators available.');
       _printAdditionalInfo(showCreateInstruction: true);
     } else {
       _printEmulatorList(
@@ -103,7 +113,7 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   void _printEmulatorList(List<Emulator> emulators, String message) {
-    globals.printStatus('$message\n');
+    printStatus('$message\n');
     Emulator.printEmulators(emulators);
     _printAdditionalInfo(showCreateInstruction: true, showRunInstruction: true);
   }
@@ -112,22 +122,22 @@ class EmulatorsCommand extends FlutterCommand {
     bool showRunInstruction = false,
     bool showCreateInstruction = false,
   }) {
-    globals.printStatus('');
+    printStatus('');
     if (showRunInstruction) {
-      globals.printStatus(
+      printStatus(
           "To run an emulator, run 'flutter emulators --launch <emulator id>'.");
     }
     if (showCreateInstruction) {
-      globals.printStatus(
+      printStatus(
           "To create a new emulator, run 'flutter emulators --create [--name xyz]'.");
     }
 
     if (showRunInstruction || showCreateInstruction) {
-      globals.printStatus('');
+      printStatus('');
     }
     // TODO(dantup): Update this link to flutter.dev if/when we have a better page.
     // That page can then link out to these places if required.
-    globals.printStatus('You can find more information on managing emulators at the links below:\n'
+    printStatus('You can find more information on managing emulators at the links below:\n'
         '  https://developer.android.com/studio/run/managing-avds\n'
         '  https://developer.android.com/studio/command-line/avdmanager');
   }

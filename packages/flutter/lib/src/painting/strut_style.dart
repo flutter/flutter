@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,10 +28,10 @@ import 'text_style.dart';
 ///
 /// The vertical components of strut are as follows:
 ///
-///  * Half the font-defined leading
+///  * `leading * fontSize / 2` or half the font leading if `leading` is undefined (half leading)
 ///  * `ascent * height`
 ///  * `descent * height`
-///  * Half the font-defined leading
+///  * `leading * fontSize / 2` or half the font leading if `leading` is undefined (half leading)
 ///
 /// The sum of these four values is the total height of the line.
 ///
@@ -40,8 +40,7 @@ import 'text_style.dart';
 /// split evenly between the top and bottom. The values for `ascent` and
 /// `descent` are provided by the font named by [fontFamily]. If no
 /// [fontFamily] or [fontFamilyFallback] is provided, then the platform's
-/// default family will be used. Many fonts will have leading values of
-/// zero, so in practice, the leading component is often irrelevant.
+/// default family will be used.
 ///
 /// When [height] is omitted or null, then the font defined ascent and descent
 /// will be used. The font's combined ascent and descent may be taller or
@@ -123,7 +122,7 @@ import 'text_style.dart';
 ///
 /// ### Examples
 ///
-/// {@tool snippet}
+/// {@tool sample}
 /// In this simple case, the text will be rendered at font size 10, however,
 /// the vertical height of each line will be the strut height (Roboto in
 /// font size 30 * 1.5) as the text itself is shorter than the strut.
@@ -144,7 +143,7 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool sample}
 /// Here, strut is used to absorb the additional line height in the second line.
 /// The strut [height] was defined as 1.5 (the default font size is 14), which
 /// caused all lines to be laid out taller than without strut. This extra space
@@ -185,7 +184,7 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool sample}
 /// Here, strut is used to enable strange and overlapping text to achieve unique
 /// effects. The `M`s in lines 2 and 3 are able to extend above their lines and
 /// fill empty space in lines above. The [forceStrutHeight] is enabled and functions
@@ -228,7 +227,7 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool sample}
 /// This example uses forceStrutHeight to create a 'drop cap' for the 'T' in 'The'.
 /// By locking the line heights to the metrics of the 14pt serif font, we are able
 /// to lay out a large 37pt 'T' on the second line to take up space on both the first
@@ -542,19 +541,19 @@ class StrutStyle extends Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    return other is StrutStyle
-        && other.fontFamily == fontFamily
-        && other.fontSize == fontSize
-        && other.fontWeight == fontWeight
-        && other.fontStyle == fontStyle
-        && other.height == height
-        && other.leading == leading
-        && other.forceStrutHeight == forceStrutHeight;
+    final StrutStyle typedOther = other;
+    return fontFamily == typedOther.fontFamily &&
+           fontSize == typedOther.fontSize &&
+           fontWeight == typedOther.fontWeight &&
+           fontStyle == typedOther.fontStyle &&
+           height == typedOther.height &&
+           leading == typedOther.leading &&
+           forceStrutHeight == typedOther.forceStrutHeight;
   }
 
   @override
@@ -571,7 +570,7 @@ class StrutStyle extends Diagnosticable {
   }
 
   @override
-  String toStringShort() => objectRuntimeType(this, 'StrutStyle');
+  String toStringShort() => '$runtimeType';
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override

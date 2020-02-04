@@ -1,7 +1,6 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
@@ -108,7 +107,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () async {
         await showCupertinoModalPopup<void>(
           context: context,
-          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoPicker(
@@ -145,7 +143,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
-          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoTimerPicker(
@@ -178,7 +175,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
-          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
@@ -210,7 +206,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
-          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
@@ -242,7 +237,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
-          semanticsDismissible: true,
           builder: (BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(

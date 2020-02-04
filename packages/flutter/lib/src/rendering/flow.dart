@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -132,7 +132,7 @@ abstract class FlowDelegate {
   ///
   /// By default, returns the [runtimeType] of the class.
   @override
-  String toString() => objectRuntimeType(this, 'FlowDelegate');
+  String toString() => '$runtimeType';
 }
 
 /// Parent data for use with [RenderFlow].
@@ -287,7 +287,7 @@ class RenderFlow extends RenderBox
       _randomAccessChildren.add(child);
       final BoxConstraints innerConstraints = _delegate.getConstraintsForChild(i, constraints);
       child.layout(innerConstraints, parentUsesSize: true);
-      final FlowParentData childParentData = child.parentData as FlowParentData;
+      final FlowParentData childParentData = child.parentData;
       childParentData.offset = Offset.zero;
       child = childParentData.nextSibling;
       i += 1;
@@ -315,7 +315,7 @@ class RenderFlow extends RenderBox
   void paintChild(int i, { Matrix4 transform, double opacity = 1.0 }) {
     transform ??= Matrix4.identity();
     final RenderBox child = _randomAccessChildren[i];
-    final FlowParentData childParentData = child.parentData as FlowParentData;
+    final FlowParentData childParentData = child.parentData;
     assert(() {
       if (childParentData._transform != null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -352,8 +352,8 @@ class RenderFlow extends RenderBox
     _lastPaintOrder.clear();
     _paintingContext = context;
     _paintingOffset = offset;
-    for (final RenderBox child in _randomAccessChildren) {
-      final FlowParentData childParentData = child.parentData as FlowParentData;
+    for (RenderBox child in _randomAccessChildren) {
+      final FlowParentData childParentData = child.parentData;
       childParentData._transform = null;
     }
     try {
@@ -377,7 +377,7 @@ class RenderFlow extends RenderBox
       if (childIndex >= children.length)
         continue;
       final RenderBox child = children[childIndex];
-      final FlowParentData childParentData = child.parentData as FlowParentData;
+      final FlowParentData childParentData = child.parentData;
       final Matrix4 transform = childParentData._transform;
       if (transform == null)
         continue;
@@ -396,7 +396,7 @@ class RenderFlow extends RenderBox
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final FlowParentData childParentData = child.parentData as FlowParentData;
+    final FlowParentData childParentData = child.parentData;
     if (childParentData._transform != null)
       transform.multiply(childParentData._transform);
     super.applyPaintTransform(child, transform);

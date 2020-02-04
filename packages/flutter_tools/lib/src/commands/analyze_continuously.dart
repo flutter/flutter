@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,11 +10,12 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../dart/sdk.dart' as sdk;
-import '../globals.dart' as globals;
+import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
@@ -42,13 +43,13 @@ class AnalyzeContinuously extends AnalyzeBase {
       directories = repoRoots;
       analysisTarget = 'Flutter repository';
 
-      globals.printTrace('Analyzing Flutter repository:');
-      for (final String projectPath in repoRoots) {
-        globals.printTrace('  ${globals.fs.path.relative(projectPath)}');
+      printTrace('Analyzing Flutter repository:');
+      for (String projectPath in repoRoots) {
+        printTrace('  ${fs.path.relative(projectPath)}');
       }
     } else {
-      directories = <String>[globals.fs.currentDirectory.path];
-      analysisTarget = globals.fs.currentDirectory.path;
+      directories = <String>[fs.currentDirectory.path];
+      analysisTarget = fs.currentDirectory.path;
     }
 
     final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
@@ -66,7 +67,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (exitCode != 0) {
       throwToolExit(message, exitCode: exitCode);
     }
-    globals.printStatus(message);
+    printStatus(message);
 
     if (server.didServerErrorOccur) {
       throwToolExit('Server error(s) occurred.');
@@ -77,9 +78,9 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (isAnalyzing) {
       analysisStatus?.cancel();
       if (!firstAnalysis) {
-        globals.printStatus('\n');
+        printStatus('\n');
       }
-      analysisStatus = globals.logger.startProgress('Analyzing $analysisTarget...', timeout: timeoutConfiguration.slowOperation);
+      analysisStatus = logger.startProgress('Analyzing $analysisTarget...', timeout: timeoutConfiguration.slowOperation);
       analyzedPaths.clear();
       analysisTimer = Stopwatch()..start();
     } else {
@@ -87,12 +88,12 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisStatus = null;
       analysisTimer.stop();
 
-      globals.logger.printStatus(globals.terminal.clearScreen(), newline: false);
+      logger.printStatus(terminal.clearScreen(), newline: false);
 
       // Remove errors for deleted files, sort, and print errors.
       final List<AnalysisError> errors = <AnalysisError>[];
-      for (final String path in analysisErrors.keys.toList()) {
-        if (globals.fs.isFileSync(path)) {
+      for (String path in analysisErrors.keys.toList()) {
+        if (fs.isFileSync(path)) {
           errors.addAll(analysisErrors[path]);
         } else {
           analysisErrors.remove(path);
@@ -112,10 +113,10 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       errors.sort();
 
-      for (final AnalysisError error in errors) {
-        globals.printStatus(error.toString());
+      for (AnalysisError error in errors) {
+        printStatus(error.toString());
         if (error.code != null) {
-          globals.printTrace('error code: ${error.code}');
+          printTrace('error code: ${error.code}');
         }
       }
 
@@ -148,9 +149,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       final String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
       final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
       if (undocumentedMembers > 0) {
-        globals.printStatus('$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
+        printStatus('$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
       } else {
-        globals.printStatus('$errorsMessage • analyzed $files in $seconds seconds');
+        printStatus('$errorsMessage • analyzed $files in $seconds seconds');
       }
 
       if (firstAnalysis && isBenchmarking) {

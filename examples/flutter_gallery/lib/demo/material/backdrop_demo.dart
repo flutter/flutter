@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -185,7 +185,7 @@ class BackdropPanel extends StatelessWidget {
               padding: const EdgeInsetsDirectional.only(start: 16.0),
               alignment: AlignmentDirectional.centerStart,
               child: DefaultTextStyle(
-                style: theme.textTheme.subtitle1,
+                style: theme.textTheme.subhead,
                 child: Tooltip(
                   message: 'Tap to dismiss',
                   child: title,
@@ -205,14 +205,14 @@ class BackdropPanel extends StatelessWidget {
 class BackdropTitle extends AnimatedWidget {
   const BackdropTitle({
     Key key,
-    Animation<double> listenable,
+    Listenable listenable,
   }) : super(key: key, listenable: listenable);
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = listenable as Animation<double>;
+    final Animation<double> animation = listenable;
     return DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.headline6,
+      style: Theme.of(context).primaryTextTheme.title,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
       child: Stack(
@@ -283,7 +283,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   }
 
   double get _backdropHeight {
-    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject() as RenderBox;
+    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject();
     return renderBox.size.height;
   }
 
@@ -359,8 +359,8 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
         children: <Widget>[
           ListTileTheme(
             iconColor: theme.primaryIconTheme.color,
-            textColor: theme.primaryTextTheme.headline6.color.withOpacity(0.6),
-            selectedColor: theme.primaryTextTheme.headline6.color,
+            textColor: theme.primaryTextTheme.title.color.withOpacity(0.6),
+            selectedColor: theme.primaryTextTheme.title.color,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(

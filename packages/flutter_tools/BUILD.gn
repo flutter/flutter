@@ -1,4 +1,4 @@
-# Copyright 2014 The Flutter Authors. All rights reserved.
+# Copyright 2016 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -29,6 +29,7 @@ dart_library("flutter_tools") {
     # because it uses mirrors which Fuchsia's Dart VM doesn't support.
     "//third_party/dart-pkg/pub/json_rpc_2",
     "//third_party/dart-pkg/pub/json_schema",
+    "//third_party/dart-pkg/pub/linter",
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/mime",
     "//third_party/dart-pkg/pub/multi_server_socket",
@@ -94,7 +95,9 @@ dart_tool("fuchsia_asset_builder") {
     "src/base/logger.dart",
     "src/base/net.dart",
     "src/base/os.dart",
+    "src/base/platform.dart",
     "src/base/process.dart",
+    "src/base/process_manager.dart",
     "src/base/terminal.dart",
     "src/base/utils.dart",
     "src/base/version.dart",
@@ -180,7 +183,9 @@ dart_tool("fuchsia_tester") {
     "src/base/logger.dart",
     "src/base/net.dart",
     "src/base/os.dart",
+    "src/base/platform.dart",
     "src/base/process.dart",
+    "src/base/process_manager.dart",
     "src/base/terminal.dart",
     "src/base/utils.dart",
     "src/base/version.dart",

@@ -1,14 +1,14 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import '../base/common.dart';
 import '../cache.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({bool verboseHelp = false}) {
@@ -57,77 +57,37 @@ class PrecacheCommand extends FlutterCommand {
   @override
   bool get shouldUpdateCache => false;
 
-  /// Some flags are umbrella names that expand to include multiple artifacts.
-  static const Map<String, List<String>> _expandedArtifacts = <String, List<String>>{
-    'android': <String>[
-      'android_gen_snapshot',
-      'android_maven',
-      'android_internal_build',
-    ]
-  };
-
-  @override
-  Future<void> validateCommand() {
-    _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
-      if (!argResults.arguments.contains('--no-$umbrellaName')) {
-        return;
-      }
-      for (final String childArtifactName in childArtifactNames) {
-        if (argResults.arguments.contains('--$childArtifactName')) {
-          throwToolExit('--$childArtifactName requires --$umbrellaName');
-        }
-      }
-    });
-
-    return super.validateCommand();
-  }
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (boolArg('all-platforms')) {
-      globals.cache.includeAllPlatforms = true;
+      cache.includeAllPlatforms = true;
     }
     if (boolArg('use-unsigned-mac-binaries')) {
-      globals.cache.useUnsignedMacBinaries = true;
+      cache.useUnsignedMacBinaries = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
-    for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
+    for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
-      if (!globals.flutterVersion.isMaster && artifact.unstable) {
+      if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
       }
       if (artifact.feature != null && !featureFlags.isEnabled(artifact.feature)) {
         continue;
       }
-
-      bool expandedArtifactProcessed = false;
-      _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
-        if (!childArtifactNames.contains(artifact.name)) {
-          return;
-        }
-        expandedArtifactProcessed = true;
-
-        // Expanded artifacts options are true by default.
-        // Explicitly ignore them if umbrella name is excluded.
-        // Example: --no-android [--android_gen_snapshot]
-        if (!boolArg(umbrellaName)) {
-          return;
-        }
-
-        // Example: --android [--android_gen_snapshot]
+      if (boolArg(artifact.name)) {
         requiredArtifacts.add(artifact);
-      });
-
-      if (!expandedArtifactProcessed && boolArg(artifact.name)) {
+      }
+      // The `android` flag expands to android_gen_snapshot, android_maven, android_internal_build.
+      if (artifact.name.startsWith('android_') && boolArg('android')) {
         requiredArtifacts.add(artifact);
       }
     }
     final bool forceUpdate = boolArg('force');
-    if (forceUpdate || !globals.cache.isUpToDate()) {
-      await globals.cache.updateAll(requiredArtifacts);
+    if (forceUpdate || !cache.isUpToDate()) {
+      await cache.updateAll(requiredArtifacts);
     } else {
-      globals.printStatus('Already up-to-date.');
+      printStatus('Already up-to-date.');
     }
-    return FlutterCommandResult.success();
+    return null;
   }
 }

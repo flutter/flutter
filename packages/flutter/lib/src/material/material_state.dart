@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,6 @@ import 'dart:ui' show Color;
 /// Some Material widgets track their current state in a `Set<MaterialState>`.
 ///
 /// See also:
-///
 ///  * [MaterialStateColor], a color that has a `resolve` method that can
 ///    return a different color depending on the state of the widget that it
 ///    is used in.
@@ -85,7 +84,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// This should only be used as parameters when they are documented to take
 /// [MaterialStateColor], otherwise only the default state will be used.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// This example shows how you could pass a `MaterialStateColor` to `FlatButton.textColor`.
 /// Here, the text color will be `Colors.blue[900]` when the button is being
@@ -119,7 +118,7 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   /// to provide a `defaultValue` to the super constructor, so that we can know
   /// at compile-time what the value of the default [Color] is.
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   ///
   /// In this next example, we see how you can create a `MaterialStateColor` by
   /// extending the abstract class and overriding the `resolve` method.

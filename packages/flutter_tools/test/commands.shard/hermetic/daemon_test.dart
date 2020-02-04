@@ -1,16 +1,14 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 
@@ -47,7 +45,7 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
-      expect(response['result'], isA<String>());
+      expect(response['result'] is String, true);
       await responses.close();
       await commands.close();
     });
@@ -61,13 +59,13 @@ void main() {
         notifyingLogger: notifyingLogger,
         dartDefines: const <String>[],
       );
-      globals.printError('daemon.logMessage test');
+      printError('daemon.logMessage test');
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
         return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
       });
       expect(response['id'], isNull);
       expect(response['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = castStringKeyedMap(response['params']).cast<String, String>();
+      final Map<String, String> logMessage = response['params'].cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
       await responses.close();
@@ -89,7 +87,7 @@ void main() {
           logToStdout: true,
           dartDefines: const <String>[],
         );
-        globals.printStatus('daemon.logMessage test');
+        printStatus('daemon.logMessage test');
         // Service the event loop.
         await Future<void>.value();
       }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
@@ -234,7 +232,7 @@ void main() {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 
-        final Map<String, dynamic> params = castStringKeyedMap(response['params']);
+        final Map<String, dynamic> params = response['params'];
         expect(params['platform'], isNotEmpty); // the mock device has a platform of 'android-arm'
 
         await responses.close();
@@ -279,35 +277,6 @@ void main() {
       expect(response['result'], isList);
       await responses.close();
       await commands.close();
-    });
-
-    testUsingContext('daemon can send exposeUrl requests to the client', () async {
-      const String originalUrl = 'http://localhost:1234/';
-      const String mappedUrl = 'https://publichost:4321/';
-      final StreamController<Map<String, dynamic>> input = StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> output = StreamController<Map<String, dynamic>>();
-
-      daemon = Daemon(
-        input.stream,
-        output.add,
-        notifyingLogger: notifyingLogger,
-        dartDefines: const <String>[],
-      );
-
-      // Respond to any requests from the daemon to expose a URL.
-      unawaited(output.stream
-        .firstWhere((Map<String, dynamic> request) => request['method'] == 'app.exposeUrl')
-        .then((Map<String, dynamic> request) {
-          expect(request['params']['url'], equals(originalUrl));
-          input.add(<String, dynamic>{'id': request['id'], 'result': <String, dynamic>{'url': mappedUrl}});
-        })
-      );
-
-      final String exposedUrl = await daemon.daemonDomain.exposeUrl(originalUrl);
-      expect(exposedUrl, equals(mappedUrl));
-
-      await output.close();
-      await input.close();
     });
   });
 

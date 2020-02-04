@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -40,12 +40,12 @@ String diffMotionEvents(
 void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
     Map<String, dynamic> synthesizedEvent) {
   final int synthesizedActionMasked =
-      getActionMasked(synthesizedEvent['action'] as int);
-  final int originalActionMasked = getActionMasked(originalEvent['action'] as int);
+      getActionMasked(synthesizedEvent['action']);
+  final int originalActionMasked = getActionMasked(originalEvent['action']);
   final String synthesizedActionName =
-      getActionName(synthesizedActionMasked, synthesizedEvent['action'] as int);
+      getActionName(synthesizedActionMasked, synthesizedEvent['action']);
   final String originalActionName =
-      getActionName(originalActionMasked, originalEvent['action'] as int);
+      getActionName(originalActionMasked, originalEvent['action']);
 
   if (synthesizedActionMasked != originalActionMasked)
     diffBuffer.write(
@@ -53,8 +53,8 @@ void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
 
   if (kPointerActions.contains(originalActionMasked) &&
       originalActionMasked == synthesizedActionMasked) {
-    final int originalPointer = getPointerIdx(originalEvent['action'] as int);
-    final int synthesizedPointer = getPointerIdx(synthesizedEvent['action'] as int);
+    final int originalPointer = getPointerIdx(originalEvent['action']);
+    final int synthesizedPointer = getPointerIdx(synthesizedEvent['action']);
     if (originalPointer != synthesizedPointer)
       diffBuffer.write(
           'pointerIdx (expected: $originalPointer actual: $synthesizedPointer action: $originalActionName ');
@@ -64,9 +64,9 @@ void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
 void diffPointerProperties(StringBuffer diffBuffer,
     Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
   final List<Map<dynamic, dynamic>> expectedList =
-      (originalEvent['pointerProperties'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+      originalEvent['pointerProperties'].cast<Map<dynamic, dynamic>>();
   final List<Map<dynamic, dynamic>> actualList =
-      (synthesizedEvent['pointerProperties'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+      synthesizedEvent['pointerProperties'].cast<Map<dynamic, dynamic>>();
 
   if (expectedList.length != actualList.length) {
     diffBuffer.write(
@@ -86,9 +86,9 @@ void diffPointerProperties(StringBuffer diffBuffer,
 void diffPointerCoordsList(StringBuffer diffBuffer,
     Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
   final List<Map<dynamic, dynamic>> expectedList =
-      (originalEvent['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+      originalEvent['pointerCoords'].cast<Map<dynamic, dynamic>>();
   final List<Map<dynamic, dynamic>> actualList =
-      (synthesizedEvent['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+      synthesizedEvent['pointerCoords'].cast<Map<dynamic, dynamic>>();
 
   if (expectedList.length != actualList.length) {
     diffBuffer.write(
@@ -122,7 +122,7 @@ void diffMaps(
         '${messagePrefix}keys (expected: ${expected.keys} actual: ${actual.keys} ');
     return;
   }
-  for (final String key in expected.keys) {
+  for (String key in expected.keys) {
     if (excludeKeys.contains(key))
       continue;
     if (doublesApproximatelyMatch(expected[key], actual[key]))

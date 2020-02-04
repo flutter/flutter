@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,14 +50,14 @@ class IconData {
   final bool matchTextDirection;
 
   @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+  bool operator ==(dynamic other) {
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is IconData
-        && other.codePoint == codePoint
-        && other.fontFamily == fontFamily
-        && other.fontPackage == fontPackage
-        && other.matchTextDirection == matchTextDirection;
+    final IconData typedOther = other;
+    return codePoint == typedOther.codePoint
+        && fontFamily == typedOther.fontFamily
+        && fontPackage == typedOther.fontPackage
+        && matchTextDirection == typedOther.matchTextDirection;
   }
 
   @override

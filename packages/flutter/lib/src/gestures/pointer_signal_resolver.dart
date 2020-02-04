@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,10 +9,6 @@ import 'events.dart';
 /// The callback to register with a [PointerSignalResolver] to express
 /// interest in a pointer signal event.
 typedef PointerSignalResolvedCallback = void Function(PointerSignalEvent event);
-
-bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
-  return (event1.original ?? event1) == (event2.original ?? event2);
-}
 
 /// An resolver for pointer signal events.
 ///
@@ -33,7 +29,7 @@ class PointerSignalResolver {
   void register(PointerSignalEvent event, PointerSignalResolvedCallback callback) {
     assert(event != null);
     assert(callback != null);
-    assert(_currentEvent == null || _isSameEvent(_currentEvent, event));
+    assert(_currentEvent == null || _currentEvent == event);
     if (_firstRegisteredCallback != null) {
       return;
     }
@@ -51,7 +47,7 @@ class PointerSignalResolver {
       assert(_currentEvent == null);
       return;
     }
-    assert(_isSameEvent(_currentEvent, event));
+    assert((_currentEvent.original ?? _currentEvent) == event);
     try {
       _firstRegisteredCallback(_currentEvent);
     } catch (exception, stack) {

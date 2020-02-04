@@ -1,11 +1,10 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../base/context.dart';
 import '../base/user_messages.dart';
 import '../doctor.dart';
-import '../globals.dart' as globals;
 import 'xcode.dart';
 
 XcodeValidator get xcodeValidator => context.get<XcodeValidator>();
@@ -19,36 +18,36 @@ class XcodeValidator extends DoctorValidator {
     ValidationType xcodeStatus = ValidationType.missing;
     String xcodeVersionInfo;
 
-    if (globals.xcode.isInstalled) {
+    if (xcode.isInstalled) {
       xcodeStatus = ValidationType.installed;
 
-      messages.add(ValidationMessage(userMessages.xcodeLocation(globals.xcode.xcodeSelectPath)));
+      messages.add(ValidationMessage(userMessages.xcodeLocation(xcode.xcodeSelectPath)));
 
-      xcodeVersionInfo = globals.xcode.versionText;
+      xcodeVersionInfo = xcode.versionText;
       if (xcodeVersionInfo.contains(',')) {
         xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
       }
-      messages.add(ValidationMessage(globals.xcode.versionText));
+      messages.add(ValidationMessage(xcode.versionText));
 
-      if (!globals.xcode.isInstalledAndMeetsVersionCheck) {
+      if (!xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(
             userMessages.xcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
         ));
       }
 
-      if (!globals.xcode.eulaSigned) {
+      if (!xcode.eulaSigned) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.xcodeEula));
       }
-      if (!globals.xcode.isSimctlInstalled) {
+      if (!xcode.isSimctlInstalled) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.xcodeMissingSimct));
       }
 
     } else {
       xcodeStatus = ValidationType.missing;
-      if (globals.xcode.xcodeSelectPath == null || globals.xcode.xcodeSelectPath.isEmpty) {
+      if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
         messages.add(ValidationMessage.error(userMessages.xcodeMissing));
       } else {
         messages.add(ValidationMessage.error(userMessages.xcodeIncomplete));

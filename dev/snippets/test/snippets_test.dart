@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,20 +37,20 @@ main() {
   {{code}}
 }
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.sample).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.application).writeAsStringSync('''
 <div>HTML Bits</div>
 {{description}}
 <pre>{{code}}</pre>
 <pre>{{app}}</pre>
 <div>More HTML Bits</div>
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.snippet).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.sample).writeAsStringSync('''
 <div>HTML Bits</div>
 {{description}}
 <pre>{{code}}</pre>
 <div>More HTML Bits</div>
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.sample, showDartPad: true).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.application, showDartPad: true).writeAsStringSync('''
 <div>HTML Bits (DartPad-style)</div>
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}"></iframe>
 <div>More HTML Bits</div>
@@ -83,7 +83,7 @@ void main() {
 
       final String html = generator.generate(
         inputFile,
-        SnippetType.sample,
+        SnippetType.application,
         template: 'template',
         metadata: <String, Object>{
           'id': 'id',
@@ -126,13 +126,14 @@ void main() {
 
       final String html = generator.generate(
         inputFile,
-        SnippetType.snippet,
+        SnippetType.sample,
         metadata: <String, Object>{'id': 'id'},
       );
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
       expect(html, contains('  print(&#39;The actual \$name.&#39;);'));
-      expect(html, contains('<div class="snippet-description">{@end-inject-html}A description of the snippet.\n\n'
+      expect(html, contains('<div class="snippet-description">'
+          '{@end-inject-html}A description of the snippet.\n\n'
           'On several lines.{@inject-html}</div>\n'));
       expect(html, contains('main() {'));
     });
@@ -154,7 +155,7 @@ void main() {
 
       final String html = generator.generate(
         inputFile,
-        SnippetType.sample,
+        SnippetType.application,
         showDartPad: true,
         template: 'template',
         metadata: <String, Object>{'id': 'id'},
@@ -184,13 +185,13 @@ void main() {
 
       generator.generate(
         inputFile,
-        SnippetType.sample,
+        SnippetType.application,
         template: 'template',
         output: outputFile,
         metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id'},
       );
       expect(expectedMetadataFile.existsSync(), isTrue);
-      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync()) as Map<String, dynamic>;
+      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync());
       expect(json['id'], equals('id'));
       expect(json['file'], equals('snippet_out.dart'));
       expect(json['description'], equals('A description of the snippet.\n\nOn several lines.'));

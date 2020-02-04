@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,7 +59,7 @@ class Animation {
     sb.write('const $className $varName = const $className(\n');
     sb.write('${kIndent}const Size(${size.x}, ${size.y}),\n');
     sb.write('${kIndent}const <_PathFrames>[\n');
-    for (final PathAnimation path in paths)
+    for (PathAnimation path in paths)
       sb.write(path.toDart());
     sb.write('$kIndent],\n');
     sb.write(');');
@@ -87,8 +87,8 @@ class PathAnimation {
         final String currentCommandType = frame.paths[pathIdx].commands[commandIdx].type;
         if (commandType != currentCommandType)
           throw Exception(
-              'Paths must be built from the same commands in all frames '
-              'command $commandIdx at frame 0 was of type \'$commandType\' '
+              'Paths must be built from the same commands in all frames'
+              'command $commandIdx at frame 0 was of type \'$commandType\''
               'command $commandIdx at frame $i was of type \'$currentCommandType\''
           );
         for (int j = 0; j < numPointsInCommand; j += 1)
@@ -117,11 +117,11 @@ class PathAnimation {
     final StringBuffer sb = StringBuffer();
     sb.write('${kIndent * 2}const _PathFrames(\n');
     sb.write('${kIndent * 3}opacities: const <double>[\n');
-    for (final double opacity in opacities)
+    for (double opacity in opacities)
       sb.write('${kIndent * 4}$opacity,\n');
     sb.write('${kIndent * 3}],\n');
     sb.write('${kIndent * 3}commands: const <_PathCommand>[\n');
-    for (final PathCommandAnimation command in commands)
+    for (PathCommandAnimation command in commands)
       sb.write(command.toDart());
     sb.write('${kIndent * 3}],\n');
     sb.write('${kIndent * 2}),\n');
@@ -166,9 +166,9 @@ class PathCommandAnimation {
     }
     final StringBuffer sb = StringBuffer();
     sb.write('${kIndent * 4}const $dartCommandClass(\n');
-    for (final List<Point<double>> pointFrames in points) {
+    for (List<Point<double>> pointFrames in points) {
       sb.write('${kIndent * 5}const <Offset>[\n');
-      for (final Point<double> point in pointFrames)
+      for (Point<double> point in pointFrames)
         sb.write('${kIndent * 6}const Offset(${point.x}, ${point.y}),\n');
       sb.write('${kIndent * 5}],\n');
     }
@@ -201,10 +201,10 @@ FrameData interpretSvg(String svgFilePath) {
 
 List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
   final List<SvgPath> paths = <SvgPath>[];
-  for (final XmlNode node in children) {
+  for (XmlNode node in children) {
     if (node.nodeType != XmlNodeType.ELEMENT)
       continue;
-    final XmlElement element = node as XmlElement;
+    final XmlElement element = node;
 
     if (element.name.local == 'path') {
       paths.add(SvgPath.fromElement(element).applyTransform(transform));
@@ -268,11 +268,11 @@ class FrameData {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is FrameData
-        && other.size == size
-        && const ListEquality<SvgPath>().equals(other.paths, paths);
+    final FrameData typedOther = other;
+    return size == typedOther.size
+        && const ListEquality<SvgPath>().equals(paths, typedOther.paths);
   }
 
   @override
@@ -304,7 +304,7 @@ class SvgPath {
     final SvgPathCommandBuilder commandsBuilder = SvgPathCommandBuilder();
     if (!_pathCommandValidator.hasMatch(dAttr))
       throw Exception('illegal or unsupported path d expression: $dAttr');
-    for (final Match match in _pathCommandMatcher.allMatches(dAttr)) {
+    for (Match match in _pathCommandMatcher.allMatches(dAttr)) {
       final String commandType = match.group(1);
       final String pointStr = match.group(2);
       commands.add(commandsBuilder.build(commandType, parsePoints(pointStr)));
@@ -320,12 +320,12 @@ class SvgPath {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is SvgPath
-        && other.id == id
-        && other.opacity == opacity
-        && const ListEquality<SvgPathCommand>().equals(other.commands, commands);
+    final SvgPath typedOther = other;
+    return id == typedOther.id
+        && opacity == typedOther.opacity
+        && const ListEquality<SvgPathCommand>().equals(commands, typedOther.commands);
   }
 
   @override
@@ -369,11 +369,11 @@ class SvgPathCommand {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is SvgPathCommand
-        && other.type == type
-        && const ListEquality<Point<double>>().equals(other.points, points);
+    final SvgPathCommand typedOther = other;
+    return type == typedOther.type
+        && const ListEquality<Point<double>>().equals(points, typedOther.points);
   }
 
   @override
@@ -469,7 +469,7 @@ Matrix3 _parseSvgTransform(String transform) {
     throw Exception('illegal or unsupported transform: $transform');
   final Iterable<Match> matches =_transformCommand.allMatches(transform).toList().reversed;
   Matrix3 result = Matrix3.identity();
-  for (final Match m in matches) {
+  for (Match m in matches) {
     final String command = m.group(1);
     final String params = m.group(2);
     if (command == 'translate') {
@@ -554,7 +554,7 @@ XmlElement _extractSvgElement(XmlDocument document) {
   return document.children.singleWhere(
     (XmlNode node) => node.nodeType  == XmlNodeType.ELEMENT &&
       _asElement(node).name.local == 'svg'
-  ) as XmlElement;
+  );
 }
 
-XmlElement _asElement(XmlNode node) => node as XmlElement;
+XmlElement _asElement(XmlNode node) => node;

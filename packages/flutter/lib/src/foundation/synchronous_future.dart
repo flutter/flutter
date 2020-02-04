@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,10 +17,7 @@ import 'dart:async';
 class SynchronousFuture<T> implements Future<T> {
   /// Creates a synchronous future.
   ///
-  /// See also:
-  ///
-  ///  * [new Future.value] for information about creating a regular
-  ///    [Future] that completes with a value.
+  /// See also [new Future.value].
   SynchronousFuture(this._value);
 
   final T _value;
@@ -34,25 +31,25 @@ class SynchronousFuture<T> implements Future<T> {
   }
 
   @override
-  Future<T> catchError(Function onError, { bool test(Object error) }) => Completer<T>().future;
+  Future<T> catchError(Function onError, { bool test(dynamic error) }) => Completer<T>().future;
 
   @override
-  Future<E> then<E>(FutureOr<E> f(T value), { Function onError }) {
+  Future<E> then<E>(dynamic f(T value), { Function onError }) {
     final dynamic result = f(_value);
     if (result is Future<E>)
       return result;
-    return SynchronousFuture<E>(result as E);
+    return SynchronousFuture<E>(result);
   }
 
   @override
-  Future<T> timeout(Duration timeLimit, { FutureOr<T> onTimeout() }) {
+  Future<T> timeout(Duration timeLimit, { dynamic onTimeout() }) {
     return Future<T>.value(_value).timeout(timeLimit, onTimeout: onTimeout);
   }
 
   @override
-  Future<T> whenComplete(FutureOr<dynamic> action()) {
+  Future<T> whenComplete(dynamic action()) {
     try {
-      final FutureOr<dynamic> result = action();
+      final dynamic result = action();
       if (result is Future)
         return result.then<T>((dynamic value) => _value);
       return this;

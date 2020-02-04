@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,19 +28,17 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
 
   @override
   bool operator [](T index) {
-    final int _index = index.index as int;
-    assert(_index < _length);
-    return (_bits & 1 << _index) > 0;
+    assert(index.index < _length);
+    return (_bits & 1 << index.index) > 0;
   }
 
   @override
   void operator []=(T index, bool value) {
-    final int _index = index.index as int;
-    assert(_index < _length);
+    assert(index.index < _length);
     if (value)
-      _bits = _bits | (1 << _index);
+      _bits = _bits | (1 << index.index);
     else
-      _bits = _bits & ~(1 << _index);
+      _bits = _bits & ~(1 << index.index);
   }
 
   @override

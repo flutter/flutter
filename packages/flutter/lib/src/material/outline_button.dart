@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,6 @@ import 'material_button.dart';
 import 'material_state.dart';
 import 'raised_button.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 // The total time to make the button's fill color opaque and change
 // its elevation. Only applies when highlightElevation > 0.0.
@@ -76,7 +75,6 @@ class OutlineButton extends MaterialButton {
     this.disabledBorderColor,
     this.highlightedBorderColor,
     EdgeInsetsGeometry padding,
-    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
@@ -99,7 +97,6 @@ class OutlineButton extends MaterialButton {
          splashColor: splashColor,
          highlightElevation: highlightElevation,
          padding: padding,
-         visualDensity: visualDensity,
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
@@ -132,7 +129,6 @@ class OutlineButton extends MaterialButton {
     Color disabledBorderColor,
     BorderSide borderSide,
     EdgeInsetsGeometry padding,
-    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior,
     FocusNode focusNode,
@@ -191,7 +187,6 @@ class OutlineButton extends MaterialButton {
       disabledBorderColor: disabledBorderColor,
       highlightedBorderColor: highlightedBorderColor ?? buttonTheme.colorScheme.primary,
       padding: buttonTheme.getPadding(this),
-      visualDensity: visualDensity,
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -230,7 +225,6 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     Color disabledBorderColor,
     BorderSide borderSide,
     EdgeInsetsGeometry padding,
-    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
@@ -259,7 +253,6 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          highlightedBorderColor: highlightedBorderColor,
          borderSide: borderSide,
          padding: padding,
-         visualDensity: visualDensity,
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
@@ -294,7 +287,6 @@ class _OutlineButton extends StatefulWidget {
     this.disabledBorderColor,
     @required this.highlightedBorderColor,
     this.padding,
-    this.visualDensity,
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
@@ -322,7 +314,6 @@ class _OutlineButton extends StatefulWidget {
   final Color disabledBorderColor;
   final Color highlightedBorderColor;
   final EdgeInsetsGeometry padding;
-  final VisualDensity visualDensity;
   final ShapeBorder shape;
   final Clip clipBehavior;
   final FocusNode focusNode;
@@ -444,8 +435,6 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget child) {
@@ -467,7 +456,6 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           highlightElevation: _getHighlightElevation(),
           onHighlightChanged: _handleHighlightChanged,
           padding: widget.padding,
-          visualDensity: widget.visualDensity ?? theme.visualDensity,
           shape: _OutlineBorder(
             shape: widget.shape,
             side: _getOutline(),
@@ -552,14 +540,13 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is _OutlineBorder
-        && other.side == side
-        && other.shape == shape;
+    final _OutlineBorder typedOther = other;
+    return side == typedOther.side && shape == typedOther.shape;
   }
 
   @override

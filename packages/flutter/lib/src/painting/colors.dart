@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -206,29 +206,31 @@ class HSVColor {
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSVColor.fromAHSV(
-      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0) as double,
+      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t) % 360.0,
-      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0) as double,
-      lerpDouble(a.value, b.value, t).clamp(0.0, 1.0) as double,
+      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0),
+      lerpDouble(a.value, b.value, t).clamp(0.0, 1.0),
     );
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    return other is HSVColor
-        && other.alpha == alpha
-        && other.hue == hue
-        && other.saturation == saturation
-        && other.value == value;
+    if (other is! HSVColor)
+      return false;
+    final HSVColor typedOther = other;
+    return typedOther.alpha == alpha
+        && typedOther.hue == hue
+        && typedOther.saturation == saturation
+        && typedOther.value == value;
   }
 
   @override
   int get hashCode => hashValues(alpha, hue, saturation, value);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'HSVColor')}($alpha, $hue, $saturation, $value)';
+  String toString() => '$runtimeType($alpha, $hue, $saturation, $value)';
 }
 
 /// A color represented using [alpha], [hue], [saturation], and [lightness].
@@ -290,7 +292,7 @@ class HSLColor {
     // Saturation can exceed 1.0 with rounding errors, so clamp it.
     final double saturation = lightness == 1.0
       ? 0.0
-      : ((delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0) as double);
+      : (delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0);
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
@@ -390,29 +392,31 @@ class HSLColor {
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSLColor.fromAHSL(
-      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0) as double,
+      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0),
       lerpDouble(a.hue, b.hue, t) % 360.0,
-      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0) as double,
-      lerpDouble(a.lightness, b.lightness, t).clamp(0.0, 1.0) as double,
+      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0),
+      lerpDouble(a.lightness, b.lightness, t).clamp(0.0, 1.0),
     );
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    return other is HSLColor
-        && other.alpha == alpha
-        && other.hue == hue
-        && other.saturation == saturation
-        && other.lightness == lightness;
+    if (other is! HSLColor)
+      return false;
+    final HSLColor typedOther = other;
+    return typedOther.alpha == alpha
+        && typedOther.hue == hue
+        && typedOther.saturation == saturation
+        && typedOther.lightness == lightness;
   }
 
   @override
   int get hashCode => hashValues(alpha, hue, saturation, lightness);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'HSLColor')}($alpha, $hue, $saturation, $lightness)';
+  String toString() => '$runtimeType($alpha, $hue, $saturation, $lightness)';
 }
 
 /// A color that has a small table of related colors called a "swatch".
@@ -441,21 +445,20 @@ class ColorSwatch<T> extends Color {
   Color operator [](T index) => _swatch[index];
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    return super == other
-        && other is ColorSwatch<T>
-        && other._swatch == _swatch;
+    final ColorSwatch<T> typedOther = other;
+    return super == other && _swatch == typedOther._swatch;
   }
 
   @override
   int get hashCode => hashValues(runtimeType, value, _swatch);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ColorSwatch')}(primary value: ${super.toString()})';
+  String toString() => '$runtimeType(primary value: ${super.toString()})';
 }
 
 /// [DiagnosticsProperty] that has an [Color] as value.

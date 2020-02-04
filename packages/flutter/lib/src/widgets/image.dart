@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,11 +13,9 @@ import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'binding.dart';
-import 'disposable_build_context.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
-import 'scroll_aware_image_provider.dart';
 import 'ticker_provider.dart';
 
 export 'package:flutter/painting.dart' show
@@ -209,7 +207,7 @@ typedef ImageLoadingBuilder = Widget Function(
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 /// The default constructor can be used with any [ImageProvider], such as a
 /// [NetworkImage], to display an image from the internet.
 ///
@@ -222,7 +220,7 @@ typedef ImageLoadingBuilder = Widget Function(
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool sample}
 /// The [Image] Widget also provides several constructors to display different
 /// types of images for convenience. In this example, use the [Image.network]
 /// constructor to display an image from the internet.
@@ -462,7 +460,7 @@ class Image extends StatefulWidget {
   /// which corresponds to bilinear interpolation, rather than the default
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   ///
   /// Suppose that the project's `pubspec.yaml` file contains the following:
   ///
@@ -501,7 +499,7 @@ class Image extends StatefulWidget {
   /// must be provided. For instance, suppose a package called `my_icons` has
   /// `icons/heart.png` .
   ///
-  /// {@tool snippet}
+  /// {@tool sample}
   /// Then to display the image, use:
   ///
   /// ```dart
@@ -684,7 +682,7 @@ class Image extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool sample --template=stateless_widget_material}
+  /// {@tool snippet --template=stateless_widget_material}
   ///
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
@@ -755,7 +753,7 @@ class Image extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.image.chainedBuildersExample}
   ///
-  /// {@tool sample --template=stateless_widget_material}
+  /// {@tool snippet --template=stateless_widget_material}
   ///
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.
@@ -948,13 +946,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   bool _invertColors;
   int _frameNumber;
   bool _wasSynchronouslyLoaded;
-  DisposableBuildContext<State<Image>> _scrollAwareContext;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _scrollAwareContext = DisposableBuildContext<State<Image>>(this);
   }
 
   @override
@@ -962,7 +958,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     assert(_imageStream != null);
     WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
-    _scrollAwareContext.dispose();
     super.dispose();
   }
 
@@ -1011,12 +1006,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _resolveImage() {
-    final ScrollAwareImageProvider provider = ScrollAwareImageProvider<dynamic>(
-      context: _scrollAwareContext,
-      imageProvider: widget.image,
-    );
     final ImageStream newStream =
-      provider.resolve(createLocalImageConfiguration(
+      widget.image.resolve(createLocalImageConfiguration(
         context,
         size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
       ));

@@ -1,10 +1,9 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'scaffold.dart';
@@ -122,7 +121,7 @@ abstract class FloatingActionButtonLocation {
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
 
   @override
-  String toString() => objectRuntimeType(this, 'FloatingActionButtonLocation');
+  String toString() => '$runtimeType';
 }
 
 double _leftOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
@@ -407,7 +406,7 @@ abstract class FloatingActionButtonAnimator {
   double getAnimationRestart(double previousValue) => 0.0;
 
   @override
-  String toString() => objectRuntimeType(this, 'FloatingActionButtonAnimator');
+  String toString() => '$runtimeType';
 }
 
 class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {

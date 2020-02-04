@@ -1,41 +1,37 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../convert.dart';
+import '../globals.dart';
+import 'context.dart';
 import 'file_system.dart';
 import 'logger.dart';
 import 'utils.dart';
 
 class Config {
-  Config({
-    @required File file,
-    @required Logger logger,
-  }) : _file = file, _logger = logger {
-    if (!_file.existsSync()) {
-      return;
-    }
-    try {
-      _values = castStringKeyedMap(json.decode(_file.readAsStringSync()));
-    } on FormatException {
-      _logger
-        ..printError('Failed to decode preferences in ${_file.path}.')
-        ..printError(
-            'You may need to reapply any previously saved configuration '
-            'with the "flutter config" command.',
-        );
-      _file.deleteSync();
+  Config([File configFile, Logger localLogger]) {
+    final Logger loggerInstance = localLogger ?? logger;
+    _configFile = configFile ?? fs.file(fs.path.join(userHomePath(), '.flutter_settings'));
+    if (_configFile.existsSync()) {
+      try {
+        _values = castStringKeyedMap(json.decode(_configFile.readAsStringSync()));
+      } on FormatException {
+        loggerInstance
+          ..printError('Failed to decode preferences in ${_configFile.path}.')
+          ..printError(
+              'You may need to reapply any previously saved configuration '
+              'with the "flutter config" command.',
+          );
+        _configFile.deleteSync();
+      }
     }
   }
 
-  static const String kFlutterSettings = '.flutter_settings';
+  static Config get instance => context.get<Config>();
 
-  final File _file;
-  final Logger _logger;
-
-  String get configPath => _file.path;
+  File _configFile;
+  String get configPath => _configFile.path;
 
   Map<String, dynamic> _values = <String, dynamic>{};
 
@@ -58,6 +54,6 @@ class Config {
   void _flushValues() {
     String json = const JsonEncoder.withIndent('  ').convert(_values);
     json = '$json\n';
-    _file.writeAsStringSync(json);
+    _configFile.writeAsStringSync(json);
   }
 }

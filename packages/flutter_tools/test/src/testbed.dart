@@ -1,10 +1,11 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -12,8 +13,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/process.dart';
-
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -37,12 +36,9 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 // this provider. For example, [BufferLogger], [MemoryFileSystem].
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
-  FileSystem: () => MemoryFileSystem(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
+  FileSystem: () => MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
   ProcessManager: () => FakeProcessManager.any(),
-  Logger: () => BufferLogger(
-    terminal: AnsiTerminal(stdio: globals.stdio, platform: globals.platform),  // Danger, using real stdio.
-    outputPreferences: OutputPreferences.test(),
-  ), // Allows reading logs and prevents stdout.
+  Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
@@ -66,14 +62,14 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///
 ///         setUp(() {
 ///           testbed = Testbed(setUp: () {
-///             globals.fs.file('foo').createSync()
+///             fs.file('foo').createSync()
 ///           });
 ///         })
 ///
 ///         test('Can delete a file', () => testbed.run(() {
-///           expect(globals.fs.file('foo').existsSync(), true);
-///           globals.fs.file('foo').deleteSync();
-///           expect(globals.fs.file('foo').existsSync(), false);
+///           expect(fs.file('foo').existsSync(), true);
+///           fs.file('foo').deleteSync();
+///           expect(fs.file('foo').existsSync(), false);
 ///         }));
 ///       });
 ///     }
@@ -114,9 +110,6 @@ class Testbed {
       // Add the test-specific overrides
       ...?overrides,
     };
-    if (testOverrides.containsKey(ProcessUtils)) {
-      throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
-    }
     // Cache the original flutter root to restore after the test case.
     final String originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
@@ -146,7 +139,7 @@ class Testbed {
             }
             await test();
             Cache.flutterRoot = originalFlutterRoot;
-            for (final MapEntry<Timer, StackTrace> entry in timers.entries) {
+            for (MapEntry<Timer, StackTrace> entry in timers.entries) {
               if (entry.key.isActive) {
                 throw StateError('A Timer was active at the end of a test: ${entry.value}');
               }
@@ -178,7 +171,7 @@ class NoOpUsage implements Usage {
   bool get isFirstRun => false;
 
   @override
-  Stream<Map<String, Object>> get onSend => const Stream<Map<String, Object>>.empty();
+  Stream<Map<String, Object>> get onSend => const Stream<Object>.empty();
 
   @override
   void printWelcome() {}
@@ -358,7 +351,7 @@ class FakeHttpClientRequest implements HttpClientRequest {
   }
 
   @override
-  HttpHeaders get headers => FakeHttpHeaders();
+  HttpHeaders get headers => null;
 
   @override
   String get method => null;
@@ -380,7 +373,7 @@ class FakeHttpClientRequest implements HttpClientRequest {
 }
 
 class FakeHttpClientResponse implements HttpClientResponse {
-  final Stream<List<int>> _delegate = Stream<List<int>>.fromIterable(const Iterable<List<int>>.empty());
+  final Stream<Uint8List> _delegate = Stream<Uint8List>.fromIterable(const Iterable<Uint8List>.empty());
 
   @override
   final HttpHeaders headers = FakeHttpHeaders();
@@ -411,8 +404,8 @@ class FakeHttpClientResponse implements HttpClientResponse {
   bool get isRedirect => false;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, { Function onError, void Function() onDone, bool cancelOnError }) {
-    return const Stream<List<int>>.empty().listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  StreamSubscription<Uint8List> listen(void Function(Uint8List event) onData, { Function onError, void Function() onDone, bool cancelOnError }) {
+    return const Stream<Uint8List>.empty().listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override
@@ -433,25 +426,25 @@ class FakeHttpClientResponse implements HttpClientResponse {
   int get statusCode => 400;
 
   @override
-  Future<bool> any(bool Function(List<int> element) test) {
+  Future<bool> any(bool Function(Uint8List element) test) {
     return _delegate.any(test);
   }
 
   @override
-  Stream<List<int>> asBroadcastStream({
-    void Function(StreamSubscription<List<int>> subscription) onListen,
-    void Function(StreamSubscription<List<int>> subscription) onCancel,
+  Stream<Uint8List> asBroadcastStream({
+    void Function(StreamSubscription<Uint8List> subscription) onListen,
+    void Function(StreamSubscription<Uint8List> subscription) onCancel,
   }) {
     return _delegate.asBroadcastStream(onListen: onListen, onCancel: onCancel);
   }
 
   @override
-  Stream<E> asyncExpand<E>(Stream<E> Function(List<int> event) convert) {
+  Stream<E> asyncExpand<E>(Stream<E> Function(Uint8List event) convert) {
     return _delegate.asyncExpand<E>(convert);
   }
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> Function(List<int> event) convert) {
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) {
     return _delegate.asyncMap<E>(convert);
   }
 
@@ -466,7 +459,7 @@ class FakeHttpClientResponse implements HttpClientResponse {
   }
 
   @override
-  Stream<List<int>> distinct([bool Function(List<int> previous, List<int> next) equals]) {
+  Stream<Uint8List> distinct([bool Function(Uint8List previous, Uint8List next) equals]) {
     return _delegate.distinct(equals);
   }
 
@@ -476,43 +469,43 @@ class FakeHttpClientResponse implements HttpClientResponse {
   }
 
   @override
-  Future<List<int>> elementAt(int index) {
+  Future<Uint8List> elementAt(int index) {
     return _delegate.elementAt(index);
   }
 
   @override
-  Future<bool> every(bool Function(List<int> element) test) {
+  Future<bool> every(bool Function(Uint8List element) test) {
     return _delegate.every(test);
   }
 
   @override
-  Stream<S> expand<S>(Iterable<S> Function(List<int> element) convert) {
+  Stream<S> expand<S>(Iterable<S> Function(Uint8List element) convert) {
     return _delegate.expand(convert);
   }
 
   @override
-  Future<List<int>> get first => _delegate.first;
+  Future<Uint8List> get first => _delegate.first;
 
   @override
-  Future<List<int>> firstWhere(
-    bool Function(List<int> element) test, {
+  Future<Uint8List> firstWhere(
+    bool Function(Uint8List element) test, {
     List<int> Function() orElse,
   }) {
     return _delegate.firstWhere(test, orElse: orElse);
   }
 
   @override
-  Future<S> fold<S>(S initialValue, S Function(S previous, List<int> element) combine) {
+  Future<S> fold<S>(S initialValue, S Function(S previous, Uint8List element) combine) {
     return _delegate.fold<S>(initialValue, combine);
   }
 
   @override
-  Future<dynamic> forEach(void Function(List<int> element) action) {
+  Future<dynamic> forEach(void Function(Uint8List element) action) {
     return _delegate.forEach(action);
   }
 
   @override
-  Stream<List<int>> handleError(
+  Stream<Uint8List> handleError(
     Function onError, {
     bool Function(dynamic error) test,
   }) {
@@ -531,11 +524,11 @@ class FakeHttpClientResponse implements HttpClientResponse {
   }
 
   @override
-  Future<List<int>> get last => _delegate.last;
+  Future<Uint8List> get last => _delegate.last;
 
   @override
-  Future<List<int>> lastWhere(
-    bool Function(List<int> element) test, {
+  Future<Uint8List> lastWhere(
+    bool Function(Uint8List element) test, {
     List<int> Function() orElse,
   }) {
     return _delegate.lastWhere(test, orElse: orElse);
@@ -545,7 +538,7 @@ class FakeHttpClientResponse implements HttpClientResponse {
   Future<int> get length => _delegate.length;
 
   @override
-  Stream<S> map<S>(S Function(List<int> event) convert) {
+  Stream<S> map<S>(S Function(Uint8List event) convert) {
     return _delegate.map<S>(convert);
   }
 
@@ -555,53 +548,53 @@ class FakeHttpClientResponse implements HttpClientResponse {
   }
 
   @override
-  Future<List<int>> reduce(List<int> Function(List<int> previous, List<int> element) combine) {
+  Future<Uint8List> reduce(List<int> Function(Uint8List previous, Uint8List element) combine) {
     return _delegate.reduce(combine);
   }
 
   @override
-  Future<List<int>> get single => _delegate.single;
+  Future<Uint8List> get single => _delegate.single;
 
   @override
-  Future<List<int>> singleWhere(bool Function(List<int> element) test, {List<int> Function() orElse}) {
+  Future<Uint8List> singleWhere(bool Function(Uint8List element) test, {List<int> Function() orElse}) {
     return _delegate.singleWhere(test, orElse: orElse);
   }
 
   @override
-  Stream<List<int>> skip(int count) {
+  Stream<Uint8List> skip(int count) {
     return _delegate.skip(count);
   }
 
   @override
-  Stream<List<int>> skipWhile(bool Function(List<int> element) test) {
+  Stream<Uint8List> skipWhile(bool Function(Uint8List element) test) {
     return _delegate.skipWhile(test);
   }
 
   @override
-  Stream<List<int>> take(int count) {
+  Stream<Uint8List> take(int count) {
     return _delegate.take(count);
   }
 
   @override
-  Stream<List<int>> takeWhile(bool Function(List<int> element) test) {
+  Stream<Uint8List> takeWhile(bool Function(Uint8List element) test) {
     return _delegate.takeWhile(test);
   }
 
   @override
-  Stream<List<int>> timeout(
+  Stream<Uint8List> timeout(
     Duration timeLimit, {
-    void Function(EventSink<List<int>> sink) onTimeout,
+    void Function(EventSink<Uint8List> sink) onTimeout,
   }) {
     return _delegate.timeout(timeLimit, onTimeout: onTimeout);
   }
 
   @override
-  Future<List<List<int>>> toList() {
+  Future<List<Uint8List>> toList() {
     return _delegate.toList();
   }
 
   @override
-  Future<Set<List<int>>> toSet() {
+  Future<Set<Uint8List>> toSet() {
     return _delegate.toSet();
   }
 
@@ -611,7 +604,7 @@ class FakeHttpClientResponse implements HttpClientResponse {
   }
 
   @override
-  Stream<List<int>> where(bool Function(List<int> event) test) {
+  Stream<Uint8List> where(bool Function(Uint8List event) test) {
     return _delegate.where(test);
   }
 }
@@ -622,7 +615,7 @@ class FakeHttpHeaders extends HttpHeaders {
   List<String> operator [](String name) => <String>[];
 
   @override
-  void add(String name, Object value, {bool preserveHeaderCase = false}) { }
+  void add(String name, Object value) { }
 
   @override
   void clear() { }
@@ -640,7 +633,7 @@ class FakeHttpHeaders extends HttpHeaders {
   void removeAll(String name) { }
 
   @override
-  void set(String name, Object value, {bool preserveHeaderCase = false}) { }
+  void set(String name, Object value) { }
 
   @override
   String value(String name) => null;
@@ -687,9 +680,6 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   String get frameworkVersion => null;
-
-  @override
-  GitTagVersion get gitTagVersion => null;
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
@@ -841,9 +831,6 @@ class FakeCache implements Cache {
   String get dartSdkVersion => null;
 
   @override
-  String get storageBaseUrl => null;
-
-  @override
   MapEntry<String, String> get dyLdLibEntry => null;
 
   @override
@@ -851,32 +838,27 @@ class FakeCache implements Cache {
 
   @override
   Directory getArtifactDirectory(String name) {
-    return globals.fs.currentDirectory;
+    return fs.currentDirectory;
   }
 
   @override
   Directory getCacheArtifacts() {
-    return globals.fs.currentDirectory;
+    return fs.currentDirectory;
   }
 
   @override
   Directory getCacheDir(String name) {
-    return globals.fs.currentDirectory;
+    return fs.currentDirectory;
   }
 
   @override
   Directory getDownloadDir() {
-    return globals.fs.currentDirectory;
+    return fs.currentDirectory;
   }
 
   @override
   Directory getRoot() {
-    return globals.fs.currentDirectory;
-  }
-
-  @override
-  File getLicenseFile() {
-    return globals.fs.currentDirectory.childFile('LICENSE');
+    return fs.currentDirectory;
   }
 
   @override
@@ -901,7 +883,7 @@ class FakeCache implements Cache {
 
   @override
   Directory getWebSdkDirectory() {
-    return globals.fs.currentDirectory;
+    return fs.currentDirectory;
   }
 
   @override
@@ -921,14 +903,5 @@ class FakeCache implements Cache {
 
   @override
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
-  }
-
-  @override
-  Future<void> downloadFile(Uri url, File location) async {
-  }
-
-  @override
-  Future<bool> doesRemoteExist(String message, Uri url) async {
-    return true;
   }
 }

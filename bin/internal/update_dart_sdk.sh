@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2014 The Flutter Authors. All rights reserved.
+# Copyright 2016 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -60,13 +60,6 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
       ;;
   esac
 
-  # Use the default find if possible.
-  if [ -e /usr/bin/find ]; then
-    FIND=/usr/bin/find
-  else
-    FIND=find
-  fi
-
   DART_SDK_BASE_URL="${FLUTTER_STORAGE_BASE_URL:-https://storage.googleapis.com}"
   DART_SDK_URL="$DART_SDK_BASE_URL/flutter_infra/flutter/$ENGINE_VERSION/$DART_ZIP_NAME"
 
@@ -100,8 +93,8 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     exit 1
   }
   rm -f -- "$DART_SDK_ZIP"
-  $FIND "$DART_SDK_PATH" -type d -exec chmod 755 {} \;
-  $FIND "$DART_SDK_PATH" -type f $IS_USER_EXECUTABLE -exec chmod a+x,a+r {} \;
+  find "$DART_SDK_PATH" -type d -exec chmod 755 {} \;
+  find "$DART_SDK_PATH" -type f $IS_USER_EXECUTABLE -exec chmod a+x,a+r {} \;
   echo "$ENGINE_VERSION" > "$ENGINE_STAMP"
 
   # delete any temporary sdk path

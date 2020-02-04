@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,7 +17,7 @@ void main() {
   test('parsePixels', () {
     expect(parsePixels('23px'), 23);
     expect(parsePixels('9px'), 9);
-    expect(() { parsePixels('9pt'); }, throwsArgumentError);
+    expect(() { parsePixels('9pt'); }, throwsA(isInstanceOf<ArgumentError>()));
   });
 
   test('parsePoints', () {
@@ -622,7 +622,7 @@ class PathMatcher extends Matcher {
     if (item.runtimeType != actual.runtimeType)
       return false;
 
-    final SvgPath other = item as SvgPath;
+    final SvgPath other = item;
     if (other.id != actual.id || other.opacity != actual.opacity)
       return false;
 
@@ -666,7 +666,7 @@ class PathAnimationMatcher extends Matcher {
     if (item.runtimeType != expected.runtimeType)
       return false;
 
-    final PathAnimation other = item as PathAnimation;
+    final PathAnimation other = item;
 
     if (!const ListEquality<double>().equals(other.opacities, expected.opacities))
       return false;
@@ -696,3 +696,4 @@ class PathAnimationMatcher extends Matcher {
 String testAsset(String name) {
   return path.join(kPackagePath, 'test_assets', name);
 }
+

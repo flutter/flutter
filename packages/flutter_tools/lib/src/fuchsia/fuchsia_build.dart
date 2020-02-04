@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,7 +18,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
 import '../devfs.dart';
-import '../globals.dart' as globals;
+import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 
@@ -28,17 +28,8 @@ import 'fuchsia_sdk.dart';
 Future<void> _timedBuildStep(String name, Future<void> Function() action) async {
   final Stopwatch sw = Stopwatch()..start();
   await action();
-  globals.printTrace('$name: ${sw.elapsedMilliseconds} ms.');
+  printTrace('$name: ${sw.elapsedMilliseconds} ms.');
   flutterUsage.sendTiming('build', name, Duration(milliseconds: sw.elapsedMilliseconds));
-}
-
-Future<void> _validateCmxFile(FuchsiaProject fuchsiaProject) async {
-  final String appName = fuchsiaProject.project.manifest.appName;
-  final String cmxPath = globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx');
-  final File cmxFile = globals.fs.file(cmxPath);
-  if (!await cmxFile.exists()) {
-    throwToolExit('The Fuchsia build requires a .cmx file at $cmxPath for the app: $appName.');
-  }
 }
 
 // Building a Fuchsia package has a few steps:
@@ -54,8 +45,7 @@ Future<void> buildFuchsia({
   BuildInfo buildInfo = BuildInfo.debug,
   String runnerPackageSource = FuchsiaPackageServer.toolHost,
 }) async {
-  await _validateCmxFile(fuchsiaProject);
-  final Directory outDir = globals.fs.directory(getFuchsiaBuildDirectory());
+  final Directory outDir = fs.directory(getFuchsiaBuildDirectory());
   if (!outDir.existsSync()) {
     outDir.createSync(recursive: true);
   }
@@ -83,14 +73,14 @@ Future<void> _genSnapshot(
 ) async {
   final String outDir = getFuchsiaBuildDirectory();
   final String appName = fuchsiaProject.project.manifest.appName;
-  final String dilPath = globals.fs.path.join(outDir, '$appName.dil');
+  final String dilPath = fs.path.join(outDir, '$appName.dil');
 
-  final String vmSnapshotData = globals.fs.path.join(outDir, 'vm_data.aotsnapshot');
-  final String vmSnapshotInstructions = globals.fs.path.join(outDir, 'vm_instructions.aotsnapshot');
-  final String snapshotData = globals.fs.path.join(outDir, 'data.aotsnapshot');
-  final String snapshotInstructions = globals.fs.path.join(outDir, 'instructions.aotsnapshot');
+  final String vmSnapshotData = fs.path.join(outDir, 'vm_data.aotsnapshot');
+  final String vmSnapshotInstructions = fs.path.join(outDir, 'vm_instructions.aotsnapshot');
+  final String snapshotData = fs.path.join(outDir, 'data.aotsnapshot');
+  final String snapshotInstructions = fs.path.join(outDir, 'instructions.aotsnapshot');
 
-  final String genSnapshot = globals.artifacts.getArtifactPath(
+  final String genSnapshot = artifacts.getArtifactPath(
     Artifact.genSnapshot,
     platform: targetPlatform,
     mode: buildInfo.mode,
@@ -98,8 +88,7 @@ Future<void> _genSnapshot(
 
   final List<String> command = <String>[
     genSnapshot,
-    '--no-causal-async-stacks',
-    '--lazy-async-stacks',
+    '--no_causal_async_stacks',
     '--deterministic',
     '--snapshot_kind=app-aot-blobs',
     '--vm_snapshot_data=$vmSnapshotData',
@@ -110,7 +99,7 @@ Future<void> _genSnapshot(
     dilPath,
   ];
   int result;
-  final Status status = globals.logger.startProgress(
+  final Status status = logger.startProgress(
     'Compiling Fuchsia application to native code...',
     timeout: null,
   );
@@ -139,17 +128,17 @@ Future<void> _buildAssets(
 
   final Map<String, DevFSContent> assetEntries =
       Map<String, DevFSContent>.from(assets.entries);
-  await writeBundle(globals.fs.directory(assetDir), assetEntries);
+  await writeBundle(fs.directory(assetDir), assetEntries);
 
   final String appName = fuchsiaProject.project.manifest.appName;
   final String outDir = getFuchsiaBuildDirectory();
-  final String assetManifest = globals.fs.path.join(outDir, '${appName}_pkgassets');
+  final String assetManifest = fs.path.join(outDir, '${appName}_pkgassets');
 
-  final File destFile = globals.fs.file(assetManifest);
+  final File destFile = fs.file(assetManifest);
   await destFile.create(recursive: true);
   final IOSink outFile = destFile.openWrite();
 
-  for (final String path in assets.entries.keys) {
+  for (String path in assets.entries.keys) {
     outFile.write('data/$appName/$path=$assetDir/$path\n');
   }
   await outFile.flush();
@@ -194,29 +183,29 @@ Future<void> _buildPackage(
   String runnerPackageSource,
 ) async {
   final String outDir = getFuchsiaBuildDirectory();
-  final String pkgDir = globals.fs.path.join(outDir, 'pkg');
+  final String pkgDir = fs.path.join(outDir, 'pkg');
   final String appName = fuchsiaProject.project.manifest.appName;
-  final String pkgassets = globals.fs.path.join(outDir, '${appName}_pkgassets');
-  final String packageManifest = globals.fs.path.join(pkgDir, 'package_manifest');
-  final String devKeyPath = globals.fs.path.join(pkgDir, 'development.key');
+  final String pkgassets = fs.path.join(outDir, '${appName}_pkgassets');
+  final String packageManifest = fs.path.join(pkgDir, 'package_manifest');
+  final String devKeyPath = fs.path.join(pkgDir, 'development.key');
 
-  final Directory pkg = globals.fs.directory(pkgDir);
+  final Directory pkg = fs.directory(pkgDir);
   if (!pkg.existsSync()) {
     pkg.createSync(recursive: true);
   }
 
   final File srcCmx =
-      globals.fs.file(globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx'));
-  final File dstCmx = globals.fs.file(globals.fs.path.join(outDir, '$appName.cmx'));
+      fs.file(fs.path.join(fuchsiaProject.meta.path, '$appName.cmx'));
+  final File dstCmx = fs.file(fs.path.join(outDir, '$appName.cmx'));
   _rewriteCmx(buildInfo.mode, runnerPackageSource, srcCmx, dstCmx);
 
-  final File manifestFile = globals.fs.file(packageManifest);
+  final File manifestFile = fs.file(packageManifest);
 
   if (buildInfo.usesAot) {
-    final String vmSnapshotData = globals.fs.path.join(outDir, 'vm_data.aotsnapshot');
-    final String vmSnapshotInstructions = globals.fs.path.join(outDir, 'vm_instructions.aotsnapshot');
-    final String snapshotData = globals.fs.path.join(outDir, 'data.aotsnapshot');
-    final String snapshotInstructions = globals.fs.path.join(outDir, 'instructions.aotsnapshot');
+    final String vmSnapshotData = fs.path.join(outDir, 'vm_data.aotsnapshot');
+    final String vmSnapshotInstructions = fs.path.join(outDir, 'vm_instructions.aotsnapshot');
+    final String snapshotData = fs.path.join(outDir, 'data.aotsnapshot');
+    final String snapshotInstructions = fs.path.join(outDir, 'instructions.aotsnapshot');
     manifestFile.writeAsStringSync(
       'data/$appName/vm_snapshot_data.bin=$vmSnapshotData\n');
     manifestFile.writeAsStringSync(
@@ -229,11 +218,11 @@ Future<void> _buildPackage(
       'data/$appName/isolate_snapshot_instructions.bin=$snapshotInstructions\n',
       mode: FileMode.append);
   } else {
-    final String dilpmanifest = globals.fs.path.join(outDir, '$appName.dilpmanifest');
-    manifestFile.writeAsStringSync(globals.fs.file(dilpmanifest).readAsStringSync());
+    final String dilpmanifest = fs.path.join(outDir, '$appName.dilpmanifest');
+    manifestFile.writeAsStringSync(fs.file(dilpmanifest).readAsStringSync());
   }
 
-  manifestFile.writeAsStringSync(globals.fs.file(pkgassets).readAsStringSync(),
+  manifestFile.writeAsStringSync(fs.file(pkgassets).readAsStringSync(),
       mode: FileMode.append);
   manifestFile.writeAsStringSync('meta/$appName.cmx=${dstCmx.path}\n',
       mode: FileMode.append);

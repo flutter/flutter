@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,7 +52,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
 
   @override
   _RenderSliverPrototypeExtentList createRenderObject(BuildContext context) {
-    final _SliverPrototypeExtentListElement element = context as _SliverPrototypeExtentListElement;
+    final _SliverPrototypeExtentListElement element = context;
     return _RenderSliverPrototypeExtentList(childManager: element);
   }
 
@@ -64,10 +64,10 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   _SliverPrototypeExtentListElement(SliverPrototypeExtentList widget) : super(widget);
 
   @override
-  SliverPrototypeExtentList get widget => super.widget as SliverPrototypeExtentList;
+  SliverPrototypeExtentList get widget => super.widget;
 
   @override
-  _RenderSliverPrototypeExtentList get renderObject => super.renderObject as _RenderSliverPrototypeExtentList;
+  _RenderSliverPrototypeExtentList get renderObject => super.renderObject;
 
   Element _prototype;
   static final Object _prototypeSlot = Object();
@@ -76,9 +76,9 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   void insertChildRenderObject(covariant RenderObject child, covariant dynamic slot) {
     if (slot == _prototypeSlot) {
       assert(child is RenderBox);
-      renderObject.child = child as RenderBox;
+      renderObject.child = child;
     } else {
-      super.insertChildRenderObject(child, slot as int);
+      super.insertChildRenderObject(child, slot);
     }
   }
 
@@ -93,7 +93,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
     if (slot == _prototypeSlot)
       assert(false); // There's only one prototype child so it cannot be moved.
     else
-      super.moveChildRenderObject(child, slot as int);
+      super.moveChildRenderObject(child, slot);
   }
 
   @override

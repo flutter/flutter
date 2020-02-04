@@ -1,17 +1,15 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:convert' show json;
 
 import 'package:file/memory.dart';
-import 'package:platform/platform.dart';
-import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/fingerprint.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -36,9 +34,9 @@ void main() {
     };
 
     testUsingContext('throws when depfile is malformed', () {
-      globals.fs.file('a.dart').createSync();
-      globals.fs.file('b.dart').createSync();
-      globals.fs.file('depfile').createSync();
+      fs.file('a.dart').createSync();
+      fs.file('b.dart').createSync();
+      fs.file('depfile').createSync();
 
       final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
@@ -53,7 +51,7 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('creates fingerprint with specified properties and files', () {
-      globals.fs.file('a.dart').createSync();
+      fs.file('a.dart').createSync();
 
       final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
@@ -71,9 +69,9 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('creates fingerprint with file checksums', () {
-      globals.fs.file('a.dart').createSync();
-      globals.fs.file('b.dart').createSync();
-      globals.fs.file('depfile').writeAsStringSync('depfile : b.dart');
+      fs.file('a.dart').createSync();
+      fs.file('b.dart').createSync();
+      fs.file('depfile').writeAsStringSync('depfile : b.dart');
 
       final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
@@ -92,8 +90,8 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('fingerprint does not match if not present', () {
-      globals.fs.file('a.dart').createSync();
-      globals.fs.file('b.dart').createSync();
+      fs.file('a.dart').createSync();
+      fs.file('b.dart').createSync();
 
       final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
@@ -107,8 +105,8 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('fingerprint does match if different', () {
-      globals.fs.file('a.dart').createSync();
-      globals.fs.file('b.dart').createSync();
+      fs.file('a.dart').createSync();
+      fs.file('b.dart').createSync();
 
       final Fingerprinter fingerprinter1 = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
@@ -132,9 +130,9 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('fingerprint does not match if depfile is malformed', () {
-      globals.fs.file('a.dart').createSync();
-      globals.fs.file('b.dart').createSync();
-      globals.fs.file('depfile').writeAsStringSync('depfile : b.dart');
+      fs.file('a.dart').createSync();
+      fs.file('b.dart').createSync();
+      fs.file('depfile').writeAsStringSync('depfile : b.dart');
 
       // Write a valid fingerprint
       final Fingerprinter fingerprinter = Fingerprinter(
@@ -149,7 +147,7 @@ void main() {
       fingerprinter.writeFingerprint();
 
       // Write a corrupt depfile.
-      globals.fs.file('depfile').writeAsStringSync('');
+      fs.file('depfile').writeAsStringSync('');
       final Fingerprinter badFingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart', 'b.dart'],
@@ -164,9 +162,9 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('fingerprint does not match if previous fingerprint is malformed', () {
-      globals.fs.file('a.dart').createSync();
-      globals.fs.file('b.dart').createSync();
-      globals.fs.file('out.fingerprint').writeAsStringSync('** not JSON **');
+      fs.file('a.dart').createSync();
+      fs.file('b.dart').createSync();
+      fs.file('out.fingerprint').writeAsStringSync('** not JSON **');
 
       final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
@@ -181,8 +179,8 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('fingerprint does match if identical', () {
-      globals.fs.file('a.dart').createSync();
-      globals.fs.file('b.dart').createSync();
+      fs.file('a.dart').createSync();
+      fs.file('b.dart').createSync();
 
       final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
@@ -196,6 +194,48 @@ void main() {
       expect(fingerprinter.doesFingerprintMatch(), isTrue);
     }, overrides: contextOverrides);
 
+    final Platform mockPlatformDisabledCache = MockPlatform();
+    mockPlatformDisabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'true';
+    testUsingContext('can be disabled with an environment variable', () {
+      fs.file('a.dart').createSync();
+      fs.file('b.dart').createSync();
+
+      final Fingerprinter fingerprinter = Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart', 'b.dart'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+      fingerprinter.writeFingerprint();
+      expect(fingerprinter.doesFingerprintMatch(), isFalse);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatformDisabledCache,
+      ...contextOverrides,
+    });
+
+    final Platform mockPlatformEnabledCache = MockPlatform();
+    mockPlatformEnabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'false';
+    testUsingContext('can be not-disabled with an environment variable', () {
+      fs.file('a.dart').createSync();
+      fs.file('b.dart').createSync();
+
+      final Fingerprinter fingerprinter = Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart', 'b.dart'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+      fingerprinter.writeFingerprint();
+      expect(fingerprinter.doesFingerprintMatch(), isTrue);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatformEnabledCache,
+      ...contextOverrides,
+    });
+
     testUsingContext('fails to write fingerprint if inputs are missing', () {
       final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
@@ -206,13 +246,13 @@ void main() {
         },
       );
       fingerprinter.writeFingerprint();
-      expect(globals.fs.file('out.fingerprint').existsSync(), isFalse);
+      expect(fs.file('out.fingerprint').existsSync(), isFalse);
     }, overrides: contextOverrides);
 
     testUsingContext('applies path filter to inputs paths', () {
-      globals.fs.file('a.dart').createSync();
-      globals.fs.file('ab.dart').createSync();
-      globals.fs.file('depfile').writeAsStringSync('depfile : ab.dart c.dart');
+      fs.file('a.dart').createSync();
+      fs.file('ab.dart').createSync();
+      fs.file('depfile').writeAsStringSync('depfile : ab.dart c.dart');
 
       final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
@@ -225,7 +265,7 @@ void main() {
         pathFilter: (String path) => path.startsWith('a'),
       );
       fingerprinter.writeFingerprint();
-      expect(globals.fs.file('out.fingerprint').existsSync(), isTrue);
+      expect(fs.file('out.fingerprint').existsSync(), isTrue);
     }, overrides: contextOverrides);
   });
 
@@ -246,7 +286,7 @@ void main() {
       });
 
       testUsingContext('throws if any input file does not exist', () {
-        globals.fs.file('a.dart').createSync();
+        fs.file('a.dart').createSync();
         expect(
           () => Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']),
           throwsArgumentError,
@@ -257,11 +297,11 @@ void main() {
       });
 
       testUsingContext('populates checksums for valid files', () {
-        globals.fs.file('a.dart').writeAsStringSync('This is a');
-        globals.fs.file('b.dart').writeAsStringSync('This is b');
+        fs.file('a.dart').writeAsStringSync('This is a');
+        fs.file('b.dart').writeAsStringSync('This is b');
         final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']);
 
-        final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
+        final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
         expect(jsonObject['files'], hasLength(2));
         expect(jsonObject['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
         expect(jsonObject['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
@@ -273,14 +313,14 @@ void main() {
       testUsingContext('includes framework version', () {
         final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{}, <String>[]);
 
-        final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
+        final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
         expect(jsonObject['version'], mockVersion.frameworkRevision);
       }, overrides: <Type, Generator>{FlutterVersion: () => mockVersion});
 
       testUsingContext('includes provided properties', () {
         final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{'a': 'A', 'b': 'B'}, <String>[]);
 
-        final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
+        final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
         expect(jsonObject['properties'], hasLength(2));
         expect(jsonObject['properties']['a'], 'A');
         expect(jsonObject['properties']['b'], 'B');
@@ -308,7 +348,7 @@ void main() {
           },
         });
         final Fingerprint fingerprint = Fingerprint.fromJson(jsonString);
-        final Map<String, dynamic> content = castStringKeyedMap(json.decode(fingerprint.toJson()));
+        final Map<String, dynamic> content = json.decode(fingerprint.toJson());
         expect(content, hasLength(3));
         expect(content['version'], mockVersion.frameworkRevision);
         expect(content['properties'], hasLength(3));
@@ -453,12 +493,12 @@ void main() {
     };
 
     testUsingContext('returns one file if only one is listed', () {
-      globals.fs.file('a.d').writeAsStringSync('snapshot.d: /foo/a.dart');
+      fs.file('a.d').writeAsStringSync('snapshot.d: /foo/a.dart');
       expect(readDepfile('a.d'), unorderedEquals(<String>['/foo/a.dart']));
     }, overrides: contextOverrides);
 
     testUsingContext('returns multiple files', () {
-      globals.fs.file('a.d').writeAsStringSync('snapshot.d: /foo/a.dart /foo/b.dart');
+      fs.file('a.d').writeAsStringSync('snapshot.d: /foo/a.dart /foo/b.dart');
       expect(readDepfile('a.d'), unorderedEquals(<String>[
         '/foo/a.dart',
         '/foo/b.dart',
@@ -466,7 +506,7 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('trims extra spaces between files', () {
-      globals.fs.file('a.d').writeAsStringSync('snapshot.d: /foo/a.dart    /foo/b.dart  /foo/c.dart');
+      fs.file('a.d').writeAsStringSync('snapshot.d: /foo/a.dart    /foo/b.dart  /foo/c.dart');
       expect(readDepfile('a.d'), unorderedEquals(<String>[
         '/foo/a.dart',
         '/foo/b.dart',
@@ -475,7 +515,7 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('returns files with spaces and backslashes', () {
-      globals.fs.file('a.d').writeAsStringSync(r'snapshot.d: /foo/a\ a.dart /foo/b\\b.dart /foo/c\\ c.dart');
+      fs.file('a.d').writeAsStringSync(r'snapshot.d: /foo/a\ a.dart /foo/b\\b.dart /foo/c\\ c.dart');
       expect(readDepfile('a.d'), unorderedEquals(<String>[
         r'/foo/a a.dart',
         r'/foo/b\b.dart',

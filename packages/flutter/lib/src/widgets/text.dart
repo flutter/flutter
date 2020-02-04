@@ -1,8 +1,6 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -15,8 +13,7 @@ import 'media_query.dart';
 // Examples can assume:
 // String _name;
 
-/// The text style to apply to descendant [Text] widgets which don't have an
-/// explicit style.
+/// The text style to apply to descendant [Text] widgets without explicit style.
 ///
 /// See also:
 ///
@@ -45,7 +42,6 @@ class DefaultTextStyle extends InheritedTheme {
     this.overflow = TextOverflow.clip,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
-    this.textHeightBehavior,
     @required Widget child,
   }) : assert(style != null),
        assert(softWrap != null),
@@ -61,15 +57,13 @@ class DefaultTextStyle extends InheritedTheme {
   ///
   /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
   /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextStyle.fallback({ Key key })
+  const DefaultTextStyle.fallback()
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
       maxLines = null,
       overflow = TextOverflow.clip,
-      textWidthBasis = TextWidthBasis.parent,
-      textHeightBehavior = null,
-      super(key: key, child: null);
+      textWidthBasis = TextWidthBasis.parent;
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -145,9 +139,6 @@ class DefaultTextStyle extends InheritedTheme {
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
-  final ui.TextHeightBehavior textHeightBehavior;
-
   /// The closest instance of this class that encloses the given context.
   ///
   /// If no such instance exists, returns an instance created by
@@ -169,8 +160,7 @@ class DefaultTextStyle extends InheritedTheme {
         softWrap != oldWidget.softWrap ||
         overflow != oldWidget.overflow ||
         maxLines != oldWidget.maxLines ||
-        textWidthBasis != oldWidget.textWidthBasis ||
-        textHeightBehavior != oldWidget.textHeightBehavior;
+        textWidthBasis != oldWidget.textWidthBasis;
   }
 
   @override
@@ -183,7 +173,6 @@ class DefaultTextStyle extends InheritedTheme {
       overflow: overflow,
       maxLines: maxLines,
       textWidthBasis: textWidthBasis,
-      textHeightBehavior: textHeightBehavior,
       child: child,
     );
   }
@@ -197,7 +186,6 @@ class DefaultTextStyle extends InheritedTheme {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
-    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -214,7 +202,7 @@ class DefaultTextStyle extends InheritedTheme {
 /// behavior is useful, for example, to make the text bold while using the
 /// default font family and size.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// This example shows how to display text using the [Text] widget with the
 /// [overflow] set to [TextOverflow.ellipsis].
@@ -238,7 +226,7 @@ class DefaultTextStyle extends InheritedTheme {
 /// that follows displays "Hello beautiful world" with different styles
 /// for each word.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ![The word "Hello" is shown with the default text styles. The word "beautiful" is italicized. The word "world" is bold.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_rich.png)
 ///
@@ -293,7 +281,6 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
-    this.textHeightBehavior,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -325,7 +312,6 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
-    this.textHeightBehavior,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -428,9 +414,6 @@ class Text extends StatelessWidget {
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
-  /// {@macro flutter.dart:ui.textHeightBehavior}
-  final ui.TextHeightBehavior textHeightBehavior;
-
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -449,11 +432,10 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
-        children: textSpan != null ? <InlineSpan>[textSpan] : null,
+        children: textSpan != null ? <TextSpan>[textSpan] : null,
       ),
     );
     if (semanticsLabel != null) {
@@ -483,8 +465,6 @@ class Text extends StatelessWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null));
-    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }

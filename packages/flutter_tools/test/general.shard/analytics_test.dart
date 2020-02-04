@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
@@ -27,17 +26,17 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  setUpAll(() {
-    Cache.disableLocking();
-  });
-
   group('analytics', () {
     Directory tempDir;
     MockFlutterConfig mockFlutterConfig;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       Cache.flutterRoot = '../..';
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
       mockFlutterConfig = MockFlutterConfig();
     });
 
@@ -95,13 +94,13 @@ void main() {
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
-      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting) as bool)
+      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting))
           .thenReturn(true);
       final Usage usage = Usage();
       usage.sendCommand('test');
 
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
-      expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
+      expect(fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Config: () => mockFlutterConfig,
@@ -113,17 +112,17 @@ void main() {
     });
 
     testUsingContext('Usage records multiple features in experiment setting', () async {
-      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting) as bool)
+      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting))
           .thenReturn(true);
-      when<bool>(mockFlutterConfig.getValue(flutterLinuxDesktopFeature.configSetting) as bool)
+      when<bool>(mockFlutterConfig.getValue(flutterLinuxDesktopFeature.configSetting))
           .thenReturn(true);
-      when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting) as bool)
+      when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting))
           .thenReturn(true);
       final Usage usage = Usage();
       usage.sendCommand('test');
 
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
-      expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'));
+      expect(fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Config: () => mockFlutterConfig,
@@ -202,7 +201,7 @@ void main() {
 
     testUsingContext('compound command usage path', () async {
       final BuildCommand buildCommand = BuildCommand();
-      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'] as FlutterCommand;
+      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'];
       expect(await buildApkCommand.usagePath, 'build/apk');
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
@@ -219,7 +218,7 @@ void main() {
 
       usage.sendCommand('test');
 
-      final String log = globals.fs.file('analytics.log').readAsStringSync();
+      final String log = fs.file('analytics.log').readAsStringSync();
       final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(kMillis);
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
@@ -245,7 +244,7 @@ void main() {
 
       usage.sendEvent('test', 'test');
 
-      final String log = globals.fs.file('analytics.log').readAsStringSync();
+      final String log = fs.file('analytics.log').readAsStringSync();
       final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(kMillis);
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
@@ -265,7 +264,7 @@ void main() {
     Directory tempDir;
 
     setUp(() {
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
     });
 
     tearDown(() {

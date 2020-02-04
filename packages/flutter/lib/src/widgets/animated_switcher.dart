@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -87,7 +87,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 /// progress indicator and the image will be fading out while a new progress
 /// indicator is fading in.)
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// class ClickCounter extends StatefulWidget {
@@ -118,7 +118,7 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 ///                 // child each time the count changes, so that it will begin its animation
 ///                 // when the count changes.
 ///                 key: ValueKey<int>(_count),
-///                 style: Theme.of(context).textTheme.headline4,
+///                 style: Theme.of(context).textTheme.display1,
 ///               ),
 ///             ),
 ///             RaisedButton(
@@ -425,7 +425,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   void dispose() {
     if (_currentEntry != null)
       _currentEntry.controller.dispose();
-    for (final _ChildEntry entry in _outgoingEntries)
+    for (_ChildEntry entry in _outgoingEntries)
       entry.controller.dispose();
     super.dispose();
   }

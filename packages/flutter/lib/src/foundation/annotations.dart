@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,7 +16,7 @@
 ///
 /// A class can have multiple categories.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// /// A copper coffee pot, as desired by Ben Turpin.
@@ -54,7 +54,7 @@ class Category {
 ///
 /// Each class should only have one [DocumentationIcon].
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// /// Utility class for beginning a dream-sharing sequence.
@@ -87,7 +87,7 @@ class DocumentationIcon {
 /// for this purpose, but on occasion the first paragraph is either too short
 /// or too long for use in isolation, without the remainder of the documentation.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// /// A famous cat.

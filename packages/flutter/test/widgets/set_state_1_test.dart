@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class Inside extends StatefulWidget {
-  const Inside({ Key key }) : super(key: key);
   @override
   InsideState createState() => InsideState();
 }
@@ -26,10 +25,7 @@ class InsideState extends State<Inside> {
 }
 
 class Middle extends StatefulWidget {
-  const Middle({
-    Key key,
-    this.child,
-  }) : super(key: key);
+  const Middle({ this.child });
 
   final Inside child;
 
@@ -52,7 +48,6 @@ class MiddleState extends State<Middle> {
 }
 
 class Outside extends StatefulWidget {
-  const Outside({ Key key }) : super(key: key);
   @override
   OutsideState createState() => OutsideState();
 }
@@ -60,13 +55,13 @@ class Outside extends StatefulWidget {
 class OutsideState extends State<Outside> {
   @override
   Widget build(BuildContext context) {
-    return const Middle(child: Inside());
+    return Middle(child: Inside());
   }
 }
 
 void main() {
   testWidgets('setState() smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const Outside());
+    await tester.pumpWidget(Outside());
     final Offset location = tester.getCenter(find.text('INSIDE'));
     final TestGesture gesture = await tester.startGesture(location);
     await tester.pump();

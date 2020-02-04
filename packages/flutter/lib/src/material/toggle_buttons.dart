@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -566,7 +566,7 @@ class ToggleButtons extends StatelessWidget {
         return true;
       }(),
       'focusNodes.length must match children.length.\n'
-      'There are ${focusNodes.length} focus nodes, while '
+      'There are ${focusNodes.length} focus nodes, while'
       'there are ${children.length} children.'
     );
     final ThemeData theme = Theme.of(context);
@@ -800,7 +800,7 @@ class _ToggleButton extends StatelessWidget {
       currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
-    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.bodyText2;
+    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.body1;
     final BoxConstraints currentConstraints = constraints ?? toggleButtonsTheme.constraints ?? const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension);
 
     final Widget result = ClipRRect(
@@ -1061,7 +1061,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         );
 
         child.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child.parentData as BoxParentData;
+        final BoxParentData childParentData = child.parentData;
         childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
 
         size = constraints.constrain(Size(
@@ -1083,7 +1083,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         );
 
         child.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child.parentData as BoxParentData;
+        final BoxParentData childParentData = child.parentData;
 
         if (isLastButton) {
           childParentData.offset = Offset(trailingBorderOffset, trailingBorderOffset);

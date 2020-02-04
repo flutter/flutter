@@ -1,9 +1,8 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/linux/linux_doctor.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -23,13 +22,13 @@ void main() {
     });
 
     testUsingContext('Returns full validation when clang++ and make are availibe', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
+      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
           exitCode: 0,
         );
       });
-      when(globals.processManager.run(<String>[
+      when(processManager.run(<String>[
         'make',
         '--version',
       ])).thenAnswer((_) async {
@@ -50,13 +49,13 @@ void main() {
     });
 
     testUsingContext('Returns partial validation when clang++ version is too old', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
+      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: 'clang version 2.0.1-10 (tags/RELEASE_401/final)\njunk',
           exitCode: 0,
         );
       });
-      when(globals.processManager.run(<String>[
+      when(processManager.run(<String>[
         'make',
         '--version',
       ])).thenAnswer((_) async {
@@ -77,13 +76,13 @@ void main() {
     });
 
     testUsingContext('Returns mising validation when make is not availible', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
+      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
           exitCode: 0,
         );
       });
-      when(globals.processManager.run(<String>[
+      when(processManager.run(<String>[
         'make',
         '--version',
       ])).thenAnswer((_) async {
@@ -104,13 +103,13 @@ void main() {
     });
 
     testUsingContext('Returns mising validation when clang++ is not availible', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
+      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: '',
           exitCode: 1,
         );
       });
-      when(globals.processManager.run(<String>[
+      when(processManager.run(<String>[
         'make',
         '--version',
       ])).thenAnswer((_) async {
@@ -132,13 +131,13 @@ void main() {
 
 
     testUsingContext('Returns missing validation when clang and make are not availible', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
+      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: '',
           exitCode: 1,
         );
       });
-      when(globals.processManager.run(<String>[
+      when(processManager.run(<String>[
         'make',
         '--version',
       ])).thenAnswer((_) async {

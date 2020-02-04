@@ -1,7 +1,6 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -814,13 +813,13 @@ void main() {
     }
 
     testWidgets('Gradients - 45 degrees', (WidgetTester tester) async {
-      for (final Gradient gradient in gradients45) {
+      for (Gradient gradient in gradients45) {
         await runTest(tester, gradient, 45);
       }
     }, skip: isBrowser); // TODO(yjbanov): web does not support golden tests yet: https://github.com/flutter/flutter/issues/40297
 
     testWidgets('Gradients - 90 degrees', (WidgetTester tester) async {
-      for (final Gradient gradient in gradients90) {
+      for (Gradient gradient in gradients90) {
         await runTest(tester, gradient, 90);
       }
     }, skip: isBrowser); // TODO(yjbanov): web does not support golden tests yet: https://github.com/flutter/flutter/issues/40297

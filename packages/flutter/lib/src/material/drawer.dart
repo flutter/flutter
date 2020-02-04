@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -61,7 +61,7 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///
 /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/drawer.mp4}
 ///
-/// {@tool snippet}
+/// {@tool sample}
 /// This example shows how to create a [Scaffold] that contains an [AppBar] and
 /// a [Drawer]. A user taps the "menu" icon in the [AppBar] to open the
 /// [Drawer]. The [Drawer] displays four items: A header and three menu items.
@@ -177,7 +177,6 @@ class Drawer extends StatelessWidget {
     String label = semanticLabel;
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         label = semanticLabel;
         break;
       case TargetPlatform.android:
@@ -381,7 +380,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
-    final RenderBox box = _drawerKey.currentContext?.findRenderObject() as RenderBox;
+    final RenderBox box = _drawerKey.currentContext?.findRenderObject();
     if (box != null)
       return box.size.width;
     return _kWidth; // drawer not being shown currently
@@ -524,7 +523,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = true;
           break;
         case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
         case TargetPlatform.fuchsia:
           platformHasBackButton = false;
           break;
@@ -542,20 +540,18 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           child: Stack(
             children: <Widget>[
               BlockSemantics(
-                child: ExcludeSemantics(
+                child: GestureDetector(
                   // On Android, the back button is used to dismiss a modal.
-                  excluding: platformHasBackButton,
-                  child: GestureDetector(
-                    onTap: close,
-                    child: Semantics(
-                      label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
-                      child: MouseRegion(
-                        opaque: true,
-                        child: Container( // The drawer's "scrim"
-                          color: _scrimColorTween.evaluate(_controller),
-                        ),
+                  excludeFromSemantics: platformHasBackButton,
+                  onTap: close,
+                  child: Semantics(
+                    label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
+                    child: MouseRegion(
+                      opaque: true,
+                      child: Container( // The drawer's "scrim"
+                        color: _scrimColorTween.evaluate(_controller),
                       ),
-                    ),
+                    )
                   ),
                 ),
               ),

@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 List<String> ancestors = <String>[];
 
 class TestWidget extends StatefulWidget {
-  const TestWidget({ Key key }) : super(key: key);
   @override
   TestWidgetState createState() => TestWidgetState();
 }
@@ -29,7 +28,7 @@ class TestWidgetState extends State<TestWidget> {
 
 void main() {
   testWidgets('initState() is called when we are in the tree', (WidgetTester tester) async {
-    await tester.pumpWidget(Container(child: const TestWidget()));
+    await tester.pumpWidget(Container(child: TestWidget()));
     expect(ancestors, equals(<String>['Container', 'RenderObjectToWidgetAdapter<RenderBox>']));
   });
 }

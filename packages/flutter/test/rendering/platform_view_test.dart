@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import '../gestures/gesture_tester.dart';
 import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
@@ -16,7 +15,7 @@ void main() {
   group('PlatformViewRenderBox', () {
     FakePlatformViewController fakePlatformViewController;
     PlatformViewRenderBox platformViewRenderBox;
-    setUp(() {
+    setUp((){
       fakePlatformViewController = FakePlatformViewController(0);
       platformViewRenderBox = PlatformViewRenderBox(
         controller: fakePlatformViewController,
@@ -38,7 +37,7 @@ void main() {
     });
 
     test('send semantics update if id is changed', (){
-      final RenderConstrainedBox tree = RenderConstrainedBox(
+      final RenderObject tree = RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
         child: platformViewRenderBox,
       );
@@ -69,17 +68,5 @@ void main() {
 
       semanticsHandle.dispose();
     });
-
-    testGesture('hover events are dispatched via PlatformViewController.dispatchPointerEvent', (GestureTester tester) {
-      layout(platformViewRenderBox);
-      pumpFrame(phase: EnginePhase.flushSemantics);
-
-      final TestPointer pointer = TestPointer(1, PointerDeviceKind.mouse);
-      tester.route(pointer.addPointer());
-      tester.route(pointer.hover(const Offset(10, 10)));
-
-      expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
-    });
-
   }, skip: isBrowser); // TODO(yjbanov): fails on Web with obscured stack trace: https://github.com/flutter/flutter/issues/42770
 }

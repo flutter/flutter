@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -136,19 +136,19 @@ class DecorationImage {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
-    return other is DecorationImage
-        && other.image == image
-        && other.colorFilter == colorFilter
-        && other.fit == fit
-        && other.alignment == alignment
-        && other.centerSlice == centerSlice
-        && other.repeat == repeat
-        && other.matchTextDirection == matchTextDirection;
+    final DecorationImage typedOther = other;
+    return image == typedOther.image
+        && colorFilter == typedOther.colorFilter
+        && fit == typedOther.fit
+        && alignment == typedOther.alignment
+        && centerSlice == typedOther.centerSlice
+        && repeat == typedOther.repeat
+        && matchTextDirection == typedOther.matchTextDirection;
   }
 
   @override
@@ -172,7 +172,7 @@ class DecorationImage {
       if (matchTextDirection)
         'match text direction',
     ];
-    return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
+    return '$runtimeType(${properties.join(", ")})';
   }
 }
 
@@ -222,7 +222,7 @@ class DecorationImagePainter {
         // when the image is ready.
         if (configuration.textDirection == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('DecorationImage.matchTextDirection can only be used when a TextDirection is available.'),
+            ErrorSummary('ImageDecoration.matchTextDirection can only be used when a TextDirection is available.'),
             ErrorDescription(
               'When DecorationImagePainter.paint() was called, there was no text direction provided '
               'in the ImageConfiguration object to match.'
@@ -291,7 +291,7 @@ class DecorationImagePainter {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'DecorationImagePainter')}(stream: $_imageStream, image: $_image) for $_details';
+    return '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
   }
 }
 
@@ -392,8 +392,8 @@ void paintImage({
       centerSlice.left + inputSize.width - centerSlice.right,
       centerSlice.top + inputSize.height - centerSlice.bottom,
     );
-    outputSize = outputSize - sliceBorder as Size;
-    inputSize = inputSize - sliceBorder as Size;
+    outputSize -= sliceBorder;
+    inputSize -= sliceBorder;
   }
   fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
   assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
@@ -443,14 +443,14 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
         canvas.drawImageRect(image, sourceRect, tileRect, paint);
     }
   } else {
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageNine(image, centerSlice, destinationRect, paint);
     } else {
-      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
         canvas.drawImageNine(image, centerSlice, tileRect, paint);
     }
   }

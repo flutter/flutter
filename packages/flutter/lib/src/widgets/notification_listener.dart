@@ -1,8 +1,6 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
@@ -67,7 +65,7 @@ abstract class Notification {
   String toString() {
     final List<String> description = <String>[];
     debugFillDescription(description);
-    return '${objectRuntimeType(this, 'Notification')}(${description.join(", ")})';
+    return '$runtimeType(${description.join(", ")})';
   }
 
   /// Add additional information to the given description for use by [toString].

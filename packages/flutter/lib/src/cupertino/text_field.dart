@@ -1,7 +1,6 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +11,7 @@ import 'icons.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
 // Value inspected from Xcode 11 & iOS 13.0 Simulator.
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
@@ -98,7 +97,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext.findRenderObject() as RenderBox;
+      final RenderBox renderBox = _state._clearGlobalKey.currentContext.findRenderObject();
       final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
         return;
@@ -133,7 +132,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// [controller]. For example, to set the initial value of the text field, use
 /// a [controller] that already contains some text such as:
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// ```dart
 /// class MyPrefilledText extends StatefulWidget {
@@ -165,8 +164,8 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// rounded rectangle border around the text field. If you set the [decoration]
 /// property to null, the decoration will be removed entirely.
 ///
-/// Remember to call [TextEditingController.dispose] when it is no longer
-/// needed. This will ensure we discard any resources used by the object.
+/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
+/// This will ensure we discard any resources used by the object.
 ///
 /// See also:
 ///
@@ -198,8 +197,8 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], and [enableSuggestions]
-  /// properties must not be null.
+  /// [scrollPadding], [suffixMode], [textAlign], and [enableSuggestions] properties
+  /// must not be null.
   ///
   /// See also:
   ///
@@ -236,8 +235,6 @@ class CupertinoTextField extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
-    SmartDashesType smartDashesType,
-    SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
@@ -264,8 +261,6 @@ class CupertinoTextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
-       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -404,7 +399,7 @@ class CupertinoTextField extends StatefulWidget {
   /// paste and cut will be disabled regardless.
   final ToolbarOptions toolbarOptions;
 
-  /// {@macro flutter.widgets.inputDecorator.textAlignVertical}
+  /// {@macro flutter.material.inputDecorator.textAlignVertical}
   final TextAlignVertical textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.readOnly}
@@ -421,12 +416,6 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
-
-  /// {@macro flutter.services.textInput.smartDashesType}
-  final SmartDashesType smartDashesType;
-
-  /// {@macro flutter.services.textInput.smartQuotesType}
-  final SmartQuotesType smartQuotesType;
 
   /// {@macro flutter.services.textInput.enableSuggestions}
   final bool enableSuggestions;
@@ -549,7 +538,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollController}
   final ScrollController scrollController;
 
-  /// {@macro flutter.widgets.editableText.scrollPhysics}
+  /// {@macro flutter.widgets.edtiableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
@@ -578,8 +567,6 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
@@ -847,14 +834,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
     final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
 
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? CupertinoTheme.brightnessOf(context);
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
     final Color cursorColor = CupertinoDynamicColor.resolve(widget.cursorColor, context) ?? themeData.primaryColor;
     final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
 
     final Color decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
 
     final BoxBorder border = widget.decoration?.border;
-    Border resolvedBorder = border as Border;
+    Border resolvedBorder = border;
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
         return side == BorderSide.none
@@ -896,8 +883,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           autofocus: widget.autofocus,
           obscureText: widget.obscureText,
           autocorrect: widget.autocorrect,
-          smartDashesType: widget.smartDashesType,
-          smartQuotesType: widget.smartQuotesType,
           enableSuggestions: widget.enableSuggestions,
           maxLines: widget.maxLines,
           minLines: widget.minLines,
@@ -929,8 +914,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
 
     return Semantics(
-      enabled: enabled,
-      onTap: !enabled ? null : () {
+      onTap: () {
         if (!controller.selection.isValid) {
           controller.selection = TextSelection.collapsed(offset: controller.text.length);
         }

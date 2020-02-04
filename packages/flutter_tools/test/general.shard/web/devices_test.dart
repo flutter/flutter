@@ -1,14 +1,14 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -41,8 +41,8 @@ void main() {
     expect(chromeDevice.supportsFlutterExit, true);
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
-    expect(chromeDevice.getLogReader(app: mockWebApplicationPackage), isA<NoOpDeviceLogReader>());
-    expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
+    expect(chromeDevice.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
+    expect(chromeDevice.getLogReader(), isInstanceOf<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
   });
 
@@ -57,8 +57,7 @@ void main() {
     expect(device.supportsFlutterExit, true);
     expect(device.supportsScreenshot, false);
     expect(await device.isLocalEmulator, false);
-    expect(device.getLogReader(app: mockWebApplicationPackage), isA<NoOpDeviceLogReader>());
-    expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
+    expect(device.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
     expect(await device.portForwarder.forward(1), 1);
   });
 
@@ -67,7 +66,7 @@ void main() {
 
     final WebDevices deviceDiscoverer = WebDevices();
     final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
-    expect(devices, contains(isA<ChromeDevice>()));
+    expect(devices, contains(isInstanceOf<ChromeDevice>()));
   }, overrides: <Type, Generator>{
     ChromeLauncher: () => mockChromeLauncher,
   });
@@ -77,7 +76,7 @@ void main() {
 
     final WebDevices deviceDiscoverer = WebDevices();
     final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
-    expect(devices, isNot(contains(isA<ChromeDevice>())));
+    expect(devices, isNot(contains(isInstanceOf<ChromeDevice>())));
   }, overrides: <Type, Generator>{
     ChromeLauncher: () => mockChromeLauncher,
   });
@@ -87,7 +86,7 @@ void main() {
 
     final WebDevices deviceDiscoverer = WebDevices();
     final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
-    expect(devices, contains(isA<WebServerDevice>()));
+    expect(devices, contains(isInstanceOf<WebServerDevice>()));
   }, overrides: <Type, Generator>{
     ChromeLauncher: () => mockChromeLauncher,
   });

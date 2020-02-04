@@ -1,8 +1,7 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -116,6 +115,24 @@ void main() {
     expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
     expect(_getRawMaterialButton(tester).shape, shape);
     expect(_getRawMaterialButton(tester).splashColor, splashColor);
+  });
+
+  testWidgets('FloatingActionButton foreground color uses iconAccentTheme if no widget or widget theme color is specified', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        floatingActionButton: Theme(
+          data: ThemeData().copyWith(
+            accentIconTheme: const IconThemeData(color: Color(0xFACEFACE)),
+          ),
+          child: FloatingActionButton(
+            onPressed: () { },
+            child: const Icon(Icons.add),
+          ),
+        ),
+      ),
+    ));
+
+    expect(_getRichText(tester).text.style.color, const Color(0xFACEFACE));
   });
 
   testWidgets('FloatingActionButton uses a custom shape when specified in the theme', (WidgetTester tester) async {

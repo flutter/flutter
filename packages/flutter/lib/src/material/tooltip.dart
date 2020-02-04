@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -130,9 +130,9 @@ class Tooltip extends StatefulWidget {
   ///
   /// If null, the message's [TextStyle] will be determined based on
   /// [ThemeData]. If [ThemeData.brightness] is set to [Brightness.dark],
-  /// [ThemeData.textTheme.bodyText2] will be used with [Colors.white]. Otherwise,
+  /// [ThemeData.textTheme.body1] will be used with [Colors.white]. Otherwise,
   /// if [ThemeData.brightness] is set to [Brightness.light],
-  /// [ThemeData.textTheme.bodyText2] will be used with [Colors.black].
+  /// [ThemeData.textTheme.body1] will be used with [Colors.black].
   final TextStyle textStyle;
 
   /// The length of time that a pointer must hover over a tooltip's widget
@@ -280,7 +280,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _createNewEntry() {
-    final RenderBox box = context.findRenderObject() as RenderBox;
+    final RenderBox box = context.findRenderObject();
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
 
     // We create this widget outside of the overlay entry's builder to prevent
@@ -362,7 +362,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     TextStyle defaultTextStyle;
     BoxDecoration defaultDecoration;
     if (theme.brightness == Brightness.dark) {
-      defaultTextStyle = theme.textTheme.bodyText2.copyWith(
+      defaultTextStyle = theme.textTheme.body1.copyWith(
         color: Colors.black,
       );
       defaultDecoration = BoxDecoration(
@@ -370,7 +370,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         borderRadius: const BorderRadius.all(Radius.circular(4)),
       );
     } else {
-      defaultTextStyle = theme.textTheme.bodyText2.copyWith(
+      defaultTextStyle = theme.textTheme.body1.copyWith(
         color: Colors.white,
       );
       defaultDecoration = BoxDecoration(
@@ -504,7 +504,7 @@ class _TooltipOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.body1,
                 child: Container(
                   decoration: decoration,
                   padding: padding,

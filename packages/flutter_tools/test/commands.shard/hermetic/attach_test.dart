@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
-
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
@@ -26,7 +26,6 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -42,7 +41,7 @@ void main() {
       Cache.disableLocking();
       logger = StreamLogger();
       testFileSystem = MemoryFileSystem(
-      style: globals.platform.isWindows
+      style: platform.isWindows
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
@@ -165,10 +164,7 @@ void main() {
               if (message == '[stdout] Lost connection to device.') {
                 observatoryLogs.add(message);
               }
-              if (message.contains('Hot reload.')) {
-                observatoryLogs.add(message);
-              }
-              if (message.contains('Hot restart.')) {
+              if (message.contains('To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R".')) {
                 observatoryLogs.add(message);
               }
             });
@@ -206,16 +202,14 @@ void main() {
           }));
         });
 
-        expect(observatoryLogs.length, 9);
+        expect(observatoryLogs.length, 7);
         expect(observatoryLogs[0], '[stdout] Waiting for a connection from Flutter on MockAndroidDevice...');
         expect(observatoryLogs[1], '[verbose] Observatory URL on device: http://127.0.0.1:1234');
         expect(observatoryLogs[2], '[stdout] Lost connection to device.');
-        expect(observatoryLogs[3].contains('Hot reload.'), isTrue);
-        expect(observatoryLogs[4].contains('Hot restart.'), isTrue);
-        expect(observatoryLogs[5], '[verbose] Observatory URL on device: http://127.0.0.1:1235');
-        expect(observatoryLogs[6], '[stdout] Lost connection to device.');
-        expect(observatoryLogs[7].contains('Hot reload.'), isTrue);
-        expect(observatoryLogs[8].contains('Hot restart.'), isTrue);
+        expect(observatoryLogs[3].contains('To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R"'), isTrue);
+        expect(observatoryLogs[4], '[verbose] Observatory URL on device: http://127.0.0.1:1235');
+        expect(observatoryLogs[5], '[stdout] Lost connection to device.');
+        expect(observatoryLogs[6].contains('To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R"'), isTrue);
 
         verify(portForwarder.forward(1234, hostPort: anyNamed('hostPort'))).called(1);
         verify(portForwarder.forward(1235, hostPort: anyNamed('hostPort'))).called(1);
@@ -240,7 +234,7 @@ void main() {
         });
         testDeviceManager.addDevice(device);
         expect(createTestCommandRunner(AttachCommand()).run(<String>['attach']),
-               throwsToolExit());
+               throwsA(isA<ToolExit>()));
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -312,7 +306,7 @@ void main() {
           ),
         )..called(1);
 
-        final List<FlutterDevice> flutterDevices = verificationResult.captured.first as List<FlutterDevice>;
+        final List<FlutterDevice> flutterDevices = verificationResult.captured.first;
         expect(flutterDevices, hasLength(1));
 
         // Validate that the attach call built a flutter device with the right
@@ -409,63 +403,11 @@ void main() {
               'Observatory listening on http://127.0.0.1:$devicePort');
           return mockLogReader;
         });
-      final File foo = globals.fs.file('lib/foo.dart')
+      final File foo = fs.file('lib/foo.dart')
         ..createSync();
 
       // Delete the main.dart file to be sure that attach works without it.
-      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).deleteSync();
-
-      final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
-      await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
-
-      verify(mockHotRunnerFactory.build(
-        any,
-        target: foo.path,
-        debuggingOptions: anyNamed('debuggingOptions'),
-        packagesFilePath: anyNamed('packagesFilePath'),
-        flutterProject: anyNamed('flutterProject'),
-        ipv6: false,
-      )).called(1);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
-    testUsingContext('fallbacks to protocol observatory if MDNS failed on iOS', () async {
-      const int devicePort = 499;
-      const int hostPort = 42;
-      final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
-      final MockPortForwarder portForwarder = MockPortForwarder();
-      final MockIOSDevice device = MockIOSDevice();
-      final MockHotRunner mockHotRunner = MockHotRunner();
-      final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
-      when(device.portForwarder).thenReturn(portForwarder);
-      when(device.getLogReader()).thenAnswer((_) => mockLogReader);
-      when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-        .thenAnswer((_) async => hostPort);
-      when(portForwarder.forwardedPorts)
-        .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
-      when(portForwarder.unforward(any))
-        .thenAnswer((_) async => null);
-      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
-        .thenAnswer((_) async => 0);
-      when(mockHotRunnerFactory.build(
-        any,
-        target: anyNamed('target'),
-        debuggingOptions: anyNamed('debuggingOptions'),
-        packagesFilePath: anyNamed('packagesFilePath'),
-        flutterProject: anyNamed('flutterProject'),
-        ipv6: false,
-      )).thenReturn(mockHotRunner);
-      when(mockHotRunner.exited).thenReturn(false);
-      when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
-
-      testDeviceManager.addDevice(device);
-
-      final File foo = globals.fs.file('lib/foo.dart')..createSync();
-
-      // Delete the main.dart file to be sure that attach works without it.
-      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).deleteSync();
+      fs.file(fs.path.join('lib', 'main.dart')).deleteSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
       await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
@@ -619,7 +561,7 @@ void main() {
       final AttachCommand command = AttachCommand();
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsToolExit(),
+        throwsA(isInstanceOf<ToolExit>()),
       );
       expect(testLogger.statusText, contains('No supported devices connected'));
     }, overrides: <Type, Generator>{
@@ -642,7 +584,7 @@ void main() {
       testDeviceManager.addDevice(aDeviceWithId('yy2'));
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsToolExit(),
+        throwsA(isInstanceOf<ToolExit>()),
       );
       expect(testLogger.statusText, contains('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
@@ -704,11 +646,7 @@ class StreamLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
-    return SilentStatus(
-      timeout: timeout,
-      timeoutConfiguration: timeoutConfiguration,
-      stopwatch: Stopwatch(),
-    )..start();
+    return SilentStatus(timeout: timeout)..start();
   }
 
   bool _interrupt = false;
@@ -731,12 +669,6 @@ class StreamLogger extends Logger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
-
-  @override
-  bool get supportsColor => throw UnimplementedError();
-
-  @override
-  bool get hasTerminal => false;
 }
 
 class LoggerInterrupted implements Exception {
@@ -763,9 +695,7 @@ VMServiceConnector getFakeVmServiceFactory({
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     CompressionOptions compression,
-    Device device,
   }) async {
     final VMService vmService = VMServiceMock();
     final VM vm = VMMock();

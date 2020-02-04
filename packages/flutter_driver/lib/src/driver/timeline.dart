@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,20 +29,20 @@ class TimelineEvent {
   factory TimelineEvent(Map<String, dynamic> json) {
     return TimelineEvent._(
       json,
-      json['name'] as String,
-      json['cat'] as String,
-      json['ph'] as String,
-      json['pid'] as int,
-      json['tid'] as int,
+      json['name'],
+      json['cat'],
+      json['ph'],
+      json['pid'],
+      json['tid'],
       json['dur'] != null
-        ? Duration(microseconds: json['dur'] as int)
+        ? Duration(microseconds: json['dur'])
         : null,
       json['tdur'] != null
-        ? Duration(microseconds: json['tdur'] as int)
+        ? Duration(microseconds: json['tdur'])
         : null,
-      json['ts'] as int,
-      json['tts'] as int,
-      json['args'] as Map<String, dynamic>,
+      json['ts'],
+      json['tts'],
+      json['args'],
     );
   }
 
@@ -122,7 +122,7 @@ class TimelineEvent {
 }
 
 List<TimelineEvent> _parseEvents(Map<String, dynamic> json) {
-  final List<dynamic> jsonEvents = json['traceEvents'] as List<dynamic>;
+  final List<dynamic> jsonEvents = json['traceEvents'];
 
   if (jsonEvents == null)
     return null;

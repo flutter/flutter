@@ -1,11 +1,10 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:device_info/device_info.dart';
@@ -61,7 +60,7 @@ class VideoCard extends StatelessWidget {
 
     void pushFullScreenWidget() {
       final TransitionRoute<void> route = PageRouteBuilder<void>(
-        settings: RouteSettings(name: title),
+        settings: RouteSettings(name: title, isInitialRoute: false),
         pageBuilder: fullScreenRoutePageBuilder,
       );
 
@@ -281,7 +280,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
   StreamSubscription<ConnectivityResult> connectivitySubscription;
   bool connected = true;
 
-  static const SnackBar errorSnackBar = SnackBar(
+  static const Widget errorSnackBar = SnackBar(
     backgroundColor: Colors.red,
     content: ListTile(
       title: Text('No network'),
@@ -295,7 +294,8 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
     final Connectivity connectivity = Connectivity();
     ConnectivityResult previousResult = await connectivity.checkConnectivity();
     yield previousResult;
-    await for (final ConnectivityResult result in connectivity.onConnectivityChanged) {
+    await for (ConnectivityResult result
+        in connectivity.onConnectivityChanged) {
       if (result != previousResult) {
         yield result;
         previousResult = result;
@@ -306,15 +306,6 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) {
-      // Assume connectivity
-      // TODO(ditman): Remove this shortcut when `connectivity` support for web
-      // lands, https://github.com/flutter/flutter/issues/46735
-      if (!widget.connectedCompleter.isCompleted) {
-        widget.connectedCompleter.complete(null);
-      }
-      return;
-    }
     connectivitySubscription = connectivityStream().listen(
       (ConnectivityResult connectivityResult) {
         if (!mounted) {
@@ -333,7 +324,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
 
   @override
   void dispose() {
-    connectivitySubscription?.cancel();
+    connectivitySubscription.cancel();
     super.dispose();
   }
 
@@ -353,9 +344,7 @@ class VideoDemo extends StatefulWidget {
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 
 Future<bool> isIOSSimulator() async {
-  return !kIsWeb &&
-      Platform.isIOS &&
-      !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
+  return Platform.isIOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
 }
 
 class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMixin {

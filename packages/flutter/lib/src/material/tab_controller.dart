@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,9 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
-
-// Examples can assume:
-// BuildContext context;
 
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].
 ///
@@ -26,7 +23,7 @@ import 'constants.dart';
 ///
 /// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
@@ -339,13 +336,11 @@ class DefaultTabController extends StatefulWidget {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// {@tool snippet}
-  /// Typical usage is as follows:
+  /// Typical usage:
   ///
   /// ```dart
-  /// TabController controller = DefaultTabController.of(context);
+  /// TabController controller = DefaultTabBarController.of(context);
   /// ```
-  /// {@end-tool}
   static TabController of(BuildContext context) {
     final _TabControllerScope scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
     return scope?.controller;

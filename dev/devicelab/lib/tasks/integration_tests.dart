@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -107,22 +107,8 @@ TaskFunction createAndroidSplashScreenKitchenSinkTest() {
   );
 }
 
-/// Executes a driver test that takes a screenshot and compares it against a golden image.
-/// If [useFlutterGold] is true, the golden image is served by Flutter Gold
-/// (https://flutter-gold.skia.org/), otherwise the golden image is read from the disk.
-TaskFunction createFlutterDriverScreenshotTest({
-  bool useFlutterGold = false,
-}) {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/flutter_driver_screenshot_test',
-    'lib/main.dart',
-    extraOptions: useFlutterGold ? const <String>[
-      '--driver', 'test_driver/flutter_gold_main_test.dart'
-    ] : const <String>[]
-  );
-}
-
 class DriverTest {
+
   DriverTest(
     this.testDirectory,
     this.testTarget, {

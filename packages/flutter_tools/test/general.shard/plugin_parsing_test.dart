@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,13 +18,13 @@ void main() {
           'iosPrefix: FLT\n'
           'pluginClass: SamplePlugin\n';
 
-      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
           Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       final AndroidPlugin androidPlugin =
-          plugin.platforms[AndroidPlugin.kConfigKey] as AndroidPlugin;
-      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey] as IOSPlugin;
+          plugin.platforms[AndroidPlugin.kConfigKey];
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -51,20 +51,20 @@ void main() {
           ' windows:\n'
           '  pluginClass: WinSamplePlugin\n';
 
-      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
           Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       final AndroidPlugin androidPlugin =
-          plugin.platforms[AndroidPlugin.kConfigKey] as AndroidPlugin;
-      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey] as IOSPlugin;
+          plugin.platforms[AndroidPlugin.kConfigKey];
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
       final LinuxPlugin linuxPlugin =
-          plugin.platforms[LinuxPlugin.kConfigKey] as LinuxPlugin;
+          plugin.platforms[LinuxPlugin.kConfigKey];
       final MacOSPlugin macOSPlugin =
-          plugin.platforms[MacOSPlugin.kConfigKey] as MacOSPlugin;
-      final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey] as WebPlugin;
+          plugin.platforms[MacOSPlugin.kConfigKey];
+      final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey];
       final WindowsPlugin windowsPlugin =
-          plugin.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
+          plugin.platforms[WindowsPlugin.kConfigKey];
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -100,14 +100,18 @@ void main() {
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
-      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml as YamlMap, const <String>[]);
+      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
-      final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey] as AndroidPlugin;
-      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey] as IOSPlugin;
-      final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey] as LinuxPlugin;
-      final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey] as MacOSPlugin;
-      final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey] as WebPlugin;
-      final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
+      final AndroidPlugin androidPlugin =
+      plugin.platforms[AndroidPlugin.kConfigKey];
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
+      final LinuxPlugin linuxPlugin =
+      plugin.platforms[LinuxPlugin.kConfigKey];
+      final MacOSPlugin macOSPlugin =
+      plugin.platforms[MacOSPlugin.kConfigKey];
+      final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey];
+      final WindowsPlugin windowsPlugin =
+      plugin.platforms[WindowsPlugin.kConfigKey];
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -120,19 +124,6 @@ void main() {
       expect(webPlugin.pluginClass, 'WebSamplePlugin');
       expect(webPlugin.fileName, 'web_plugin.dart');
       expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
-    });
-
-    test('Legacy Format and Multi-Platform Format together is not allowed and error message contains plugin name', () {
-      const String pluginYamlRaw = 'androidPackage: com.flutter.dev\n'
-          'platforms:\n'
-          ' android:\n'
-          '  package: com.flutter.dev\n';
-
-      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
-      expect(
-        () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
-        throwsToolExit(message: _kTestPluginName),
-      );
     });
 
     test('A default_package field is allowed', () {
@@ -153,31 +144,9 @@ void main() {
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
-      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml as YamlMap, const <String>[]);
+      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       expect(plugin.platforms, <String, PluginPlatform> {});
-    });
-
-    test('error on empty platforms', () {
-      const String pluginYamlRaw = 'platforms:\n';
-
-      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
-      expect(
-            () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
-        throwsToolExit(message: 'Invalid "platforms" specification.'),
-      );
-    });
-
-    test('error on empty platform', () {
-      const String pluginYamlRaw =
-          'platforms:\n'
-          ' android:\n';
-
-      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
-      expect(
-            () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
-        throwsToolExit(message: 'Invalid "android" plugin specification.'),
-      );
     });
   });
 }

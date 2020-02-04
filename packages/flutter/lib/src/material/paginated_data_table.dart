@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -74,7 +74,6 @@ class PaginatedDataTable extends StatefulWidget {
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
-    this.showCheckboxColumn = true,
     this.initialFirstRowIndex = 0,
     this.onPageChanged,
     this.rowsPerPage = defaultRowsPerPage,
@@ -92,7 +91,6 @@ class PaginatedDataTable extends StatefulWidget {
        assert(headingRowHeight != null),
        assert(horizontalMargin != null),
        assert(columnSpacing != null),
-       assert(showCheckboxColumn != null),
        assert(rowsPerPage != null),
        assert(rowsPerPage > 0),
        assert(() {
@@ -166,9 +164,6 @@ class PaginatedDataTable extends StatefulWidget {
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double columnSpacing;
 
-  /// {@macro flutter.material.dataTable.showCheckboxColumn}
-  final bool showCheckboxColumn;
-
   /// The index of the first row to display when the widget is first created.
   final int initialFirstRowIndex;
 
@@ -231,7 +226,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   @override
   void initState() {
     super.initState();
-    _firstRowIndex = PageStorage.of(context)?.readState(context) as int ?? widget.initialFirstRowIndex ?? 0;
+    _firstRowIndex = PageStorage.of(context)?.readState(context) ?? widget.initialFirstRowIndex ?? 0;
     widget.source.addListener(_handleDataSourceChanged);
     _handleDataSourceChanged();
   }
@@ -387,7 +382,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             alignment: AlignmentDirectional.centerEnd,
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
-                items: availableRowsPerPage.cast<DropdownMenuItem<int>>(),
+                items: availableRowsPerPage,
                 value: widget.rowsPerPage,
                 onChanged: widget.onRowsPerPageChanged,
                 style: footerTextStyle,
@@ -426,82 +421,74 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     ]);
 
     // CARD
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return Card(
-          semanticContainer: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Semantics(
-                container: true,
-                child: DefaultTextStyle(
-                  // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
-                  // list and then tweak them appropriately.
-                  // See https://material.io/design/components/data-tables.html#tables-within-cards
-                  style: _selectedRowCount > 0 ? themeData.textTheme.subtitle1.copyWith(color: themeData.accentColor)
-                                               : themeData.textTheme.headline6.copyWith(fontWeight: FontWeight.w400),
-                  child: IconTheme.merge(
-                    data: const IconThemeData(
-                      opacity: 0.54
-                    ),
-                    child: Ink(
-                      height: 64.0,
-                      color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: headerWidgets,
-                        ),
-                      ),
+    return Card(
+      semanticContainer: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Semantics(
+            container: true,
+            child: DefaultTextStyle(
+              // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
+              // list and then tweak them appropriately.
+              // See https://material.io/design/components/data-tables.html#tables-within-cards
+              style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
+                                           : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
+              child: IconTheme.merge(
+                data: const IconThemeData(
+                  opacity: 0.54
+                ),
+                child: Ink(
+                  height: 64.0,
+                  color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: headerWidgets,
                     ),
                   ),
                 ),
               ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                dragStartBehavior: widget.dragStartBehavior,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: constraints.minWidth),
-                  child: DataTable(
-                    key: _tableKey,
-                    columns: widget.columns,
-                    sortColumnIndex: widget.sortColumnIndex,
-                    sortAscending: widget.sortAscending,
-                    onSelectAll: widget.onSelectAll,
-                    dataRowHeight: widget.dataRowHeight,
-                    headingRowHeight: widget.headingRowHeight,
-                    horizontalMargin: widget.horizontalMargin,
-                    columnSpacing: widget.columnSpacing,
-                    rows: _getRows(_firstRowIndex, widget.rowsPerPage),
-                  ),
-                ),
-              ),
-              DefaultTextStyle(
-                style: footerTextStyle,
-                child: IconTheme.merge(
-                  data: const IconThemeData(
-                    opacity: 0.54
-                  ),
-                  child: Container(
-                    // TODO(bkonyi): this won't handle text zoom correctly, https://github.com/flutter/flutter/issues/48522
-                    height: 56.0,
-                    child: SingleChildScrollView(
-                      dragStartBehavior: widget.dragStartBehavior,
-                      scrollDirection: Axis.horizontal,
-                      reverse: true,
-                      child: Row(
-                        children: footerWidgets,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        );
-      },
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            dragStartBehavior: widget.dragStartBehavior,
+            child: DataTable(
+              key: _tableKey,
+              columns: widget.columns,
+              sortColumnIndex: widget.sortColumnIndex,
+              sortAscending: widget.sortAscending,
+              onSelectAll: widget.onSelectAll,
+              dataRowHeight: widget.dataRowHeight,
+              headingRowHeight: widget.headingRowHeight,
+              horizontalMargin: widget.horizontalMargin,
+              columnSpacing: widget.columnSpacing,
+              rows: _getRows(_firstRowIndex, widget.rowsPerPage),
+            ),
+          ),
+          DefaultTextStyle(
+            style: footerTextStyle,
+            child: IconTheme.merge(
+              data: const IconThemeData(
+                opacity: 0.54
+              ),
+              child: Container(
+                height: 56.0,
+                child: SingleChildScrollView(
+                  dragStartBehavior: widget.dragStartBehavior,
+                  scrollDirection: Axis.horizontal,
+                  reverse: true,
+                  child: Row(
+                    children: footerWidgets,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

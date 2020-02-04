@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -93,7 +93,7 @@ class GridTileBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       DefaultTextStyle(
-                        style: darkTheme.textTheme.subtitle1,
+                        style: darkTheme.textTheme.subhead,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         child: title,
@@ -110,7 +110,7 @@ class GridTileBar extends StatelessWidget {
               else if (title != null || subtitle != null)
                 Expanded(
                   child: DefaultTextStyle(
-                    style: darkTheme.textTheme.subtitle1,
+                    style: darkTheme.textTheme.subhead,
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     child: title ?? subtitle,

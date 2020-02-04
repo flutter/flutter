@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -40,7 +40,7 @@ import 'theme_data.dart';
 ///
 /// The [clipBehavior] argument must not be null.
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// This example shows a simple [FlatButton].
 ///
@@ -58,7 +58,7 @@ import 'theme_data.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// This example shows a [FlatButton] that is normally white-on-blue,
 /// with splashes rendered in a different shade of blue.
@@ -115,7 +115,6 @@ class FlatButton extends MaterialButton {
     Color splashColor,
     Brightness colorBrightness,
     EdgeInsetsGeometry padding,
-    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
@@ -140,7 +139,6 @@ class FlatButton extends MaterialButton {
          splashColor: splashColor,
          colorBrightness: colorBrightness,
          padding: padding,
-         visualDensity: visualDensity,
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
@@ -201,7 +199,6 @@ class FlatButton extends MaterialButton {
       highlightElevation: buttonTheme.getHighlightElevation(this),
       disabledElevation: buttonTheme.getDisabledElevation(this),
       padding: buttonTheme.getPadding(this),
-      visualDensity: visualDensity ?? theme.visualDensity,
       constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,

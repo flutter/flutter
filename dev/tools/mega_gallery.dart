@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,7 +25,7 @@ void main(List<String> args) {
 
   final ArgResults results = argParser.parse(args);
 
-  if (results['help'] as bool) {
+  if (results['help']) {
     print('Generate n copies of flutter_gallery.\n');
     print('usage: dart mega_gallery.dart <options>');
     print(argParser.usage);
@@ -33,9 +33,9 @@ void main(List<String> args) {
   }
 
   final Directory source = Directory(_normalize('examples/flutter_gallery'));
-  final Directory out = Directory(_normalize(results['out'] as String));
+  final Directory out = Directory(_normalize(results['out']));
 
-  if (results['delete'] as bool) {
+  if (results['delete']) {
     if (out.existsSync()) {
       print('Deleting ${out.path}');
       out.deleteSync(recursive: true);
@@ -55,7 +55,7 @@ void main(List<String> args) {
     final SourceStats stats = getStatsFor(_dir(source, 'lib'));
     copies = (kTargetLineCount / stats.lines).round();
   } else {
-    copies = int.parse(results['copies'] as String);
+    copies = int.parse(results['copies']);
   }
 
   print('Making $copies copies of flutter_gallery.');
@@ -89,7 +89,7 @@ void main(List<String> args) {
   _file(out, '.dartignore').writeAsStringSync('');
 
   // Count source lines and number of files; tell how to run it.
-  print('  ${path.relative(results["out"] as String)} : ${getStatsFor(out)}');
+  print('  ${path.relative(results["out"])} : ${getStatsFor(out)}');
 }
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
@@ -102,7 +102,7 @@ void _createEntry(File mainFile, int copies) {
   }
 
   final String contents = '''
-// Copyright 2014 The Flutter Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -134,7 +134,7 @@ void _copy(Directory source, Directory target) {
   if (!target.existsSync())
     target.createSync(recursive: true);
 
-  for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
+  for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
 
     if (entity is Directory) {
@@ -165,7 +165,7 @@ class SourceStats {
 SourceStats getStatsFor(Directory dir, [SourceStats stats]) {
   stats ??= SourceStats();
 
-  for (final FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
+  for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
     final String name = path.basename(entity.path);
     if (entity is File && name.endsWith('.dart')) {
       stats.files += 1;
