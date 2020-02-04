@@ -375,54 +375,6 @@ void main() {
   }, skip: isBrowser);
 
   group('New Floating Action Button Locations', () {
-    const double _leftOffsetX = 44.0;
-    const double _centerOffsetX = 400.0;
-    const double _rightOffsetX = 756.0;
-    const double _miniLeftOffsetX = _leftOffsetX - kMiniButtonOffsetAdjustment;
-    const double _miniRightOffsetX = _rightOffsetX + kMiniButtonOffsetAdjustment;
-
-    const double _topOffsetY = 56.0;
-    const double _floatOffsetY = 500.0;
-    const double _dockedOffsetY = 544.0;
-    const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
-
-    Widget _singleFABScaffold(
-      FloatingActionButtonLocation location,
-      {
-        bool mini = false,
-        TextDirection textDirection = TextDirection.ltr,
-      }
-    ) {
-      return MaterialApp(
-        home: Directionality(
-          textDirection: textDirection,
-          child: Scaffold(
-            appBar: AppBar(
-              title: const Text('FloatingActionButtonLocation Test.'),
-            ),
-            bottomNavigationBar: BottomNavigationBar(
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  title: const Text('Home'),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.school),
-                  title: const Text('School'),
-                ),
-              ],
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {},
-              child: Icon(Icons.beach_access),
-              mini: mini,
-            ),
-            floatingActionButtonLocation: location,
-          ),
-        ),
-      );
-    }
-
     testWidgets('startTop', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startTop));
 
@@ -534,6 +486,59 @@ void main() {
     });
   });
 
+  group('Moves involving new locations', () {
+    testWidgets('Moves between new locations and new locations', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.centerTop));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_centerOffsetX, _topOffsetY));
+
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startFloat));
+
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+      await tester.pumpAndSettle();
+      expect(tester.binding.transientCallbackCount, 0);
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _floatOffsetY));
+
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startDocked));
+
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+      await tester.pumpAndSettle();
+      expect(tester.binding.transientCallbackCount, 0);
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _dockedOffsetY));
+    });
+
+    testWidgets('Moves between new locations and old locations', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.endDocked));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX, _dockedOffsetY));
+
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.startDocked));
+
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+      await tester.pumpAndSettle();
+      expect(tester.binding.transientCallbackCount, 0);
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _dockedOffsetY));
+
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.centerFloat));
+
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+      await tester.pumpAndSettle();
+      expect(tester.binding.transientCallbackCount, 0);
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_centerOffsetX, _floatOffsetY));
+
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.centerTop));
+
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+      await tester.pumpAndSettle();
+      expect(tester.binding.transientCallbackCount, 0);
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_centerOffsetX, _topOffsetY));
+    });
+  });
 }
 
 
@@ -574,6 +579,53 @@ class _GeometryListenerState extends State<_GeometryListener> {
   }
 }
 
+const double _leftOffsetX = 44.0;
+const double _centerOffsetX = 400.0;
+const double _rightOffsetX = 756.0;
+const double _miniLeftOffsetX = _leftOffsetX - kMiniButtonOffsetAdjustment;
+const double _miniRightOffsetX = _rightOffsetX + kMiniButtonOffsetAdjustment;
+
+const double _topOffsetY = 56.0;
+const double _floatOffsetY = 500.0;
+const double _dockedOffsetY = 544.0;
+const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
+
+Widget _singleFABScaffold(
+  FloatingActionButtonLocation location,
+  {
+    bool mini = false,
+    TextDirection textDirection = TextDirection.ltr,
+  }
+) {
+  return MaterialApp(
+    home: Directionality(
+      textDirection: textDirection,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('FloatingActionButtonLocation Test.'),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              title: const Text('Home'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.school),
+              title: const Text('School'),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          child: Icon(Icons.beach_access),
+          mini: mini,
+        ),
+        floatingActionButtonLocation: location,
+      ),
+    ),
+  );
+}
 
 // The Scaffold.geometryOf() value is only available at paint time.
 // To fetch it for the tests we implement this CustomPainter that just
