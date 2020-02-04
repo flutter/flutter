@@ -145,7 +145,7 @@ class SkiaGoldClient {
     print('stdout: ${result.stdout}');
     print('stderr: ${result.stderr}');
     print('auth_opt.json:');
-    print(_printClientAuthConfig());
+    print(await _printClientAuthConfig());
   }
 
   /// Prepares the local work space for an unauthorized client to lookup golden
