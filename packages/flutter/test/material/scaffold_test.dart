@@ -273,39 +273,39 @@ void main() {
               child: Icon(Icons.beach_access),
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-            additionalFloatingActionButtonConfigurations: {
-              ValueKey('fab2') : FloatingActionButtonConfiguration(
+            additionalFloatingActionButtonConfigurations: <Key, FloatingActionButtonConfiguration>{
+              const ValueKey<String>('fab2') : FloatingActionButtonConfiguration(
                 button: FloatingActionButton(
                   onPressed: () {},
-                  child: Icon(Icons.golf_course),
+                  child: const Icon(Icons.golf_course),
                 ),
                 location: FloatingActionButtonLocation.endTop,
               ),
-              ValueKey('fab3') : FloatingActionButtonConfiguration(
+              const ValueKey<String>('fab3') : FloatingActionButtonConfiguration(
                 button: FloatingActionButton(
                   onPressed: () {},
-                  child: Icon(Icons.android),
+                  child: const Icon(Icons.android),
                 ),
                 location: FloatingActionButtonLocation.centerTop,
               ),
-              ValueKey('fab4') : FloatingActionButtonConfiguration(
+              const ValueKey<String>('fab4') : FloatingActionButtonConfiguration(
                 button: FloatingActionButton(
                   onPressed: () {},
-                  child: Icon(Icons.book),
+                  child: const Icon(Icons.book),
                 ),
                 location: FloatingActionButtonLocation.startTop,
               ),
-              ValueKey('fab5') : FloatingActionButtonConfiguration(
+              const ValueKey<String>('fab5') : FloatingActionButtonConfiguration(
                 button: FloatingActionButton(
                   onPressed: () {},
-                  child: Icon(Icons.add_location),
+                  child: const Icon(Icons.add_location),
                 ),
                 location: FloatingActionButtonLocation.startFloat,
               ),
-              ValueKey('fab6') : FloatingActionButtonConfiguration(
+              const ValueKey<String>('fab6') : FloatingActionButtonConfiguration(
                 button: FloatingActionButton(
                   onPressed: () {},
-                  child: Icon(Icons.cake),
+                  child: const Icon(Icons.cake),
                 ),
                 location: FloatingActionButtonLocation.centerFloat,
               ),
