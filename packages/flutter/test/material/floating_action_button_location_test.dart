@@ -386,30 +386,39 @@ void main() {
     const double _dockedOffsetY = 544.0;
     const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 
-    Widget _singleFABScaffold(FloatingActionButtonLocation location, {bool mini = false}) {
+    Widget _singleFABScaffold(
+      FloatingActionButtonLocation location,
+      {
+        bool mini = false,
+        TextDirection textDirection = TextDirection.ltr,
+      }
+    ) {
       return MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('FloatingActionButtonLocation Test.'),
+        home: Directionality(
+          textDirection: textDirection,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('FloatingActionButtonLocation Test.'),
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  title: const Text('Home'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.school),
+                  title: const Text('School'),
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              child: Icon(Icons.beach_access),
+              mini: mini,
+            ),
+            floatingActionButtonLocation: location,
           ),
-          bottomNavigationBar: BottomNavigationBar(
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                title: const Text('Home'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.school),
-                title: const Text('School'),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {},
-            child: Icon(Icons.beach_access),
-            mini: mini,
-          ),
-          floatingActionButtonLocation: location,
         ),
       );
     }
@@ -508,6 +517,20 @@ void main() {
       await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniEndDocked));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_miniRightOffsetX, _dockedOffsetY));
+    });
+
+    /// Test a few RTL cases.
+
+    testWidgets('endTop, RTL', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.endTop, textDirection: TextDirection.rtl));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _topOffsetY));
+    });
+
+    testWidgets('miniStartFloat, RTL', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFABScaffold(FloatingActionButtonLocation.miniStartFloat, textDirection: TextDirection.rtl));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_miniRightOffsetX, _miniFloatOffsetY));
     });
   });
 
