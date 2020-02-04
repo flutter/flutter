@@ -5,7 +5,7 @@
 @TestOn('!chrome') // This whole test suite needs triage.
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui show window;
+import 'dart:ui' as ui show window, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -489,21 +489,21 @@ void main() {
 
   testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-                toolbarOptions: const ToolbarOptions(copy: true),
-              ),
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+              toolbarOptions: const ToolbarOptions(copy: true),
             ),
           ),
         ),
-      );
+      ),
+    );
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
@@ -535,6 +535,98 @@ void main() {
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Select All'), findsNothing);
   }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('text selection style', (WidgetTester tester) async {
+
+    final TextEditingController controller0 = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure\nhi',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: RepaintBoundary(
+              child: Container(
+                width: 650.0,
+                height: 600.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      key: Key('field0'),
+                      controller: controller0,
+                      style: TextStyle(height: 4, color: Colors.black45),
+                      toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
+                      selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+                      selectionWidthStyle: ui.BoxWidthStyle.max,
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byKey(Key('field0')));
+
+    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.longPressAt(textfieldStart + const Offset(100.0, 107.0));
+    await tester.pump(const Duration(milliseconds: 150));
+
+    await tester.pump(const Duration(milliseconds: 150));
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('text_golden.TextSelectionStyle.1.png'),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: RepaintBoundary(
+              child: Container(
+                width: 650.0,
+                height: 600.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      key: Key('field0'),
+                      controller: controller0,
+                      style: TextStyle(height: 4, color: Colors.black45),
+                      toolbarOptions: ToolbarOptions(copy: true, selectAll: true),
+                      selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
+                      selectionWidthStyle: ui.BoxWidthStyle.max,
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.longPressAt(textfieldStart + const Offset(100.0, 107.0));
+    await tester.pump(const Duration(milliseconds: 150));
+
+    await tester.pump(const Duration(milliseconds: 150));
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('text_golden.TextSelectionStyle.2.png'),
+    );
+  });
 
   testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
