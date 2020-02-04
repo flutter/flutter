@@ -1204,13 +1204,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // TextInputClient implementation:
 
-  // _lastFormattedUnmodifiedTextEditingValue tracks the last value
-  // that the formatter ran on and is used to prevent double-formatting.
-  TextEditingValue _lastFormattedUnmodifiedTextEditingValue;
-  // _receivedRemoteTextEditingValue is the direct value last passed in
-  // updateEditingValue. This value does not get updated with the formatted
-  // version.
-  TextEditingValue _receivedRemoteTextEditingValue;
+  TextEditingValue _lastKnownRemoteTextEditingValue;
 
   @override
   TextEditingValue get currentTextEditingValue => _value;
@@ -1222,7 +1216,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.readOnly) {
       return;
     }
-    _receivedRemoteTextEditingValue = value;
     if (value.text != _value.text) {
       hideToolbar();
       _showCaretOnScreen();
@@ -1231,7 +1224,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _obscureLatestCharIndex = _value.selection.baseOffset;
       }
     }
-
+    _lastKnownRemoteTextEditingValue = value;
     _formatAndSetValue(value);
 
     // To keep the cursor from blinking while typing, we want to restart the
@@ -1258,7 +1251,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         break;
       default:
         // Finalize editing, but don't give up focus because this keyboard
-        // action does not imply the user is done inputting information.
+        //  action does not imply the user is done inputting information.
         _finalizeEditing(false);
         break;
     }
@@ -1358,8 +1351,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection)
       return;
     final TextEditingValue localValue = _value;
-    if (localValue == _receivedRemoteTextEditingValue)
+    if (localValue == _lastKnownRemoteTextEditingValue)
       return;
+    _lastKnownRemoteTextEditingValue = localValue;
     _textInputConnection.setEditingState(localValue);
   }
 
@@ -1420,7 +1414,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
-      _lastFormattedUnmodifiedTextEditingValue = localValue;
+      _lastKnownRemoteTextEditingValue = localValue;
       _textInputConnection = TextInput.attach(
         this,
         TextInputConfiguration(
@@ -1460,8 +1454,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection.close();
       _textInputConnection = null;
-      _lastFormattedUnmodifiedTextEditingValue = null;
-      _receivedRemoteTextEditingValue = null;
+      _lastKnownRemoteTextEditingValue = null;
     }
   }
 
@@ -1479,8 +1472,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection.connectionClosedReceived();
       _textInputConnection = null;
-      _lastFormattedUnmodifiedTextEditingValue = null;
-      _receivedRemoteTextEditingValue = null;
+      _lastKnownRemoteTextEditingValue = null;
       _finalizeEditing(true);
     }
   }
@@ -1624,21 +1616,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _formatAndSetValue(TextEditingValue value) {
-    // Check if the new value is the same as the current local value, or is the same
-    // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
-    final bool isRepeat = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    if (textChanged && !isRepeat && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
       for (final TextInputFormatter formatter in widget.inputFormatters)
         value = formatter.formatEditUpdate(_value, value);
       _value = value;
       _updateRemoteEditingValueIfNeeded();
-    } else if (!isRepeat || !textChanged) {
+    } else {
       _value = value;
     }
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
-    _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
   }
 
   void _onCursorColorTick() {

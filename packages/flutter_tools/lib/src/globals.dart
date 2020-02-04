@@ -35,6 +35,12 @@ FileSystem get fs => ErrorHandlingFileSystem(
   context.get<FileSystem>() ?? _kLocalFs,
 );
 
+final FileSystemUtils _defaultFileSystemUtils = FileSystemUtils(
+  fileSystem: fs,
+  platform: platform,
+);
+
+FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? _defaultFileSystemUtils;
 
 const ProcessManager _kLocalProcessManager = LocalProcessManager();
 

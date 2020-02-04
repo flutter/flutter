@@ -13,8 +13,8 @@ void main() {
     imageCache.clear();
   });
 
-  RecordingPhysics _findPhysics(WidgetTester tester) {
-    return Scrollable.of(find.byType(TestWidget).evaluate().first).position.physics as RecordingPhysics;
+  T _findPhysics<T extends ScrollPhysics>(WidgetTester tester) {
+    return Scrollable.of(find.byType(TestWidget).evaluate().first).position.physics as T;
   }
 
   ScrollMetrics _findMetrics(WidgetTester tester) {
@@ -83,7 +83,7 @@ void main() {
     testImageProvider.complete();
 
     expect(imageCache.currentSize, 1);
-    expect(_findPhysics(tester).velocities, <double>[0]);
+    expect(_findPhysics<RecordingPhysics>(tester).velocities, <double>[0]);
   });
 
   testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (WidgetTester tester) async {
@@ -119,7 +119,7 @@ void main() {
       curve: Curves.fastLinearToSlowEaseIn,
     );
     await tester.pump();
-    final RecordingPhysics physics = _findPhysics(tester);
+    final RecordingPhysics physics = _findPhysics<RecordingPhysics>(tester);
 
     expect(physics.velocities.length, 0);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -177,7 +177,7 @@ void main() {
       curve: Curves.fastLinearToSlowEaseIn,
     );
     await tester.pump();
-    final RecordingPhysics physics = _findPhysics(tester);
+    final RecordingPhysics physics = _findPhysics<RecordingPhysics>(tester);
 
     expect(physics.velocities.length, 0);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -245,7 +245,7 @@ void main() {
       curve: Curves.fastLinearToSlowEaseIn,
     );
     await tester.pump();
-    final RecordingPhysics physics = _findPhysics(tester);
+    final RecordingPhysics physics = _findPhysics<RecordingPhysics>(tester);
 
     expect(physics.velocities.length, 0);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
@@ -281,6 +281,54 @@ void main() {
 
     expect(imageCache.currentSize, 0);
   });
+
+  testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice', (WidgetTester tester) async {
+    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        physics: ControllablePhysics(),
+        controller: scrollController,
+        child: TestWidget(key),
+      ),
+    ));
+
+    final DisposableBuildContext context = DisposableBuildContext(key.currentState);
+    const TestImage testImage = TestImage(width: 10, height: 10);
+    final TestImageProvider testImageProvider = TestImageProvider(testImage);
+    final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
+
+    expect(testImageProvider.configuration, null);
+    expect(imageCache.containsKey(testImageProvider), false);
+
+    final ControllablePhysics physics = _findPhysics<ControllablePhysics>(tester);
+    physics.recommendDeferredLoadingValue = true;
+
+    final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+
+    expect(testImageProvider.configuration, null);
+    expect(stream.completer, null);
+    expect(imageCache.containsKey(testImageProvider), false);
+    expect(imageCache.currentSize, 0);
+
+    // Simulate a case where somone else has managed to complete this stream -
+    // so it can land in the cache right before we stop scrolling fast.
+    // If we miss the early return, we will fail.
+    testImageProvider.complete();
+
+    imageCache.putIfAbsent(testImageProvider, () => testImageProvider.load(testImageProvider, PaintingBinding.instance.instantiateImageCodec));
+    // We've stopped scrolling fast.
+    physics.recommendDeferredLoadingValue = false;
+    await tester.idle();
+
+    expect(imageCache.containsKey(testImageProvider), true);
+    expect(imageCache.currentSize, 1);
+    expect(stream.completer, null);
+  });
 }
 
 class TestWidget extends StatefulWidget {
@@ -309,5 +357,24 @@ class RecordingPhysics extends ScrollPhysics {
   bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
     velocities.add(velocity);
     return super.recommendDeferredLoading(velocity, metrics, context);
+  }
+}
+
+// Ignore this so that we can mutate whether we defer loading or not at specific
+// times without worrying about actual scrolling mechanics.
+// ignore: must_be_immutable
+class ControllablePhysics extends ScrollPhysics {
+  ControllablePhysics({ ScrollPhysics parent }) : super(parent: parent);
+
+  bool recommendDeferredLoadingValue = false;
+
+  @override
+  ControllablePhysics applyTo(ScrollPhysics ancestor) {
+    return ControllablePhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
+    return recommendDeferredLoadingValue;
   }
 }

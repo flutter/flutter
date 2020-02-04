@@ -397,7 +397,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-      'Launching ${fsUtils.getDisplayPath(target)} '
+      'Launching ${globals.fsUtils.getDisplayPath(target)} '
       'on ${device.device.name} in $modeName mode...',
     );
     final String effectiveHostname = debuggingOptions.hostname ?? 'localhost';
@@ -515,7 +515,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
           'import "$generatedImport";',
         'Future<void> main() async {',
         if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistry);'
+          '  registerPlugins(webPluginRegistry);',
         '  await ui.webOnlyInitializePlatform();',
         '  entrypoint.main();',
         '}',
@@ -641,7 +641,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-      'Launching ${fsUtils.getDisplayPath(target)} '
+      'Launching ${globals.fsUtils.getDisplayPath(target)} '
       'on ${device.device.name} in $modeName mode...',
     );
     Status buildStatus;
