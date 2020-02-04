@@ -1,4 +1,4 @@
-Signature: d4172921f48473fbb848a21f0ec3b6da
+Signature: a4ee20f8eb7fb9c7ce2ac5d9348208b8
 
 UNUSED LICENSES:
 
@@ -7472,6 +7472,26 @@ FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_x86.S
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_functions_helpers.S
 FILE: ../../../third_party/dart/runtime/docs/compiler/images/catch-block-entry-0.png
 FILE: ../../../third_party/dart/runtime/docs/compiler/images/catch-block-entry-1.png
+FILE: ../../../third_party/dart/runtime/docs/images/aot-ic-dictionary.png
+FILE: ../../../third_party/dart/runtime/docs/images/aot-ic-linear.png
+FILE: ../../../third_party/dart/runtime/docs/images/aot-ic-monomorphic.png
+FILE: ../../../third_party/dart/runtime/docs/images/aot-ic-singletarget.png
+FILE: ../../../third_party/dart/runtime/docs/images/aot-ic-unlinked.png
+FILE: ../../../third_party/dart/runtime/docs/images/aot.png
+FILE: ../../../third_party/dart/runtime/docs/images/dart-to-kernel.png
+FILE: ../../../third_party/dart/runtime/docs/images/flutter-cfe.png
+FILE: ../../../third_party/dart/runtime/docs/images/images.graffle!images
+FILE: ../../../third_party/dart/runtime/docs/images/inline-cache-1.png
+FILE: ../../../third_party/dart/runtime/docs/images/isolates.png
+FILE: ../../../third_party/dart/runtime/docs/images/kernel-loaded-1.png
+FILE: ../../../third_party/dart/runtime/docs/images/kernel-loaded-2.png
+FILE: ../../../third_party/dart/runtime/docs/images/kernel-service.png
+FILE: ../../../third_party/dart/runtime/docs/images/optimizing-compilation.png
+FILE: ../../../third_party/dart/runtime/docs/images/raw-function-lazy-compile.png
+FILE: ../../../third_party/dart/runtime/docs/images/snapshot-appjit.png
+FILE: ../../../third_party/dart/runtime/docs/images/snapshot-with-code.png
+FILE: ../../../third_party/dart/runtime/docs/images/snapshot.png
+FILE: ../../../third_party/dart/runtime/docs/images/unoptimized-compilation.png
 FILE: ../../../third_party/dart/runtime/docs/infra/images/isolated-out-browser.png
 FILE: ../../../third_party/dart/runtime/docs/infra/images/isolated-out-link.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/elements.dart
@@ -7482,6 +7502,10 @@ FILE: ../../../third_party/dart/runtime/observatory/web/favicon.ico
 FILE: ../../../third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
+FILE: ../../../third_party/dart/runtime/tools/wiki/styles/style.scss
+FILE: ../../../third_party/dart/runtime/tools/wiki/templates/includes/auto-refresh.html
+FILE: ../../../third_party/dart/runtime/tools/wiki/templates/includes/favicon.html
+FILE: ../../../third_party/dart/runtime/tools/wiki/templates/page.html
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
@@ -7755,6 +7779,11 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/TypedDataDuplicate/dart/TypedDataDuplicate.dart
 FILE: ../../../third_party/dart/runtime/observatory/bin/heap_snapshot.dart
+FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/bin/main.dart
+FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/cquery_driver.dart
+FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/xref_extractor.dart
+FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/call.cc
@@ -7771,6 +7800,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_representation.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/native_representation.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.h
+FILE: ../../../third_party/dart/runtime/vm/dispatch_table.cc
+FILE: ../../../third_party/dart/runtime/vm/dispatch_table.h
 FILE: ../../../third_party/dart/runtime/vm/field_table.cc
 FILE: ../../../third_party/dart/runtime/vm/field_table.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
