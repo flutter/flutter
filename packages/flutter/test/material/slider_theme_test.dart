@@ -862,7 +862,7 @@ Widget _buildApp(
           data: sliderTheme,
           child: Slider(
             value: value,
-            label: '$value',
+            label: value,
             onChanged: onChanged,
             divisions: divisions,
           ),

@@ -607,7 +607,7 @@ void main() {
                 data: theme,
                 child: Slider(
                   value: value,
-                  label: '$value',
+                  label: value,
                   divisions: divisions,
                   activeColor: activeColor,
                   inactiveColor: inactiveColor,
@@ -1354,7 +1354,7 @@ void main() {
                   data: sliderTheme,
                   child: Slider(
                     value: value,
-                    label: '$value',
+                    label: value,
                     divisions: divisions,
                     onChanged: onChanged,
                   ),
