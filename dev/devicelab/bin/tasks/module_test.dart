@@ -270,7 +270,7 @@ Future<void> main() async {
           return TaskResult.failure('Failed to copy read-only asset file');
         }
 
-        String modes = readonlyDebugAssetFile.statSync().modeString();
+        final String modes = readonlyDebugAssetFile.statSync().modeString();
         if (modes != null && modes.compareTo('rw-r--r--') != 0) {
           return TaskResult.failure('Failed to make assets user-readable and writable');
         }
@@ -341,7 +341,7 @@ Future<void> main() async {
           return TaskResult.failure('Failed to copy read-only asset file');
         }
 
-        String modes = readonlyReleaseAssetFile.statSync().modeString();
+        final String modes = readonlyReleaseAssetFile.statSync().modeString();
         if (modes != null && modes.compareTo('rw-r--r--') != 0) {
           return TaskResult.failure('Failed to make assets user-readable and writable');
         }
