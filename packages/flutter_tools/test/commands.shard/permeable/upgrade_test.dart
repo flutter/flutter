@@ -251,12 +251,17 @@ void main() {
           ],
         );
 
-        expect(json.decode(flutterToolState.readAsStringSync()),
-          containsPair('redisplay-welcome-message', true));
+        expect(
+          json.decode(flutterToolState.readAsStringSync()),
+          containsPair('redisplay-welcome-message', true),
+        );
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockFlutterVersion,
         ProcessManager: () => fakeProcessManager,
-        PersistentToolState: () => PersistentToolState(flutterToolState),
+        PersistentToolState: () => PersistentToolState.test(
+          directory: tempDir,
+          logger: testLogger,
+        ),
       });
     });
   });

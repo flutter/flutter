@@ -18,7 +18,6 @@ import '../base/time.dart';
 import '../doctor.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
