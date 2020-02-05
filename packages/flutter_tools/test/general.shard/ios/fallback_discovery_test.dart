@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -22,12 +23,14 @@ void main() {
   MockMDnsObservatoryDiscovery mockMDnsObservatoryDiscovery;
   MockPrototcolDiscovery mockPrototcolDiscovery;
   MockPortForwarder mockPortForwarder;
+  MockVmService mockVmService;
 
   setUp(() {
     logger = BufferLogger(
       terminal: AnsiTerminal(stdio: MockStdio(), platform: const LocalPlatform()),
       outputPreferences: OutputPreferences.test(),
     );
+    mockVmService = MockVmService();
     mockMDnsObservatoryDiscovery = MockMDnsObservatoryDiscovery();
     mockPrototcolDiscovery = MockPrototcolDiscovery();
     mockPortForwarder = MockPortForwarder();
@@ -36,25 +39,37 @@ void main() {
       mDnsObservatoryDiscovery: mockMDnsObservatoryDiscovery,
       portForwarder: mockPortForwarder,
       protocolDiscovery: mockPrototcolDiscovery,
+      vmServiceConnectUri: (String uri, {Log log}) async {
+        return mockVmService;
+      },
     );
-  });
-
-  testUsingContext('Selects assumed port of PortFowarder does not throw', () async {
     when(mockPortForwarder.forward(23, hostPort: anyNamed('hostPort')))
       .thenAnswer((Invocation invocation) async => 1);
+  });
 
+  testUsingContext('Selects assumed port if VM service connection is successful', () async {
+    when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
+      return VM()..isolates = <IsolateRef>[
+        IsolateRef(),
+      ];
+    });
+    when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
+      return Isolate()
+        ..rootLib = (LibraryRef()..uri = 'package:hello/main.dart');
+    });
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
       deivce: null,
       hostVmservicePort: 1,
       packageId: null,
       usesIpv6: false,
+      packageName: 'hello',
     ), Uri.parse('http://localhost:1'));
   });
 
-  testUsingContext('Selects mdns discovery if PortForwarder fails', () async {
-    when(mockPortForwarder.forward(23, hostPort: anyNamed('hostPort')))
-      .thenThrow(Exception());
+  testUsingContext('Selects mdns discovery if VM service connecton fails', () async {
+    when(mockVmService.getVM()).thenThrow(Exception());
+
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
       'hello',
       null, // Device
@@ -70,12 +85,12 @@ void main() {
       hostVmservicePort: 1,
       packageId: 'hello',
       usesIpv6: false,
+       packageName: 'hello',
     ), Uri.parse('http://localhost:1234'));
   });
 
-  testUsingContext('Selects log scanning if both PortForwarder and mDNS fails', () async {
-    when(mockPortForwarder.forward(23, hostPort: anyNamed('hostPort')))
-      .thenThrow(Exception());
+  testUsingContext('Selects log scanning if both VM Service and mDNS fails', () async {
+    when(mockVmService.getVM()).thenThrow(Exception());
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
       'hello',
       null, // Device
@@ -92,6 +107,7 @@ void main() {
       hostVmservicePort: 1,
       packageId: 'hello',
       usesIpv6: false,
+      packageName: 'hello',
     ), Uri.parse('http://localhost:5678'));
   });
 }
@@ -99,3 +115,4 @@ void main() {
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockPrototcolDiscovery extends Mock implements ProtocolDiscovery {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
+class MockVmService extends Mock implements VmService {}

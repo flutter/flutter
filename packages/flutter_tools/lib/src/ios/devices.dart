@@ -275,6 +275,9 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
+    print('!!!!!!!');
+    print(package.name);
+    print(package.displayName);
 
     String packageId;
 
@@ -324,9 +327,10 @@ class IOSDevice extends Device {
     }
 
     // Step 2.5: Generate a potential open port using the provided argument,
-    // or randomly with the package name as a seed.
+    // or randomly with the package name as a seed. Intentionally choose
+    // ports within the ephemeral port range.
     final int assumedObservatoryPort = debuggingOptions?.deviceVmServicePort
-      ?? math.Random(packageId.hashCode).nextInt(1000) + 6000;
+      ?? math.Random(packageId.hashCode).nextInt(16383) + 49152;
 
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = <String>[
@@ -364,11 +368,7 @@ class IOSDevice extends Device {
     try {
       ProtocolDiscovery observatoryDiscovery;
       if (debuggingOptions.debuggingEnabled) {
-        // Debugging is enabled, look for the observatory server port post launch.
         globals.printTrace('Debugging is enabled, connecting to observatory');
-
-        // TODO(danrubel): The Android device class does something similar to this code below.
-        // The various Device subclasses should be refactored and common code moved into the superclass.
         observatoryDiscovery = ProtocolDiscovery.observatory(
           getLogReader(app: package),
           portForwarder: portForwarder,
@@ -393,12 +393,13 @@ class IOSDevice extends Device {
       if (!debuggingOptions.debuggingEnabled) {
         return LaunchResult.succeeded();
       }
+
       globals.printTrace('Application launched on the device. Waiting for observatory port.');
       final FallbackDiscovery fallbackDiscovery = FallbackDiscovery(
         logger: globals.logger,
         mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
-        protocolDiscovery: observatoryDiscovery
+        protocolDiscovery: observatoryDiscovery,
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
@@ -406,6 +407,7 @@ class IOSDevice extends Device {
         usesIpv6: ipv6,
         hostVmservicePort: debuggingOptions.hostVmServicePort,
         packageId: packageId,
+        packageName: FlutterProject.current().manifest.appName,
       );
       if (localUri == null) {
         return LaunchResult.failed();
