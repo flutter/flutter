@@ -133,14 +133,6 @@ class FileSystemUtils {
         && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
   }
 
-  /// Reads the process environment to find the current user's home directory.
-  ///
-  /// If the searched environment variables are not set, '.' is returned instead.
-  String get userHomePath {
-    final String envKey = _platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-    return _platform.environment[envKey] ?? '.';
-  }
-
   /// Return the absolute path of the user's home directory
   String get homeDirPath {
     String path = _platform.isWindows

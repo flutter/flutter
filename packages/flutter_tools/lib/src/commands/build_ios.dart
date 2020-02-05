@@ -18,6 +18,7 @@ import 'build.dart';
 /// .ipas, see https://flutter.dev/docs/deployment/ios.
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
+    addTreeShakeIconsFlag();
     addBuildModeFlags(defaultToRelease: false);
     usesTargetOption();
     usesFlavorOption();

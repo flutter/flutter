@@ -314,7 +314,7 @@ class WebServiceWorker extends Target {
       for (File file in contents)
         // Do not force caching of source maps.
         if (!file.path.endsWith('main.dart.js.map'))
-        '/${globals.fs.path.relative(file.path, from: environment.outputDir.path)}':
+        '/${globals.fs.path.toUri(globals.fs.path.relative(file.path, from: environment.outputDir.path)).toString()}':
           md5.convert(await file.readAsBytes()).toString(),
     };
     final File serviceWorkerFile = environment.outputDir

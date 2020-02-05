@@ -14,6 +14,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
+import 'icon_tree_shaker.dart';
 
 /// The define to pass a [BuildMode].
 const String kBuildMode= 'BuildMode';
@@ -75,6 +76,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
