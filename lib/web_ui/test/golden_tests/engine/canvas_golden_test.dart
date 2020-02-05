@@ -166,7 +166,7 @@ void main() async {
     await matchGoldenFile(
       'bitmap_canvas_draws_high_quality_text.png',
       region: canvasSize,
-      maxDiffRate: 0.0,
+      maxDiffRatePercent: 0.0,
       pixelComparison: PixelComparison.precise,
     );
   }, timeout: const Timeout(Duration(seconds: 10)), testOn: 'chrome');

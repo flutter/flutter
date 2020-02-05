@@ -219,7 +219,7 @@ void main() async {
 
   testEachCanvas('draws text with a shadow', (EngineCanvas canvas) {
     drawTextWithShadow(canvas);
-    return scuba.diffCanvasScreenshot(canvas, 'text_shadow', maxDiffRate: 0.2);
+    return scuba.diffCanvasScreenshot(canvas, 'text_shadow', maxDiffRatePercent: 0.2);
   }, bSkipHoudini: true);
 
   testEachCanvas('Handles disabled strut style', (EngineCanvas canvas) {
@@ -238,7 +238,7 @@ void main() async {
       canvas,
       'text_strut_style_disabled',
       region: Rect.fromLTRB(0, 0, 100, 100),
-      maxDiffRate: 0.9 / 100, // 0.9%
+      maxDiffRatePercent: 0.0,
     );
   });
 }
