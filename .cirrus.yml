@@ -652,6 +652,15 @@ task:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - ./dev/bots/deploy_gallery.sh
 
+    - name: verify_binaries_codesigned-macos # macos-only
+      # TODO(fujino): remove this `only_if` after https://github.com/flutter/flutter/issues/44372
+      only_if: "$CIRRUS_BRANCH == 'dev' || $CIRRUS_BRANCH == 'beta' || $CIRRUS_BRANCH == 'stable' || $CIRRUS_BRANCH =~ '.*hotfix.*'"
+      depends_on:
+        - analyze-linux
+      script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts ./dev/bots/codesign.dart
+
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or
   # stable). Note: tagging a commit and pushing to a release branch are
