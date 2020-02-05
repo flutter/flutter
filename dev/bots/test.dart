@@ -304,10 +304,16 @@ Future<void> _runBuildTests() async {
       continue;
     }
     final String examplePath = fileEntity.path;
-    await _flutterBuildAot(examplePath);
-    await _flutterBuildApk(examplePath);
-    if (Platform.isMacOS) {
+    if (Directory(path.join(examplePath, 'android')).existsSync()) {
+      await _flutterBuildAot(examplePath);
+      await _flutterBuildApk(examplePath);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no android directory, skipping aot and apk');
+    }
+    if (Platform.isMacOS && Directory(path.join(examplePath, 'ios')).existsSync()) {
       await _flutterBuildIpa(examplePath);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
     }
   }
 
