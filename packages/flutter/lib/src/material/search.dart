@@ -201,6 +201,25 @@ abstract class SearchDelegate<T> {
     );
   }
 
+  /// The decoration used to style the [TextField].
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.border], which is set to [InputBorder.none].
+  ///  * [InputDecoration.hintText], which is set to [searchFieldLabel].
+  ///  * [InputDecoration.hintText], which is set to [ThemeData.inputDecorationTheme.hintStyle].
+    InputDecoration inputDecoration(BuildContext context) {
+    assert(context != null);
+    final InputDecoration inputDecoration = InputDecoration();
+    assert(inputDecoration != null);
+    final ThemeData theme = Theme.of(context);
+    assert(theme != null);
+    return inputDecoration.copyWith(
+      border: InputBorder.none,
+      hintText: searchFieldLabel,
+      hintStyle: theme.inputDecorationTheme.hintStyle,
+    );
+  }
   /// The current query string shown in the [AppBar].
   ///
   /// The user manipulates this string via the keyboard.
@@ -467,6 +486,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
+    final InputDecoration inputDecoration = widget.delegate.inputDecoration(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
       ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
@@ -516,11 +536,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
             },
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: searchFieldLabel,
-              hintStyle: theme.inputDecorationTheme.hintStyle,
-            ),
+            decoration: inputDecoration,
           ),
           actions: widget.delegate.buildActions(context),
         ),
