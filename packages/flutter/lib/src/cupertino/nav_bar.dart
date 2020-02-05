@@ -445,6 +445,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       padding: widget.padding,
       userLargeTitle: null,
       large: false,
+      context: context,
     );
 
     final Widget navBar = _wrapWithBackground(
@@ -1081,7 +1082,7 @@ class _NavigationBarStaticComponents {
     @required BuildContext context,
   }) {
     Widget leadingContent;
-
+    
     if (userLeading != null) {
       leadingContent = userLeading;
     } else if (

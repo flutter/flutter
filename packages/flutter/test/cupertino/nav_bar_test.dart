@@ -596,13 +596,14 @@ void main() {
       },
     ));
 
+     const CupertinoLocalizations localizations = DefaultCupertinoLocalizations();
+
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-
-    expect(find.widgetWithText(CupertinoButton, 'Close'), findsOneWidget);
+    expect(find.widgetWithText(CupertinoButton, localizations.closeButtonLabel), findsOneWidget);
 
     // Test popping goes back correctly.
-    await tester.tap(find.text('Close'));
+    await tester.tap(find.text(localizations.closeButtonLabel));
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));

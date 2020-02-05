@@ -440,7 +440,7 @@ void main() {
             return CupertinoTabView(
               builder: (BuildContext context) {
                 return CupertinoPageScaffold(
-                  navigationBar: CupertinoNavigationBar(
+                  navigationBar: CupertinoNavigationBar( 
                     middle: Text('Tab ${tab + 1} Page 1'),
                   ),
                   child: Center(
