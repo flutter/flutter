@@ -396,7 +396,10 @@ DarwinArch getIOSArchForName(String arch) {
   return null;
 }
 
-String getNameForTargetPlatform(TargetPlatform platform) {
+String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}) {
+  if (darwinArch != null) {
+    return 'ios-${getNameForDarwinArch(darwinArch)}';
+  }
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';

@@ -161,9 +161,7 @@ class AOTSnapshotter {
     // The name of the debug file must contain additonal information about
     // the architecture, since a single build command may produce
     // multiple debug files.
-    final String archName = darwinArch == null || platform == TargetPlatform.darwin_x64
-      ? getNameForTargetPlatform(platform)
-      : 'ios-${getNameForDarwinArch(darwinArch)}';
+    final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
     final String debugFilename = 'app.$archName.symbols';
     if (splitDebugInfo != null) {
       globals.fs.directory(splitDebugInfo)
