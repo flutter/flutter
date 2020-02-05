@@ -146,6 +146,13 @@ class DriveCommand extends RunCommandBase {
     if (argResults['use-existing-app'] == null) {
       globals.printStatus('Starting application: $targetFile');
 
+      if (isWebPlatform) {
+        throwToolExit(
+            'Flutter Driver (web) does not support running without use-existing-app.\n'
+            'Please launch your application beforehand and connects via use-existing-app.'
+        );
+      }
+
       if (getBuildInfo().isRelease && !isWebPlatform) {
         // This is because we need VM service to be able to drive the app.
         // For Flutter Web, testing in release mode is allowed.
@@ -177,13 +184,21 @@ class DriveCommand extends RunCommandBase {
     // For web device, WebDriver session will be launched beforehand
     // so that FlutterDriver can reuse it.
     if (isWebPlatform) {
+      final Browser browser = _browserNameToEnum(
+          argResults['browser-name'].toString());
       // start WebDriver
-      final Browser browser = _browserNameToEnum(argResults['browser-name'].toString());
-      driver = await _createDriver(
-        argResults['driver-port'].toString(),
-        browser,
-        argResults['headless'].toString() == 'true',
-      );
+      try {
+        driver = await _createDriver(
+          argResults['driver-port'].toString(),
+          browser,
+          argResults['headless'].toString() == 'true',
+        );
+      } catch (_) {
+        throwToolExit(
+            'Unable to start WebDriver browser. \n'
+            'Flutter Driver Web test requires WebDriver binary.\n'
+        );
+      }
 
       // set window size
       final List<String> dimensions = argResults['browser-dimension'].split(',') as List<String>;
@@ -192,8 +207,8 @@ class DriveCommand extends RunCommandBase {
       final int y = int.parse(dimensions[1]);
       final async_io.Window window = await driver.window;
       try {
-        window.setLocation(const math.Point<int>(0, 0));
-        window.setSize(math.Rectangle<int>(0, 0, x, y));
+        await window.setLocation(const math.Point<int>(0, 0));
+        await window.setSize(math.Rectangle<int>(0, 0, x, y));
       } catch (_) {
        // Error might be thrown in some browsers.
       }
@@ -389,6 +404,7 @@ Future<void> _runTests(List<String> testArgs, Map<String, String> environment) a
     ],
     environment: environment,
   );
+  print('done ${DateTime.now()}');
   if (result != 0) {
     throwToolExit('Driver tests failed: $result', exitCode: result);
   }
