@@ -210,8 +210,8 @@ class AndroidValidator extends DoctorValidator {
     // Now check for the JDK.
     final String javaBinary = AndroidSdk.findJavaBinary(
       androidStudio: _androidStudio,
-      fs: _fs,
-      os: _os,
+      fileSystem: _fs,
+      operatingSystemUtils: _os,
       platform: _platform,
     );
     if (javaBinary == null) {
@@ -270,8 +270,8 @@ class AndroidLicenseValidator extends DoctorValidator {
   Future<bool> _checkJavaVersionNoOutput() async {
     final String javaBinary = AndroidSdk.findJavaBinary(
       androidStudio: globals.androidStudio,
-      fs: globals.fs,
-      os: globals.os,
+      fileSystem: globals.fs,
+      operatingSystemUtils: globals.os,
       platform: globals.platform,
     );
     if (javaBinary == null) {

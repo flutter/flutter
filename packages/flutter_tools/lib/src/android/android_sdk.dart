@@ -553,18 +553,18 @@ class AndroidSdk {
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
   static String findJavaBinary({
     @required AndroidStudio androidStudio,
-    @required FileSystem fs,
-    @required OperatingSystemUtils os,
+    @required FileSystem fileSystem,
+    @required OperatingSystemUtils operatingSystemUtils,
     @required Platform platform,
   }) {
     if (androidStudio?.javaPath != null) {
-      return fs.path.join(androidStudio.javaPath, 'bin', 'java');
+      return fileSystem.path.join(androidStudio.javaPath, 'bin', 'java');
     }
 
     final String javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
       // Trust JAVA_HOME.
-      return fs.path.join(javaHomeEnv, 'bin', 'java');
+      return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
     }
 
     // MacOS specific logic to avoid popping up a dialog window.
@@ -580,14 +580,14 @@ class AndroidSdk {
           final List<String> javaHomeOutputSplit = javaHomeOutput.split('\n');
           if ((javaHomeOutputSplit != null) && (javaHomeOutputSplit.isNotEmpty)) {
             final String javaHome = javaHomeOutputSplit[0].trim();
-            return fs.path.join(javaHome, 'bin', 'java');
+            return fileSystem.path.join(javaHome, 'bin', 'java');
           }
         }
       } catch (_) { /* ignore */ }
     }
 
     // Fallback to PATH based lookup.
-    return os.which(_javaExecutable)?.path;
+    return operatingSystemUtils.which(_javaExecutable)?.path;
   }
 
   Map<String, String> _sdkManagerEnv;
@@ -599,8 +599,8 @@ class AndroidSdk {
       _sdkManagerEnv = <String, String>{};
       final String javaBinary = findJavaBinary(
         androidStudio: globals.androidStudio,
-        fs: globals.fs,
-        os: globals.os,
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
         platform: globals.platform,
       );
       if (javaBinary != null) {
