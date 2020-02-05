@@ -14,7 +14,9 @@
 #include "flutter/shell/platform/windows/text_input_plugin.h"
 #include "flutter/shell/platform/windows/win32_task_runner.h"
 
-struct flutter::Win32FlutterWindow;
+namespace flutter {
+struct Win32FlutterWindow;
+}
 
 // Struct for storing state within an instance of the windows native (HWND or
 // CoreWindow) Window.

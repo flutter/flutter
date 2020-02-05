@@ -70,7 +70,7 @@ static std::unique_ptr<FlutterDesktopEngineState> RunFlutterEngine(
   config.open_gl.fbo_callback = [](void* user_data) -> uint32_t { return 0; };
   config.open_gl.gl_proc_resolver = [](void* user_data,
                                        const char* what) -> void* {
-    return eglGetProcAddress(what);
+    return reinterpret_cast<void*>(eglGetProcAddress(what));
   };
   config.open_gl.make_resource_current = [](void* user_data) -> bool {
     auto host = static_cast<flutter::Win32FlutterWindow*>(user_data);
