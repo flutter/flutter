@@ -142,13 +142,13 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
       String suffix = '',
       bool onCirrus = false,
     }) {
+    const FileSystem fs = LocalFileSystem();
     if (onCirrus) {
-      return io.Directory.systemTemp.createTemp(
+      return fs.systemTempDirectory.childDirectory(
         'skia_goldens$suffix'
-      ) as Directory;
+      );
     }
 
-    const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     final Directory comparisonRoot = flutterRoot.childDirectory(
       fs.path.join(
