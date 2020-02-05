@@ -139,9 +139,9 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   static Directory getBaseDirectory(
     LocalFileComparator defaultComparator,
     Platform platform, {
-      String suffix = '',
-      bool local = false,
-    }) {
+    String suffix = '',
+    bool local = false,
+  }) {
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     Directory comparisonRoot;
