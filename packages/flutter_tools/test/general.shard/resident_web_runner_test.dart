@@ -414,6 +414,7 @@ void main() {
   test('Can hot restart after attaching - experimental', () => testbed.run(() async {
     _setupMocks();
     launchChromeInstance(mockChrome);
+    String entrypointFileName;
     when(mockWebDevFS.update(
       mainPath: anyNamed('mainPath'),
       target: anyNamed('target'),
@@ -428,6 +429,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
     )).thenAnswer((Invocation invocation) async {
+      entrypointFileName = invocation.namedArguments[#mainPath] as String;
       return UpdateFSReport(success: true)
         ..invalidatedModules = <String>['example'];
     });
@@ -437,6 +439,12 @@ void main() {
     ));
     await connectionInfoCompleter.future;
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    // Ensure that generated entrypoint is generated correctly.
+    expect(entrypointFileName, isNotNull);
+    expect(globals.fs.file(entrypointFileName).readAsStringSync(), contains(
+      'await ui.webOnlyInitializePlatform();'
+    ));
 
     expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);

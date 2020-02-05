@@ -15,6 +15,7 @@ import 'build.dart';
 /// Builds AOT snapshots into platform specific library containers.
 class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
   BuildAotCommand({bool verboseHelp = false, this.aotBuilder}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
@@ -88,6 +89,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
       extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       dartDefines: dartDefines,
+      treeShakeIcons: boolArg('tree-shake-icons'),
     );
     return FlutterCommandResult.success();
   }

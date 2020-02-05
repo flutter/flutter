@@ -39,6 +39,7 @@ void main() {
       targetPlatform: TargetPlatform.ios,
       depfilePath: 'example.d',
       precompiled: false,
+      treeShakeIcons: false,
     );
     expect(globals.fs.file(globals.fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
     expect(globals.fs.file(globals.fs.path.join('example', 'LICENSE')).existsSync(), true);
@@ -61,6 +62,7 @@ void main() {
       targetPlatform: TargetPlatform.linux_x64,
       depfilePath: 'example.d',
       precompiled: false,
+      treeShakeIcons: false,
     ), throwsToolExit());
   }));
 }
