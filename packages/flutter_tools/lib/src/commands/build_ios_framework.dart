@@ -44,6 +44,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
        _bundleBuilder = bundleBuilder,
        _cache = cache,
        _platform = platform {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -361,6 +362,7 @@ end
         mainPath: globals.fs.path.absolute(targetFile),
         assetDirPath: destinationAppFrameworkDirectory.childDirectory('flutter_assets').path,
         precompiledSnapshot: mode != BuildMode.debug,
+        treeShakeIcons: boolArg('tree-shake-icons')
       );
     } finally {
       status.stop();
@@ -426,6 +428,7 @@ end
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
         dartDefines: dartDefines,
+        treeShakeIcons: boolArg('tree-shake-icons'),
       );
     } finally {
       status.stop();
@@ -460,6 +463,7 @@ end
         'iphoneos',
         '-configuration',
         xcodeBuildConfiguration,
+        '-destination generic/platform=iOS',
         'SYMROOT=${iPhoneBuildOutput.path}',
         'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
         'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
@@ -484,6 +488,7 @@ end
           'iphonesimulator',
           '-configuration',
           xcodeBuildConfiguration,
+          '-destination generic/platform=iOS',
           'SYMROOT=${simulatorBuildOutput.path}',
           'ARCHS=x86_64',
           'ONLY_ACTIVE_ARCH=NO'

@@ -12,6 +12,8 @@ import '../../plugins.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
+import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
@@ -31,6 +33,16 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
     pubspecFile,
   ];
   final List<File> outputs = <File>[];
+
+  final IconTreeShaker iconTreeShaker = IconTreeShaker(
+    environment,
+    assetBundle.entries[kFontManifestJson] as DevFSStringContent,
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    artifacts: globals.artifacts,
+  );
+
   await Future.wait<void>(
     assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
@@ -46,7 +58,13 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
           inputs.add(globals.fs.file(content.file.path));
-          await (content.file as File).copy(file.path);
+          if (!await iconTreeShaker.subsetFont(
+            inputPath: content.file.path,
+            outputPath: file.path,
+            relativePath: entry.key,
+          )) {
+            await (content.file as File).copy(file.path);
+          }
         } else {
           await file.writeAsBytes(await entry.value.contentsAsBytes());
         }
@@ -65,11 +83,14 @@ class CopyAssets extends Target {
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override

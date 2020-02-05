@@ -338,6 +338,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.fastStart) {
     command.add('-Pfast-start=true');
   }
+  if (androidBuildInfo.buildInfo.treeShakeIcons) {
+    command.add('-Ptree-shake-icons=true');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;
@@ -546,6 +549,9 @@ Future<void> buildGradleAar({
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
     command.add('-Plocal-engine-build-mode=${androidBuildInfo.buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+    if (androidBuildInfo.buildInfo.treeShakeIcons) {
+      command.add('-Pfont-subset=true');
+    }
 
     // Copy the local engine repo in the output directory.
     try {
@@ -738,10 +744,11 @@ Future<void> buildPluginsAsAar(
     try {
       await buildGradleAar(
         project: FlutterProject.fromDirectory(pluginDirectory),
-        androidBuildInfo: const AndroidBuildInfo(
+        androidBuildInfo: AndroidBuildInfo(
           BuildInfo(
             BuildMode.release, // Plugins are built as release.
             null, // Plugins don't define flavors.
+            treeShakeIcons: androidBuildInfo.buildInfo.treeShakeIcons,
           ),
         ),
         target: '',

@@ -20,6 +20,7 @@ import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabledDefault;
 import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../dart/package_map.dart';
@@ -365,6 +366,14 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
+  void addTreeShakeIconsFlag() {
+    argParser.addFlag('tree-shake-icons',
+      negatable: true,
+      defaultsTo: kIconTreeShakerEnabledDefault,
+      help: 'Tree shake icon fonts so that only glyphs used by the application remain.',
+    );
+  }
+
   void addShrinkingFlag() {
     argParser.addFlag('shrink',
       negatable: true,
@@ -490,6 +499,9 @@ abstract class FlutterCommand extends Command<void> {
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
           : null,
+      treeShakeIcons: argParser.options.containsKey('tree-shake-icons')
+          ? boolArg('tree-shake-icons')
+          : kIconTreeShakerEnabledDefault,
     );
   }
 
