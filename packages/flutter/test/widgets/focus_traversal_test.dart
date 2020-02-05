@@ -1444,7 +1444,7 @@ void main() {
 
       await tester.pump();
 
-      final FocusTraversalPolicy policy = FocusTraversalGroup.of(upperLeftKey.currentContext).policy;
+      final FocusTraversalPolicy policy = FocusTraversalGroup.of(upperLeftKey.currentContext);
 
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.up), equals(lowerLeftNode));
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.down), equals(upperLeftNode));
