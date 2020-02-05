@@ -176,34 +176,32 @@ class DebugUniveralFramework extends Target {
   @override
   Future<void> build(Environment environment) async {
     // Generate a trivial App.framework.
-    final File iphoneFile = environment.buildDir.childFile('iphone_framework');
-    final File simulatorFile = environment.buildDir.childFile('simulator_framework');
-    final File lipoOutputFile = environment.buildDir.childFile('App');
-    final RunResult iphoneResult = await createStubAppFramework(
-      iphoneFile,
-      SdkType.iPhone,
-    );
-    final RunResult simulatorResult = await createStubAppFramework(
-      simulatorFile,
-      SdkType.iPhoneSimulator,
-    );
-    if (iphoneResult.exitCode != 0 || simulatorResult.exitCode != 0) {
-      throw Exception('Failed to create App.framework.');
-    }
-    final List<String> lipoCommand = <String>[
-      'xcrun',
-      'lipo',
-      '-create',
-      iphoneFile.path,
-      simulatorFile.path,
-      '-output',
-      lipoOutputFile.path
-    ];
-    final RunResult lipoResult = await processUtils.run(
-      lipoCommand,
-    );
+    final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
+      ?.split(' ')
+      ?.map(getIOSArchForName)
+      ?.toList()
+      ?? <DarwinArch>[DarwinArch.arm64];
 
-    if (lipoResult.exitCode != 0) {
+    final File stubSource = environment.buildDir.childFile('debug_app.cc')
+      ..writeAsStringSync(r'''
+  static const int Moo = 88;
+  ''');
+    final File outputFile = environment.buildDir.childFile('App');
+    final RunResult result = await globals.xcode.clang(<String>[
+      '-x',
+      'c',
+      for (DarwinArch arch in iosArchs)
+        ...<String>['-arch', getNameForDarwinArch(arch)],
+      stubSource.path,
+      '-dynamiclib',
+      '-fembed-bitcode-marker',
+      '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+      '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-install_name', '@rpath/App.framework/App',
+      '-o', outputFile.path,
+    ]);
+
+    if (result.exitCode != 0) {
       throw Exception('Failed to create App.framework.');
     }
   }

@@ -29,7 +29,6 @@ const List<String> _kSharedConfig = <String>[
   '@loader_path/Frameworks',
   '-install_name',
   '@rpath/App.framework/App',
-  '-isysroot',
 ];
 
 void main() {
@@ -46,49 +45,20 @@ void main() {
   });
 
   test('DebugUniveralFramework creates expected binary', () => testbed.run(() async {
+    environment.defines[kIosArchs] = 'armv7';
+    environment.buildDir.createSync(recursive: true);
     processManager = FakeProcessManager.list(<FakeCommand>[
       // Create iphone stub.
-      const FakeCommand(command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path']),
       FakeCommand(command: <String>[
         'xcrun',
         'clang',
         '-x',
         'c',
-         // iphone gets both arm arches
         '-arch',
         'armv7',
-        '-arch',
-        'arm64',
-        globals.fs.path.absolute(globals.fs.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
+        environment.buildDir.childFile('debug_app.cc').path,
         ..._kSharedConfig,
-        '',
         '-o',
-        environment.buildDir.childFile('iphone_framework').path
-      ]),
-      // Create simulator stub.
-      const FakeCommand(command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-path']),
-      FakeCommand(command: <String>[
-        'xcrun',
-        'clang',
-        '-x',
-        'c',
-        // Simulator only as x86_64 arch
-        '-arch',
-        'x86_64',
-        globals.fs.path.absolute(globals.fs.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
-        ..._kSharedConfig,
-        '',
-        '-o',
-        environment.buildDir.childFile('simulator_framework').path
-      ]),
-      // Lipo stubs together.
-      FakeCommand(command: <String>[
-        'xcrun',
-        'lipo',
-        '-create',
-        environment.buildDir.childFile('iphone_framework').path,
-        environment.buildDir.childFile('simulator_framework').path,
-        '-output',
         environment.buildDir.childFile('App').path,
       ]),
     ]);
