@@ -137,9 +137,9 @@ class FallbackDiscovery {
             return Uri.parse('http://localhost:$hostPort');
           }
         }
-      } on Exception {
+      } on Exception catch (err) {
         // No action, we might have failed to connect.
-        // The error message will be irrelevant.
+        _logger.printTrace(err.toString());
       }
 
       // No exponential backoff is used here to keep the amount of time the
