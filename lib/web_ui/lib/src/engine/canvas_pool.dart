@@ -101,11 +101,7 @@ class _CanvasPool extends _SaveStackTracking {
     _rootElement.append(_canvas);
     _context = _canvas.context2D;
     _contextHandle = ContextStateHandle(_context);
-    _initializeViewport();
-    if (requiresClearRect) {
-      // Now that the context is reset, clear old contents.
-      _context.clearRect(0, 0, _widthInBitmapPixels, _heightInBitmapPixels);
-    }
+    _initializeViewport(requiresClearRect);
     _replayClipStack();
   }
 
@@ -136,20 +132,34 @@ class _CanvasPool extends _SaveStackTracking {
     translate(transform.dx, transform.dy);
   }
 
-  int _replaySingleSaveEntry(
-      int clipDepth, Matrix4 transform, List<_SaveClipEntry> clipStack) {
+  int _replaySingleSaveEntry(int clipDepth, Matrix4 prevTransform,
+      Matrix4 transform, List<_SaveClipEntry> clipStack) {
     final html.CanvasRenderingContext2D ctx = _context;
-    if (!transform.isIdentity()) {
-      final double ratio = EngineWindow.browserDevicePixelRatio;
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-      ctx.transform(transform[0], transform[1], transform[4], transform[5],
-          transform[12], transform[13]);
-    }
     if (clipStack != null) {
       for (int clipCount = clipStack.length;
           clipDepth < clipCount;
           clipDepth++) {
         _SaveClipEntry clipEntry = clipStack[clipDepth];
+        Matrix4 clipTimeTransform = clipEntry.currentTransform;
+        // If transform for entry recording change since last element, update.
+        // Comparing only matrix3 elements since Canvas API restricted.
+        if (clipTimeTransform[0] != prevTransform[0] ||
+            clipTimeTransform[1] != prevTransform[1] ||
+            clipTimeTransform[4] != prevTransform[4] ||
+            clipTimeTransform[5] != prevTransform[5] ||
+            clipTimeTransform[12] != prevTransform[12] ||
+            clipTimeTransform[13] != prevTransform[13]) {
+          final double ratio = EngineWindow.browserDevicePixelRatio;
+          ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+          ctx.transform(
+              clipTimeTransform[0],
+              clipTimeTransform[1],
+              clipTimeTransform[4],
+              clipTimeTransform[5],
+              clipTimeTransform[12],
+              clipTimeTransform[13]);
+          prevTransform = clipTimeTransform;
+        }
         if (clipEntry.rect != null) {
           _clipRect(ctx, clipEntry.rect);
         } else if (clipEntry.rrect != null) {
@@ -160,6 +170,19 @@ class _CanvasPool extends _SaveStackTracking {
         }
       }
     }
+    // If transform was changed between last clip operation and save call,
+    // update.
+    if (transform[0] != prevTransform[0] ||
+        transform[1] != prevTransform[1] ||
+        transform[4] != prevTransform[4] ||
+        transform[5] != prevTransform[5] ||
+        transform[12] != prevTransform[12] ||
+        transform[13] != prevTransform[13]) {
+      final double ratio = EngineWindow.browserDevicePixelRatio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.transform(transform[0], transform[1], transform[4], transform[5],
+          transform[12], transform[13]);
+    }
     return clipDepth;
   }
 
@@ -167,16 +190,19 @@ class _CanvasPool extends _SaveStackTracking {
     // Replay save/clip stack on this canvas now.
     html.CanvasRenderingContext2D ctx = _context;
     int clipDepth = 0;
+    Matrix4 prevTransform = Matrix4.identity();
     for (int saveStackIndex = 0, len = _saveStack.length;
         saveStackIndex < len;
         saveStackIndex++) {
       _SaveStackEntry saveEntry = _saveStack[saveStackIndex];
       clipDepth = _replaySingleSaveEntry(
-          clipDepth, saveEntry.transform, saveEntry.clipStack);
+          clipDepth, prevTransform, saveEntry.transform, saveEntry.clipStack);
+      prevTransform = saveEntry.transform;
       ctx.save();
       ++_saveContextCount;
     }
-    _replaySingleSaveEntry(clipDepth, _currentTransform, _clipStack);
+    _replaySingleSaveEntry(
+        clipDepth, prevTransform, _currentTransform, _clipStack);
   }
 
   // Marks this pool for reuse.
@@ -216,7 +242,7 @@ class _CanvasPool extends _SaveStackTracking {
   /// Configures the canvas such that its coordinate system follows the scene's
   /// coordinate system, and the pixel ratio is applied such that CSS pixels are
   /// translated to bitmap pixels.
-  void _initializeViewport() {
+  void _initializeViewport(bool clearCanvas) {
     html.CanvasRenderingContext2D ctx = context;
     // Save the canvas state with top-level transforms so we can undo
     // any clips later when we reuse the canvas.
@@ -226,6 +252,9 @@ class _CanvasPool extends _SaveStackTracking {
     // We always start with identity transform because the surrounding transform
     // is applied on the DOM elements.
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (clearCanvas) {
+      ctx.clearRect(0, 0, _widthInBitmapPixels, _heightInBitmapPixels);
+    }
 
     // This scale makes sure that 1 CSS pixel is translated to the correct
     // number of bitmap pixels.
