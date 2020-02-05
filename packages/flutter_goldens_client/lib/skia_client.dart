@@ -110,6 +110,7 @@ class SkiaGoldClient {
       return;
 
     List<String> authArguments;
+    String failureContext;
 
     if (ci == 'luci') {
       authArguments = <String>[
@@ -119,10 +120,20 @@ class SkiaGoldClient {
           .path,
         '--luci',
       ];
+      failureContext = 'Luci environments authenticate without a service '
+        'account, so if this is a Luci instance, there may be an error with '
+        'Gold.';
     } else {
+      if (_serviceAccount.isEmpty) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('The Gold service account is unavailable.')
+          ..writeln('Without a service account, Gold can not be authorized.')
+          ..writeln('Please check your user permissions and current comparator.');
+        throw Exception(buf.toString());
+      }
+
       final File authorization = workDirectory.childFile('serviceAccount.json');
       await authorization.writeAsString(_serviceAccount);
-
       authArguments = <String>[
         'auth',
         '--service-account', authorization.path,
@@ -130,6 +141,9 @@ class SkiaGoldClient {
           .childDirectory('temp')
           .path,
       ];
+      failureContext = 'This could be caused by incorrect user permissions on '
+        'Cirrus, if the debug information below contains ENCRYPTED, the wrong '
+        'comparator was chosen for the test case.';
     }
 
     final io.ProcessResult result = await io.Process.run(
@@ -140,11 +154,7 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold authorization failed.')
-        ..writeln('This could be caused by incorrect user permissions on Cirrus, ')
-        ..writeln('if the debug information below contains ENCRYPTED, the wrong ')
-        ..writeln('comparator was chosen for the test case.')
-        ..writeln('Luci environments authenticate without a service account, so ')
-        ..writeln('if this is a Luci instance, there may be an error with Gold.')
+        ..writeln(failureContext)
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
@@ -158,6 +168,10 @@ class SkiaGoldClient {
   /// It will only be called once for each instance of an
   /// [_UnauthorizedFlutterPreSubmitComparator].
   Future<void> emptyAuth() async {
+    // We only use emptyAuth when the service account cannot be decrypted on
+    // Cirrus.
+    assert(ci == 'cirrus');
+
     final List<String> authArguments = <String>[
       'auth',
       '--work-dir', workDirectory
@@ -184,7 +198,8 @@ class SkiaGoldClient {
   /// Executes the `imgtest init` command in the goldctl tool.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
-  /// backend, the `init` argument initializes the current test.
+  /// backend, the `init` argument initializes the current test. Used by the
+  /// [FlutterPostSubmitFileComparator].
   Future<void> imgtestInit() async {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
@@ -240,7 +255,7 @@ class SkiaGoldClient {
   /// result.
   ///
   /// The [testName] and [goldenFile] parameters reference the current
-  /// comparison being evaluated by the [FlutterSkiaGoldFileComparator].
+  /// comparison being evaluated by the [FlutterPostSubmitFileComparator].
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
     assert(testName != null);
     assert(goldenFile != null);
@@ -273,7 +288,8 @@ class SkiaGoldClient {
   /// Executes the `imgtest init` command in the goldctl tool for tryjobs.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
-  /// backend, the `init` argument initializes the current tryjob.
+  /// backend, the `init` argument initializes the current tryjob. Used by the
+  /// [FlutterPostSubmitFileComparator].
   Future<void> tryjobInit() async {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
@@ -281,8 +297,19 @@ class SkiaGoldClient {
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
     final String commitHash = await _getCurrentCommit();
-    final String pullRequest = platform.environment['CIRRUS_PR'];
-    final String cirrusTaskID = platform.environment['CIRRUS_TASK_ID'];
+
+    String pullRequest;
+    String cirrusTaskID;
+    if (ci == 'luci') {
+      // TODO(Piinks): check arguments here for luci
+      // --cis
+      // --changelist
+      // --jobid
+      // --patchset_id
+    } else {
+      pullRequest = platform.environment['CIRRUS_PR'];
+      cirrusTaskID = platform.environment['CIRRUS_TASK_ID'];
+    }
 
 
     final List<String> imgtestInitArguments = <String>[
@@ -603,6 +630,8 @@ class SkiaGoldClient {
   String _getKeysJSON() {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
+      'ci' : ci,
+      // TODO(Piinks): Add device information from driver tests
     };
     if (platform.environment[_kTestBrowserKey] != null)
       keys['Browser'] = platform.environment[_kTestBrowserKey];
