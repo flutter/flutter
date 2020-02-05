@@ -11,6 +11,7 @@
 """
 
 import argparse
+import errno
 import json
 import os
 import re
@@ -26,10 +27,16 @@ def Touch(fname):
 
 
 def GetBuildIdParts(exec_path, read_elf):
-  file_out = subprocess.check_output(
-      [read_elf, '--hex-dump=.note.gnu.build-id', exec_path])
-  second_line = file_out.splitlines()[-1].split()
-  build_id = second_line[1] + second_line[2]
+  sha1_pattern = re.compile(r'[0-9a-fA-F\-]+')
+  file_out = subprocess.check_output([read_elf, '-n', exec_path])
+  build_id_line = file_out.splitlines()[-1].split()
+  if (build_id_line[0] != 'Build' or
+      build_id_line[1] != 'ID:' or not
+      sha1_pattern.match(build_id_line[-1]) or not
+      len(build_id_line[-1]) > 2):
+    raise Exception('Expected the last line of llvm-readelf to match "Build ID <Hex String>" Got: %s' % file_out)
+
+  build_id = build_id_line[-1]
   return {
       'build_id': build_id,
       'prefix_dir': build_id[:2],
@@ -86,19 +93,15 @@ def main():
   parts = GetBuildIdParts(args.exec_path, args.read_elf)
   dbg_prefix_base = os.path.join(args.dest, parts['prefix_dir'])
 
-  success = False
-  for _ in range(3):
-    try:
-      if not os.path.exists(dbg_prefix_base):
-        os.makedirs(dbg_prefix_base)
-      success = True
-      break
-    except OSError as error:
-      print 'Failed to create dir %s, error: %s. sleeping...' % (
-          dbg_prefix_base, error)
-      time.sleep(3)
+  # Multiple processes may be trying to create the same directory.
+  # TODO(dnfield): use exist_ok when we upgrade to python 3, rather than try
+  try:
+    os.makedirs(dbg_prefix_base)
+  except OSError as e:
+    if e.errno != errno.EEXIST:
+      raise
 
-  if not success:
+  if not os.path.exists(dbg_prefix_base):
     print 'Unable to create directory: %s.' % dbg_prefix_base
     return 1
 
