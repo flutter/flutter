@@ -11,6 +11,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
@@ -119,6 +120,7 @@ class DebugBundleLinuxAssets extends Target {
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override

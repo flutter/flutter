@@ -14,6 +14,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 const String _kOutputPrefix = '{OUTPUT_DIR}/FlutterMacOS.framework';
 
@@ -243,6 +244,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
