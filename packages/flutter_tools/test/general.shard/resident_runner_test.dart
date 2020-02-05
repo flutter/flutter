@@ -427,7 +427,7 @@ void main() {
     residentRunner.clearScreen();
     expect(testLogger.statusText, equals(''));
   }));
-  
+
   test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws post', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockIsolate.flutterDebugAllowBanner(true)).thenThrow(Exception());

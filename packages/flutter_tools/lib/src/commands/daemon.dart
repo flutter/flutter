@@ -1001,7 +1001,7 @@ class NotifyingLogger extends Logger {
   @override
   bool get hasTerminal => false;
 
-  // This method is only relevant for terminals. 
+  // This method is only relevant for terminals.
   @override
   void clear() { }
 }
@@ -1235,7 +1235,7 @@ class _AppRunLogger extends Logger {
   @override
   bool get hasTerminal => false;
 
-  // This method is only relevant for terminals. 
+  // This method is only relevant for terminals.
   @override
   void clear() { }
 }

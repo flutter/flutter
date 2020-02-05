@@ -1167,7 +1167,7 @@ class TerminalHandler {
           return true;
         }
         return false;
-      case 'c': 
+      case 'c':
         residentRunner.clearScreen();
         return true;
       case 'd':
