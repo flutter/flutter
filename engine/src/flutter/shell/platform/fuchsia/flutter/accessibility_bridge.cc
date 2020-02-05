@@ -281,12 +281,65 @@ void AccessibilityBridge::UpdateScreenRects(
   }
 }
 
+std::optional<flutter::SemanticsAction>
+AccessibilityBridge::GetFlutterSemanticsAction(
+    fuchsia::accessibility::semantics::Action fuchsia_action,
+    uint32_t node_id) {
+  switch (fuchsia_action) {
+    // The default action associated with the element.
+    case fuchsia::accessibility::semantics::Action::DEFAULT:
+      return flutter::SemanticsAction::kTap;
+    // The secondary action associated with the element. This may correspond to
+    // a long press (touchscreens) or right click (mouse).
+    case fuchsia::accessibility::semantics::Action::SECONDARY:
+      return flutter::SemanticsAction::kLongPress;
+    // Set (input/non-accessibility) focus on this element.
+    case fuchsia::accessibility::semantics::Action::SET_FOCUS:
+      FML_DLOG(WARNING)
+          << "Unsupported action SET_FOCUS sent for accessibility node "
+          << node_id;
+      return {};
+    // Set the element's value.
+    case fuchsia::accessibility::semantics::Action::SET_VALUE:
+      FML_DLOG(WARNING)
+          << "Unsupported action SET_VALUE sent for accessibility node "
+          << node_id;
+      return {};
+    // Scroll node to make it visible.
+    case fuchsia::accessibility::semantics::Action::SHOW_ON_SCREEN:
+      return flutter::SemanticsAction::kShowOnScreen;
+    default:
+      FML_DLOG(WARNING) << "Unexpected action "
+                        << static_cast<int32_t>(fuchsia_action)
+                        << " sent for accessibility node " << node_id;
+      return {};
+  }
+}
+
 // |fuchsia::accessibility::semantics::SemanticListener|
 void AccessibilityBridge::OnAccessibilityActionRequested(
     uint32_t node_id,
     fuchsia::accessibility::semantics::Action action,
     fuchsia::accessibility::semantics::SemanticListener::
-        OnAccessibilityActionRequestedCallback callback) {}
+        OnAccessibilityActionRequestedCallback callback) {
+  if (nodes_.find(node_id) == nodes_.end()) {
+    FML_LOG(ERROR) << "Attempted to send accessibility action "
+                   << static_cast<int32_t>(action)
+                   << " to unkonwn node id: " << node_id;
+    callback(false);
+    return;
+  }
+
+  std::optional<flutter::SemanticsAction> flutter_action =
+      GetFlutterSemanticsAction(action, node_id);
+  if (!flutter_action.has_value()) {
+    callback(false);
+    return;
+  }
+  delegate_.DispatchSemanticsAction(static_cast<int32_t>(node_id),
+                                    flutter_action.value());
+  callback(true);
+}
 
 // |fuchsia::accessibility::semantics::SemanticListener|
 void AccessibilityBridge::HitTest(
