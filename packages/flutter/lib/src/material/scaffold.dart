@@ -36,6 +36,8 @@ import 'theme_data.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
+const Curve _kBottomSheetCurve = Curves.fastOutSlowIn;
+const Curve _kBottomSheetFlingCurve = Curves.easeOutCubic;
 // When the top of the BottomSheet crosses this threshold, it will start to
 // shrink the FAB and show a scrim.
 const double _kBottomSheetDominatesPercentage = 0.3;
@@ -2516,6 +2518,8 @@ class _StandardBottomSheet extends StatefulWidget {
 }
 
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
+  Curve animationCurve = _kBottomSheetCurve;
+
   @override
   void initState() {
     super.initState();
@@ -2538,6 +2542,24 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       widget.onClosing();
     }
     return null;
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    // allows the bottom sheet to track the user's finger accurately
+    animationCurve = Curves.linear;
+  }
+
+  void _handleDragEnd(DragEndDetails details, { bool isClosing }) {
+    if (isClosing) {
+      // shortened curve on exit minimizes risk of a visibly slow linear
+      // animation
+      animationCurve = const Interval(0.5, 1, curve: Curves.linear);
+    } else {
+      animationCurve = BottomSheetSuspendedCurve(
+        widget.animationController.value,
+        curve: _kBottomSheetFlingCurve,
+      );
+    }
   }
 
   void _handleStatusChange(AnimationStatus status) {
@@ -2585,7 +2607,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         builder: (BuildContext context, Widget child) {
           return Align(
             alignment: AlignmentDirectional.topStart,
-            heightFactor: widget.animationController.value,
+            heightFactor: animationCurve.transform(widget.animationController.value),
             child: child,
           );
         },
@@ -2593,6 +2615,8 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           BottomSheet(
             animationController: widget.animationController,
             enableDrag: widget.enableDrag,
+            onDragStart: _handleDragStart,
+            onDragEnd: _handleDragEnd,
             onClosing: widget.onClosing,
             builder: widget.builder,
             backgroundColor: widget.backgroundColor,

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -16,9 +17,17 @@ import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-const Duration _bottomSheetDuration = Duration(milliseconds: 200);
+const Duration _bottomSheetDuration = Duration(milliseconds: 250);
+const Curve _bottomSheetCurve = Curves.fastOutSlowIn;
+const Curve _bottomSheetFlingCurve = Curves.easeOutCubic;
 const double _minFlingVelocity = 700.0;
 const double _closeProgressThreshold = 0.5;
+
+typedef BottomSheetDragStartHandler = void Function(DragStartDetails details);
+typedef BottomSheetDragEndHandler = void Function(
+  DragEndDetails details, {
+  bool isClosing,
+});
 
 /// A material design bottom sheet.
 ///
@@ -57,6 +66,8 @@ class BottomSheet extends StatefulWidget {
     Key key,
     this.animationController,
     this.enableDrag = true,
+    this.onDragStart,
+    this.onDragEnd,
     this.backgroundColor,
     this.elevation,
     this.shape,
@@ -94,6 +105,12 @@ class BottomSheet extends StatefulWidget {
   ///
   /// Default is true.
   final bool enableDrag;
+
+  /// Called when the user begins dragging the bottom sheet vertically.
+  final BottomSheetDragStartHandler onDragStart;
+
+  /// Called when the user stops dragging the bottom sheet.
+  final BottomSheetDragEndHandler onDragEnd;
 
   /// The bottom sheet's background color.
   ///
@@ -158,6 +175,12 @@ class _BottomSheetState extends State<BottomSheet> {
 
   bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
 
+  void _handleDragStart(DragStartDetails details) {
+    if (widget.onDragStart != null) {
+      widget.onDragStart(details);
+    }
+  }
+
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(widget.enableDrag);
     if (_dismissUnderway)
@@ -169,6 +192,7 @@ class _BottomSheetState extends State<BottomSheet> {
     assert(widget.enableDrag);
     if (_dismissUnderway)
       return;
+    bool isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (widget.animationController.value > 0.0) {
@@ -176,14 +200,23 @@ class _BottomSheetState extends State<BottomSheet> {
       }
       if (flingVelocity < 0.0) {
         widget.onClosing();
+        isClosing = true;
       }
     } else if (widget.animationController.value < _closeProgressThreshold) {
       if (widget.animationController.value > 0.0)
         widget.animationController.fling(velocity: -1.0);
       widget.onClosing();
+      isClosing = true;
     } else {
       widget.animationController.forward();
-   }
+    }
+
+    if (widget.onDragEnd != null) {
+      widget.onDragEnd(
+        details,
+        isClosing: isClosing,
+      );
+    }
   }
 
   bool extentChanged(DraggableScrollableNotification notification) {
@@ -213,6 +246,7 @@ class _BottomSheetState extends State<BottomSheet> {
       ),
     );
     return !widget.enableDrag ? bottomSheet : GestureDetector(
+      onVerticalDragStart: _handleDragStart,
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
       child: bottomSheet,
@@ -283,6 +317,8 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 }
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
+  Curve animationCurve = _bottomSheetCurve;
+
   String _getRouteLabel(MaterialLocalizations localizations) {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
@@ -293,6 +329,24 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         return localizations.dialogLabel;
     }
     return null;
+  }
+
+  void handleDragStart(DragStartDetails details) {
+    // allows the bottom sheet to track the user's finger accurately
+    animationCurve = Curves.linear;
+  }
+
+  void handleDragEnd(DragEndDetails details, {bool isClosing}) {
+    if (isClosing) {
+      // shortened curve on exit minimizes risk of a visibly slow linear
+      // animation
+      animationCurve = const Interval(0.5, 1, curve: Curves.linear);
+    } else {
+      animationCurve = BottomSheetSuspendedCurve(
+        widget.route.animation.value,
+        curve: _bottomSheetFlingCurve,
+      );
+    }
   }
 
   @override
@@ -308,7 +362,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
       builder: (BuildContext context, Widget child) {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
-        final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
+        final double animationValue = animationCurve.transform(
+            mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value
+        );
         return Semantics(
           scopesRoute: true,
           namesRoute: true,
@@ -330,6 +386,8 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                 shape: widget.shape,
                 clipBehavior: widget.clipBehavior,
                 enableDrag: widget.enableDrag,
+                onDragStart: handleDragStart,
+                onDragEnd: handleDragEnd,
               ),
             ),
           ),
@@ -383,7 +441,6 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   AnimationController _animationController;
 
-
   @override
   AnimationController createAnimationController() {
     assert(_animationController == null);
@@ -412,6 +469,59 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     if (theme != null)
       bottomSheet = Theme(data: theme, child: bottomSheet);
     return bottomSheet;
+  }
+}
+
+/// A curve that progresses linearly until a specified [startingPoint], at which
+/// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
+/// but will use [startingPoint] as the Y position.
+///
+/// For example, if [startingPoint] is set to `0.5`, and [curve] is set to
+/// [Curves.easeOut], then the bottom-left quarter of the curve will be a
+/// straight line, and the top-right quarter will contain the entire contents of
+/// [Curves.easeOut].
+///
+/// This is useful in situations where a widget must track the user's finger
+/// (which requires a linear animation), and afterwards can be flung using a
+/// curve specified with the [curve] argument, after the finger is released. In
+/// such a case, the value of [startingPoint] would be the progress of the
+/// animation at the time when the finger was released.
+///
+/// The [startingPoint] and [curve] arguments must not be null.
+class BottomSheetSuspendedCurve extends Curve {
+  /// Creates a suspended curve.
+  const BottomSheetSuspendedCurve(this.startingPoint,
+      {this.curve = Curves.easeOutCubic})
+      : assert(startingPoint != null),
+        assert(curve != null);
+
+  /// The progress value at which [curve] should begin.
+  final double startingPoint;
+
+  /// The curve to use when [startingPoint] is reached.
+  final Curve curve;
+
+  @override
+  double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    assert(startingPoint >= 0.0 && startingPoint <= 1.0);
+
+    if (t < startingPoint) {
+      return t;
+    }
+
+    if (t == 1.0) {
+      return t;
+    }
+
+    final double curveProgress = (t - startingPoint) / (1 - startingPoint);
+    final double transformed = curve.transform(curveProgress);
+    return lerpDouble(startingPoint, 1, transformed);
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($startingPoint, $curve)';
   }
 }
 
