@@ -469,7 +469,7 @@ void main() {
       );
     });
 
-    test('calculates the basedir correctly from defaultComparator', () async {
+    test('calculates the basedir correctly from defaultComparator for local testing', () async {
       final MockLocalFileComparator defaultComparator = MockLocalFileComparator();
       final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT'])
         ..createSync(recursive: true);
@@ -478,6 +478,7 @@ void main() {
       final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(
         defaultComparator,
         platform,
+        local: true,
       );
       expect(
         basedir.uri,
