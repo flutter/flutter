@@ -193,7 +193,7 @@ class WebDevices extends PollingDeviceDiscovery {
 
 @visibleForTesting
 String parseVersionForWindows(String input) {
-  return input.split(RegExp('\w')).last;
+  return input.split(RegExp(r'\w')).last;
 }
 
 

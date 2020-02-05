@@ -952,12 +952,12 @@ void main() {
       return Intl.plural(
         count,
       locale: _localeName,
-      name: \'helloWorlds\',
+      name: 'helloWorlds',
       args: <Object>[count, currentDate],
-      one: \'Hello World, today is \${currentDateString}\',
-      two: \'Hello two worlds, today is \${currentDateString}\',
-      many: \'Hello all \${count} worlds, today is \${currentDateString}\',
-      other: \'Hello other \${count} worlds, today is \${currentDateString}\'
+      one: 'Hello World, today is \${currentDateString}',
+      two: 'Hello two worlds, today is \${currentDateString}',
+      many: 'Hello all \${count} worlds, today is \${currentDateString}',
+      other: 'Hello other \${count} worlds, today is \${currentDateString}'
       );
     }
     return helloWorlds(count, currentDateString);
@@ -1334,12 +1334,12 @@ void main() {
       return Intl.plural(
         count,
       locale: _localeName,
-      name: \'helloWorlds\',
+      name: 'helloWorlds',
       args: <Object>[count, currentDate],
-      one: \'Hello World, today is \${currentDateString}\',
-      two: \'Hello two worlds, today is \${currentDateString}\',
-      many: \'Hello all \${count} worlds, today is \${currentDateString}\',
-      other: \'Hello other \${count} worlds, today is \${currentDateString}\'
+      one: 'Hello World, today is \${currentDateString}',
+      two: 'Hello two worlds, today is \${currentDateString}',
+      many: 'Hello all \${count} worlds, today is \${currentDateString}',
+      other: 'Hello other \${count} worlds, today is \${currentDateString}'
       );
     }
     return helloWorlds(count, currentDateString);
@@ -1393,12 +1393,12 @@ void main() {
       return Intl.plural(
         count,
       locale: _localeName,
-      name: \'helloWorlds\',
+      name: 'helloWorlds',
       args: <Object>[count, population],
-      one: \'Hello World of \${populationString} citizens\',
-      two: \'Hello two worlds with \${populationString} total citizens\',
-      many: \'Hello all \${count} worlds, with a total of \${populationString} citizens\',
-      other: \'Hello other \${count} worlds, with a total of \${populationString} citizens\'
+      one: 'Hello World of \${populationString} citizens',
+      two: 'Hello two worlds with \${populationString} total citizens',
+      many: 'Hello all \${count} worlds, with a total of \${populationString} citizens',
+      other: 'Hello other \${count} worlds, with a total of \${populationString} citizens'
       );
     }
     return helloWorlds(count, populationString);

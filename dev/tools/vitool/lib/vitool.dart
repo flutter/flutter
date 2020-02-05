@@ -292,7 +292,7 @@ class SvgPath {
   final List<SvgPathCommand> commands;
   final double opacity;
 
-  static const String _pathCommandAtom = ' *([a-zA-Z]) *([\-\.0-9 ,]*)';
+  static const String _pathCommandAtom = r' *([a-zA-Z]) *([\-\.0-9 ,]*)';
   static final RegExp _pathCommandValidator = RegExp('^($_pathCommandAtom)*\$');
   static final RegExp _pathCommandMatcher = RegExp(_pathCommandAtom);
 
