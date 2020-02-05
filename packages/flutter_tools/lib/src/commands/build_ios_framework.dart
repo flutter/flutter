@@ -44,6 +44,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
        _bundleBuilder = bundleBuilder,
        _cache = cache,
        _platform = platform {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -361,6 +362,7 @@ end
         mainPath: globals.fs.path.absolute(targetFile),
         assetDirPath: destinationAppFrameworkDirectory.childDirectory('flutter_assets').path,
         precompiledSnapshot: mode != BuildMode.debug,
+        treeShakeIcons: boolArg('tree-shake-icons')
       );
     } finally {
       status.stop();
@@ -426,6 +428,7 @@ end
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
         dartDefines: dartDefines,
+        treeShakeIcons: boolArg('tree-shake-icons'),
       );
     } finally {
       status.stop();

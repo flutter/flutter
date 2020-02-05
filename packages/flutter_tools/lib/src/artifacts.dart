@@ -367,7 +367,10 @@ class CachedArtifacts extends Artifacts {
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
       case Artifact.fontSubset:
       case Artifact.constFinder:
-        return _cache.getArtifactDirectory('font-subset').childFile(_artifactToFileName(artifact, platform, mode)).path;
+        return _cache.getArtifactDirectory('engine')
+                     .childDirectory(getNameForTargetPlatform(platform))
+                     .childFile(_artifactToFileName(artifact, platform, mode))
+                     .path;
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
