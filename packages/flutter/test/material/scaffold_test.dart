@@ -379,6 +379,8 @@ void main() {
       ]));
 
       expect(find.byType(FloatingActionButtonLocation), findsNWidgets(3));
+
+      // TODO: Add location expectations.
     });
   });
 
