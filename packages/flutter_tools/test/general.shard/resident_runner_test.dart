@@ -424,7 +424,7 @@ void main() {
   }));
 
   test('ResidentTunner clears the screen when it should', () => testbed.run(() async {
-    residentRunner.clearScreen(testLogger);
+    residentRunner.clearScreen();
     expect(testLogger.statusText, equals(''));
   }));
   
