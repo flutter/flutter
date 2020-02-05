@@ -60,17 +60,18 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   Uri testUri;
 
   @override
-  Future<bool> compare(Element element, Size size, Uri golden) async {
+  Future<bool> compare(dynamic element, dynamic size, Uri golden) async {
+    assert(size is Size);
+    final Size realSize = size as Size;
     final String key = golden.toString();
-
     final html.HttpRequest request = await html.HttpRequest.request(
       'flutter_goldens',
       method: 'POST',
       sendData: json.encode(<String, Object>{
         'testUri': testUri.toString(),
         'key': key.toString(),
-        'width': size.width.round(),
-        'height': size.height.round(),
+        'width': realSize.width.round(),
+        'height': realSize.height.round(),
       }),
     );
     final String response = request.response as String;
@@ -82,7 +83,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   }
 
   @override
-  Future<void> update(Uri golden, Element element, Size size) async {
+  Future<void> update(Uri golden, dynamic element, dynamic size) async {
     // Update is handled on the server side, just use the same logic here
     await compare(element, size, golden);
   }

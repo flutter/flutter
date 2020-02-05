@@ -5,8 +5,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
 
@@ -174,7 +173,7 @@ abstract class WebGoldenComparator {
   /// is left up to the implementation class. For instance, some implementations
   /// may load files from the local file system, whereas others may load files
   /// over the network or from a remote repository.
-  Future<bool> compare(Element element, Size size, Uri golden);
+  Future<bool> compare(dynamic element, dynamic size, Uri golden);
 
   /// Updates the golden file identified by [golden] with rendered pixels of
   /// [element].
@@ -185,7 +184,7 @@ abstract class WebGoldenComparator {
   ///
   /// The method by which [golden] is located and by which its bytes are written
   /// is left up to the implementation class.
-  Future<void> update(Uri golden, Element element, Size size);
+  Future<void> update(Uri golden, dynamic element, dynamic size);
 
   /// Returns a new golden file [Uri] to incorporate any [version] number with
   /// the [key].
@@ -280,7 +279,7 @@ class TrivialComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {
-    debugPrint('Golden file comparison requested for "$golden"; skipping...');
+    print('Golden file comparison requested for "$golden"; skipping...');
     return Future<bool>.value(true);
   }
 
@@ -299,13 +298,13 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
   const _TrivialWebGoldenComparator._();
 
   @override
-  Future<bool> compare(Element element, Size size, Uri golden) {
-    debugPrint('Golden comparison requested for "$golden"; skipping...');
+  Future<bool> compare(dynamic element, dynamic size, Uri golden) {
+    print('Golden comparison requested for "$golden"; skipping...');
     return Future<bool>.value(true);
   }
 
   @override
-  Future<void> update(Uri golden, Element element, Size size) {
+  Future<void> update(Uri golden, dynamic element, dynamic size) {
     throw StateError('webGoldenComparator has not been initialized');
   }
 
