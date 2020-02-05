@@ -4,9 +4,9 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'flat_button.dart';
@@ -41,6 +41,8 @@ class _TextSelectionToolbar extends StatefulWidget {
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
+
+  // When true, the toolbar fits above its anchor and will be positioned there.
   final bool isAbove;
 
   // Returns true iff the menu items that this widget renders will produce a
@@ -60,6 +62,9 @@ class _TextSelectionToolbar extends StatefulWidget {
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
   final GlobalKey _containerKey = GlobalKey();
   final GlobalKey _moreButtonKey = GlobalKey();
+
+  // The width of all of the items that are being rendered in the closed
+  // toolbar, including the more button if visible.
   double _menuContentWidth;
 
   // Keys for all items in the menu.
@@ -352,12 +357,7 @@ class _TextSelectionToolbarContentOverflow extends StatelessWidget {
       onPressed: onBackPressed,
     );
     final List<Widget> children = <Widget>[...items];
-    //if ((materialTextSelectionControls as _MaterialTextSelectionControls).fitsAbove) {
-    if (isAbove) {
-      children.insert(children.length, moreButton);
-    } else {
-      children.insert(0, moreButton);
-    }
+    children.insert(isAbove ? children.length : 0, moreButton);
 
     return Container(
       child: Column(
@@ -374,7 +374,7 @@ class _TextSelectionToolbarContentOverflow extends StatelessWidget {
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
   _TextSelectionToolbarLayout(this.anchor, this.upperBounds, this.fitsAbove);
 
-  /// Anchor anchor of the toolbar in global coordinates.
+  /// Anchor position of the toolbar in global coordinates.
   final Offset anchor;
 
   /// The upper-most valid y value for the anchor.

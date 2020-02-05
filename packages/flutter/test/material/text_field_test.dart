@@ -5752,6 +5752,7 @@ void main() {
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, 0));
+      // Selection menu renders one frame offstage, so pump twice.
       await tester.pump();
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
