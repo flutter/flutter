@@ -143,8 +143,8 @@ class ScrollController extends ChangeNotifier {
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
   ///
-  /// Note that when calling [animateTo] in widget tests, `await`ing the
-  /// returned [Future] may cause the test to hang and timeout. Instead, use
+  /// When calling [animateTo] in widget tests, `await`ing the returned
+  /// [Future] may cause the test to hang and timeout. Instead, use
   /// [WidgetTester.pumpAndSettle].
   Future<void> animateTo(
     double offset, {
