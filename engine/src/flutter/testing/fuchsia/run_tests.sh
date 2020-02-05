@@ -45,6 +45,11 @@ done
     -t flutter_runner_tests
 
 ./fuchsia_ctl -d $device_name test \
+    -f flutter_aot_runner-0.far    \
+    -f flutter_runner_scenic_tests-0.far  \
+    -t flutter_runner_scenic_tests
+
+./fuchsia_ctl -d $device_name test \
     -f fml_tests-0.far  \
     -t fml_tests
 

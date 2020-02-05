@@ -317,6 +317,7 @@ executable("flutter_runner_unittests") {
     "task_observers.h",
     "task_runner_adapter.cc",
     "task_runner_adapter.h",
+    "tests/vsync_recorder_unittests.cc",
     "thread.cc",
     "thread.h",
     "vsync_recorder.cc",
@@ -430,6 +431,117 @@ fuchsia_archive("flutter_runner_tzdata_tests") {
 
   deps = [
     ":flutter_runner_tzdata_unittests",
+  ]
+
+  binary = "$target_name"
+
+  resources = [
+    {
+      path = rebase_path("//third_party/icu/common/icudtl.dat")
+      dest = "icudtl.dat"
+    },
+  ]
+
+  meta_dir = "//flutter/shell/platform/fuchsia/flutter/meta"
+
+  libraries = common_libs
+
+  meta = [
+    {
+      path = rebase_path("meta/$target_name.cmx")
+      dest = "$target_name.cmx"
+    },
+  ]
+}
+
+executable("flutter_runner_scenic_unittests") {
+  testonly = true
+
+  output_name = "flutter_runner_scenic_tests"
+
+  sources = [
+    "component.cc",
+    "component.h",
+    "compositor_context.cc",
+    "compositor_context.h",
+    "engine.cc",
+    "engine.h",
+    "fuchsia_intl.cc",
+    "fuchsia_intl.h",
+    "isolate_configurator.cc",
+    "isolate_configurator.h",
+    "logging.h",
+    "loop.cc",
+    "loop.h",
+    "platform_view.cc",
+    "platform_view.h",
+    "runner.cc",
+    "runner.h",
+    "session_connection.cc",
+    "session_connection.h",
+    "surface.cc",
+    "surface.h",
+    "task_observers.cc",
+    "task_observers.h",
+    "task_runner_adapter.cc",
+    "task_runner_adapter.h",
+    "tests/session_connection_unittests.cc",
+    "thread.cc",
+    "thread.h",
+    "unique_fdio_ns.h",
+    "vsync_recorder.cc",
+    "vsync_recorder.h",
+    "vsync_waiter.cc",
+    "vsync_waiter.h",
+    "vsync_waiter_unittests.cc",
+    "vulkan_surface.cc",
+    "vulkan_surface.h",
+    "vulkan_surface_pool.cc",
+    "vulkan_surface_pool.h",
+    "vulkan_surface_producer.cc",
+    "vulkan_surface_producer.h",
+  ]
+
+  # This is needed for //third_party/googletest for linking zircon symbols.
+  libs = [ "//fuchsia/sdk/$host_os/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+
+  deps = [
+    ":flutter_runner_fixtures",
+    ":jit",
+    "$fuchsia_sdk_root/fidl:fuchsia.ui.policy",
+    "$fuchsia_sdk_root/pkg:trace-provider-so",
+    "//build/fuchsia/fidl:fuchsia.accessibility.semantics",
+    "//build/fuchsia/pkg:async-default",
+    "//build/fuchsia/pkg:async-loop-cpp",
+    "//build/fuchsia/pkg:async-loop-default",
+    "//build/fuchsia/pkg:scenic_cpp",
+    "//build/fuchsia/pkg:sys_cpp_testing",
+    "//flutter/common:common",
+    "//flutter/flow:flow",
+    "//flutter/lib/ui",
+    "//flutter/runtime",
+    "//flutter/shell/common",
+    "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia:sdk_ext",
+    "//flutter/shell/platform/fuchsia/dart-pkg/zircon:zircon",
+    "//flutter/shell/platform/fuchsia/runtime/dart/utils",
+    "//flutter/testing",
+    "//flutter/vulkan:vulkan",
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/platform:libdart_platform_jit",
+    "//third_party/icu",
+    "//third_party/skia",
+  ]
+
+  public_deps = [
+    "//third_party/googletest:gtest",
+  ]
+}
+
+fuchsia_archive("flutter_runner_scenic_tests") {
+  testonly = true
+
+  deps = [
+    ":flutter_runner_scenic_unittests",
   ]
 
   binary = "$target_name"

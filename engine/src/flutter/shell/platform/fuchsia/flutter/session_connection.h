@@ -24,6 +24,9 @@
 
 namespace flutter_runner {
 
+using on_frame_presented_event =
+    std::function<void(fuchsia::scenic::scheduling::FramePresentedInfo)>;
+
 // The component residing on the GPU thread that is responsible for
 // maintaining the Scenic session connection and presenting node updates.
 class SessionConnection final {
@@ -33,6 +36,7 @@ class SessionConnection final {
                     scenic::ViewRefPair view_ref_pair,
                     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
                     fml::closure session_error_callback,
+                    on_frame_presented_event on_frame_presented_callback,
                     zx_handle_t vsync_event_handle);
 
   ~SessionConnection();
@@ -59,7 +63,7 @@ class SessionConnection final {
   scenic::ContainerNode& root_node() { return root_node_; }
   scenic::View* root_view() { return &root_view_; }
 
-  void Present(flutter::CompositorContext::ScopedFrame& frame);
+  void Present(flutter::CompositorContext::ScopedFrame* frame);
 
   void OnSessionSizeChangeHint(float width_change_factor,
                                float height_change_factor);
@@ -73,8 +77,11 @@ class SessionConnection final {
 
   std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
   flutter::SceneUpdateContext scene_update_context_;
+  on_frame_presented_event on_frame_presented_callback_;
 
   zx_handle_t vsync_event_handle_;
+
+  bool initialized_ = false;
 
   // A flow event trace id for following |Session::Present| calls into
   // Scenic.  This will be incremented each |Session::Present| call.  By
@@ -84,7 +91,14 @@ class SessionConnection final {
   uint64_t next_present_session_trace_id_ = 0;
   uint64_t processed_present_session_trace_id_ = 0;
 
-  bool presentation_callback_pending_ = false;
+  // The maximum number of frames Flutter sent to Scenic that it can have
+  // outstanding at any time. This is equivalent to how many times it has
+  // called Present2() before receiving an OnFramePresented() event.
+  static constexpr int kMaxFramesInFlight = 2;
+  int frames_in_flight_ = 0;
+
+  int frames_in_flight_allowed_ = 0;
+
   bool present_session_pending_ = false;
 
   void EnqueueClearOps();
