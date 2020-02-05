@@ -63,7 +63,7 @@ class BuildInfo {
   /// On Xcode builds it is used as CFBundleShortVersionString,
   final String buildName;
 
-  /// A optional directory path to save debugging information from dwarf stack
+  /// An optional directory path to save debugging information from dwarf stack
   /// traces. If null, stack trace information is not stripped from the
   /// executable.
   final String splitDebugInfoPath;

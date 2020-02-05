@@ -365,6 +365,9 @@ abstract class FlutterCommand extends Command<void> {
       negatable: false,
       hide: !verboseHelp,
       help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+  }
+
+  void addSplitDebugInfoOption() {
     argParser.addOption(FlutterOptions.kSplitDebugInfoOption,
       help: 'In a release build, this flag reduces application size by storing '
         'Dart program symbols in a separate file on the host rather than in the '
@@ -372,7 +375,8 @@ abstract class FlutterCommand extends Command<void> {
         'symbol files can be stored for later use. These symbol files contain '
         'the information needed to symbolize Dart stack traces. For an app built '
         'with this flag, the \'flutter symbolize\' command with the right program '
-        'symbol file is required to obtain a human readable stack trace',
+        'symbol file is required to obtain a human readable stack trace. This '
+        'command is tracked by https://github.com/flutter/flutter/issues/50206',
       valueHelp: '/project-name/v1.2.3/',
     );
   }
