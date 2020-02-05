@@ -487,6 +487,9 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField
     // when there is not enough space above the TextField to show it.
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
+      ? endpoints[1]
+      : endpoints[0];
     const double toolbarHeightNeeded = _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance;
@@ -508,7 +511,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     );
     final Offset anchorBottom = Offset(
       globalEditableRegion.left + position.dx,
-      globalEditableRegion.top + startTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
     );
 
     return Stack(
@@ -524,20 +527,13 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
             anchorBottom,
             MediaQuery.of(context).padding.top,
           ),
-            child: _TextSelectionToolbar(
-              handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-              handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-              handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-              handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-              // TODO(justinmc): Desired behavior for reference:
-              // If the menu is above the anchor but the overflow menu can't fit
-              // above, then it grows downward and the arrow is on top. If the
-              // overflow menu does fit above, then it grows upward and the arrow is
-              // on the bottom. If the menu is below the anchor, then it grows down
-              // and the arrow is on top. It can't happen that the menu is below the
-              // anchor and the overflow menu grows upward.
-              isAbove: fitsAbove,
-            ),
+          child: _TextSelectionToolbar(
+            handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+            handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
+            handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+            handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+            isAbove: fitsAbove,
+          ),
         ),
       ],
     );
