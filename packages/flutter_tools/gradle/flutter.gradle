@@ -603,15 +603,13 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
-<<<<<<< HEAD
         String splitDebugInfoValue = null
         if (project.hasProperty('split-debug-info')) {
             splitDebugInfoValue = project.property('split-debug-info')
-=======
+        }
         Boolean treeShakeIconsOptionsValue = false
         if (project.hasProperty('tree-shake-icons')) {
             treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
->>>>>>> 374b55cc608bcc555713b37afa1ce8b089c4800c
         }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
@@ -647,11 +645,8 @@ class FlutterPlugin implements Plugin<Project> {
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
-<<<<<<< HEAD
                 splitDebugInfo splitDebugInfoValue
-=======
                 treeShakeIcons treeShakeIconsOptionsValue
->>>>>>> 374b55cc608bcc555713b37afa1ce8b089c4800c
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -785,11 +780,9 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     String extraGenSnapshotOptions
     @Optional @Input
-<<<<<<< HEAD
     String splitDebugInfo
-=======
+    @Optional @Input
     Boolean treeShakeIcons
->>>>>>> 374b55cc608bcc555713b37afa1ce8b089c4800c
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -846,13 +839,11 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
-<<<<<<< HEAD
             if (splitDebugInfo != null) {
                 args "-dSplitDebugInfo=${splitDebugInfo}"
-=======
+            }
             if (treeShakeIcons == true) {
                 args "-dTreeShakeIcons=true"
->>>>>>> 374b55cc608bcc555713b37afa1ce8b089c4800c
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
