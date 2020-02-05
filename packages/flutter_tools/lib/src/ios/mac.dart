@@ -9,11 +9,9 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -25,8 +23,6 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
-
-IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 
 /// Specialized exception for expected situations where the ideviceinfo
 /// tool responds with exit code 255 / 'No device found' message
@@ -93,13 +89,11 @@ class IMobileDevice {
   IMobileDevice()
       : _ideviceIdPath = globals.artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
         _ideviceinfoPath = globals.artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
-        _idevicenamePath = globals.artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
         _idevicesyslogPath = globals.artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
         _idevicescreenshotPath = globals.artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
 
   final String _ideviceIdPath;
   final String _ideviceinfoPath;
-  final String _idevicenamePath;
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
 
@@ -116,56 +110,6 @@ class IMobileDevice {
     return _isInstalled;
   }
   bool _isInstalled;
-
-  /// Returns true if libimobiledevice is installed and working as expected.
-  ///
-  /// Older releases of libimobiledevice fail to work with iOS 10.3 and above.
-  Future<bool> get isWorking async {
-    if (_isWorking != null) {
-      return _isWorking;
-    }
-    if (!isInstalled) {
-      _isWorking = false;
-      return _isWorking;
-    }
-    // If usage info is printed in a hyphenated id, we need to update.
-    const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final Map<String, String> executionEnv = Map<String, String>.fromEntries(
-      <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
-    );
-    final ProcessResult ideviceResult = (await processUtils.run(
-      <String>[
-        _ideviceinfoPath,
-        '-u',
-        fakeIphoneId,
-      ],
-      environment: executionEnv,
-    )).processResult;
-    if ((ideviceResult.stdout as String).contains('Usage: ideviceinfo')) {
-      _isWorking = false;
-      return _isWorking;
-    }
-
-    // If no device is attached, we're unable to detect any problems. Assume all is well.
-    final ProcessResult result = (await processUtils.run(
-      <String>[
-        _ideviceIdPath,
-        '-l',
-      ],
-      environment: executionEnv,
-    )).processResult;
-    if (result.exitCode == 0 && (result.stdout as String).isEmpty) {
-      _isWorking = true;
-    } else {
-      // Check that we can look up the names of any attached devices.
-      _isWorking = await processUtils.exitsHappy(
-        <String>[_idevicenamePath],
-        environment: executionEnv,
-      );
-    }
-    return _isWorking;
-  }
-  bool _isWorking;
 
   Future<String> getAvailableDeviceIDs() async {
     try {
@@ -265,7 +209,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   DarwinArch activeArch,
   bool codesign = true,
-
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project)) {
     return XcodeBuildResult(success: false);
@@ -422,7 +365,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (globals.logger.hasTerminal) {
     tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_build_log_pipe.');
     scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
-    os.makePipe(scriptOutputPipeFile.path);
+    globals.os.makePipe(scriptOutputPipeFile.path);
 
     Future<void> listenToScriptOutputLine() async {
       final List<String> lines = await scriptOutputPipeFile.readAsLines();
@@ -473,7 +416,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus = null;
   globals.printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
-        + '${getElapsedAsSeconds(sw.elapsed).padLeft(5)}',
+        + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
   flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
@@ -551,7 +494,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         // (for example, kernel binary files produced from previous run).
         globals.fs.directory(outputDir).deleteSync(recursive: true);
       }
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         globals.fs.directory(expectedOutputDirectory),
         globals.fs.directory(outputDir),
       );

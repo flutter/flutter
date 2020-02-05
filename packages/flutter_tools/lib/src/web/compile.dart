@@ -52,6 +52,8 @@ Future<void> buildWeb(
         kHasWebPlugins: hasWebPlugins.toString(),
         kDartDefines: jsonEncode(dartDefines),
         kCspMode: csp.toString(),
+        // TODO(dnfield): Enable font subset. We need to get a kernel file to do
+        // that. https://github.com/flutter/flutter/issues/49730
       },
     ));
     if (!result.success) {

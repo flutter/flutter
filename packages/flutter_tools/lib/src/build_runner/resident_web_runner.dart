@@ -18,7 +18,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/os.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -398,12 +397,12 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-      'Launching ${fsUtils.getDisplayPath(target)} '
+      'Launching ${globals.fsUtils.getDisplayPath(target)} '
       'on ${device.device.name} in $modeName mode...',
     );
     final String effectiveHostname = debuggingOptions.hostname ?? 'localhost';
     final int hostPort = debuggingOptions.port == null
-        ? await os.findFreePort()
+        ? await globals.os.findFreePort()
         : int.tryParse(debuggingOptions.port);
     device.devFS = WebDevFS(
       effectiveHostname,
@@ -516,7 +515,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
           'import "$generatedImport";',
         'Future<void> main() async {',
         if (hasWebPlugins)
-          '  registerPlugins(webPluginRegistry);'
+          '  registerPlugins(webPluginRegistry);',
         '  await ui.webOnlyInitializePlatform();',
         '  entrypoint.main();',
         '}',
@@ -642,7 +641,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-      'Launching ${fsUtils.getDisplayPath(target)} '
+      'Launching ${globals.fsUtils.getDisplayPath(target)} '
       'on ${device.device.name} in $modeName mode...',
     );
     Status buildStatus;

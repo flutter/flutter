@@ -292,7 +292,7 @@ void main() {
 
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
+          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
           platformArgs: <String, dynamic>{},
         );
         verify(mockUsage.sendEvent('ios-mdns', 'success')).called(1);
@@ -362,7 +362,7 @@ void main() {
 
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
+          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
           platformArgs: <String, dynamic>{},
         );
         verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
@@ -395,7 +395,7 @@ void main() {
 
         final LaunchResult launchResult = await device.startApp(mockApp,
             prebuiltApplication: true,
-            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
+            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
             platformArgs: <String, dynamic>{},
         );
         verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
@@ -416,7 +416,7 @@ void main() {
         final IOSDevice device = IOSDevice('123');
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)),
+          debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
           platformArgs: <String, dynamic>{},
         );
         expect(launchResult.started, isTrue);
@@ -455,7 +455,7 @@ void main() {
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(
-              const BuildInfo(BuildMode.debug, null),
+              const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
               cacheSkSL: true,
           ),
           platformArgs: <String, dynamic>{},
@@ -499,7 +499,7 @@ void main() {
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(
-            const BuildInfo(BuildMode.debug, null),
+            const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
             deviceVmServicePort: 8181,
           ),
           platformArgs: <String, dynamic>{},
@@ -600,7 +600,7 @@ void main() {
             device.startApp(
               app,
               prebuiltApplication: false,
-              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)),
+              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
               platformArgs: <String, dynamic>{},
             ).then((LaunchResult result) {
               completer.complete(result);
@@ -770,8 +770,8 @@ void main() {
     });
 
     testUsingContext('returns no devices if none are attached', () async {
-      when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs())
+      when(globals.iMobileDevice.isInstalled).thenReturn(true);
+      when(globals.iMobileDevice.getAvailableDeviceIDs())
           .thenAnswer((Invocation invocation) => Future<String>.value(''));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, isEmpty);
@@ -783,8 +783,8 @@ void main() {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final Platform platform in unsupportedPlatforms) {
       testUsingContext('throws Unsupported Operation exception on ${platform.operatingSystem}', () async {
-        when(iMobileDevice.isInstalled).thenReturn(false);
-        when(iMobileDevice.getAvailableDeviceIDs())
+        when(globals.iMobileDevice.isInstalled).thenReturn(false);
+        when(globals.iMobileDevice.getAvailableDeviceIDs())
             .thenAnswer((Invocation invocation) => Future<String>.value(''));
         expect(
             () async { await IOSDevice.getAttachedDevices(); },
@@ -797,19 +797,19 @@ void main() {
     }
 
     testUsingContext('returns attached devices', () async {
-      when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs())
+      when(globals.iMobileDevice.isInstalled).thenReturn(true);
+      when(globals.iMobileDevice.getAvailableDeviceIDs())
           .thenAnswer((Invocation invocation) => Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
-      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
+      when(globals.iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('La tele me regarde'));
-      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
+      when(globals.iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
           .thenAnswer((_) => Future<String>.value('10.3.2'));
-      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
+      when(globals.iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('Puits sans fond'));
-      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
+      when(globals.iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
           .thenAnswer((_) => Future<String>.value('11.0'));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(2));
@@ -823,15 +823,15 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     });
 
     testUsingContext('returns attached devices and ignores devices that cannot be found by ideviceinfo', () async {
-      when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs())
+      when(globals.iMobileDevice.isInstalled).thenReturn(true);
+      when(globals.iMobileDevice.getAvailableDeviceIDs())
           .thenAnswer((Invocation invocation) => Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
-      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
+      when(globals.iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('La tele me regarde'));
-      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
+      when(globals.iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
           .thenThrow(const IOSDeviceNotFoundError('Device not found'));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(1));

@@ -693,9 +693,15 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-    // Xcode build system
-    final String xcodeWorkspaceSettingsPath = globals.fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata', 'WorkspaceSettings.xcsettings');
-    expectExists(xcodeWorkspaceSettingsPath, false);
+    // Xcode workspace shared data
+    final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata'));
+    expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
+    expectExists(workspaceSharedData.childFile('IDEWorkspaceChecks.plist').path);
+    // Xcode project shared data
+    final Directory projectSharedData = globals.fs.directory(globals.fs.path.join('.ios', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'));
+    expectExists(projectSharedData.childFile('WorkspaceSettings.xcsettings').path);
+    expectExists(projectSharedData.childFile('IDEWorkspaceChecks.plist').path);
+
 
     final String versionPath = globals.fs.path.join('.metadata');
     expectExists(versionPath);
@@ -767,6 +773,14 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
+    // Xcode workspace shared data
+    final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('ios', 'Runner.xcworkspace', 'xcshareddata'));
+    expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
+    expectExists(workspaceSharedData.childFile('IDEWorkspaceChecks.plist').path);
+    // Xcode project shared data
+    final Directory projectSharedData = globals.fs.directory(globals.fs.path.join('ios', 'Runner.xcodeproj', 'project.xcworkspace', 'xcshareddata'));
+    expectExists(projectSharedData.childFile('WorkspaceSettings.xcsettings').path);
+    expectExists(projectSharedData.childFile('IDEWorkspaceChecks.plist').path);
 
     final String versionPath = globals.fs.path.join('.metadata');
     expectExists(versionPath);

@@ -223,10 +223,10 @@ String genSimpleMethod(Message message) {
   String genSimpleMethodMessage() {
     String messageValue = message.value;
     for (final Placeholder placeholder in message.placeholders) {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}');
+        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
     }
-    final String rawMessage = generateString(messageValue); // "r'...'"
-    return rawMessage.substring(1);
+    final String generatedMessage = generateString(messageValue); // "r'...'"
+    return generatedMessage.startsWith('r') ? generatedMessage.substring(1) : generatedMessage;
   }
 
   List<String> genMethodParameters([String type]) {
@@ -286,9 +286,17 @@ String generatePluralMethod(Message message) {
     'other': 'other'
   };
 
-  final String countPlaceholder = message.value.split(',')[0].substring(1);
+  final Placeholder countPlaceholder = message.getCountPlaceholder();
+  if (countPlaceholder == null) {
+    throw L10nException(
+      'Unable to find the count placeholder for the plural message: ${message.resourceId}.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+  }
+
   final List<String> intlMethodArgs = <String>[
-    countPlaceholder,
+    countPlaceholder.name,
     'locale: _localeName',
     ...generateIntlMethodArgs(message),
   ];
@@ -300,9 +308,9 @@ String generatePluralMethod(Message message) {
       String argValue = match.group(2);
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}String');
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
         } else {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}');
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
         }
       }
       intlMethodArgs.add("${pluralIds[pluralKey]}: '$argValue'");
@@ -311,7 +319,7 @@ String generatePluralMethod(Message message) {
 
   List<String> generatePluralMethodParameters([String type]) {
     return message.placeholders.map((Placeholder placeholder) {
-      final String placeholderType = placeholder.name == countPlaceholder ? 'int' : (type ?? placeholder.type);
+      final String placeholderType = placeholder == countPlaceholder ? 'int' : (type ?? placeholder.type);
       return '$placeholderType ${placeholder.name}';
     }).toList();
   }
@@ -346,7 +354,6 @@ class LocalizationsGenerator {
 
   static RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
   static RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
-  static RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
 
   final file.FileSystem _fs;
 
@@ -673,7 +680,7 @@ class LocalizationsGenerator {
       }
 
       final Message message = Message(bundle, key);
-      if (pluralValueRE.hasMatch(message.value))
+      if (message.isPlural)
         classMethods.add(generatePluralMethod(message));
       else
         classMethods.add(genSimpleMethod(message));

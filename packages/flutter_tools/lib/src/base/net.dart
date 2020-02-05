@@ -233,3 +233,13 @@ class _MemoryIOSink implements IOSink {
   @override
   Future<void> flush() async { }
 }
+
+/// Returns [true] if [address] is an IPv6 address.
+bool isIPv6Address(String address) {
+  try {
+    Uri.parseIPv6Address(address);
+    return true;
+  } on FormatException {
+    return false;
+  }
+}
