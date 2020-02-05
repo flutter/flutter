@@ -11,8 +11,11 @@ import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals;
 import '../../macos/xcode.dart';
+import '../../project.dart';
 import '../build_system.dart';
+import '../depfile.dart';
 import '../exceptions.dart';
+import 'assets.dart';
 import 'dart.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
@@ -25,7 +28,7 @@ abstract class AotAssemblyBase extends Target {
   @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
-    final String buildOutputPath = environment.outputDir.path;
+    final String buildOutputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_assembly');
     }
@@ -35,8 +38,11 @@ abstract class AotAssemblyBase extends Target {
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-    final List<DarwinArch> iosArchs = environment.defines[kIosArchs]?.split(',')?.map(getIOSArchForName)?.toList()
-        ?? <DarwinArch>[DarwinArch.arm64];
+    final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
+      ?.split(' ')
+      ?.map(getIOSArchForName)
+      ?.toList()
+      ?? <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
       throw Exception('aot_assembly is only supported for iOS applications');
     }
@@ -60,7 +66,7 @@ abstract class AotAssemblyBase extends Target {
     if (results.any((int result) => result != 0)) {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
-    final String resultPath = globals.fs.path.join(environment.outputDir.path, 'App.framework', 'App');
+    final String resultPath = globals.fs.path.join(environment.buildDir.path, 'App.framework', 'App');
     globals.fs.directory(resultPath).parent.createSync(recursive: true);
     final ProcessResult result = await globals.processManager.run(<String>[
       'lipo',
@@ -142,6 +148,202 @@ class AotAssemblyProfile extends AotAssemblyBase {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+  ];
+}
+
+/// Create a trivial App.framework file for debug iOS builds.
+class DebugUniveralFramework extends Target {
+  const DebugUniveralFramework();
+
+  @override
+  String get name => 'debug_universal_framework';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/App')
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    // Generate a trivial App.framework.
+    final File iphoneFile = environment.buildDir.childFile('iphone_framework');
+    final File simulatorFile = environment.buildDir.childFile('simulator_framework');
+    final File lipoOutputFile = environment.buildDir.childFile('App');
+    final RunResult iphoneResult = await createStubAppFramework(
+      iphoneFile,
+      SdkType.iPhone,
+    );
+    final RunResult simulatorResult = await createStubAppFramework(
+      simulatorFile,
+      SdkType.iPhoneSimulator,
+    );
+    if (iphoneResult.exitCode != 0 || simulatorResult.exitCode != 0) {
+      throw Exception('Failed to create App.framework.');
+    }
+    final List<String> lipoCommand = <String>[
+      'xcrun',
+      'lipo',
+      '-create',
+      iphoneFile.path,
+      simulatorFile.path,
+      '-output',
+      lipoOutputFile.path
+    ];
+    final RunResult lipoResult = await processUtils.run(
+      lipoCommand,
+    );
+
+    if (lipoResult.exitCode != 0) {
+      throw Exception('Failed to create App.framework.');
+    }
+  }
+}
+
+/// The base class for all iOS bundle targets.
+///
+/// This is responsible for setting up the basic App.framework structure, including:
+/// * Copying the app.dill/kernel_blob.bin from the build directory to assets (debug)
+/// * Copying the precompiled isolate/vm data from the engine (debug)
+/// * Copying the flutter assets to App.framework/flutter_assets
+/// * Copying either the stub or real App assembly file to App.framework/App
+abstract class IosAssetBundle extends Target {
+  const IosAssetBundle();
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/App'),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/App.framework/App'),
+    Source.pattern('{OUTPUT_DIR}/App.framework/Info.plist')
+  ];
+
+  @override
+  List<String> get depfiles => <String>[
+    'flutter_assets.d',
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+    final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
+    frameworkDirectory.createSync(recursive: true);
+    assetDirectory.createSync();
+
+    // Only copy the prebuilt runtimes and kernel blob in debug mode.
+    if (buildMode == BuildMode.debug) {
+      // Copy the App.framework to the output directory.
+      environment.buildDir.childFile('App')
+        .copySync(frameworkDirectory.childFile('App').path);
+
+      final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+      final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+      environment.buildDir.childFile('app.dill')
+          .copySync(assetDirectory.childFile('kernel_blob.bin').path);
+      globals.fs.file(vmSnapshotData)
+          .copySync(assetDirectory.childFile('vm_snapshot_data').path);
+      globals.fs.file(isolateSnapshotData)
+          .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+    } else {
+      environment.buildDir.childDirectory('App.framework').childFile('App')
+        .copySync(frameworkDirectory.childFile('App').path);
+    }
+
+    // Copy the assets.
+    final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
+    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+
+
+    // Copy the plist from either the project or module.
+    // TODO(jonahwilliams): add plist to inputs
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final Directory plistRoot = flutterProject.isModule
+      ? flutterProject.ios.ephemeralDirectory
+      : environment.projectDir.childDirectory('ios');
+    plistRoot
+      .childDirectory('Flutter')
+      .childFile('AppFrameworkInfo.plist')
+      .copySync(environment.outputDir
+      .childDirectory('App.framework')
+      .childFile('Info.plist').path);
+  }
+}
+
+/// Build a debug iOS application bundle.
+class DebugIosApplicationBundle extends IosAssetBundle {
+  const DebugIosApplicationBundle();
+
+  @override
+  String get name => 'debug_ios_bundle_flutter_assets';
+
+  @override
+  List<Source> get inputs => <Source>[
+    const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
+    const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    ...super.inputs,
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vm_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/isolate_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/kernel_blob.bin'),
+    ...super.outputs,
+  ];
+
+  @override
+  List<Target> get dependencies => <Target>[
+    const DebugUniveralFramework(),
+    ...super.dependencies,
+  ];
+}
+
+/// Build a profile iOS application bundle.
+class ProfileIosApplicationBundle extends IosAssetBundle {
+  const ProfileIosApplicationBundle();
+
+  @override
+  String get name => 'profile_ios_bundle_flutter_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotAssemblyProfile(),
+  ];
+}
+
+/// Build a release iOS application bundle.
+class ReleaseIosApplicationBundle extends IosAssetBundle {
+  const ReleaseIosApplicationBundle();
+
+  @override
+  String get name => 'release_ios_bundle_flutter_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    AotAssemblyRelease(),
   ];
 }
 
