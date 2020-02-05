@@ -38,7 +38,6 @@ List<String> findBinaryPaths() {
 }
 
 void main() {
-  print('CWD is $cacheDirectory');
   final List<String> failures = <String>[];
 
   for (final String binaryPath in findBinaryPaths()) {
