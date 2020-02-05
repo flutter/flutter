@@ -34,7 +34,7 @@ Future<void> main(FutureOr<void> testMain()) async {
     goldenFileComparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(platform);
   } else if (FlutterSkippingFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingFileComparator.fromDefaultComparator(
-      'Golden file testing is not on some Cirrus environments.'
+      'Golden file testing is not executed on some Cirrus environments.'
     );
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
