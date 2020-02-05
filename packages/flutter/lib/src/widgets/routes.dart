@@ -259,8 +259,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   // A callback method that disposes existing train hopping animation and
   // removes its listener.
   //
-  // The caller must reset this property to null once it is called, and this
-  // property is non-null if there is a train hopping in progress
+  // This property is non-null if there is a train hopping in progress, and the
+  // caller must reset this property to null after it is called.
   VoidCallback _trainHoppingListenerRemover;
 
   void _updateSecondaryAnimation(Route<dynamic> nextRoute) {
