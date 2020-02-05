@@ -44,6 +44,8 @@ class AccessibilityBridge
   class Delegate {
    public:
     virtual void SetSemanticsEnabled(bool enabled) = 0;
+    virtual void DispatchSemanticsAction(int32_t node_id,
+                                         flutter::SemanticsAction action) = 0;
   };
 
   // TODO(MI4-2531, FIDL-718): Remove this. We shouldn't be worried about
@@ -90,6 +92,13 @@ class AccessibilityBridge
       fuchsia::math::PointF local_point,
       fuchsia::accessibility::semantics::SemanticListener::HitTestCallback
           callback) override;
+
+  // |fuchsia::accessibility::semantics::SemanticListener|
+  void OnAccessibilityActionRequested(
+      uint32_t node_id,
+      fuchsia::accessibility::semantics::Action action,
+      fuchsia::accessibility::semantics::SemanticListener::
+          OnAccessibilityActionRequestedCallback callback) override;
 
  private:
   // Holds only the fields we need for hit testing.
@@ -164,12 +173,14 @@ class AccessibilityBridge
   // Assumes that SemanticsNode::screen_rect is up to date.
   std::optional<int32_t> GetHitNode(int32_t node_id, float x, float y);
 
-  // |fuchsia::accessibility::semantics::SemanticListener|
-  void OnAccessibilityActionRequested(
-      uint32_t node_id,
-      fuchsia::accessibility::semantics::Action action,
-      fuchsia::accessibility::semantics::SemanticListener::
-          OnAccessibilityActionRequestedCallback callback) override;
+  // Converts a fuchsia::accessibility::semantics::Action to a
+  // flutter::SemanticsAction.
+  //
+  // The node_id parameter is used for printing warnings about unsupported
+  // action types.
+  std::optional<flutter::SemanticsAction> GetFlutterSemanticsAction(
+      fuchsia::accessibility::semantics::Action fuchsia_action,
+      uint32_t node_id);
 
   // |fuchsia::accessibility::semantics::SemanticListener|
   void OnSemanticsModeChanged(bool enabled,
