@@ -227,7 +227,7 @@ void main() {
     final ValidationResult validationResult = await AndroidValidator(
       androidStudio: null,
       androidSdk: sdk,
-      fs: fs,
+      fileSystem: fs,
       logger: logger,
       processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
@@ -261,7 +261,7 @@ void main() {
     final AndroidValidator androidValidator = AndroidValidator(
       androidStudio: null,
       androidSdk: sdk,
-      fs: fs,
+      fileSystem: fs,
       logger: logger,
       processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
@@ -320,7 +320,7 @@ void main() {
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: sdk,
       androidStudio: null,
-      fs: fs,
+      fileSystem: fs,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,
@@ -337,7 +337,7 @@ void main() {
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: null,
       androidStudio: null,
-      fs: fs,
+      fileSystem: fs,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,

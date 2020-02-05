@@ -72,7 +72,7 @@ Future<T> runInContext<T>(
       AndroidValidator: () => AndroidValidator(
         androidStudio: globals.androidStudio,
         androidSdk: globals.androidSdk,
-        fs: globals.fs,
+        fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
         processManager: globals.processManager,

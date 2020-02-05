@@ -61,17 +61,17 @@ class AndroidValidator extends DoctorValidator {
   AndroidValidator({
     @required AndroidSdk androidSdk,
     @required AndroidStudio androidStudio,
-    @required FileSystem fs,
+    @required FileSystem fileSystem,
     @required Logger logger,
     @required Platform platform,
     @required ProcessManager processManager,
     @required UserMessages userMessages,
   }) : _androidSdk = androidSdk,
        _androidStudio = androidStudio,
-       _fs = fs,
+       _fileSystem = fileSystem,
        _logger = logger,
-       _os = OperatingSystemUtils(
-         fileSystem: fs,
+       _operatingSystemUtils = OperatingSystemUtils(
+         fileSystem: fileSystem,
          logger: logger,
          platform: platform,
          processManager: processManager,
@@ -83,9 +83,9 @@ class AndroidValidator extends DoctorValidator {
 
   final AndroidSdk _androidSdk;
   final AndroidStudio _androidStudio;
-  final FileSystem _fs;
+  final FileSystem _fileSystem;
   final Logger _logger;
-  final OperatingSystemUtils _os;
+  final OperatingSystemUtils _operatingSystemUtils;
   final Platform _platform;
   final ProcessManager _processManager;
   final UserMessages _userMessages;
@@ -210,8 +210,8 @@ class AndroidValidator extends DoctorValidator {
     // Now check for the JDK.
     final String javaBinary = AndroidSdk.findJavaBinary(
       androidStudio: _androidStudio,
-      fileSystem: _fs,
-      operatingSystemUtils: _os,
+      fileSystem: _fileSystem,
+      operatingSystemUtils: _operatingSystemUtils,
       platform: _platform,
     );
     if (javaBinary == null) {
