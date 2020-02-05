@@ -47,6 +47,8 @@ class FallbackDiscovery {
        _protocolDiscovery = protocolDiscovery,
        _vmServiceConnectUri = vmServiceConnectUri;
 
+  static const String _kEventName = 'ios-handshake';
+
   final DevicePortForwarder _portForwarder;
   final MDnsObservatoryDiscovery _mDnsObservatoryDiscovery;
   final Logger _logger;
@@ -79,18 +81,18 @@ class FallbackDiscovery {
         hostVmservicePort: hostVmservicePort,
       );
       if (result != null) {
-        UsageEvent('ios-mdns', 'success').send();
+        UsageEvent(_kEventName, 'mdns-success').send();
         return result;
       }
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
     }
     _logger.printTrace('Failed to connect with mDNS, falling back to log scanning');
-    UsageEvent('ios-mdns', 'failure').send();
+    UsageEvent(_kEventName, 'mdns-failure').send();
 
     try {
       final Uri result = await _protocolDiscovery.uri;
-      UsageEvent('ios-mdns', 'fallback-success').send();
+      UsageEvent(_kEventName, 'fallback-success').send();
       return result;
     } on ArgumentError {
     // In the event of an invalid InternetAddress, this code attempts to catch
@@ -99,7 +101,7 @@ class FallbackDiscovery {
       _logger.printTrace(err.toString());
     }
     _logger.printTrace('Failed to connect with log scanning');
-    UsageEvent('ios-mdns', 'fallback-failure').send();
+    UsageEvent(_kEventName, 'fallback-failure').send();
     return null;
   }
 
@@ -118,7 +120,7 @@ class FallbackDiscovery {
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
       _logger.printTrace('Failed to connect directly, falling back to mDNS');
-      UsageEvent('ios-handshake', 'failure').send();
+      UsageEvent(_kEventName, 'failure').send();
       return null;
     }
 
@@ -133,7 +135,7 @@ class FallbackDiscovery {
           final Isolate isolate = await vmService.getIsolate(isolateRefs.id) as Isolate;
           final LibraryRef library = isolate.rootLib;
           if (library.uri.startsWith('package:$packageName')) {
-            UsageEvent('ios-handshake', 'success').send();
+            UsageEvent(_kEventName, 'success').send();
             return Uri.parse('http://localhost:$hostPort');
           }
         }
@@ -150,7 +152,7 @@ class FallbackDiscovery {
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
-    UsageEvent('ios-handshake', 'failure').send();
+    UsageEvent(_kEventName, 'failure').send();
     return null;
   }
 }

@@ -299,7 +299,7 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
           platformArgs: <String, dynamic>{},
         );
-        verify(mockUsage.sendEvent('ios-mdns', 'success')).called(1);
+        verify(mockUsage.sendEvent('ios-handshake', 'mdns-success')).called(1);
         expect(launchResult.started, isTrue);
         expect(launchResult.hasObservatory, isTrue);
         expect(await device.stopApp(mockApp), isFalse);
@@ -369,8 +369,8 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
           platformArgs: <String, dynamic>{},
         );
-        verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
-        verify(mockUsage.sendEvent('ios-mdns', 'fallback-success')).called(1);
+        verify(mockUsage.sendEvent('ios-handshake', 'mdns-failure')).called(1);
+        verify(mockUsage.sendEvent('ios-handshake', 'fallback-success')).called(1);
         expect(launchResult.started, isTrue);
         expect(launchResult.hasObservatory, isTrue);
         expect(await device.stopApp(mockApp), isFalse);
@@ -403,8 +403,8 @@ void main() {
             platformArgs: <String, dynamic>{},
         );
         verify(mockUsage.sendEvent('ios-handshake', 'failure')).called(1);
-        verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
-        verify(mockUsage.sendEvent('ios-mdns', 'fallback-failure')).called(1);
+        verify(mockUsage.sendEvent('ios-handshake', 'mdns-failure')).called(1);
+        verify(mockUsage.sendEvent('ios-handshake', 'fallback-failure')).called(1);
         expect(launchResult.started, isFalse);
         expect(launchResult.hasObservatory, isFalse);
       }, overrides: <Type, Generator>{
