@@ -332,8 +332,9 @@ class StdoutLogger extends Logger {
 
   @override
   void clear() {
-    _clearStatus();
+    _status?.pause();
     writeToStdOut(_terminal.clearScreen() + '\n');
+    _status?.resume();
   }
 }
 
