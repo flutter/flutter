@@ -169,6 +169,7 @@ abstract class Logger {
   /// non-machine modes.
   void sendEvent(String name, [Map<String, dynamic> args]) { }
 
+  /// Clears all output.
   void clear();
 }
 
@@ -478,7 +479,6 @@ class BufferLogger extends Logger {
     )..start();
   }
 
-  /// Clears all buffers.
   @override
   void clear() {
     _error.clear();
