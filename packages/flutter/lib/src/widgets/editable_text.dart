@@ -342,10 +342,10 @@ class EditableText extends StatefulWidget {
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
-  /// [enableSuggestions], [paintCursorAboveText], [textAlign],
-  /// [dragStartBehavior], [scrollPadding], [dragStartBehavior],
-  /// [toolbarOptions], [rendererIgnoresPointer], and [readOnly] arguments must
-  /// not be null.
+  /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
+  /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
+  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer], and
+  /// [readOnly] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -419,6 +419,8 @@ class EditableText extends StatefulWidget {
        assert(cursorOpacityAnimates != null),
        assert(paintCursorAboveText != null),
        assert(backgroundCursorColor != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
