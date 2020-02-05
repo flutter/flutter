@@ -337,6 +337,79 @@ void main() {
     });
   });
 
+  group('menu position', () {
+    testWidgets('When renders below a block of text, menu appears below bottom endpoint', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                child: TextField(
+                  controller: controller,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      // Initially, the menu isn't shown at all.
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+
+      // Tap to place the cursor in the field, then tap the handle to show the
+      // selection menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+      RenderEditable renderEditable = findRenderEditable(tester);
+      List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 1);
+      final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
+      await tester.tapAt(handlePos, pointer: 7);
+      // Selection menu renders one frame offstage, so pump twice.
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.byType(IconButton), findsNothing);
+
+      // Tap to select all.
+      await tester.tap(find.text('SELECT ALL'));
+      await tester.pumpAndSettle();
+
+      // Only CUT, COPY, and PASTE are shown.
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+
+      // The menu appears below the bottom handle.
+      renderEditable = findRenderEditable(tester);
+      endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 2);
+      final Offset bottomHandlePos = endpoints[1].point;
+      final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
+      expect(cutOffset.dy, greaterThan(bottomHandlePos.dy));
+    });
+  });
+
   group('material handles', () {
     testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
       await tester.pumpWidget(RepaintBoundary(
