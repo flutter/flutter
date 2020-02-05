@@ -2984,6 +2984,11 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 }
 
 /// Parent data to support a doubly-linked list of children.
+///
+/// The children can be traversed using [nextSibling] or [previousSibling],
+/// which can be called on the parent data of the render objects
+/// obtained via [ContainerRenderObjectMixin.firstChild] or
+/// [ContainerRenderObjectMixin.lastChild].
 mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
   /// The previous sibling in the parent's child list.
   ChildType previousSibling;
@@ -3003,6 +3008,20 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
 ///
 /// Provides a child model for a render object subclass that has a doubly-linked
 /// list of children.
+///
+/// The [ChildType] specifies the type of the children (extending [RenderObject]),
+/// e.g. [RenderBox].
+///
+/// [ParentDataType] stores parent container data on its child render objects.
+/// It must extend [ContainerParentDataMixin], which provides the interface
+/// for visiting children. This data is populated by
+/// [RenderObject.setupParentData] implemented by the class using this mixin.
+///
+/// When using [RenderBox] as the child type, you will usually want to make use of
+/// [RenderBoxContainerDefaultsMixin] and extend [ContainerBoxParentData] for the
+/// parent data.
+///
+/// Moreover, this is a required mixin for render objects returned to [MultiChildRenderObjectWidget].
 mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
     ParentDataType childParentData = child.parentData as ParentDataType;

@@ -1799,10 +1799,20 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   SingleChildRenderObjectElement createElement() => SingleChildRenderObjectElement(this);
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have a single list of children. (This superclass only provides the
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
+///
+/// This will return a [RenderObject] mixing in [ContainerRenderObjectMixin],
+/// which provides the necessary functionality to visit the children of the
+/// container render object (the render object belonging to the [children] widgets).
+/// Typically, this is a [RenderBox] with [RenderBoxContainerDefaultsMixin].
+///
+/// See also:
+///
+///  * [Stack], which uses [MultiChildRenderObjectWidget].
+///  * [RenderStack], for an example implementation of the associated render object.
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   ///
