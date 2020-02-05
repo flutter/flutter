@@ -45,12 +45,12 @@ class EngineScubaTester {
   Future<void> diffScreenshot(
     String fileName, {
     ui.Rect region,
-    double maxDiffRate,
+    double maxDiffRatePercent,
   }) async {
     await matchGoldenFile(
       '$fileName.png',
       region: region ?? viewportRegion,
-      maxDiffRate: maxDiffRate,
+      maxDiffRatePercent: maxDiffRatePercent,
     );
   }
 
@@ -62,7 +62,7 @@ class EngineScubaTester {
     EngineCanvas canvas,
     String fileName, {
     ui.Rect region,
-    double maxDiffRate,
+    double maxDiffRatePercent,
   }) async {
     // Wrap in <flt-scene> so that our CSS selectors kick in.
     final html.Element sceneElement = html.Element.tag('flt-scene');
@@ -76,7 +76,7 @@ class EngineScubaTester {
       await diffScreenshot(
         screenshotName,
         region: region,
-        maxDiffRate: maxDiffRate,
+        maxDiffRatePercent: maxDiffRatePercent,
       );
     } finally {
       // The page is reused across tests, so remove the element after taking the

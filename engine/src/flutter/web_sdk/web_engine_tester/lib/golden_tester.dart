@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
 import 'package:test/test.dart';
@@ -49,13 +50,13 @@ enum PixelComparison {
 /// [pixelComparison] determines the algorithm used to compare pixels. Uses
 /// fuzzy comparison by default.
 Future<void> matchGoldenFile(String filename,
-    {bool write = false, Rect region = null, double maxDiffRate = null, PixelComparison pixelComparison = PixelComparison.fuzzy}) async {
+    {bool write = false, Rect region = null, double maxDiffRatePercent = null, PixelComparison pixelComparison = PixelComparison.fuzzy}) async {
   Map<String, dynamic> serverParams = <String, dynamic>{
     'filename': filename,
     'write': write,
     'region': region == null
         ? null
-        : {
+        : <String, dynamic>{
             'x': region.left,
             'y': region.top,
             'width': region.width,
@@ -63,10 +64,18 @@ Future<void> matchGoldenFile(String filename,
           },
     'pixelComparison': pixelComparison.toString(),
   };
-  if (maxDiffRate != null) {
-    serverParams['maxdiffrate'] = maxDiffRate;
+
+  // Chrome on macOS renders slighly differently from Linux, so allow it an
+  // extra 1% to deviate from the golden files.
+  if (maxDiffRatePercent != null) {
+    if (operatingSystem == OperatingSystem.macOs) {
+      maxDiffRatePercent += 1.0;
+    }
+    serverParams['maxdiffrate'] = maxDiffRatePercent / 100;
+  } else if (operatingSystem == OperatingSystem.macOs) {
+    serverParams['maxdiffrate'] = 0.01;
   }
-  final String response = await _callScreenshotServer(serverParams);
+  final String response = await _callScreenshotServer(serverParams) as String;
   if (response == 'OK') {
     // Pass
     return;
