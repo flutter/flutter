@@ -81,11 +81,8 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
     -dBuildMode="${build_mode}"                                             \
-<<<<<<< HEAD
     "${split_debug_info_option}"                                            \
-=======
-    -dFontSubset="${icon_tree_shaker_flag}"                                      \
->>>>>>> 374b55cc608bcc555713b37afa1ce8b089c4800c
+    -dFontSubset="${icon_tree_shaker_flag}"                                 \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \
