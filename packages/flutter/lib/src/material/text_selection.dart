@@ -23,7 +23,7 @@ const double _kHandleSize = 22.0;
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
 // Padding when positioning toolbar below selection.
-const double _kToolbarContentDistanceBelow = 16.0;
+const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
 /// Manages a copy/paste text selection toolbar.
@@ -433,7 +433,7 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
         size.width - _kToolbarScreenPadding,
       ),
       fitsAbove
-        ? math.max(upperBounds, anchorTop.dy - childSize.height)
+        ? math.max(upperBounds, anchorTop.dy - childSize.height + globalEditableRegion.top)
         : anchorBottom.dy,
     );
   }
@@ -503,12 +503,12 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     final Offset preciseMidpoint = Offset(position.dx, y);
 
     final Offset anchorTop = Offset(
-      position.dx,
+      globalEditableRegion.left + position.dx,
       startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance,
     );
     final Offset anchorBottom = Offset(
-      position.dx,
-      startTextSelectionPoint.point.dy + _kToolbarHeight + _kToolbarContentDistance,
+      globalEditableRegion.left + position.dx,
+      globalEditableRegion.top + startTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
     );
 
     return Stack(
