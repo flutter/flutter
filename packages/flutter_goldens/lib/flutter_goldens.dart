@@ -140,24 +140,27 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     LocalFileComparator defaultComparator,
     Platform platform, {
       String suffix = '',
-      bool onCirrus = false,
+      bool local = false,
     }) {
     const FileSystem fs = LocalFileSystem();
-    if (onCirrus) {
-      return fs.systemTempDirectory.childDirectory(
+    final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
+    Directory comparisonRoot;
+
+    if (!local) {
+      comparisonRoot = fs.systemTempDirectory.childDirectory(
         'skia_goldens$suffix'
+      );
+    } else {
+      comparisonRoot = flutterRoot.childDirectory(
+        fs.path.join(
+          'bin',
+          'cache',
+          'pkg',
+          'skia_goldens',
+        )
       );
     }
 
-    final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
-    final Directory comparisonRoot = flutterRoot.childDirectory(
-      fs.path.join(
-        'bin',
-        'cache',
-        'pkg',
-        'skia_goldens$suffix',
-      )
-    );
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
     final String testDirectoryRelativePath = fs.path.relative(
       testDirectory.path,
@@ -232,7 +235,6 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
       suffix: '${math.Random().nextInt(10000)}',
-      onCirrus: platform.environment.containsKey('CIRRUS_CI'),
     );
     baseDirectory.createSync(recursive: true);
 
@@ -315,7 +317,6 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
       suffix: '${math.Random().nextInt(10000)}',
-      onCirrus: platform.environment.containsKey('CIRRUS_CI'),
     );
 
     if (!baseDirectory.existsSync())
@@ -563,6 +564,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
+      local: true,
     );
 
     if(!baseDirectory.existsSync()) {
