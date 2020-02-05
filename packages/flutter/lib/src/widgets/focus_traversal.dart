@@ -21,11 +21,18 @@ import 'scrollable.dart';
 // simulated with visitAncestorElements. getParent is needed because
 // context.getElementForInheritedWidgetOfExactType will return itself it
 // happens to be of the correct type. getParent should be O(1), since we
-// always return false at the first ancestor.
-BuildContext _getParent(BuildContext context) {
-  BuildContext parent;
-  context.visitAncestorElements((Element ancestor) { parent = ancestor; return false; });
-  return parent;
+// always return false at a specific ancestor.
+BuildContext _getAncestor(BuildContext context, {int count = 1}) {
+  BuildContext target;
+  context.visitAncestorElements((Element ancestor) {
+    count--;
+    if (count == 0) {
+      target = ancestor;
+      return false;
+    }
+    return true;
+  });
+  return target;
 }
 
 void _focusAndEnsureVisible(
@@ -37,9 +44,9 @@ void _focusAndEnsureVisible(
 }
 
 class _FocusPolicyGroupInfo {
-  _FocusPolicyGroupInfo(_FocusTraversalGroupState groupState, {List<FocusNode> members, FocusTraversalPolicy defaultPolicy})
-      : groupNode = groupState?.focusNode,
-        policy = groupState?.widget?.policy ?? defaultPolicy ?? ReadingOrderTraversalPolicy(),
+  _FocusPolicyGroupInfo(_FocusTraversalGroupMarker marker, {List<FocusNode> members, FocusTraversalPolicy defaultPolicy})
+      : groupNode = marker?.focusNode,
+        policy = marker?.policy ?? defaultPolicy ?? ReadingOrderTraversalPolicy(),
         members = members ?? <FocusNode>[];
   final FocusNode groupNode;
   final FocusTraversalPolicy policy;
@@ -219,25 +226,35 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
   @protected
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants);
 
+  _FocusTraversalGroupMarker _getMarker(BuildContext context) {
+    return context?.getElementForInheritedWidgetOfExactType<_FocusTraversalGroupMarker>()?.widget as _FocusTraversalGroupMarker;
+  }
+
   // Sort all descendants, taking into account the FocusTraversalGroup
   // that they are each in, and filtering out non-traversable/focusable nodes.
   List<FocusNode> _sortAllDescendants(FocusScopeNode scope) {
     assert(scope != null);
-    final _FocusTraversalGroupState scopeGroupState = scope.context?.findAncestorStateOfType<_FocusTraversalGroupState>();
-    final FocusTraversalPolicy defaultPolicy = scopeGroupState?.widget?.policy ?? ReadingOrderTraversalPolicy();
+    final _FocusTraversalGroupMarker scopeGroupMarker = _getMarker(scope.context);
+    final FocusTraversalPolicy defaultPolicy = scopeGroupMarker?.policy ?? ReadingOrderTraversalPolicy();
     // Build the sorting data structure, separating descendants into groups.
     final Map<FocusNode, _FocusPolicyGroupInfo> groups = <FocusNode, _FocusPolicyGroupInfo>{};
     for (final FocusNode node in scope.descendants) {
-      final _FocusTraversalGroupState groupState = node.context?.findAncestorStateOfType<_FocusTraversalGroupState>();
-      final FocusNode groupNode = groupState?.focusNode;
+      final _FocusTraversalGroupMarker groupMarker = _getMarker(node.context);
+      final FocusNode groupNode = groupMarker?.focusNode;
       // Group nodes need to be added to their parent's node, or to the "null"
       // node if no parent is found. This creates the hierarchy of group nodes
       // and makes it so the entire group is sorted along with the other members
       // of the parent group.
       if (node == groupNode) {
-        final _FocusTraversalGroupState parentState = _getParent(node.context)?.findAncestorStateOfType<_FocusTraversalGroupState>();
-        final FocusNode parentNode = parentState?.focusNode;
-        groups[parentNode] ??= _FocusPolicyGroupInfo(parentState, members: <FocusNode>[], defaultPolicy: defaultPolicy);
+        // To find the parent of the group node, we need to skip over the parent
+        // of the Focus node in _FocusTraversalGroupState.build, and start
+        // looking with that node's parent, since
+        // getElementForInheritedWidgetOfExactType will return the context it
+        // was called on if it matches the type.
+        final BuildContext parentContext = _getAncestor(groupNode.context, count: 2);
+        final _FocusTraversalGroupMarker parentMarker = _getMarker(parentContext);
+        final FocusNode parentNode = parentMarker?.focusNode;
+        groups[parentNode] ??= _FocusPolicyGroupInfo(parentMarker, members: <FocusNode>[], defaultPolicy: defaultPolicy);
         assert(!groups[parentNode].members.contains(node));
         groups[parentNode].members.add(groupNode);
         continue;
@@ -245,7 +262,7 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
       // Skip non-focusable and non-traversable nodes in the same way that
       // FocusScopeNode.traversalDescendants would.
       if (node.canRequestFocus && !node.skipTraversal) {
-        groups[groupNode] ??= _FocusPolicyGroupInfo(groupState, members: <FocusNode>[], defaultPolicy: defaultPolicy);
+        groups[groupNode] ??= _FocusPolicyGroupInfo(groupMarker, members: <FocusNode>[], defaultPolicy: defaultPolicy);
         assert(!groups[groupNode].members.contains(node));
         groups[groupNode].members.add(node);
       }
@@ -261,7 +278,7 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
 
     // Traverse the group tree, adding the children of members in the order they
     // appear in the member lists.
-    final List<FocusNode> sortedDescendants =  <FocusNode>[];
+    final List<FocusNode> sortedDescendants = <FocusNode>[];
     void visitGroups(_FocusPolicyGroupInfo info) {
       for (final FocusNode node in info.members) {
         if (groupKeys.contains(node)) {
@@ -274,15 +291,11 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
       }
     }
 
-    visitGroups(groups[scopeGroupState?.focusNode]);
-    assert(
-      sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
-      'sorted descendants contains more nodes than it should: (${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())})'
-    );
-    assert(
-      scope.traversalDescendants.toSet().difference(sortedDescendants.toSet()).isEmpty,
-      'sorted descendants are missing some nodes: (${scope.traversalDescendants.toSet().difference(sortedDescendants.toSet())})'
-    );
+    visitGroups(groups[scopeGroupMarker?.focusNode]);
+    assert(sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
+        'sorted descendants contains more nodes than it should: (${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())})');
+    assert(scope.traversalDescendants.toSet().difference(sortedDescendants.toSet()).isEmpty,
+        'sorted descendants are missing some nodes: (${scope.traversalDescendants.toSet().difference(sortedDescendants.toSet())})');
     return sortedDescendants;
   }
 
@@ -433,7 +446,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     return null;
   }
 
-  FocusNode _sortAndFindInitial(FocusNode currentNode, { bool vertical, bool first }) {
+  FocusNode _sortAndFindInitial(FocusNode currentNode, {bool vertical, bool first}) {
     final Iterable<FocusNode> nodes = currentNode.nearestScope.traversalDescendants;
     final List<FocusNode> sorted = nodes.toList();
     mergeSort<FocusNode>(sorted, compare: (FocusNode a, FocusNode b) {
@@ -786,7 +799,7 @@ class _ReadingOrderSortData extends Diagnosticable {
 
   // Find the directionality in force for a build context without creating a dependency.
   static TextDirection _findDirectionality(BuildContext context) {
-    return (context.getElementForInheritedWidgetOfExactType<Directionality>().widget as Directionality).textDirection;
+    return (context.getElementForInheritedWidgetOfExactType<Directionality>()?.widget as Directionality)?.textDirection;
   }
 
   /// Finds the common Directional ancestor of an entire list of groups.
@@ -812,8 +825,8 @@ class _ReadingOrderSortData extends Diagnosticable {
   }
 
   static void sortWithDirectionality(List<_ReadingOrderSortData> list, TextDirection directionality) {
-    mergeSort<_ReadingOrderSortData>(list, compare: (_ReadingOrderSortData a,_ReadingOrderSortData b) {
-      switch(directionality) {
+    mergeSort<_ReadingOrderSortData>(list, compare: (_ReadingOrderSortData a, _ReadingOrderSortData b) {
+      switch (directionality) {
         case TextDirection.ltr:
           return a.rect.left.compareTo(b.rect.left);
         case TextDirection.rtl:
@@ -832,13 +845,15 @@ class _ReadingOrderSortData extends Diagnosticable {
       InheritedElement directionalityElement = context.getElementForInheritedWidgetOfExactType<Directionality>();
       while (directionalityElement != null) {
         result.add(directionalityElement.widget as Directionality);
-        directionalityElement = _getParent(directionalityElement)?.getElementForInheritedWidgetOfExactType<Directionality>();
+        directionalityElement = _getAncestor(directionalityElement)?.getElementForInheritedWidgetOfExactType<Directionality>();
       }
       return result;
     }
+
     _directionalAncestors ??= getDirectionalityAncestors(node.context);
     return _directionalAncestors;
   }
+
   List<Directionality> _directionalAncestors;
 
   @override
@@ -857,7 +872,7 @@ class _ReadingOrderDirectionalGroupData extends Diagnosticable {
   Rect _rect;
   Rect get rect {
     if (_rect == null) {
-      for (final Rect rect in members.map<Rect>((_ReadingOrderSortData data) => data.rect)){
+      for (final Rect rect in members.map<Rect>((_ReadingOrderSortData data) => data.rect)) {
         _rect ??= rect;
         _rect = _rect.expandToInclude(rect);
       }
@@ -874,11 +889,12 @@ class _ReadingOrderDirectionalGroupData extends Diagnosticable {
     }
     return _memberAncestors;
   }
+
   List<Directionality> _memberAncestors;
 
   static void sortWithDirectionality(List<_ReadingOrderDirectionalGroupData> list, TextDirection directionality) {
-    mergeSort<_ReadingOrderDirectionalGroupData>(list, compare: (_ReadingOrderDirectionalGroupData a,_ReadingOrderDirectionalGroupData b) {
-      switch(directionality) {
+    mergeSort<_ReadingOrderDirectionalGroupData>(list, compare: (_ReadingOrderDirectionalGroupData a, _ReadingOrderDirectionalGroupData b) {
+      switch (directionality) {
         case TextDirection.ltr:
           return a.rect.left.compareTo(b.rect.left);
         case TextDirection.rtl:
@@ -968,6 +984,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
         return !item.rect.intersect(band).isEmpty;
       }).toList();
     }
+
     final List<_ReadingOrderSortData> inBandOfTop = inBand(topmost, candidates);
     assert(topmost.rect.isEmpty || inBandOfTop.isNotEmpty); // It has to have at least topmost in it if the topmost is not degenerate.
 
@@ -1284,7 +1301,7 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
         unordered.add(node);
       }
     }
-    mergeSort<_OrderedFocusInfo>(ordered, compare:(_OrderedFocusInfo a, _OrderedFocusInfo b) {
+    mergeSort<_OrderedFocusInfo>(ordered, compare: (_OrderedFocusInfo a, _OrderedFocusInfo b) {
       assert(
         a.order.runtimeType == b.order.runtimeType,
         'When sorting nodes for determining focus order, the order (${a.order}) of '
@@ -1406,8 +1423,8 @@ class FocusTraversalGroup extends StatefulWidget {
   ///
   /// Will assert if no [FocusTraversalGroup] ancestor is found, and `nullOk` is false.
   ///
-  /// If `nullOk` is true, then either having a null `context`, or not finding
-  /// an ancestor will return null.
+  /// If `nullOk` is true, then it will return null if it doesn't find a
+  /// [FocusTraversalGroup] ancestor.
   static FocusTraversalPolicy of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
     final FocusTraversalGroup inherited = context?.findAncestorWidgetOfExactType<FocusTraversalGroup>();
@@ -1467,16 +1484,34 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
+    return _FocusTraversalGroupMarker(
+      policy: widget.policy,
       focusNode: focusNode,
-      // The focus node shouldn't actually participate in focus operations: it's
-      // just used as an ancestor node in the focus tree to provide a context by
-      // which to sort the tree.
-      canRequestFocus: false,
-      skipTraversal: true,
-      child: widget.child,
+      child: Focus(
+        focusNode: focusNode,
+        canRequestFocus: false,
+        skipTraversal: true,
+        child: widget.child,
+      ),
     );
   }
+}
+
+// A "marker" inherited widget to make the group faster to find.
+class _FocusTraversalGroupMarker extends InheritedWidget {
+  const _FocusTraversalGroupMarker({
+    @required this.policy,
+    @required this.focusNode,
+    Widget child,
+  })  : assert(policy != null),
+        assert(focusNode != null),
+        super(child: child);
+
+  final FocusTraversalPolicy policy;
+  final FocusNode focusNode;
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) => false;
 }
 
 /// A deprecated widget that describes the inherited focus policy for focus
@@ -1484,9 +1519,8 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 ///
 /// _This widget has been deprecated: use [FocusTraversalGroup] instead._
 @Deprecated(
-  'Use FocusTraversalGroup as a replacement for DefaultFocusTraversal. Be aware that FocusTraversalGroup does add an (unfocusable) Focus widget to the hierarchy that DefaultFocusTraversal does not. Use FocusTraversalGroup.of(context).policy as a replacement for DefaultFocusTraversal.of(context). '
-  'This feature was deprecated after v1.14.3.'
-)
+    'Use FocusTraversalGroup as a replacement for DefaultFocusTraversal. Be aware that FocusTraversalGroup does add an (unfocusable) Focus widget to the hierarchy that DefaultFocusTraversal does not. Use FocusTraversalGroup.of(context) as a replacement for DefaultFocusTraversal.of(context). '
+    'This feature was deprecated after v1.14.3.')
 class DefaultFocusTraversal extends InheritedWidget {
   /// Creates a [DefaultFocusTraversal] object.
   ///
