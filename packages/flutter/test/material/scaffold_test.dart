@@ -326,7 +326,60 @@ void main() {
       expect(tester.getCenter(find.byIcon(Icons.cake)), const Offset(_centerOffsetX, _floatOffsetY));
     });
 
-    // TODO: Add another test with animations, possibly with custom animators.
+    testWidgets('Custom animator', (WidgetTester tester) async {
+      Widget build(List<FloatingActionButtonLocation> locations) {
+        return MaterialApp(
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('FloatingActionButtonLocation Test.'),
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  title: const Text('Home'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.school),
+                  title: const Text('School'),
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              child: Icon(Icons.beach_access),
+            ),
+            floatingActionButtonLocation: locations[0],
+            animator: _LinearMovementFabAnimator(),
+            additionalFloatingActionButtonConfigurations: <Key, FloatingActionButtonConfiguration>{
+              const ValueKey<String>('fab2') : FloatingActionButtonConfiguration(
+                button: FloatingActionButton(
+                  onPressed: () {},
+                  child: const Icon(Icons.golf_course),
+                ),
+                location: locations[1],
+              ),
+              const ValueKey<String>('fab3') : FloatingActionButtonConfiguration(
+                button: FloatingActionButton(
+                  onPressed: () {},
+                  child: const Icon(Icons.android),
+                ),
+                location: locations[2],
+                animator: _LinearMovementFabAnimator(),
+              ),
+            },
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build([
+        FloatingActionButtonLocation.endFloat,
+        FloatingActionButtonLocation.centerTop,
+        FloatingActionButtonLocation.startDocked,
+      ]));
+
+      expect(find.byType(FloatingActionButtonLocation), findsNWidgets(3));
+    });
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
