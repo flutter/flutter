@@ -292,7 +292,7 @@ void main() {
 
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
+          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
           platformArgs: <String, dynamic>{},
         );
         verify(mockUsage.sendEvent('ios-mdns', 'success')).called(1);
@@ -362,7 +362,7 @@ void main() {
 
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
+          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
           platformArgs: <String, dynamic>{},
         );
         verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
@@ -395,7 +395,7 @@ void main() {
 
         final LaunchResult launchResult = await device.startApp(mockApp,
             prebuiltApplication: true,
-            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
+            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
             platformArgs: <String, dynamic>{},
         );
         verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
@@ -416,7 +416,7 @@ void main() {
         final IOSDevice device = IOSDevice('123');
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)),
+          debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
           platformArgs: <String, dynamic>{},
         );
         expect(launchResult.started, isTrue);
@@ -455,7 +455,7 @@ void main() {
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(
-              const BuildInfo(BuildMode.debug, null),
+              const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
               cacheSkSL: true,
           ),
           platformArgs: <String, dynamic>{},
@@ -499,7 +499,7 @@ void main() {
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(
-            const BuildInfo(BuildMode.debug, null),
+            const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
             deviceVmServicePort: 8181,
           ),
           platformArgs: <String, dynamic>{},
@@ -600,7 +600,7 @@ void main() {
             device.startApp(
               app,
               prebuiltApplication: false,
-              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)),
+              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
               platformArgs: <String, dynamic>{},
             ).then((LaunchResult result) {
               completer.complete(result);

@@ -34,6 +34,7 @@ class BuildAarCommand extends BuildSubCommand {
         defaultsTo: true,
         help: 'Build a release version of the current project.',
       );
+    addTreeShakeIconsFlag();
     usesFlavorOption();
     usesBuildNumberOption();
     usesPubOption();
@@ -104,7 +105,7 @@ class BuildAarCommand extends BuildSubCommand {
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(AndroidBuildInfo(
-          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor')),
+          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor'), treeShakeIcons: boolArg('tree-shake-icons')),
           targetArchs: targetArchitectures,
         ));
       }

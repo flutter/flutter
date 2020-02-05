@@ -68,6 +68,11 @@ ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
 build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
 build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
 
+icon_tree_shaker_flag="false"
+if [[ -n "$TREE_SHAKE_ICONS" ]]; then
+  icon_tree_shaker_flag="true"
+fi
+
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
@@ -76,7 +81,11 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
     -dBuildMode="${build_mode}"                                             \
+<<<<<<< HEAD
     "${split_debug_info_option}"                                            \
+=======
+    -dFontSubset="${icon_tree_shaker_flag}"                                      \
+>>>>>>> 374b55cc608bcc555713b37afa1ce8b089c4800c
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \

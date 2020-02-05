@@ -65,7 +65,7 @@ class GenSnapshot {
       // Filter out gen_snapshot's warning message about stripping debug symbols
       // from ELF library snapshots.
       const String kStripWarning = 'Warning: Generating ELF library without DWARF debugging information.';
-      const String kAssemblyStripWarning = 'Warning: Generating assembly code without DWARF debugging information';
+      const String kAssemblyStripWarning = 'Warning: Generating assembly code without DWARF debugging information.';
       outputFilter = (String line) => line != kStripWarning && line != kAssemblyStripWarning ? line : null;
     }
 

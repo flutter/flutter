@@ -36,6 +36,7 @@ class AotBuilder {
     List<String> extraFrontEndOptions,
     List<String> extraGenSnapshotOptions,
     @required List<String> dartDefines,
+    @required bool treeShakeIcons,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');

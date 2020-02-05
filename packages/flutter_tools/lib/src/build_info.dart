@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 import 'base/utils.dart';
+import 'build_system/targets/icon_tree_shaker.dart';
 import 'globals.dart' as globals;
 
 /// Information about a build to be performed or used.
@@ -19,9 +22,13 @@ class BuildInfo {
     this.buildNumber,
     this.buildName,
     this.splitDebugInfoPath,
+    @required this.treeShakeIcons,
   });
 
   final BuildMode mode;
+
+  /// Whether the build should subdset icon fonts.
+  final bool treeShakeIcons;
 
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
@@ -61,10 +68,10 @@ class BuildInfo {
   /// executable.
   final String splitDebugInfoPath;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null);
+  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
 
   /// Returns whether a debug build is requested.
   ///

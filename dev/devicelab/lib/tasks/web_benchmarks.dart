@@ -149,6 +149,14 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 }
 
 String _findSystemChromeExecutable() {
+  // On some environments, such as the Dart HHH tester, Chrome resides in a
+  // non-standard location and is provided via the following environment
+  // variable.
+  final String envExecutable = io.Platform.environment['CHROME_EXECUTABLE'];
+  if (envExecutable != null) {
+    return envExecutable;
+  }
+
   if (io.Platform.isLinux) {
     final io.ProcessResult which =
         io.Process.runSync('which', <String>['google-chrome']);
