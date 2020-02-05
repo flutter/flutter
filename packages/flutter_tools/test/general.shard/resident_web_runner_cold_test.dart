@@ -129,7 +129,7 @@ void main() {
     expect(result.message, contains('Failed to recompile application.'));
   }));
 
-  test('Correctly peforms a full refresh on attached chrome device.', () => testbed.run(() async {
+  test('Correctly performs a full refresh on attached chrome device.', () => testbed.run(() async {
     _setupMocks();
     final MockChromeDevice chromeDevice = MockChromeDevice();
     final MockChrome chrome = MockChrome();
