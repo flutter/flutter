@@ -62,37 +62,14 @@ class FallbackDiscovery {
     @required int hostVmservicePort,
     @required String packageName,
   }) async {
-    final int hostPort = await _portForwarder.forward(assumedDevicePort, hostPort: hostVmservicePort);
-    final Uri assumedWsUri = Uri.parse('ws://localhost:$hostPort/ws');
-    // Attempt to connect to the vmservice.
-    int attempts = 0;
-    const int kDelaySeconds = 2;
-    while (attempts < 5) {
-      try {
-        final VmService vmService = await _vmServiceConnectUri(assumedWsUri.toString());
-        final VM vm = await vmService.getVM();
-        for (final IsolateRef isolateRefs in vm.isolates) {
-          final Isolate isolate = await vmService.getIsolate(isolateRefs.id) as Isolate;
-          final LibraryRef library = isolate.rootLib;
-          if (library.uri.startsWith('package:$packageName')) {
-            UsageEvent('ios-mdns', 'precheck-success').send();
-            return Uri.parse('http://localhost:$hostPort');
-          }
-        }
-      } on Exception {
-        // No action, we might have failed to connect.
-        // The error message will be irrelevant.
-      }
-
-      // No exponential backoff is used here to keep the amount of time the
-      // tool waits for a connection to be reasonable. If the vmservice cannot
-      // be connected to in this way, the mDNS discovery must be reached
-      // sooner rather than later.
-      await Future<void>.delayed(const Duration(seconds: kDelaySeconds));
-      attempts += 1;
+    final Uri result = await _attemptServiceConnection(
+      assumedDevicePort: assumedDevicePort,
+      hostVmservicePort: hostVmservicePort,
+      packageName: packageName,
+    );
+    if (result != null) {
+      return result;
     }
-    _logger.printTrace('Failed to connect directly, falling back to mDNS');
-    UsageEvent('ios-mdns', 'precheck-failure').send();
 
     try {
       final Uri result = await _mDnsObservatoryDiscovery.getObservatoryUri(
@@ -123,6 +100,57 @@ class FallbackDiscovery {
     }
     _logger.printTrace('Failed to connect with log scanning');
     UsageEvent('ios-mdns', 'fallback-failure').send();
+    return null;
+  }
+
+  // Attempt to connect to the VM service and find an isolate with a matching `packageName`.
+  // Returns `null` if no connection can be made.
+  Future<Uri> _attemptServiceConnection({
+    @required int assumedDevicePort,
+    @required int  hostVmservicePort,
+    @required String packageName,
+  }) async {
+    int hostPort;
+    Uri assumedWsUri;
+    try {
+      hostPort = await _portForwarder.forward(assumedDevicePort, hostPort: hostVmservicePort);
+      assumedWsUri = Uri.parse('ws://localhost:$hostPort/ws');
+    } on Exception catch (err) {
+      _logger.printTrace(err.toString());
+      _logger.printTrace('Failed to connect directly, falling back to mDNS');
+      UsageEvent('ios-handshake', 'failure').send();
+      return null;
+    }
+
+    // Attempt to connect to the VM service 5 times.
+    int attempts = 0;
+    const int kDelaySeconds = 2;
+    while (attempts < 5) {
+      try {
+        final VmService vmService = await _vmServiceConnectUri(assumedWsUri.toString());
+        final VM vm = await vmService.getVM();
+        for (final IsolateRef isolateRefs in vm.isolates) {
+          final Isolate isolate = await vmService.getIsolate(isolateRefs.id) as Isolate;
+          final LibraryRef library = isolate.rootLib;
+          if (library.uri.startsWith('package:$packageName')) {
+            UsageEvent('ios-handshake', 'success').send();
+            return Uri.parse('http://localhost:$hostPort');
+          }
+        }
+      } on Exception {
+        // No action, we might have failed to connect.
+        // The error message will be irrelevant.
+      }
+
+      // No exponential backoff is used here to keep the amount of time the
+      // tool waits for a connection to be reasonable. If the vmservice cannot
+      // be connected to in this way, the mDNS discovery must be reached
+      // sooner rather than later.
+      await Future<void>.delayed(const Duration(seconds: kDelaySeconds));
+      attempts += 1;
+    }
+    _logger.printTrace('Failed to connect directly, falling back to mDNS');
+    UsageEvent('ios-handshake', 'failure').send();
     return null;
   }
 }

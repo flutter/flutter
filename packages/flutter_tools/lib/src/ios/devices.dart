@@ -275,10 +275,6 @@ class IOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
-    print('!!!!!!!');
-    print(package.name);
-    print(package.displayName);
-
     String packageId;
 
     if (!prebuiltApplication) {

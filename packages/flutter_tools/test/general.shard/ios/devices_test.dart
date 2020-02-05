@@ -226,6 +226,10 @@ void main() {
         when(mockPortForwarder.unforward(any))
           .thenAnswer((_) async => null);
 
+        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+        when(mockFileSystem.currentDirectory)
+          .thenReturn(memoryFileSystem.currentDirectory);
+
         const String bundlePath = '/path/to/bundle';
         final List<String> installArgs = <String>[installerPath, '-i', bundlePath];
         when(mockApp.deviceBundlePath).thenReturn(bundlePath);
@@ -398,7 +402,7 @@ void main() {
             debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
             platformArgs: <String, dynamic>{},
         );
-        verify(mockUsage.sendEvent('ios-mdns', 'precheck-failure')).called(1);
+        verify(mockUsage.sendEvent('ios-handshake', 'failure')).called(1);
         verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
         verify(mockUsage.sendEvent('ios-mdns', 'fallback-failure')).called(1);
         expect(launchResult.started, isFalse);
@@ -688,6 +692,9 @@ void main() {
         mockCache = MockCache();
         when(mockCache.dyLdLibEntry).thenReturn(libraryEntry);
         mockFileSystem = MockFileSystem();
+        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+        when(mockFileSystem.currentDirectory)
+          .thenReturn(memoryFileSystem.currentDirectory);
         mockProcessManager = MockProcessManager();
         when(
             mockArtifacts.getArtifactPath(
