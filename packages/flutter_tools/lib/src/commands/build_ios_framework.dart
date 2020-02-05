@@ -460,6 +460,7 @@ end
         'iphoneos',
         '-configuration',
         xcodeBuildConfiguration,
+        '-destination generic/platform=iOS',
         'SYMROOT=${iPhoneBuildOutput.path}',
         'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
         'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
@@ -484,6 +485,7 @@ end
           'iphonesimulator',
           '-configuration',
           xcodeBuildConfiguration,
+          '-destination generic/platform=iOS',
           'SYMROOT=${simulatorBuildOutput.path}',
           'ARCHS=x86_64',
           'ONLY_ACTIVE_ARCH=NO'
