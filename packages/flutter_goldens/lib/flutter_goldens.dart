@@ -136,7 +136,19 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// maintain thread safety while using the `goldctl` tool.
   @protected
   @visibleForTesting
-  static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform, {String suffix = ''}) {
+  static Directory getBaseDirectory(
+    LocalFileComparator defaultComparator,
+    Platform platform, {
+      String suffix = '',
+      bool onCirrus = false,
+    }) {
+    if (onCirrus) {
+      final Directory tempDirectory = io.Directory.systemTemp.createTemp(
+        'skia_goldens$suffix'
+      ) as Directory;
+      return tempDirectory;
+    }
+
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     final Directory comparisonRoot = flutterRoot.childDirectory(
@@ -221,6 +233,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
       suffix: '${math.Random().nextInt(10000)}',
+      onCirrus: platform.environment.containsKey('CIRRUS_CI'),
     );
     baseDirectory.createSync(recursive: true);
 
@@ -303,6 +316,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
       suffix: '${math.Random().nextInt(10000)}',
+      onCirrus: platform.environment.containsKey('CIRRUS_CI'),
     );
 
     if (!baseDirectory.existsSync())
