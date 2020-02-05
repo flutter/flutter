@@ -45,6 +45,75 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 }  // namespace
 
+/// A proxy class for SemanticsObject and UISwitch.  For most Accessibility and
+/// SemanticsObject methods it delegates to the semantics object, otherwise it
+/// sends messages to the UISwitch.
+@interface FlutterSwitchSemanticsObject : UISwitch
+@end
+
+@implementation FlutterSwitchSemanticsObject {
+  SemanticsObject* _semanticsObject;
+}
+
+- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject {
+  self = [super init];
+  if (self) {
+    _semanticsObject = [semanticsObject retain];
+  }
+  return self;
+}
+
+- (void)dealloc {
+  [_semanticsObject release];
+  [super dealloc];
+}
+
+- (NSMethodSignature*)methodSignatureForSelector:(SEL)sel {
+  NSMethodSignature* result = [super methodSignatureForSelector:sel];
+  if (!result) {
+    result = [_semanticsObject methodSignatureForSelector:sel];
+  }
+  return result;
+}
+
+- (void)forwardInvocation:(NSInvocation*)anInvocation {
+  [anInvocation setTarget:_semanticsObject];
+  [anInvocation invoke];
+}
+
+- (CGRect)accessibilityFrame {
+  return [_semanticsObject accessibilityFrame];
+}
+
+- (id)accessibilityContainer {
+  return [_semanticsObject accessibilityContainer];
+}
+
+- (NSString*)accessibilityLabel {
+  return [_semanticsObject accessibilityLabel];
+}
+
+- (NSString*)accessibilityHint {
+  return [_semanticsObject accessibilityHint];
+}
+
+- (NSString*)accessibilityValue {
+  if ([_semanticsObject node].HasFlag(flutter::SemanticsFlags::kIsToggled) ||
+      [_semanticsObject node].HasFlag(flutter::SemanticsFlags::kIsChecked)) {
+    self.on = YES;
+  } else {
+    self.on = NO;
+  }
+
+  if (![_semanticsObject isAccessibilityBridgeAlive]) {
+    return nil;
+  } else {
+    return [super accessibilityValue];
+  }
+}
+
+@end  // FlutterSwitchSemanticsObject
+
 @implementation FlutterCustomAccessibilityAction {
 }
 @end
@@ -265,9 +334,23 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 - (NSString*)accessibilityValue {
   if (![self isAccessibilityBridgeAlive])
     return nil;
-  if ([self node].value.empty())
-    return nil;
-  return @([self node].value.data());
+
+  if (![self node].value.empty()) {
+    return @([self node].value.data());
+  }
+
+  // FlutterSwitchSemanticsObject should supercede these conditionals.
+  if ([self node].HasFlag(flutter::SemanticsFlags::kHasToggledState) ||
+      [self node].HasFlag(flutter::SemanticsFlags::kHasCheckedState)) {
+    if ([self node].HasFlag(flutter::SemanticsFlags::kIsToggled) ||
+        [self node].HasFlag(flutter::SemanticsFlags::kIsChecked)) {
+      return @"1";
+    } else {
+      return @"0";
+    }
+  }
+
+  return nil;
 }
 
 - (CGRect)accessibilityFrame {
@@ -423,10 +506,12 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
       [self node].HasAction(flutter::SemanticsAction::kDecrease)) {
     traits |= UIAccessibilityTraitAdjustable;
   }
-  // TODO(jonahwilliams): switches should have a value of "on" or "off"
-  if ([self node].HasFlag(flutter::SemanticsFlags::kIsSelected) ||
-      [self node].HasFlag(flutter::SemanticsFlags::kIsToggled) ||
-      [self node].HasFlag(flutter::SemanticsFlags::kIsChecked)) {
+  // FlutterSwitchSemanticsObject should supercede these conditionals.
+  if ([self node].HasFlag(flutter::SemanticsFlags::kHasToggledState) ||
+      [self node].HasFlag(flutter::SemanticsFlags::kHasCheckedState)) {
+    traits |= UIAccessibilityTraitButton;
+  }
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsSelected)) {
     traits |= UIAccessibilityTraitSelected;
   }
   if ([self node].HasFlag(flutter::SemanticsFlags::kIsButton)) {
@@ -755,20 +840,49 @@ void AccessibilityBridge::DispatchSemanticsAction(int32_t uid,
   platform_view_->DispatchSemanticsAction(uid, action, std::move(args));
 }
 
+static void ReplaceSemanticsObject(SemanticsObject* oldObject,
+                                   SemanticsObject* newObject,
+                                   NSMutableDictionary<NSNumber*, SemanticsObject*>* objects) {
+  // `newObject` should represent the same id as `oldObject`.
+  assert(oldObject.node.id == newObject.node.id);
+  NSNumber* nodeId = @(oldObject.node.id);
+  NSUInteger positionInChildlist = [oldObject.parent.children indexOfObject:oldObject];
+  SemanticsObject* parent = oldObject.parent;
+  [objects removeObjectForKey:nodeId];
+  newObject.parent = parent;
+  [newObject.parent.children replaceObjectAtIndex:positionInChildlist withObject:newObject];
+  objects[nodeId] = newObject;
+}
+
+static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
+                                     fml::WeakPtr<AccessibilityBridge> weak_ptr) {
+  if (node.HasFlag(flutter::SemanticsFlags::kIsTextField) &&
+      !node.HasFlag(flutter::SemanticsFlags::kIsReadOnly)) {
+    // Text fields are backed by objects that implement UITextInput.
+    return [[[TextInputSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id] autorelease];
+  } else if (node.HasFlag(flutter::SemanticsFlags::kHasToggledState) ||
+             node.HasFlag(flutter::SemanticsFlags::kHasCheckedState)) {
+    SemanticsObject* delegateObject = [[FlutterSemanticsObject alloc] initWithBridge:weak_ptr
+                                                                                 uid:node.id];
+    return (SemanticsObject*)[[[FlutterSwitchSemanticsObject alloc]
+        initWithSemanticsObject:delegateObject] autorelease];
+    [delegateObject release];
+  } else {
+    return [[[FlutterSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id] autorelease];
+  }
+}
+
+static bool DidFlagChange(const flutter::SemanticsNode& oldNode,
+                          const flutter::SemanticsNode& newNode,
+                          SemanticsFlags flag) {
+  return oldNode.HasFlag(flag) != newNode.HasFlag(flag);
+}
+
 SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
                                                         flutter::SemanticsNodeUpdates& updates) {
   SemanticsObject* object = objects_.get()[@(uid)];
   if (!object) {
-    // New node case: simply create a new SemanticsObject.
-    flutter::SemanticsNode node = updates[uid];
-    if (node.HasFlag(flutter::SemanticsFlags::kIsTextField) &&
-        !node.HasFlag(flutter::SemanticsFlags::kIsReadOnly)) {
-      // Text fields are backed by objects that implement UITextInput.
-      object = [[[TextInputSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
-    } else {
-      object = [[[FlutterSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
-    }
-
+    object = CreateObject(updates[uid], GetWeakPtr());
     objects_.get()[@(uid)] = object;
   } else {
     // Existing node case
@@ -776,28 +890,16 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
     if (nodeEntry != updates.end()) {
       // There's an update for this node
       flutter::SemanticsNode node = nodeEntry->second;
-      BOOL isTextField = node.HasFlag(flutter::SemanticsFlags::kIsTextField);
-      BOOL wasTextField = object.node.HasFlag(flutter::SemanticsFlags::kIsTextField);
-      BOOL isReadOnly = node.HasFlag(flutter::SemanticsFlags::kIsReadOnly);
-      BOOL wasReadOnly = object.node.HasFlag(flutter::SemanticsFlags::kIsReadOnly);
-      if (wasTextField != isTextField || isReadOnly != wasReadOnly) {
-        // The node changed its type from text field to something else, or vice versa. In this
-        // case, we cannot reuse the existing SemanticsObject implementation. Instead, we replace
-        // it with a new instance.
-        NSUInteger positionInChildlist = [object.parent.children indexOfObject:object];
-        SemanticsObject* parent = object.parent;
-        [objects_ removeObjectForKey:@(node.id)];
-        if (isTextField && !isReadOnly) {
-          // Text fields are backed by objects that implement UITextInput.
-          object = [[[TextInputSemanticsObject alloc] initWithBridge:GetWeakPtr()
-                                                                 uid:uid] autorelease];
-        } else {
-          object = [[[FlutterSemanticsObject alloc] initWithBridge:GetWeakPtr()
-                                                               uid:uid] autorelease];
-        }
-        object.parent = parent;
-        [object.parent.children replaceObjectAtIndex:positionInChildlist withObject:object];
-        objects_.get()[@(node.id)] = object;
+      if (DidFlagChange(object.node, node, flutter::SemanticsFlags::kIsTextField) ||
+          DidFlagChange(object.node, node, flutter::SemanticsFlags::kIsReadOnly) ||
+          DidFlagChange(object.node, node, flutter::SemanticsFlags::kHasCheckedState) ||
+          DidFlagChange(object.node, node, flutter::SemanticsFlags::kHasToggledState)) {
+        // The node changed its type. In this case, we cannot reuse the existing
+        // SemanticsObject implementation. Instead, we replace it with a new
+        // instance.
+        SemanticsObject* newSemanticsObject = CreateObject(node, GetWeakPtr());
+        ReplaceSemanticsObject(object, newSemanticsObject, objects_.get());
+        object = newSemanticsObject;
       }
     }
   }
