@@ -445,12 +445,12 @@ void main() {
   });
 
   group('FlutterGoldenFileComparator', () {
-    FlutterSkiaGoldFileComparator comparator;
+    FlutterPostSubmitFileComparator comparator;
 
     setUp(() {
       final Directory basedir = fs.directory('flutter/test/library/')
         ..createSync(recursive: true);
-      comparator = FlutterSkiaGoldFileComparator(
+      comparator = FlutterPostSubmitFileComparator(
         basedir.uri,
         MockSkiaGoldClient(),
         fs: fs,
@@ -485,7 +485,7 @@ void main() {
       setUp(() {
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
-        comparator = FlutterSkiaGoldFileComparator(
+        comparator = FlutterPostSubmitFileComparator(
           basedir.uri,
           mockSkiaClient,
           fs: fs,
@@ -503,7 +503,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
             isTrue,
           );
         });
@@ -520,7 +520,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
             isTrue,
           );
         });
@@ -537,7 +537,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
             isFalse,
           );
         });
@@ -553,7 +553,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
             isFalse,
           );
         });
@@ -568,7 +568,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
             isFalse,
           );
         });
@@ -585,7 +585,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkiaGoldFileComparator.isAvailableForEnvironment(platform),
+            FlutterPostSubmitFileComparator.isAvailableForEnvironment(platform),
             isFalse,
           );
         });
@@ -776,7 +776,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform),
+            FlutterSkippingFileComparator.isAvailableForEnvironment(platform),
             isTrue,
           );
         });
@@ -789,7 +789,7 @@ void main() {
             operatingSystem: 'macos'
           );
           expect(
-            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(
+            FlutterSkippingFileComparator.isAvailableForEnvironment(
               platform),
             isFalse,
           );
@@ -880,7 +880,7 @@ void main() {
           goldens: mockSkiaClient,
           baseDirectory: mockDirectory,
         );
-        expect(comparator.runtimeType, FlutterSkippingGoldenFileComparator);
+        expect(comparator.runtimeType, FlutterSkippingFileComparator);
 
         when(mockSkiaClient.getExpectations())
           .thenAnswer((_) => throw const SocketException('Can\'t reach Gold'));
@@ -889,7 +889,7 @@ void main() {
           goldens: mockSkiaClient,
           baseDirectory: mockDirectory,
         );
-        expect(comparator.runtimeType, FlutterSkippingGoldenFileComparator);
+        expect(comparator.runtimeType, FlutterSkippingFileComparator);
       });
     });
   });
