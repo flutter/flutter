@@ -159,10 +159,14 @@ class DebugUniveralFramework extends Target {
   String get name => 'debug_universal_framework';
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
 
   @override
-  List<Source> get inputs => const <Source>[];
+  List<Source> get inputs => const <Source>[
+     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
