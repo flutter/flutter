@@ -29,6 +29,7 @@ class SkiaGoldClient {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
+    this.ci,
     io.HttpClient httpClient,
   }) : assert(workDirectory != null),
        assert(fs != null),
@@ -54,6 +55,9 @@ class SkiaGoldClient {
   /// can be replaced by a mock process manager that doesn't really create
   /// sub-processes.
   final ProcessManager process;
+
+  /// Whether we are in a testing environment like Cirrus or Luci.
+  final String ci;
 
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
@@ -107,7 +111,7 @@ class SkiaGoldClient {
 
     List<String> authArguments;
 
-    if (platform.environment.containsKey('SWARMING_TASK_ID')) {
+    if (ci == 'luci') {
       authArguments = <String>[
         'auth',
         '--work-dir', workDirectory
@@ -140,8 +144,7 @@ class SkiaGoldClient {
         ..writeln('if the debug information below contains ENCRYPTED, the wrong ')
         ..writeln('comparator was chosen for the test case.')
         ..writeln('Luci environments authenticate without a service account, so ')
-        ..writeln('if this is a Luci inatsance, there may be an error with Gold.')
-        ..writeln()
+        ..writeln('if this is a Luci instance, there may be an error with Gold.')
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');

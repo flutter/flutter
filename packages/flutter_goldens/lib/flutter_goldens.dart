@@ -34,7 +34,7 @@ Future<void> main(FutureOr<void> testMain()) async {
     goldenFileComparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(platform);
   } else if (FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingGoldenFileComparator.fromDefaultComparator(
-      'Golden file testing is not executed on some Luci and Cirrus environments.'
+      'Golden file testing is not on some Cirrus environments.'
     );
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
@@ -136,7 +136,19 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// maintain thread safety while using the `goldctl` tool.
   @protected
   @visibleForTesting
-  static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform, {String suffix = ''}) {
+  static Directory getBaseDirectory(
+    LocalFileComparator defaultComparator,
+    Platform platform, {
+    String suffix = '',
+    bool onCirrus = false,
+  }) {
+    if (onCirrus) {
+      final Directory tempDirectory = io.Directory.systemTemp.createTemp(
+        'skia_goldens$suffix'
+      ) as Directory;
+      return tempDirectory;
+    }
+
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     final Directory comparisonRoot = flutterRoot.childDirectory(
@@ -221,10 +233,14 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
       suffix: '${math.Random().nextInt(10000)}',
+      onCirrus: platform.environment.containsKey('CIRRUS_CI'),
     );
     baseDirectory.createSync(recursive: true);
 
-    goldens ??= SkiaGoldClient(baseDirectory);
+    goldens ??= SkiaGoldClient(
+      baseDirectory,
+      ci: platform.environment.containsKey('CIRRUS_CI') ? 'cirrus' : 'luci',
+    );
     await goldens.auth();
     await goldens.imgtestInit();
     return FlutterSkiaGoldFileComparator(baseDirectory.uri, goldens);
@@ -249,10 +265,9 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
       && cirrusBranch == 'master'
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
 
-    // TODO(PIINKS): Is this actually empty on post-submit?
-    final String luciPR = platform.environment['github_link'] ?? '';
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      && luciPR.isEmpty;
+      // TODO(PIINKS): I don't think this key exists in post-submit luci checks, verify.
+      && !platform.environment.containsKey('github_link');
 
     return cirrusPostSubmit || luciPostSubmit;
   }
@@ -310,15 +325,22 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       defaultComparator,
       platform,
       suffix: '${math.Random().nextInt(10000)}',
+      onCirrus: platform.environment.containsKey('CIRRUS_CI'),
     );
 
     if (!baseDirectory.existsSync())
       baseDirectory.createSync(recursive: true);
 
-    goldens ??= SkiaGoldClient(baseDirectory);
+    goldens ??= SkiaGoldClient(
+      baseDirectory,
+      ci: platform.environment.containsKey('CIRRUS_CI') ? 'cirrus' : 'luci',
+    );
 
-    final bool hasWritePermission = !platform.environment['GOLD_SERVICE_ACCOUNT'].startsWith('ENCRYPTED');
-    if (hasWritePermission) {
+    bool onCirrusWithPermission = false;
+    if (platform.environment.containsKey('GOLD_SERVICE_ACCOUNT'))
+      onCirrusWithPermission = !platform.environment['GOLD_SERVICE_ACCOUNT'].startsWith('ENCRYPTED');
+    final bool onLuci = platform.environment.containsKey('SWARMING_TASK_ID');
+    if (onCirrusWithPermission || onLuci) {
       await goldens.auth();
       await goldens.tryjobInit();
       return _AuthorizedFlutterPreSubmitComparator(
@@ -357,9 +379,8 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       && cirrusPR.isNotEmpty
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
 
-    final String luciPR = platform.environment['github_link'] ?? '';
     final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      && luciPR.isNotEmpty;
+      && platform.environment.containsKey('github_link');
 
     return cirrusPreSubmit || luciPreSubmit;
   }
