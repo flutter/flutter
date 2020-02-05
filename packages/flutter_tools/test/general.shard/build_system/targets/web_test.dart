@@ -405,7 +405,7 @@ void main() {
   });
 
   test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
-    environment.outputDir.childFile('a/a.txt')
+    environment.outputDir.childDirectory('a').childFile('a.txt')
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
     await const WebServiceWorker().build(environment);
