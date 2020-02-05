@@ -143,10 +143,9 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
       bool onCirrus = false,
     }) {
     if (onCirrus) {
-      final Directory tempDirectory = io.Directory.systemTemp.createTemp(
+      return io.Directory.systemTemp.createTemp(
         'skia_goldens$suffix'
       ) as Directory;
-      return tempDirectory;
     }
 
     const FileSystem fs = LocalFileSystem();
