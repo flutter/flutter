@@ -76,7 +76,7 @@ class FruitPage extends StatelessWidget {
   static final String paragraph2 = '''Pomegranates on the other hand have become
  almost ubiquitous. You can find its juice in any bodega, Walmart, and even some
  gas stations. But at what cost? The pomegranate juice craze of the aughts made
- \"megafarmers\" Lynda and Stewart Resnick billions. Unfortunately, it takes a lot
+ "megafarmers" Lynda and Stewart Resnick billions. Unfortunately, it takes a lot
  of water to make that much pomegranate juice. Water the Resnicks get from their
  majority stake in the Kern Water Bank. How did one family come to hold control
  over water meant for the whole central valley of California? The story will shock you.
