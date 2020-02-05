@@ -604,6 +604,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    // TODO(Piinks): What does driver test support look like locally?
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     final List<String> testExpectations = skiaClient.expectations[testName];

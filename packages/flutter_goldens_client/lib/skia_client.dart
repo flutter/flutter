@@ -56,7 +56,7 @@ class SkiaGoldClient {
   /// sub-processes.
   final ProcessManager process;
 
-  /// Whether we are in a testing environment like Cirrus or Luci.
+  /// What testing environment we may be in, like Cirrus or Luci.
   final String ci;
 
   /// A client for making Http requests to the Flutter Gold dashboard.
@@ -74,8 +74,8 @@ class SkiaGoldClient {
   /// hashes.
   ///
   /// This is set and used by the [FlutterLocalFileComparator] and
-  /// [FlutterPreSubmitFileComparator] to test against golden masters maintained
-  /// in the Flutter Gold dashboard.
+  /// [_UnauthorizedFlutterPreSubmitComparator] to test against golden masters
+  /// maintained in the Flutter Gold dashboard.
   Map<String, List<String>> get expectations => _expectations;
   Map<String, List<String>> _expectations;
 
@@ -98,9 +98,9 @@ class SkiaGoldClient {
   /// Prepares the local work space for golden file testing and calls the
   /// goldctl `auth` command.
   ///
-  /// This ensures that the goldctl tool is authorized and ready for testing. It
-  /// will only be called once for each instance of
-  /// [FlutterSkiaGoldFileComparator].
+  /// This ensures that the goldctl tool is authorized and ready for testing.
+  /// Used byt the [FlutterPostSubmitFileComparator] and the
+  /// [_AuthorizedFlutterPreSubmitComparator].
   ///
   /// Based on the current environment, the goldctl tool may be authorized by
   /// with a service account for Cirrus testing, or through the context provided
@@ -289,7 +289,7 @@ class SkiaGoldClient {
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current tryjob. Used by the
-  /// [FlutterPostSubmitFileComparator].
+  /// [_AuthorizedFlutterPreSubmitComparator].
   Future<void> tryjobInit() async {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
@@ -299,16 +299,17 @@ class SkiaGoldClient {
     final String commitHash = await _getCurrentCommit();
 
     String pullRequest;
-    String cirrusTaskID;
+    String jobId;
+    String patchsetId;
     if (ci == 'luci') {
       // TODO(Piinks): check arguments here for luci
-      // --cis
-      // --changelist
-      // --jobid
-      // --patchset_id
+      // pullRequest =
+      // jobId =
+      // patchsetId =
     } else {
       pullRequest = platform.environment['CIRRUS_PR'];
-      cirrusTaskID = platform.environment['CIRRUS_TASK_ID'];
+      jobId = platform.environment['CIRRUS_TASK_ID'];
+      patchsetId = commitHash;
     }
 
 
@@ -324,9 +325,9 @@ class SkiaGoldClient {
       '--passfail',
       '--crs', 'github',
       '--changelist', pullRequest,
-      '--cis', 'cirrus',
-      '--jobid', cirrusTaskID,
-      '--patchset_id', commitHash,
+      '--cis', ci,
+      '--jobid', jobId,
+      '--patchset_id', patchsetId,
     ];
 
     if (imgtestInitArguments.contains(null)) {
@@ -508,11 +509,12 @@ class SkiaGoldClient {
   /// Returns a boolean value for whether or not the given test and current pull
   /// request are ignored on Flutter Gold.
   ///
-  /// This is only relevant when used by the [FlutterPreSubmitFileComparator]
-  /// when a golden file test fails. In order to land a change to an existing
-  /// golden file, an ignore must be set up in Flutter Gold. This will serve as
-  /// a flag to permit the change to land, protect against any unwanted changes,
-  /// and ensure that changes that have landed are triaged.
+  /// This is only relevant when used by the
+  /// [_UnauthorizedFlutterPreSubmitComparator] when a golden file test fails.
+  /// In order to land a change to an existing golden file, an ignore must be
+  /// set up in Flutter Gold. This will serve as a flag to permit the change to
+  /// land, protect against any unwanted changes, and ensure that changes that
+  /// have landed are triaged.
   Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
     bool ignoreIsActive = false;
     testName = cleanTestName(testName);
@@ -630,8 +632,9 @@ class SkiaGoldClient {
   String _getKeysJSON() {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'ci' : ci,
+      'CI' : ci,
       // TODO(Piinks): Add device information from driver tests
+      // 'Device' : '',
     };
     if (platform.environment[_kTestBrowserKey] != null)
       keys['Browser'] = platform.environment[_kTestBrowserKey];
@@ -675,7 +678,11 @@ class SkiaGoldDigest {
     return SkiaGoldDigest(
       imageHash: json['digest'] as String,
       paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic> ??
-        <String, List<String>>{'Platform': <String>[]}),
+        <String, List<String>>{
+          'Platform': <String>[],
+          'Browser' : <String>[],
+          'Device' : <String>[],
+        }),
       testName: json['test'] as String,
       status: json['status'] as String,
     );
@@ -699,6 +706,9 @@ class SkiaGoldDigest {
       && (paramSet['Platform'] as List<dynamic>).contains(platform.operatingSystem)
       && (platform.environment[_kTestBrowserKey] == null
          || paramSet['Browser'] == platform.environment[_kTestBrowserKey])
+      // TODO(Piinks): device info for local driver tests
+      // && (deviceFlag == null
+      //    || paramSet['Device'] == ?)
       && testName == name
       && status == 'positive';
   }
