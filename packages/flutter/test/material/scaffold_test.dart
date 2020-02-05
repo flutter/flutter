@@ -350,7 +350,7 @@ void main() {
               child: Icon(Icons.beach_access),
             ),
             floatingActionButtonLocation: locations[0],
-            animator: _LinearMovementFabAnimator(),
+            floatingActionButtonAnimator: _LinearMovementFabAnimator(),
             additionalFloatingActionButtonConfigurations: <Key, FloatingActionButtonConfiguration>{
               const ValueKey<String>('fab2') : FloatingActionButtonConfiguration(
                 button: FloatingActionButton(
@@ -2123,5 +2123,22 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return child;
+  }
+}
+
+class _LinearMovementFabAnimator extends FloatingActionButtonAnimator {
+  @override
+  Offset getOffset({@required Offset begin, @required Offset end, @required double progress}) {
+    return begin * (1 - progress) + end * progress;
+  }
+
+  @override
+  Animation<double> getScaleAnimation({@required Animation<double> parent}) {
+    return const AlwaysStoppedAnimation<double>(1.0);
+  }
+
+  @override
+  Animation<double> getRotationAnimation({@required Animation<double> parent}) {
+    return Tween<double>(begin: 0.0, end: 2.0).animate(parent);
   }
 }
