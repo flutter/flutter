@@ -170,6 +170,7 @@ void main() {
       expect(find.text('PASTE'), findsOneWidget);
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
+      final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
 
       // Tapping the button shows the overflow menu.
       await tester.tap(find.byType(IconButton));
@@ -184,6 +185,9 @@ void main() {
       final Offset selectAllOffset = tester.getTopLeft(find.text('SELECT ALL'));
       final Offset moreOffset = tester.getTopLeft(find.byType(IconButton));
       expect(moreOffset.dy, greaterThan(selectAllOffset.dy));
+
+      // The overflow menu grows upward.
+      expect(selectAllOffset.dy, lessThan(cutOffset.dy));
 
       // Tapping the back button shows the selection menu again.
       await tester.tap(find.byType(IconButton));
@@ -303,6 +307,7 @@ void main() {
       expect(find.text('PASTE'), findsOneWidget);
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
+      final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
 
       // Tapping the button shows the overflow menu.
       await tester.tap(find.byType(IconButton));
@@ -318,6 +323,9 @@ void main() {
       final Offset moreOffset = tester.getTopLeft(find.byType(IconButton));
       expect(moreOffset.dy, lessThan(selectAllOffset.dy));
 
+      // The overflow menu grows downward.
+      expect(selectAllOffset.dy, greaterThan(cutOffset.dy));
+
       // Tapping the back button shows the selection menu again.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
@@ -326,8 +334,7 @@ void main() {
       expect(find.text('PASTE'), findsOneWidget);
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
-      // TODO(justinmc): Unskip when you fix rendering below the text.
-    }, skip: true);
+    });
   });
 
   group('material handles', () {
