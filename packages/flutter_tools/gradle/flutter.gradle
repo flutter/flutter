@@ -603,6 +603,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
+        Boolean treeShakeIconsOptionsValue = false
+        if (project.hasProperty('tree-shake-icons')) {
+            treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -637,6 +641,7 @@ class FlutterPlugin implements Plugin<Project> {
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
+                treeShakeIcons treeShakeIconsOptionsValue
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -769,6 +774,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String extraFrontEndOptions
     @Optional @Input
     String extraGenSnapshotOptions
+    @Optional @Input
+    Boolean treeShakeIcons
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -824,6 +831,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "-dBuildMode=${buildMode}"
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
+            }
+            if (treeShakeIcons == true) {
+                args "-dTreeShakeIcons=true"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"

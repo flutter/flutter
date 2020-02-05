@@ -151,7 +151,7 @@ String generateArbBasedLocalizationSubclasses({
         output.writeln(generateClassDeclaration(
           scriptBaseLocale,
           generatedClassPrefix,
-          '$generatedClassPrefix${camelCase(languageLocale)}',
+          '$generatedClassPrefix${languageLocale.camelCase()}',
         ));
         output.writeln(generateConstructor(scriptBaseLocale));
         final Map<String, String> scriptResources = localeToResources[scriptBaseLocale];
@@ -175,7 +175,7 @@ String generateArbBasedLocalizationSubclasses({
           output.writeln(generateClassDeclaration(
             locale,
             generatedClassPrefix,
-            '$generatedClassPrefix${camelCase(scriptBaseLocale)}',
+            '$generatedClassPrefix${scriptBaseLocale.camelCase()}',
           ));
           output.writeln(generateConstructor(locale));
           final Map<String, String> localeResources = localeToResources[locale];
@@ -201,7 +201,7 @@ String generateArbBasedLocalizationSubclasses({
         output.writeln(generateClassDeclaration(
           locale,
           generatedClassPrefix,
-          '$generatedClassPrefix${camelCase(languageLocale)}',
+          '$generatedClassPrefix${languageLocale.camelCase()}',
         ));
         output.writeln(generateConstructor(locale));
         for (final String key in localeResources.keys) {
@@ -267,7 +267,7 @@ $factoryDeclaration
     if (languageToLocales[language].length == 1) {
       output.writeln('''
     case '$language':
-      return $generatedClassPrefix${camelCase(languageToLocales[language][0])}($factoryArguments);''');
+      return $generatedClassPrefix${(languageToLocales[language][0]).camelCase()}($factoryArguments);''');
     } else if (!languageToScriptCodes.containsKey(language)) { // Does not distinguish between scripts. Switch on countryCode directly.
       output.writeln('''
     case '$language': {
@@ -279,11 +279,11 @@ $factoryDeclaration
         final String countryCode = locale.countryCode;
         output.writeln('''
         case '$countryCode':
-          return $generatedClassPrefix${camelCase(locale)}($factoryArguments);''');
+          return $generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
       }
       output.writeln('''
       }
-      return $generatedClassPrefix${camelCase(LocaleInfo.fromString(language))}($factoryArguments);
+      return $generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
     }''');
     } else { // Language has scriptCode, add additional switch logic.
       bool hasCountryCode = false;
@@ -309,7 +309,7 @@ $factoryDeclaration
             final String countryCode = locale.countryCode;
             output.writeln('''
             case '$countryCode':
-              return $generatedClassPrefix${camelCase(locale)}($factoryArguments);''');
+              return $generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
           }
         }
         // Return a fallback locale that matches scriptCode, but not countryCode.
@@ -321,7 +321,7 @@ $factoryDeclaration
           }''');
           }
           output.writeln('''
-          return $generatedClassPrefix${camelCase(scriptLocale)}($factoryArguments);
+          return $generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
         }''');
         } else {
           // Not Explicitly defined, fallback to first locale with the same language and
@@ -334,7 +334,7 @@ $factoryDeclaration
           }''');
             }
             output.writeln('''
-          return $generatedClassPrefix${camelCase(scriptLocale)}($factoryArguments);
+          return $generatedClassPrefix${scriptLocale.camelCase()}($factoryArguments);
         }''');
             break;
           }
@@ -354,13 +354,13 @@ $factoryDeclaration
           final String countryCode = locale.countryCode;
           output.writeln('''
         case '$countryCode':
-          return $generatedClassPrefix${camelCase(locale)}($factoryArguments);''');
+          return $generatedClassPrefix${locale.camelCase()}($factoryArguments);''');
         }
         output.writeln('''
       }''');
       }
       output.writeln('''
-      return $generatedClassPrefix${camelCase(LocaleInfo.fromString(language))}($factoryArguments);
+      return $generatedClassPrefix${LocaleInfo.fromString(language).camelCase()}($factoryArguments);
     }''');
     }
   }
