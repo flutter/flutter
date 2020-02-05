@@ -63,22 +63,10 @@ void main() {
       } else {
         assert(false);
       }
-      final String skyEngineLine = globals.platform.isWindows
-        ? r'sky_engine:file:///C:/bin/cache/pkg/sky_engine/lib/'
-        : 'sky_engine:file:///bin/cache/pkg/sky_engine/lib/';
-      globals.fs.file('.packages')
-        ..createSync()
-        ..writeAsStringSync('''
-# Generated
-$skyEngineLine
-flutter_tools:lib/''');
+
       final String engineArtifacts = globals.fs.path.join('bin', 'cache',
           'artifacts', 'engine');
       final List<String> paths = <String>[
-        globals.fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui',
-          'ui.dart'),
-        globals.fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'sdk_ext',
-            'vmservice_io.dart'),
         globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
         globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart.exe'),
         globals.fs.path.join(engineArtifacts, getNameForHostPlatform(hostPlatform),
