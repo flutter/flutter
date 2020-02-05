@@ -820,7 +820,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
         status.stop();
         return OperationResult.ok;
       } catch (err) {
-        print('ERRR: $err');
+        globals.printTrace(err.toString());
         // Ignore error and continue with posted message;
       }
     }
