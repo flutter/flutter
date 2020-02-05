@@ -85,7 +85,8 @@ const double _kDividerThickness = 1.0;
 /// sheet title and message text style.
 ///
 /// To display action buttons that look like standard iOS action sheet buttons,
-/// provide [CupertinoActionSheetAction]s for the [actions] given to this action sheet.
+/// provide [CupertinoActionSheetAction]s for the [actions] given to this action
+/// sheet.
 ///
 /// To include a iOS-style cancel button separate from the other buttons,
 /// provide an [CupertinoActionSheetAction] for the [cancelButton] given to this
