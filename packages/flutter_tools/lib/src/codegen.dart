@@ -131,7 +131,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   static Future<ResidentCompiler> create({
     @required ResidentCompiler residentCompiler,
     @required FlutterProject flutterProject,
-    bool runCold,
+    bool runCold = false,
   }) async {
     if (runCold) {
       return residentCompiler;
