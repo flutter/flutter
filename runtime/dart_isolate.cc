@@ -8,6 +8,7 @@
 #include <tuple>
 
 #include "flutter/fml/paths.h"
+#include "flutter/fml/posix_wrappers.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/io/dart_io.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
@@ -577,7 +578,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   auto vm_data = DartVMRef::GetVMData();
 
   if (!vm_data) {
-    *error = strdup(
+    *error = fml::strdup(
         "Could not access VM data to initialize isolates. This may be because "
         "the VM has initialized shutdown on another thread already.");
     return nullptr;
@@ -613,7 +614,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
 
   std::shared_ptr<DartIsolate> service_isolate = weak_service_isolate.lock();
   if (!service_isolate) {
-    *error = strdup("Could not create the service isolate.");
+    *error = fml::strdup("Could not create the service isolate.");
     FML_DLOG(ERROR) << *error;
     return nullptr;
   }
@@ -722,7 +723,7 @@ bool DartIsolate::DartIsolateInitializeCallback(void** child_callback_data,
   TRACE_EVENT0("flutter", "DartIsolate::DartIsolateInitializeCallback");
   Dart_Isolate isolate = Dart_CurrentIsolate();
   if (isolate == nullptr) {
-    *error = strdup("Isolate should be available in initialize callback.");
+    *error = fml::strdup("Isolate should be available in initialize callback.");
     FML_DLOG(ERROR) << *error;
     return false;
   }
@@ -799,14 +800,14 @@ bool DartIsolate::InitializeIsolate(
     char** error) {
   TRACE_EVENT0("flutter", "DartIsolate::InitializeIsolate");
   if (!embedder_isolate->Initialize(isolate)) {
-    *error = strdup("Embedder could not initialize the Dart isolate.");
+    *error = fml::strdup("Embedder could not initialize the Dart isolate.");
     FML_DLOG(ERROR) << *error;
     return false;
   }
 
   if (!embedder_isolate->LoadLibraries()) {
-    *error =
-        strdup("Embedder could not load libraries in the new Dart isolate.");
+    *error = fml::strdup(
+        "Embedder could not load libraries in the new Dart isolate.");
     FML_DLOG(ERROR) << *error;
     return false;
   }
@@ -819,7 +820,7 @@ bool DartIsolate::InitializeIsolate(
         embedder_isolate->GetIsolateGroupData().GetChildIsolatePreparer();
     FML_DCHECK(child_isolate_preparer);
     if (!child_isolate_preparer(embedder_isolate.get())) {
-      *error = strdup("Could not prepare the child isolate to run.");
+      *error = fml::strdup("Could not prepare the child isolate to run.");
       FML_DLOG(ERROR) << *error;
       return false;
     }

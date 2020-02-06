@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/posix_wrappers.h"
 #include "flutter/runtime/embedder_resources.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -19,12 +20,12 @@
     return handle;                  \
   }
 
-#define SHUTDOWN_ON_ERROR(handle)           \
-  if (Dart_IsError(handle)) {               \
-    *error = strdup(Dart_GetError(handle)); \
-    Dart_ExitScope();                       \
-    Dart_ShutdownIsolate();                 \
-    return false;                           \
+#define SHUTDOWN_ON_ERROR(handle)                \
+  if (Dart_IsError(handle)) {                    \
+    *error = fml::strdup(Dart_GetError(handle)); \
+    Dart_ExitScope();                            \
+    Dart_ShutdownIsolate();                      \
+    return false;                                \
   }
 
 namespace flutter {
