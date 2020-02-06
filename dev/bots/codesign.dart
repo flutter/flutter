@@ -23,6 +23,7 @@ bool isBinary(String filePath) {
 
 /// Find every binary file in the given [rootDirectory]
 List<String> findBinaryPaths([String rootDirectory]) {
+  rootDirectory ??= cacheDirectory;
   final ProcessResult result = Process.runSync(
     'find',
     <String>[
@@ -64,7 +65,8 @@ void main() {
   final List<String> failures = <String>[];
 
   if (!Platform.isMacOS) {
-    print('Warning! This script only works on macOS, as it requires Xcode.');
+    print('Error! Expected operating system "macos", actual operating system '
+      'is: "${Platform.operatingSystem}"');
     exit(1);
   }
 
