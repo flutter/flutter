@@ -225,6 +225,9 @@ class _CanvasPool extends _SaveStackTracking {
   void endOfPaint() {
     if (_reusablePool != null) {
       for (html.CanvasElement e in _reusablePool) {
+        if (browserEngine == BrowserEngine.webkit) {
+          e.width = e.height = 0;
+        }
         e.remove();
       }
       _reusablePool = null;
