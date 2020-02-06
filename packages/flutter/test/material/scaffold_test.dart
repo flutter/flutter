@@ -358,6 +358,7 @@ void main() {
                   child: const Icon(Icons.golf_course),
                 ),
                 location: locations[1],
+                animator: _LinearMovementFabAnimator(),
               ),
               const ValueKey<String>('fab3') : FloatingActionButtonConfiguration(
                 button: FloatingActionButton(
@@ -374,13 +375,51 @@ void main() {
 
       await tester.pumpWidget(build([
         FloatingActionButtonLocation.endFloat,
-        FloatingActionButtonLocation.centerTop,
-        FloatingActionButtonLocation.startDocked,
+        FloatingActionButtonLocation.centerDocked,
+        FloatingActionButtonLocation.startTop,
       ]));
 
-      expect(find.byType(FloatingActionButtonLocation), findsNWidgets(3));
+      const Offset beach_access_start = Offset(_rightOffsetX, _floatOffsetY);
+      const Offset golf_course_start = Offset(_centerOffsetX, _dockedOffsetY);
+      const Offset android_start = Offset(_leftOffsetX, _topOffsetY);
 
-      // TODO: Add location expectations.
+      expect(find.byType(FloatingActionButton), findsNWidgets(3));
+
+      await tester.pumpWidget(build([
+        FloatingActionButtonLocation.startDocked,
+        FloatingActionButtonLocation.endTop,
+        FloatingActionButtonLocation.centerFloat,
+      ]));
+
+      const Offset beach_access_stop = Offset(_leftOffsetX, _dockedOffsetY);
+      const Offset golf_course_stop = Offset(_rightOffsetX, _topOffsetY);
+      const Offset android_stop = Offset(_centerOffsetX, _floatOffsetY);
+
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+
+      await tester.pump(kFloatingActionButtonSegue * 0.5);
+
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), beach_access_start * 0.75 + beach_access_stop * 0.25);
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), golf_course_start * 0.75 + golf_course_stop * 0.25);
+      expect(tester.getCenter(find.byIcon(Icons.android)), android_start * 0.75 + android_stop * 0.25);
+
+      await tester.pump(kFloatingActionButtonSegue * 0.5);
+
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), beach_access_start * 0.5 + beach_access_stop * 0.5);
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), golf_course_start * 0.5 + golf_course_stop * 0.5);
+      expect(tester.getCenter(find.byIcon(Icons.android)), android_start * 0.5 + android_stop * 0.5);
+
+      await tester.pump(kFloatingActionButtonSegue * 0.5);
+
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), beach_access_start * 0.25 + beach_access_stop * 0.75);
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), golf_course_start * 0.25 + golf_course_stop * 0.75);
+      expect(tester.getCenter(find.byIcon(Icons.android)), android_start * 0.25 + android_stop * 0.75);
+
+      await tester.pumpAndSettle();
+
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), beach_access_start);
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), golf_course_start);
+      expect(tester.getCenter(find.byIcon(Icons.android)), android_start);
     });
   });
 
