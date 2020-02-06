@@ -16,10 +16,13 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
+import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -126,6 +129,38 @@ void main() {
     expect(result.message, contains('Failed to recompile application.'));
   }));
 
+  test('Correctly performs a full refresh on attached chrome device.', () => testbed.run(() async {
+    _setupMocks();
+    final MockChromeDevice chromeDevice = MockChromeDevice();
+    final MockChrome chrome = MockChrome();
+    final MockChromeConnection mockChromeConnection = MockChromeConnection();
+    final MockChromeTab mockChromeTab = MockChromeTab();
+    final MockWipConnection mockWipConnection = MockWipConnection();
+    when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
+      return mockChromeTab;
+    });
+    when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
+      return mockWipConnection;
+    });
+    when(chrome.chromeConnection).thenReturn(mockChromeConnection);
+    launchChromeInstance(chrome);
+    when(mockFlutterDevice.device).thenReturn(chromeDevice);
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+      return true;
+    });
+    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    expect(result.code, 0);
+    verify(mockWipConnection.sendCommand('Page.reload', <String, Object>{
+      'ignoreCache': true,
+    })).called(1);
+  }));
+
 }
 
 class MockWebDevice extends Mock implements Device {}
@@ -135,3 +170,8 @@ class MockDebugConnection extends Mock implements DebugConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
+class MockChromeDevice extends Mock implements ChromeDevice {}
+class MockChrome extends Mock implements Chrome {}
+class MockChromeConnection extends Mock implements ChromeConnection {}
+class MockChromeTab extends Mock implements ChromeTab {}
+class MockWipConnection extends Mock implements WipConnection {}
