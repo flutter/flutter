@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 import 'base/utils.dart';
+import 'build_system/targets/icon_tree_shaker.dart';
 import 'globals.dart' as globals;
 
 /// Information about a build to be performed or used.
@@ -18,9 +21,14 @@ class BuildInfo {
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
+    this.splitDebugInfoPath,
+    @required this.treeShakeIcons,
   });
 
   final BuildMode mode;
+
+  /// Whether the build should subdset icon fonts.
+  final bool treeShakeIcons;
 
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
@@ -55,10 +63,15 @@ class BuildInfo {
   /// On Xcode builds it is used as CFBundleShortVersionString,
   final String buildName;
 
-  static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
-  static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
-  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null);
-  static const BuildInfo release = BuildInfo(BuildMode.release, null);
+  /// An optional directory path to save debugging information from dwarf stack
+  /// traces. If null, stack trace information is not stripped from the
+  /// executable.
+  final String splitDebugInfoPath;
+
+  static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+  static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
+  static const BuildInfo release = BuildInfo(BuildMode.release, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
 
   /// Returns whether a debug build is requested.
   ///
@@ -378,12 +391,14 @@ DarwinArch getIOSArchForName(String arch) {
       return DarwinArch.armv7;
     case 'arm64':
       return DarwinArch.arm64;
+    case 'x86_64':
+      return DarwinArch.x86_64;
   }
   assert(false);
   return null;
 }
 
-String getNameForTargetPlatform(TargetPlatform platform) {
+String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
@@ -394,6 +409,9 @@ String getNameForTargetPlatform(TargetPlatform platform) {
     case TargetPlatform.android_x86:
       return 'android-x86';
     case TargetPlatform.ios:
+      if (darwinArch != null) {
+        return 'ios-${getNameForDarwinArch(darwinArch)}';
+      }
       return 'ios';
     case TargetPlatform.darwin_x64:
       return 'darwin-x64';

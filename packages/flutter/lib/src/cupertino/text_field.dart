@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -196,10 +198,15 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// If specified, the [maxLength] property must be greater than zero.
   ///
+  /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
+  /// changing the shape of the selection highlighting. These properties default
+  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
-  /// [scrollPadding], [suffixMode], [textAlign], and [enableSuggestions]
-  /// properties must not be null.
+  /// [scrollPadding], [suffixMode], [textAlign], [selectionHeightStyle],
+  /// [selectionWidthStyle], and [enableSuggestions] properties must not be null.
   ///
   /// See also:
   ///
@@ -252,6 +259,8 @@ class CupertinoTextField extends StatefulWidget {
     this.cursorWidth = 2.0,
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorColor,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
@@ -270,6 +279,8 @@ class CupertinoTextField extends StatefulWidget {
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
@@ -529,6 +540,16 @@ class CupertinoTextField extends StatefulWidget {
   /// which itself defaults to [CupertinoColors.activeBlue] in the light theme
   /// and [CupertinoColors.activeOrange] in the dark theme.
   final Color cursorColor;
+
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxHeightStyle] for details on available styles.
+  final ui.BoxHeightStyle selectionHeightStyle;
+
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxWidthStyle] for details on available styles.
+  final ui.BoxWidthStyle selectionWidthStyle;
 
   /// The appearance of the keyboard.
   ///
@@ -918,6 +939,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorOffset: cursorOffset,
           paintCursorAboveText: true,
           backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
+          selectionHeightStyle: widget.selectionHeightStyle,
+          selectionWidthStyle: widget.selectionWidthStyle,
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,
           dragStartBehavior: widget.dragStartBehavior,

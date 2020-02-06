@@ -94,7 +94,7 @@ RUN touch ~/.android/repositories.cfg
 ENV GRADLE_ROOT="/opt/gradle"
 RUN mkdir -p "${GRADLE_ROOT}"
 ENV GRADLE_ARCHIVE="${GRADLE_ROOT}/gradle.zip"
-ENV GRADLE_URL="http://services.gradle.org/distributions/gradle-4.4-bin.zip"
+ENV GRADLE_URL="https://services.gradle.org/distributions/gradle-4.4-bin.zip"
 RUN wget --progress=dot:giga "$GRADLE_URL" -O "${GRADLE_ARCHIVE}"
 RUN unzip -q -d "${GRADLE_ROOT}" "${GRADLE_ARCHIVE}"
 ENV PATH="$GRADLE_ROOT/bin:$PATH"
@@ -107,7 +107,7 @@ RUN dpkg-query -L nodejs
 RUN /usr/bin/npm --verbose install -g firebase-tools
 # TODO(dnfield): Remove this once Firebase has a fix upstream for
 # https://github.com/flutter/flutter/issues/34435
-COPY patch_firebase.sh /root/patch_firebase.sh
+COPY ci/docker_linux/patch_firebase.sh /root/patch_firebase.sh
 RUN /root/patch_firebase.sh
 
 # Install golang more recent than in repo (necessary for dashing to build)
@@ -124,11 +124,18 @@ RUN $GOBINARY get -u github.com/technosophos/dashing
 RUN locale-gen en_US "en_US.UTF-8" && dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
 
+# Install fastlane via pinned Gemfile & Gemfile.lock
 # Skip all the documentation (-N) since it's just on CI.
 RUN gem install bundler -N
 
 # Gemfile last edited 1/6/2019 (update to trigger a rebuild of Docker image)
-COPY Gemfile /Gemfile
-COPY Gemfile.lock /Gemfile.lock
+COPY ci/docker_linux/Gemfile /Gemfile
+COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 
 RUN bundle install --system
+
+# Install goldctl, for Golden testing
+# Last updated 2020-02-04 (update to rebuild Dockerfile with latest goldctl)
+COPY bots/download_goldctl.sh /download_goldctl.sh
+ENV GOLDCTL '/depot_tools/goldctl'
+RUN /download_goldctl.sh

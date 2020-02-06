@@ -15,6 +15,7 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand() {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesPubOption();
     addBuildModeFlags(excludeDebug: true);
