@@ -453,8 +453,12 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       .join(',');
 
     try {
-      if (fullRestart) {
-        await _wipConnection?.sendCommand('Page.reload');
+      if (fullRestart || !debuggingOptions.buildInfo.isDebug) {
+        // On non-debug builds, a hard refresh is required to ensure the
+        // up to date sources are loaded.
+        await _wipConnection?.sendCommand('Page.reload', <String, Object>{
+          'ignoreCache': !debuggingOptions.buildInfo.isDebug,
+        });
       } else {
         await _wipConnection?.debugger
             ?.sendCommand('Runtime.evaluate', params: <String, Object>{
@@ -808,10 +812,15 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           return chromeTab.url.contains(debuggingOptions.hostname);
         });
         final WipConnection wipConnection = await chromeTab.connect();
-        await wipConnection.sendCommand('Page.reload');
+        // On non-debug builds, a hard refresh is required to ensure the
+        // up to date sources are loaded.
+        await wipConnection?.sendCommand('Page.reload', <String, Object>{
+          'ignoreCache': !debuggingOptions.buildInfo.isDebug,
+        });
         status.stop();
         return OperationResult.ok;
       } catch (err) {
+        globals.printTrace(err.toString());
         // Ignore error and continue with posted message;
       }
     }

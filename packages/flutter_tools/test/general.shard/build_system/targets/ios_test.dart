@@ -45,7 +45,8 @@ void main() {
     });
   });
 
-  test('DebugUniveralFramework creates expected binary', () => testbed.run(() async {
+  test('DebugUniveralFramework creates expected binary with arm64 only arch', () => testbed.run(() async {
+    environment.defines[kIosArchs] = 'arm64';
     processManager = FakeProcessManager.list(<FakeCommand>[
       // Create iphone stub.
       const FakeCommand(command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path']),
@@ -54,9 +55,7 @@ void main() {
         'clang',
         '-x',
         'c',
-         // iphone gets both arm arches
-        '-arch',
-        'armv7',
+         // iphone only gets 64 bit arch based on kIosArchs
         '-arch',
         'arm64',
         globals.fs.path.absolute(globals.fs.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),

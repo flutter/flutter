@@ -176,12 +176,19 @@ class DebugUniveralFramework extends Target {
   @override
   Future<void> build(Environment environment) async {
     // Generate a trivial App.framework.
+    final Set<DarwinArch> iosArchs = environment.defines[kIosArchs]
+      ?.split(' ')
+      ?.map(getIOSArchForName)
+      ?.toSet()
+      ?? <DarwinArch>{DarwinArch.arm64};
     final File iphoneFile = environment.buildDir.childFile('iphone_framework');
     final File simulatorFile = environment.buildDir.childFile('simulator_framework');
     final File lipoOutputFile = environment.buildDir.childFile('App');
     final RunResult iphoneResult = await createStubAppFramework(
       iphoneFile,
       SdkType.iPhone,
+      // Only include 32bit if it is contained in the active architectures.
+      include32Bit: iosArchs.contains(DarwinArch.armv7)
     );
     final RunResult simulatorResult = await createStubAppFramework(
       simulatorFile,
@@ -352,7 +359,7 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
+Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool include32Bit = true }) async {
   try {
     outputFile.createSync(recursive: true);
   } catch (e) {
@@ -369,8 +376,8 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
     List<String> archFlags;
     if (sdk == SdkType.iPhone) {
       archFlags = <String>[
-        '-arch',
-        getNameForDarwinArch(DarwinArch.armv7),
+        if (include32Bit)
+          ...<String>['-arch', getNameForDarwinArch(DarwinArch.armv7)],
         '-arch',
         getNameForDarwinArch(DarwinArch.arm64),
       ];
