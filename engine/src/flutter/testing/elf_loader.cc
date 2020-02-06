@@ -33,6 +33,11 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary() {
   // Must not be freed.
   const char* error = nullptr;
 
+#if OS_FUCHSIA
+  // TODO(gw280): https://github.com/flutter/flutter/issues/50285
+  // Dart doesn't implement Dart_LoadELF on Fuchsia
+  auto loaded_elf = nullptr;
+#else
   auto loaded_elf =
       Dart_LoadELF(elf_path.c_str(),             // file path
                    0,                            // file offset
@@ -42,6 +47,7 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary() {
                    &symbols.vm_isolate_data,     // vm isolate data (out)
                    &symbols.vm_isolate_instrs    // vm isolate instr (out)
       );
+#endif
 
   if (loaded_elf == nullptr) {
     FML_LOG(ERROR)
