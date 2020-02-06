@@ -1,4 +1,4 @@
-Signature: 8a324a172f9ed19ea8547c59d67640a5
+Signature: 25ebda78b811d12660c00b15a7ce8dc8
 
 UNUSED LICENSES:
 
@@ -5608,45 +5608,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/gm/3d.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/gm/circles.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/gm/3d.cpp
-FILE: ../../../third_party/skia/gm/bc1_transparency.cpp
-FILE: ../../../third_party/skia/gm/bicubic.cpp
-FILE: ../../../third_party/skia/gm/compressed_textures.cpp
-FILE: ../../../third_party/skia/gm/exoticformats.cpp
-FILE: ../../../third_party/skia/gm/skbug_9819.cpp
-FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
-FILE: ../../../third_party/skia/include/private/SkM44.h
-FILE: ../../../third_party/skia/modules/skottie/src/Adapter.h
-FILE: ../../../third_party/skia/modules/skottie/src/Animator.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/Animator.h
-FILE: ../../../third_party/skia/modules/skottie/src/Camera.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/Camera.h
-FILE: ../../../third_party/skia/modules/skottie/src/Path.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/Transform.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/Transform.h
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/MergePaths.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Polystar.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Rectangle.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Repeater.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/RoundCorners.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/ShapeLayer.h
-FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/TrimPaths.cpp
-FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
-FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
-FILE: ../../../third_party/skia/src/core/SkCanvasMatrix.h
-FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.cpp
-FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
-FILE: ../../../third_party/skia/src/core/SkM44.cpp
-FILE: ../../../third_party/skia/src/gpu/GrEagerVertexAllocator.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathParser.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathParser.h
+FILE: ../../../third_party/skia/gm/circles.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2020 Google Inc.
+Copyright 2012 Intel Inc.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -5679,11 +5645,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/gm/circles.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/gm/verifiers/gmverifier.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/gm/circles.cpp
+FILE: ../../../third_party/skia/gm/3d.cpp
+FILE: ../../../third_party/skia/gm/bc1_transparency.cpp
+FILE: ../../../third_party/skia/gm/bicubic.cpp
+FILE: ../../../third_party/skia/gm/compressed_textures.cpp
+FILE: ../../../third_party/skia/gm/exoticformats.cpp
+FILE: ../../../third_party/skia/gm/skbug_9819.cpp
+FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
+FILE: ../../../third_party/skia/gm/verifiers/gmverifier.cpp
+FILE: ../../../third_party/skia/gm/verifiers/gmverifier.h
+FILE: ../../../third_party/skia/include/private/SkM44.h
+FILE: ../../../third_party/skia/modules/skottie/src/Adapter.h
+FILE: ../../../third_party/skia/modules/skottie/src/Animator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/Animator.h
+FILE: ../../../third_party/skia/modules/skottie/src/Camera.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/Camera.h
+FILE: ../../../third_party/skia/modules/skottie/src/Path.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/Transform.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/Transform.h
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/MergePaths.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Polystar.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Rectangle.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Repeater.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/RoundCorners.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/ShapeLayer.h
+FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/TrimPaths.cpp
+FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
+FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
+FILE: ../../../third_party/skia/src/core/SkCanvasMatrix.h
+FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.cpp
+FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
+FILE: ../../../third_party/skia/src/core/SkM44.cpp
+FILE: ../../../third_party/skia/src/gpu/GrEagerVertexAllocator.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathParser.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathParser.h
 ----------------------------------------------------------------------------------------------------
-Copyright 2012 Intel Inc.
+Copyright 2020 Google Inc.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
