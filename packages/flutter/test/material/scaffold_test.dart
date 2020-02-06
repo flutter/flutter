@@ -536,8 +536,16 @@ void main() {
       expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin * 0.75 + book_end * 0.25));
       expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin * 0.75 + camera_end * 0.25 + const Offset(0.0, -37.5)));
 
+      // A custom function is used here because `tester.getSize` gives Size(56.0, 56.0)
+      // for both `find.widgetWithIcon(FloatingActionButton, Icons.android)`
+      // and `find.widgetWithIcon(FloatingActionButton, Icons.book)`,
+      // while the former is visibly smaller due to the scaling animation.
+
       double getWidth(IconData icon) {
-        return (tester.getTopRight(find.widgetWithIcon(FloatingActionButton, icon)) - tester.getTopLeft(find.widgetWithIcon(FloatingActionButton, icon))).dx;
+        final Finder finder = find.widgetWithIcon(FloatingActionButton, icon);
+        final Offset topRight = tester.getTopRight(finder);
+        final Offset topLeft = tester.getTopLeft(finder);
+        return (topRight - topLeft).dx;
       }
 
       expect(getWidth(Icons.android), moreOrLessEquals(44.9, epsilon: 0.1));
