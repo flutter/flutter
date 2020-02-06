@@ -187,7 +187,7 @@ class DebugUniveralFramework extends Target {
     final RunResult iphoneResult = await createStubAppFramework(
       iphoneFile,
       SdkType.iPhone,
-      // Only include 32bit if it is contained in the active arches.
+      // Only include 32bit if it is contained in the active architectures.
       include32Bit: iosArchs.contains(DarwinArch.armv7)
     );
     final RunResult simulatorResult = await createStubAppFramework(
