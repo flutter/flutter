@@ -135,7 +135,8 @@ TEST_F(ShellTest,
             [task_runners = shell.GetTaskRunners()]() {
               return static_cast<std::unique_ptr<VsyncWaiter>>(
                   std::make_unique<VsyncWaiterFallback>(task_runners));
-            });
+            },
+            ShellTestPlatformView::BackendType::kDefaultBackend);
       },
       [](Shell& shell) {
         return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());
