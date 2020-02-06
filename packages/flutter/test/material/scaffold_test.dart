@@ -249,7 +249,10 @@ void main() {
     const double _dockedOffsetY = 544.0;
     const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 
-    Widget buildLinearAnimatorScaffold(List<FloatingActionButtonLocation> locations) {
+    Widget buildLinearAnimatorScaffold(
+      List<FloatingActionButtonLocation> locations,
+      [List<FloatingActionButtonAnimator> animators,]
+    ) {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(
@@ -272,7 +275,7 @@ void main() {
             child: Icon(Icons.android),
           ),
           floatingActionButtonLocation: locations[0],
-          floatingActionButtonAnimator: _LinearMovementFabAnimator(),
+          floatingActionButtonAnimator: animators != null ? animators[0] : _LinearMovementFabAnimator(),
           additionalFloatingActionButtonConfigurations: <Key, FloatingActionButtonConfiguration>{
             const ValueKey<String>('fab2') : FloatingActionButtonConfiguration(
               button: FloatingActionButton(
@@ -280,7 +283,7 @@ void main() {
                 child: const Icon(Icons.book),
               ),
               location: locations[1],
-              animator: _LinearMovementFabAnimator(),
+              animator: animators != null ? animators[1] : _LinearMovementFabAnimator(),
             ),
             const ValueKey<String>('fab3') : FloatingActionButtonConfiguration(
               button: FloatingActionButton(
@@ -288,7 +291,7 @@ void main() {
                 child: const Icon(Icons.camera),
               ),
               location: locations[2],
-              animator: _LinearMovementFabAnimator(),
+              animator: animators != null ? animators[2] : _LinearMovementFabAnimator(),
             ),
           },
         ),
