@@ -959,7 +959,7 @@ class FloatingActionButtonConfiguration {
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text(widget.title),
+///       title: Text('Flutter Demo'),
 ///     ),
 ///     body: Center(
 ///       child: RaisedButton(
@@ -976,8 +976,9 @@ class FloatingActionButtonConfiguration {
 ///       onPressed: () {print('add');},
 ///       tooltip: 'Increment',
 ///       child: Icon(Icons.add),
+///       backgroundColor: Colors.blue,
 ///     ),
-///     floatingActionButtonLocation: _Locations[(_location+0)%6],
+///     floatingActionButtonLocation: _Locations[(_location + 0)%6],
 ///     additionalFloatingActionButtonConfigurations: {
 ///       ValueKey('beach_access_button'): FloatingActionButtonConfiguration(
 ///         button: FloatingActionButton(
