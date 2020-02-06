@@ -88,11 +88,10 @@ Future<T> runInContext<T>(
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => Config(
-        file: globals.fs.file(globals.fs.path.join(
-          globals.fsUtils.userHomePath,
-          Config.kFlutterSettings,
-        )),
+        Config.kFlutterSettings,
+        fileSystem: globals.fs,
         logger: globals.logger,
+        platform: globals.platform,
       ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
@@ -137,7 +136,11 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         processManager: globals.processManager,
       ),
-      PersistentToolState: () => PersistentToolState(),
+      PersistentToolState: () => PersistentToolState(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       ProcessInfo: () => ProcessInfo(),
       ProcessUtils: () => ProcessUtils(
         processManager: globals.processManager,

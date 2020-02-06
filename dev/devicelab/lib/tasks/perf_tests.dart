@@ -422,6 +422,7 @@ class CompileTest {
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        options.add('--tree-shake-icons');
         watch.start();
         await flutter('build', options: options);
         watch.stop();

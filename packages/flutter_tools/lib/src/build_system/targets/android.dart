@@ -12,6 +12,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 /// Prepares the asset bundle in the format expected by flutter.gradle.
 ///
@@ -25,6 +26,7 @@ abstract class AndroidAssetBundle extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
@@ -202,6 +204,7 @@ class AndroidAot extends AotElfBase {
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
     final Directory output = environment.buildDir.childDirectory(_androidAbiName);
+    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');
     }
@@ -219,6 +222,7 @@ class AndroidAot extends AotElfBase {
       outputPath: output.path,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
+      splitDebugInfo: splitDebugInfo,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
