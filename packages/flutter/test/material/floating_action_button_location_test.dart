@@ -605,7 +605,7 @@ Widget _singleFABScaffold(
           title: const Text('FloatingActionButtonLocation Test.'),
         ),
         bottomNavigationBar: BottomNavigationBar(
-          items: [
+          items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               title: const Text('Home'),

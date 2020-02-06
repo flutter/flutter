@@ -241,13 +241,10 @@ void main() {
     const double _leftOffsetX = 44.0;
     const double _centerOffsetX = 400.0;
     const double _rightOffsetX = 756.0;
-    const double _miniLeftOffsetX = _leftOffsetX - kMiniButtonOffsetAdjustment;
-    const double _miniRightOffsetX = _rightOffsetX + kMiniButtonOffsetAdjustment;
 
     const double _topOffsetY = 56.0;
     const double _floatOffsetY = 500.0;
     const double _dockedOffsetY = 544.0;
-    const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 
     Widget buildScaffold(
       List<FloatingActionButtonLocation> locations,
@@ -259,7 +256,7 @@ void main() {
             title: const Text('FloatingActionButtonLocation Test.'),
           ),
           bottomNavigationBar: BottomNavigationBar(
-            items: [
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
                 title: const Text('Home'),
@@ -306,7 +303,7 @@ void main() {
               title: const Text('FloatingActionButtonLocation Test.'),
             ),
             bottomNavigationBar: BottomNavigationBar(
-              items: [
+              items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
                   title: const Text('Home'),
