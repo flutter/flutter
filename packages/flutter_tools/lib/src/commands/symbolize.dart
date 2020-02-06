@@ -120,7 +120,6 @@ class SymbolizeCommand extends FlutterCommand {
 
 /// A service which decodes stack traces from Dart applications.
 class DwarfSymbolicationService {
-
   const DwarfSymbolicationService();
 
   /// Decode a stack trace from [input] and place the results in [output].
