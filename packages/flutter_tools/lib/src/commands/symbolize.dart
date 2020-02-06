@@ -60,7 +60,7 @@ class SymbolizeCommand extends FlutterCommand {
   String get description => 'symbolicate a stack trace from an AOT compiled flutter application.';
 
   @override
-  String get name => 'symbolicate';
+  String get name => 'symbolize';
 
   @override
   bool get shouldUpdateCache => false;
