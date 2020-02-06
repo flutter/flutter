@@ -5,10 +5,8 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
-String get cacheDirectory {
-  final String flutterRepoRoot = path.normalize(path.join(path.dirname(Platform.script.path), '..', '..'));
-  return path.normalize(path.join(flutterRepoRoot, 'bin', 'cache'));
-}
+String get repoRoot => path.normalize(path.join(path.dirname(Platform.script.path), '..', '..'));
+String get cacheDirectory => path.normalize(path.join(repoRoot, 'bin', 'cache'));
 
 bool isBinary(String filePath) {
   final ProcessResult result = Process.runSync(
@@ -37,8 +35,40 @@ List<String> findBinaryPaths() {
   return allFiles.where(isBinary).toList();
 }
 
+String readStamp(String filePath) {
+  final File file = File(filePath);
+  if (!file.existsSync()) {
+    throw 'Error! Stamp file $filePath does not exist!';
+  }
+  return file.readAsStringSync().trim();
+}
+
+bool checkCacheIsCurrent() {
+  try {
+    final String dartSdkStamp = readStamp(path.join(cacheDirectory, 'engine-dart-sdk.stamp'));
+    final String engineVersion = readStamp(path.join(repoRoot, 'bin', 'internal', 'engine.version'));
+    return dartSdkStamp == engineVersion;
+  } catch (e) {
+    print(e);
+    return false;
+  }
+}
+
 void main() {
   final List<String> failures = <String>[];
+
+  if (!Platform.isMacOS) {
+    print('Warning! This script only works on macOS, as it requires Xcode.');
+    exit(1);
+  }
+
+  if (!checkCacheIsCurrent()) {
+    print(
+      'Warning! Your cache is either not present or not matching your flutter\n'
+      'version. Run a `flutter` command to update your cache, and re-try this\n'
+      'test.');
+    exit(1);
+  }
 
   for (final String binaryPath in findBinaryPaths()) {
     print('Verifying the code signature of $binaryPath');
