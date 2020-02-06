@@ -47,4 +47,17 @@ FLUTTER_ASSERT_ARC
             }]);
 }
 
+- (void)testNotifyPluginOfDealloc {
+  id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
+  OCMStub([plugin detachFromEngineForRegistrar:[OCMArg any]]);
+  {
+    id project = OCMClassMock([FlutterDartProject class]);
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"engine" project:project];
+    NSObject<FlutterPluginRegistrar>* registrar = [engine registrarForPlugin:@"plugin"];
+    [registrar publish:plugin];
+    engine = nil;
+  }
+  OCMVerify([plugin detachFromEngineForRegistrar:[OCMArg any]]);
+}
+
 @end

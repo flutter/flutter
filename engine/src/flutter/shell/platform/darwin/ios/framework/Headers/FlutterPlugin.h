@@ -223,6 +223,19 @@ typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>*
  * @param result A callback for submitting the result of the call.
  */
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
+@optional
+/**
+ * Called when a plugin is being removed from a `FlutterEngine`, which is
+ * usually the result of the `FlutterEngine` being deallocated.  This method
+ * provides the opportunity to do necessary cleanup.
+ *
+ * You will only receive this method if you registered your plugin instance with
+ * the `FlutterEngine` via `-[FlutterPluginRegistry publish:]`.
+ *
+ * @param registrar The registrar that was used to publish the plugin.
+ *
+ */
+- (void)detachFromEngineForRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar;
 @end
 
 #pragma mark -
