@@ -1052,9 +1052,6 @@ abstract class ResidentRunner {
       commandHelp.P.print();
       commandHelp.a.print();
     }
-    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
-      commandHelp.s.print();
-    }
   }
 
   /// Called when a signal has requested we exit.
@@ -1062,6 +1059,9 @@ abstract class ResidentRunner {
 
   /// Called right before we exit.
   Future<void> cleanupAtFinish();
+
+  // Clears the screen.
+  void clearScreen() => globals.logger.clear();
 }
 
 class OperationResult {
@@ -1167,6 +1167,9 @@ class TerminalHandler {
           return true;
         }
         return false;
+      case 'c':
+        residentRunner.clearScreen();
+        return true;
       case 'd':
       case 'D':
         await residentRunner.detach();
