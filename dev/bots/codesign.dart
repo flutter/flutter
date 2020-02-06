@@ -8,6 +8,7 @@ import 'package:path/path.dart' as path;
 String get repoRoot => path.normalize(path.join(path.dirname(Platform.script.path), '..', '..'));
 String get cacheDirectory => path.normalize(path.join(repoRoot, 'bin', 'cache'));
 
+/// Check mime-type of file at [filePath] to determine if it is binary
 bool isBinary(String filePath) {
   final ProcessResult result = Process.runSync(
     'file',
@@ -20,11 +21,12 @@ bool isBinary(String filePath) {
   return (result.stdout as String).contains('application/x-mach-binary');
 }
 
-List<String> findBinaryPaths() {
+/// Find every binary file in the given [rootDirectory]
+List<String> findBinaryPaths([String rootDirectory]) {
   final ProcessResult result = Process.runSync(
     'find',
     <String>[
-      cacheDirectory,
+      rootDirectory,
       '-type',
       'f',
       '-perm',
@@ -35,6 +37,9 @@ List<String> findBinaryPaths() {
   return allFiles.where(isBinary).toList();
 }
 
+/// Given the path to a stamp file, read the contents.
+///
+/// Will throw if the file doesn't exist.
 String readStamp(String filePath) {
   final File file = File(filePath);
   if (!file.existsSync()) {
@@ -43,6 +48,7 @@ String readStamp(String filePath) {
   return file.readAsStringSync().trim();
 }
 
+/// Return whether or not the flutter cache is up to date.
 bool checkCacheIsCurrent() {
   try {
     final String dartSdkStamp = readStamp(path.join(cacheDirectory, 'engine-dart-sdk.stamp'));
@@ -70,7 +76,7 @@ void main() {
     exit(1);
   }
 
-  for (final String binaryPath in findBinaryPaths()) {
+  for (final String binaryPath in findBinaryPaths(cacheDirectory)) {
     print('Verifying the code signature of $binaryPath');
     final ProcessResult result = Process.runSync(
       'codesign',
