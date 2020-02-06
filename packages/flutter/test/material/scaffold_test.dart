@@ -269,7 +269,7 @@ void main() {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {},
-            child: Icon(Icons.beach_access),
+            child: Icon(Icons.android),
           ),
           floatingActionButtonLocation: locations[0],
           floatingActionButtonAnimator: _LinearMovementFabAnimator(),
@@ -277,7 +277,7 @@ void main() {
             const ValueKey<String>('fab2') : FloatingActionButtonConfiguration(
               button: FloatingActionButton(
                 onPressed: () {},
-                child: const Icon(Icons.golf_course),
+                child: const Icon(Icons.book),
               ),
               location: locations[1],
               animator: _LinearMovementFabAnimator(),
@@ -285,7 +285,7 @@ void main() {
             const ValueKey<String>('fab3') : FloatingActionButtonConfiguration(
               button: FloatingActionButton(
                 onPressed: () {},
-                child: const Icon(Icons.android),
+                child: const Icon(Icons.camera),
               ),
               location: locations[2],
               animator: _LinearMovementFabAnimator(),
@@ -379,9 +379,9 @@ void main() {
         FloatingActionButtonLocation.startTop,
       ]));
 
-      const Offset beach_access_begin = Offset(_rightOffsetX, _floatOffsetY);
-      const Offset golf_course_begin = Offset(_centerOffsetX, _dockedOffsetY);
-      const Offset android_begin = Offset(_leftOffsetX, _topOffsetY);
+      const Offset android_begin = Offset(_rightOffsetX, _floatOffsetY);
+      const Offset book_begin = Offset(_centerOffsetX, _dockedOffsetY);
+      const Offset camera_begin = Offset(_leftOffsetX, _topOffsetY);
 
       expect(find.byType(FloatingActionButton), findsNWidgets(3));
 
@@ -391,47 +391,47 @@ void main() {
         FloatingActionButtonLocation.centerFloat,
       ]));
 
-      const Offset beach_access_end = Offset(_leftOffsetX, _dockedOffsetY);
-      const Offset golf_course_end = Offset(_rightOffsetX, _topOffsetY);
-      const Offset android_end = Offset(_centerOffsetX, _floatOffsetY);
+      const Offset android_end = Offset(_leftOffsetX, _dockedOffsetY);
+      const Offset book_end = Offset(_rightOffsetX, _topOffsetY);
+      const Offset camera_end = Offset(_centerOffsetX, _floatOffsetY);
 
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
       await tester.pump(kFloatingActionButtonSegue * 0.5);
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_begin * 0.75 + beach_access_end * 0.25));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin * 0.75 + golf_course_end * 0.25));
       expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin * 0.75 + android_end * 0.25));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin * 0.75 + book_end * 0.25));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin * 0.75 + camera_end * 0.25));
 
       await tester.pump(kFloatingActionButtonSegue * 0.5);
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_begin * 0.5 + beach_access_end * 0.5));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin * 0.5 + golf_course_end * 0.5));
       expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin * 0.5 + android_end * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin * 0.5 + book_end * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin * 0.5 + camera_end * 0.5));
 
       await tester.pump(kFloatingActionButtonSegue * 0.5);
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_begin * 0.25 + beach_access_end * 0.75));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin * 0.25 + golf_course_end * 0.75));
       expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin * 0.25 + android_end * 0.75));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin * 0.25 + book_end * 0.75));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin * 0.25 + camera_end * 0.75));
 
       await tester.pumpAndSettle();
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_end));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_end));
       expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_end));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_end));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_end));
 
       expect(tester.binding.transientCallbackCount, 0);
     });
 
     testWidgets('Custom animator, different times', (WidgetTester tester) async {
-      const Offset beach_access_begin = Offset(_leftOffsetX, _topOffsetY);
-      const Offset golf_course_begin = Offset(_leftOffsetX, _floatOffsetY);
-      const Offset android_begin = Offset(_leftOffsetX, _dockedOffsetY);
+      const Offset android_begin = Offset(_leftOffsetX, _topOffsetY);
+      const Offset book_begin = Offset(_leftOffsetX, _floatOffsetY);
+      const Offset camera_begin = Offset(_leftOffsetX, _dockedOffsetY);
 
-      const Offset beach_access_end = Offset(_rightOffsetX, _topOffsetY);
-      const Offset golf_course_end = Offset(_rightOffsetX, _floatOffsetY);
-      const Offset android_end = Offset(_rightOffsetX, _dockedOffsetY);
+      const Offset android_end = Offset(_rightOffsetX, _topOffsetY);
+      const Offset book_end = Offset(_rightOffsetX, _floatOffsetY);
+      const Offset camera_end = Offset(_rightOffsetX, _dockedOffsetY);
 
       await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.startTop,
@@ -451,9 +451,9 @@ void main() {
 
       await tester.pump(kFloatingActionButtonSegue);
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_begin * 0.5 + beach_access_end * 0.5));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin));
-      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin * 0.5 + android_end * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin));
 
       await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.endTop,
@@ -463,9 +463,9 @@ void main() {
 
       await tester.pump(kFloatingActionButtonSegue);
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_end));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin * 0.5 + golf_course_end * 0.5));
-      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_end));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin * 0.5 + book_end * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin));
 
       await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.endTop,
@@ -475,15 +475,15 @@ void main() {
 
       await tester.pump(kFloatingActionButtonSegue);
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_end));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_end));
-      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin * 0.5 + android_end * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_end));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_end));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin * 0.5 + camera_end * 0.5));
 
       await tester.pumpAndSettle();
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_end));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_end));
       expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_end));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_end));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_end));
 
       expect(tester.binding.transientCallbackCount, 0);
     });
