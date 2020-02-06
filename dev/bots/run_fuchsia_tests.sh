@@ -75,4 +75,4 @@ find $flutter_dir -name ".packages" | xargs rm
 cd $flutter_dir/dev/benchmarks/test_apps/stocks/
 
 $flutter_bin pub get
-$flutter_bin drive -v --target=test_driver/stock_view.dart
+$flutter_bin drive -v -d $device_name --target=test_driver/stock_view.dart
