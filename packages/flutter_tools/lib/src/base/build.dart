@@ -94,6 +94,7 @@ class AOTSnapshotter {
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
+    @required String splitDebugInfo,
     bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
@@ -157,11 +158,25 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--no-use-integer-division');
     }
 
+    // The name of the debug file must contain additonal information about
+    // the architecture, since a single build command may produce
+    // multiple debug files.
+    final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
+    final String debugFilename = 'app.$archName.symbols';
+    if (splitDebugInfo != null) {
+      globals.fs.directory(splitDebugInfo)
+        .createSync(recursive: true);
+    }
+
     // Optimization arguments.
     genSnapshotArgs.addAll(<String>[
       // Faster async/await
       '--no-causal-async-stacks',
       '--lazy-async-stacks',
+      if (splitDebugInfo != null) ...<String>[
+        '--dwarf-stack-traces',
+        '--save-debugging-info=${globals.fs.path.join(splitDebugInfo, debugFilename)}'
+      ]
     ]);
 
     genSnapshotArgs.add(mainPath);

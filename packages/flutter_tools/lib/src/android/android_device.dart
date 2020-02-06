@@ -582,6 +582,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'trace-skia', 'true'],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
+      if (debuggingOptions.endlessTraceBuffer)
+        ...<String>['--ez', 'endless-trace-buffer', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
       if (debuggingOptions.cacheSkSL)

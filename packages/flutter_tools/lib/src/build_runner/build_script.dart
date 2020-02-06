@@ -268,7 +268,6 @@ import 'dart:js';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
-import 'package:test_api/src/util/stack_trace_mapper.dart'; // ignore: implementation_imports
 import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
 import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
 
@@ -289,12 +288,7 @@ Future<void> main() async {
 }
 
 void internalBootstrapBrowserTest(Function getMain()) {
-  var channel =
-      serializeSuite(getMain, hidePrints: false, beforeLoad: () async {
-    var serialized =
-        await suiteChannel("test.browser.mapper").stream.first as Map;
-    if (serialized == null) return;
-  });
+  var channel = serializeSuite(getMain, hidePrints: false);
   postMessageChannel().pipe(channel);
 }
 StreamChannel serializeSuite(Function getMain(),
@@ -334,16 +328,6 @@ StreamChannel postMessageChannel() {
     window.location.origin,
   ]);
   return controller.foreign;
-}
-
-void setStackTraceMapper(StackTraceMapper mapper) {
-  var formatter = StackTraceFormatter.current;
-  if (formatter == null) {
-    throw StateError(
-        'setStackTraceMapper() may only be called within a test worker.');
-  }
-
-  formatter.configure(mapper: mapper);
 }
 ''');
     }

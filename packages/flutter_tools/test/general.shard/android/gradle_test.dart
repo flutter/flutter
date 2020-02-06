@@ -98,33 +98,33 @@ void main() {
   group('gradle tasks', () {
     test('assemble release', () {
       expect(
-        getAssembleTaskFor(const BuildInfo(BuildMode.release, null)),
+        getAssembleTaskFor(const BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         equals('assembleRelease'),
       );
       expect(
-        getAssembleTaskFor(const BuildInfo(BuildMode.release, 'flavorFoo')),
+        getAssembleTaskFor(const BuildInfo(BuildMode.release, 'flavorFoo', treeShakeIcons: false)),
         equals('assembleFlavorFooRelease'),
       );
     });
 
     test('assemble debug', () {
       expect(
-        getAssembleTaskFor(const BuildInfo(BuildMode.debug, null)),
+        getAssembleTaskFor(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
         equals('assembleDebug'),
       );
       expect(
-        getAssembleTaskFor(const BuildInfo(BuildMode.debug, 'flavorFoo')),
+        getAssembleTaskFor(const BuildInfo(BuildMode.debug, 'flavorFoo', treeShakeIcons: false)),
         equals('assembleFlavorFooDebug'),
       );
     });
 
     test('assemble profile', () {
       expect(
-        getAssembleTaskFor(const BuildInfo(BuildMode.profile, null)),
+        getAssembleTaskFor(const BuildInfo(BuildMode.profile, null, treeShakeIcons: false)),
         equals('assembleProfile'),
       );
       expect(
-        getAssembleTaskFor(const BuildInfo(BuildMode.profile, 'flavorFoo')),
+        getAssembleTaskFor(const BuildInfo(BuildMode.profile, 'flavorFoo', treeShakeIcons: false)),
         equals('assembleFlavorFooProfile'),
       );
     });
@@ -135,7 +135,7 @@ void main() {
 
     testUsingContext('Finds app bundle when flavor contains underscores in release mode', () {
       final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar'));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app.aab'));
     }, overrides: <Type, Generator>{
@@ -145,7 +145,7 @@ void main() {
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in release mode', () {
       final FlutterProject project = generateFakeAppBundle('fooRelease', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo'));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooRelease', 'app.aab'));
     }, overrides: <Type, Generator>{
@@ -155,7 +155,7 @@ void main() {
 
     testUsingContext('Finds app bundle when no flavor is used in release mode', () {
       final FlutterProject project = generateFakeAppBundle('release', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, null));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app.aab'));
     }, overrides: <Type, Generator>{
@@ -165,7 +165,7 @@ void main() {
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode', () {
       final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar'));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barDebug', 'app.aab'));
     }, overrides: <Type, Generator>{
@@ -175,7 +175,7 @@ void main() {
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in debug mode', () {
       final FlutterProject project = generateFakeAppBundle('fooDebug', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo'));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooDebug', 'app.aab'));
     }, overrides: <Type, Generator>{
@@ -185,7 +185,7 @@ void main() {
 
     testUsingContext('Finds app bundle when no flavor is used in debug mode', () {
       final FlutterProject project = generateFakeAppBundle('debug', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app.aab'));
     }, overrides: <Type, Generator>{
@@ -195,7 +195,7 @@ void main() {
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode', () {
       final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_bar'));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app.aab'));
     }, overrides: <Type, Generator>{
@@ -205,7 +205,7 @@ void main() {
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in profile mode', () {
       final FlutterProject project = generateFakeAppBundle('fooProfile', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo'));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooProfile', 'app.aab'));
     }, overrides: <Type, Generator>{
@@ -215,7 +215,7 @@ void main() {
 
     testUsingContext('Finds app bundle when no flavor is used in profile mode', () {
       final FlutterProject project = generateFakeAppBundle('profile', 'app.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, null));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app.aab'));
     }, overrides: <Type, Generator>{
@@ -225,7 +225,7 @@ void main() {
 
     testUsingContext('Finds app bundle in release mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('release', 'app-release.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, null));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app-release.aab'));
     }, overrides: <Type, Generator>{
@@ -235,7 +235,7 @@ void main() {
 
     testUsingContext('Finds app bundle in profile mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('profile', 'app-profile.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, null));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app-profile.aab'));
     }, overrides: <Type, Generator>{
@@ -245,7 +245,7 @@ void main() {
 
     testUsingContext('Finds app bundle in debug mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('debug', 'app-debug.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null, treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app-debug.aab'));
     }, overrides: <Type, Generator>{
@@ -255,7 +255,7 @@ void main() {
 
     testUsingContext('Finds app bundle when flavor contains underscores in release mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar'));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app-foo_bar-release.aab'));
     }, overrides: <Type, Generator>{
@@ -265,7 +265,7 @@ void main() {
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app-foo_bar-profile.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_bar'));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app-foo_bar-profile.aab'));
     }, overrides: <Type, Generator>{
@@ -275,7 +275,7 @@ void main() {
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode - Gradle 3.5', () {
       final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app-foo_bar-debug.aab');
-      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar'));
+      final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false));
       expect(bundle, isNotNull);
       expect(bundle.path, globals.fs.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
     }, overrides: <Type, Generator>{
@@ -287,7 +287,7 @@ void main() {
       final FlutterProject project = FlutterProject.current();
       expect(
         () {
-          findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar'));
+          findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false));
         },
         throwsToolExit(
           message:
@@ -329,7 +329,7 @@ void main() {
 
       final Iterable<File> apks = findApkFiles(
         project,
-        const AndroidBuildInfo(BuildInfo(BuildMode.release, '')),
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, '', treeShakeIcons: false)),
       );
       expect(apks.isNotEmpty, isTrue);
       expect(apks.first.path, equals(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release', 'app-release.apk')));
@@ -352,7 +352,7 @@ void main() {
 
       final Iterable<File> apks = findApkFiles(
         project,
-        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1')),
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false)),
       );
       expect(apks.isNotEmpty, isTrue);
       expect(apks.first.path, equals(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release', 'app-flavor1-release.apk')));
@@ -375,7 +375,7 @@ void main() {
 
       final Iterable<File> apks = findApkFiles(
         project,
-        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1')),
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false)),
       );
       expect(apks.isNotEmpty, isTrue);
       expect(apks.first.path, equals(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'flavor1', 'release', 'app-flavor1-release.apk')));
@@ -390,7 +390,7 @@ void main() {
         () {
           findApkFiles(
             project,
-            const AndroidBuildInfo(BuildInfo(BuildMode.debug, 'foo_bar')),
+            const AndroidBuildInfo(BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false)),
           );
         },
         throwsToolExit(
@@ -604,7 +604,7 @@ dependencies:
 flutter:
 ''';
 
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -622,7 +622,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -640,7 +640,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -658,7 +658,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: '3');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -676,7 +676,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -694,7 +694,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -711,7 +711,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -730,19 +730,19 @@ flutter:
 ''';
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null, treeShakeIcons: false),
         expectedBuildName: null,
         expectedBuildNumber: null,
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3'),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3', treeShakeIcons: false),
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: '4'),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: '4', treeShakeIcons: false),
         expectedBuildName: '1.0.3',
         expectedBuildNumber: '4',
       );
@@ -756,7 +756,7 @@ flutter:
       // Values get unset.
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null, treeShakeIcons: false),
         expectedBuildName: null,
         expectedBuildNumber: null,
       );
@@ -1125,6 +1125,7 @@ plugin1=${plugin1.path}
             BuildInfo(
               BuildMode.release,
               null,
+              treeShakeIcons: false,
             ),
           ),
           target: 'lib/main.dart',
@@ -1204,6 +1205,7 @@ plugin1=${plugin1.path}
             BuildInfo(
               BuildMode.release,
               null,
+              treeShakeIcons: false,
             ),
           ),
           target: 'lib/main.dart',
@@ -1279,6 +1281,7 @@ plugin1=${plugin1.path}
             BuildInfo(
               BuildMode.release,
               null,
+              treeShakeIcons: false,
             ),
           ),
           target: 'lib/main.dart',
@@ -1351,6 +1354,7 @@ plugin1=${plugin1.path}
             BuildInfo(
               BuildMode.release,
               null,
+              treeShakeIcons: false,
             ),
           ),
           target: 'lib/main.dart',
@@ -1418,6 +1422,7 @@ plugin1=${plugin1.path}
           BuildInfo(
             BuildMode.release,
             null,
+            treeShakeIcons: false,
           ),
         ),
         target: 'lib/main.dart',
@@ -1491,6 +1496,7 @@ plugin1=${plugin1.path}
             BuildInfo(
               BuildMode.release,
               null,
+              treeShakeIcons: false,
             ),
           ),
           target: 'lib/main.dart',
@@ -1582,6 +1588,7 @@ plugin1=${plugin1.path}
           BuildInfo(
             BuildMode.release,
             null,
+            treeShakeIcons: false,
           ),
         ),
         target: 'lib/main.dart',
@@ -1630,7 +1637,7 @@ plugin1=${plugin1.path}
       fileSystem.directory('build/outputs/repo').createSync(recursive: true);
 
       await buildGradleAar(
-        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
+        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.current(),
         outputDirectory: fileSystem.directory('build/'),
         target: '',
@@ -1715,6 +1722,7 @@ plugin1=${plugin1.path}
             BuildInfo(
               BuildMode.release,
               null,
+              treeShakeIcons: false,
             ),
           ),
           target: 'lib/main.dart',
@@ -1801,7 +1809,7 @@ plugin1=${plugin1.path}
       when(fileSystemUtils.copyDirectorySync(any, any)).thenReturn(null);
 
       await buildGradleAar(
-        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
+        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
         project: FlutterProject.current(),
         outputDirectory: fileSystem.directory('build/'),
         target: '',

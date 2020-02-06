@@ -376,10 +376,10 @@ class _DefaultUsage implements Usage {
         // Display the welcome message if we are not on master, and if the
         // persistent tool state instructs that we should.
         (!globals.flutterVersion.isMaster &&
-        (persistentToolState.redisplayWelcomeMessage ?? true))) {
+        (globals.persistentToolState.redisplayWelcomeMessage ?? true))) {
       _printWelcome();
       _printedWelcome = true;
-      persistentToolState.redisplayWelcomeMessage = false;
+      globals.persistentToolState.redisplayWelcomeMessage = false;
     }
   }
 }
