@@ -30,7 +30,7 @@ TEST(RasterCache, SimpleInitialization) {
 }
 
 TEST(RasterCache, ThresholdIsRespected) {
-  size_t threshold = 3;
+  size_t threshold = 2;
   flutter::RasterCache cache(threshold);
 
   SkMatrix matrix = SkMatrix::I();
@@ -40,18 +40,28 @@ TEST(RasterCache, ThresholdIsRespected) {
   sk_sp<SkImage> image;
 
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
-  ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                             false));  // 1
+  ASSERT_FALSE(
+      cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
+  // 1st access.
+  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+
   cache.SweepAfterFrame();
-  ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                             false));  // 2
+
+  ASSERT_FALSE(
+      cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
+
+  // 2st access.
+  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+
   cache.SweepAfterFrame();
-  ASSERT_TRUE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                            false));  // 3
-  cache.SweepAfterFrame();
+
+  // Now Prepare should cache it.
+  ASSERT_TRUE(
+      cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
+  ASSERT_TRUE(cache.Get(*picture, matrix).is_valid());
 }
 
-TEST(RasterCache, ThresholdIsRespectedWhenZero) {
+TEST(RasterCache, AccessThresholdOfZeroDisablesCaching) {
   size_t threshold = 0;
   flutter::RasterCache cache(threshold);
 
@@ -62,19 +72,31 @@ TEST(RasterCache, ThresholdIsRespectedWhenZero) {
   sk_sp<SkImage> image;
 
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
-  ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                             false));  // 1
-  cache.SweepAfterFrame();
-  ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                             false));  // 2
-  cache.SweepAfterFrame();
-  ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                             false));  // 3
-  cache.SweepAfterFrame();
+  ASSERT_FALSE(
+      cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
+
+  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+}
+
+TEST(RasterCache, PictureCacheLimitPerFrameIsRespectedWhenZero) {
+  size_t picture_cache_limit_per_frame = 0;
+  flutter::RasterCache cache(3, picture_cache_limit_per_frame);
+
+  SkMatrix matrix = SkMatrix::I();
+
+  auto picture = GetSamplePicture();
+
+  sk_sp<SkImage> image;
+
+  sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
+  ASSERT_FALSE(
+      cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
+
+  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
 }
 
 TEST(RasterCache, SweepsRemoveUnusedFrames) {
-  size_t threshold = 3;
+  size_t threshold = 1;
   flutter::RasterCache cache(threshold);
 
   SkMatrix matrix = SkMatrix::I();
@@ -86,19 +108,18 @@ TEST(RasterCache, SweepsRemoveUnusedFrames) {
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
                              false));  // 1
+  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+
   cache.SweepAfterFrame();
-  ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                             false));  // 2
-  cache.SweepAfterFrame();
+
   ASSERT_TRUE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                            false));  // 3
+                            false));  // 2
+  ASSERT_TRUE(cache.Get(*picture, matrix).is_valid());
+
   cache.SweepAfterFrame();
-  ASSERT_TRUE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                            false));  // 4
-  cache.SweepAfterFrame();
-  cache.SweepAfterFrame();  // Extra frame without a preroll image access.
-  ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
-                             false));  // 5
+  cache.SweepAfterFrame();  // Extra frame without a Get image access.
+
+  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
 }
 
 }  // namespace testing
