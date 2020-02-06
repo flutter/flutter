@@ -424,7 +424,7 @@ void main() {
       expect(tester.binding.transientCallbackCount, 0);
     });
 
-    testWidgets('Custom animator, different times', (WidgetTester tester) async {
+    testWidgets('Custom animator, different floating action buttons move independently', (WidgetTester tester) async {
       const Offset android_begin = Offset(_leftOffsetX, _topOffsetY);
       const Offset book_begin = Offset(_leftOffsetX, _floatOffsetY);
       const Offset camera_begin = Offset(_leftOffsetX, _dockedOffsetY);
