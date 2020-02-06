@@ -411,6 +411,9 @@ abstract class ImageProvider<T> {
   /// [ImageCache].
   @protected
   void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, T key, ImageErrorListener handleError) {
+    // This is an unusual edge case where someone has told us that they found
+    // the image we want before getting to this method. We should avoid calling
+    // load again, but still update the image cache with LRU information.
     if (stream.completer != null) {
       PaintingBinding.instance.imageCache.putIfAbsent(
         key,
