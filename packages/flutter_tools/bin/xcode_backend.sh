@@ -156,7 +156,7 @@ BuildApp() {
     track_widget_creation_flag="true"
   fi
 
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
+  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
     ${verbose_flag}                                                       \
     ${flutter_engine_flag}                                                \
     ${local_engine_flag}                                                  \
