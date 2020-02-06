@@ -499,6 +499,7 @@ void main() {
   testUsingContext('FontSubset artifacts on linux', () {
     final MockCache mockCache = MockCache();
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-x64', 'linux-x64/font-subset.zip']]);
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform()..operatingSystem = 'linux',
@@ -507,6 +508,7 @@ void main() {
   testUsingContext('FontSubset artifacts on windows', () {
     final MockCache mockCache = MockCache();
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['windows-x64', 'windows-x64/font-subset.zip']]);
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform()..operatingSystem = 'windows',
@@ -515,6 +517,7 @@ void main() {
   testUsingContext('FontSubset artifacts on macos', () {
     final MockCache mockCache = MockCache();
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['darwin-x64', 'darwin-x64/font-subset.zip']]);
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform()..operatingSystem = 'macos',
@@ -523,7 +526,21 @@ void main() {
   testUsingContext('FontSubset artifacts on fuchsia', () {
     final MockCache mockCache = MockCache();
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
     expect(() => artifacts.getBinaryDirs(), throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'fuchsia',
+  });
+
+  testUsingContext('FontSubset artifacts for all platforms', () {
+    final MockCache mockCache = MockCache();
+    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(true);
+    expect(artifacts.getBinaryDirs(), <List<String>>[
+        <String>['darwin-x64', 'darwin-x64/font-subset.zip'],
+        <String>['linux-x64', 'linux-x64/font-subset.zip'],
+        <String>['windows-x64', 'windows-x64/font-subset.zip'],
+    ]);
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform()..operatingSystem = 'fuchsia',
   });

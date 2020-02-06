@@ -37,12 +37,6 @@ if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
 fi
 
-# Provide location to split debug info
-split_debug_info_option=""
-if [[ -n "$SPLIT_DEBUG_INFO" ]]; then
-  split_debug_info_option="-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
-fi
-
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
 
@@ -81,7 +75,6 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
     -dBuildMode="${build_mode}"                                             \
-    "${split_debug_info_option}"                                            \
     -dFontSubset="${icon_tree_shaker_flag}"                                 \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \

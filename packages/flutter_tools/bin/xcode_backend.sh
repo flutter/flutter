@@ -156,6 +156,11 @@ BuildApp() {
     track_widget_creation_flag="true"
   fi
 
+  icon_tree_shaker_flag="false"
+  if [[ -n "$TREE_SHAKE_ICONS" ]]; then
+    icon_tree_shaker_flag="true"
+  fi
+
   RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
     ${verbose_flag}                                                       \
     ${flutter_engine_flag}                                                \
@@ -166,6 +171,7 @@ BuildApp() {
     -dTargetFile="${target_path}"                                         \
     -dBuildMode=${build_mode}                                             \
     -dIosArchs="${ARCHS}"                                                 \
+    -dFontSubset="${icon_tree_shaker_flag}"                               \
     -dTrackWidgetCreation="${track_widget_creation_flag}"                 \
     -dEnableBitcode="${bitcode_flag}"                                     \
     "${build_mode}_ios_bundle_flutter_assets"

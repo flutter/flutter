@@ -362,6 +362,45 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => macPlatform,
       });
+
+      testUsingContext('ignores "Preparing debugger support for iPhone" error', () async {
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+
+        when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
+            .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
+
+        const String devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone",
+    "error" : {
+      "code" : -10,
+      "failureReason" : "",
+      "description" : "iPhone is busy: Preparing debugger support for iPhone",
+      "recoverySuggestion" : "Xcode will continue when iPhone is finished.",
+      "domain" : "com.apple.platform.iphoneos"
+    }
+  }
+]
+''';
+
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+            .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
+        final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
+        expect(devices, hasLength(1));
+        expect(devices[0].id, '43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7');
+      }, overrides: <Type, Generator>{
+        Platform: () => macPlatform,
+      });
     });
 
     group('diagnostics', () {
@@ -473,7 +512,6 @@ void main() {
     "modelName" : "iPhone 6s",
     "name" : "iPhone",
     "error" : {
-      "code" : -9,
       "failureReason" : "",
       "description" : "iPhone is not paired with your computer",
       "domain" : "com.apple.platform.iphoneos"
@@ -494,6 +532,25 @@ void main() {
       "failureReason" : "",
       "domain" : "com.apple.platform.iphoneos"
     }
+  },
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : false,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "43ad2fda7991b34fe1acbda82f9e2fd3d6ddc9f7",
+    "architecture" : "arm64",
+    "modelName" : "iPhone 6s",
+    "name" : "iPhone",
+    "error" : {
+      "code" : -10,
+      "failureReason" : "",
+      "description" : "iPhone is busy: Preparing debugger support for iPhone",
+      "recoverySuggestion" : "Xcode will continue when iPhone is finished.",
+      "domain" : "com.apple.platform.iphoneos"
+    }
   }
 ]
 ''';
@@ -501,10 +558,11 @@ void main() {
         when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<String> errors = await xcdevice.getDiagnostics();
-        expect(errors, hasLength(3));
+        expect(errors, hasLength(4));
         expect(errors[0], 'Error: iPhone is not paired with your computer. To use iPhone with Xcode, unlock it and choose to trust this computer when prompted. (code -9)');
-        expect(errors[1], 'Error: iPhone is not paired with your computer. (code -9)');
+        expect(errors[1], 'Error: iPhone is not paired with your computer.');
         expect(errors[2], 'Error: Xcode pairing error. (code -13)');
+        expect(errors[3], 'Error: iPhone is busy: Preparing debugger support for iPhone. Xcode will continue when iPhone is finished. (code -10)');
       }, overrides: <Type, Generator>{
         Platform: () => macPlatform,
       });
