@@ -373,7 +373,7 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(build([
+      await tester.pumpWidget(build(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.endFloat,
         FloatingActionButtonLocation.centerDocked,
         FloatingActionButtonLocation.startTop,
@@ -385,7 +385,7 @@ void main() {
 
       expect(find.byType(FloatingActionButton), findsNWidgets(3));
 
-      await tester.pumpWidget(build([
+      await tester.pumpWidget(build(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.startDocked,
         FloatingActionButtonLocation.endTop,
         FloatingActionButtonLocation.centerFloat,
