@@ -5,6 +5,8 @@
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import 'android/android_sdk.dart';
+import 'android/android_studio.dart';
 import 'artifacts.dart';
 import 'base/config.dart';
 import 'base/context.dart';
@@ -14,6 +16,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/terminal.dart';
+import 'base/user_messages.dart';
 import 'cache.dart';
 import 'ios/mac.dart';
 import 'macos/xcode.dart';
@@ -53,9 +56,12 @@ const Platform _kLocalPlatform = LocalPlatform();
 
 Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
-Xcode get xcode => context.get<Xcode>();
+AndroidStudio get androidStudio => context.get<AndroidStudio>();
+AndroidSdk get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
+UserMessages get userMessages => context.get<UserMessages>();
+Xcode get xcode => context.get<Xcode>();
 
 XCDevice get xcdevice => context.get<XCDevice>();
 
