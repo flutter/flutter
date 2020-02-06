@@ -937,6 +937,106 @@ class FloatingActionButtonConfiguration {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and six
+/// [FloatingActionButton]s, each in a different [FloatingActionButtonLocation].
+/// Each [FloatingActionButton] is configured using a [FloatingActionButtonConfiguration]
+/// and has a different callback.
+///
+/// ```dart
+/// int _location = 0;
+///
+/// static const List<FloatingActionButtonLocation> _Locations = [
+///   FloatingActionButtonLocation.endTop,
+///   FloatingActionButtonLocation.centerTop,
+///   FloatingActionButtonLocation.startTop,
+///   FloatingActionButtonLocation.startFloat,
+///   FloatingActionButtonLocation.centerFloat,
+///   FloatingActionButtonLocation.endFloat,
+/// ];
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text(widget.title),
+///     ),
+///     body: Center(
+///       child: RaisedButton(
+///         child: Text('Switch'),
+///         onPressed: () {
+///           setState(() {
+///             _location ++;
+///             print('Switch-button pressed.');
+///           });
+///         },
+///       ),
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () {print('add');},
+///       tooltip: 'Increment',
+///       child: Icon(Icons.add),
+///     ),
+///     floatingActionButtonLocation: _Locations[(_location+0)%6],
+///     additionalFloatingActionButtonConfigurations: {
+///       ValueKey('beach_access_button'): FloatingActionButtonConfiguration(
+///         button: FloatingActionButton(
+///           onPressed: () {
+///             print('beach_access');
+///           },
+///           child: Icon(Icons.beach_access),
+///           backgroundColor: Colors.yellow,
+///           foregroundColor: Colors.black,
+///         ),
+///         location: _Locations[(_location + 1) % 6],
+///       ),
+///       ValueKey('android_button'): FloatingActionButtonConfiguration(
+///         button: FloatingActionButton(
+///           onPressed: () {
+///             print('android');
+///           },
+///           child: Icon(Icons.android),
+///           backgroundColor: Colors.green,
+///         ),
+///         location: _Locations[(_location + 2) % 6],
+///       ),
+///       ValueKey('category_button'): FloatingActionButtonConfiguration(
+///         button: FloatingActionButton(
+///           onPressed: () {
+///             print('category');
+///           },
+///           child: Icon(Icons.category),
+///           backgroundColor: Colors.red,
+///         ),
+///         location: _Locations[(_location + 3) % 6],
+///       ),
+///       ValueKey('camera_button'): FloatingActionButtonConfiguration(
+///         button: FloatingActionButton(
+///           onPressed: () {
+///             print('camera');
+///           },
+///           child: Icon(Icons.camera),
+///           backgroundColor: Colors.white,
+///           foregroundColor: Colors.black,
+///         ),
+///         location: _Locations[(_location + 4) % 6],
+///       ),
+///       ValueKey('satellite_button'): FloatingActionButtonConfiguration(
+///         button: FloatingActionButton(
+///           onPressed: () {
+///             print('satellite');
+///           },
+///           child: Icon(Icons.satellite),
+///           backgroundColor: Colors.orange,
+///         ),
+///         location: _Locations[(_location + 5) % 6],
+///       ),
+///     },
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// ## Scaffold layout, the keyboard, and display "notches"
 ///
 /// The scaffold will expand to fill the available space. That usually
