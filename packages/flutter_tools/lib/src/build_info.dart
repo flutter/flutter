@@ -21,6 +21,7 @@ class BuildInfo {
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
+    this.splitDebugInfoPath,
     @required this.treeShakeIcons,
   });
 
@@ -61,6 +62,11 @@ class BuildInfo {
   /// On Android it is used as versionName.
   /// On Xcode builds it is used as CFBundleShortVersionString,
   final String buildName;
+
+  /// An optional directory path to save debugging information from dwarf stack
+  /// traces. If null, stack trace information is not stripped from the
+  /// executable.
+  final String splitDebugInfoPath;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -392,7 +398,7 @@ DarwinArch getIOSArchForName(String arch) {
   return null;
 }
 
-String getNameForTargetPlatform(TargetPlatform platform) {
+String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
@@ -403,6 +409,9 @@ String getNameForTargetPlatform(TargetPlatform platform) {
     case TargetPlatform.android_x86:
       return 'android-x86';
     case TargetPlatform.ios:
+      if (darwinArch != null) {
+        return 'ios-${getNameForDarwinArch(darwinArch)}';
+      }
       return 'ios';
     case TargetPlatform.darwin_x64:
       return 'darwin-x64';

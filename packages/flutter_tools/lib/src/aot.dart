@@ -92,6 +92,7 @@ class AotBuilder {
             extraGenSnapshotOptions: extraGenSnapshotOptions,
             bitcode: bitcode,
             quiet: quiet,
+            splitDebugInfo: null,
           ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
@@ -128,6 +129,7 @@ class AotBuilder {
           outputPath: outputPath,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           bitcode: false,
+          splitDebugInfo: null,
         );
         if (snapshotExitCode != 0) {
           status?.cancel();
