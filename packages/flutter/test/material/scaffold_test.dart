@@ -249,6 +249,52 @@ void main() {
     const double _dockedOffsetY = 544.0;
     const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 
+    Widget buildLinearAnimatorScaffold(List<FloatingActionButtonLocation> locations) {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('FloatingActionButtonLocation Test.'),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                title: const Text('Home'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.school),
+                title: const Text('School'),
+              ),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: Icon(Icons.beach_access),
+          ),
+          floatingActionButtonLocation: locations[0],
+          floatingActionButtonAnimator: _LinearMovementFabAnimator(),
+          additionalFloatingActionButtonConfigurations: <Key, FloatingActionButtonConfiguration>{
+            const ValueKey<String>('fab2') : FloatingActionButtonConfiguration(
+              button: FloatingActionButton(
+                onPressed: () {},
+                child: const Icon(Icons.golf_course),
+              ),
+              location: locations[1],
+              animator: _LinearMovementFabAnimator(),
+            ),
+            const ValueKey<String>('fab3') : FloatingActionButtonConfiguration(
+              button: FloatingActionButton(
+                onPressed: () {},
+                child: const Icon(Icons.android),
+              ),
+              location: locations[2],
+              animator: _LinearMovementFabAnimator(),
+            ),
+          },
+        ),
+      );
+    }
+
     testWidgets('All render correctly', (WidgetTester tester) async {
       Widget build() {
         return MaterialApp(
@@ -327,53 +373,7 @@ void main() {
     });
 
     testWidgets('Custom animator', (WidgetTester tester) async {
-      Widget build(List<FloatingActionButtonLocation> locations) {
-        return MaterialApp(
-          home: Scaffold(
-            appBar: AppBar(
-              title: const Text('FloatingActionButtonLocation Test.'),
-            ),
-            bottomNavigationBar: BottomNavigationBar(
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  title: const Text('Home'),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.school),
-                  title: const Text('School'),
-                ),
-              ],
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {},
-              child: Icon(Icons.beach_access),
-            ),
-            floatingActionButtonLocation: locations[0],
-            floatingActionButtonAnimator: _LinearMovementFabAnimator(),
-            additionalFloatingActionButtonConfigurations: <Key, FloatingActionButtonConfiguration>{
-              const ValueKey<String>('fab2') : FloatingActionButtonConfiguration(
-                button: FloatingActionButton(
-                  onPressed: () {},
-                  child: const Icon(Icons.golf_course),
-                ),
-                location: locations[1],
-                animator: _LinearMovementFabAnimator(),
-              ),
-              const ValueKey<String>('fab3') : FloatingActionButtonConfiguration(
-                button: FloatingActionButton(
-                  onPressed: () {},
-                  child: const Icon(Icons.android),
-                ),
-                location: locations[2],
-                animator: _LinearMovementFabAnimator(),
-              ),
-            },
-          ),
-        );
-      }
-
-      await tester.pumpWidget(build(<FloatingActionButtonLocation>[
+      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.endFloat,
         FloatingActionButtonLocation.centerDocked,
         FloatingActionButtonLocation.startTop,
@@ -385,7 +385,7 @@ void main() {
 
       expect(find.byType(FloatingActionButton), findsNWidgets(3));
 
-      await tester.pumpWidget(build(<FloatingActionButtonLocation>[
+      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.startDocked,
         FloatingActionButtonLocation.endTop,
         FloatingActionButtonLocation.centerFloat,
