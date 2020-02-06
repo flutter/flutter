@@ -330,6 +330,7 @@ void main() {
             'frame_count': 3,
             'frame_build_times': <int>[17000, 9000, 19000],
             'frame_rasterizer_times': <int>[18000, 10000, 20000],
+            'frame_begin_times': <int>[0, 18000, 28000],
           },
         );
       });
@@ -382,6 +383,7 @@ void main() {
           'frame_count': 3,
           'frame_build_times': <int>[17000, 9000, 19000],
           'frame_rasterizer_times': <int>[18000, 10000, 20000],
+          'frame_begin_times': <int>[0, 18000, 28000],
         });
       });
     });
