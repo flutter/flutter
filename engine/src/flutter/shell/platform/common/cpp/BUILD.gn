@@ -53,6 +53,11 @@ source_set("common_cpp") {
   # won't have a JSON dependency.
   defines = [ "USE_RAPID_JSON" ]
   deps += [ "//third_party/rapidjson" ]
+
+  if (is_win) {
+    # For wstring_conversion. See issue #50053.
+    defines += [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
+  }
 }
 
 copy("publish_headers") {
