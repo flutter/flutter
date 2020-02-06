@@ -249,7 +249,7 @@ void main() {
     const double _dockedOffsetY = 544.0;
     const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 
-    Widget buildLinearAnimatorScaffold(
+    Widget buildScaffold(
       List<FloatingActionButtonLocation> locations,
       [List<FloatingActionButtonAnimator> animators,]
     ) {
@@ -272,7 +272,7 @@ void main() {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {},
-            child: Icon(Icons.android),
+            child: const Icon(Icons.android),
           ),
           floatingActionButtonLocation: locations[0],
           floatingActionButtonAnimator: animators != null ? animators[0] : _LinearMovementFabAnimator(),
@@ -376,7 +376,7 @@ void main() {
     });
 
     testWidgets('Custom animator', (WidgetTester tester) async {
-      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+      await tester.pumpWidget(buildScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.endFloat,
         FloatingActionButtonLocation.centerDocked,
         FloatingActionButtonLocation.startTop,
@@ -388,7 +388,7 @@ void main() {
 
       expect(find.byType(FloatingActionButton), findsNWidgets(3));
 
-      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+      await tester.pumpWidget(buildScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.startDocked,
         FloatingActionButtonLocation.endTop,
         FloatingActionButtonLocation.centerFloat,
@@ -436,7 +436,7 @@ void main() {
       const Offset book_end = Offset(_rightOffsetX, _floatOffsetY);
       const Offset camera_end = Offset(_rightOffsetX, _dockedOffsetY);
 
-      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+      await tester.pumpWidget(buildScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.startTop,
         FloatingActionButtonLocation.startFloat,
         FloatingActionButtonLocation.startDocked,
@@ -444,7 +444,7 @@ void main() {
 
       expect(find.byType(FloatingActionButton), findsNWidgets(3));
 
-      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+      await tester.pumpWidget(buildScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.endTop,
         FloatingActionButtonLocation.startFloat,
         FloatingActionButtonLocation.startDocked,
@@ -458,7 +458,7 @@ void main() {
       expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin));
       expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin));
 
-      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+      await tester.pumpWidget(buildScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.endTop,
         FloatingActionButtonLocation.endFloat,
         FloatingActionButtonLocation.startDocked,
@@ -470,7 +470,7 @@ void main() {
       expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin * 0.5 + book_end * 0.5));
       expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin));
 
-      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+      await tester.pumpWidget(buildScaffold(<FloatingActionButtonLocation>[
         FloatingActionButtonLocation.endTop,
         FloatingActionButtonLocation.endFloat,
         FloatingActionButtonLocation.endDocked,
