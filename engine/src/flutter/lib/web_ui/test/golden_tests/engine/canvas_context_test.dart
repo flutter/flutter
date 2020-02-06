@@ -29,7 +29,8 @@ void main() async {
     try {
       sceneElement.append(engineCanvas.rootElement);
       html.document.body.append(sceneElement);
-      await matchGoldenFile('$fileName.png', region: region, maxDiffRate: 0.1);
+      // TODO(yjbanov): 10% diff rate is excessive. Update goldens.
+      await matchGoldenFile('$fileName.png', region: region, maxDiffRatePercent: 10);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.
