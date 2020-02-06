@@ -490,6 +490,66 @@ void main() {
 
       expect(tester.binding.transientCallbackCount, 0);
     });
+
+    testWidgets('Multiple custom animators', (WidgetTester tester) async {
+      const Offset android_begin = Offset(_leftOffsetX, _topOffsetY);
+      const Offset book_begin = Offset(_leftOffsetX, _floatOffsetY);
+      const Offset camera_begin = Offset(_leftOffsetX, _dockedOffsetY);
+
+      const Offset android_end = Offset(_rightOffsetX, _topOffsetY);
+      const Offset book_end = Offset(_rightOffsetX, _floatOffsetY);
+      const Offset camera_end = Offset(_rightOffsetX, _dockedOffsetY);
+
+      await tester.pumpWidget(buildScaffold(
+        <FloatingActionButtonLocation>[
+          FloatingActionButtonLocation.startTop,
+          FloatingActionButtonLocation.startFloat,
+          FloatingActionButtonLocation.startDocked,
+        ],
+        <FloatingActionButtonAnimator>[
+          FloatingActionButtonAnimator.scaling,
+          _LinearMovementFabAnimator(),
+          _ParabolicMovementFabAnimator(),
+        ],
+      ));
+
+      expect(find.byType(FloatingActionButton), findsNWidgets(3));
+
+      await tester.pumpWidget(buildScaffold(
+        <FloatingActionButtonLocation>[
+          FloatingActionButtonLocation.endTop,
+          FloatingActionButtonLocation.endFloat,
+          FloatingActionButtonLocation.endDocked,
+        ],
+        <FloatingActionButtonAnimator>[
+          FloatingActionButtonAnimator.scaling,
+          _LinearMovementFabAnimator(),
+          _ParabolicMovementFabAnimator(),
+        ],
+      ));
+
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+
+      await tester.pump(kFloatingActionButtonSegue * 0.5);
+
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin * 0.75 + book_end * 0.25));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin * 0.75 + camera_end * 0.25 + const Offset(0.0, -37.5)));
+
+      await tester.pump(kFloatingActionButtonSegue);
+
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_end));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin * 0.25 + book_end * 0.75));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin * 0.25 + camera_end * 0.75 + const Offset(0.0, -37.5)));
+
+      await tester.pumpAndSettle();
+
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_end));
+      expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_end));
+      expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_end));
+
+      expect(tester.binding.transientCallbackCount, 0);
+    });
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
@@ -2240,6 +2300,23 @@ class _LinearMovementFabAnimator extends FloatingActionButtonAnimator {
   @override
   Offset getOffset({@required Offset begin, @required Offset end, @required double progress}) {
     return begin * (1 - progress) + end * progress;
+  }
+
+  @override
+  Animation<double> getScaleAnimation({@required Animation<double> parent}) {
+    return const AlwaysStoppedAnimation<double>(1.0);
+  }
+
+  @override
+  Animation<double> getRotationAnimation({@required Animation<double> parent}) {
+    return const AlwaysStoppedAnimation<double>(1.0);
+  }
+}
+
+class _ParabolicMovementFabAnimator extends FloatingActionButtonAnimator {
+  @override
+  Offset getOffset({@required Offset begin, @required Offset end, @required double progress}) {
+    return begin * (1 - progress) + end * progress + const Offset(0.0, -50.0) * progress * (1 - progress) * 4;
   }
 
   @override
