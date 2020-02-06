@@ -129,7 +129,7 @@ class CocoaPods {
       return true;
     }
     final String cocoapodsReposDir = globals.platform.environment['CP_REPOS_DIR']
-      ?? globals.fs.path.join(homeDirPath, '.cocoapods', 'repos');
+      ?? globals.fs.path.join(globals.fsUtils.homeDirPath, '.cocoapods', 'repos');
     return globals.fs.isDirectory(globals.fs.path.join(cocoapodsReposDir, 'master'));
   }
 
