@@ -8,8 +8,6 @@ import("//flutter/tools/fuchsia/dart.gni")
 import("//flutter/tools/fuchsia/fuchsia_host_bundle.gni")
 
 if (using_fuchsia_sdk) {
-  testonly = true
-
   product_suffix = ""
   is_product = false
 

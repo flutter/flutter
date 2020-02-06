@@ -136,6 +136,7 @@ if (is_fuchsia) {
       "//flutter/flow:flow_tests",
       "//flutter/fml:fml_tests",
       "//flutter/runtime:runtime_tests",
+      "//flutter/shell/common:shell_tests",
       "//flutter/shell/platform/fuchsia/flutter:flutter_runner_scenic_tests",
       "//flutter/shell/platform/fuchsia/flutter:flutter_runner_tests",
     ]
