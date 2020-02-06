@@ -60,3 +60,6 @@ done
     -f flow_tests-0.far  \
     -t flow_tests
 
+./fuchsia_ctl -d $device_name test \
+    -f runtime_tests-0.far  \
+    -t runtime_tests
