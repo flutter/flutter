@@ -327,7 +327,7 @@ bool _validate(YamlMap manifest) {
   final List<String> errors = <String>[];
   for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {
     if (kvp.key is! String) {
-      errors.add('Expected YAML key to be a a string, but got ${kvp.key}.');
+      errors.add('Expected YAML key to be a string, but got ${kvp.key}.');
       continue;
     }
     switch (kvp.key as String) {
