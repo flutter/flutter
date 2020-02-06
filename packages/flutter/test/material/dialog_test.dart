@@ -259,6 +259,7 @@ void main() {
         SimpleDialogOption(
           onPressed: () {},
           child: const Text('First option'),
+          padding: customPadding,
         ),
       ],
     );
