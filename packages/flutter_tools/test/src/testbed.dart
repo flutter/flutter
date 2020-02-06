@@ -822,6 +822,9 @@ class DelegateLogger implements Logger {
 
   @override
   bool get supportsColor => delegate.supportsColor;
+
+  @override
+  void clear() => delegate.clear();
 }
 
 /// An implementation of the Cache which does not download or require locking.
