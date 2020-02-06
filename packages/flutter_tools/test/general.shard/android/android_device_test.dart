@@ -101,7 +101,7 @@ void main() {
           mockApk,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.disabled(
-            const BuildInfo(BuildMode.release, null),
+            const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
             cacheSkSL: true,
           ),
           platformArgs: <String, dynamic>{},
@@ -153,7 +153,7 @@ void main() {
           mockApk,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.disabled(
-            const BuildInfo(BuildMode.release, null),
+            const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
           ),
           platformArgs: <String, dynamic>{},
         );

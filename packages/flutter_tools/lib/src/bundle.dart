@@ -15,6 +15,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/dart.dart';
+import 'build_system/targets/icon_tree_shaker.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
@@ -68,6 +69,7 @@ class BundleBuilder {
     List<String> extraGenSnapshotOptions = const <String>[],
     List<String> fileSystemRoots,
     String fileSystemScheme,
+    @required bool treeShakeIcons,
   }) async {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
@@ -83,6 +85,7 @@ class BundleBuilder {
       depfilePath: depfilePath,
       precompiled: precompiledSnapshot,
       trackWidgetCreation: trackWidgetCreation,
+      treeShakeIcons: treeShakeIcons,
     );
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -107,6 +110,7 @@ Future<void> buildWithAssemble({
   @required String depfilePath,
   @required bool precompiled,
   bool trackWidgetCreation,
+  @required bool treeShakeIcons,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
   buildMode = precompiled ? buildMode : BuildMode.debug;
@@ -121,6 +125,7 @@ Future<void> buildWithAssemble({
       kBuildMode: getNameForBuildMode(buildMode),
       kTargetPlatform: getNameForTargetPlatform(targetPlatform),
       kTrackWidgetCreation: trackWidgetCreation?.toString(),
+      kIconTreeShakerFlag: treeShakeIcons ? 'true' : null,
     },
   );
   final Target target = buildMode == BuildMode.debug

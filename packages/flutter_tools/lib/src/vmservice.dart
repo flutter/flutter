@@ -226,7 +226,7 @@ class VMService {
     }
 
     _peer.registerMethod('flutterVersion', (rpc.Parameters params) async {
-      final FlutterVersion version = FlutterVersion();
+      final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
       final Map<String, Object> versionJson = version.toJson();
       versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
       versionJson['engineRevisionShort'] = version.engineRevisionShort;

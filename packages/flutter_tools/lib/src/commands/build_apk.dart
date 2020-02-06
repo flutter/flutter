@@ -18,6 +18,7 @@ import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand({bool verboseHelp = false}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
@@ -25,7 +26,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesBuildNumberOption();
     usesBuildNameOption();
     addShrinkingFlag();
-
+    addSplitDebugInfoOption();
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
