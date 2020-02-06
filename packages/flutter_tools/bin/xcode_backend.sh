@@ -172,7 +172,7 @@ BuildApp() {
     -dBuildMode=${build_mode}                                             \
     -dIosArchs="${ARCHS}"                                                 \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                \
-    -dFontSubset="${icon_tree_shaker_flag}"                               \
+    -dTreeShakeIcons="${icon_tree_shaker_flag}"                           \
     -dTrackWidgetCreation="${track_widget_creation_flag}"                 \
     -dEnableBitcode="${bitcode_flag}"                                     \
     "${build_mode}_ios_bundle_flutter_assets"
