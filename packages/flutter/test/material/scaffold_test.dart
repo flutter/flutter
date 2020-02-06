@@ -423,6 +423,70 @@ void main() {
 
       expect(tester.binding.transientCallbackCount, 0);
     });
+
+    testWidgets('Custom animator, different times', (WidgetTester tester) async {
+      const Offset beach_access_begin = Offset(_leftOffsetX, _topOffsetY);
+      const Offset golf_course_begin = Offset(_leftOffsetX, _floatOffsetY);
+      const Offset android_begin = Offset(_leftOffsetX, _dockedOffsetY);
+
+      const Offset beach_access_end = Offset(_rightOffsetX, _topOffsetY);
+      const Offset golf_course_end = Offset(_rightOffsetX, _floatOffsetY);
+      const Offset android_end = Offset(_rightOffsetX, _dockedOffsetY);
+
+      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+        FloatingActionButtonLocation.startTop,
+        FloatingActionButtonLocation.startFloat,
+        FloatingActionButtonLocation.startDocked,
+      ]));
+
+      expect(find.byType(FloatingActionButton), findsNWidgets(3));
+
+      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+        FloatingActionButtonLocation.endTop,
+        FloatingActionButtonLocation.startFloat,
+        FloatingActionButtonLocation.startDocked,
+      ]));
+
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+
+      await tester.pump(kFloatingActionButtonSegue);
+
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_begin * 0.5 + beach_access_end * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin));
+
+      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+        FloatingActionButtonLocation.endTop,
+        FloatingActionButtonLocation.endFloat,
+        FloatingActionButtonLocation.startDocked,
+      ]));
+
+      await tester.pump(kFloatingActionButtonSegue);
+
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_end));
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin * 0.5 + golf_course_end * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin));
+
+      await tester.pumpWidget(buildLinearAnimatorScaffold(<FloatingActionButtonLocation>[
+        FloatingActionButtonLocation.endTop,
+        FloatingActionButtonLocation.endFloat,
+        FloatingActionButtonLocation.endDocked,
+      ]));
+
+      await tester.pump(kFloatingActionButtonSegue);
+
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_end));
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_end));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin * 0.5 + android_end * 0.5));
+
+      await tester.pumpAndSettle();
+
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_end));
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_end));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_end));
+
+      expect(tester.binding.transientCallbackCount, 0);
+    });
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
