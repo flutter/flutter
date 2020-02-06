@@ -107,6 +107,7 @@ class FlutterOptions {
   static const String kEnableExperiment = 'enable-experiment';
   static const String kFileSystemRoot = 'filesystem-root';
   static const String kFileSystemScheme = 'filesystem-scheme';
+  static const String kSplitDebugInfoOption = 'split-debug-info';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -366,6 +367,20 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
+  void addSplitDebugInfoOption() {
+    argParser.addOption(FlutterOptions.kSplitDebugInfoOption,
+      help: 'In a release build, this flag reduces application size by storing '
+        'Dart program symbols in a separate file on the host rather than in the '
+        'application. The value of the flag should be a directory where program '
+        'symbol files can be stored for later use. These symbol files contain '
+        'the information needed to symbolize Dart stack traces. For an app built '
+        'with this flag, the \'flutter symbolize\' command with the right program '
+        'symbol file is required to obtain a human readable stack trace. This '
+        'command is tracked by https://github.com/flutter/flutter/issues/50206',
+      valueHelp: '/project-name/v1.2.3/',
+    );
+  }
+
   void addTreeShakeIconsFlag() {
     argParser.addFlag('tree-shake-icons',
       negatable: true,
@@ -498,6 +513,9 @@ abstract class FlutterCommand extends Command<void> {
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
+          : null,
+      splitDebugInfoPath: argParser.options.containsKey(FlutterOptions.kSplitDebugInfoOption)
+          ? stringArg(FlutterOptions.kSplitDebugInfoOption)
           : null,
       treeShakeIcons: argParser.options.containsKey('tree-shake-icons')
           ? boolArg('tree-shake-icons')

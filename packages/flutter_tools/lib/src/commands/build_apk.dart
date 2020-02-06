@@ -26,6 +26,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesBuildNumberOption();
     usesBuildNameOption();
     addShrinkingFlag();
+    addSplitDebugInfoOption();
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
