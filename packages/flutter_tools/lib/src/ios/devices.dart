@@ -24,7 +24,6 @@ import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-import '../reporting/reporting.dart';
 import '../vmservice.dart';
 import 'code_signing.dart';
 import 'fallback_discovery.dart';
