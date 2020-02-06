@@ -385,6 +385,8 @@ DarwinArch getIOSArchForName(String arch) {
       return DarwinArch.armv7;
     case 'arm64':
       return DarwinArch.arm64;
+    case 'x86_64':
+      return DarwinArch.x86_64;
   }
   assert(false);
   return null;
