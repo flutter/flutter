@@ -618,7 +618,7 @@ Widget _singleFABScaffold(
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {},
-          child: Icon(Icons.beach_access),
+          child: const Icon(Icons.beach_access),
           mini: mini,
         ),
         floatingActionButtonLocation: location,

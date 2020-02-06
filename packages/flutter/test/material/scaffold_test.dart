@@ -316,7 +316,7 @@ void main() {
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {},
-              child: Icon(Icons.beach_access),
+              child: const Icon(Icons.beach_access),
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
             additionalFloatingActionButtonConfigurations: <Key, FloatingActionButtonConfiguration>{
