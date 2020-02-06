@@ -411,6 +411,14 @@ abstract class ImageProvider<T> {
   /// [ImageCache].
   @protected
   void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, T key, ImageErrorListener handleError) {
+    if (stream.completer != null) {
+      PaintingBinding.instance.imageCache.putIfAbsent(
+        key,
+        () => stream.completer,
+        onError: handleError,
+      );
+      return;
+    }
     final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
       key,
       () => load(key, PaintingBinding.instance.instantiateImageCodec),
