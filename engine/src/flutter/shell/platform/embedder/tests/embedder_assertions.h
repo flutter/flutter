@@ -224,16 +224,16 @@ inline std::ostream& operator<<(std::ostream& out,
                                 const FlutterOpenGLTexture& item) {
   return out << "(FlutterOpenGLTexture) Target: 0x" << std::hex << item.target
              << std::dec << " Name: " << item.name << " Format: " << item.format
-             << " User Data: " << item.user_data
-             << " Destruction Callback: " << item.destruction_callback;
+             << " User Data: " << item.user_data << " Destruction Callback: "
+             << reinterpret_cast<void*>(item.destruction_callback);
 }
 
 inline std::ostream& operator<<(std::ostream& out,
                                 const FlutterOpenGLFramebuffer& item) {
   return out << "(FlutterOpenGLFramebuffer) Target: 0x" << std::hex
              << item.target << std::dec << " Name: " << item.name
-             << " User Data: " << item.user_data
-             << " Destruction Callback: " << item.destruction_callback;
+             << " User Data: " << item.user_data << " Destruction Callback: "
+             << reinterpret_cast<void*>(item.destruction_callback);
 }
 
 inline std::string FlutterPlatformViewMutationTypeToString(
@@ -318,8 +318,8 @@ inline std::ostream& operator<<(std::ostream& out,
                                 const FlutterSoftwareBackingStore& item) {
   return out << "(FlutterSoftwareBackingStore) Allocation: " << item.allocation
              << " Row Bytes: " << item.row_bytes << " Height: " << item.height
-             << " User Data: " << item.user_data
-             << " Destruction Callback: " << item.destruction_callback;
+             << " User Data: " << item.user_data << " Destruction Callback: "
+             << reinterpret_cast<void*>(item.destruction_callback);
 }
 
 inline std::ostream& operator<<(std::ostream& out,
