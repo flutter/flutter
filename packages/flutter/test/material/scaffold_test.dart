@@ -540,7 +540,7 @@ void main() {
         return (tester.getTopRight(find.widgetWithIcon(FloatingActionButton, icon)) - tester.getTopLeft(find.widgetWithIcon(FloatingActionButton, icon))).dx;
       }
 
-      expect(getWidth(Icons.android), 44.91156630516052);
+      expect(getWidth(Icons.android), moreOrLessEquals(44.9, epsilon: 0.1));
       expect(getWidth(Icons.book), 56.0);
 
       await tester.pump(kFloatingActionButtonSegue);
@@ -549,7 +549,7 @@ void main() {
       expect(tester.getCenter(find.byIcon(Icons.book)), offsetMoreOrLessEquals(book_begin * 0.25 + book_end * 0.75));
       expect(tester.getCenter(find.byIcon(Icons.camera)), offsetMoreOrLessEquals(camera_begin * 0.25 + camera_end * 0.75 + const Offset(0.0, -37.5)));
 
-      expect(getWidth(Icons.android), 44.91156630516048);
+      expect(getWidth(Icons.android), moreOrLessEquals(44.9, epsilon: 0.1));
       expect(getWidth(Icons.book), 56.0);
 
       await tester.pumpAndSettle();
