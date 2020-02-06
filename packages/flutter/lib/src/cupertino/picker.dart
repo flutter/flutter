@@ -54,10 +54,8 @@ class CupertinoPicker extends StatefulWidget {
   /// The [diameterRatio] and [itemExtent] arguments must not be null. The
   /// [itemExtent] must be greater than zero.
   ///
-  /// The [backgroundColor] defaults to light gray. It can be set to null to
-  /// disable the background painting entirely; this is mildly more efficient
-  /// than using [Colors.transparent]. Also, if it has transparency, no gradient
-  /// effect will be rendered.
+  /// The [backgroundColor] defaults to null, which disables the background
+  /// painting entirely; this is mildly more efficient than using [Colors.transparent].
   ///
   /// The [scrollController] argument can be used to specify a custom
   /// [FixedExtentScrollController] for programmatically reading or changing
@@ -107,9 +105,8 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// The [itemExtent] argument must be non-null and positive.
   ///
-  /// The [backgroundColor] defaults to light gray. It can be set to null to
-  /// disable the background painting entirely; this is mildly more efficient
-  /// than using [Colors.transparent].
+  /// The [backgroundColor] defaults to null which disables the background painting
+  /// entirely; this is mildly more efficient than using [Colors.transparent].
   CupertinoPicker.builder({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
@@ -145,13 +142,8 @@ class CupertinoPicker extends StatefulWidget {
 
   /// Background color behind the children.
   ///
-  /// Defaults to a gray color in the iOS color palette.
-  ///
-  /// This can be set to null to disable the background painting entirely; this
-  /// is mildly more efficient than using [Colors.transparent].
-  ///
-  /// Any alpha value less 255 (fully opaque) will cause the removal of the
-  /// wheel list edge fade gradient from rendering of the widget.
+  /// Defaults to null in which case the background painting is disabled entirely;
+  /// this is mildly more efficient than using [Colors.transparent].
   final Color backgroundColor;
 
   /// {@macro flutter.rendering.wheelList.offAxisFraction}
