@@ -300,10 +300,12 @@ Future<void> _runBuildTests() async {
     } else {
       print('Example project ${path.basename(examplePath)} has no android directory, skipping aot and apk');
     }
-    if (Platform.isMacOS && Directory(path.join(examplePath, 'ios')).existsSync()) {
-      await _flutterBuildIpa(examplePath);
-    } else {
-      print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
+    if (Platform.isMacOS) {
+      if (Directory(path.join(examplePath, 'ios')).existsSync()) {
+        await _flutterBuildIpa(examplePath);
+      } else {
+        print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
+      }
     }
   }
 
