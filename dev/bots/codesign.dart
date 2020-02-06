@@ -5,7 +5,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
-String get repoRoot => path.normalize(path.join(path.dirname(Platform.script.path), '..', '..'));
+String get repoRoot => path.normalize(path.join(path.dirname(Platform.script.toFilePath()), '..', '..'));
 String get cacheDirectory => path.normalize(path.join(repoRoot, 'bin', 'cache'));
 
 /// Check mime-type of file at [filePath] to determine if it is binary
