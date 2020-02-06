@@ -420,6 +420,8 @@ void main() {
       expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_end));
       expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_end));
       expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_end));
+
+      expect(tester.binding.transientCallbackCount, 0);
     });
   });
 
