@@ -2897,7 +2897,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
 /// Generic mixin for render objects with one child.
 ///
-/// Provides a child model for a render object subclass that has a unique child.
+/// Provides a child model for a render object subclass that has
+/// a unique child, which is accessible via the [child] getter.
+///
+/// This mixin is typically used to implement render objects created
+/// in a [SingleChildRenderObjectWidget].
 mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject {
 
   /// Checks whether the given render object has the correct [runtimeType] to be
