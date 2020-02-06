@@ -379,9 +379,9 @@ void main() {
         FloatingActionButtonLocation.startTop,
       ]));
 
-      const Offset beach_access_start = Offset(_rightOffsetX, _floatOffsetY);
-      const Offset golf_course_start = Offset(_centerOffsetX, _dockedOffsetY);
-      const Offset android_start = Offset(_leftOffsetX, _topOffsetY);
+      const Offset beach_access_begin = Offset(_rightOffsetX, _floatOffsetY);
+      const Offset golf_course_begin = Offset(_centerOffsetX, _dockedOffsetY);
+      const Offset android_begin = Offset(_leftOffsetX, _topOffsetY);
 
       expect(find.byType(FloatingActionButton), findsNWidgets(3));
 
@@ -391,35 +391,35 @@ void main() {
         FloatingActionButtonLocation.centerFloat,
       ]));
 
-      const Offset beach_access_stop = Offset(_leftOffsetX, _dockedOffsetY);
-      const Offset golf_course_stop = Offset(_rightOffsetX, _topOffsetY);
-      const Offset android_stop = Offset(_centerOffsetX, _floatOffsetY);
+      const Offset beach_access_end = Offset(_leftOffsetX, _dockedOffsetY);
+      const Offset golf_course_end = Offset(_rightOffsetX, _topOffsetY);
+      const Offset android_end = Offset(_centerOffsetX, _floatOffsetY);
 
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
       await tester.pump(kFloatingActionButtonSegue * 0.5);
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_start * 0.75 + beach_access_stop * 0.25));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_start * 0.75 + golf_course_stop * 0.25));
-      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_start * 0.75 + android_stop * 0.25));
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_begin * 0.75 + beach_access_end * 0.25));
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin * 0.75 + golf_course_end * 0.25));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin * 0.75 + android_end * 0.25));
 
       await tester.pump(kFloatingActionButtonSegue * 0.5);
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_start * 0.5 + beach_access_stop * 0.5));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_start * 0.5 + golf_course_stop * 0.5));
-      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_start * 0.5 + android_stop * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_begin * 0.5 + beach_access_end * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin * 0.5 + golf_course_end * 0.5));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin * 0.5 + android_end * 0.5));
 
       await tester.pump(kFloatingActionButtonSegue * 0.5);
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_start * 0.25 + beach_access_stop * 0.75));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_start * 0.25 + golf_course_stop * 0.75));
-      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_start * 0.25 + android_stop * 0.75));
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_begin * 0.25 + beach_access_end * 0.75));
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_begin * 0.25 + golf_course_end * 0.75));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_begin * 0.25 + android_end * 0.75));
 
       await tester.pumpAndSettle();
 
-      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_stop));
-      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_stop));
-      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_stop));
+      expect(tester.getCenter(find.byIcon(Icons.beach_access)), offsetMoreOrLessEquals(beach_access_end));
+      expect(tester.getCenter(find.byIcon(Icons.golf_course)), offsetMoreOrLessEquals(golf_course_end));
+      expect(tester.getCenter(find.byIcon(Icons.android)), offsetMoreOrLessEquals(android_end));
     });
   });
 
