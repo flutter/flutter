@@ -415,11 +415,12 @@ abstract class ImageProvider<T> {
     // the image we want before getting to this method. We should avoid calling
     // load again, but still update the image cache with LRU information.
     if (stream.completer != null) {
-      PaintingBinding.instance.imageCache.putIfAbsent(
+      final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
         key,
         () => stream.completer,
         onError: handleError,
       );
+      assert(identical(completer, stream.completer));
       return;
     }
     final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
