@@ -1229,11 +1229,15 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
       'linux': <String>['linux-x64', 'linux-x64/$artifactName.zip'],
       'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
     };
-    final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
-    if (binaryDirs == null) {
-      throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+    if (cache.includeAllPlatforms) {
+      return artifacts.values.toList();
+    } else {
+      final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
+      if (binaryDirs == null) {
+        throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+      }
+      return <List<String>>[binaryDirs];
     }
-    return <List<String>>[binaryDirs];
   }
 
   @override
