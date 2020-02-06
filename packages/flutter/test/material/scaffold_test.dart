@@ -256,14 +256,14 @@ void main() {
             title: const Text('FloatingActionButtonLocation Test.'),
           ),
           bottomNavigationBar: BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
-                title: const Text('Home'),
+                title: Text('Home'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.school),
-                title: const Text('School'),
+                title: Text('School'),
               ),
             ],
           ),
@@ -303,14 +303,14 @@ void main() {
               title: const Text('FloatingActionButtonLocation Test.'),
             ),
             bottomNavigationBar: BottomNavigationBar(
-              items: <BottomNavigationBarItem>[
+              items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
-                  title: const Text('Home'),
+                  title: Text('Home'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.school),
-                  title: const Text('School'),
+                  title: Text('School'),
                 ),
               ],
             ),
