@@ -17,12 +17,6 @@
 
 namespace flutter {
 
-RasterCacheResult::RasterCacheResult() {}
-
-RasterCacheResult::RasterCacheResult(const RasterCacheResult& other) = default;
-
-RasterCacheResult::~RasterCacheResult() = default;
-
 RasterCacheResult::RasterCacheResult(sk_sp<SkImage> image,
                                      const SkRect& logical_rect)
     : image_(std::move(image)), logical_rect_(logical_rect) {}
@@ -41,10 +35,7 @@ RasterCache::RasterCache(size_t access_threshold,
                          size_t picture_cache_limit_per_frame)
     : access_threshold_(access_threshold),
       picture_cache_limit_per_frame_(picture_cache_limit_per_frame),
-      checkerboard_images_(false),
-      weak_factory_(this) {}
-
-RasterCache::~RasterCache() = default;
+      checkerboard_images_(false) {}
 
 static bool CanRasterizePicture(SkPicture* picture) {
   if (picture == nullptr) {
@@ -138,24 +129,12 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
                    [=](SkCanvas* canvas) { canvas->drawPicture(picture); });
 }
 
-static inline size_t ClampSize(size_t value, size_t min, size_t max) {
-  if (value > max) {
-    return max;
-  }
-
-  if (value < min) {
-    return min;
-  }
-
-  return value;
-}
-
 void RasterCache::Prepare(PrerollContext* context,
                           Layer* layer,
                           const SkMatrix& ctm) {
   LayerRasterCacheKey cache_key(layer->unique_id(), ctm);
   Entry& entry = layer_cache_[cache_key];
-  entry.access_count = ClampSize(entry.access_count + 1, 0, access_threshold_);
+  entry.access_count++;
   entry.used_this_frame = true;
   if (!entry.image.is_valid()) {
     entry.image = Rasterize(
@@ -191,6 +170,10 @@ bool RasterCache::Prepare(GrContext* context,
                           SkColorSpace* dst_color_space,
                           bool is_complex,
                           bool will_change) {
+  // Disabling caching when access_threshold is zero is historic behavior.
+  if (access_threshold_ == 0) {
+    return false;
+  }
   if (picture_cached_this_frame_ >= picture_cache_limit_per_frame_) {
     return false;
   }
@@ -210,11 +193,9 @@ bool RasterCache::Prepare(GrContext* context,
 
   PictureRasterCacheKey cache_key(picture->uniqueID(), transformation_matrix);
 
+  // Creates an entry, if not present prior.
   Entry& entry = picture_cache_[cache_key];
-  entry.access_count = ClampSize(entry.access_count + 1, 0, access_threshold_);
-  entry.used_this_frame = true;
-
-  if (entry.access_count < access_threshold_ || access_threshold_ == 0) {
+  if (entry.access_count < access_threshold_) {
     // Frame threshold has not yet been reached.
     return false;
   }
@@ -231,20 +212,34 @@ RasterCacheResult RasterCache::Get(const SkPicture& picture,
                                    const SkMatrix& ctm) const {
   PictureRasterCacheKey cache_key(picture.uniqueID(), ctm);
   auto it = picture_cache_.find(cache_key);
-  return it == picture_cache_.end() ? RasterCacheResult() : it->second.image;
+  if (it == picture_cache_.end()) {
+    return RasterCacheResult();
+  }
+
+  Entry& entry = it->second;
+  entry.access_count++;
+  entry.used_this_frame = true;
+
+  return entry.image;
 }
 
 RasterCacheResult RasterCache::Get(Layer* layer, const SkMatrix& ctm) const {
   LayerRasterCacheKey cache_key(layer->unique_id(), ctm);
   auto it = layer_cache_.find(cache_key);
-  return it == layer_cache_.end() ? RasterCacheResult() : it->second.image;
+  if (it == layer_cache_.end()) {
+    return RasterCacheResult();
+  }
+
+  Entry& entry = it->second;
+  entry.access_count++;
+  entry.used_this_frame = true;
+
+  return entry.image;
 }
 
 void RasterCache::SweepAfterFrame() {
-  using PictureCache = PictureRasterCacheKey::Map<Entry>;
-  using LayerCache = LayerRasterCacheKey::Map<Entry>;
-  SweepOneCacheAfterFrame<PictureCache, PictureCache::iterator>(picture_cache_);
-  SweepOneCacheAfterFrame<LayerCache, LayerCache::iterator>(layer_cache_);
+  SweepOneCacheAfterFrame(picture_cache_);
+  SweepOneCacheAfterFrame(layer_cache_);
   picture_cached_this_frame_ = 0;
   TraceStatsToTimeline();
 }
