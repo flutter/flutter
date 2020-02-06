@@ -74,12 +74,16 @@ class ScrollAwareImageProvider<T> extends ImageProvider<T> {
     T key,
     ImageErrorListener handleError,
   ) {
-    // Something managed to complete the stream. Nothing left to do.
-    if (stream.completer != null) {
-      return;
-    }
-    // Something else got this image into the cache. Return it.
-    if (PaintingBinding.instance.imageCache.containsKey(key)) {
+    // Something managed to complete the stream, or it's already in the image
+    // cache. Notify the wrapped provider and expect it to behave by not
+    // reloading the image since it's already resolved.
+    // Do this even if the context has gone out of the tree, since it will
+    // update LRU information about the cache. Even though we never showed the
+    // image, it was still touched more recently.
+    // Do this before checking scrolling, so that if the bytes are available we
+    // render them even though we're scrolling fast - there's no additional
+    // allocations to do for texture memory, it's already there.
+    if (stream.completer != null || PaintingBinding.instance.imageCache.containsKey(key)) {
       imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
       return;
     }
