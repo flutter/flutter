@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -19,7 +18,6 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
-import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -113,18 +111,11 @@ class IOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => iosWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() => IOSDevice.getAttachedDevices(globals.platform, globals.xcdevice);
-
-  @override
-  Future<List<String>> getDiagnostics() => IOSDevice.getDiagnostics(globals.platform, globals.xcdevice);
+  Future<List<Device>> pollingGetDevices() => IOSDevice.getAttachedDevices();
 }
 
 class IOSDevice extends Device {
-  IOSDevice(String id, {
-    @required this.name,
-    @required this.cpuArchitecture,
-    @required String sdkVersion,
-  })
+  IOSDevice(String id, { this.name, String sdkVersion })
       : _sdkVersion = sdkVersion,
         super(
           id,
@@ -166,8 +157,6 @@ class IOSDevice extends Device {
   @override
   final String name;
 
-  final DarwinArch cpuArchitecture;
-
   Map<IOSApp, DeviceLogReader> _logReaders;
 
   DevicePortForwarder _portForwarder;
@@ -181,20 +170,34 @@ class IOSDevice extends Device {
   @override
   bool get supportsStartPaused => false;
 
-  static Future<List<IOSDevice>> getAttachedDevices(Platform platform, XCDevice xcdevice) async {
-    if (!platform.isMacOS) {
-      throw UnsupportedError('Control of iOS devices or simulators only supported on macOS.');
+  static Future<List<IOSDevice>> getAttachedDevices() async {
+    if (!globals.platform.isMacOS) {
+      throw UnsupportedError('Control of iOS devices or simulators only supported on Mac OS.');
+    }
+    if (!globals.iMobileDevice.isInstalled) {
+      return <IOSDevice>[];
     }
 
-    return await xcdevice.getAvailableTetheredIOSDevices();
-  }
+    final List<IOSDevice> devices = <IOSDevice>[];
+    for (String id in (await globals.iMobileDevice.getAvailableDeviceIDs()).split('\n')) {
+      id = id.trim();
+      if (id.isEmpty) {
+        continue;
+      }
 
-  static Future<List<String>> getDiagnostics(Platform platform, XCDevice xcdevice) async {
-    if (!platform.isMacOS) {
-      return const <String>['Control of iOS devices or simulators only supported on macOS.'];
+      try {
+        final String deviceName = await globals.iMobileDevice.getInfoForDevice(id, 'DeviceName');
+        final String sdkVersion = await globals.iMobileDevice.getInfoForDevice(id, 'ProductVersion');
+        devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
+      } on IOSDeviceNotFoundError catch (error) {
+        // Unable to find device with given udid. Possibly a network device.
+        globals.printTrace('Error getting attached iOS device: $error');
+      } on IOSDeviceNotTrustedError catch (error) {
+        globals.printTrace('Error getting attached iOS device information: $error');
+        UsageEvent('device', 'ios-trust-failure').send();
+      }
     }
-
-    return await xcdevice.getDiagnostics();
+    return devices;
   }
 
   @override
@@ -277,13 +280,24 @@ class IOSDevice extends Device {
       // TODO(chinmaygarde): Use mainPath, route.
       globals.printTrace('Building ${package.name} for $id');
 
+      String cpuArchitecture;
+
+      try {
+        cpuArchitecture = await globals.iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
+      } on IOSDeviceNotFoundError catch (e) {
+        globals.printError(e.message);
+        return LaunchResult.failed();
+      }
+
+      final DarwinArch iosArch = getIOSArchForName(cpuArchitecture);
+
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
           app: package as BuildableIOSApp,
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
           buildForDevice: true,
-          activeArch: cpuArchitecture,
+          activeArch: iosArch,
       );
       if (!buildResult.success) {
         globals.printError('Could not build the precompiled application for the device.');
