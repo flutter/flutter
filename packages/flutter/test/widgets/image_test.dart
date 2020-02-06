@@ -187,7 +187,8 @@ void main() {
     final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
-    final TestImageProvider imageProvider = TestImageProvider();
+    final ConfigurationKeyedTestImageProvider imageProvider = ConfigurationKeyedTestImageProvider();
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider);
 
     // Of the two nested MediaQuery objects, the innermost one,
     // mediaQuery2, should define the configuration of the imageProvider.
@@ -207,7 +208,7 @@ void main() {
           child: Image(
             excludeFromSemantics: true,
             key: imageKey,
-            image: imageProvider,
+            image: debouncingProvider,
           ),
         ),
       ),
@@ -234,7 +235,7 @@ void main() {
           child: Image(
             excludeFromSemantics: true,
             key: imageKey,
-            image: imageProvider,
+            image: debouncingProvider,
           ),
         ),
       ),
@@ -247,7 +248,8 @@ void main() {
     final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
-    final TestImageProvider imageProvider = TestImageProvider();
+    final ConfigurationKeyedTestImageProvider imageProvider = ConfigurationKeyedTestImageProvider();
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider);
 
     // This is just a variation on the previous test. In this version the location
     // of the Image changes and the MediaQuery widgets do not.
@@ -264,7 +266,7 @@ void main() {
             child: Image(
               excludeFromSemantics: true,
               key: imageKey,
-              image: imageProvider,
+              image: debouncingProvider,
             ),
           ),
           MediaQuery(
@@ -302,7 +304,7 @@ void main() {
             child: Image(
               excludeFromSemantics: true,
               key: imageKey,
-              image: imageProvider,
+              image: debouncingProvider,
             ),
           ),
         ],
@@ -310,6 +312,137 @@ void main() {
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
+  });
+
+  testWidgets('Verify ImageProvider does not inherit configuration when it does not key to it', (WidgetTester tester) async {
+    final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
+    final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
+    final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
+    final TestImageProvider imageProvider = TestImageProvider();
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider);
+
+    // Of the two nested MediaQuery objects, the innermost one,
+    // mediaQuery2, should define the configuration of the imageProvider.
+    await tester.pumpWidget(
+      MediaQuery(
+        key: mediaQueryKey1,
+        data: const MediaQueryData(
+          devicePixelRatio: 10.0,
+          padding: EdgeInsets.zero,
+        ),
+        child: MediaQuery(
+          key: mediaQueryKey2,
+          data: const MediaQueryData(
+            devicePixelRatio: 5.0,
+            padding: EdgeInsets.zero,
+          ),
+          child: Image(
+            excludeFromSemantics: true,
+            key: imageKey,
+            image: debouncingProvider,
+          ),
+        ),
+      ),
+    );
+
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
+
+    // This is the same widget hierarchy as before except that the
+    // two MediaQuery objects have exchanged places. The imageProvider
+    // should be resolved again, with the new innermost MediaQuery.
+    await tester.pumpWidget(
+      MediaQuery(
+        key: mediaQueryKey2,
+        data: const MediaQueryData(
+          devicePixelRatio: 5.0,
+          padding: EdgeInsets.zero,
+        ),
+        child: MediaQuery(
+          key: mediaQueryKey1,
+          data: const MediaQueryData(
+            devicePixelRatio: 10.0,
+            padding: EdgeInsets.zero,
+          ),
+          child: Image(
+            excludeFromSemantics: true,
+            key: imageKey,
+            image: debouncingProvider,
+          ),
+        ),
+      ),
+    );
+
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
+  });
+
+  testWidgets('Verify ImageProvider does not inherit configuration when it does not key to it again', (WidgetTester tester) async {
+    final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
+    final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
+    final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
+    final TestImageProvider imageProvider = TestImageProvider();
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider);
+
+    // This is just a variation on the previous test. In this version the location
+    // of the Image changes and the MediaQuery widgets do not.
+    await tester.pumpWidget(
+      Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget> [
+          MediaQuery(
+            key: mediaQueryKey2,
+            data: const MediaQueryData(
+              devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: Image(
+              excludeFromSemantics: true,
+              key: imageKey,
+              image: debouncingProvider,
+            ),
+          ),
+          MediaQuery(
+            key: mediaQueryKey1,
+            data: const MediaQueryData(
+              devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: Container(width: 100.0),
+          ),
+        ],
+      ),
+    );
+
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
+
+    await tester.pumpWidget(
+      Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget> [
+          MediaQuery(
+            key: mediaQueryKey2,
+            data: const MediaQueryData(
+              devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: Container(width: 100.0),
+          ),
+          MediaQuery(
+            key: mediaQueryKey1,
+            data: const MediaQueryData(
+              devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: Image(
+              excludeFromSemantics: true,
+              key: imageKey,
+              image: debouncingProvider,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
   });
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
@@ -1225,7 +1358,33 @@ void main() {
   });
 }
 
-class TestImageProvider extends ImageProvider<TestImageProvider> {
+class ConfigurationAwareKey {
+  const ConfigurationAwareKey(this.provider, this.configuration)
+    : assert(provider != null),
+      assert(configuration != null);
+
+  final ImageProvider provider;
+  final ImageConfiguration configuration;
+
+  @override
+  int get hashCode => hashValues(provider, configuration);
+
+  @override
+  bool operator ==(Object other) {
+    return other is ConfigurationAwareKey
+        && other.provider == provider
+        && other.configuration == configuration;
+  }
+}
+
+class ConfigurationKeyedTestImageProvider extends TestImageProvider {
+  @override
+  Future<ConfigurationAwareKey> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<ConfigurationAwareKey>(ConfigurationAwareKey(this, configuration));
+  }
+}
+
+class TestImageProvider extends ImageProvider<Object> {
   TestImageProvider({ImageStreamCompleter streamCompleter}) {
     _streamCompleter = streamCompleter
       ?? OneFrameImageStreamCompleter(_completer.future);
@@ -1239,18 +1398,18 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   bool _loadCalled = false;
 
   @override
-  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<Object> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
-  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, TestImageProvider key, ImageErrorListener handleError) {
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, Object key, ImageErrorListener handleError) {
     _lastResolvedConfiguration = configuration;
     super.resolveStreamForKey(configuration, stream, key, handleError);
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(Object key, DecoderCallback decode) {
     _loadCalled = true;
     return _streamCompleter;
   }
@@ -1322,4 +1481,25 @@ class TestImage implements ui.Image {
 
   @override
   String toString() => '[$width\u00D7$height]';
+}
+
+class DebouncingImageProvider extends ImageProvider<Object> {
+  DebouncingImageProvider(this.imageProvider);
+
+  static Set<Object> seenKeys = <Object>{};
+
+  final ImageProvider<Object> imageProvider;
+
+  @override
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, Object key, ImageErrorListener handleError) {
+    if (seenKeys.add(key)) {
+      imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
+    }
+  }
+
+  @override
+  Future<Object> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
+
+  @override
+  ImageStreamCompleter load(Object key, DecoderCallback decode) => imageProvider.load(key, decode);
 }
