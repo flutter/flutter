@@ -321,19 +321,22 @@ class XCDevice {
         continue;
       }
 
-      final String errorMessage = _parseErrorMessage(deviceProperties);
-      if (errorMessage != null) {
+      final Map<String, dynamic> errorProperties = _errorProperties(deviceProperties);
+      if (errorProperties != null) {
+        final String errorMessage = _parseErrorMessage(errorProperties);
         if (errorMessage.contains('not paired')) {
           UsageEvent('device', 'ios-trust-failure').send();
         }
         _logger.printTrace(errorMessage);
 
-        continue;
-      }
+        final int code = _errorCode(errorProperties);
 
-      // In case unavailable without an error (may not be possible...)
-      if (!_isAvailable(deviceProperties)) {
-        continue;
+        // Temporary error -10: iPhone is busy: Preparing debugger support for iPhone.
+        // Sometimes the app launch will fail on these devices until Xcode is done setting up the device.
+        // Other times this is a false positive and the app will successfully launch despite the error.
+        if (code != -10) {
+          continue;
+        }
       }
 
       // Only support USB devices, skip "network" interface (Xcode > Window > Devices and Simulators > Connect via network).
@@ -361,8 +364,18 @@ class XCDevice {
     return false;
   }
 
-  static bool _isAvailable(Map<String, dynamic> deviceProperties) {
-    return deviceProperties.containsKey('available') && (deviceProperties['available'] as bool);
+  static Map<String, dynamic> _errorProperties(Map<String, dynamic> deviceProperties) {
+    if (deviceProperties.containsKey('error')) {
+      return deviceProperties['error'] as Map<String, dynamic>;
+    }
+    return null;
+  }
+
+  static int _errorCode(Map<String, dynamic> errorProperties) {
+    if (errorProperties.containsKey('code') && errorProperties['code'] is int) {
+      return errorProperties['code'] as int;
+    }
+    return null;
   }
 
   static bool _isUSBTethered(Map<String, dynamic> deviceProperties) {
@@ -399,7 +412,7 @@ class XCDevice {
   }
 
   /// Error message parsed from xcdevice. null if no error.
-  static String _parseErrorMessage(Map<String, dynamic> deviceProperties) {
+  static String _parseErrorMessage(Map<String, dynamic> errorProperties) {
     //  {
     //    "simulator" : false,
     //    "operatingSystemVersion" : "13.3 (17C54)",
@@ -448,16 +461,14 @@ class XCDevice {
     //  }
     // ...
 
-    if (!deviceProperties.containsKey('error')) {
+    if (errorProperties == null) {
       return null;
     }
 
-    final Map<String, dynamic> error = deviceProperties['error'] as Map<String, dynamic>;
-
     final StringBuffer errorMessage = StringBuffer('Error: ');
 
-    if (error.containsKey('description')) {
-      final String description = error['description'] as String;
+    if (errorProperties.containsKey('description')) {
+      final String description = errorProperties['description'] as String;
       errorMessage.write(description);
       if (!description.endsWith('.')) {
         errorMessage.write('.');
@@ -466,13 +477,13 @@ class XCDevice {
       errorMessage.write('Xcode pairing error.');
     }
 
-    if (error.containsKey('recoverySuggestion')) {
-      final String recoverySuggestion = error['recoverySuggestion'] as String;
+    if (errorProperties.containsKey('recoverySuggestion')) {
+      final String recoverySuggestion = errorProperties['recoverySuggestion'] as String;
       errorMessage.write(' $recoverySuggestion');
     }
 
-    if (error.containsKey('code') && error['code'] is int) {
-      final int code = error['code'] as int;
+    final int code = _errorCode(errorProperties);
+    if (code != null) {
       errorMessage.write(' (code $code)');
     }
 
@@ -493,7 +504,8 @@ class XCDevice {
         continue;
       }
       final Map<String, dynamic> deviceProperties = device as Map<String, dynamic>;
-      final String errorMessage = _parseErrorMessage(deviceProperties);
+      final Map<String, dynamic> errorProperties = _errorProperties(deviceProperties);
+      final String errorMessage = _parseErrorMessage(errorProperties);
       if (errorMessage != null) {
         diagnostics.add(errorMessage);
       }
