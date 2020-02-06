@@ -145,6 +145,7 @@ class AOTSnapshotter {
       outputPaths.add(aotSharedLibrary);
       genSnapshotArgs.add('--snapshot_kind=app-aot-elf');
       genSnapshotArgs.add('--elf=$aotSharedLibrary');
+      genSnapshotArgs.add('--strip');
     }
 
     if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {
