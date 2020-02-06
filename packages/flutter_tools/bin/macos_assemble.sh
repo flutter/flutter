@@ -76,6 +76,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dTargetFile="${target_path}"                                           \
     -dBuildMode="${build_mode}"                                             \
     -dFontSubset="${icon_tree_shaker_flag}"                                 \
+    -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \
