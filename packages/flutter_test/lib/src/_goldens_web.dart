@@ -5,10 +5,7 @@
 import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:typed_data';
-import 'dart:ui';
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
@@ -60,9 +57,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   Uri testUri;
 
   @override
-  Future<bool> compare(dynamic element, dynamic size, Uri golden) async {
-    assert(size is Size);
-    final Size realSize = size as Size;
+  Future<bool> compare(double width, double height, Uri golden) async {
     final String key = golden.toString();
     final html.HttpRequest request = await html.HttpRequest.request(
       'flutter_goldens',
@@ -70,8 +65,8 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
       sendData: json.encode(<String, Object>{
         'testUri': testUri.toString(),
         'key': key.toString(),
-        'width': realSize.width.round(),
-        'height': realSize.height.round(),
+        'width': width.round(),
+        'height': height.round(),
       }),
     );
     final String response = request.response as String;
@@ -83,8 +78,8 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   }
 
   @override
-  Future<void> update(Uri golden, dynamic element, dynamic size) async {
+  Future<void> update(double width, double height, Uri golden) async {
     // Update is handled on the server side, just use the same logic here
-    await compare(element, size, golden);
+    await compare(width, height, golden);
   }
 }

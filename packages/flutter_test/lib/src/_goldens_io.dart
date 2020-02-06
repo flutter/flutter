@@ -245,12 +245,12 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
   @override
-  Future<bool> compare(dynamic element, dynamic size, Uri golden) {
+  Future<bool> compare(double width, double height, Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 
   @override
-  Future<void> update(Uri golden, dynamic element, dynamic size) {
+  Future<void> update(double width, double height, Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 }
