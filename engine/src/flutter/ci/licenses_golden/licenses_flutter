@@ -201,6 +201,7 @@ FILE: ../../../flutter/fml/platform/posix/file_posix.cc
 FILE: ../../../flutter/fml/platform/posix/mapping_posix.cc
 FILE: ../../../flutter/fml/platform/posix/native_library_posix.cc
 FILE: ../../../flutter/fml/platform/posix/paths_posix.cc
+FILE: ../../../flutter/fml/platform/posix/posix_wrappers_posix.cc
 FILE: ../../../flutter/fml/platform/posix/shared_mutex_posix.cc
 FILE: ../../../flutter/fml/platform/posix/shared_mutex_posix.h
 FILE: ../../../flutter/fml/platform/win/errors_win.cc
@@ -211,7 +212,9 @@ FILE: ../../../flutter/fml/platform/win/message_loop_win.cc
 FILE: ../../../flutter/fml/platform/win/message_loop_win.h
 FILE: ../../../flutter/fml/platform/win/native_library_win.cc
 FILE: ../../../flutter/fml/platform/win/paths_win.cc
+FILE: ../../../flutter/fml/platform/win/posix_wrappers_win.cc
 FILE: ../../../flutter/fml/platform/win/wstring_conversion.h
+FILE: ../../../flutter/fml/posix_wrappers.h
 FILE: ../../../flutter/fml/size.h
 FILE: ../../../flutter/fml/status.h
 FILE: ../../../flutter/fml/synchronization/atomic_object.h

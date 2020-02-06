@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/posix_wrappers.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/utils/SkEventTracer.h"
@@ -243,7 +244,7 @@ bool enableSkiaTracingCallback(const char* method,
                                const char** json_object) {
   FlutterEventTracer* tracer = static_cast<FlutterEventTracer*>(user_data);
   tracer->enable();
-  *json_object = strdup("{\"type\":\"Success\"}");
+  *json_object = fml::strdup("{\"type\":\"Success\"}");
   return true;
 }
 
