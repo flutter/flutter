@@ -338,6 +338,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.fastStart) {
     command.add('-Pfast-start=true');
   }
+  if (androidBuildInfo.buildInfo.splitDebugInfoPath != null) {
+    command.add('-Psplit-debug-info=${androidBuildInfo.buildInfo.splitDebugInfoPath}');
+  }
   if (androidBuildInfo.buildInfo.treeShakeIcons) {
     command.add('-Ptree-shake-icons=true');
   }
