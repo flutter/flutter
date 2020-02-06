@@ -1,4 +1,4 @@
-Signature: e1a7f39cc6f3e5c1fc87d8e5499466a6
+Signature: 21d09c6d07210fdbb43d3babf03c0369
 
 UNUSED LICENSES:
 
@@ -7740,6 +7740,10 @@ ORIGIN: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart + ../..
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/TypedDataDuplicate/dart/TypedDataDuplicate.dart
+FILE: ../../../third_party/dart/runtime/bin/dartdev_utils.cc
+FILE: ../../../third_party/dart/runtime/bin/dartdev_utils.h
+FILE: ../../../third_party/dart/runtime/bin/exe_utils.cc
+FILE: ../../../third_party/dart/runtime/bin/exe_utils.h
 FILE: ../../../third_party/dart/runtime/observatory/bin/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/bin/main.dart
 FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/cquery_driver.dart
