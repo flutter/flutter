@@ -342,10 +342,10 @@ class EditableText extends StatefulWidget {
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
-  /// [enableSuggestions], [paintCursorAboveText], [textAlign],
-  /// [dragStartBehavior], [scrollPadding], [dragStartBehavior],
-  /// [toolbarOptions], [rendererIgnoresPointer], and [readOnly] arguments must
-  /// not be null.
+  /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
+  /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
+  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer], and
+  /// [readOnly] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -389,6 +389,8 @@ class EditableText extends StatefulWidget {
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
     this.paintCursorAboveText = false,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -417,6 +419,8 @@ class EditableText extends StatefulWidget {
        assert(cursorOpacityAnimates != null),
        assert(paintCursorAboveText != null),
        assert(backgroundCursorColor != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
@@ -978,6 +982,16 @@ class EditableText extends StatefulWidget {
 
   ///{@macro flutter.rendering.editable.paintCursorOnTop}
   final bool paintCursorAboveText;
+
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxHeightStyle] for details on available styles.
+  final ui.BoxHeightStyle selectionHeightStyle;
+
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxWidthStyle] for details on available styles.
+  final ui.BoxWidthStyle selectionWidthStyle;
 
   /// The appearance of the keyboard.
   ///
@@ -1894,6 +1908,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,
               cursorOffset: widget.cursorOffset,
+              selectionHeightStyle: widget.selectionHeightStyle,
+              selectionWidthStyle: widget.selectionWidthStyle,
               paintCursorAboveText: widget.paintCursorAboveText,
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
@@ -1962,9 +1978,11 @@ class _Editable extends LeafRenderObjectWidget {
     this.cursorWidth,
     this.cursorRadius,
     this.cursorOffset,
+    this.paintCursorAboveText,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
-    this.paintCursorAboveText,
     this.devicePixelRatio,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
@@ -2002,10 +2020,12 @@ class _Editable extends LeafRenderObjectWidget {
   final double cursorWidth;
   final Radius cursorRadius;
   final Offset cursorOffset;
+  final bool paintCursorAboveText;
+  final ui.BoxHeightStyle selectionHeightStyle;
+  final ui.BoxWidthStyle selectionWidthStyle;
   final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
-  final bool paintCursorAboveText;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -2039,6 +2059,8 @@ class _Editable extends LeafRenderObjectWidget {
       cursorRadius: cursorRadius,
       cursorOffset: cursorOffset,
       paintCursorAboveText: paintCursorAboveText,
+      selectionHeightStyle: selectionHeightStyle,
+      selectionWidthStyle: selectionWidthStyle,
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
@@ -2075,6 +2097,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius
       ..cursorOffset = cursorOffset
+      ..selectionHeightStyle = selectionHeightStyle
+      ..selectionWidthStyle = selectionWidthStyle
       ..textSelectionDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
       ..paintCursorAboveText = paintCursorAboveText;
