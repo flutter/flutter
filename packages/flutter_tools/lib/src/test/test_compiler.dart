@@ -93,20 +93,7 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler> createCompiler() async {
-    if (flutterProject.hasBuilders) {
-      return CodeGeneratingResidentCompiler.create(
-        flutterProject: flutterProject,
-        buildMode: buildMode,
-        trackWidgetCreation: trackWidgetCreation,
-        compilerMessageConsumer: _reportCompilerMessage,
-        initializeFromDill: testFilePath,
-        // We already ran codegen once at the start, we only need to
-        // configure builders.
-        runCold: true,
-        dartDefines: const <String>[],
-      );
-    }
-    return ResidentCompiler(
+    final ResidentCompiler residentCompiler = ResidentCompiler(
       globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       packagesPath: PackageMap.globalPackagesPath,
       buildMode: buildMode,
@@ -116,6 +103,13 @@ class TestCompiler {
       unsafePackageSerialization: false,
       dartDefines: const <String>[],
     );
+    if (flutterProject.hasBuilders) {
+      return CodeGeneratingResidentCompiler.create(
+        residentCompiler: residentCompiler,
+        flutterProject: flutterProject,
+      );
+    }
+    return residentCompiler;
   }
 
   // Handle a compilation request.
