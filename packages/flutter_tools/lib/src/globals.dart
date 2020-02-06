@@ -57,6 +57,8 @@ Xcode get xcode => context.get<Xcode>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 
+XCDevice get xcdevice => context.get<XCDevice>();
+
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
 ///
