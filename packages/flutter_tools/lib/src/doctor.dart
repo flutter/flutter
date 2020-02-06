@@ -859,15 +859,22 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   @override
   String get pluginsPath {
-    final List<String> split = version.split('.');
-    final String major = split[0];
-    final String minor = split[1];
-    return globals.fs.path.join(
-      globals.fsUtils.homeDirPath,
-      'Library',
-      'Application Support',
-      '$id$major.$minor',
-    );
+    final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
+    final String altLocation = PlistParser.instance.getValueFromFile(plistFile, 'JetBrainsToolboxApp');
+    
+    if (altLocation == null) {
+      final List<String> split = version.split('.');
+      final String major = split[0];
+      final String minor = split[1];
+      return globals.fs.path.join(
+        globals.fsUtils.homeDirPath,
+        'Library',
+        'Application Support',
+        '$id$major.$minor',
+      );
+    }
+    
+    return altLocation + '.plugins';
   }
 }
 
