@@ -5,6 +5,11 @@
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
+if (is_fuchsia) {
+  import("//build/fuchsia/sdk.gni")
+  import("//flutter/tools/fuchsia/fuchsia_archive.gni")
+}
+
 source_set("test_font") {
   sources = [
     "test_font_data.cc",
@@ -167,4 +172,25 @@ executable("runtime_unittests") {
   deps = [
     ":runtime_unittests_common",
   ]
+}
+
+if (is_fuchsia) {
+  fuchsia_test_archive("runtime_tests") {
+    deps = [
+      ":runtime_fixtures",
+      ":runtime_unittests",
+    ]
+
+    binary = "runtime_unittests"
+
+    # TODO(gw280): https://github.com/flutter/flutter/issues/50294
+    # Right now we need to manually specify all the fixtures that are
+    # declared in the test_fixtures() call above.
+    resources = [
+      {
+        path = "$target_gen_dir/assets/kernel_blob.bin"
+        dest = "assets/kernel_blob.bin"
+      },
+    ]
+  }
 }
