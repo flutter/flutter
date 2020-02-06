@@ -218,7 +218,7 @@ class SkTextStyle implements ui.TextStyle {
     }
     List<String> fontFamilies = <String>[fontFamily];
     if (fontFamilyFallback != null) {
-      fontFamilies.addAll(fontFamilies);
+      fontFamilies.addAll(fontFamilyFallback);
     }
 
     style['fontFamilies'] = fontFamilies;
@@ -343,6 +343,10 @@ class SkParagraph implements ui.Paragraph {
     ui.BoxHeightStyle boxHeightStyle: ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle: ui.BoxWidthStyle.tight,
   }) {
+    if (start < 0 || end < 0) {
+      return const <ui.TextBox>[];
+    }
+
     js.JsObject heightStyle;
     switch (boxHeightStyle) {
       case ui.BoxHeightStyle.tight:
@@ -413,10 +417,21 @@ class SkParagraph implements ui.Paragraph {
   @override
   void layout(ui.ParagraphConstraints constraints) {
     assert(constraints.width != null);
+
+    // Infinite width breaks layout, just use a very large number instead.
+    // TODO(het): Remove this once https://bugs.chromium.org/p/skia/issues/detail?id=9874
+    //            is fixed.
+    double width;
+    const double largeFiniteWidth = 1000000;
+    if (constraints.width.isInfinite) {
+      width = largeFiniteWidth;
+    } else {
+      width = constraints.width;
+    }
     // TODO(het): CanvasKit throws an exception when laid out with
     // a font that wasn't registered.
     try {
-      skParagraph.callMethod('layout', <double>[constraints.width]);
+      skParagraph.callMethod('layout', <double>[width]);
     } catch (e) {
       html.window.console.warn('CanvasKit threw an exception while laying '
           'out the paragraph. The font was "$_fontFamily". Exception:\n$e');
