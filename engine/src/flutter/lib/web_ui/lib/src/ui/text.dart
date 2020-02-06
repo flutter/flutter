@@ -1587,9 +1587,15 @@ abstract class ParagraphBuilder {
 /// * `fontFamily`: The family name used to identify the font in text styles.
 ///  If this is not provided, then the family name will be extracted from the font file.
 Future<void> loadFontFromList(Uint8List list, {String fontFamily}) {
-  return _fontCollection.loadFontFromList(list, fontFamily: fontFamily).then(
-    (_) => _sendFontChangeMessage()
-  );
+  if (engine.experimentalUseSkia) {
+    return engine.skiaFontCollection.loadFontFromList(list, fontFamily: fontFamily).then(
+        (_) => _sendFontChangeMessage()
+    );
+  } else {
+    return _fontCollection.loadFontFromList(list, fontFamily: fontFamily).then(
+      (_) => _sendFontChangeMessage()
+    );
+  }
 }
 
 final ByteData _fontChangeMessage = engine.JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'fontsChange'});

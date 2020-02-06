@@ -56,7 +56,7 @@ class SkPath implements ui.Path {
 
   @override
   void addOval(ui.Rect oval) {
-    _skPath.callMethod('addOval', <dynamic>[makeSkRect(oval), true, 0]);
+    _skPath.callMethod('addOval', <dynamic>[makeSkRect(oval), false, 1]);
   }
 
   @override

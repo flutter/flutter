@@ -30,6 +30,7 @@ class SkPaint extends SkiaObject implements ui.Paint {
 
   @override
   ui.PaintingStyle get style => _style;
+
   @override
   set style(ui.PaintingStyle value) {
     _style = value;
