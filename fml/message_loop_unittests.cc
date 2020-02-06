@@ -331,8 +331,8 @@ TEST(MessageLoop, TIME_SENSITIVE(WakeUpTimersAreSingletons)) {
       [&]() {
         auto delta = fml::TimePoint::Now() - begin;
         auto ms = delta.ToMillisecondsF();
-        ASSERT_GE(ms, 18);
-        ASSERT_LE(ms, 22);
+        ASSERT_GE(ms, 10);
+        ASSERT_LE(ms, 25);
 
         loop_impl->Terminate();
       },
