@@ -67,21 +67,32 @@ abstract class InteractiveInkFeature extends InkFeature {
 
   /// Draws an ink splash or ink ripple on the passed in [Canvas].
   ///
-  /// The [transform] argument gives the coordinate conversion from the coordinate
-  /// system of the canvas to the coordinate system of the [referenceBox].
+  /// The [transform] argument is the [Matrix4] transform that typically
+  /// shifts the coordinate space of the canvas to the space in which
+  /// the ink circle is to be painted.
   ///
-  /// [Center], [Paint] and [radius] are used to paint the cirle with desired origin,
-  /// paint and radius
+  /// [center] is the [Offset] from origin of the canvas where center
+  /// of the circle is drawn
   ///
-  /// [TextDirection] is used for calculating path to clip if [customBorder] is not null.
+  /// Using [paint] you can specify properties like color, strokewidth, colorFiler, etc
+  /// for painting the circle
   ///
-  /// If [customBorder] is not null, the canvas is clipped by the [ShapeBorder] provided. If
-  /// [customBorder] is null and [borderRadius] is provided (i.e not [BorderRadius.zero]),
-  /// the canvas is clipped by the [BorderRadius] provided.
+  /// [radius] is the radius of circle to be drawn on canvas
   ///
-  /// If [clipCallBack] is null, no clipping is performed and only the ink circle is painted
+  /// [clipCallback] is required by ink effects to obtain the rectangle for the effect,
+  /// if [clipCallback] is null, no clipping is performed and only the ink circle is painted
   ///
-  /// The [InkSplash] and [InkRipple] widgets draw their ink circles using this function.
+  /// [customBorder] is a [ShapeBorder] which can be used if you want to clip
+  /// something other than a simply a [Rect] or [RRect]
+  ///
+  /// If [customBorder] is provided, the canvas is clipped by it. If
+  /// [customBorder] is null, canvas is clipped by the [RRect]
+  /// formed by [borderRadius] and [clipCallBack]
+  ///
+  /// [textDirection] is used if [customBorder] is provided (as [customBorder] can have
+  /// a [textDirection] dependency), it is required for calculation of path to clip
+  ///
+  /// Used by [InkSplash] and [InkRipple], for example.
   @protected
   void paintInkCircle({
     @required Canvas canvas,
