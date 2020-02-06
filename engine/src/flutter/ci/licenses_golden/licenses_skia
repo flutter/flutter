@@ -1,4 +1,4 @@
-Signature: 8fa1eb02f96ceffefc1471f64ea3b72d
+Signature: cd4c796dcec7f6bb20d35e70ab6c90f5
 
 UNUSED LICENSES:
 
@@ -5737,8 +5737,6 @@ FILE: ../../../third_party/skia/include/core/SkPath.h
 FILE: ../../../third_party/skia/include/core/SkPathEffect.h
 FILE: ../../../third_party/skia/include/core/SkPathMeasure.h
 FILE: ../../../third_party/skia/include/core/SkPoint.h
-FILE: ../../../third_party/skia/include/core/SkPostConfig.h
-FILE: ../../../third_party/skia/include/core/SkPreConfig.h
 FILE: ../../../third_party/skia/include/core/SkRect.h
 FILE: ../../../third_party/skia/include/core/SkRefCnt.h
 FILE: ../../../third_party/skia/include/core/SkScalar.h
