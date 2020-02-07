@@ -72,35 +72,37 @@ abstract class InteractiveInkFeature extends InkFeature {
   /// the ink circle is to be painted.
   ///
   /// [center] is the [Offset] from origin of the canvas where center
-  /// of the circle is drawn
+  /// of the circle is drawn.
   ///
-  /// Using [paint] you can specify properties like color, strokewidth, colorFiler, etc
-  /// for painting the circle
+  /// [paint] takes a [Paint] object that describes the styles used to draw the ink circle.
+  /// For example, [paint] can specify properties like color, strokewidth, colorFiler.
   ///
-  /// [radius] is the radius of circle to be drawn on canvas
+  /// [radius] is the radius of ink circle to be drawn on canvas.
   ///
-  /// [clipCallback] is required by ink effects to obtain the rectangle for the effect,
-  /// if [clipCallback] is null, no clipping is performed and only the ink circle is painted
+  /// [clipCallback] is the callback used to obtain the [Rect] used for clipping the ink effect.
+  /// If [clipCallback] is null, no clipping is performed on the ink circle.
   ///
-  /// [customBorder] is a [ShapeBorder] which can be used if you want to clip
-  /// something other than a simply a [Rect] or [RRect]
+  /// Clipping can happen in 3 different ways -
+  ///  1. If [customBorder] is provided, it is used to determine the path
+  ///     for clipping.
+  ///  2. If [customBorder] is null, and [borderRadius] is provided, canvas
+  ///     is clipped by a [RRect] created from [clipCallback] and [borderRadius].
+  ///  3. if [borderRadius] is the default [BorderRadius.zero]. The [Rect] provided
+  ///      by [clipCallback] is used for clipping.
   ///
-  /// If [customBorder] is provided, the canvas is clipped by it. If
-  /// [customBorder] is null, canvas is clipped by the [RRect]
-  /// formed by [borderRadius] and [clipCallBack]
+  /// [textDirection] is used by [customBorder] if it is non-null. This allows the [customBorder]'s path
+  /// to be properly defined if it was the path was expressed in terms of "start" and "end" instead of
+  /// "left" and "right".
   ///
-  /// [textDirection] is used if [customBorder] is provided (as [customBorder] can have
-  /// a [textDirection] dependency), it is required for calculation of path to clip
-  ///
-  /// Used by [InkSplash] and [InkRipple], for example.
+  /// For examples on how the function is used, see [InkSplash] and [InkRipple].
   @protected
   void paintInkCircle({
     @required Canvas canvas,
     @required Matrix4 transform,
     @required Paint paint,
     @required Offset center,
-    @required TextDirection textDirection,
     @required double radius,
+    TextDirection textDirection,
     ShapeBorder customBorder,
     BorderRadius borderRadius = BorderRadius.zero,
     RectCallback clipCallback,
@@ -109,7 +111,7 @@ abstract class InteractiveInkFeature extends InkFeature {
     assert(transform != null);
     assert(paint != null);
     assert(center != null);
-    assert(textDirection != null);
+    assert(customBorder == null || textDirection != null, 'Must provide textDirection if customBorder is not null');
     assert(radius != null);
     assert(borderRadius != null);
 
