@@ -408,7 +408,7 @@ class FuchsiaRemoteConnection {
     // loopback device, so connecting to the IPv4 loopback would fail when the
     // target address is IPv6 link-local.
     final String addr = _useIpV6Loopback
-        ? 'http://\[$_ipv6Loopback\]:$port'
+        ? 'http://[$_ipv6Loopback]:$port'
         : 'http://$_ipv4Loopback:$port';
     final Uri uri = Uri.parse(addr);
     return uri;

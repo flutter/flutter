@@ -168,7 +168,7 @@ String getFullTag() {
 }
 
 Match parseFullTag(String version) {
-  final RegExp versionPattern = RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
+  final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)$');
   return versionPattern.matchAsPrefix(version);
 }
 
