@@ -639,13 +639,17 @@ void main() {
       )
     );
 
-    expect(imageStreamCompleter.listeners.length, 2);
-    imageStreamCompleter.listeners.toList()[1].onImage(null, null);
+    // Two listeners - one is the listener added by precacheImage, the other by the ImageCache.
+    final List<ImageStreamListener> listeners = imageStreamCompleter.listeners.toList();
+    expect(listeners.length, 2);
 
-    expect(imageStreamCompleter.listeners.length, 1);
-    imageStreamCompleter.listeners.toList()[0].onImage(null, null);
+    // Make sure the first listener can be called re-entrantly
+    listeners[1].onImage(null, null);
+    listeners[1].onImage(null, null);
 
-    expect(imageStreamCompleter.listeners.length, 0);
+    // Make sure the second listener can be called re-entrantly.
+    listeners[0].onImage(null, null);
+    listeners[0].onImage(null, null);
   });
 
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
