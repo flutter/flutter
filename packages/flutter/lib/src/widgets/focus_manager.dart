@@ -84,12 +84,13 @@ class FocusAttachment {
       if (_node.hasPrimaryFocus || (_node._manager != null && _node._manager._nextFocus == _node)) {
         _node.unfocus(focusPrevious: true);
       }
-      assert(_node._manager?._nextFocus != _node);
-      assert(!_node.hasPrimaryFocus);
       // This node is no longer be in the tree, so shouldn't receive notifications anymore.
       _node._manager?._markDetached(_node);
       _node._parent?._removeChild(_node);
       _node._attachment = null;
+      assert(!_node.hasPrimaryFocus);
+      assert(_node._manager?._nextFocus != _node);
+      assert(_node._manager?._unfocusedNode != _node);
     }
     assert(!isAttached);
   }
@@ -1387,6 +1388,12 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
     // The node has been removed from the tree, so it no longer needs to be
     // notified.
     assert(_focusDebug('Node was detached: $node'));
+    if (_unfocusedNode == node) {
+      _unfocusedNode = null;
+    }
+    if (_primaryFocus == node) {
+      _primaryFocus = null;
+    }
     _dirtyNodes?.remove(node);
   }
 
@@ -1424,7 +1431,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
         _nextFocus = null;
       }
       if (_primaryFocus == node) {
-        _primaryFocus = null;
         _unfocusedNode = node;
       }
       _markNeedsUpdate();
@@ -1448,6 +1454,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
 
   void _applyFocusChange() {
     _haveScheduledUpdate = false;
+    if (_unfocusedNode == _primaryFocus) {
+      _primaryFocus = null;
+    }
     final FocusNode previousFocus = _primaryFocus;
     if (_primaryFocus == null && _nextFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
@@ -1487,6 +1496,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
       node._notify();
     }
     _dirtyNodes.clear();
+    _unfocusedNode = null;
     if (previousFocus != _primaryFocus) {
       notifyListeners();
     }
