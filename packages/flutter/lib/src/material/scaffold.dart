@@ -966,7 +966,7 @@ class FloatingActionButtonConfiguration {
 ///         child: Text('Switch'),
 ///         onPressed: () {
 ///           setState(() {
-///             _location ++;
+///             _location++;
 ///             print('Switch-button pressed.');
 ///           });
 ///         },
