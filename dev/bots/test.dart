@@ -282,13 +282,6 @@ Future<void> _runToolTests() async {
   await selectSubshard(subshards);
 }
 
-// Example apps that should not be built by _runBuildTests`
-const List<String> _excludedExampleApplications = <String>[
-  // This application contains no platform code and cannot be built, except for
-  // as a part of a '--fast-start' Android application.
-  'splash',
-];
-
 /// Verifies that AOT, APK, and IPA (if on macOS) builds the examples apps
 /// without crashing. It does not actually launch the apps. That happens later
 /// in the devicelab. This is just a smoke-test. In particular, this will verify
@@ -300,14 +293,19 @@ Future<void> _runBuildTests() async {
     if (fileEntity is! Directory) {
       continue;
     }
-    if (_excludedExampleApplications.any(fileEntity.path.endsWith)) {
-      continue;
-    }
     final String examplePath = fileEntity.path;
-    await _flutterBuildAot(examplePath);
-    await _flutterBuildApk(examplePath);
+    if (Directory(path.join(examplePath, 'android')).existsSync()) {
+      await _flutterBuildAot(examplePath);
+      await _flutterBuildApk(examplePath);
+    } else {
+      print('Example project ${path.basename(examplePath)} has no android directory, skipping aot and apk');
+    }
     if (Platform.isMacOS) {
-      await _flutterBuildIpa(examplePath);
+      if (Directory(path.join(examplePath, 'ios')).existsSync()) {
+        await _flutterBuildIpa(examplePath);
+      } else {
+        print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
+      }
     }
   }
 

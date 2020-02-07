@@ -69,7 +69,15 @@ Future<T> runInContext<T>(
       AndroidLicenseValidator: () => AndroidLicenseValidator(),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
-      AndroidValidator: () => AndroidValidator(),
+      AndroidValidator: () => AndroidValidator(
+        androidStudio: globals.androidStudio,
+        androidSdk: globals.androidSdk,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        userMessages: globals.userMessages,
+      ),
       AndroidWorkflow: () => AndroidWorkflow(),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
       Artifacts: () => CachedArtifacts(
@@ -87,7 +95,12 @@ Future<T> runInContext<T>(
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
-      Config: () => Config(),
+      Config: () => Config(
+        Config.kFlutterSettings,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
@@ -131,7 +144,11 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         processManager: globals.processManager,
       ),
-      PersistentToolState: () => PersistentToolState(),
+      PersistentToolState: () => PersistentToolState(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       ProcessInfo: () => ProcessInfo(),
       ProcessUtils: () => ProcessUtils(
         processManager: globals.processManager,
@@ -156,6 +173,11 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         xcodeProjectInterpreter: xcodeProjectInterpreter,
+      ),
+      XCDevice: () => XCDevice(
+        processManager: globals.processManager,
+        logger: globals.logger,
+        xcode: globals.xcode,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,

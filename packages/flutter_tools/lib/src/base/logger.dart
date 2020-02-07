@@ -168,6 +168,9 @@ abstract class Logger {
   /// Only surfaces a value in machine modes, Loggers may ignore this message in
   /// non-machine modes.
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+
+  /// Clears all output.
+  void clear();
 }
 
 class StdoutLogger extends Logger {
@@ -326,6 +329,13 @@ class StdoutLogger extends Logger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+
+  @override
+  void clear() {
+    _status?.pause();
+    writeToStdOut(_terminal.clearScreen() + '\n');
+    _status?.resume();
+  }
 }
 
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
@@ -470,7 +480,7 @@ class BufferLogger extends Logger {
     )..start();
   }
 
-  /// Clears all buffers.
+  @override
   void clear() {
     _error.clear();
     _status.clear();
@@ -627,6 +637,9 @@ class VerboseLogger extends Logger {
 
   @override
   bool get hasTerminal => parent.hasTerminal;
+
+  @override
+  void clear() => parent.clear();
 }
 
 enum _LogType { error, status, trace }

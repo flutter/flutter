@@ -481,7 +481,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     if (!isModule) {
       return;
     }
-    final bool pubspecChanged = fsUtils.isOlderThanReference(
+    final bool pubspecChanged = globals.fsUtils.isOlderThanReference(
       entity: ephemeralDirectory,
       referenceFile: parent.pubspecFile,
     );
@@ -528,7 +528,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
           .childDirectory('Flutter')
           .childDirectory('engine');
       final File podspec = framework.parent.childFile('Flutter.podspec');
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         framework,
         engineDest.childDirectory('Flutter.framework'),
       );
@@ -602,9 +602,9 @@ class AndroidProject extends FlutterProjectPlatform {
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
-  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
-  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\:\\s+[\'\"]kotlin-android[\'\"]\\s*\$');
-  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
+  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
@@ -689,7 +689,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   bool _shouldRegenerateFromTemplate() {
-    return fsUtils.isOlderThanReference(
+    return globals.fsUtils.isOlderThanReference(
       entity: ephemeralDirectory,
       referenceFile: parent.pubspecFile,
     ) || globals.cache.isOlderThanToolsStamp(ephemeralDirectory);

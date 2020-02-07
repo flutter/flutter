@@ -720,7 +720,7 @@ void main() {
         app = BuildableFuchsiaApp(project: FlutterProject.current().fuchsia);
       }
 
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null, treeShakeIcons: false));
       return await device.startApp(
         app,
         prebuiltApplication: prebuilt,
@@ -753,7 +753,7 @@ void main() {
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
       final DebuggingOptions debuggingOptions =
-          DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null));
+          DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true,
           debuggingOptions: debuggingOptions);

@@ -405,7 +405,7 @@ void main() {
   });
 
   test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
-    environment.outputDir.childFile('a.txt')
+    environment.outputDir.childDirectory('a').childFile('a.txt')
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
     await const WebServiceWorker().build(environment);
@@ -413,10 +413,10 @@ void main() {
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
     // Contains file hash.
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-      contains('"/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
+      contains('"/a/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
     expect(environment.buildDir.childFile('service_worker.d'), exists);
     // Depends on resource file.
-    expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(), contains('a.txt'));
+    expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(), contains('a/a.txt'));
   }));
 }
 

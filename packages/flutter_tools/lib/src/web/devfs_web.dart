@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/discovery.dart';
@@ -33,13 +35,7 @@ import 'chrome.dart';
 /// This is only used in development mode.
 class WebAssetServer implements AssetReader {
   @visibleForTesting
-  WebAssetServer(this._httpServer, this._packages, this.internetAddress,
-      {@required void Function(dynamic, StackTrace) onError}) {
-    // _httpServer.listen((HttpRequest request) {
-    //   _handleRequest(request).catchError(onError);
-    //   // TODO(jonahwilliams): test the onError callback when https://github.com/dart-lang/sdk/issues/39094 is fixed.
-    // }, onError: onError);
-  }
+  WebAssetServer(this._httpServer, this._packages, this.internetAddress);
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -49,18 +45,13 @@ class WebAssetServer implements AssetReader {
   ///
   /// Unhandled exceptions will throw a [ToolExit] with the error and stack
   /// trace.
-  static Future<WebAssetServer> start(String hostname, int port) async {
+  static Future<WebAssetServer> start(String hostname, int port, UrlTunneller urlTunneller) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final Packages packages =
-          await loadPackagesFile(Uri.base.resolve('.packages'));
-      final WebAssetServer server = WebAssetServer(httpServer, packages, address,
-          onError: (dynamic error, StackTrace stackTrace) {
-        httpServer.close(force: true);
-        throwToolExit(
-            'Unhandled exception in web development server:\n$error\n$stackTrace');
-      });
+          await loadPackagesFile(Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
+      final WebAssetServer server = WebAssetServer(httpServer, packages, address);
       final Dwds dwds = await Dwds.start(
         assetReader: server,
         buildResults: const Stream<BuildResult>.empty(),
@@ -68,15 +59,15 @@ class WebAssetServer implements AssetReader {
           final Chrome chrome = await ChromeLauncher.connectedInstance;
           return chrome.chromeConnection;
         },
+        urlEncoder: urlTunneller,
         enableDebugging: true,
       );
       final shelf.Handler dwdsHandler = const shelf.Pipeline()
         .addMiddleware(dwds.middleware)
-        .addHandler(dwds.handler);
+        .addHandler(server._handleRequest);
       final shelf.Cascade cascade = shelf.Cascade()
-        .add(dwdsHandler)
-        .add(server._handleRequest);
-
+        .add(dwds.handler)
+        .add(dwdsHandler);
       shelf.serveRequests(httpServer, cascade.handler);
       server.dwds = dwds;
       return server;
@@ -97,6 +88,12 @@ class WebAssetServer implements AssetReader {
   final Packages _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
+
+  @visibleForTesting
+  Uint8List getFile(String path) => _files[path];
+
+  @visibleForTesting
+  Uint8List getSourceMap(String path) => _sourcemaps[path];
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   Future<shelf.Response> _handleRequest(shelf.Request request) async {
@@ -125,7 +122,7 @@ class WebAssetServer implements AssetReader {
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
     if (_files.containsKey(requestPath)) {
-      final List<int> bytes = _files[requestPath];
+      final List<int> bytes = getFile(requestPath);
       headers[HttpHeaders.contentLengthHeader] = bytes.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/javascript';
       return shelf.Response.ok(bytes, headers: headers);
@@ -133,7 +130,7 @@ class WebAssetServer implements AssetReader {
     // If this is a sourcemap file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
     if (_sourcemaps.containsKey(requestPath)) {
-      final List<int> bytes = _sourcemaps[requestPath];
+      final List<int> bytes = getSourceMap(requestPath);
       headers[HttpHeaders.contentLengthHeader] = bytes.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/json';
       return shelf.Response.ok(bytes, headers: headers);
@@ -286,15 +283,46 @@ class WebAssetServer implements AssetReader {
   }
 }
 
+class ConnectionResult {
+  ConnectionResult(this.appConnection, this.debugConnection);
+
+  final AppConnection appConnection;
+  final DebugConnection debugConnection;
+}
+
 class WebDevFS implements DevFS {
-  WebDevFS(this.hostname, this.port, this._packagesFilePath);
+  WebDevFS(this.hostname, this.port, this._packagesFilePath, this.urlTunneller);
 
   final String hostname;
   final int port;
   final String _packagesFilePath;
-  WebAssetServer _webAssetServer;
+  final UrlTunneller urlTunneller;
 
-  Dwds get dwds => _webAssetServer.dwds;
+  @visibleForTesting
+  WebAssetServer webAssetServer;
+
+  Dwds get dwds => webAssetServer.dwds;
+
+  Future<DebugConnection> _cachedExtensionFuture;
+  StreamSubscription<void> _connectedApps;
+
+  /// Connect and retrieve the [DebugConnection] for the current application.
+  ///
+  /// Only calls [AppConnection.runMain] on the subsequent connections.
+  Future<ConnectionResult> connect(bool useDebugExtension) {
+    final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
+    _connectedApps = dwds.connectedApps.listen((AppConnection appConnection) async {
+      final DebugConnection debugConnection = useDebugExtension
+        ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
+        : await dwds.debugConnection(appConnection);
+      if (!firstConnection.isCompleted) {
+        firstConnection.complete(ConnectionResult(appConnection, debugConnection));
+      } else {
+        appConnection.runMain();
+      }
+    });
+    return firstConnection.future;
+  }
 
   @override
   List<Uri> sources = <Uri>[];
@@ -311,13 +339,14 @@ class WebDevFS implements DevFS {
 
   @override
   Future<Uri> create() async {
-    _webAssetServer = await WebAssetServer.start(hostname, port);
+    webAssetServer = await WebAssetServer.start(hostname, port, urlTunneller);
     return Uri.parse('http://$hostname:$port');
   }
 
   @override
   Future<void> destroy() async {
-    await _webAssetServer.dispose();
+    await webAssetServer.dispose();
+    await _connectedApps?.cancel();
   }
 
   @override
@@ -350,55 +379,33 @@ class WebDevFS implements DevFS {
     assert(trackWidgetCreation != null);
     assert(generator != null);
     if (bundleFirstUpload) {
-      final File requireJS = globals.fs.file(globals.fs.path.join(
-        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-        'lib',
-        'dev_compiler',
-        'kernel',
-        'amd',
-        'require.js',
-      ));
-      final File dartSdk = globals.fs.file(globals.fs.path.join(
-        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-        'kernel',
-        'amd',
-        'dart_sdk.js',
-      ));
-      final File dartSdkSourcemap = globals.fs.file(globals.fs.path.join(
-        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-        'kernel',
-        'amd',
-        'dart_sdk.js.map',
-      ));
-      final File stackTraceMapper = globals.fs.file(globals.fs.path.join(
-        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-        'lib',
-        'dev_compiler',
-        'web',
-        'dart_stack_trace_mapper.js',
-      ));
       final String entrypoint = PackageUriMapper(mainPath, '.packages', null, null)
         .map(mainPath)
         ?.pathSegments?.join('/');
-      _webAssetServer.writeFile(
+      webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
+      webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
+      webAssetServer.writeFile(
           '/main.dart.js',
           generateBootstrapScript(
             requireUrl: _filePathToUriFragment(requireJS.path),
             mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
             entrypoint: entrypoint != null ? '/packages/$entrypoint.lib.js' : '$mainPath.lib.js',
           ));
-      _webAssetServer.writeFile(
+      webAssetServer.writeFile(
           '/main_module.bootstrap.js',
           generateMainModule(
             entrypoint: entrypoint != null ? '/packages/$entrypoint.lib.js' : '$mainPath.lib.js',
           ));
-      _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
-      _webAssetServer.writeFile(
+      webAssetServer.writeFile('/basic.digests', '{}');
+      webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
+      webAssetServer.writeFile(
           '/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
       // be shared.
-      await writeBundle(
-          globals.fs.directory(getAssetBuildDirectory()), bundle.entries);
+      if (bundle != null) {
+        await writeBundle(
+            globals.fs.directory(getAssetBuildDirectory()), bundle.entries);
+      }
     }
     final DateTime candidateCompileTime = DateTime.now();
     if (fullRestart) {
@@ -427,7 +434,7 @@ class WebDevFS implements DevFS {
       codeFile = globals.fs.file('${compilerOutput.outputFilename}.sources');
       manifestFile = globals.fs.file('${compilerOutput.outputFilename}.json');
       sourcemapFile = globals.fs.file('${compilerOutput.outputFilename}.map');
-      modules = _webAssetServer.write(codeFile, manifestFile, sourcemapFile);
+      modules = webAssetServer.write(codeFile, manifestFile, sourcemapFile);
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
@@ -437,6 +444,41 @@ class WebDevFS implements DevFS {
         invalidatedSourcesCount: invalidatedFiles.length)
       ..invalidatedModules = modules.map(_filePathToUriFragment).toList();
   }
+
+  @visibleForTesting
+  final File requireJS = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    'lib',
+    'dev_compiler',
+    'kernel',
+    'amd',
+    'require.js',
+  ));
+
+  @visibleForTesting
+  final File dartSdk = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd',
+    'dart_sdk.js',
+  ));
+
+  @visibleForTesting
+  final File dartSdkSourcemap = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd',
+    'dart_sdk.js.map',
+  ));
+
+  @visibleForTesting
+  final File stackTraceMapper = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+    'lib',
+    'dev_compiler',
+    'web',
+    'dart_stack_trace_mapper.js',
+  ));
 }
 
 String _filePathToUriFragment(String path) {

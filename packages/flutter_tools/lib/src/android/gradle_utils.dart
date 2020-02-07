@@ -97,7 +97,7 @@ class GradleUtils {
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
-    fsUtils.copyDirectorySync(
+    globals.fsUtils.copyDirectorySync(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       directory,
       shouldCopyFile: (File sourceFile, File destinationFile) {
@@ -266,10 +266,10 @@ void updateLocalProperties({
   }
 
   if (androidSdk != null) {
-    changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory));
+    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory));
   }
 
-  changeIfNecessary('flutter.sdk', fsUtils.escapePath(Cache.flutterRoot));
+  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String buildName = validatedBuildNameForPlatform(
@@ -295,7 +295,7 @@ void updateLocalProperties({
 void writeLocalProperties(File properties) {
   final SettingsFile settings = SettingsFile();
   if (androidSdk != null) {
-    settings.values['sdk.dir'] = fsUtils.escapePath(androidSdk.directory);
+    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory);
   }
   settings.writeContents(properties);
 }

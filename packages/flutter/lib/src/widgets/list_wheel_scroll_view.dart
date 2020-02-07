@@ -924,6 +924,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   @override
   void forgetChild(Element child) {
     _childElements.remove(child.slot);
+    super.forgetChild(child);
   }
 
 }

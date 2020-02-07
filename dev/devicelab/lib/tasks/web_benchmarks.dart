@@ -99,8 +99,13 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
         '--disable-translate',
       ];
 
-      final bool isUncalibratedSmokeTest =
-          io.Platform.environment['UNCALIBRATED_SMOKE_TEST'] == 'true';
+      // TODO(yjbanov): temporarily disables headful Chrome until we get
+      //                devicelab hardware that is able to run it. Our current
+      //                GCE VMs can only run in headless mode.
+      //                See: https://github.com/flutter/flutter/issues/50164
+      final bool isUncalibratedSmokeTest = io.Platform.environment['CALIBRATED'] != 'true';
+      // final bool isUncalibratedSmokeTest =
+      //     io.Platform.environment['UNCALIBRATED_SMOKE_TEST'] == 'true';
       if (isUncalibratedSmokeTest) {
         print('Running in headless mode because running on uncalibrated hardware.');
         args.add('--headless');
@@ -149,6 +154,14 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
 }
 
 String _findSystemChromeExecutable() {
+  // On some environments, such as the Dart HHH tester, Chrome resides in a
+  // non-standard location and is provided via the following environment
+  // variable.
+  final String envExecutable = io.Platform.environment['CHROME_EXECUTABLE'];
+  if (envExecutable != null) {
+    return envExecutable;
+  }
+
   if (io.Platform.isLinux) {
     final io.ProcessResult which =
         io.Process.runSync('which', <String>['google-chrome']);

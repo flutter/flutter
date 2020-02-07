@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/web/devfs_web.dart';
 import 'package:mockito/mockito.dart';
@@ -68,10 +69,7 @@ void main() {
       when(response.close()).thenAnswer((Invocation invocation) async {
         closeCompleter.complete();
       });
-      webAssetServer = WebAssetServer(
-          mockHttpServer, packages, InternetAddress.loopbackIPv4, onError: (dynamic error, StackTrace stackTrace) {
-        closeCompleter.completeError(error, stackTrace);
-      });
+      webAssetServer = WebAssetServer(mockHttpServer, packages, InternetAddress.loopbackIPv4);
     });
   });
 
@@ -81,7 +79,7 @@ void main() {
   });
 
   test('Throws a tool exit if bind fails with a SocketException', () => testbed.run(() async {
-    expect(WebAssetServer.start('hello', 1234), throwsToolExit());
+    expect(WebAssetServer.start('hello', 1234, null), throwsToolExit());
   }));
 
   test('Can catch exceptions through the onError callback', () => testbed.run(() async {
@@ -321,6 +319,43 @@ void main() {
 
     verify(mockHttpServer.close()).called(1);
   }));
+
+  test('Can start web server with specified assets', () => testbed.run(() async {
+    globals.fs.file('a.sources').writeAsStringSync('');
+    globals.fs.file('a.json').writeAsStringSync('{}');
+    globals.fs.file('a.map').writeAsStringSync('{}');
+    globals.fs.file('.packages').writeAsStringSync('\n');
+
+    final ResidentCompiler residentCompiler = MockResidentCompiler();
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packagesFilePath: anyNamed('packagesFilePath'),
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('a', 0, <Uri>[]);
+    });
+
+    final WebDevFS webDevFS = WebDevFS('localhost', 0, '.packages', null);
+    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.dartSdk.createSync(recursive: true);
+    webDevFS.dartSdkSourcemap.createSync(recursive: true);
+    webDevFS.stackTraceMapper.createSync(recursive: true);
+
+    await webDevFS.create();
+    await webDevFS.update(
+      mainPath: globals.fs.path.join('lib', 'main.dart'),
+      generator: residentCompiler,
+      trackWidgetCreation: true,
+      bundleFirstUpload: true,
+      invalidatedFiles: <Uri>[],
+    );
+
+    expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);
+
+    await webDevFS.destroy();
+  }));
 }
 
 class MockHttpServer extends Mock implements HttpServer {}
@@ -328,3 +363,4 @@ class MockHttpRequest extends Mock implements HttpRequest {}
 class MockHttpResponse extends Mock implements HttpResponse {}
 class MockHttpHeaders extends Mock implements HttpHeaders {}
 class MockPlatform extends Mock implements Platform {}
+class MockResidentCompiler extends Mock implements ResidentCompiler {}
