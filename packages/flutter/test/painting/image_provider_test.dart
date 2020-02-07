@@ -174,7 +174,6 @@ void main() {
     test('File image with empty file throws expected error - (image cache)', () async {
       final Completer<StateError> error = Completer<StateError>();
       FlutterError.onError = (FlutterErrorDetails details) {
-        print(details.exception);
         error.complete(details.exception as StateError);
       };
       final MemoryFileSystem fs = MemoryFileSystem();
