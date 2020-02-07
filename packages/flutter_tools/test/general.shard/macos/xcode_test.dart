@@ -83,23 +83,23 @@ void main() {
 
     testWithoutContext('xcodeVersionSatisfactory is true when version meets minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
       expect(xcode.isVersionSatisfactory, isTrue);
     });
 
     testWithoutContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(12);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
       expect(xcode.isVersionSatisfactory, isTrue);
     });
 
     testWithoutContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
       when(mockXcodeProjectInterpreter.minorVersion).thenReturn(3);
 
       expect(xcode.isVersionSatisfactory, isTrue);
@@ -126,8 +126,8 @@ void main() {
       when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
         .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
       expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
     });
@@ -138,8 +138,8 @@ void main() {
       when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
         .thenReturn(ProcessResult(1, 0, xcodePath, ''));
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
 
       expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
     });
@@ -150,8 +150,8 @@ void main() {
       when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
         .thenReturn(ProcessResult(1, 0, xcodePath, ''));
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
       expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
     });

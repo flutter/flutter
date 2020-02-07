@@ -19,8 +19,8 @@ import '../ios/devices.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
 
-const int kXcodeRequiredVersionMajor = 11;
-const int kXcodeRequiredVersionMinor = 0;
+const int kXcodeRequiredVersionMajor = 10;
+const int kXcodeRequiredVersionMinor = 2;
 
 enum SdkType {
   iPhone,
