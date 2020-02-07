@@ -1140,7 +1140,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.initState();
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
-    widget.focusNode.addListener(_handleEditableTextFocusChanged);
+    widget.focusNode.addListener(_handleFocusChanged);
     _scrollController = widget.scrollController ?? ScrollController();
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
@@ -1176,10 +1176,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     _selectionOverlay?.handlesVisible = widget.showSelectionHandles;
     if (widget.focusNode != oldWidget.focusNode) {
-      oldWidget.focusNode.removeListener(_handleEditableTextFocusChanged);
+      oldWidget.focusNode.removeListener(_handleFocusChanged);
       _focusAttachment?.detach();
       _focusAttachment = widget.focusNode.attach(context);
-      widget.focusNode.addListener(_handleEditableTextFocusChanged);
+      widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
     if (widget.readOnly) {
@@ -1216,7 +1216,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     _focusAttachment.detach();
-    widget.focusNode.removeListener(_handleEditableTextFocusChanged);
+    widget.focusNode.removeListener(_handleFocusChanged);
     super.dispose();
   }
 
@@ -1755,7 +1755,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     setState(() { /* We use widget.controller.value in build(). */ });
   }
 
-  void _handleEditableTextFocusChanged() {
+  void _handleFocusChanged() {
     _openOrCloseInputConnectionIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();

@@ -357,7 +357,7 @@ class _FocusState extends State<Focus> {
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should
     // have already removed its listener.
-    focusNode.addListener(_handleFocusScopeFocusChanged);
+    focusNode.addListener(_handleFocusChanged);
   }
 
   FocusNode _createNode() {
@@ -372,7 +372,7 @@ class _FocusState extends State<Focus> {
   void dispose() {
     // Regardless of the node owner, we need to remove it from the tree and stop
     // listening to it.
-    focusNode.removeListener(_handleFocusScopeFocusChanged);
+    focusNode.removeListener(_handleFocusChanged);
     _focusAttachment.detach();
 
     // Don't manage the lifetime of external nodes given to the widget, just the
@@ -429,7 +429,7 @@ class _FocusState extends State<Focus> {
       }
     } else {
       _focusAttachment.detach();
-      focusNode.removeListener(_handleFocusScopeFocusChanged);
+      focusNode.removeListener(_handleFocusChanged);
       _initNode();
     }
 
@@ -438,7 +438,7 @@ class _FocusState extends State<Focus> {
     }
   }
 
-  void _handleFocusScopeFocusChanged() {
+  void _handleFocusChanged() {
     final bool hasPrimaryFocus = focusNode.hasPrimaryFocus;
     final bool canRequestFocus = focusNode.canRequestFocus;
     if (widget.onFocusChange != null) {

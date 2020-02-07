@@ -18,7 +18,7 @@ import 'framework.dart';
 
 // Used for debugging focus code. Set to true to see highly verbose debug output
 // when focus changes occur.
-const bool _kDebugFocus = true;
+const bool _kDebugFocus = false;
 
 bool _focusDebug(String message, [Iterable<String> details]) {
   if (_kDebugFocus) {
@@ -84,7 +84,7 @@ class FocusAttachment {
       if (_node.hasPrimaryFocus || (_node._manager != null && _node._manager._nextFocus == _node)) {
         _node.unfocus(focusPrevious: true);
       }
-      // This node is no longer be in the tree, so shouldn't receive notifications anymore.
+      // This node is no longer in the tree, so shouldn't send notifications anymore.
       _node._manager?._markDetached(_node);
       _node._parent?._removeChild(_node);
       _node._attachment = null;
@@ -560,7 +560,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///  * [Focus.isAt], which is a static method that will return the focus
   ///    state of the nearest ancestor [Focus] widget's focus node.
   bool get hasFocus {
-    if (_manager?.primaryFocus == null) {
+    if (_manager?.primaryFocus == null || _manager?._unfocusedNode == this) {
       return false;
     }
     if (hasPrimaryFocus) {
@@ -1386,7 +1386,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
 
   void _markDetached(FocusNode node) {
     // The node has been removed from the tree, so it no longer needs to be
-    // notified.
+    // notified of changes.
     assert(_focusDebug('Node was detached: $node'));
     if (_unfocusedNode == node) {
       _unfocusedNode = null;
@@ -1405,13 +1405,11 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
 
   void _markNextFocus(FocusNode node) {
     if (_primaryFocus == node) {
-      // Caller asked for the current focus to be the next focus, so just
-      // pretend that didn't happen.  Ideally, it would also unschedule the
-      // update, but it's not possible to know that this is the only reason for
-      // the update, so just don't schedule another one.
+      // The caller asked for the current focus to be the next focus, so just
+      // pretend that didn't happen.
       _nextFocus = null;
       // If this node is going to be the next focus, then it's not going to be
-      // unfocused unless we call _markUnfocused again, so unset it.
+      // unfocused unless we call _markUnfocused again, so unset _unfocusedNode.
       if (_unfocusedNode == node) {
         _unfocusedNode = null;
       }
