@@ -732,12 +732,12 @@ void main() {
             backgroundColor: Colors.white,
             body: Center(
               child: Column(
-                children: <Widget>[
+                children: const <Widget>[
                   ExcludeSemantics(
-                    child: const Text('One', style: TextStyle(color: Colors.white)),
+                    child: Text('One', style: TextStyle(color: Colors.white)),
                   ),
-                  const SizedBox(height: 30),
-                  const MergeSemantics(
+                  SizedBox(height: 30),
+                  MergeSemantics(
                     child: Text('One', style: TextStyle(color: Colors.black)),
                   )
                 ],
@@ -758,12 +758,12 @@ void main() {
             backgroundColor: Colors.white,
             body: Center(
               child: Column(
-                children: <Widget>[
+                children: const <Widget>[
                   ExcludeSemantics(
-                    child: const Text('Two', style: TextStyle(color: Colors.white)),
+                    child: Text('Two', style: TextStyle(color: Colors.white)),
                   ),
-                  const SizedBox(height: 30),
-                  const MergeSemantics(
+                  SizedBox(height: 30),
+                  MergeSemantics(
                     child: Text('One', style: TextStyle(color: Colors.black)),
                   )
                 ],
@@ -784,12 +784,12 @@ void main() {
             backgroundColor: Colors.white,
             body: Center(
               child: Column(
-                children: <Widget>[
+                children: const <Widget>[
                   ExcludeSemantics(
-                    child: FlatButton(child: const Text('One'), onPressed: null),
+                    child: FlatButton(child: Text('One'), onPressed: null),
                   ),
-                  const SizedBox(height: 30),
-                  const MergeSemantics(
+                  SizedBox(height: 30),
+                  MergeSemantics(
                     child: Text('One', style: TextStyle(color: Colors.black)),
                   )
                 ],
@@ -810,12 +810,12 @@ void main() {
             backgroundColor: Colors.white,
             body: Center(
               child: Column(
-                children: <Widget>[
+                children: const <Widget>[
                   ExcludeSemantics(
-                    child: FlatButton(child: const Text('Two'), onPressed: null),
+                    child: FlatButton(child: Text('Two'), onPressed: null),
                   ),
-                  const SizedBox(height: 30),
-                  const MergeSemantics(
+                  SizedBox(height: 30),
+                  MergeSemantics(
                     child: Text('One', style: TextStyle(color: Colors.black)),
                   )
                 ],
@@ -836,12 +836,12 @@ void main() {
             backgroundColor: Colors.white,
             body: Center(
               child: Column(
-                children: <Widget>[
+                children: const <Widget>[
                   ExcludeSemantics(
-                    child: const Text('One', style: TextStyle(color: Colors.black)),
+                    child: Text('One', style: TextStyle(color: Colors.black)),
                   ),
-                  const SizedBox(height: 30),
-                  const Text('One', style: TextStyle(color: Colors.white)),
+                  SizedBox(height: 30),
+                  Text('One', style: TextStyle(color: Colors.white)),
                 ],
               ),
             ),
