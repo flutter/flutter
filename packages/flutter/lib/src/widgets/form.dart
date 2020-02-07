@@ -219,10 +219,7 @@ class FormState extends State<Form> {
   /// See also:
   ///   * [validate], which will validate and show any error on screen.
   bool isValid() {
-    return _fields.fold(
-      true,
-      (bool prev, FormFieldState<dynamic> field) => prev && field.isValid,
-    );
+    return !_fields.any((FormFieldState<dynamic> field) => !field.isValid);
   }
 }
 
@@ -365,9 +362,12 @@ class FormFieldState<T> extends State<FormField<T>> {
   bool get hasError => _errorText != null;
 
   /// True if the current value is valid.
-  ///
-  /// Calling this will not set [errorText] or [hasError] and it will not
-  /// display the error in Screen. Use [validate] for that.
+  /// This will not set [errorText] or [hasError] and it will not update
+  /// error display.
+  /// 
+  /// See also:
+  /// 
+  ///  * [validate], which will update [errorText] or [hasError].
   bool get isValid => widget.validator?.call(_value) == null;
 
   /// Calls the [FormField]'s onSaved method with the current value.
@@ -387,8 +387,9 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
   /// were no errors.
   ///
-  /// In order to get the validity without setting [errorText] or [hasError],
-  /// use [isValid] instead.
+  /// See also:
+  ///
+  ///  * [isValid], which passively gets the validity without setting [errorText] or [hasError].
   bool validate() {
     setState(() {
       _validate();

@@ -180,7 +180,7 @@ void main() {
   });
 
   testWidgets(
-    'IsValid returns false when one of the fields is invalid and does not change error display',
+    'IsValid returns false when any of the fields are invalid and does not change error display',
     (WidgetTester tester) async {
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
