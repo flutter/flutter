@@ -7,6 +7,64 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('text contrast guideline', () {
+    testWidgets('white text on white background with merge semantics', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: MergeSemantics(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const <Widget>[
+                  Text(
+                    'I am text one',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  Text(
+                    'And I am text two',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('black text on white background with merge semantics', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: MergeSemantics(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const <Widget>[
+                  Text(
+                    'I am text one',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  Text(
+                    'And I am text two',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
     testWidgets('black text on white background - Text Widget - direct style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
@@ -594,6 +652,205 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
     handle.dispose();
   });
+
+  testWidgets('white text on white', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: MergeSemantics(
+                child: Column(
+                  children: const <Widget>[
+                    Text('White', style: TextStyle(color: Colors.white)),
+                  ]
+                ),
+              ),
+            ),
+          ),
+        ));
+    await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('white and black text on white', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: MergeSemantics(
+                child: Column(
+                  children: const <Widget>[
+                    Text('White', style: TextStyle(color: Colors.white)),
+                    SizedBox(height: 30),
+                    Text('Black', style: TextStyle(color: Colors.black)),
+                  ]
+                ),
+              ),
+            ),
+          ),
+        ));
+    await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('black and white text on white', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: MergeSemantics(
+                child: Column(
+                  children: const <Widget>[
+                    Text('Black', style: TextStyle(color: Colors.black)),
+                    SizedBox(height: 30),
+                    Text('White', style: TextStyle(color: Colors.white)),
+                  ]
+                ),
+              ),
+            ),
+          ),
+        ));
+    await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('irrelevant text', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                children: <Widget>[
+                  ExcludeSemantics(
+                    child: const Text('One', style: TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(height: 30),
+                  const MergeSemantics(
+                    child: Text('One', style: TextStyle(color: Colors.black)),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('irrelevant text - passing', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                children: <Widget>[
+                  ExcludeSemantics(
+                    child: const Text('Two', style: TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(height: 30),
+                  const MergeSemantics(
+                    child: Text('One', style: TextStyle(color: Colors.black)),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('irrelevant button', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                children: <Widget>[
+                  ExcludeSemantics(
+                    child: FlatButton(child: const Text('One'), onPressed: null),
+                  ),
+                  const SizedBox(height: 30),
+                  const MergeSemantics(
+                    child: Text('One', style: TextStyle(color: Colors.black)),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('irrelevant button - passing', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                children: <Widget>[
+                  ExcludeSemantics(
+                    child: FlatButton(child: const Text('Two'), onPressed: null),
+                  ),
+                  const SizedBox(height: 30),
+                  const MergeSemantics(
+                    child: Text('One', style: TextStyle(color: Colors.black)),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('black and white text, without MergeSemantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                children: <Widget>[
+                  ExcludeSemantics(
+                    child: const Text('One', style: TextStyle(color: Colors.black)),
+                  ),
+                  const SizedBox(height: 30),
+                  const Text('One', style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+          ),
+        ));
+    await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
 }
 
 Widget _boilerplate(Widget child) {
