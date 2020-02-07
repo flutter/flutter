@@ -71,7 +71,7 @@ void main() {
   });
 
   test('FlutterWebShellBuilder correctly imports registrant', () async {
-    AssetId nestedEntrypoint = AssetId('hello_world', 'lib/src/nested_main.dart');
+    final AssetId nestedEntrypoint = AssetId('hello_world', 'lib/src/nested_main.dart');
     when(mockBuildStep.inputId).thenReturn(nestedEntrypoint);
 
     const FlutterWebShellBuilder builder = FlutterWebShellBuilder(
