@@ -17,6 +17,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -237,6 +238,7 @@ abstract class IosAssetBundle extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override

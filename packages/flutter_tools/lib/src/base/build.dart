@@ -147,7 +147,7 @@ class AOTSnapshotter {
     // multiple debug files.
     final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
     final String debugFilename = 'app.$archName.symbols';
-    if (splitDebugInfo != null) {
+    if (splitDebugInfo?.isNotEmpty ?? false) {
       globals.fs.directory(splitDebugInfo)
         .createSync(recursive: true);
     }
@@ -157,7 +157,7 @@ class AOTSnapshotter {
       // Faster async/await
       '--no-causal-async-stacks',
       '--lazy-async-stacks',
-      if (splitDebugInfo != null) ...<String>[
+      if (splitDebugInfo?.isNotEmpty ?? false) ...<String>[
         '--dwarf-stack-traces',
         '--save-debugging-info=${globals.fs.path.join(splitDebugInfo, debugFilename)}'
       ]
