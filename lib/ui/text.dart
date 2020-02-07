@@ -1633,8 +1633,8 @@ enum BoxHeightStyle {
   /// This does not guarantee that the boxes will cover the entire vertical height of the line
   /// when there is additional line spacing.
   ///
-  /// See [RectHeightStyle.includeLineSpacingTop], [RectHeightStyle.includeLineSpacingMiddle],
-  /// and [RectHeightStyle.includeLineSpacingBottom] for styles that will cover
+  /// See [BoxHeightStyle.includeLineSpacingTop], [BoxHeightStyle.includeLineSpacingMiddle],
+  /// and [BoxHeightStyle.includeLineSpacingBottom] for styles that will cover
   /// the entire line.
   max,
 
@@ -1656,7 +1656,7 @@ enum BoxHeightStyle {
   ///
   /// The line spacing will be added to the top of the box.
   ///
-  /// {@macro flutter.dart:ui.rectHeightStyle.includeLineSpacing}
+  /// {@macro flutter.dart:ui.boxHeightStyle.includeLineSpacing}
   includeLineSpacingTop,
 
   /// Extends the bottom edge of the bounds to fully cover any line spacing.
