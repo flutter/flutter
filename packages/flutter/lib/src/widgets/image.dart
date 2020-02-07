@@ -117,6 +117,8 @@ Future<void> precacheImage(
       if (!completer.isCompleted) {
         completer.complete();
       }
+      // Give callers at least one frame to subscribe to the image stream
+      // so that FlutterImageCache can weakly hold it without losing it.
       SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
         stream.removeListener(listener);
       });
