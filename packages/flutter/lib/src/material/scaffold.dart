@@ -946,7 +946,7 @@ class FloatingActionButtonConfiguration {
 /// ```dart
 /// int _location = 0;
 ///
-/// static const List<FloatingActionButtonLocation> _Locations = [
+/// static const List<FloatingActionButtonLocation> _locations = [
 ///   FloatingActionButtonLocation.endTop,
 ///   FloatingActionButtonLocation.centerTop,
 ///   FloatingActionButtonLocation.startTop,
@@ -978,7 +978,7 @@ class FloatingActionButtonConfiguration {
 ///       child: Icon(Icons.add),
 ///       backgroundColor: Colors.blue,
 ///     ),
-///     floatingActionButtonLocation: _Locations[(_location + 0) % 6],
+///     floatingActionButtonLocation: _locations[(_location + 0) % 6],
 ///     additionalFloatingActionButtonConfigurations: {
 ///       ValueKey('beach_access_button'): FloatingActionButtonConfiguration(
 ///         button: FloatingActionButton(
@@ -989,7 +989,7 @@ class FloatingActionButtonConfiguration {
 ///           backgroundColor: Colors.yellow,
 ///           foregroundColor: Colors.black,
 ///         ),
-///         location: _Locations[(_location + 1) % 6],
+///         location: _locations[(_location + 1) % 6],
 ///       ),
 ///       ValueKey('android_button'): FloatingActionButtonConfiguration(
 ///         button: FloatingActionButton(
@@ -999,7 +999,7 @@ class FloatingActionButtonConfiguration {
 ///           child: Icon(Icons.android),
 ///           backgroundColor: Colors.green,
 ///         ),
-///         location: _Locations[(_location + 2) % 6],
+///         location: _locations[(_location + 2) % 6],
 ///       ),
 ///       ValueKey('category_button'): FloatingActionButtonConfiguration(
 ///         button: FloatingActionButton(
@@ -1009,7 +1009,7 @@ class FloatingActionButtonConfiguration {
 ///           child: Icon(Icons.category),
 ///           backgroundColor: Colors.red,
 ///         ),
-///         location: _Locations[(_location + 3) % 6],
+///         location: _locations[(_location + 3) % 6],
 ///       ),
 ///       ValueKey('camera_button'): FloatingActionButtonConfiguration(
 ///         button: FloatingActionButton(
@@ -1020,7 +1020,7 @@ class FloatingActionButtonConfiguration {
 ///           backgroundColor: Colors.white,
 ///           foregroundColor: Colors.black,
 ///         ),
-///         location: _Locations[(_location + 4) % 6],
+///         location: _locations[(_location + 4) % 6],
 ///       ),
 ///       ValueKey('satellite_button'): FloatingActionButtonConfiguration(
 ///         button: FloatingActionButton(
@@ -1030,7 +1030,7 @@ class FloatingActionButtonConfiguration {
 ///           child: Icon(Icons.satellite),
 ///           backgroundColor: Colors.orange,
 ///         ),
-///         location: _Locations[(_location + 5) % 6],
+///         location: _locations[(_location + 5) % 6],
 ///       ),
 ///     },
 ///   );
