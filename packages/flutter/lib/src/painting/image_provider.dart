@@ -746,7 +746,7 @@ class FileImage extends ImageProvider<FileImage> {
 
     final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
-      return null;
+      throw StateError('$file is empty and cannot be loaded as an image.');
 
     return await decode(bytes);
   }
