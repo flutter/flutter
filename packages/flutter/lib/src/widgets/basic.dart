@@ -4444,7 +4444,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_rnZaagadyo}
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
 /// it's middle child, a [Container] here, expands to fill the space.
 ///
@@ -4483,7 +4483,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Row] with multiple
 /// children expanded, utilizing the [flex] factor to prioritize available space.
 ///
@@ -4826,9 +4826,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///
 ///
-/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
-///
-/// {@tool sample --template=freeform}
+/// {@tool dartpad --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
@@ -5542,7 +5540,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being touched, showing a count of
 /// the number of pointer downs and ups.
 ///
@@ -5795,7 +5793,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being entered by a mouse
 /// pointer, showing a count of the number of entries and exits.
 ///
@@ -5949,7 +5947,7 @@ class MouseRegion extends StatefulWidget {
   ///    override [State.dispose] and call [onExit], or create your own widget
   ///    using [RenderMouseRegion].
   ///
-  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// The following example shows a blue rectangular that turns yellow when
   /// hovered. Since the hover state is completely contained within a widget
   /// that unconditionally creates the `MouseRegion`, you can ignore the
@@ -5977,7 +5975,7 @@ class MouseRegion extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// The following example shows a widget that hides its content one second
   /// after behing hovered, and also exposes the enter and exit callbacks.
   /// Because the widget conditionally creates the `MouseRegion`, and leaks the
