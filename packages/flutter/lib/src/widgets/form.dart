@@ -364,9 +364,9 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// True if the current value is valid.
   /// This will not set [errorText] or [hasError] and it will not update
   /// error display.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [validate], which will update [errorText] or [hasError].
   bool get isValid => widget.validator?.call(_value) == null;
 
