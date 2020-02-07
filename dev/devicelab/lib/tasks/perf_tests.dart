@@ -777,7 +777,7 @@ class ListStatistics {
 
 class _UnzipListEntry {
   factory _UnzipListEntry.fromLine(String line) {
-    final List<String> data = line.trim().split(RegExp('\\s+'));
+    final List<String> data = line.trim().split(RegExp(r'\s+'));
     assert(data.length == 8);
     return _UnzipListEntry._(
       uncompressedSize:  int.parse(data[0]),

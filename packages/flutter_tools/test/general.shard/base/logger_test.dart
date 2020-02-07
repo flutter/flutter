@@ -282,7 +282,7 @@ void main() {
           );
           logger.printStatus('Rude Interrupting Cow');
           status.stop();
-          final String a = currentPlatform().isWindows ? '\\' : '⣽';
+          final String a = currentPlatform().isWindows ? r'\' : '⣽';
           final String b = currentPlatform().isWindows ? '|' : '⣻';
 
           expect(

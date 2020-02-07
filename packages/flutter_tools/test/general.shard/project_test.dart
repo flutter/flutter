@@ -388,7 +388,7 @@ apply plugin: 'kotlin-android'
               });
             }
         );
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
 
@@ -403,7 +403,7 @@ apply plugin: 'kotlin-android'
             });
           }
         );
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
       });
       testWithMocks('empty surrounded by quotes', () async {

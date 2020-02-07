@@ -64,7 +64,7 @@ main() {
     test('generates application snippets', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        ..writeAsStringSync(r'''
 A description of the snippet.
 
 On several lines.
@@ -75,7 +75,7 @@ const String name = 'snippet';
 
 ```dart
 void main() {
-  print('The actual \$name.');
+  print('The actual $name.');
 }
 ```
 ''');
@@ -93,7 +93,7 @@ void main() {
       );
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains('print(&#39;The actual \$name.&#39;);'));
+      expect(html, contains(r'print(&#39;The actual $name.&#39;);'));
       expect(html, contains('A description of the snippet.\n'));
       expect(
           html,
@@ -112,14 +112,14 @@ void main() {
     test('generates sample snippets', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        ..writeAsStringSync(r'''
 A description of the snippet.
 
 On several lines.
 
 ```code
 void main() {
-  print('The actual \$name.');
+  print('The actual $name.');
 }
 ```
 ''');
@@ -131,7 +131,7 @@ void main() {
       );
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains('  print(&#39;The actual \$name.&#39;);'));
+      expect(html, contains(r'  print(&#39;The actual $name.&#39;);'));
       expect(html, contains('<div class="snippet-description">{@end-inject-html}A description of the snippet.\n\n'
           'On several lines.{@inject-html}</div>\n'));
       expect(html, contains('main() {'));
@@ -140,14 +140,14 @@ void main() {
     test('generates dartpad snippets', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        ..writeAsStringSync(r'''
 A description of the snippet.
 
 On several lines.
 
 ```code
 void main() {
-  print('The actual \$name.');
+  print('The actual $name.');
 }
 ```
 ''');
@@ -167,14 +167,14 @@ void main() {
     test('generates snippet application metadata', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
-        ..writeAsStringSync('''
+        ..writeAsStringSync(r'''
 A description of the snippet.
 
 On several lines.
 
 ```code
 void main() {
-  print('The actual \$name.');
+  print('The actual $name.');
 }
 ```
 ''');

@@ -250,7 +250,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Salary',
-                      prefixText: '\$',
+                      prefixText: r'$',
                       suffixText: 'USD',
                       suffixStyle: TextStyle(color: Colors.green),
                     ),

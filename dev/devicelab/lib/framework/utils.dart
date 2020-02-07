@@ -588,7 +588,7 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
 
 final RegExp _obsRegExp =
   RegExp('An Observatory debugger .* is available at: ');
-final RegExp _obsPortRegExp = RegExp('(\\S+:(\\d+)/\\S*)\$');
+final RegExp _obsPortRegExp = RegExp(r'(\S+:(\d+)/\S*)$');
 final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
 /// Tries to extract a port from the string.

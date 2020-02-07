@@ -70,22 +70,22 @@ Future<void> main() async {
       },
     ));
     expect(console.join('\n'), matches(
-      '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
-      'The following assertion was thrown testing the error handling logic:\n'
-      'Message goes here\\.\n'
-      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
-      'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
-      '\n'
-      'When the exception was thrown, this was the stack:\n'
-      '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
-      '#2      getSampleStack \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
-      '#3      main \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
-      '(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
-      '\\(elided [0-9]+ frames from class _RawReceivePortImpl and dart:async\\)\n'
-      '\n'
-      'line 1 of extra information\n'
-      'line 2 of extra information\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      r'^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
+      r'The following assertion was thrown testing the error handling logic:\n'
+      r'Message goes here\.\n'
+      r"'[^']+flutter/test/foundation/error_reporting_test\.dart':\n"
+      r"Failed assertion: line [0-9]+ pos [0-9]+: 'false'\n"
+      r'\n'
+      r'When the exception was thrown, this was the stack:\n'
+      r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+      r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+      r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+      r'(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+      r'\(elided [0-9]+ frames from class _RawReceivePortImpl and dart:async\)\n'
+      r'\n'
+      r'line 1 of extra information\n'
+      r'line 2 of extra information\n'
+      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -102,16 +102,16 @@ Future<void> main() async {
       exception: getAssertionErrorWithLongMessage(),
     ));
     expect(console.join('\n'), matches(
-      '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      'The following assertion was thrown:\n'
-      'word word word word word word word word word word word word word word word word word word word word\n'
-      'word word word word word word word word word word word word word word word word word word word word\n'
-      'word word word word word word word word word word word word word word word word word word word word\n'
-      'word word word word word word word word word word word word word word word word word word word word\n'
-      'word word word word word word word word word word word word word word word word word word word word\n'
-      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
-      'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
+      r'The following assertion was thrown:\n'
+      r'word word word word word word word word word word word word word word word word word word word word\n'
+      r'word word word word word word word word word word word word word word word word word word word word\n'
+      r'word word word word word word word word word word word word word word word word word word word word\n'
+      r'word word word word word word word word word word word word word word word word word word word word\n'
+      r'word word word word word word word word word word word word word word word word word word word word\n'
+      r"'[^']+flutter/test/foundation/error_reporting_test\.dart':\n"
+      r"Failed assertion: line [0-9]+ pos [0-9]+: 'false'\n"
+      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -143,21 +143,21 @@ Future<void> main() async {
       },
     ));
     expect(console.join('\n'), matches(
-      '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
-      'The following assertion was thrown testing the error handling logic:\n'
-      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':[\n ]'
-      'Failed[\n ]assertion:[\n ]line[\n ][0-9]+[\n ]pos[\n ][0-9]+:[\n ]\'false\':[\n ]is[\n ]not[\n ]true\\.\n'
-      '\n'
-      'When the exception was thrown, this was the stack:\n'
-      '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
-      '#2      getSampleStack \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
-      '#3      main \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
-      '(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
-      '\\(elided [0-9]+ frames from class _RawReceivePortImpl and dart:async\\)\n'
-      '\n'
-      'line 1 of extra information\n'
-      'line 2 of extra information\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      r'^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
+      r'The following assertion was thrown testing the error handling logic:\n'
+      r"'[^']+flutter/test/foundation/error_reporting_test\.dart':[\n ]"
+      r"Failed[\n ]assertion:[\n ]line[\n ][0-9]+[\n ]pos[\n ][0-9]+:[\n ]'false':[\n ]is[\n ]not[\n ]true\.\n"
+      r'\n'
+      r'When the exception was thrown, this was the stack:\n'
+      r'#0      getSampleStack\.<anonymous closure> \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+      r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+      r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
+      r'(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+      r'\(elided [0-9]+ frames from class _RawReceivePortImpl and dart:async\)\n'
+      r'\n'
+      r'line 1 of extra information\n'
+      r'line 2 of extra information\n'
+      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -175,11 +175,11 @@ Future<void> main() async {
       exception: exception,
     ));
     expect(console.join('\n'), matches(
-      '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      'The following NoSuchMethodError was thrown:\n'
-      'Receiver: 5\n'
-      'Tried calling: foo = 2, 4\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
+      r'The following NoSuchMethodError was thrown:\n'
+      r'Receiver: 5\n'
+      r'Tried calling: foo = 2, 4\n'
+      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -196,10 +196,10 @@ Future<void> main() async {
       exception: 'hello',
     ));
     expect(console.join('\n'), matches(
-      '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
-      'The following message was thrown:\n'
-      'hello\n'
-      '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
+      r'^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
+      r'The following message was thrown:\n'
+      r'hello\n'
+      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(const FlutterErrorDetails(

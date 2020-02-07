@@ -196,7 +196,7 @@ class FuchsiaRemoteConnection {
     sshConfigPath ??= Platform.environment['FUCHSIA_SSH_CONFIG'];
     if (address == null) {
       throw FuchsiaRemoteConnectionError(
-          'No address supplied, and \$FUCHSIA_DEVICE_URL not found.');
+          r'No address supplied, and $FUCHSIA_DEVICE_URL not found.');
     }
     const String interfaceDelimiter = '%';
     if (address.contains(interfaceDelimiter)) {

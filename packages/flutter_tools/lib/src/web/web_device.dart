@@ -100,7 +100,7 @@ class ChromeDevice extends Device {
     String version = 'unknown';
     if (globals.platform.isWindows) {
       final ProcessResult result = await globals.processManager.run(<String>[
-        r'reg', 'query', 'HKEY_CURRENT_USER\\Software\\Google\\Chrome\\BLBeacon', '/v', 'version',
+        r'reg', 'query', r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon', '/v', 'version',
       ]);
       if (result.exitCode == 0) {
         final List<String> parts = (result.stdout as String).split(RegExp(r'\s+'));
