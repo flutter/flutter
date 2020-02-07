@@ -463,11 +463,11 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  post_backdrop_filter_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of animations after a backdrop filter is removed on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/iphonexs"]
+  # post_backdrop_filter_perf_ios__timeline_summary:
+  #   description: >
+  #     Measures the runtime performance of animations after a backdrop filter is removed on iOS.
+  #   stage: devicelab_ios
+  #   required_agent_capabilities: ["mac/iphonexs"]
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -560,11 +560,11 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  simple_animation_perf_iphonexs:
-    description: >
-      Measure CPU/GPU usage percentages of a simple animation.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/iphonexs"]
+  # simple_animation_perf_iphonexs:
+  #   description: >
+  #     Measure CPU/GPU usage percentages of a simple animation.
+  #   stage: devicelab_ios
+  #   required_agent_capabilities: ["mac/iphonexs"]
 
   smoke_catalina_start_up_ios:
     description: >
