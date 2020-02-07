@@ -90,9 +90,9 @@ void main() {
 
   testWithoutContext('xcodebuild majorVersion returns major version', () {
     when(processManager.runSync(<String>[xcodebuild, '-version']))
-        .thenReturn(ProcessResult(1, 0, 'Xcode 11.4.1\nBuild version 11N111s', ''));
+        .thenReturn(ProcessResult(1, 0, 'Xcode 10.3.3\nBuild version 8E3004b', ''));
 
-    expect(xcodeProjectInterpreter.majorVersion, 11);
+    expect(xcodeProjectInterpreter.majorVersion, 10);
   });
 
   testWithoutContext('xcodebuild majorVersion is null when version has unexpected format', () {
@@ -102,7 +102,7 @@ void main() {
     expect(xcodeProjectInterpreter.majorVersion, isNull);
   });
 
-  testWithoutContext('xcodebuild minorVersion returns minor version', () {
+  testWithoutContext('xcodebuild inorVersion returns minor version', () {
     when(processManager.runSync(<String>[xcodebuild, '-version']))
         .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
 
