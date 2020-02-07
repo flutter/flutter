@@ -88,11 +88,15 @@ Future<void> precacheImage(
   ImageStreamListener listener;
   listener = ImageStreamListener(
     (ImageInfo image, bool sync) {
-      completer.complete();
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
       stream.removeListener(listener);
     },
     onError: (dynamic exception, StackTrace stackTrace) {
-      completer.complete();
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
       stream.removeListener(listener);
       if (onError != null) {
         onError(exception, stackTrace);

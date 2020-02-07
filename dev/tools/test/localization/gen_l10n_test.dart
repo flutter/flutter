@@ -420,9 +420,9 @@ void main() {
       }
 
       if (Platform.isWindows) {
-        expect(generator.arbPathStrings.first, 'lib\\l10n\\app_en_US.arb');
-        expect(generator.arbPathStrings.elementAt(1), 'lib\\l10n\\app_es.arb');
-        expect(generator.arbPathStrings.elementAt(2), 'lib\\l10n\\app_zh.arb');
+        expect(generator.arbPathStrings.first, r'lib\l10n\app_en_US.arb');
+        expect(generator.arbPathStrings.elementAt(1), r'lib\l10n\app_es.arb');
+        expect(generator.arbPathStrings.elementAt(2), r'lib\l10n\app_zh.arb');
       } else {
         expect(generator.arbPathStrings.first, 'lib/l10n/app_en_US.arb');
         expect(generator.arbPathStrings.elementAt(1), 'lib/l10n/app_es.arb');
@@ -688,13 +688,14 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springGreetings(DateTime springStartDate, Object helloWorld) {
+          r'''
+  String springGreetings(DateTime springStartDate, Object helloWorld) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
     String springGreetings(Object springStartDate, Object helloWorld) {
       return Intl.message(
-        "Since it's \${springStartDate}, it's finally spring! \${helloWorld}!",
+        "Since it's ${springStartDate}, it's finally spring! ${helloWorld}!",
         locale: _localeName,
         name: 'springGreetings',
         desc: "A realization that it's finally the spring season, followed by a greeting.",
@@ -757,7 +758,8 @@ void main() {
           expect(generator.classMethods, isNotEmpty);
           expect(
             generator.classMethods.first,
-            '''  String courseCompletion(double progress) {
+            '''
+  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(
       locale: _localeName,
       decimalDigits: 2,
@@ -820,7 +822,8 @@ void main() {
           expect(generator.classMethods, isNotEmpty);
           expect(
             generator.classMethods.first,
-            '''  String courseCompletion(double progress) {
+            '''
+  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(_localeName);
     final String progressString = progressNumberFormat.format(progress);
 

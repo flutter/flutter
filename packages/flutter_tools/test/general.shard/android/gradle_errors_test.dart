@@ -40,15 +40,15 @@ void main() {
 
   group('network errors', () {
     testUsingContext('retries if gradle fails while downloading', () async {
-      const String errorMessage = '''
+      const String errorMessage = r'''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
 at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1872)
 at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
 at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:254)
 at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
 at org.gradle.wrapper.Download.download(Download.java:44)
-at org.gradle.wrapper.Install\$1.call(Install.java:61)
-at org.gradle.wrapper.Install\$1.call(Install.java:48)
+at org.gradle.wrapper.Install$1.call(Install.java:61)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
 at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
 at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
@@ -66,7 +66,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     });
 
     testUsingContext('retries if gradle fails downloading with proxy error', () async {
-      const String errorMessage = '''
+      const String errorMessage = r'''
 Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
 at sun.net.www.protocol.http.HttpURLConnection.doTunneling(HttpURLConnection.java:2124)
 at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:183)
@@ -75,8 +75,8 @@ at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.
 at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:254)
 at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
 at org.gradle.wrapper.Download.download(Download.java:44)
-at org.gradle.wrapper.Install\$1.call(Install.java:61)
-at org.gradle.wrapper.Install\$1.call(Install.java:48)
+at org.gradle.wrapper.Install$1.call(Install.java:61)
+at org.gradle.wrapper.Install$1.call(Install.java:48)
 at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
 at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
@@ -113,7 +113,7 @@ Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached
     });
 
     testUsingContext('retries if remote host closes connection', () async {
-      const String errorMessage = '''
+      const String errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
 Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake
 	at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:994)
@@ -129,8 +129,8 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
 	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:263)
 	at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
 	at org.gradle.wrapper.Download.download(Download.java:44)
-	at org.gradle.wrapper.Install\$1.call(Install.java:61)
-	at org.gradle.wrapper.Install\$1.call(Install.java:48)
+	at org.gradle.wrapper.Install$1.call(Install.java:61)
+	at org.gradle.wrapper.Install$1.call(Install.java:48)
 	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
 	at org.gradle.wrapper.Install.createDist(Install.java:48)
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
@@ -175,7 +175,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
     });
 
     testUsingContext('retries if the connection is reset', () async {
-      const String errorMessage = '''
+      const String errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
 Exception in thread "main" java.net.SocketException: Connection reset
 	at java.net.SocketInputStream.read(SocketInputStream.java:210)
@@ -194,8 +194,8 @@ Exception in thread "main" java.net.SocketException: Connection reset
 	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:263)
 	at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
 	at org.gradle.wrapper.Download.download(Download.java:44)
-	at org.gradle.wrapper.Install\$1.call(Install.java:61)
-	at org.gradle.wrapper.Install\$1.call(Install.java:48)
+	at org.gradle.wrapper.Install$1.call(Install.java:61)
+	at org.gradle.wrapper.Install$1.call(Install.java:48)
 	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
 	at org.gradle.wrapper.Install.createDist(Install.java:48)
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
