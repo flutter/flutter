@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 
@@ -88,8 +89,17 @@ Future<void> precacheImage(
   ImageStreamListener listener;
   listener = ImageStreamListener(
     (ImageInfo image, bool sync) {
+      print('completing');
       completer.complete();
+      // Add a listener to make sure the image cache does not drop the weak ref
+      // until at least the next frame.
+      final ImageStreamListener frameListener = ImageStreamListener((_, __) {});
+      stream.addListener(frameListener);
       stream.removeListener(listener);
+      SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
+        print('next frame!');
+        stream.removeListener(frameListener);
+      });
     },
     onError: (dynamic exception, StackTrace stackTrace) {
       completer.complete();

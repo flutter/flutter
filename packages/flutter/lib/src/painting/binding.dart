@@ -65,9 +65,11 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
 
   /// Creates the [ImageCache] singleton (accessible via [imageCache]).
   ///
-  /// This method can be overridden to provide a custom image cache.
+  /// This method can be overridden to provide a custom image cache. By default,
+  /// the framework uses a [FlutterImageCache] which exposes additional
+  /// information about the cache dimensions beyond the [ImageCache] interface.
   @protected
-  ImageCache createImageCache() => ImageCache();
+  ImageCache createImageCache() => FlutterImageCache();
 
   /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
   ///

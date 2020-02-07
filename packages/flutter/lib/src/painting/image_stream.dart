@@ -392,6 +392,23 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         break;
       }
     }
+    if (_listeners.isEmpty) {
+      for (final VoidCallback callback in _onLastListenerRemovedCallbacks) {
+        callback();
+      }
+      _onLastListenerRemovedCallbacks.clear();
+    }
+  }
+
+  final List<VoidCallback> _onLastListenerRemovedCallbacks = <VoidCallback>[];
+
+  /// A adds a callback to call when [removeListener] results in an empty
+  /// list of listeners.
+  ///
+  /// This callback will never fire if [removeListener] is never called.
+  void addOnLastListenerRemovedCallback(VoidCallback callback) {
+    assert(callback != null);
+    _onLastListenerRemovedCallbacks.add(callback);
   }
 
   /// Calls all the registered listeners to notify them of a new image.
