@@ -79,7 +79,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// will wait one frame after its future completes before releasing its own
 /// listener, to give callers a chance to listen to the stream if necessary. A
 /// caller can determine if the image ended up in the cache by calling
-/// [ImageProvider.checkCacheLocation], if and only if the
+/// [ImageProvider.findCacheLocation], if and only if the
 /// `PaintingBinding.instance.imageCache is FlutterImageCache`. If it is only
 /// [ImageCacheLocation.weak]ly held, and the caller wishes to keep the resolved
 /// image in memory, the caller should immediately call `provider.resolve` and

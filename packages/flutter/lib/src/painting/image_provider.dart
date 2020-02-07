@@ -338,7 +338,9 @@ abstract class ImageProvider<T> {
   /// The `cache` and `configuration` parameters must not be null. If the
   /// `handleError` parameter is null, errors will be reported to
   /// [FlutterError.onError], and the method will return null.
-  Future<ImageCacheLocation> checkCacheLocation({
+  ///
+  /// A completed return value of null indicates that an error has occurred.
+  Future<ImageCacheLocation> findCacheLocation({
     @required ImageConfiguration configuration,
     ImageErrorListener handleError,
     @required FlutterImageCache cache,

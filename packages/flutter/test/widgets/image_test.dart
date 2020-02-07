@@ -1319,6 +1319,16 @@ void main() {
     expect(flutterImageCache.weakImageCount, 1);
     expect(flutterImageCache.containsKey(provider), false);
 
+    final ImageCacheLocation providerLocation = await provider.findCacheLocation(
+      configuration: ImageConfiguration.empty,
+      cache: flutterImageCache,
+    );
+
+    expect(providerLocation, isNotNull);
+    expect(providerLocation.weak, true);
+    expect(providerLocation.strong, false);
+    expect(providerLocation.pending, false);
+
     // Check that a second resolve of the same image is synchronous.
     expect(provider._lastResolvedConfiguration, isNotNull);
     final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
