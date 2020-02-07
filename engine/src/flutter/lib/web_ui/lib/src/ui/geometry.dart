@@ -12,7 +12,8 @@ abstract class OffsetBase {
   ///
   /// The first argument sets the horizontal component, and the second the
   /// vertical component.
-  const OffsetBase(this._dx, this._dy);
+  const OffsetBase(double dx, double dy)
+      : _dx = dx, _dy = dy;
 
   final double _dx;
   final double _dy;

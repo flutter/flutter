@@ -12,7 +12,11 @@ abstract class OffsetBase {
   ///
   /// The first argument sets the horizontal component, and the second the
   /// vertical component.
-  const OffsetBase(this._dx, this._dy);
+  const OffsetBase(double dx, double dy)
+      : _dx = dx ?? 0.0,
+        _dy = dy ?? 0.0,
+        assert(dx != null),
+        assert(dy != null);
 
   final double _dx;
   final double _dy;
@@ -615,11 +619,15 @@ class Size extends OffsetBase {
 class Rect {
   /// Construct a rectangle from its left, top, right, and bottom edges.
   @pragma('vm:entry-point')
-  const Rect.fromLTRB(this.left, this.top, this.right, this.bottom)
-    : assert(left != null),
-      assert(top != null),
-      assert(right != null),
-      assert(bottom != null);
+      const Rect.fromLTRB(double left, double top, double right, double bottom)
+          : left = left ?? 0.0,
+            right = right ?? 0.0,
+            top = top ?? 0.0,
+            bottom = bottom ?? 0.0,
+            assert(left != null),
+            assert(top != null),
+            assert(right != null),
+            assert(bottom != null);
 
   /// Construct a rectangle from its left and top edges, its width, and its
   /// height.
