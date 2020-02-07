@@ -1,4 +1,9 @@
+import 'dart:math';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+
+import '../../scheduler.dart';
 
 /// Defines the behavior of the labels of a [NavigationRail].
 ///
@@ -145,7 +150,8 @@ class NavigationRail extends StatefulWidget {
   /// navigation rail.
   final List<NavigationRailDestination> destinations;
 
-  /// The index into [destinations] for the current active [NavigationRailDestination].
+  /// The index into [destinations] for the current active
+  /// [NavigationRailDestination].
   final int currentIndex;
 
   /// Called when one of the [destinations] is selected.
@@ -232,10 +238,17 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   AnimationController _extendedController;
   Animation<double> _extendedAnimation;
 
+  List<GlobalKey> _offstageLabelKeys;
+  List<Size> _labelSizes;
+  bool _labelsMeasured = false;
+
   @override
   void initState() {
+    print('initState()');
     super.initState();
     _initControllers();
+    _offstageLabelKeys = widget.destinations.map((NavigationRailDestination destination) => GlobalKey()).toList();
+    SchedulerBinding.instance.addPostFrameCallback(_resize);
   }
 
   @override
@@ -246,7 +259,13 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   void didUpdateWidget(NavigationRail oldWidget) {
+    print('didUpdateWidget()');
     super.didUpdateWidget(oldWidget);
+
+    setState(() {
+      _labelsMeasured = false;
+      SchedulerBinding.instance.addPostFrameCallback(_resize);
+    });
 
     if (widget.extended != oldWidget.extended) {
       if (widget.extended) {
@@ -270,71 +289,148 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    print('build()');
+    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final Widget leading = widget.leading;
     final Widget trailing = widget.trailing;
-    final double currentWidth = _railWidth + (widget.extendedWidth - _railWidth) * _extendedAnimation.value;
-    final MainAxisAlignment destinationsAlignemnt = _resolveMainAxisAlignment();
+    final double railWidth = _labelSizes == null ? _railWidth : max(_railWidth, _labelSizes.map((e) => e.width).reduce(max));
+    final double currentWidth = railWidth;
+    final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment();
     final IconThemeData selectedIconTheme = widget.selectedIconTheme ?? widget.iconTheme;
-    final TextStyle selectedLabelTextStyle = widget.selectedLabelTextStyle ?? widget.selectedLabelTextStyle;
-    return _ExtendedNavigationRailAnimation(
-      animation: _extendedAnimation,
-      child: DefaultTextStyle(
-        style: TextStyle(color: Theme.of(context).colorScheme.primary),
-        child: Container(
-          width: currentWidth,
-          color: widget.backgroundColor ?? Theme.of(context).colorScheme.surface,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _verticalSpacing,
-              if (leading != null)
-                ...<Widget>[
-                  Container(
-                    padding: const EdgeInsets.all(_spacing),
-                    child: leading,
+    final TextStyle selectedLabelTextStyle = widget.selectedLabelTextStyle ?? widget.labelTextStyle;
+
+    if (!_labelsMeasured) {
+        return Stack(
+          overflow: Overflow.visible,
+          children: <Widget>[
+            for (int i = 0; i < widget.destinations.length; i++)
+              // Change this to KeyedSubtree to get a non-zero width.
+              Offstage(
+                child: Container(
+                  key: _offstageLabelKeys[i],
+                  child: DefaultTextStyle(
+                    style: widget.currentIndex == i ? selectedLabelTextStyle : widget.labelTextStyle,
+                      child: widget.destinations[i].label,
                   ),
-                  _verticalSpacing,
-                ],
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: destinationsAlignemnt,
-                  children: <Widget>[
-                    for (int i = 0; i < widget.destinations.length; i++)
-                      _RailDestinationBox(
-                        destinationAnimation: _destinationAnimations[i],
-                        labelKind: widget.labelType,
-                        selected: widget.currentIndex == i,
-                        icon: IconTheme(
-                          data: IconThemeData(
-                            color: widget.currentIndex == i ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.64),
-                          ).merge(widget.currentIndex == i ? selectedIconTheme : widget.iconTheme),
-                          child: widget.currentIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
-                        ),
-                        label: DefaultTextStyle(
-                          style: TextStyle(
-                            color: widget.currentIndex == i ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withOpacity(0.64),
-                            ).merge(widget.currentIndex == i ? selectedLabelTextStyle : widget.labelTextStyle),
-                          child: widget.destinations[i].label,
-                        ),
-                        onTap: () {
-                          widget.onDestinationSelected(i);
-                        },
-                        extendedTransitionAnimation: _extendedAnimation,
-                        width: _railWidth,
-                        height: _railWidth,
-                      ),
-                  ],
                 ),
               ),
-              if (trailing != null) trailing,
-            ],
+          ],
+        );
+//        return Offstage(
+//          key: _offstageLabelKeys[0],
+//          child: DefaultTextStyle(
+//            style: widget.currentIndex == 0 ? selectedLabelTextStyle : widget.labelTextStyle,
+//            child: widget.destinations[0].label,
+//          ),
+//        ),
+    } else {
+      return _ExtendedNavigationRailAnimation(
+        animation: _extendedAnimation,
+        child: DefaultTextStyle(
+          style: TextStyle(color: Theme
+              .of(context)
+              .colorScheme
+              .primary),
+          child: Container(
+            width: currentWidth,
+            color: widget.backgroundColor ?? Theme
+                .of(context)
+                .colorScheme
+                .surface,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _verticalSpacing,
+                if (leading != null)
+                  ...<Widget>[
+                    Container(
+                      padding: EdgeInsets.all(_spacing),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                            minWidth: railWidth),
+                        child: leading,
+                      ),
+                    ),
+                    _verticalSpacing,
+                  ],
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: destinationsAlignment,
+                    children: <Widget>[
+                      for (int i = 0; i < widget.destinations.length; i++)
+                        _RailDestinationBox(
+                          destinationAnimation: _destinationAnimations[i],
+                          labelKind: widget.labelType,
+                          selected: widget.currentIndex == i,
+                          icon: IconTheme(
+                            data: IconThemeData(
+                              color: widget.currentIndex == i ? Theme
+                                  .of(context)
+                                  .colorScheme
+                                  .primary : Theme
+                                  .of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.64),
+                            ).merge(widget.currentIndex == i
+                                ? selectedIconTheme
+                                : widget.iconTheme),
+                            child: widget.currentIndex == i ? widget
+                                .destinations[i].activeIcon : widget
+                                .destinations[i].icon,
+                          ),
+                          label: DefaultTextStyle(
+                            style: TextStyle(
+                              color: widget.currentIndex == i ? Theme
+                                  .of(context)
+                                  .colorScheme
+                                  .primary : Theme
+                                  .of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.64),
+                            ).merge(widget.currentIndex == i
+                                ? selectedLabelTextStyle
+                                : widget.labelTextStyle),
+                            child: widget.destinations[i].label,
+                          ),
+                          onTap: () {
+                            widget.onDestinationSelected(i);
+                          },
+                          extendedTransitionAnimation: _extendedAnimation,
+                          width: railWidth,
+                          height: railWidth,
+                        ),
+                    ],
+                  ),
+                ),
+                if (trailing != null) trailing,
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 
-  MainAxisAlignment _resolveMainAxisAlignment() {
+  void _resize(Duration duration) {
+    print('_resize()');
+
+    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).size.width);
+//    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).getMinIntrinsicWidth(0));
+//    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).getMinIntrinsicWidth(double.infinity));
+//    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).getMaxIntrinsicWidth(0));
+//    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).getMaxIntrinsicWidth(double.infinity));
+
+    final List<Size> labelSizes = _offstageLabelKeys.map((e) => (e.currentContext.findRenderObject() as RenderBox).size).toList();
+
+    setState(() {
+      _labelsMeasured = true;
+      _labelSizes = labelSizes;
+    });
+  }
+
+  MainAxisAlignment _resolveGroupAlignment() {
     switch (widget.groupAlignment) {
       case NavigationRailGroupAlignment.top:
         return MainAxisAlignment.start;
@@ -380,6 +476,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   void _resetState() {
     _disposeControllers();
     _initControllers();
+    _offstageLabelKeys = widget.destinations.map((e) => GlobalKey()).toList();
   }
 
   void _rebuild() {
@@ -480,7 +577,7 @@ class _RailDestinationBox extends StatelessWidget {
               icon,
               Opacity(
                 alwaysIncludeSemantics: true,
-                opacity: selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue(),
+                opacity: (selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue()).clamp(0, 0.9).toDouble() + 0.1,
                 child: label,
               ),
             ],
@@ -513,8 +610,8 @@ class _RailDestinationBox extends StatelessWidget {
         highlightShape: BoxShape.rectangle,
         borderRadius: BorderRadius.all(Radius.circular(width / 2)),
         containedInkWell: true,
-        splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
-        hoverColor: Theme.of(context).colorScheme.primary.withOpacity(0.04),
+        splashColor: colors.primary.withOpacity(0.12),
+        hoverColor: colors.primary.withOpacity(0.04),
         child: content,
       ),
     );
