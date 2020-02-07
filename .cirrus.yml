@@ -1,5 +1,24 @@
 gcp_credentials: ENCRYPTED[987a78af29b91ce8489594c9ab3fec21845bbe5ba68294b8f6def3cf0d380830f06687a89ea69c87344c5ade369700fe]
 
+web_shard_template: &WEB_SHARD_TEMPLATE
+  only_if: "changesInclude('.cirrus.yml', 'lib/web_ui/**', 'web_sdk/**') || $CIRRUS_PR == ''"
+  environment:
+    # As of October 2019, the Web shards needed more than 6G of RAM.
+    CPU: 2
+    MEMORY: 8G
+  compile_host_script: |
+    cd $ENGINE_PATH/src
+    ./flutter/tools/gn --unoptimized --full-dart-sdk
+    ninja -C out/host_debug_unopt
+  fetch_framework_script: |
+    mkdir -p $FRAMEWORK_PATH
+    cd $FRAMEWORK_PATH
+    git clone https://github.com/flutter/flutter.git
+    cd flutter
+    bin/flutter update-packages --local-engine=host_debug_unopt
+  script:
+    - dart --enable-asserts $FRAMEWORK_PATH/flutter/dev/bots/test.dart --local-engine=host_debug_unopt
+
 # LINUX
 task:
   gke_container:
@@ -80,6 +99,32 @@ task:
       test_framework_script: |
         cd $FRAMEWORK_PATH/flutter/packages/flutter
         ../../bin/flutter test --local-engine=host_debug_unopt
+
+    # PLEASE KEEP THESE WEB TEST SHARDS IN SYNC WITH THEIR COUNTERPARTS IN flutter/flutter's CIRRUS CONFIG.
+    - name: web_tests-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
     - name: build_and_test_web_linux_firefox
       compile_host_script: |
         cd $ENGINE_PATH/src
