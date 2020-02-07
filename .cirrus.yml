@@ -1,6 +1,35 @@
 # CIRRUS CONFIGURATION FILE
 # https://cirrus-ci.org/guide/writing-tasks/
 
+web_shard_template: &WEB_SHARD_TEMPLATE
+  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+  environment:
+    # As of October 2019, the Web shards needed more than 6G of RAM.
+    CPU: 2
+    MEMORY: 8G
+    GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+  script:
+    - dart --enable-asserts ./dev/bots/test.dart
+
+linux_shard_template: &LINUX_SHARD_TEMPLATE
+  environment:
+    # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
+    CPU: 2
+    MEMORY: 8G
+  script:
+    - dart --enable-asserts ./dev/bots/test.dart
+
+windows_shard_template: &WINDOWS_SHARD_TEMPLATE
+  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+  script:
+    - dart --enable-asserts ./dev/bots/test.dart
+
+macos_shard_template: &MACOS_SHARD_TEMPLATE
+  only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+  script:
+    - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    - dart --enable-asserts ./dev/bots/test.dart
+
 use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
 
 environment:
@@ -145,84 +174,28 @@ task:
         - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/coverage/lcov.info -F flutter_tool
 
     - name: web_tests-0-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *WEB_SHARD_TEMPLATE
 
     - name: web_tests-1-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *WEB_SHARD_TEMPLATE
 
     - name: web_tests-2-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *WEB_SHARD_TEMPLATE
 
     - name: web_tests-3-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *WEB_SHARD_TEMPLATE
 
     - name: web_tests-4-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *WEB_SHARD_TEMPLATE
 
     - name: web_tests-5-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *WEB_SHARD_TEMPLATE
 
     - name: web_tests-6-linux
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *WEB_SHARD_TEMPLATE
 
     - name: web_tests-7_last-linux # last Web shard must end with _last
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
-      environment:
-        # As of October 2019, the Web shards needed more than 6G of RAM.
-        CPU: 2
-        MEMORY: 8G
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *WEB_SHARD_TEMPLATE
 
     - name: build_tests-linux
       environment:
@@ -235,36 +208,16 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-linux
-      environment:
-        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
-        CPU: 2
-        MEMORY: 8G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *LINUX_SHARD_TEMPLATE
 
     - name: hostonly_devicelab_tests-1-linux
-      environment:
-        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
-        CPU: 2
-        MEMORY: 8G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *LINUX_SHARD_TEMPLATE
 
     - name: hostonly_devicelab_tests-2-linux
-      environment:
-        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
-        CPU: 2
-        MEMORY: 8G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *LINUX_SHARD_TEMPLATE
 
     - name: hostonly_devicelab_tests-3_last-linux
-      environment:
-        # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
-        CPU: 2
-        MEMORY: 8G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *LINUX_SHARD_TEMPLATE
 
     # TODO(ianh): name: add_to_app_tests-linux
 
@@ -436,48 +389,40 @@ task:
         - dart --enable-asserts dev\bots\test.dart
 
     - name: hostonly_devicelab_tests-0-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      << : *WINDOWS_SHARD_TEMPLATE
       environment:
         # As of December 2019, the hostonly_devicelab_tests-0-windows shard needs at least 6G RAM to
         # succeed. The shard got faster with more CPUs up to 6 CPUs and more RAM up to 8 GB
         # (running in about 30 minutes).
         CPU: 6
         MEMORY: 8G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      << : *WINDOWS_SHARD_TEMPLATE
       environment:
         # As of December 2019, the hostonly_devicelab_tests-1-windows shard requires 4 GB RAM to
         # succeed. The optimal configuration was 4 CPUs and 6 GB RAM, running in ~26 minutes.
         # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
         CPU: 4
         MEMORY: 6G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      << : *WINDOWS_SHARD_TEMPLATE
       environment:
         # As of December 2019, the hostonly_devicelab_tests-2-windows shard required 2 GB RAM to
         # succeed. The optimal configuration was 4 CPUs and 8 GB RAM, running in ~33 minutes.
         # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
         CPU: 4
         MEMORY: 8G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3_last-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      << : *WINDOWS_SHARD_TEMPLATE
       environment:
         # As of December 2019, the hostonly_devicelab_tests-3_last-windows shard required 6 GB RAM
         # to succeed. The optimal configuration was 4 CPUs and 6 GB RAM, running in ~43 minutes.
         # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
         CPU: 4
         MEMORY: 6G
-      script:
-        - dart --enable-asserts ./dev/bots/test.dart
 
     # TODO(ianh): name: add_to_app_tests-windows
 
@@ -578,28 +523,16 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *MACOS_SHARD_TEMPLATE
 
     - name: hostonly_devicelab_tests-1-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *MACOS_SHARD_TEMPLATE
 
     - name: hostonly_devicelab_tests-2-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *MACOS_SHARD_TEMPLATE
 
     - name: hostonly_devicelab_tests-3_last-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
-      script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts ./dev/bots/test.dart
+      << : *MACOS_SHARD_TEMPLATE
 
     - name: add_to_app_tests-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41940
