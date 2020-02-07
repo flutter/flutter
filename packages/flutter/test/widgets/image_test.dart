@@ -1367,14 +1367,17 @@ class ConfigurationAwareKey {
   final ImageConfiguration configuration;
 
   @override
-  int get hashCode => hashValues(provider, configuration);
-
-  @override
   bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     return other is ConfigurationAwareKey
         && other.provider == provider
         && other.configuration == configuration;
   }
+
+  @override
+  int get hashCode => hashValues(provider, configuration);
 }
 
 class ConfigurationKeyedTestImageProvider extends TestImageProvider {
