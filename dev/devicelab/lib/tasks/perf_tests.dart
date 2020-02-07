@@ -409,6 +409,7 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
+        options.add('--tree-shake-icons');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
