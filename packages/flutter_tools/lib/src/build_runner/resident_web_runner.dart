@@ -47,29 +47,16 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required List<String> dartDefines,
     @required UrlTunneller urlTunneller,
   }) {
-    // if (featureFlags.isWebIncrementalCompilerEnabled && debuggingOptions.buildInfo.isDebug) {
-      return _ExperimentalResidentWebRunner(
-        device,
-        target: target,
-        flutterProject: flutterProject,
-        debuggingOptions: debuggingOptions,
-        ipv6: ipv6,
-        stayResident: stayResident,
-        dartDefines: dartDefines,
-        urlTunneller: urlTunneller,
-        // TODO(dantup): If this becomes default it may need to urlTunneller.
-      );
-    // }
-    // return _DwdsResidentWebRunner(
-    //   device,
-    //   target: target,
-    //   flutterProject: flutterProject,
-    //   debuggingOptions: debuggingOptions,
-    //   ipv6: ipv6,
-    //   stayResident: stayResident,
-    //   dartDefines: dartDefines,
-    //   urlTunneller: urlTunneller,
-    // );
+    return _ExperimentalResidentWebRunner(
+      device,
+      target: target,
+      flutterProject: flutterProject,
+      debuggingOptions: debuggingOptions,
+      ipv6: ipv6,
+      stayResident: stayResident,
+      dartDefines: dartDefines,
+      urlTunneller: urlTunneller,
+    );
   }
 }
 
@@ -149,7 +136,11 @@ abstract class ResidentWebRunner extends ResidentRunner {
     }
     await _stdOutSub?.cancel();
     await device.device.stopApp(null);
-    _generatedEntrypointDirectory?.deleteSync(recursive: true);
+    try {
+      _generatedEntrypointDirectory?.deleteSync(recursive: true);
+    } on FileSystemException {
+      // Best effort to clean up temp dirs.
+    }
     if (ChromeLauncher.hasChromeInstance) {
       final Chrome chrome = await ChromeLauncher.connectedInstance;
       await chrome.close();
@@ -435,7 +426,8 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       progressId: 'hot.restart',
     );
 
-    final UpdateFSReport report = await _updateDevFS(fullRestart: fullRestart);
+    // Full restart is always false for web, since the extra recompile is wasteful.
+    final UpdateFSReport report = await _updateDevFS(fullRestart: false);
     if (report.success) {
       device.generator.accept();
     } else {
@@ -603,9 +595,13 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
         globals.printStatus(message);
       });
       unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
-      // _vmService.registerServiceCallback('reloadSources', (Map<String, Object> params) async {
-
-      // });
+      _vmService.registerServiceCallback('reloadSources', (Map<String, Object> params) async {
+        final bool pause = params['pause'] as bool ?? false;
+        await restart(benchmarkMode: false, pause: pause, fullRestart: false);
+        return <String, Object>{'type': 'Success'};
+      });
+      // Note: can't register our own hot restart hook. Would be fixed by moving
+      // to DWDS digests.
 
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
       // Always run main after connecting because start paused doesn't work yet.
@@ -621,9 +617,6 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
           }
         });
       }
-    }
-    if (websocketUri != null) {
-      globals.printStatus('Debug service listening on $websocketUri');
     }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));

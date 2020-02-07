@@ -11,7 +11,7 @@ dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   archive: 2.0.11
   args: 1.5.2
-  dwds: 0.8.5
+  dwds: 1.0.0
   completion: 0.2.1+1
   coverage: 0.13.5
   crypto: 2.1.3
@@ -126,11 +126,5 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
-
-dependency_overrides:
-  dwds:
-    git:
-      url: git@github.com:dart-lang/webdev.git
-      path: dwds/
 
 # PUBSPEC CHECKSUM: 955c

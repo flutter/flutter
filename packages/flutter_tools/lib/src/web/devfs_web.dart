@@ -378,10 +378,10 @@ class WebDevFS implements DevFS {
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
+    final String outputDirectoryPath = globals.fs.file(mainPath).parent.path;
     if (bundleFirstUpload) {
-      final String entrypoint = PackageUriMapper(mainPath, '.packages', null, null)
-        .map(mainPath)
-        ?.pathSegments?.join('/');
+      generator.addFileSystemRoot(outputDirectoryPath);
+      final String entrypoint = globals.fs.path.basename(mainPath);
       webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -389,13 +389,14 @@ class WebDevFS implements DevFS {
           generateBootstrapScript(
             requireUrl: _filePathToUriFragment(requireJS.path),
             mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
-            entrypoint: entrypoint != null ? '/packages/$entrypoint.lib.js' : '$mainPath.lib.js',
+            entrypoint: '/$entrypoint.lib.js',
           ));
       webAssetServer.writeFile(
           '/main_module.bootstrap.js',
           generateMainModule(
-            entrypoint: entrypoint != null ? '/packages/$entrypoint.lib.js' : '$mainPath.lib.js',
+            entrypoint: '/$entrypoint.lib.js',
           ));
+      // TODO(jonahwilliams): switch to DWDS provided APIs when they are ready.
       webAssetServer.writeFile('/basic.digests', '{}');
       webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
       webAssetServer.writeFile(
@@ -411,8 +412,12 @@ class WebDevFS implements DevFS {
     if (fullRestart) {
       generator.reset();
     }
+    // The tool generates an entrypoint file in a temp directory to handle
+    // the web specific bootrstrap logic. To make it easier for DWDS to handle
+    // mapping the file name, this is done via an additional file root and
+    // specicial hard-coded scheme.
     final CompilerOutput compilerOutput = await generator.recompile(
-      mainPath,
+     'org-dartlang-app:///' + globals.fs.path.basename(mainPath),
       invalidatedFiles,
       outputPath: dillOutputPath ??
           getDefaultApplicationKernelPath(
@@ -431,9 +436,10 @@ class WebDevFS implements DevFS {
     File sourcemapFile;
     List<String> modules;
     try {
-      codeFile = globals.fs.file('${compilerOutput.outputFilename}.sources');
-      manifestFile = globals.fs.file('${compilerOutput.outputFilename}.json');
-      sourcemapFile = globals.fs.file('${compilerOutput.outputFilename}.map');
+      final Directory parentDirectory = globals.fs.directory(outputDirectoryPath);
+      codeFile = parentDirectory.childFile('${compilerOutput.outputFilename}.sources');
+      manifestFile = parentDirectory.childFile('${compilerOutput.outputFilename}.json');
+      sourcemapFile = parentDirectory.childFile('${compilerOutput.outputFilename}.map');
       modules = webAssetServer.write(codeFile, manifestFile, sourcemapFile);
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');

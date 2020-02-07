@@ -86,7 +86,7 @@ window.\$hotReloadHook = function(modules) {
         if (reloadCount == modules.length) {
           require(["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
             // See L81 below for an explanation.
-            window.\$mainEntrypoint = app[Object.keys(app)[0]].main;
+            window.\$dartRunMain = app[Object.keys(app)[0]].main;
             window.\$hotReload(resolve);
           });
         }
@@ -184,19 +184,20 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
   // the file `foo/bar/baz.dart` will generate a property named approximately
   // `foo__bar__baz`. Rather than attempt to guess, we assume the first property of
   // this object is the module.
-  window.\$mainEntrypoint = app[Object.keys(app)[0]].main;
+  var child = {};
+  child.main = app[Object.keys(app)[0]].main;
   if (window.\$hotReload == null) {
     window.\$hotReload = function(cb) {
       dart_sdk.developer.invokeExtension("ext.flutter.disassemble", "{}").then((_) => {
         dart_sdk.dart.hotRestart();
-        window.\$mainEntrypoint();
+        window.\$dartRunMain();
         window.requestAnimationFrame(cb);
       });
     }
   }
 
   /* MAIN_EXTENSION_MARKER */
-  window.\$mainEntrypoint();
+  child.main();
 });
 
 // Require JS configuration.

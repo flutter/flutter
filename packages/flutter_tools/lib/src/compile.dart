@@ -463,6 +463,9 @@ abstract class ResidentCompiler {
     List<String> dartDefines,
   }) = DefaultResidentCompiler;
 
+  // TODO(jonahwilliams): remove this hack.
+  void addFileSystemRoot(String root);
+
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -537,6 +540,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final bool unsafePackageSerialization;
   final List<String> experimentalFlags;
   final List<String> dartDefines;
+
+  @override
+  void addFileSystemRoot(String root) {
+    fileSystemRoots.add(root);
+  }
 
   /// The path to the root of the Dart SDK used to compile.
   ///
