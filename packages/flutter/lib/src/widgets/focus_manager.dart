@@ -670,7 +670,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // the primary instead.
       _manager?.primaryFocus?.unfocus(focusPrevious: focusPrevious);
     }
-    _manager?._willUnfocusNode(this);
+    _manager?._markUnfocused(this);
     final FocusScopeNode scope = enclosingScope;
     if (scope != null) {
       scope._focusedChildren.remove(this);
@@ -1381,7 +1381,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   // The set of nodes that need to notify their listeners of changes at the next
   // update.
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
-  final Set<FocusNode> _unfocusedNodes = <FocusNode>{};
+  FocusNode _unfocusedNode;
 
   void _markDetached(FocusNode node) {
     // The node has been removed from the tree, so it no longer needs to be
@@ -1403,19 +1403,20 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
       // update, but it's not possible to know that this is the only reason for
       // the update, so just don't schedule another one.
       _nextFocus = null;
+      // If this node is going to be the next focus, then it's not going to be
+      // unfocused unless we call _markUnfocused again, so unset it.
+      if (_unfocusedNode == node) {
+        _unfocusedNode = null;
+      }
     } else {
       _nextFocus = node;
       _markNeedsUpdate();
     }
-    // If this node is going to be the next focus, then it's not going to be
-    // unfocused unless we call _willUnfocusNode again, so remove it from the
-    // set.
-    _unfocusedNodes.removeAll(<FocusNode>[node, ...node.ancestors]);
   }
 
   // Called to indicate that the given node is being unfocused, and that any
   // pending request to be focused should be canceled.
-  void _willUnfocusNode(FocusNode node) {
+  void _markUnfocused(FocusNode node) {
     assert(node != null);
     assert(_focusDebug('Unfocusing node $node'));
     if (_primaryFocus == node || _nextFocus == node) {
@@ -1424,7 +1425,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
       }
       if (_primaryFocus == node) {
         _primaryFocus = null;
-        _unfocusedNodes.addAll(<FocusNode>[node, ...node.ancestors]);
+        _unfocusedNode = node;
       }
       _markNeedsUpdate();
      }
@@ -1459,7 +1460,11 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
     if (_nextFocus != null && _nextFocus != _primaryFocus) {
       final Set<FocusNode> previousPath = previousFocus?.ancestors?.toSet() ?? <FocusNode>{};
       final Set<FocusNode> nextPath = _nextFocus.ancestors.toSet();
-      _dirtyNodes.addAll(_unfocusedNodes);
+      if (_unfocusedNode != null) {
+        final Set<FocusNode> unfocusedNodes = <FocusNode>{_unfocusedNode, ..._unfocusedNode.ancestors};
+        unfocusedNodes.removeAll(nextPath); // No need to dirty the ancestors that are in the newly focused set.
+        _dirtyNodes.addAll(unfocusedNodes);
+      }
       // Notify nodes that are newly focused.
       _dirtyNodes.addAll(nextPath.difference(previousPath));
       // Notify nodes that are no longer focused
@@ -1482,7 +1487,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
       node._notify();
     }
     _dirtyNodes.clear();
-    _unfocusedNodes.clear();
     if (previousFocus != _primaryFocus) {
       notifyListeners();
     }
