@@ -82,7 +82,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
     // the correct fuchsia module.
     final RegExp matchRegExp = _app == null
         ? _flutterLogOutput
-        : RegExp('INFO: ${_app.name}(\.cmx)?\\(flutter\\): ');
+        : RegExp('INFO: ${_app.name}(\\.cmx)?\\(flutter\\): ');
     return Stream<String>.eventTransformed(
       lines,
       (EventSink<String> output) => _FuchsiaLogSink(output, matchRegExp, startTime),

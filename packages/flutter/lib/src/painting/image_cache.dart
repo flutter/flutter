@@ -4,7 +4,7 @@
 
 import 'dart:ui' show hashValues;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'image_stream.dart';
 
