@@ -36,7 +36,7 @@ import 'ticker_provider.dart';
 ///  * [Navigator], which is where all the [Route]s end up.
 typedef RouteFactory = Route<dynamic> Function(RouteSettings settings);
 
-/// Creates a route for the given context.
+/// Creates a route for the given context and route settings.
 ///
 /// Used by [PageBuilder.routeBuilder].
 typedef RouteBuilder<T> = Route<T> Function(BuildContext context, RouteSettings settings);
@@ -58,10 +58,10 @@ typedef WillPopCallback = Future<bool> Function();
 /// Signature for the [Navigator.onPopPage] callback.
 ///
 /// The callback must call [Route.didPop] or [Route.didComplete] on the
-/// specified route, and must [setState] so that the [Navigator] is updated with
-/// a [Navigator.pages] list that no longer includes the corresponding [Page].
-/// (Otherwise, the page will be interpreted as a new page to show when the
-/// [Navigator.pages] list is next updated.)
+/// specified route, and must properly updates its pages list so that it no
+/// longer includes the corresponding [Page]. (Otherwise, the page will be
+/// interpreted as a new page to show when the [Navigator.pages] list is next
+/// updated.)
 typedef OnPopPageCallback = bool Function(Route<dynamic> route, dynamic result);
 
 /// Indicates whether the current route should be popped.
@@ -531,7 +531,7 @@ abstract class Page<T> extends RouteSettings {
   String toString() => '${objectRuntimeType(this, 'Page')}("$name", $key, $arguments)';
 }
 
-/// A [Page] that uses [routeBuilder] to builds customized [Route].
+/// A [Page] that builds customized [Route] based on the [routeBuilder].
 ///
 /// The type argument `T` is the corresponding [Route]'s return type, as
 /// used by [Route.currentResult], [Route.popped], and [Route.didPop].
@@ -607,8 +607,8 @@ class NavigatorObserver {
   void didStopUserGesture() { }
 }
 
-/// The delegate class to resolve conflicts of route transition during [Page]s
-/// update in the [Navigator].
+/// The delegate class to resolve route transition conflicts during the
+/// [Navigator.page] updates.
 ///
 /// This abstract class implements the api to resolve route transition conflicts
 /// when the [Navigator] requires explicit decisions on how the routes transits
@@ -773,7 +773,7 @@ abstract class TransitionDelegate<T> {
   /// route. The [pageRouteToPagelessRoutes] is a look up map to look up if a
   /// page route in the [exitingPageRoutes] has any pageless routes.
   ///
-  /// The method of the subclasses must decide how to transit the
+  /// The subclasses that implements this method must decide how to transit the
   /// [enteringPageRoutes] and the [exitingPageRoutes] as well as their order
   /// during the transition.
   ///
@@ -788,7 +788,7 @@ abstract class TransitionDelegate<T> {
   /// 2. All routes in [exitingPageRoutes] must either be called with [pop],
   ///    [remove] or [complete]
   /// 3. Only routes in [exitingPageRoutes] will have pageless routes. These
-  ///    pageless routes must also either be called with [pop], [remove] or
+  ///    pageless routes must also be called with either [pop], [remove] or
   ///    [complete]
   /// 4. All the entering routes in the return list must preserve the same order
   ///    as in the [enteringPageRoutes], same rule apply to the
@@ -823,7 +823,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
   /// The default route transition conflicts resolution.
   ///
   /// It follows two rules. Firstly, all the entering routes are placed on top
-  /// of the exiting routs. Secondly, the top most route will either be called
+  /// of the exiting routes. Secondly, the top most route will either be called
   /// with [pop] if it is an exiting route or [push] if it is an entering route.
   /// All the routes will either be completed with [Route.currentResult] or
   /// added without transition.
@@ -2473,7 +2473,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     int newPagesBottom = widget.pages.length - 1;
     int oldEntriesBottom = _history.length - 1;
 
-    final List<_RouteEntry> newHistoryTop = <_RouteEntry>[];
+    final List<_RouteEntry> newHistory = <_RouteEntry>[];
 
     // Updates the top of the list.
     while (oldEntriesTop <= oldEntriesBottom) {
@@ -2486,7 +2486,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       // 2. Any consecutive pageless routes follows a page will stay with the
       //    page.
       if (!oldEntry.hasPage) {
-        newHistoryTop.add(oldEntry);
+        newHistory.add(oldEntry);
         oldEntriesTop += 1;
         continue;
       }
@@ -2497,7 +2497,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (!oldEntry.canUpdateFrom(newPage))
         break;
       oldEntry.route._updateSettings(newPage);
-      newHistoryTop.add(oldEntry);
+      newHistory.add(oldEntry);
       newPagesTop += 1;
       oldEntriesTop += 1;
     }
@@ -2578,9 +2578,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     // pages and all routes in between the corresponding old routes into
     // transition delegate to resolve the conflict.
     void addPageRoute(Route<dynamic> pageRoute) {
-      newHistoryTop.add(pageRoute._entry);
+      newHistory.add(pageRoute._entry);
       if (pageRouteToPagelessRoutes.containsKey(pageRoute)) {
-        newHistoryTop.addAll(
+        newHistory.addAll(
           pageRouteToPagelessRoutes[pageRoute].map(
               (Route<dynamic> pagelessRoute) => pagelessRoute._entry
           )
@@ -2654,7 +2654,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           ._transition(
             enteringPageRoutes: enteringPageRoutes,
             exitingPageRoutes: exitingPageRoutes,
-            precedingRoutes: newHistoryTop.map((_RouteEntry entry) => entry.route)
+            precedingRoutes: newHistory.map((_RouteEntry entry) => entry.route)
               .toList(),
             succeedingRoutes: _history.sublist(oldEntriesTop).map((
               _RouteEntry entry) => entry.route).toList(),
@@ -2696,7 +2696,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         ._transition(
         enteringPageRoutes: enteringPageRoutes,
         exitingPageRoutes: exitingPageRoutes,
-        precedingRoutes: newHistoryTop.map((_RouteEntry entry) => entry.route)
+        precedingRoutes: newHistory.map((_RouteEntry entry) => entry.route)
           .toList(),
         succeedingRoutes: _history.sublist(oldEntriesTop).map((
           _RouteEntry entry) => entry.route).toList(),
@@ -2726,17 +2726,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       final _RouteEntry oldEntry = _history[oldEntriesTop];
       assert(oldEntry != null && oldEntry.currentState != _RouteLifecycle.disposed);
       if (!oldEntry.hasPage) {
-        newHistoryTop.add(oldEntry);
+        newHistory.add(oldEntry);
         continue;
       }
       final Page<dynamic> newPage = widget.pages[newPagesTop];
       assert(oldEntry.canUpdateFrom(newPage));
       oldEntry.route._updateSettings(newPage);
-      newHistoryTop.add(oldEntry);
+      newHistory.add(oldEntry);
       oldEntriesTop += 1;
       newPagesTop += 1;
     }
-    _history = newHistoryTop;
+    _history = newHistory;
     assert(() {_debugUpdatingPage = false; return true;}());
     assert(() { _debugLocked = true; return true; }());
     _flushHistoryUpdates();
@@ -2753,7 +2753,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _RouteEntry next;
     _RouteEntry entry = _history[index];
     _RouteEntry previous = index > 0 ? _history[index - 1] : null;
-    bool canRemove = false; // Whether there is a fully opaque route on top to silent remove or add route underneath.
+    bool canRemoveOrAdd = false; // Whether there is a fully opaque route on top to silent remove or add route underneath.
     Route<dynamic> poppedRoute; // The route that should trigger didPopNext on the top active route.
     bool seenTopActiveRoute = false; // Whether we've seen the route that would get didPopNext.
     final List<_RouteEntry> toBeDisposed = <_RouteEntry>[];
@@ -2767,7 +2767,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           assert(entry.currentState == _RouteLifecycle.adding);
           continue;
         case _RouteLifecycle.adding:
-          if (canRemove || next == null) {
+          if (canRemoveOrAdd || next == null) {
             entry.didAdd(
               navigator: this,
               previous: previous?.route,
@@ -2807,7 +2807,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           seenTopActiveRoute = true;
           // This route is idle, so we are allowed to remove subsequent (earlier)
           // routes that are waiting to be removed silently:
-          canRemove = true;
+          canRemoveOrAdd = true;
           break;
         case _RouteLifecycle.pop:
           if (!seenTopActiveRoute) {
@@ -2820,7 +2820,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
             previousPresent: _getRouteBefore(index, _RouteEntry.willBePresentPredicate)?.route,
           );
           assert(entry.currentState == _RouteLifecycle.popping);
-          canRemove = true;
+          canRemoveOrAdd = true;
           break;
         case _RouteLifecycle.popping:
           // Will exit this state when animation completes.
@@ -2838,7 +2838,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           assert(entry.currentState == _RouteLifecycle.removing);
           continue;
         case _RouteLifecycle.removing:
-          if (!canRemove && next != null) {
+          if (!canRemoveOrAdd && next != null) {
             // We aren't allowed to remove this route yet.
             break;
           }
@@ -3397,9 +3397,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }());
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
     if (entry.hasPage) {
-      if (!widget.onPopPage(entry.route, result))
-        return;
-      entry.currentState = _RouteLifecycle.pop;
+      if (widget.onPopPage(entry.route, result))
+        entry.currentState = _RouteLifecycle.pop;
     } else {
       // A pageless route will need to be popped manually.
       entry.pop<T>(result);
