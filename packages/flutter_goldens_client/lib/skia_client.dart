@@ -120,9 +120,9 @@ class SkiaGoldClient {
           .path,
         '--luci',
       ];
-      failureContext = 'Luci environments authenticate without a service '
-        'account, so if this is a Luci instance, there may be an error with '
-        'Gold.';
+      failureContext = 'Luci environments authenticate using the file provided '
+        'by LUCI_CONTEXT. There may be an error with this file or Gold '
+        'authentication.';
     } else {
       if (_serviceAccount.isEmpty) {
         final StringBuffer buf = StringBuffer()
@@ -300,16 +300,12 @@ class SkiaGoldClient {
 
     String pullRequest;
     String jobId;
-    String patchsetId;
     if (ci == 'luci') {
-      // TODO(Piinks): check arguments here for luci
-      // pullRequest =
-      // jobId =
-      // patchsetId =
+      jobId = platform.environment['SWARMING_TASK_ID'];
+      pullRequest = platform.environment['github_link'].split('/').last;
     } else {
       pullRequest = platform.environment['CIRRUS_PR'];
       jobId = platform.environment['CIRRUS_TASK_ID'];
-      patchsetId = commitHash;
     }
 
 
@@ -327,7 +323,7 @@ class SkiaGoldClient {
       '--changelist', pullRequest,
       '--cis', ci,
       '--jobid', jobId,
-      '--patchset_id', patchsetId,
+      '--patchset_id', commitHash,
     ];
 
     if (imgtestInitArguments.contains(null)) {
@@ -633,8 +629,6 @@ class SkiaGoldClient {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
       'CI' : ci,
-      // TODO(Piinks): Add device information from driver tests
-      // 'Device' : '',
     };
     if (platform.environment[_kTestBrowserKey] != null)
       keys['Browser'] = platform.environment[_kTestBrowserKey];
@@ -706,9 +700,6 @@ class SkiaGoldDigest {
       && (paramSet['Platform'] as List<dynamic>).contains(platform.operatingSystem)
       && (platform.environment[_kTestBrowserKey] == null
          || paramSet['Browser'] == platform.environment[_kTestBrowserKey])
-      // TODO(Piinks): device info for local driver tests
-      // && (deviceFlag == null
-      //    || paramSet['Device'] == ?)
       && testName == name
       && status == 'positive';
   }
