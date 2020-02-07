@@ -171,15 +171,18 @@ class TimelineSummary {
   List<Duration> _extractBeginEndEvents(String name) {
     return _extractDurations(
       name,
-      (TimelineEvent beginEvent, TimelineEvent endEvent) =>
-          Duration(microseconds: endEvent.timestampMicros - beginEvent.timestampMicros),
+      (TimelineEvent beginEvent, TimelineEvent endEvent) {
+        return Duration(microseconds: endEvent.timestampMicros - beginEvent.timestampMicros);
+      },
     );
   }
 
   List<Duration> _extractBeginTimestamps(String name) {
     final List<Duration> result = _extractDurations(
       name,
-      (TimelineEvent beginEvent, TimelineEvent endEvent) => Duration(microseconds: beginEvent.timestampMicros),
+      (TimelineEvent beginEvent, TimelineEvent endEvent) {
+        return Duration(microseconds: beginEvent.timestampMicros);
+      },
     );
 
     // Align timestamps so the first event is at 0.
