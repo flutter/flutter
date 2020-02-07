@@ -410,6 +410,7 @@ class CompileTest {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
         options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -424,6 +425,7 @@ class CompileTest {
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
         options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
