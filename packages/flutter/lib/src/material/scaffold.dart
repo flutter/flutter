@@ -978,7 +978,7 @@ class FloatingActionButtonConfiguration {
 ///       child: Icon(Icons.add),
 ///       backgroundColor: Colors.blue,
 ///     ),
-///     floatingActionButtonLocation: _Locations[(_location + 0)%6],
+///     floatingActionButtonLocation: _Locations[(_location + 0) % 6],
 ///     additionalFloatingActionButtonConfigurations: {
 ///       ValueKey('beach_access_button'): FloatingActionButtonConfiguration(
 ///         button: FloatingActionButton(
