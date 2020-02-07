@@ -332,4 +332,10 @@ executable("txt_benchmarks") {
            "//third_party/benchmark",
            ":txt_fixtures",
          ] + txt_common_executable_deps
+
+  if (flutter_enable_skshaper) {
+    sources += [ "benchmarks/skparagraph_benchmarks.cc" ]
+
+    deps += [ "//third_party/skia/modules/skparagraph" ]
+  }
 }
