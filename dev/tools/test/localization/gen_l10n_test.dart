@@ -433,9 +433,9 @@ void main() {
       }
 
       if (Platform.isWindows) {
-        expect(generator.arbPathStrings.first, 'lib\\l10n\\app_en_US.arb');
-        expect(generator.arbPathStrings.elementAt(1), 'lib\\l10n\\app_es.arb');
-        expect(generator.arbPathStrings.elementAt(2), 'lib\\l10n\\app_zh.arb');
+        expect(generator.arbPathStrings.first, r'lib\l10n\app_en_US.arb');
+        expect(generator.arbPathStrings.elementAt(1), r'lib\l10n\app_es.arb');
+        expect(generator.arbPathStrings.elementAt(2), r'lib\l10n\app_zh.arb');
       } else {
         expect(generator.arbPathStrings.first, 'lib/l10n/app_en_US.arb');
         expect(generator.arbPathStrings.elementAt(1), 'lib/l10n/app_es.arb');
@@ -610,7 +610,8 @@ void main() {
       expect(generator.classMethods, isNotEmpty);
       expect(
         generator.classMethods.first,
-        '''  String get title {
+        '''
+  String get title {
     return Intl.message(
       'Title',
       locale: _localeName,
@@ -655,9 +656,10 @@ void main() {
       expect(generator.classMethods, isNotEmpty);
       expect(
         generator.classMethods.first,
-        '''  String itemNumber(Object value) {
+        r'''
+  String itemNumber(Object value) {
     return Intl.message(
-      'Item \${value}',
+      'Item ${value}',
       locale: _localeName,
       name: 'itemNumber',
       desc: 'Item placement in list.',
@@ -704,13 +706,14 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springBegins(DateTime springStartDate) {
+          r'''
+  String springBegins(DateTime springStartDate) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
     String springBegins(Object springStartDate) {
       return Intl.message(
-        'Spring begins on \${springStartDate}',
+        'Spring begins on ${springStartDate}',
         locale: _localeName,
         name: 'springBegins',
         desc: 'The first day of spring',
@@ -831,13 +834,14 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springGreetings(DateTime springStartDate, Object helloWorld) {
+          r'''
+  String springGreetings(DateTime springStartDate, Object helloWorld) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
     String springGreetings(Object springStartDate, Object helloWorld) {
       return Intl.message(
-        "Since it's \${springStartDate}, it's finally spring! \${helloWorld}!",
+        "Since it's ${springStartDate}, it's finally spring! ${helloWorld}!",
         locale: _localeName,
         name: 'springGreetings',
         desc: "A realization that it's finally the spring season, followed by a greeting.",
@@ -888,7 +892,8 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springRange(DateTime springStartDate, DateTime springEndDate) {
+          '''
+  String springRange(DateTime springStartDate, DateTime springEndDate) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
@@ -944,7 +949,8 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count, DateTime currentDate) {
+          r'''
+  String helloWorlds(int count, DateTime currentDate) {
     final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String currentDateString = currentDateDateFormat.format(currentDate);
 
@@ -954,10 +960,10 @@ void main() {
       locale: _localeName,
       name: 'helloWorlds',
       args: <Object>[count, currentDate],
-      one: 'Hello World, today is \${currentDateString}',
-      two: 'Hello two worlds, today is \${currentDateString}',
-      many: 'Hello all \${count} worlds, today is \${currentDateString}',
-      other: 'Hello other \${count} worlds, today is \${currentDateString}'
+      one: 'Hello World, today is ${currentDateString}',
+      two: 'Hello two worlds, today is ${currentDateString}',
+      many: 'Hello all ${count} worlds, today is ${currentDateString}',
+      other: 'Hello other ${count} worlds, today is ${currentDateString}'
       );
     }
     return helloWorlds(count, currentDateString);
@@ -1001,7 +1007,8 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String courseCompletion(double progress) {
+          r'''
+  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.compact(
       locale: _localeName,
     );
@@ -1009,7 +1016,7 @@ void main() {
 
     String courseCompletion(Object progress) {
       return Intl.message(
-        'You have completed \${progress} of the course.',
+        'You have completed ${progress} of the course.',
         locale: _localeName,
         name: 'courseCompletion',
         desc: 'The amount of progress the student has made in their class.',
@@ -1070,7 +1077,8 @@ void main() {
           expect(generator.classMethods, isNotEmpty);
           expect(
             generator.classMethods.first,
-            '''  String courseCompletion(double progress) {
+            '''
+  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(
       locale: _localeName,
       decimalDigits: 2,
@@ -1133,7 +1141,8 @@ void main() {
           expect(generator.classMethods, isNotEmpty);
           expect(
             generator.classMethods.first,
-            '''  String courseCompletion(double progress) {
+            '''
+  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(_localeName);
     final String progressString = progressNumberFormat.format(progress);
 
@@ -1223,7 +1232,8 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count) {
+          r'''
+  String helloWorlds(int count) {
     return Intl.plural(
       count,
       locale: _localeName,
@@ -1232,9 +1242,9 @@ void main() {
       zero: 'Hello',
       one: 'Hello World',
       two: 'Hello two worlds',
-      few: 'Hello \${count} worlds',
-      many: 'Hello all \${count} worlds',
-      other: 'Hello other \${count} worlds'
+      few: 'Hello ${count} worlds',
+      many: 'Hello all ${count} worlds',
+      other: 'Hello other ${count} worlds'
     );
   }
 '''
@@ -1273,18 +1283,19 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-        '''  String helloWorlds(int count, Object adjective) {
+          r'''
+  String helloWorlds(int count, Object adjective) {
     return Intl.plural(
       count,
       locale: _localeName,
       name: 'helloWorlds',
       args: <Object>[count, adjective],
       zero: 'Hello',
-      one: 'Hello \${adjective} World',
-      two: 'Hello two \${adjective} worlds',
-      few: 'Hello \${count} \${adjective} worlds',
-      many: 'Hello all \${count} \${adjective} worlds',
-      other: 'Hello other \${count} \${adjective} worlds'
+      one: 'Hello ${adjective} World',
+      two: 'Hello two ${adjective} worlds',
+      few: 'Hello ${count} ${adjective} worlds',
+      many: 'Hello all ${count} ${adjective} worlds',
+      other: 'Hello other ${count} ${adjective} worlds'
     );
   }
 '''
@@ -1326,7 +1337,8 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count, DateTime currentDate) {
+          r'''
+  String helloWorlds(int count, DateTime currentDate) {
     final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String currentDateString = currentDateDateFormat.format(currentDate);
 
@@ -1336,10 +1348,10 @@ void main() {
       locale: _localeName,
       name: 'helloWorlds',
       args: <Object>[count, currentDate],
-      one: 'Hello World, today is \${currentDateString}',
-      two: 'Hello two worlds, today is \${currentDateString}',
-      many: 'Hello all \${count} worlds, today is \${currentDateString}',
-      other: 'Hello other \${count} worlds, today is \${currentDateString}'
+      one: 'Hello World, today is ${currentDateString}',
+      two: 'Hello two worlds, today is ${currentDateString}',
+      many: 'Hello all ${count} worlds, today is ${currentDateString}',
+      other: 'Hello other ${count} worlds, today is ${currentDateString}'
       );
     }
     return helloWorlds(count, currentDateString);
@@ -1383,7 +1395,8 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String helloWorlds(int count, int population) {
+          r'''
+  String helloWorlds(int count, int population) {
     final NumberFormat populationNumberFormat = NumberFormat.compactLong(
       locale: _localeName,
     );
@@ -1395,10 +1408,10 @@ void main() {
       locale: _localeName,
       name: 'helloWorlds',
       args: <Object>[count, population],
-      one: 'Hello World of \${populationString} citizens',
-      two: 'Hello two worlds with \${populationString} total citizens',
-      many: 'Hello all \${count} worlds, with a total of \${populationString} citizens',
-      other: 'Hello other \${count} worlds, with a total of \${populationString} citizens'
+      one: 'Hello World of ${populationString} citizens',
+      two: 'Hello two worlds with ${populationString} total citizens',
+      many: 'Hello all ${count} worlds, with a total of ${populationString} citizens',
+      other: 'Hello other ${count} worlds, with a total of ${populationString} citizens'
       );
     }
     return helloWorlds(count, populationString);
