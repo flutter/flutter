@@ -804,7 +804,7 @@ void main() {
       child2Notify++;
       child2Focus = child2.hasFocus;
     });
-    parent1.autofocus(child1);
+    child1.requestFocus();
     await tester.pump();
     expect(topFocus, isTrue);
     expect(parent1Focus, isTrue);
@@ -859,7 +859,23 @@ void main() {
     expect(parent2Notify, equals(1));
     expect(child2Notify, equals(1));
 
-    // Changing the focus back before the pump shouldn't cause notification.
+    // Changing the focus back before the pump shouldn't cause notifications.
+    clear();
+    child1.requestFocus();
+    child2.requestFocus();
+    await tester.pump();
+    expect(topFocus, isNull);
+    expect(parent1Focus, isNull);
+    expect(child1Focus, isNull);
+    expect(parent2Focus, isNull);
+    expect(child2Focus, isNull);
+    expect(topNotify, equals(0));
+    expect(parent1Notify, equals(0));
+    expect(child1Notify, equals(0));
+    expect(parent2Notify, equals(0));
+    expect(child2Notify, equals(0));
+
+    // Restoring the focus before the pump shouldn't cause notifications.
     clear();
     child2.unfocus();
     child2.requestFocus();
