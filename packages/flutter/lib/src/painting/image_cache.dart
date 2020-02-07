@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import 'image_provider.dart';
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
