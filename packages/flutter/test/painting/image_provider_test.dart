@@ -22,7 +22,7 @@ void main() {
     return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
   };
 
-  group(ImageProvider, () {
+  group('ImageProvider', () {
     setUpAll(() {
       TestRenderingFlutterBinding(); // initializes the imageCache
     });
@@ -101,6 +101,20 @@ void main() {
       expect(await caughtError.future, true);
     });
 
+    test('obtainKey errors will be caught - check location', () async {
+      final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
+      final Completer<bool> caughtError = Completer<bool>();
+      FlutterError.onError = (FlutterErrorDetails details) {
+        caughtError.complete(true);
+      };
+      await imageProvider.checkCacheLocation(
+        configuration: ImageConfiguration.empty,
+        cache: imageCache as FlutterImageCache,
+      );
+
+      expect(await caughtError.future, true);
+    });
+
     test('resolve sync errors will be caught', () async {
       bool uncaught = false;
       final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
@@ -147,7 +161,7 @@ void main() {
       expect(uncaught, false);
     });
 
-    group(NetworkImage, () {
+    group('NetworkImage', () {
       MockHttpClient httpClient;
 
       setUp(() {

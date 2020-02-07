@@ -651,16 +651,17 @@ void main() {
       )
     );
 
-print(imageStreamCompleter.listeners);
-await tester.pump();
-print(imageStreamCompleter.listeners);
-    // expect(imageStreamCompleter.listeners.length, 2);
-    // imageStreamCompleter.listeners.toList()[1].onImage(null, null);
-    // // await tester.pump();
-    // expect(imageStreamCompleter.listeners.length, 1);
-    // imageStreamCompleter.listeners.toList()[0].onImage(null, null);
+    // Two listeners - one is the listener added by precacheImage, the other by the ImageCache.
+    final List<ImageStreamListener> listeners = imageStreamCompleter.listeners.toList();
+    expect(listeners.length, 2);
 
-    // expect(imageStreamCompleter.listeners.length, 0);
+    // Make sure the first listener can be called re-entrantly
+    listeners[1].onImage(null, null);
+    listeners[1].onImage(null, null);
+
+    // Make sure the second listener can be called re-entrantly.
+    listeners[0].onImage(null, null);
+    listeners[0].onImage(null, null);
   });
 
   testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
@@ -1298,9 +1299,9 @@ print(imageStreamCompleter.listeners);
     expect(flutterImageCache.weakImageCount, 0);
   });
 
-  testWidgets('precacheImage - weak', (WidgetTester tester) async {
+  testWidgets('precacheImage does not hold weak ref for more than a frame', (WidgetTester tester) async {
     imageCache.maximumSize = 0;
-    var f = imageCache as FlutterImageCache;
+    final FlutterImageCache flutterImageCache = imageCache as FlutterImageCache;
     final TestImageProvider provider = TestImageProvider();
     Future<void> precache;
     await tester.pumpWidget(
@@ -1311,27 +1312,81 @@ print(imageStreamCompleter.listeners);
         }
       )
     );
-// print('1 ${f.weakCache}');
     provider.complete();
-// print('2 ${f.weakCache}');
-
     await precache;
-// print('3 ${f.weakCache}');
-    expect(provider._lastResolvedConfiguration, isNotNull);
-// print('4 ${f.weakCache}');
+
+    // Should have ended up with only a weak ref, not in cache because cache size is 0
+    expect(flutterImageCache.weakImageCount, 1);
+    expect(flutterImageCache.containsKey(provider), false);
 
     // Check that a second resolve of the same image is synchronous.
+    expect(provider._lastResolvedConfiguration, isNotNull);
     final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
-// print('5 ${f.weakCache}');
     bool isSync;
     final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
-print('6 ${f.weakCache}');
-    stream.addListener(listener);
-print('7 ${f.weakCache}');
+
     await tester.pump();
-    // stream.removeListener(listener);
-print('8 ${f.weakCache}');
-    // expect(isSync, isTrue);
+    // Weak ref should be gone.
+    expect(flutterImageCache.weakImageCount, 0);
+    expect(flutterImageCache.currentSize, 0);
+
+    stream.addListener(listener);
+    expect(isSync, true); // because the stream still has us.
+
+    expect(flutterImageCache.weakImageCount, 0);
+    expect(flutterImageCache.currentSize, 0);
+
+    expect(provider.loadCallCount, 1);
+  });
+
+  testWidgets('precacheImage allows time to take over weak refernce', (WidgetTester tester) async {
+    final FlutterImageCache flutterImageCache = imageCache as FlutterImageCache;
+    final TestImageProvider provider = TestImageProvider();
+    Future<void> precache;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          precache = precacheImage(provider, context);
+          return Container();
+        }
+      )
+    );
+    provider.complete();
+    await precache;
+
+    // Should have ended up in the cache and have a weak reference.
+    expect(flutterImageCache.weakImageCount, 1);
+    expect(flutterImageCache.currentSize, 1);
+    expect(flutterImageCache.containsKey(provider), true);
+
+    // Check that a second resolve of the same image is synchronous.
+    expect(provider._lastResolvedConfiguration, isNotNull);
+    final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
+    bool isSync;
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
+
+    // Should have ended up in the cache and still have a weak reference.
+    expect(flutterImageCache.weakImageCount, 1);
+    expect(flutterImageCache.currentSize, 1);
+    expect(flutterImageCache.containsKey(provider), true);
+
+    stream.addListener(listener);
+    expect(isSync, true);
+
+    expect(flutterImageCache.weakImageCount, 1);
+    expect(flutterImageCache.currentSize, 1);
+    expect(flutterImageCache.containsKey(provider), true);
+    await tester.pump();
+
+    expect(flutterImageCache.weakImageCount, 1);
+    expect(flutterImageCache.currentSize, 1);
+    expect(flutterImageCache.containsKey(provider), true);
+    stream.removeListener(listener);
+
+    expect(flutterImageCache.weakImageCount, 0);
+    expect(flutterImageCache.currentSize, 1);
+    expect(flutterImageCache.containsKey(provider), true);
+    expect(provider.loadCallCount, 1);
   });
 }
 

@@ -332,6 +332,75 @@ abstract class ImageProvider<T> {
     return ImageStream();
   }
 
+  /// Checks if this [ImageProvider] has a matching key in the
+  /// [FlutterImageCache].
+  ///
+  /// The `cache` and `configuration` parameters must not be null. If the
+  /// `handleError` parameter is null, errors will be reported to
+  /// [FlutterError.onError], and the method will return null.
+  Future<ImageCacheLocation> checkCacheLocation({
+    @required ImageConfiguration configuration,
+    ImageErrorListener handleError,
+    @required FlutterImageCache cache,
+  }) {
+    assert(configuration != null);
+    assert(cache != null);
+    final Completer<ImageCacheLocation> completer = Completer<ImageCacheLocation>();
+    bool didError = false;
+    final ImageErrorListener errorHandler = (dynamic exception, StackTrace stack) {
+      if (didError) {
+        return;
+      }
+      didError = true;
+      if (handleError != null) {
+        handleError(exception, stack);
+      } else {
+        FlutterError.onError(FlutterErrorDetails(
+          context: ErrorDescription('while checking the cache location of an image'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+            yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
+            yield DiagnosticsProperty<FlutterImageCache>('Image cache', cache);
+          },
+          exception: exception,
+          stack: stack,
+        ));
+        completer.complete(null);
+      }
+    };
+
+
+    // If an error is added to a synchronous completer before a listener has been
+    // added, it can throw an error both into the zone and up the stack. Thus, it
+    // looks like the error has been caught, but it is in fact also bubbling to the
+    // zone. Since we cannot prevent all usage of Completer.sync here, or rather
+    // that changing them would be too breaking, we instead hook into the same
+    // zone mechanism to intercept the uncaught error and deliver it to the
+    // supplied error handler. Note that these errors may be duplicated,
+    // hence the need for the `didError` flag.
+    final Zone dangerZone = Zone.current.fork(
+      specification: ZoneSpecification(
+        handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
+          errorHandler(error, stackTrace);
+        }
+      )
+    );
+    dangerZone.runGuarded(() {
+      Future<T> key;
+      try {
+        key = obtainKey(configuration);
+      } catch (error, stackTrace) {
+        errorHandler(error, stackTrace);
+        return;
+      }
+      key.then<void>((T key) {
+        completer.complete(cache.locationForKey(key));
+      }).catchError(errorHandler);
+    });
+
+    return completer.future;
+  }
+
   void _createErrorHandlerAndKey(ImageConfiguration configuration, ImageStream stream) {
     assert(configuration != null);
     assert(stream != null);

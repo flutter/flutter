@@ -66,7 +66,21 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// If the image is later used by an [Image] or [BoxDecoration] or [FadeInImage],
 /// it will probably be loaded faster. The consumer of the image does not need
 /// to use the same [ImageProvider] instance. The [ImageCache] will find the image
-/// as long as both images share the same key.
+/// as long as both images share the same key, and the image is held by the
+/// cache.
+///
+/// The cache may refuse to hold the image if the image is larger than
+/// [ImageCache.maximumSizeBytes], or if that property or
+/// [ImageCache.maximumSize] are 0. In such a case, the [FlutterImageCache] will
+/// weakly hold a reference to this image as long as its [ImageStreamCompleter]
+/// has at least one listener. This method will wait one frame after its future
+/// completes before releasing its own listener, to give callers a chance to
+/// listen to the stream if necessary. A caller can determine if the image ended
+/// up in the cache by calling [ImageProvider.checkCacheLocation]. If it is only
+/// [ImageCacheLocation.weak]ly held, and the caller wishes to keep the resolved
+/// image in memory, the caller should immediately call `provider.resolve` and
+/// add a listener to the returned [ImageStream]. The image will remain pinned
+/// in memory at least until the caller removes its listener from the stream.
 ///
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
@@ -89,20 +103,17 @@ Future<void> precacheImage(
   ImageStreamListener listener;
   listener = ImageStreamListener(
     (ImageInfo image, bool sync) {
-      print('completing');
-      completer.complete();
-      // Add a listener to make sure the image cache does not drop the weak ref
-      // until at least the next frame.
-      final ImageStreamListener frameListener = ImageStreamListener((_, __) {});
-      stream.addListener(frameListener);
-      stream.removeListener(listener);
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
       SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
-        print('next frame!');
-        stream.removeListener(frameListener);
+        stream.removeListener(listener);
       });
     },
     onError: (dynamic exception, StackTrace stackTrace) {
-      completer.complete();
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
       stream.removeListener(listener);
       if (onError != null) {
         onError(exception, stackTrace);

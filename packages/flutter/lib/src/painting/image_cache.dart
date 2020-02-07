@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:meta/meta.dart';
 
+import 'image_provider.dart';
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
@@ -313,7 +312,6 @@ class ImageCacheLocation {
 /// See [ImageCacheLocation] for more details.
 class FlutterImageCache extends ImageCache {
   final Map<Object, ImageStreamCompleter> _weakCache = <Object, ImageStreamCompleter>{};
-  Map get weakCache => _weakCache;
 
   @override
   ImageStreamCompleter _checkOtherResults(Object key) {
@@ -327,7 +325,6 @@ class FlutterImageCache extends ImageCache {
   void _onImageStreamCompleterCreated(Object key, ImageStreamCompleter completer) {
     _weakCache[key] = completer;
     completer.addOnLastListenerRemovedCallback(() {
-      print('removing from weak $key');
       _weakCache.remove(key);
     });
   }
