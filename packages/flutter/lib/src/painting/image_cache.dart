@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
+
 import 'package:meta/meta.dart';
 
 import 'image_stream.dart';
@@ -238,7 +240,6 @@ class ImageCache {
         _checkCacheSize();
       }
     }
-
     if (maximumSize > 0 && maximumSizeBytes > 0) {
       final ImageStreamListener streamListener = ImageStreamListener(listener);
       _pendingImages[key] = _PendingImage(result, streamListener);
@@ -281,6 +282,9 @@ class ImageCache {
 /// A [weak] image is being held until its [ImageStreamCompleter] has no more
 /// listeners. It may also be [pending] or [strong].
 /// An [untracked] image is not being cached.
+///
+/// To obtain an [ImageCacheLocation], use [FlutterImageCache.locationForKey] or
+/// [ImageProvider.findCacheLocation].
 class ImageCacheLocation {
   const ImageCacheLocation._({
     this.pending = false,
@@ -305,6 +309,20 @@ class ImageCacheLocation {
   /// [FlutterImageCache.putIfAbsent] or has otherwise been evicted from the
   /// [strong] and [weak] caches.
   bool get untracked => !pending && !strong && !weak;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ImageCacheLocation
+        && other.pending == pending
+        && other.strong == strong
+        && other.weak == weak;
+  }
+
+  @override
+  int get hashCode => hashValues(pending, strong, weak);
 }
 
 /// An [ImageCache] that adds weak tracking of images that have at least one
