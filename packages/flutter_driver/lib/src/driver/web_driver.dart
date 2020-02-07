@@ -212,17 +212,18 @@ class FlutterWebConnection {
     }
 
     try {
-      result = await waitFor<dynamic>(() => _driver.execute('r'
-          'eturn \$flutterDriverResult', <String>[]),
-          matcher: isNotNull,
-          timeout: duration ?? const Duration(days: 30));
+      result = await waitFor<dynamic>(
+        () => _driver.execute(r'return $flutterDriverResult', <String>[]),
+        matcher: isNotNull,
+        timeout: duration ?? const Duration(days: 30),
+      );
     } catch (_) {
       // Returns null if exception thrown.
       return null;
     } finally {
       // Resets the result.
-      _driver.execute('''
-        \$flutterDriverResult = null
+      _driver.execute(r'''
+        $flutterDriverResult = null
       ''', <void>[]);
     }
     return result;
@@ -243,7 +244,7 @@ class FlutterWebConnection {
 /// Waits until extension is installed.
 Future<void> waitUntilExtensionInstalled(sync_io.WebDriver driver, Duration timeout) async {
   await waitFor<void>(() =>
-      driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
+      driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',
       timeout: timeout ?? const Duration(days: 365));
 }

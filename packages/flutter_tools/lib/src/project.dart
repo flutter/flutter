@@ -409,7 +409,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       } on FileNotFoundException {
         // iOS tooling not found; likely not running OSX; let [fromPlist] be null
       }
-      if (fromPlist != null && !fromPlist.contains('\$')) {
+      if (fromPlist != null && !fromPlist.contains(r'$')) {
         // Info.plist has no build variables in product bundle ID.
         return fromPlist;
       }

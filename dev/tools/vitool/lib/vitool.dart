@@ -460,7 +460,7 @@ class _Transform {
 }
 
 
-const String _transformCommandAtom = ' *([^(]+)\\(([^)]*)\\)';
+const String _transformCommandAtom = r' *([^(]+)\(([^)]*)\)';
 final RegExp _transformValidator = RegExp('^($_transformCommandAtom)*\$');
 final RegExp _transformCommand = RegExp(_transformCommandAtom);
 
@@ -522,7 +522,7 @@ Matrix3 _matrix(double a, double b, double c, double d, double e, double f) {
 
 // Matches a pixels expression e.g "14px".
 // First group is just the number.
-final RegExp _pixelsExp = RegExp('^([0-9]+)px\$');
+final RegExp _pixelsExp = RegExp(r'^([0-9]+)px$');
 
 /// Parses a pixel expression, e.g "14px", and returns the number.
 /// Throws an [ArgumentError] if the given string doesn't match the pattern.
