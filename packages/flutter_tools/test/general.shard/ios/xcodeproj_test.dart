@@ -79,8 +79,8 @@ void main() {
 
     testUsingOsxContext('majorVersion returns major version', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 10.3.3\nBuild version 8E3004b', ''));
-      expect(xcodeProjectInterpreter.majorVersion, 10);
+          .thenReturn(ProcessResult(1, 0, 'Xcode 11.4.3\nBuild version 11N111s', ''));
+      expect(xcodeProjectInterpreter.majorVersion, 11);
     });
 
     testUsingOsxContext('majorVersion is null when version has unexpected format', () {
