@@ -35,14 +35,14 @@ void main() {
 
   testUsingContext('symbolize exits when --debug-info argument is missing', () async {
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolicate']);
+      .run(const <String>['symbolize']);
 
     expect(result, throwsToolExit(message: '"--debug-info" is required to symbolicate stack traces.'));
   });
 
   testUsingContext('symbolize exits when --debug-info file is missing', () async {
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolicate', '--debug-info=app.debug']);
+      .run(const <String>['symbolize', '--debug-info=app.debug']);
 
     expect(result, throwsToolExit(message: 'app.debug does not exist.'));
   });
@@ -50,7 +50,7 @@ void main() {
   testUsingContext('symbolize exits when --input file is missing', () async {
     fileSystem.file('app.debug').createSync();
     final Future<void> result = createTestCommandRunner(command)
-      .run(const <String>['symbolicate', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']);
+      .run(const <String>['symbolize', '--debug-info=app.debug', '--input=foo.stack', '--output=results/foo.result']);
 
     expect(result, throwsToolExit(message: ''));
   });
