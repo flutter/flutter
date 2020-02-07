@@ -7,7 +7,7 @@
 namespace fml {
 
 NSRange RangeForCharacterAtIndex(NSString* text, NSUInteger index) {
-  if (text == nil || index >= text.length) {
+  if (text == nil || index > text.length) {
     return NSMakeRange(NSNotFound, 0);
   }
   if (index < text.length)

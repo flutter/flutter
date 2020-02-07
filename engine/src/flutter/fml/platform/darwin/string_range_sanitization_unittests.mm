@@ -28,3 +28,8 @@ TEST(StringRangeSanitizationTest, CanHandleUnicodeRange) {
   EXPECT_EQ(result.location, 0UL);
   EXPECT_EQ(result.length, 0UL);
 }
+
+TEST(StringRangeSanitizationTest, HandlesEndOfRange) {
+  EXPECT_EQ(fml::RangeForCharacterAtIndex(@"1234", 4).location, 4UL);
+  EXPECT_EQ(fml::RangeForCharacterAtIndex(@"1234", 4).length, 0UL);
+}

@@ -312,7 +312,13 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 }
 
 - (NSString*)textInRange:(UITextRange*)range {
+  if (!range) {
+    return nil;
+  }
+  NSAssert([range isKindOfClass:[FlutterTextRange class]],
+           @"Expected a FlutterTextRange for range (got %@).", [range class]);
   NSRange textRange = ((FlutterTextRange*)range).range;
+  NSAssert(textRange.location != NSNotFound, @"Expected a valid text range.");
   return [self.text substringWithRange:textRange];
 }
 
