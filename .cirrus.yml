@@ -19,6 +19,7 @@ environment:
   # TODO(amirha): remove once we've migrated to newer Gradle
   CIRRUS_CHANGE_MESSAGE: ""
   CIRRUS_COMMIT_MESSAGE: ""
+  FLUTTER_TESTS_PIN_HASH: 'f73542b1dcf6866948ca13d4f61c3557c7c3d4ad'
 
 # LINUX SHARDS
 task:
@@ -283,6 +284,8 @@ task:
       script:
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
+        # Hotfix only, this pins the flutter/tests repo
+        - (cd bin/cache/pkg/tests ; git checkout "$FLUTTER_TESTS_PIN_HASH")
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
     - name: firebase_test_lab_tests-linux # linux-only
@@ -425,6 +428,8 @@ task:
       script:
         - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
         - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
+        # Hotfix only, this pins the flutter/tests repo
+        - CMD /S /C "CD bin\cache\pkg\tests & git checkout "%FLUTTER_TESTS_PIN_HASH%""
         - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
 # MACOS SHARDS
@@ -548,6 +553,8 @@ task:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - rm -rf bin/cache/pkg/tests
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
+        # Hotfix only, this pins the flutter/tests repo
+        - (cd bin/cache/pkg/tests ; git checkout "$FLUTTER_TESTS_PIN_HASH")
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
     - name: deploy_gallery-macos # linux- and macos- only
