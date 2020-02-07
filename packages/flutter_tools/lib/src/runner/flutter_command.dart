@@ -559,7 +559,7 @@ abstract class FlutterCommand extends Command<void> {
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
         // Prints the welcome message if needed.
-        flutterUsage.printWelcome();
+        globals.flutterUsage.printWelcome();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult = FlutterCommandResult.fail();
@@ -615,7 +615,7 @@ abstract class FlutterCommand extends Command<void> {
     final String label = labels
         .where((String label) => !isBlank(label))
         .join('-');
-    flutterUsage.sendTiming(
+    globals.flutterUsage.sendTiming(
       'flutter',
       name,
       // If the command provides its own end time, use it. Otherwise report

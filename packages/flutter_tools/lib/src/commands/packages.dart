@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/os.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -97,10 +98,10 @@ class PackagesGetCommand extends FlutterCommand {
         checkLastModified: false,
       );
       pubGetTimer.stop();
-      flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
+      globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
     } catch (_) {
       pubGetTimer.stop();
-      flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'failure');
+      globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'failure');
       rethrow;
     }
   }

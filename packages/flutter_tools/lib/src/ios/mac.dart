@@ -26,8 +26,14 @@ import 'xcodeproj.dart';
 
 class IMobileDevice {
   IMobileDevice()
-      : _idevicesyslogPath = globals.artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
-        _idevicescreenshotPath = globals.artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+    : _idevicesyslogPath = globals.artifacts.getArtifactPath(
+        Artifact.idevicesyslog,
+        platform: TargetPlatform.ios,
+      ),
+      _idevicescreenshotPath = globals.artifacts.getArtifactPath(
+        Artifact.idevicescreenshot,
+        platform: TargetPlatform.ios,
+      );
 
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
@@ -291,7 +297,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
-  flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'xcode-ios', sw.elapsed);
 
   // Run -showBuildSettings again but with the exact same parameters as the
   // build. showBuildSettings is reported to ocassionally timeout. Here, we give

@@ -6,7 +6,6 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -24,7 +23,6 @@ import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
 
 void main() {
   setUpAll(() {
@@ -37,7 +35,9 @@ void main() {
 
     setUp(() {
       Cache.flutterRoot = '../..';
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
+      tempDir = globals.fs.systemTempDirectory.createTempSync(
+        'flutter_tools_analytics_test.',
+      );
       mockFlutterConfig = MockFlutterConfig();
     });
 
@@ -48,18 +48,18 @@ void main() {
     // Ensure we don't send anything when analytics is disabled.
     testUsingContext('doesn\'t send when disabled', () async {
       int count = 0;
-      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
-      flutterUsage.enabled = false;
+      globals.flutterUsage.enabled = false;
       await createProject(tempDir);
       expect(count, 0);
 
-      flutterUsage.enabled = true;
+      globals.flutterUsage.enabled = true;
       await createProject(tempDir);
-      expect(count, flutterUsage.isFirstRun ? 0 : 4);
+      expect(count, globals.flutterUsage.isFirstRun ? 0 : 4);
 
       count = 0;
-      flutterUsage.enabled = false;
+      globals.flutterUsage.enabled = false;
       final DoctorCommand doctorCommand = DoctorCommand();
       final CommandRunner<void>runner = createTestCommandRunner(doctorCommand);
       await runner.run(<String>['doctor']);
@@ -69,21 +69,28 @@ void main() {
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
+        config: globals.config,
+        fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        os: globals.os,
+        persistentToolState: globals.persistentToolState,
+        platform: globals.platform,
       ),
     });
 
     // Ensure we don't send for the 'flutter config' command.
     testUsingContext('config doesn\'t send', () async {
       int count = 0;
-      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
-      flutterUsage.enabled = false;
+      globals.flutterUsage.enabled = false;
       final ConfigCommand command = ConfigCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['config']);
       expect(count, 0);
 
-      flutterUsage.enabled = true;
+      globals.flutterUsage.enabled = true;
       await runner.run(<String>['config']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
@@ -91,13 +98,28 @@ void main() {
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
+        config: globals.config,
+        fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        os: globals.os,
+        persistentToolState: globals.persistentToolState,
+        platform: globals.platform,
       ),
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
       when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting) as bool)
           .thenReturn(true);
-      final Usage usage = Usage();
+      final Usage usage = Usage(
+        config: globals.config,
+        fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        os: globals.os,
+        persistentToolState: globals.persistentToolState,
+        platform: globals.platform,
+      );
       usage.sendCommand('test');
 
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
@@ -119,7 +141,15 @@ void main() {
           .thenReturn(true);
       when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting) as bool)
           .thenReturn(true);
-      final Usage usage = Usage();
+      final Usage usage = Usage(
+        config: globals.config,
+        fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        os: globals.os,
+        persistentToolState: globals.persistentToolState,
+        platform: globals.platform,
+      );
       usage.sendCommand('test');
 
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
@@ -137,7 +167,6 @@ void main() {
 
   group('analytics with mocks', () {
     MemoryFileSystem memoryFileSystem;
-    MockStdio mockStdio;
     Usage mockUsage;
     SystemClock mockClock;
     Doctor mockDoctor;
@@ -145,15 +174,31 @@ void main() {
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
-      mockStdio = MockStdio();
       mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(false);
       mockClock = MockClock();
       mockDoctor = MockDoctor();
       when(mockClock.now()).thenAnswer(
-        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
+        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)),
       );
     });
+
+    Usage testUsage() {
+      return Usage(
+        versionOverride: 'test',
+        config: globals.config,
+        fileSystem: memoryFileSystem,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        os: globals.os,
+        persistentToolState: globals.persistentToolState,
+        platform: FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
+          },
+        ),
+      );
+    }
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
@@ -213,25 +258,17 @@ void main() {
       mockTimes = <int>[kMillis];
       // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
       // will be written to a file.
-      final Usage usage = Usage(versionOverride: 'test');
+      final Usage usage = testUsage();
       usage.suppressAnalytics = false;
       usage.enabled = true;
 
       usage.sendCommand('test');
 
-      final String log = globals.fs.file('analytics.log').readAsStringSync();
+      final String log = memoryFileSystem.file('analytics.log').readAsStringSync();
       final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(kMillis);
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => mockClock,
-      Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
-        },
-      ),
-      Stdio: () => mockStdio,
     });
 
     testUsingContext('event sends localtime', () async {
@@ -239,25 +276,17 @@ void main() {
       mockTimes = <int>[kMillis];
       // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
       // will be written to a file.
-      final Usage usage = Usage(versionOverride: 'test');
+      final Usage usage = testUsage();
       usage.suppressAnalytics = false;
       usage.enabled = true;
 
       usage.sendEvent('test', 'test');
 
-      final String log = globals.fs.file('analytics.log').readAsStringSync();
+      final String log = memoryFileSystem.file('analytics.log').readAsStringSync();
       final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(kMillis);
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => mockClock,
-      Platform: () => FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
-        },
-      ),
-      Stdio: () => mockStdio,
     });
   });
 
@@ -274,7 +303,7 @@ void main() {
 
     testUsingContext('don\'t send on bots', () async {
       int count = 0;
-      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
       await createTestCommandRunner().run(<String>['--version']);
       expect(count, 0);
@@ -283,13 +312,20 @@ void main() {
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/unknown',
         configDirOverride: tempDir.path,
+        config: globals.config,
+        fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        os: globals.os,
+        persistentToolState: globals.persistentToolState,
+        platform: globals.platform,
       ),
     });
 
     testUsingContext('don\'t send on bots even when opted in', () async {
       int count = 0;
-      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
-      flutterUsage.enabled = true;
+      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.enabled = true;
 
       await createTestCommandRunner().run(<String>['--version']);
       expect(count, 0);
@@ -298,6 +334,13 @@ void main() {
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/unknown',
         configDirOverride: tempDir.path,
+        config: globals.config,
+        fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: globals.logger,
+        os: globals.os,
+        persistentToolState: globals.persistentToolState,
+        platform: globals.platform,
       ),
     });
   });

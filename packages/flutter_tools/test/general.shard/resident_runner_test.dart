@@ -224,13 +224,17 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      cdKey(CustomDimensions.hotEventTargetPlatform):
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      cdKey(CustomDimensions.hotEventSdkName): 'Example',
-      cdKey(CustomDimensions.hotEventEmulator): 'false',
-      cdKey(CustomDimensions.hotEventFullRestart): 'false',
-    })).called(1);
+    verify(globals.flutterUsage.sendEvent(
+      'hot',
+      'exception',
+      parameters: <String, String>{
+        cdKey(CustomDimensions.hotEventTargetPlatform):
+          getNameForTargetPlatform(TargetPlatform.android_arm),
+        cdKey(CustomDimensions.hotEventSdkName): 'Example',
+        cdKey(CustomDimensions.hotEventEmulator): 'false',
+        cdKey(CustomDimensions.hotEventFullRestart): 'false',
+      },
+    )).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   }));
@@ -259,7 +263,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(flutterUsage.sendEvent('hot', 'reload',
+    expect(verify(globals.flutterUsage.sendEvent('hot', 'reload',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
                    getNameForTargetPlatform(TargetPlatform.android_arm)),
@@ -289,7 +293,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(flutterUsage.sendEvent('hot', 'restart',
+    expect(verify(globals.flutterUsage.sendEvent('hot', 'restart',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
                    getNameForTargetPlatform(TargetPlatform.android_arm)),
@@ -333,13 +337,17 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      cdKey(CustomDimensions.hotEventTargetPlatform):
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      cdKey(CustomDimensions.hotEventSdkName): 'Example',
-      cdKey(CustomDimensions.hotEventEmulator): 'false',
-      cdKey(CustomDimensions.hotEventFullRestart): 'true',
-    })).called(1);
+    verify(globals.flutterUsage.sendEvent(
+      'hot',
+      'exception',
+      parameters: <String, String>{
+        cdKey(CustomDimensions.hotEventTargetPlatform):
+          getNameForTargetPlatform(TargetPlatform.android_arm),
+        cdKey(CustomDimensions.hotEventSdkName): 'Example',
+        cdKey(CustomDimensions.hotEventEmulator): 'false',
+        cdKey(CustomDimensions.hotEventFullRestart): 'true',
+      },
+    )).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   }));

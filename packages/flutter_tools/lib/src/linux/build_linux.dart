@@ -10,10 +10,13 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 /// Builds the Linux project through the Makefile.
-Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
+Future<void> buildLinux(
+  LinuxProject linuxProject,
+  BuildInfo buildInfo, {
+  String target = 'lib/main.dart',
+}) async {
   if (!linuxProject.makeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
       'https://github.com/flutter/flutter/wiki/Desktop-shells#create '
@@ -30,8 +33,14 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
-    buffer.writeln('export FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
-    buffer.writeln('export LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
+    buffer.writeln(
+      'export FLUTTER_ENGINE='
+      '${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}',
+    );
+    buffer.writeln(
+      'export LOCAL_ENGINE='
+      '${globals.fs.path.basename(engineOutPath)}',
+    );
   }
 
   /// Cache flutter configuration files in the linux directory.
@@ -42,14 +51,21 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   if (!buildInfo.isDebug) {
     const String warning = '🚧 ';
     globals.printStatus(warning * 20);
-    globals.printStatus('Warning: Only debug is currently implemented for Linux. This is effectively a debug build.');
-    globals.printStatus('See https://github.com/flutter/flutter/issues/38478 for details and updates.');
+    globals.printStatus(
+      'Warning: Only debug is currently implemented for Linux. '
+      'This is effectively a debug build.',
+    );
+    globals.printStatus(
+      'See https://github.com/flutter/flutter/issues/38478 for details and updates.',
+    );
     globals.printStatus(warning * 20);
     globals.printStatus('');
   }
 
   // Invoke make.
-  final String buildFlag = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
+  final String buildFlag = getNameForBuildMode(
+    buildInfo.mode ?? BuildMode.release,
+  );
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
@@ -71,5 +87,5 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  flutterUsage.sendTiming('build', 'make-linux', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'make-linux', sw.elapsed);
 }

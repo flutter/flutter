@@ -10,7 +10,6 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'cocoapod_utils.dart';
 
 /// Builds the macOS project through xcodebuild.
@@ -21,9 +20,11 @@ Future<void> buildMacOS({
   String targetOverride,
 }) async {
   if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
-    throwToolExit('No macOS desktop project configured. '
+    throwToolExit(
+      'No macOS desktop project configured. '
       'See https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-project '
-      'to learn about adding macOS support to a project.');
+      'to learn about adding macOS support to a project.',
+    );
   }
 
   final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
@@ -38,7 +39,11 @@ Future<void> buildMacOS({
     useMacOSConfig: true,
     setSymroot: false,
   );
-  await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
+  await processPodsIfNeeded(
+    flutterProject.macos,
+    getMacOSBuildDirectory(),
+    buildInfo.mode,
+  );
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
     flutterProject.macos.inputFileList.createSync(recursive: true);
@@ -93,5 +98,5 @@ Future<void> buildMacOS({
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'xcode-macos', sw.elapsed);
 }

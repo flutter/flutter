@@ -196,7 +196,7 @@ class HotRunner extends ResidentRunner {
     }
 
     globals.printStatus('reloadMethod took ${stopwatch.elapsedMilliseconds}');
-    flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
+    globals.flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
     return OperationResult.ok;
   }
 
@@ -516,7 +516,7 @@ class HotRunner extends ResidentRunner {
         restartTimer.elapsed.inMilliseconds);
 
     // Send timing analytics.
-    flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
+    globals.flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
 
     // In benchmark mode, make sure all stream notifications have finished.
     if (benchmarkMode) {
@@ -990,7 +990,7 @@ class HotRunner extends ResidentRunner {
     }
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleViews.length == 1) && !failedReassemble && shouldReportReloadTime) {
-      flutterUsage.sendTiming('hot', 'reload', reloadDuration);
+      globals.flutterUsage.sendTiming('hot', 'reload', reloadDuration);
     }
     return OperationResult(
       failedReassemble ? 1 : OperationResult.ok.code,

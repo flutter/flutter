@@ -17,7 +17,6 @@ import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
@@ -36,29 +35,36 @@ Future<void> buildWeb(
   final bool hasWebPlugins = findPlugins(flutterProject)
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   await injectPlugins(flutterProject, checkProjects: true);
-  final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
+  final Status status = globals.logger.startProgress(
+    'Compiling $target for the Web...',
+    timeout: null,
+  );
   final Stopwatch sw = Stopwatch()..start();
   try {
-    final BuildResult result = await buildSystem.build(const WebServiceWorker(), Environment.test(
-      globals.fs.currentDirectory,
-      outputDir: globals.fs.directory(getWebBuildDirectory()),
-      buildDir: flutterProject.directory
-        .childDirectory('.dart_tool')
-        .childDirectory('flutter_build'),
-      defines: <String, String>{
-        kBuildMode: getNameForBuildMode(buildInfo.mode),
-        kTargetFile: target,
-        kInitializePlatform: initializePlatform.toString(),
-        kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: jsonEncode(dartDefines),
-        kCspMode: csp.toString(),
-        // TODO(dnfield): Enable font subset. We need to get a kernel file to do
-        // that. https://github.com/flutter/flutter/issues/49730
-      },
-    ));
+    final BuildResult result = await buildSystem.build(
+      const WebServiceWorker(),
+      Environment.test(
+        globals.fs.currentDirectory,
+        outputDir: globals.fs.directory(getWebBuildDirectory()),
+        buildDir: flutterProject.directory
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_build'),
+        defines: <String, String>{
+          kBuildMode: getNameForBuildMode(buildInfo.mode),
+          kTargetFile: target,
+          kInitializePlatform: initializePlatform.toString(),
+          kHasWebPlugins: hasWebPlugins.toString(),
+          kDartDefines: jsonEncode(dartDefines),
+          kCspMode: csp.toString(),
+          // TODO(dnfield): Enable font subset. We need to get a kernel file to
+          // do that. https://github.com/flutter/flutter/issues/49730
+        },
+      ),
+    );
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+        globals.printError(
+          'Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: measurement.fatal
             ? measurement.stackTrace
             : null,
@@ -71,7 +77,7 @@ Future<void> buildWeb(
   } finally {
     status.stop();
   }
-  flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'dart2js', sw.elapsed);
 }
 
 /// An indirection on web compilation.

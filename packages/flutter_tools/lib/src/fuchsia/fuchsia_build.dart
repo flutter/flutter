@@ -20,7 +20,6 @@ import '../convert.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 import 'fuchsia_pm.dart';
 import 'fuchsia_sdk.dart';
@@ -29,15 +28,20 @@ Future<void> _timedBuildStep(String name, Future<void> Function() action) async 
   final Stopwatch sw = Stopwatch()..start();
   await action();
   globals.printTrace('$name: ${sw.elapsedMilliseconds} ms.');
-  flutterUsage.sendTiming('build', name, Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', name, sw.elapsed);
 }
 
 Future<void> _validateCmxFile(FuchsiaProject fuchsiaProject) async {
   final String appName = fuchsiaProject.project.manifest.appName;
-  final String cmxPath = globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx');
+  final String cmxPath = globals.fs.path.join(
+    fuchsiaProject.meta.path,
+    '$appName.cmx',
+  );
   final File cmxFile = globals.fs.file(cmxPath);
   if (!await cmxFile.exists()) {
-    throwToolExit('The Fuchsia build requires a .cmx file at $cmxPath for the app: $appName.');
+    throwToolExit(
+      'The Fuchsia build requires a .cmx file at $cmxPath for the app: $appName.',
+    );
   }
 }
 
@@ -85,10 +89,22 @@ Future<void> _genSnapshot(
   final String appName = fuchsiaProject.project.manifest.appName;
   final String dilPath = globals.fs.path.join(outDir, '$appName.dil');
 
-  final String vmSnapshotData = globals.fs.path.join(outDir, 'vm_data.aotsnapshot');
-  final String vmSnapshotInstructions = globals.fs.path.join(outDir, 'vm_instructions.aotsnapshot');
-  final String snapshotData = globals.fs.path.join(outDir, 'data.aotsnapshot');
-  final String snapshotInstructions = globals.fs.path.join(outDir, 'instructions.aotsnapshot');
+  final String vmSnapshotData = globals.fs.path.join(
+    outDir,
+    'vm_data.aotsnapshot',
+  );
+  final String vmSnapshotInstructions = globals.fs.path.join(
+    outDir,
+    'vm_instructions.aotsnapshot',
+  );
+  final String snapshotData = globals.fs.path.join(
+    outDir,
+    'data.aotsnapshot',
+  );
+  final String snapshotInstructions = globals.fs.path.join(
+    outDir,
+    'instructions.aotsnapshot',
+  );
 
   final String genSnapshot = globals.artifacts.getArtifactPath(
     Artifact.genSnapshot,
@@ -143,7 +159,10 @@ Future<void> _buildAssets(
 
   final String appName = fuchsiaProject.project.manifest.appName;
   final String outDir = getFuchsiaBuildDirectory();
-  final String assetManifest = globals.fs.path.join(outDir, '${appName}_pkgassets');
+  final String assetManifest = globals.fs.path.join(
+    outDir,
+    '${appName}_pkgassets',
+  );
 
   final File destFile = globals.fs.file(assetManifest);
   await destFile.create(recursive: true);
@@ -157,7 +176,9 @@ Future<void> _buildAssets(
 }
 
 void _rewriteCmx(BuildMode mode, String runnerPackageSource, File src, File dst) {
-  final Map<String, dynamic> cmx = castStringKeyedMap(json.decode(src.readAsStringSync()));
+  final Map<String, dynamic> cmx = castStringKeyedMap(
+    json.decode(src.readAsStringSync()),
+  );
   // If the app author has already specified the runner in the cmx file, then
   // do not override it with something else.
   if (cmx.containsKey('runner')) {
@@ -196,27 +217,53 @@ Future<void> _buildPackage(
   final String outDir = getFuchsiaBuildDirectory();
   final String pkgDir = globals.fs.path.join(outDir, 'pkg');
   final String appName = fuchsiaProject.project.manifest.appName;
-  final String pkgassets = globals.fs.path.join(outDir, '${appName}_pkgassets');
-  final String packageManifest = globals.fs.path.join(pkgDir, 'package_manifest');
-  final String devKeyPath = globals.fs.path.join(pkgDir, 'development.key');
+  final String pkgassets = globals.fs.path.join(
+    outDir,
+    '${appName}_pkgassets',
+  );
+  final String packageManifest = globals.fs.path.join(
+    pkgDir,
+    'package_manifest',
+  );
+  final String devKeyPath = globals.fs.path.join(
+    pkgDir,
+    'development.key',
+  );
 
   final Directory pkg = globals.fs.directory(pkgDir);
   if (!pkg.existsSync()) {
     pkg.createSync(recursive: true);
   }
 
-  final File srcCmx =
-      globals.fs.file(globals.fs.path.join(fuchsiaProject.meta.path, '$appName.cmx'));
-  final File dstCmx = globals.fs.file(globals.fs.path.join(outDir, '$appName.cmx'));
+  final File srcCmx = globals.fs.file(globals.fs.path.join(
+    fuchsiaProject.meta.path,
+    '$appName.cmx',
+  ));
+  final File dstCmx = globals.fs.file(globals.fs.path.join(
+    outDir,
+    '$appName.cmx',
+  ));
   _rewriteCmx(buildInfo.mode, runnerPackageSource, srcCmx, dstCmx);
 
   final File manifestFile = globals.fs.file(packageManifest);
 
   if (buildInfo.usesAot) {
-    final String vmSnapshotData = globals.fs.path.join(outDir, 'vm_data.aotsnapshot');
-    final String vmSnapshotInstructions = globals.fs.path.join(outDir, 'vm_instructions.aotsnapshot');
-    final String snapshotData = globals.fs.path.join(outDir, 'data.aotsnapshot');
-    final String snapshotInstructions = globals.fs.path.join(outDir, 'instructions.aotsnapshot');
+    final String vmSnapshotData = globals.fs.path.join(
+      outDir,
+      'vm_data.aotsnapshot',
+    );
+    final String vmSnapshotInstructions = globals.fs.path.join(
+      outDir,
+      'vm_instructions.aotsnapshot',
+    );
+    final String snapshotData = globals.fs.path.join(
+      outDir,
+      'data.aotsnapshot',
+    );
+    final String snapshotInstructions = globals.fs.path.join(
+      outDir,
+      'instructions.aotsnapshot',
+    );
     manifestFile.writeAsStringSync(
       'data/$appName/vm_snapshot_data.bin=$vmSnapshotData\n');
     manifestFile.writeAsStringSync(
@@ -229,16 +276,27 @@ Future<void> _buildPackage(
       'data/$appName/isolate_snapshot_instructions.bin=$snapshotInstructions\n',
       mode: FileMode.append);
   } else {
-    final String dilpmanifest = globals.fs.path.join(outDir, '$appName.dilpmanifest');
-    manifestFile.writeAsStringSync(globals.fs.file(dilpmanifest).readAsStringSync());
+    final String dilpmanifest = globals.fs.path.join(
+      outDir,
+      '$appName.dilpmanifest',
+    );
+    manifestFile.writeAsStringSync(
+      globals.fs.file(dilpmanifest).readAsStringSync(),
+    );
   }
 
-  manifestFile.writeAsStringSync(globals.fs.file(pkgassets).readAsStringSync(),
-      mode: FileMode.append);
-  manifestFile.writeAsStringSync('meta/$appName.cmx=${dstCmx.path}\n',
-      mode: FileMode.append);
-  manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n',
-      mode: FileMode.append);
+  manifestFile.writeAsStringSync(
+    globals.fs.file(pkgassets).readAsStringSync(),
+    mode: FileMode.append,
+  );
+  manifestFile.writeAsStringSync(
+    'meta/$appName.cmx=${dstCmx.path}\n',
+    mode: FileMode.append,
+  );
+  manifestFile.writeAsStringSync(
+    'meta/package=$pkgDir/meta/package\n',
+    mode: FileMode.append,
+  );
 
   final FuchsiaPM fuchsiaPM = fuchsiaSdk.fuchsiaPM;
   if (!await fuchsiaPM.init(pkgDir, appName)) {

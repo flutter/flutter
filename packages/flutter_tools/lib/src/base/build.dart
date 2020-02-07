@@ -13,7 +13,6 @@ import '../compile.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 import 'context.dart';
 import 'file_system.dart';
@@ -39,7 +38,10 @@ class GenSnapshot {
 
   static String getSnapshotterPath(SnapshotType snapshotType) {
     return globals.artifacts.getArtifactPath(
-        Artifact.genSnapshot, platform: snapshotType.platform, mode: snapshotType.mode);
+      Artifact.genSnapshot,
+      platform: snapshotType.platform,
+      mode: snapshotType.mode,
+    );
   }
 
   Future<int> run({
@@ -63,9 +65,12 @@ class GenSnapshot {
     if (additionalArgs.contains('--strip')) {
       // Filter out gen_snapshot's warning message about stripping debug symbols
       // from ELF library snapshots.
-      const String kStripWarning = 'Warning: Generating ELF library without DWARF debugging information.';
-      const String kAssemblyStripWarning = 'Warning: Generating assembly code without DWARF debugging information.';
-      outputFilter = (String line) => line != kStripWarning && line != kAssemblyStripWarning ? line : null;
+      const String kStripWarning = 'Warning: Generating ELF library without '
+                                   'DWARF debugging information.';
+      const String kAssemblyStripWarning = 'Warning: Generating assembly code '
+                                           'without DWARF debugging information.';
+      outputFilter = (String line) =>
+        line != kStripWarning && line != kAssemblyStripWarning ? line : null;
     }
 
     return processUtils.stream(
@@ -83,7 +88,8 @@ class AOTSnapshotter {
   /// machine readable form. See [AOTSnapshotter._timedStep].
   final bool reportTimings;
 
-  /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
+  /// Builds an architecture-specific ahead-of-time compiled snapshot
+  /// of the specified script.
   Future<int> build({
     @required TargetPlatform platform,
     @required BuildMode buildMode,
@@ -102,7 +108,9 @@ class AOTSnapshotter {
     }
 
     if (!_isValidAotPlatform(platform, buildMode)) {
-      globals.printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
+      globals.printError(
+        '${getNameForTargetPlatform(platform)} does not support AOT compilation.',
+      );
       return 1;
     }
     // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
@@ -132,10 +140,12 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--strip');
     }
 
-    if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {
+    if (platform == TargetPlatform.android_arm ||
+        darwinArch == DarwinArch.armv7) {
       // Use softfp for Android armv7 devices.
       // This is the default for armv7 iOS builds, but harmless to set.
-      // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
+      // TODO(cbracken): eliminate this when we fix
+      // https://github.com/flutter/flutter/issues/17489
       genSnapshotArgs.add('--no-sim-use-hardfp');
 
       // Not supported by the Pixel in 32-bit mode.
@@ -145,7 +155,10 @@ class AOTSnapshotter {
     // The name of the debug file must contain additonal information about
     // the architecture, since a single build command may produce
     // multiple debug files.
-    final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
+    final String archName = getNameForTargetPlatform(
+      platform,
+      darwinArch: darwinArch,
+    );
     final String debugFilename = 'app.$archName.symbols';
     if (splitDebugInfo?.isNotEmpty ?? false) {
       globals.fs.directory(splitDebugInfo)
@@ -174,12 +187,14 @@ class AOTSnapshotter {
       darwinArch: darwinArch,
     ));
     if (genSnapshotExitCode != 0) {
-      globals.printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
+      globals.printError(
+        'Dart snapshot generator failed with exit code $genSnapshotExitCode',
+      );
       return genSnapshotExitCode;
     }
 
-    // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
-    // end-developer can link into their app.
+    // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic
+    // library that the end-developer can link into their app.
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch,
@@ -196,8 +211,8 @@ class AOTSnapshotter {
     return 0;
   }
 
-  /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
-  /// source at [assemblyPath].
+  /// Builds an iOS or macOS framework at [outputPath]/App.framework from the
+  /// assembly source at [assemblyPath].
   Future<RunResult> _buildFramework({
     @required DarwinArch appleArch,
     @required bool isIOS,
@@ -236,7 +251,10 @@ class AOTSnapshotter {
       assemblyO,
     ]);
     if (compileResult.exitCode != 0) {
-      globals.printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
+      globals.printError(
+        'Failed to compile AOT snapshot. Compiler terminated with exit code '
+        '${compileResult.exitCode}',
+      );
       return compileResult;
     }
 
@@ -256,7 +274,10 @@ class AOTSnapshotter {
     ];
     final RunResult linkResult = await globals.xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
-      globals.printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
+      globals.printError(
+        'Failed to link AOT snapshot. Linker terminated with exit code '
+        '${compileResult.exitCode}',
+      );
     }
     return linkResult;
   }
@@ -289,7 +310,10 @@ class AOTSnapshotter {
     final CompilerOutput compilerOutput =
       await _timedStep('frontend(CompileTime)', 'aot-kernel',
         () => kernelCompiler.compile(
-      sdkRoot: globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+      sdkRoot: globals.artifacts.getArtifactPath(
+        Artifact.flutterPatchedSdkPath,
+        mode: buildMode,
+      ),
       mainPath: mainPath,
       packagesPath: packagesPath,
       outputFilePath: getKernelPathForTransformerOptions(
@@ -305,9 +329,14 @@ class AOTSnapshotter {
       dartDefines: dartDefines,
     ));
 
-    // Write path to frontend_server, since things need to be re-generated when that changes.
-    final String frontendPath = globals.artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
-    globals.fs.directory(outputPath).childFile('frontend_server.d').writeAsStringSync('frontend_server.d: $frontendPath\n');
+    // Write path to frontend_server, since things need to be re-generated
+    // when that changes.
+    final String frontendPath = globals.artifacts.getArtifactPath(
+      Artifact.frontendServerSnapshotForEngineDartSdk,
+    );
+    globals.fs.directory(outputPath)
+              .childFile('frontend_server.d')
+              .writeAsStringSync('frontend_server.d: $frontendPath\n');
 
     return compilerOutput?.outputFilename;
   }
@@ -330,13 +359,17 @@ class AOTSnapshotter {
   /// to find.
   /// Important: external performance tracking tools expect format of this
   /// output to be stable.
-  Future<T> _timedStep<T>(String marker, String analyticsVar, FutureOr<T> Function() action) async {
+  Future<T> _timedStep<T>(
+    String marker,
+    String analyticsVar,
+    FutureOr<T> Function() action,
+  ) async {
     final Stopwatch sw = Stopwatch()..start();
     final T value = await action();
     if (reportTimings) {
       globals.printStatus('$marker: ${sw.elapsedMilliseconds} ms.');
     }
-    flutterUsage.sendTiming('build', analyticsVar, Duration(milliseconds: sw.elapsedMilliseconds));
+    globals.flutterUsage.sendTiming('build', analyticsVar, sw.elapsed);
     return value;
   }
 }

@@ -20,7 +20,12 @@ class UsageEvent {
   final int value;
 
   void send() {
-    flutterUsage.sendEvent(category, parameter, label: label, value: value);
+    globals.flutterUsage.sendEvent(
+      category,
+      parameter,
+      label: label,
+      value: value,
+    );
   }
 }
 
@@ -88,7 +93,7 @@ class HotEvent extends UsageEvent {
       if (overallTimeInMs != null)
         CustomDimensions.hotEventOverallTimeInMs: overallTimeInMs.toString(),
     });
-    flutterUsage.sendEvent(category, parameter, parameters: parameters);
+    globals.flutterUsage.sendEvent(category, parameter, parameters: parameters);
   }
 }
 
@@ -109,7 +114,7 @@ class DoctorResultEvent extends UsageEvent {
   @override
   void send() {
     if (validator is! GroupedValidator) {
-      flutterUsage.sendEvent(category, parameter, label: label);
+      globals.flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
     final GroupedValidator group = validator as GroupedValidator;
@@ -159,7 +164,7 @@ class BuildEvent extends UsageEvent {
       if (eventError != null)
         CustomDimensions.buildEventError: eventError,
     });
-    flutterUsage.sendEvent(
+    globals.flutterUsage.sendEvent(
       category,
       parameter,
       label: label,
@@ -178,7 +183,7 @@ class CommandResultEvent extends UsageEvent {
   @override
   void send() {
     // An event for the command result.
-    flutterUsage.sendEvent(
+    globals.flutterUsage.sendEvent(
       'tool-command-result',
       category,
       label: parameter,
@@ -189,7 +194,7 @@ class CommandResultEvent extends UsageEvent {
     // throws an exception.
     try {
       final int maxRss = processInfo.maxRss;
-      flutterUsage.sendEvent(
+      globals.flutterUsage.sendEvent(
         'tool-command-max-rss',
         category,
         label: parameter,

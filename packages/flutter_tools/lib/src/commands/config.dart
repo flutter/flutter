@@ -87,9 +87,8 @@ class ConfigCommand extends FlutterCommand {
     if (values.isEmpty) {
       values = '  No settings have been configured.';
     }
-    return
-      '\nSettings:\n$values\n\n'
-      'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
+    final String usage = globals.flutterUsage.enabled ? 'enabled' : 'disabled';
+    return '\nSettings:\n$values\n\nAnalytics reporting is currently $usage.';
   }
 
   /// Return null to disable analytics recording of the `config` command.
@@ -117,7 +116,7 @@ class ConfigCommand extends FlutterCommand {
       // We send the analytics event *before* toggling the flag intentionally
       // to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
-      flutterUsage.enabled = value;
+      globals.flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 

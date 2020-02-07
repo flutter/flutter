@@ -476,7 +476,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     final String verb = fullRestart ? 'Restarted' : 'Reloaded';
     globals.printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
     if (!fullRestart) {
-      flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
     }
     HotEvent(
       'restart',
@@ -771,7 +771,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
     if (supportsServiceProtocol) {
       // Send an event for only recompilation.
       final Duration recompileDuration = timer.elapsed;
-      flutterUsage.sendTiming('hot', 'web-recompile', recompileDuration);
+      globals.flutterUsage.sendTiming('hot', 'web-recompile', recompileDuration);
       try {
         final vmservice.Response reloadResponse = fullRestart
           ? await _vmService.callServiceExtension('fullReload')
@@ -786,8 +786,8 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           return OperationResult(1, reloadResponse.toString());
         }
         if (!fullRestart) {
-          flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
-          flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+          globals.flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
+          globals.flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
         }
         return OperationResult.ok;
       } on vmservice.RPCError {
