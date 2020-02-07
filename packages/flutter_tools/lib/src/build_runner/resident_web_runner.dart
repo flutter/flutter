@@ -98,6 +98,8 @@ abstract class ResidentWebRunner extends ResidentRunner {
   /// WebServer device is debuggable when running with --start-paused.
   bool get deviceIsDebuggable => device.device is! WebServerDevice || debuggingOptions.startPaused;
 
+  bool get _enableDwds => debuggingEnabled;
+
   ConnectionResult _connectionResult;
   StreamSubscription<vmservice.Event> _stdOutSub;
   bool _exited = false;
@@ -393,7 +395,8 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       port: hostPort,
       packagesFilePath: packagesFilePath,
       urlTunneller: urlTunneller,
-      buildMode: debuggingOptions.buildInfo.mode
+      buildMode: debuggingOptions.buildInfo.mode,
+      enableDwds: _enableDwds,
     );
     final Uri url = await device.devFS.create();
     if (debuggingOptions.buildInfo.isDebug) {
@@ -459,6 +462,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       if (report.success) {
         device.generator.accept();
       } else {
+        status.stop();
         await device.generator.reject();
         return OperationResult(1, 'Failed to recompile application.');
       }
@@ -468,13 +472,15 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     }
 
     try {
-      if (fullRestart || !debuggingOptions.buildInfo.isDebug) {
+      if (!deviceIsDebuggable) {
+        globals.printStatus('Recompile complete. Page requires refresh.');
+      } else if (fullRestart || !debuggingOptions.buildInfo.isDebug) {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.
         await _wipConnection?.sendCommand('Page.reload', <String, Object>{
           'ignoreCache': !debuggingOptions.buildInfo.isDebug,
         });
-      } else {
+      }  else {
         await _wipConnection?.debugger
             ?.sendCommand('Runtime.evaluate', params: <String, Object>{
           'expression': 'window.\$hotReloadHook([$reloadModules])',
@@ -488,14 +494,17 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     } finally {
       status.stop();
     }
-    final String verb = fullRestart ? 'Restarted' : 'Reloaded';
-    globals.printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-    if (!fullRestart) {
-      flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+
+    if (deviceIsDebuggable) {
+      final String verb = fullRestart ? 'Restarted' : 'Reloaded';
+      globals.printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      if (!fullRestart) {
+        flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      }
     }
 
-    // Don't track restart times for dart2js builds.
-    if (debuggingOptions.buildInfo.isDebug) {
+    // Don't track restart times for dart2js builds or web-server devices.
+    if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
       HotEvent(
         'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
@@ -503,6 +512,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
         emulator: false,
         fullRestart: true,
         reason: reason,
+        overallTimeInMs: timer.elapsed.inMilliseconds,
       ).send();
     }
     return OperationResult.ok;

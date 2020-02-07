@@ -52,6 +52,7 @@ class WebAssetServer implements AssetReader {
     int port,
     UrlTunneller urlTunneller,
     BuildMode buildMode,
+    bool enableDwds,
   ) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
@@ -73,9 +74,11 @@ class WebAssetServer implements AssetReader {
           enableDebugging: true,
           logWriter: (Level logLevel, String message) => globals.printTrace(message)
         );
-        final shelf.Handler dwdsHandler = const shelf.Pipeline()
-          .addMiddleware(dwds.middleware)
-          .addHandler(server._handleRequest);
+        shelf.Pipeline pipeline = const shelf.Pipeline();
+        if (enableDwds) {
+          pipeline = pipeline.addMiddleware(dwds.middleware);
+        }
+        final shelf.Handler dwdsHandler = pipeline.addHandler(server._handleRequest);
         final shelf.Cascade cascade = shelf.Cascade()
           .add(dwds.handler)
           .add(dwdsHandler);
@@ -313,6 +316,7 @@ class WebDevFS implements DevFS {
     this.packagesFilePath,
     this.urlTunneller,
     this.buildMode,
+    this.enableDwds,
   });
 
   final String hostname;
@@ -320,6 +324,7 @@ class WebDevFS implements DevFS {
   final String packagesFilePath;
   final UrlTunneller urlTunneller;
   final BuildMode buildMode;
+  final bool enableDwds;
 
   @visibleForTesting
   WebAssetServer webAssetServer;
@@ -362,7 +367,13 @@ class WebDevFS implements DevFS {
 
   @override
   Future<Uri> create() async {
-    webAssetServer = await WebAssetServer.start(hostname, port, urlTunneller, buildMode);
+    webAssetServer = await WebAssetServer.start(
+      hostname,
+      port,
+      urlTunneller,
+      buildMode,
+      enableDwds,
+    );
     return Uri.parse('http://$hostname:$port');
   }
 
@@ -402,6 +413,7 @@ class WebDevFS implements DevFS {
     assert(trackWidgetCreation != null);
     assert(generator != null);
     final String outputDirectoryPath = globals.fs.file(mainPath).parent.path;
+
     if (bundleFirstUpload) {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainPath);
@@ -435,6 +447,7 @@ class WebDevFS implements DevFS {
     if (fullRestart) {
       generator.reset();
     }
+
     // The tool generates an entrypoint file in a temp directory to handle
     // the web specific bootrstrap logic. To make it easier for DWDS to handle
     // mapping the file name, this is done via an additional file root and
@@ -450,6 +463,7 @@ class WebDevFS implements DevFS {
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }
+
     // Only update the last compiled time if we successfully compiled.
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]

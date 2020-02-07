@@ -80,7 +80,7 @@ void main() {
   });
 
   test('Throws a tool exit if bind fails with a SocketException', () => testbed.run(() async {
-    expect(WebAssetServer.start('hello', 1234, null, BuildMode.debug), throwsToolExit());
+    expect(WebAssetServer.start('hello', 1234, null, BuildMode.debug, true), throwsToolExit());
   }));
 
   test('Can catch exceptions through the onError callback', () => testbed.run(() async {
