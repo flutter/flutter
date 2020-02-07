@@ -128,7 +128,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 }
 const String _defaultGradleVersion = '5.6.2';
 
-final RegExp _androidPluginRegExp = RegExp('com\.android\.tools\.build\:gradle\:(\\d+\.\\d+\.\\d+\)');
+final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\(\d+\.\d+\.\d+\)');
 
 /// Returns the Gradle version that the current Android plugin depends on when found,
 /// otherwise it returns a default version.

@@ -603,7 +603,7 @@ class AndroidProject extends FlutterProjectPlatform {
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
-  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
   static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
