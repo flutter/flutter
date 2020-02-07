@@ -35,8 +35,7 @@ dependencies:
 ''';
 
   @override
-  String get main => _main;
-  static const String _main = r'''
+  String get main => r'''
 import 'package:flutter/material.dart';
 
 import 'l10n/app_localizations.dart';
@@ -260,8 +259,7 @@ class GenL10nLocaleResolutionProject extends GenL10nProject {
   }
 
   @override
-  String get main => _main;
-  static const String _main = r'''
+  String get main => r'''
 import 'package:flutter/material.dart';
 
 import 'l10n/app_localizations.dart';
@@ -270,19 +268,36 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     try {
-      print('get localizations');
       final AppLocalizations localizations = AppLocalizations.of(context);
-      print('localizations: $localizations');
-      print('localizations.helloWorld');
       final List<String> results = <String>[
+        // Uses messages in app_en_CA.arb
         '${localizations.helloWorld}',
         '${localizations.helloCost("price", 123)}',
+        // Uses messages in app_en.arb, since the app_en_CA.arb
+        // equivalents are untranslated
         '${localizations.hello("World")}',
         '${localizations.greeting("Hello", "World")}',
         '${localizations.helloWorldOn(DateTime(1960))}',
         '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
         '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
         '${localizations.helloFor(123)}',
+        // All plurals are included in app_en_CA.arb because the 'intl'
+        // package's message lookup does not allow for untranslated
+        // plurals to fallback to the general language (en) messages.
+        '${localizations.helloWorlds(0)}',
+        '${localizations.helloWorlds(1)}',
+        '${localizations.helloWorlds(2)}',
+        '${localizations.helloWorldsOn(0, DateTime(1960))}',
+        '${localizations.helloWorldsOn(1, DateTime(1960))}',
+        '${localizations.helloWorldsOn(2, DateTime(1960))}',
+        '${localizations.helloAdjectiveWorlds(0, "new")}',
+        '${localizations.helloAdjectiveWorlds(1, "new")}',
+        '${localizations.helloAdjectiveWorlds(2, "new")}',
+        '${localizations.helloWorldPopulation(0, 100)}',
+        '${localizations.helloWorldPopulation(1, 101)}',
+        '${localizations.helloWorldPopulation(2, 102)}',
+        '${localizations.helloWorldInterpolation("Hello", "World")}',
+        '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
       ];
       int n = 0;
       for (final String result in results) {
@@ -327,6 +342,57 @@ void main() {
         "type": "int",
         "format": "currency"
       }
+    }
+  },
+
+  "helloWorlds": "{count,plural, =0{Hello, Canadians} =1{Hello Canadian World} =2{Hello two Canadian worlds} few{Hello {count} Canadian worlds} many{Hello all {count} Canadian worlds} other{Hello other {count} Canadian worlds}}",
+  "@helloWorlds": {
+    "description": "A plural message",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "helloWorldsOn": "{count,plural, =0{Hello on {date}} =1{Hello Canadian World, on {date}} =2{Hello two Canadian worlds, on {date}} other{Hello other {count} Canadian worlds, on {date}}}",
+  "@helloWorldsOn": {
+    "description": "A plural message with an additional date parameter",
+    "placeholders": {
+      "count": {},
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMMEEEEd"
+      }
+    }
+  },
+
+  "helloAdjectiveWorlds": "{count,plural, =0{Hello Canadians} =1{Hello {adjective} Canadian World} =2{Hello two {adjective} Canadian worlds} other{Hello other {count} {adjective} Canadian worlds}}",
+  "@helloAdjectiveWorlds": {
+    "description": "A plural message with an additional parameter",
+    "placeholders": {
+      "count": {},
+      "adjective": {}
+    }
+  },
+
+  "helloWorldPopulation": "{count,plural, =1{Hello World of {population} Canadian citizens} =2{Hello two worlds with {population} total Canadian citizens} many{Hello all {count} worlds, with a total of {population} Canadian citizens} other{Hello other {count} worlds, with a total of {population} Canadian citizens}}",
+  "@helloWorldPopulation": {
+    "description": "A plural message with an additional integer parameter",
+    "placeholders": {
+      "count": {},
+      "population": {
+        "type": "int",
+        "format": "compactLong"
+      }
+    }
+  },
+
+  "helloWorldsInterpolation": "{count,plural, other {[{hello}] Canadian -{world}- #{count}#}}",
+  "@helloWorldsInterpolation": {
+    "description": "A plural message with parameters that need string interpolation braces",
+    "placeholders": {
+      "count": {},
+      "hello": {},
+      "world": {}
     }
   }
 }

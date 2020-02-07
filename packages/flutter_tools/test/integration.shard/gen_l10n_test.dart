@@ -143,11 +143,26 @@ void main() {
       '#l10n 2 (Hello World)\n'
       '#l10n 3 (Hello World)\n'
       '#l10n 4 (Hello World on Friday, January 1, 1960)\n'
-      // Date is automatically represented as "1960-01-01" instead of
-      // "01-01-1960" since locale is passed into DateFormat.
       '#l10n 5 (Hello world argument on 1960-01-01 at 00:00)\n'
       '#l10n 6 (Hello World from 1960 to 2020)\n'
       '#l10n 7 (Hello for 123)\n'
+      // All plurals are included in app_en_CA.arb because the 'intl'
+      // package's message lookup does not allow for untranslated
+      // plurals to fallback to the general language (en) messages.
+      '#l10n 8 (Hello, Canadians)\n'
+      '#l10n 9 (Hello Canadian World)\n'
+      '#l10n 10 (Hello two Canadian worlds)\n'
+      '#l10n 11 (Hello on Friday, January 1, 1960)\n'
+      '#l10n 12 (Hello World, on Friday, January 1, 1960)\n'
+      '#l10n 13 (Hello two worlds, on Friday, January 1, 1960)\n'
+      '#l10n 14 (Hello Canadians)\n'
+      '#l10n 15 (Hello new Canadian World)\n'
+      '#l10n 16 (Hello two new Canadian worlds)\n'
+      '#l10n 17 (Hello other 0 worlds, with a total of 100 citizens)\n'
+      '#l10n 18 (Hello World of 101 citizens)\n'
+      '#l10n 19 (Hello two worlds with 102 total citizens)\n'
+      '#l10n 20 ([Hello] #World#)\n'
+      '#l10n 21 ([Hello] Canadian -World- #123#)\n'
       '#l10n END\n'
     );
   });
