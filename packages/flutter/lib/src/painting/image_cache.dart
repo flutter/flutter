@@ -172,9 +172,13 @@ class ImageCache {
     return false;
   }
 
+  /// This method exists so that [FlutterImageCache] can check its weak cache
+  /// without changes to this class's public API.
   @protected
   ImageStreamCompleter _checkOtherResults(Object key) => null;
 
+  /// This method exists so that [FlutterImageCache] can add to its weak cache
+  /// once an [ImageStreamCompleter] has been created by this cache.
   @protected
   void _onImageStreamCompleterCreated(Object key, ImageStreamCompleter completer) {}
 
@@ -351,7 +355,6 @@ class FlutterImageCache extends ImageCache {
     _weakCache.clear();
   }
 }
-
 
 class _CachedImage {
   _CachedImage(this.completer, this.sizeBytes);

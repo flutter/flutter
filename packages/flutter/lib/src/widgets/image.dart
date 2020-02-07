@@ -69,18 +69,29 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// as long as both images share the same key, and the image is held by the
 /// cache.
 ///
-/// The cache may refuse to hold the image if the image is larger than
-/// [ImageCache.maximumSizeBytes], or if that property or
-/// [ImageCache.maximumSize] are 0. In such a case, the [FlutterImageCache] will
-/// weakly hold a reference to this image as long as its [ImageStreamCompleter]
-/// has at least one listener. This method will wait one frame after its future
-/// completes before releasing its own listener, to give callers a chance to
-/// listen to the stream if necessary. A caller can determine if the image ended
-/// up in the cache by calling [ImageProvider.checkCacheLocation]. If it is only
+/// The cache may refuse to hold the image it is disabled, the image is too
+/// too large, or some other criteria implemented by a custom [ImageCache]
+/// implementation.
+///
+/// The [FlutterImageCache] is used as the default framework implementation, and
+/// it will weakly hold a reference to all images passed to [putIfAbsent] as
+/// long as their [ImageStreamCompleter] has at least one listener. This method
+/// will wait one frame after its future completes before releasing its own
+/// listener, to give callers a chance to listen to the stream if necessary. A
+/// caller can determine if the image ended up in the cache by calling
+/// [ImageProvider.checkCacheLocation], if and only if the
+/// `PaintingBinding.instance.imageCache is FlutterImageCache`. If it is only
 /// [ImageCacheLocation.weak]ly held, and the caller wishes to keep the resolved
 /// image in memory, the caller should immediately call `provider.resolve` and
 /// add a listener to the returned [ImageStream]. The image will remain pinned
-/// in memory at least until the caller removes its listener from the stream.
+/// in memory at least until the caller removes its listener from the stream,
+/// even if it would not otherwise fit into the cache.
+///
+/// Callers should be cautious about pinning large images or a large number of
+/// images in memory, as this can result in running out of memory and being
+/// killed by the operating system. The lower the avilable physical memory, the
+/// more susceptible callers will be to running into OOM issues. These issues
+/// manifest as immediate process death, sometimes with no other error messages.
 ///
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
