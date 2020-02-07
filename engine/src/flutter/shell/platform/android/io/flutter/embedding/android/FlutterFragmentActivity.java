@@ -354,10 +354,6 @@ public class FlutterFragmentActivity extends FragmentActivity
     BackgroundMode backgroundMode = getBackgroundMode();
     if (backgroundMode == BackgroundMode.transparent) {
       getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-      getWindow().setFlags(
-          WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-          WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-      );
     }
   }
 
