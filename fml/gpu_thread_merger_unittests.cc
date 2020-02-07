@@ -14,8 +14,7 @@
 #include "flutter/fml/task_runner.h"
 #include "gtest/gtest.h"
 
-// TODO(49007): Flaky. Investigate, fix and re-enable.
-TEST(GpuThreadMerger, DISABLED_RemainMergedTillLeaseExpires) {
+TEST(GpuThreadMerger, RemainMergedTillLeaseExpires) {
   fml::MessageLoop* loop1 = nullptr;
   fml::AutoResetWaitableEvent latch1;
   fml::AutoResetWaitableEvent term1;
@@ -62,8 +61,7 @@ TEST(GpuThreadMerger, DISABLED_RemainMergedTillLeaseExpires) {
   thread2.join();
 }
 
-// TODO(49007): Flaky. Investigate, fix and re-enable.
-TEST(GpuThreadMerger, DISABLED_IsNotOnRasterizingThread) {
+TEST(GpuThreadMerger, IsNotOnRasterizingThread) {
   fml::MessageLoop* loop1 = nullptr;
   fml::AutoResetWaitableEvent latch1;
   std::thread thread1([&loop1, &latch1]() {
@@ -148,8 +146,7 @@ TEST(GpuThreadMerger, DISABLED_IsNotOnRasterizingThread) {
   thread2.join();
 }
 
-// TODO(49007): Flaky. Investigate, fix and re-enable.
-TEST(GpuThreadMerger, DISABLED_LeaseExtension) {
+TEST(GpuThreadMerger, LeaseExtension) {
   fml::MessageLoop* loop1 = nullptr;
   fml::AutoResetWaitableEvent latch1;
   fml::AutoResetWaitableEvent term1;
