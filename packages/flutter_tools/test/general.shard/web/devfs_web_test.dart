@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/web/devfs_web.dart';
@@ -79,7 +80,7 @@ void main() {
   });
 
   test('Throws a tool exit if bind fails with a SocketException', () => testbed.run(() async {
-    expect(WebAssetServer.start('hello', 1234, null), throwsToolExit());
+    expect(WebAssetServer.start('hello', 1234, null, BuildMode.debug), throwsToolExit());
   }));
 
   test('Can catch exceptions through the onError callback', () => testbed.run(() async {
@@ -336,7 +337,13 @@ void main() {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
 
-    final WebDevFS webDevFS = WebDevFS('localhost', 0, '.packages', null);
+    final WebDevFS webDevFS = WebDevFS(
+      hostname: 'localhost',
+      port: 0,
+      packagesFilePath: '.packages',
+      urlTunneller: null,
+      buildMode: BuildMode.debug,
+    );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.dartSdk.createSync(recursive: true);
     webDevFS.dartSdkSourcemap.createSync(recursive: true);

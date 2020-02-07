@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/net.dart';
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/discovery.dart';
@@ -23,6 +24,7 @@ import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../devfs.dart';
@@ -45,31 +47,45 @@ class WebAssetServer implements AssetReader {
   ///
   /// Unhandled exceptions will throw a [ToolExit] with the error and stack
   /// trace.
-  static Future<WebAssetServer> start(String hostname, int port, UrlTunneller urlTunneller) async {
+  static Future<WebAssetServer> start(
+    String hostname,
+    int port,
+    UrlTunneller urlTunneller,
+    BuildMode buildMode,
+  ) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final Packages packages =
           await loadPackagesFile(Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
       final WebAssetServer server = WebAssetServer(httpServer, packages, address);
-      final Dwds dwds = await Dwds.start(
-        assetReader: server,
-        buildResults: const Stream<BuildResult>.empty(),
-        chromeConnection: () async {
-          final Chrome chrome = await ChromeLauncher.connectedInstance;
-          return chrome.chromeConnection;
-        },
-        urlEncoder: urlTunneller,
-        enableDebugging: true,
-      );
-      final shelf.Handler dwdsHandler = const shelf.Pipeline()
-        .addMiddleware(dwds.middleware)
-        .addHandler(server._handleRequest);
-      final shelf.Cascade cascade = shelf.Cascade()
-        .add(dwds.handler)
-        .add(dwdsHandler);
-      shelf.serveRequests(httpServer, cascade.handler);
-      server.dwds = dwds;
+
+      // In debug builds, spin up DWDS and the full asset server.
+      if (buildMode == BuildMode.debug) {
+        final Dwds dwds = await Dwds.start(
+          assetReader: server,
+          buildResults: const Stream<BuildResult>.empty(),
+          chromeConnection: () async {
+            final Chrome chrome = await ChromeLauncher.connectedInstance;
+            return chrome.chromeConnection;
+          },
+          urlEncoder: urlTunneller,
+          enableDebugging: true,
+          logWriter: (Level logLevel, String message) => globals.printTrace(message)
+        );
+        final shelf.Handler dwdsHandler = const shelf.Pipeline()
+          .addMiddleware(dwds.middleware)
+          .addHandler(server._handleRequest);
+        final shelf.Cascade cascade = shelf.Cascade()
+          .add(dwds.handler)
+          .add(dwdsHandler);
+        shelf.serveRequests(httpServer, cascade.handler);
+        server.dwds = dwds;
+        return server;
+      }
+      // Otherwise fall back to a simpler proxy server.
+      final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer();
+      shelf.serveRequests(httpServer, releaseAssetServer.handle);
       return server;
     } on SocketException catch (err) {
       throwToolExit('Failed to bind web development server:\n$err');
@@ -291,12 +307,19 @@ class ConnectionResult {
 }
 
 class WebDevFS implements DevFS {
-  WebDevFS(this.hostname, this.port, this._packagesFilePath, this.urlTunneller);
+  WebDevFS({
+    this.hostname,
+    this.port,
+    this.packagesFilePath,
+    this.urlTunneller,
+    this.buildMode,
+  });
 
   final String hostname;
   final int port;
-  final String _packagesFilePath;
+  final String packagesFilePath;
   final UrlTunneller urlTunneller;
+  final BuildMode buildMode;
 
   @visibleForTesting
   WebAssetServer webAssetServer;
@@ -339,7 +362,7 @@ class WebDevFS implements DevFS {
 
   @override
   Future<Uri> create() async {
-    webAssetServer = await WebAssetServer.start(hostname, port, urlTunneller);
+    webAssetServer = await WebAssetServer.start(hostname, port, urlTunneller, buildMode);
     return Uri.parse('http://$hostname:$port');
   }
 
@@ -422,7 +445,7 @@ class WebDevFS implements DevFS {
       outputPath: dillOutputPath ??
           getDefaultApplicationKernelPath(
               trackWidgetCreation: trackWidgetCreation),
-      packagesFilePath: _packagesFilePath,
+      packagesFilePath: packagesFilePath,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
@@ -498,4 +521,45 @@ String _filePathToUriFragment(String path) {
     return '/$partial';
   }
   return path;
+}
+
+
+class ReleaseAssetServer {
+  // Locations where source files, assets, or source maps may be located.
+  final List<Uri> _searchPaths = <Uri>[
+    globals.fs.directory(getWebBuildDirectory()).uri,
+    globals.fs.directory(Cache.flutterRoot).parent.uri,
+    globals.fs.currentDirectory.childDirectory('lib').uri,
+  ];
+
+  Future<shelf.Response> handle(shelf.Request request) async {
+    Uri fileUri;
+    for (final Uri uri in _searchPaths) {
+      final Uri potential = uri.resolve(request.url.path);
+      if (potential == null || !globals.fs.isFileSync(potential.toFilePath())) {
+        continue;
+      }
+      fileUri = potential;
+      break;
+    }
+
+    if (fileUri != null) {
+      final File file = globals.fs.file(fileUri);
+      final Uint8List bytes = file.readAsBytesSync();
+      // Fallback to "application/octet-stream" on null which
+      // makes no claims as to the structure of the data.
+      final String mimeType = mime.lookupMimeType(file.path, headerBytes: bytes)
+        ?? 'application/octet-stream';
+      return shelf.Response.ok(bytes, headers: <String, String>{
+        'Content-Type': mimeType,
+      });
+    }
+    if (request.url.path == '') {
+      final File file = globals.fs.file(globals.fs.path.join(getWebBuildDirectory(), 'index.html'));
+      return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
+        'Content-Type': 'text/html',
+      });
+    }
+    return shelf.Response.notFound('');
+  }
 }

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/web/compile.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -388,14 +389,26 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
         ? await globals.os.findFreePort()
         : int.tryParse(debuggingOptions.port);
     device.devFS = WebDevFS(
-      effectiveHostname,
-      hostPort,
-      packagesFilePath,
-      urlTunneller,
+      hostname: effectiveHostname,
+      port: hostPort,
+      packagesFilePath: packagesFilePath,
+      urlTunneller: urlTunneller,
+      buildMode: debuggingOptions.buildInfo.mode
     );
     final Uri url = await device.devFS.create();
-    await _updateDevFS(fullRestart: true);
-    device.generator.accept();
+    if (debuggingOptions.buildInfo.isDebug) {
+      await _updateDevFS(fullRestart: true);
+      device.generator.accept();
+    } else {
+       await buildWeb(
+        flutterProject,
+        target,
+        debuggingOptions.buildInfo,
+        debuggingOptions.initializePlatform,
+        dartDefines,
+        false,
+      );
+    }
     await device.device.startApp(
       package,
       mainPath: target,
@@ -426,16 +439,33 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       progressId: 'hot.restart',
     );
 
-    // Full restart is always false for web, since the extra recompile is wasteful.
-    final UpdateFSReport report = await _updateDevFS(fullRestart: false);
-    if (report.success) {
-      device.generator.accept();
+    String reloadModules;
+    if (!debuggingOptions.buildInfo.isDebug) {
+      try {
+        await buildWeb(
+          flutterProject,
+          target,
+          debuggingOptions.buildInfo,
+          debuggingOptions.initializePlatform,
+          dartDefines,
+          false,
+        );
+      } on ToolExit {
+        return OperationResult(1, 'Failed to recompile application.');
+      }
     } else {
-      await device.generator.reject();
+      // Full restart is always false for web, since the extra recompile is wasteful.
+      final UpdateFSReport report = await _updateDevFS(fullRestart: false);
+      if (report.success) {
+        device.generator.accept();
+      } else {
+        await device.generator.reject();
+        return OperationResult(1, 'Failed to recompile application.');
+      }
+      reloadModules = report.invalidatedModules
+        .map((String module) => '"$module"')
+        .join(',');
     }
-    final String modules = report.invalidatedModules
-      .map((String module) => '"$module"')
-      .join(',');
 
     try {
       if (fullRestart || !debuggingOptions.buildInfo.isDebug) {
@@ -447,7 +477,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       } else {
         await _wipConnection?.debugger
             ?.sendCommand('Runtime.evaluate', params: <String, Object>{
-          'expression': 'window.\$hotReloadHook([$modules])',
+          'expression': 'window.\$hotReloadHook([$reloadModules])',
           'awaitPromise': true,
           'returnByValue': true,
         });
@@ -463,14 +493,18 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     if (!fullRestart) {
       flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
     }
-    HotEvent(
-      'restart',
-      targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
-      sdkName: await device.device.sdkNameAndVersion,
-      emulator: false,
-      fullRestart: true,
-      reason: reason,
-    ).send();
+
+    // Don't track restart times for dart2js builds.
+    if (debuggingOptions.buildInfo.isDebug) {
+      HotEvent(
+        'restart',
+        targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
+        sdkName: await device.device.sdkNameAndVersion,
+        emulator: false,
+        fullRestart: true,
+        reason: reason,
+      ).send();
+    }
     return OperationResult.ok;
   }
 
@@ -568,14 +602,13 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       }
       _wipConnection = await chromeTab.connect();
     }
-
-    final WebDevFS webDevFS = device.devFS as WebDevFS;
-    final bool useDebugExtension = device.device is WebServerDevice && debuggingOptions.startPaused;
-    _connectionResult = await webDevFS.connect(useDebugExtension);
-    unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
-
     Uri websocketUri;
     if (supportsServiceProtocol) {
+      final WebDevFS webDevFS = device.devFS as WebDevFS;
+      final bool useDebugExtension = device.device is WebServerDevice && debuggingOptions.startPaused;
+      _connectionResult = await webDevFS.connect(useDebugExtension);
+      unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
+
       // Cleanup old subscriptions. These will throw if there isn't anything
       // listening, which is fine because that is what we want to ensure.
       try {
@@ -617,6 +650,9 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
           }
         });
       }
+    }
+     if (websocketUri != null) {
+      globals.printStatus('Debug service listening on $websocketUri');
     }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete(DebugConnectionInfo(wsUri: websocketUri));
