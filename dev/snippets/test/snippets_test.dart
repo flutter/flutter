@@ -52,7 +52,7 @@ main() {
 ''');
       configuration.getHtmlSkeletonFile(SnippetType.sample, showDartPad: true).writeAsStringSync('''
 <div>HTML Bits (DartPad-style)</div>
-<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}"></iframe>
+<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}&sample_channel={{channel}}"></iframe>
 <div>More HTML Bits</div>
 ''');
       generator = SnippetGenerator(configuration: configuration);
@@ -61,7 +61,7 @@ main() {
       tmpDir.deleteSync(recursive: true);
     });
 
-    test('generates application snippets', () async {
+    test('generates samples', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
         ..writeAsStringSync(r'''
@@ -87,6 +87,7 @@ void main() {
         template: 'template',
         metadata: <String, Object>{
           'id': 'id',
+          'channel': 'stable',
           'element': 'MyElement',
         },
         output: outputFile,
@@ -95,6 +96,7 @@ void main() {
       expect(html, contains('<div>More HTML Bits</div>'));
       expect(html, contains(r'print(&#39;The actual $name.&#39;);'));
       expect(html, contains('A description of the snippet.\n'));
+      expect(html, isNot(contains('sample_channel=stable')));
       expect(
           html,
           contains('&#47;&#47; A description of the snippet.\n'
@@ -109,7 +111,7 @@ void main() {
       expect(outputContents, contains("const String name = 'snippet';"));
     });
 
-    test('generates sample snippets', () async {
+    test('generates snippets', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
         ..writeAsStringSync(r'''
@@ -137,7 +139,7 @@ void main() {
       expect(html, contains('main() {'));
     });
 
-    test('generates dartpad snippets', () async {
+    test('generates dartpad samples', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
         ..writeAsStringSync(r'''
@@ -157,14 +159,14 @@ void main() {
         SnippetType.sample,
         showDartPad: true,
         template: 'template',
-        metadata: <String, Object>{'id': 'id'},
+        metadata: <String, Object>{'id': 'id', 'channel': 'stable'},
       );
       expect(html, contains('<div>HTML Bits (DartPad-style)</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains('<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id=id"></iframe>'));
+      expect(html, contains('<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id=id&sample_channel=stable"></iframe>'));
     });
 
-    test('generates snippet application metadata', () async {
+    test('generates sample metadata', () async {
       final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
         ..createSync(recursive: true)
         ..writeAsStringSync(r'''
@@ -187,11 +189,12 @@ void main() {
         SnippetType.sample,
         template: 'template',
         output: outputFile,
-        metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id'},
+        metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id', 'channel': 'stable'},
       );
       expect(expectedMetadataFile.existsSync(), isTrue);
       final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync()) as Map<String, dynamic>;
       expect(json['id'], equals('id'));
+      expect(json['channel'], equals('stable'));
       expect(json['file'], equals('snippet_out.dart'));
       expect(json['description'], equals('A description of the snippet.\n\nOn several lines.'));
       // Ensure any passed metadata is included in the output JSON too.
