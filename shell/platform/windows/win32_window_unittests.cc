@@ -15,7 +15,6 @@ TEST(Win32FlutterWindowTest, CanFontChange) {
   LRESULT result = SendMessage(hwnd, WM_FONTCHANGE, NULL, NULL);
   ASSERT_EQ(result, 0);
   ASSERT_TRUE(window.OnFontChangeWasCalled());
-  ASSERT_TRUE(TRUE);
 }
 
 }  // namespace testing
