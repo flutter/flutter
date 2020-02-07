@@ -1145,7 +1145,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         onLayout: (Size size) {
           // If [_dropdownRoute] is null and onLayout is called, this means
           // that performLayout was called on a _DropdownRoute that has not
-          // left the widget tree and is still animating away.
+          // left the widget tree but is already animating away.
           if (_dropdownRoute == null)
             return;
 
