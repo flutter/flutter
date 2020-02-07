@@ -973,7 +973,7 @@ class FloatingActionButtonConfiguration {
 ///       ),
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
-///       onPressed: () {print('add');},
+///       onPressed: () { print('add'); },
 ///       tooltip: 'Increment',
 ///       child: Icon(Icons.add),
 ///       backgroundColor: Colors.blue,
