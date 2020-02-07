@@ -298,6 +298,56 @@ Future<void> main() async {
         }
       }
 
+      // This builds all build modes' frameworks by default
+      section('Build podspec');
+
+      const String cocoapodsOutputDirectoryName = 'flutter-frameworks-cocoapods';
+
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios-framework',
+            '--cocoapods',
+            '--force', // Allow podspec creation on master.
+            '--output=$cocoapodsOutputDirectoryName'
+          ],
+        );
+      });
+
+      final String cocoapodsOutputPath = path.join(projectDir.path, cocoapodsOutputDirectoryName);
+      for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+        checkFileExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'Flutter.podspec',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'App.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'FlutterPluginRegistrant.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'device_info.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'package_info.framework',
+        ));
+      }
+
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
