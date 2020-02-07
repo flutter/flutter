@@ -1,4 +1,4 @@
-Signature: d32699f8b13c6ed276cae754358ea5bf
+Signature: 5860733e6560c59b731d5cb3b80d3817
 
 UNUSED LICENSES:
 
@@ -997,6 +997,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/armhf_sysroot/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/bloaty/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cast_toolchain/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/ccache_linux/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/ccache_mac/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/chromebook_arm_gles/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/chromebook_x86_64_gles/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/clang_linux/VERSION
