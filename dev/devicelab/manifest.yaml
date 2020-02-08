@@ -400,7 +400,8 @@ tasks:
     description: >
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
     stage: devicelab_ios
-    required_agent_capabilities: ["mac/iphonexs"]
+    # TODO(keyonghan): change with https://github.com/flutter/flutter/issues/50383
+    required_agent_capabilities: ["mac/ios"]
 
   flutter_gallery_ios32__start_up:
     description: >
