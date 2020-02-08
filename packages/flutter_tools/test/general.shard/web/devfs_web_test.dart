@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
+import '../../src/io.dart';
 import '../../src/testbed.dart';
 
 const List<int> kTransparentImage = <int>[
@@ -263,50 +264,52 @@ void main() {
   }));
 
   test('Can start web server with specified assets', () => testbed.run(() async {
-    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
-      ..createSync(recursive: true);
-    outputFile.parent.childFile('a.sources').writeAsStringSync('');
-    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
-    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
+    await IOOverrides.runWithIOOverrides(() async {
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('.packages').writeAsStringSync('\n');
 
-    final ResidentCompiler residentCompiler = MockResidentCompiler();
-    when(residentCompiler.recompile(
-      any,
-      any,
-      outputPath: anyNamed('outputPath'),
-      packagesFilePath: anyNamed('packagesFilePath'),
-    )).thenAnswer((Invocation invocation) async {
-      return const CompilerOutput('a', 0, <Uri>[]);
-    });
+      final ResidentCompiler residentCompiler = MockResidentCompiler();
+      when(residentCompiler.recompile(
+        any,
+        any,
+        outputPath: anyNamed('outputPath'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+      )).thenAnswer((Invocation invocation) async {
+        return const CompilerOutput('a', 0, <Uri>[]);
+      });
 
-    final WebDevFS webDevFS = WebDevFS(
-      hostname: 'localhost',
-      port: 0,
-      packagesFilePath: '.packages',
-      urlTunneller: null,
-      buildMode: BuildMode.debug,
-      enableDwds: false,
-    );
-    webDevFS.requireJS.createSync(recursive: true);
-    webDevFS.dartSdk.createSync(recursive: true);
-    webDevFS.dartSdkSourcemap.createSync(recursive: true);
-    webDevFS.stackTraceMapper.createSync(recursive: true);
+      final WebDevFS webDevFS = WebDevFS(
+        hostname: 'localhost',
+        port: 0,
+        packagesFilePath: '.packages',
+        urlTunneller: null,
+        buildMode: BuildMode.debug,
+        enableDwds: false,
+      );
+      webDevFS.requireJS.createSync(recursive: true);
+      webDevFS.dartSdk.createSync(recursive: true);
+      webDevFS.dartSdkSourcemap.createSync(recursive: true);
+      webDevFS.stackTraceMapper.createSync(recursive: true);
 
-    await webDevFS.create();
-    await webDevFS.update(
-      mainPath: globals.fs.path.join('lib', 'main.dart'),
-      generator: residentCompiler,
-      trackWidgetCreation: true,
-      bundleFirstUpload: true,
-      invalidatedFiles: <Uri>[],
-    );
+      await webDevFS.create();
+      await webDevFS.update(
+        mainPath: globals.fs.path.join('lib', 'main.dart'),
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        bundleFirstUpload: true,
+        invalidatedFiles: <Uri>[],
+      );
 
-    expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
-    expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);
+      expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
+      expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);
 
-    await webDevFS.destroy();
-    await webDevFS.dwds.stop();
+      await webDevFS.destroy();
+      await webDevFS.dwds.stop();
+    }, FlutterIOOverrides(fileSystem: globals.fs));
   }));
 }
 
