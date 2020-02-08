@@ -265,17 +265,20 @@ void main() {
 
       testWidgets('Use custom ScrollController when scrollController is set', (WidgetTester tester) async {
         final ScrollController customController = ScrollController();
-        final Widget reorderableList = ReorderableListView(
-          scrollController: customController,
-          children: const <Widget>[
-            SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
-            SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
-            SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
-          ],
-          onReorder: (int oldIndex, int newIndex) { },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ReorderableListView(
+              scrollController: customController,
+              children: const <Widget>[
+                SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
+                SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
+                SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
+              ],
+              onReorder: (int oldIndex, int newIndex) { },
+            ),
+          )
         );
 
-        await tester.pumpWidget(MaterialApp(home: reorderableList));
         final ReorderableListView listView = tester.widget(
           find.byType(ReorderableListView),
         );
