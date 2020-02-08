@@ -495,16 +495,13 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       status.stop();
     }
 
-    if (deviceIsDebuggable) {
-      final String verb = fullRestart ? 'Restarted' : 'Reloaded';
-      globals.printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-      if (!fullRestart) {
-        flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
-      }
-    }
+    final String verb = fullRestart ? 'Restarted' : 'Reloaded';
+    globals.printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
+      flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
       HotEvent(
         'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),

@@ -365,12 +365,15 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript',
-      'cd28': null,
-      'cd29': 'false',
-      'cd30': 'true',
-    })).called(1);
+    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+      parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
+
+    expect(config, allOf(<Matcher>[
+      containsPair('cd27', 'web-javascript'),
+      containsPair('cd28', null),
+      containsPair('cd29', 'false'),
+      containsPair('cd30', 'true'),
+    ]));
     verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
@@ -415,13 +418,16 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript',
-      'cd28': null,
-      'cd29': 'false',
-      'cd30': 'true',
-    })).called(1);
-    verifyNever(Usage.instance.sendTiming('hot', 'web-incremental-restart', any));
+    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+      parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
+
+    expect(config, allOf(<Matcher>[
+      containsPair('cd27', 'web-javascript'),
+      containsPair('cd28', null),
+      containsPair('cd29', 'false'),
+      containsPair('cd30', 'true'),
+    ]));
+    verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -457,12 +463,6 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
     // ensure that analytics are sent.
-    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript',
-      'cd28': null,
-      'cd29': 'false',
-      'cd30': 'true',
-    })).called(1);
     verifyNever(Usage.instance.sendTiming('hot', 'web-incremental-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
