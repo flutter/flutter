@@ -264,7 +264,7 @@ void main() {
       });
 
       testWidgets('Use custom ScrollController when scrollController is set', (WidgetTester tester) async {
-        final ScrollController customController = ScrollController();
+        final ScrollController customController = ScrollController(initialScrollOffset: 10);
         await tester.pumpWidget(
           MaterialApp(
             home: ReorderableListView(
@@ -283,7 +283,9 @@ void main() {
           find.byType(ReorderableListView),
         );
 
-        expect(listView.scrollController, customController);
+        listView.scrollController.jumpTo(20);
+
+        expect(customController.offset, 20);
       });
 
       testWidgets('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
