@@ -9,10 +9,10 @@ import 'package:build_daemon/client.dart';
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:path/path.dart' as path;
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
