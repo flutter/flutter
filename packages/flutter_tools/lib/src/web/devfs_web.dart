@@ -78,7 +78,7 @@ class WebAssetServer implements AssetReader {
         if (enableDwds) {
           pipeline = pipeline.addMiddleware(dwds.middleware);
         }
-        final shelf.Handler dwdsHandler = pipeline.addHandler(server._handleRequest);
+        final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
         final shelf.Cascade cascade = shelf.Cascade()
           .add(dwds.handler)
           .add(dwdsHandler);
@@ -102,8 +102,6 @@ class WebAssetServer implements AssetReader {
   // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
-  final RegExp _drivePath = RegExp(r'\/[A-Z]:\/');
-
   final Packages _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
@@ -115,7 +113,8 @@ class WebAssetServer implements AssetReader {
   Uint8List getSourceMap(String path) => _sourcemaps[path];
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
-  Future<shelf.Response> _handleRequest(shelf.Request request) async {
+  @visibleForTesting
+  Future<shelf.Response> handleRequest(shelf.Request request) async {
     final Map<String, String> headers = <String, String>{};
     // If the response is `/`, then we are requesting the index file.
     if (request.url.path == '/' || request.url.path.isEmpty) {
@@ -130,15 +129,10 @@ class WebAssetServer implements AssetReader {
       return shelf.Response.notFound('');
     }
 
-    // TODO(jonahwilliams): better path normalization in frontend_server to remove
-    // this workaround.
     // NOTE: shelf removes trailing `/` for some reason.
-    String requestPath = request.url.path.startsWith('/')
+    final String requestPath = request.url.path.startsWith('/')
       ?  request.url.path
       : '/${request.url.path}';
-    if (requestPath.startsWith(_drivePath)) {
-      requestPath = requestPath.substring(3);
-    }
 
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
@@ -260,8 +254,11 @@ class WebAssetServer implements AssetReader {
     // likely coming from a source map request. Attempt to look in the
     // local filesystem for it, and return a 404 if it is not found. The tool
     // doesn't currently consider the case of Dart files as assets.
-    File file = globals.fs.file(Uri.base.resolve(path));
+    File file = globals.fs.file(globals.fs.currentDirectory.uri.resolve(path));
     final List<String> segments = path.split('/');
+    if (segments.first.isEmpty) {
+      segments.removeAt(0);
+    }
     // If both of the lookups above failed, the file might have been a package
     // file which is signaled by a `/packages/<package>/<path>` request.
     if (!file.existsSync() && segments.first == 'packages') {
@@ -313,12 +310,12 @@ class ConnectionResult {
 
 class WebDevFS implements DevFS {
   WebDevFS({
-    this.hostname,
-    this.port,
-    this.packagesFilePath,
-    this.urlTunneller,
-    this.buildMode,
-    this.enableDwds,
+    @required this.hostname,
+    @required this.port,
+    @required this.packagesFilePath,
+    @required this.urlTunneller,
+    @required this.buildMode,
+    @required this.enableDwds,
   });
 
   final String hostname;
