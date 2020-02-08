@@ -12,52 +12,47 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.Surface;
-
-import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicLong;
-
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Represents the rendering responsibilities of a {@code FlutterEngine}.
- * <p>
- * {@code FlutterRenderer} works in tandem with a provided {@link RenderSurface} to paint Flutter
+ *
+ * <p>{@code FlutterRenderer} works in tandem with a provided {@link RenderSurface} to paint Flutter
  * pixels to an Android {@code View} hierarchy.
- * <p>
- * {@code FlutterRenderer} manages textures for rendering, and forwards some Java calls to native
- * Flutter code via JNI. The corresponding {@link RenderSurface} provides the Android
- * {@link Surface} that this renderer paints.
- * <p>
- * {@link io.flutter.embedding.android.FlutterSurfaceView} and
- * {@link io.flutter.embedding.android.FlutterTextureView} are implementations of
- * {@link RenderSurface}.
+ *
+ * <p>{@code FlutterRenderer} manages textures for rendering, and forwards some Java calls to native
+ * Flutter code via JNI. The corresponding {@link RenderSurface} provides the Android {@link
+ * Surface} that this renderer paints.
+ *
+ * <p>{@link io.flutter.embedding.android.FlutterSurfaceView} and {@link
+ * io.flutter.embedding.android.FlutterTextureView} are implementations of {@link RenderSurface}.
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class FlutterRenderer implements TextureRegistry {
   private static final String TAG = "FlutterRenderer";
 
-  @NonNull
-  private final FlutterJNI flutterJNI;
-  @NonNull
-  private final AtomicLong nextTextureId = new AtomicLong(0L);
-  @Nullable
-  private Surface surface;
+  @NonNull private final FlutterJNI flutterJNI;
+  @NonNull private final AtomicLong nextTextureId = new AtomicLong(0L);
+  @Nullable private Surface surface;
   private boolean isDisplayingFlutterUi = false;
 
   @NonNull
-  private final FlutterUiDisplayListener flutterUiDisplayListener = new FlutterUiDisplayListener() {
-    @Override
-    public void onFlutterUiDisplayed() {
-      isDisplayingFlutterUi = true;
-    }
+  private final FlutterUiDisplayListener flutterUiDisplayListener =
+      new FlutterUiDisplayListener() {
+        @Override
+        public void onFlutterUiDisplayed() {
+          isDisplayingFlutterUi = true;
+        }
 
-    @Override
-    public void onFlutterUiNoLongerDisplayed() {
-      isDisplayingFlutterUi = false;
-    }
-  };
+        @Override
+        public void onFlutterUiNoLongerDisplayed() {
+          isDisplayingFlutterUi = false;
+        }
+      };
 
   public FlutterRenderer(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
@@ -85,14 +80,14 @@ public class FlutterRenderer implements TextureRegistry {
   }
 
   /**
-   * Removes a listener added via
-   * {@link #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}.
+   * Removes a listener added via {@link
+   * #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}.
    */
   public void removeIsDisplayingFlutterUiListener(@NonNull FlutterUiDisplayListener listener) {
     flutterJNI.removeIsDisplayingFlutterUiListener(listener);
   }
 
-  //------ START TextureRegistry IMPLEMENTATION -----
+  // ------ START TextureRegistry IMPLEMENTATION -----
   /**
    * Creates and returns a new {@link SurfaceTexture} that is also made available to Flutter code.
    */
@@ -101,10 +96,8 @@ public class FlutterRenderer implements TextureRegistry {
     Log.v(TAG, "Creating a SurfaceTexture.");
     final SurfaceTexture surfaceTexture = new SurfaceTexture(0);
     surfaceTexture.detachFromGLContext();
-    final SurfaceTextureRegistryEntry entry = new SurfaceTextureRegistryEntry(
-        nextTextureId.getAndIncrement(),
-        surfaceTexture
-    );
+    final SurfaceTextureRegistryEntry entry =
+        new SurfaceTextureRegistryEntry(nextTextureId.getAndIncrement(), surfaceTexture);
     Log.v(TAG, "New SurfaceTexture ID: " + entry.id());
     registerTexture(entry.id(), surfaceTexture);
     return entry;
@@ -112,8 +105,7 @@ public class FlutterRenderer implements TextureRegistry {
 
   final class SurfaceTextureRegistryEntry implements TextureRegistry.SurfaceTextureEntry {
     private final long id;
-    @NonNull
-    private final SurfaceTexture surfaceTexture;
+    @NonNull private final SurfaceTexture surfaceTexture;
     private boolean released;
 
     SurfaceTextureRegistryEntry(long id, @NonNull SurfaceTexture surfaceTexture) {
@@ -121,8 +113,10 @@ public class FlutterRenderer implements TextureRegistry {
       this.surfaceTexture = surfaceTexture;
 
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        // The callback relies on being executed on the UI thread (unsynchronised read of mNativeView
-        // and also the engine code check for platform thread in Shell::OnPlatformViewMarkTextureFrameAvailable),
+        // The callback relies on being executed on the UI thread (unsynchronised read of
+        // mNativeView
+        // and also the engine code check for platform thread in
+        // Shell::OnPlatformViewMarkTextureFrameAvailable),
         // so we explicitly pass a Handler for the current thread.
         this.surfaceTexture.setOnFrameAvailableListener(onFrameListener, new Handler());
       } else {
@@ -133,18 +127,20 @@ public class FlutterRenderer implements TextureRegistry {
       }
     }
 
-    private SurfaceTexture.OnFrameAvailableListener onFrameListener = new SurfaceTexture.OnFrameAvailableListener() {
-      @Override
-      public void onFrameAvailable(@NonNull SurfaceTexture texture) {
-        if (released) {
-          // Even though we make sure to unregister the callback before releasing, as of Android O
-          // SurfaceTexture has a data race when accessing the callback, so the callback may
-          // still be called by a stale reference after released==true and mNativeView==null.
-          return;
-        }
-        markTextureFrameAvailable(id);
-      }
-    };
+    private SurfaceTexture.OnFrameAvailableListener onFrameListener =
+        new SurfaceTexture.OnFrameAvailableListener() {
+          @Override
+          public void onFrameAvailable(@NonNull SurfaceTexture texture) {
+            if (released) {
+              // Even though we make sure to unregister the callback before releasing, as of Android
+              // O
+              // SurfaceTexture has a data race when accessing the callback, so the callback may
+              // still be called by a stale reference after released==true and mNativeView==null.
+              return;
+            }
+            markTextureFrameAvailable(id);
+          }
+        };
 
     @Override
     @NonNull
@@ -168,14 +164,14 @@ public class FlutterRenderer implements TextureRegistry {
       released = true;
     }
   }
-  //------ END TextureRegistry IMPLEMENTATION ----
+  // ------ END TextureRegistry IMPLEMENTATION ----
 
   /**
    * Notifies Flutter that the given {@code surface} was created and is available for Flutter
    * rendering.
-   * <p>
-   * See {@link android.view.SurfaceHolder.Callback} and
-   * {@link android.view.TextureView.SurfaceTextureListener}
+   *
+   * <p>See {@link android.view.SurfaceHolder.Callback} and {@link
+   * android.view.TextureView.SurfaceTextureListener}
    */
   public void startRenderingToSurface(@NonNull Surface surface) {
     if (this.surface != null) {
@@ -188,24 +184,24 @@ public class FlutterRenderer implements TextureRegistry {
   }
 
   /**
-   * Notifies Flutter that a {@code surface} previously registered with
-   * {@link #startRenderingToSurface(Surface)} has changed size to the given {@code width} and
-   * {@code height}.
-   * <p>
-   * See {@link android.view.SurfaceHolder.Callback} and
-   * {@link android.view.TextureView.SurfaceTextureListener}
+   * Notifies Flutter that a {@code surface} previously registered with {@link
+   * #startRenderingToSurface(Surface)} has changed size to the given {@code width} and {@code
+   * height}.
+   *
+   * <p>See {@link android.view.SurfaceHolder.Callback} and {@link
+   * android.view.TextureView.SurfaceTextureListener}
    */
   public void surfaceChanged(int width, int height) {
     flutterJNI.onSurfaceChanged(width, height);
   }
 
   /**
-   * Notifies Flutter that a {@code surface} previously registered with
-   * {@link #startRenderingToSurface(Surface)} has been destroyed and needs to be released and
-   * cleaned up on the Flutter side.
-   * <p>
-   * See {@link android.view.SurfaceHolder.Callback} and
-   * {@link android.view.TextureView.SurfaceTextureListener}
+   * Notifies Flutter that a {@code surface} previously registered with {@link
+   * #startRenderingToSurface(Surface)} has been destroyed and needs to be released and cleaned up
+   * on the Flutter side.
+   *
+   * <p>See {@link android.view.SurfaceHolder.Callback} and {@link
+   * android.view.TextureView.SurfaceTextureListener}
    */
   public void stopRenderingToSurface() {
     flutterJNI.onSurfaceDestroyed();
@@ -225,14 +221,40 @@ public class FlutterRenderer implements TextureRegistry {
 
   // TODO(mattcarroll): describe the native behavior that this invokes
   public void setViewportMetrics(@NonNull ViewportMetrics viewportMetrics) {
-    Log.v(TAG, "Setting viewport metrics\n"
-      + "Size: " + viewportMetrics.width + " x " + viewportMetrics.height + "\n"
-      + "Padding - L: " + viewportMetrics.paddingLeft + ", T: " + viewportMetrics.paddingTop
-        + ", R: " + viewportMetrics.paddingRight + ", B: " + viewportMetrics.paddingBottom + "\n"
-      + "Insets - L: " + viewportMetrics.viewInsetLeft + ", T: " + viewportMetrics.viewInsetTop
-        + ", R: " + viewportMetrics.viewInsetRight + ", B: " + viewportMetrics.viewInsetBottom + "\n"
-      + "System Gesture Insets - L: " + viewportMetrics.systemGestureInsetLeft + ", T: " + viewportMetrics.systemGestureInsetTop
-        + ", R: " + viewportMetrics.systemGestureInsetRight + ", B: " + viewportMetrics.viewInsetBottom);
+    Log.v(
+        TAG,
+        "Setting viewport metrics\n"
+            + "Size: "
+            + viewportMetrics.width
+            + " x "
+            + viewportMetrics.height
+            + "\n"
+            + "Padding - L: "
+            + viewportMetrics.paddingLeft
+            + ", T: "
+            + viewportMetrics.paddingTop
+            + ", R: "
+            + viewportMetrics.paddingRight
+            + ", B: "
+            + viewportMetrics.paddingBottom
+            + "\n"
+            + "Insets - L: "
+            + viewportMetrics.viewInsetLeft
+            + ", T: "
+            + viewportMetrics.viewInsetTop
+            + ", R: "
+            + viewportMetrics.viewInsetRight
+            + ", B: "
+            + viewportMetrics.viewInsetBottom
+            + "\n"
+            + "System Gesture Insets - L: "
+            + viewportMetrics.systemGestureInsetLeft
+            + ", T: "
+            + viewportMetrics.systemGestureInsetTop
+            + ", R: "
+            + viewportMetrics.systemGestureInsetRight
+            + ", B: "
+            + viewportMetrics.viewInsetBottom);
 
     flutterJNI.setViewportMetrics(
         viewportMetrics.devicePixelRatio,
@@ -249,8 +271,7 @@ public class FlutterRenderer implements TextureRegistry {
         viewportMetrics.systemGestureInsetTop,
         viewportMetrics.systemGestureInsetRight,
         viewportMetrics.systemGestureInsetBottom,
-        viewportMetrics.systemGestureInsetLeft
-    );
+        viewportMetrics.systemGestureInsetLeft);
   }
 
   // TODO(mattcarroll): describe the native behavior that this invokes
@@ -295,22 +316,15 @@ public class FlutterRenderer implements TextureRegistry {
   }
 
   // TODO(mattcarroll): describe the native behavior that this invokes
-  public void dispatchSemanticsAction(int id,
-                                      int action,
-                                      @Nullable ByteBuffer args,
-                                      int argsPosition) {
-    flutterJNI.dispatchSemanticsAction(
-        id,
-        action,
-        args,
-        argsPosition
-    );
+  public void dispatchSemanticsAction(
+      int id, int action, @Nullable ByteBuffer args, int argsPosition) {
+    flutterJNI.dispatchSemanticsAction(id, action, args, argsPosition);
   }
 
   /**
    * Mutable data structure that holds all viewport metrics properties that Flutter cares about.
    *
-   * All distance measurements, e.g., width, height, padding, viewInsets, are measured in device
+   * <p>All distance measurements, e.g., width, height, padding, viewInsets, are measured in device
    * pixels, not logical pixels.
    */
   public static final class ViewportMetrics {

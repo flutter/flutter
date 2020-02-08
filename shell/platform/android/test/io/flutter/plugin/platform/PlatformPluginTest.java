@@ -1,20 +1,18 @@
 package io.flutter.plugin.platform;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.app.Activity;
 import android.view.View;
 import android.view.Window;
-
+import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import io.flutter.embedding.engine.systemchannels.PlatformChannel;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class PlatformPluginTest {
   @Config(sdk = 16)

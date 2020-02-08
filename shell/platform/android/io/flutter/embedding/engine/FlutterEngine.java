@@ -7,11 +7,6 @@ package io.flutter.embedding.engine;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
-
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -32,33 +27,36 @@ import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A single Flutter execution environment.
- * <p>
- * The {@code FlutterEngine} is the container through which Dart code can be run in an Android
+ *
+ * <p>The {@code FlutterEngine} is the container through which Dart code can be run in an Android
  * application.
- * <p>
- * Dart code in a {@code FlutterEngine} can execute in the background, or it can be render to the
+ *
+ * <p>Dart code in a {@code FlutterEngine} can execute in the background, or it can be render to the
  * screen by using the accompanying {@link FlutterRenderer} and Dart code using the Flutter
- * framework on the Dart side. Rendering can be started and stopped, thus allowing a
- * {@code FlutterEngine} to move from UI interaction to data-only processing and then back to UI
+ * framework on the Dart side. Rendering can be started and stopped, thus allowing a {@code
+ * FlutterEngine} to move from UI interaction to data-only processing and then back to UI
  * interaction.
- * <p>
- * Multiple {@code FlutterEngine}s may exist, execute Dart code, and render UIs within a single
+ *
+ * <p>Multiple {@code FlutterEngine}s may exist, execute Dart code, and render UIs within a single
  * Android app.
- * <p>
- * To start running Dart and/or Flutter within this {@code FlutterEngine}, get a reference to this
- * engine's {@link DartExecutor} and then use
- * {@link DartExecutor#executeDartEntrypoint(DartExecutor.DartEntrypoint)}. The
- * {@link DartExecutor#executeDartEntrypoint(DartExecutor.DartEntrypoint)} method must not be
- * invoked twice on the same {@code FlutterEngine}.
- * <p>
- * To start rendering Flutter content to the screen, use {@link #getRenderer()} to obtain a
- * {@link FlutterRenderer} and then attach a {@link RenderSurface}.  Consider using a
- * {@link io.flutter.embedding.android.FlutterView} as a {@link RenderSurface}.
- * <p>
- * Instatiating the first {@code FlutterEngine} per process will also load the Flutter engine's
+ *
+ * <p>To start running Dart and/or Flutter within this {@code FlutterEngine}, get a reference to
+ * this engine's {@link DartExecutor} and then use {@link
+ * DartExecutor#executeDartEntrypoint(DartExecutor.DartEntrypoint)}. The {@link
+ * DartExecutor#executeDartEntrypoint(DartExecutor.DartEntrypoint)} method must not be invoked twice
+ * on the same {@code FlutterEngine}.
+ *
+ * <p>To start rendering Flutter content to the screen, use {@link #getRenderer()} to obtain a
+ * {@link FlutterRenderer} and then attach a {@link RenderSurface}. Consider using a {@link
+ * io.flutter.embedding.android.FlutterView} as a {@link RenderSurface}.
+ *
+ * <p>Instatiating the first {@code FlutterEngine} per process will also load the Flutter engine's
  * native library and start the Dart VM. Subsequent {@code FlutterEngine}s will run on the same VM
  * instance but will have their own Dart <a
  * href="https://api.dartlang.org/stable/dart-isolate/Isolate-class.html">Isolate</a> when the
@@ -68,115 +66,107 @@ import io.flutter.plugin.platform.PlatformViewsController;
 public class FlutterEngine {
   private static final String TAG = "FlutterEngine";
 
-  @NonNull
-  private final FlutterJNI flutterJNI;
-  @NonNull
-  private final FlutterRenderer renderer;
-  @NonNull
-  private final DartExecutor dartExecutor;
-  @NonNull
-  private final FlutterEnginePluginRegistry pluginRegistry;
+  @NonNull private final FlutterJNI flutterJNI;
+  @NonNull private final FlutterRenderer renderer;
+  @NonNull private final DartExecutor dartExecutor;
+  @NonNull private final FlutterEnginePluginRegistry pluginRegistry;
 
   // System channels.
-  @NonNull
-  private final AccessibilityChannel accessibilityChannel;
-  @NonNull
-  private final KeyEventChannel keyEventChannel;
-  @NonNull
-  private final LifecycleChannel lifecycleChannel;
-  @NonNull
-  private final LocalizationChannel localizationChannel;
-  @NonNull
-  private final NavigationChannel navigationChannel;
-  @NonNull
-  private final PlatformChannel platformChannel;
-  @NonNull
-  private final SettingsChannel settingsChannel;
-  @NonNull
-  private final SystemChannel systemChannel;
-  @NonNull
-  private final TextInputChannel textInputChannel;
+  @NonNull private final AccessibilityChannel accessibilityChannel;
+  @NonNull private final KeyEventChannel keyEventChannel;
+  @NonNull private final LifecycleChannel lifecycleChannel;
+  @NonNull private final LocalizationChannel localizationChannel;
+  @NonNull private final NavigationChannel navigationChannel;
+  @NonNull private final PlatformChannel platformChannel;
+  @NonNull private final SettingsChannel settingsChannel;
+  @NonNull private final SystemChannel systemChannel;
+  @NonNull private final TextInputChannel textInputChannel;
 
   // Platform Views.
-  @NonNull
-  private final PlatformViewsController platformViewsController;
+  @NonNull private final PlatformViewsController platformViewsController;
 
   // Engine Lifecycle.
-  @NonNull
-  private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
-  @NonNull
-  private final EngineLifecycleListener engineLifecycleListener = new EngineLifecycleListener() {
-    @SuppressWarnings("unused")
-    public void onPreEngineRestart() {
-      Log.v(TAG, "onPreEngineRestart()");
-      for (EngineLifecycleListener lifecycleListener : engineLifecycleListeners) {
-        lifecycleListener.onPreEngineRestart();
-      }
+  @NonNull private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
 
-      platformViewsController.onPreEngineRestart();
-    }
-  };
+  @NonNull
+  private final EngineLifecycleListener engineLifecycleListener =
+      new EngineLifecycleListener() {
+        @SuppressWarnings("unused")
+        public void onPreEngineRestart() {
+          Log.v(TAG, "onPreEngineRestart()");
+          for (EngineLifecycleListener lifecycleListener : engineLifecycleListeners) {
+            lifecycleListener.onPreEngineRestart();
+          }
+
+          platformViewsController.onPreEngineRestart();
+        }
+      };
 
   /**
    * Constructs a new {@code FlutterEngine}.
-   * <p>
-   * A new {@code FlutterEngine} does not execute any Dart code automatically. See
-   * {@link #getDartExecutor()} and {@link DartExecutor#executeDartEntrypoint(DartExecutor.DartEntrypoint)}
+   *
+   * <p>A new {@code FlutterEngine} does not execute any Dart code automatically. See {@link
+   * #getDartExecutor()} and {@link DartExecutor#executeDartEntrypoint(DartExecutor.DartEntrypoint)}
    * to begin executing Dart code within this {@code FlutterEngine}.
-   * <p>
-   * A new {@code FlutterEngine} will not display any UI until a
-   * {@link RenderSurface} is registered. See
-   * {@link #getRenderer()} and {@link FlutterRenderer#startRenderingToSurface(RenderSurface)}.
-   * <p>
-   * A new {@code FlutterEngine} automatically attaches all plugins. See {@link #getPlugins()}.
-   * <p>
-   * A new {@code FlutterEngine} does come with all default system channels attached.
-   * <p>
-   * The first {@code FlutterEngine} instance constructed per process will also load the Flutter
+   *
+   * <p>A new {@code FlutterEngine} will not display any UI until a {@link RenderSurface} is
+   * registered. See {@link #getRenderer()} and {@link
+   * FlutterRenderer#startRenderingToSurface(RenderSurface)}.
+   *
+   * <p>A new {@code FlutterEngine} automatically attaches all plugins. See {@link #getPlugins()}.
+   *
+   * <p>A new {@code FlutterEngine} does come with all default system channels attached.
+   *
+   * <p>The first {@code FlutterEngine} instance constructed per process will also load the Flutter
    * native library and start a Dart VM.
-   * <p>
-   * In order to pass Dart VM initialization arguments (see {@link io.flutter.embedding.engine.FlutterShellArgs})
-   * when creating the VM, manually set the initialization arguments by calling {@link FlutterLoader#startInitialization(Context)}
-   * and {@link FlutterLoader#ensureInitializationComplete(Context, String[])}.
+   *
+   * <p>In order to pass Dart VM initialization arguments (see {@link
+   * io.flutter.embedding.engine.FlutterShellArgs}) when creating the VM, manually set the
+   * initialization arguments by calling {@link FlutterLoader#startInitialization(Context)} and
+   * {@link FlutterLoader#ensureInitializationComplete(Context, String[])}.
    */
   public FlutterEngine(@NonNull Context context) {
     this(context, null);
   }
 
   /**
-   * Same as {@link #FlutterEngine(Context)} with added support for passing Dart
-   * VM arguments.
-   * <p>
-   * If the Dart VM has already started, the given arguments will have no effect.
+   * Same as {@link #FlutterEngine(Context)} with added support for passing Dart VM arguments.
+   *
+   * <p>If the Dart VM has already started, the given arguments will have no effect.
    */
   public FlutterEngine(@NonNull Context context, @Nullable String[] dartVmArgs) {
     this(context, FlutterLoader.getInstance(), new FlutterJNI(), dartVmArgs, true);
   }
 
   /**
-   * Same as {@link #FlutterEngine(Context)} with added support for passing Dart
-   * VM arguments and avoiding automatic plugin registration.
-   * <p>
-   * If the Dart VM has already started, the given arguments will have no effect.
+   * Same as {@link #FlutterEngine(Context)} with added support for passing Dart VM arguments and
+   * avoiding automatic plugin registration.
+   *
+   * <p>If the Dart VM has already started, the given arguments will have no effect.
    */
   public FlutterEngine(
       @NonNull Context context,
       @Nullable String[] dartVmArgs,
       boolean automaticallyRegisterPlugins) {
-    this(context, FlutterLoader.getInstance(), new FlutterJNI(), dartVmArgs, automaticallyRegisterPlugins);
+    this(
+        context,
+        FlutterLoader.getInstance(),
+        new FlutterJNI(),
+        dartVmArgs,
+        automaticallyRegisterPlugins);
   }
 
   /**
    * Same as {@link #FlutterEngine(Context, FlutterLoader, FlutterJNI, String[])} but with no Dart
    * VM flags.
-   * <p>
-   * {@code flutterJNI} should be a new instance that has never been attached to an engine before.
+   *
+   * <p>{@code flutterJNI} should be a new instance that has never been attached to an engine
+   * before.
    */
   public FlutterEngine(
       @NonNull Context context,
       @NonNull FlutterLoader flutterLoader,
-      @NonNull FlutterJNI flutterJNI
-  ) {
+      @NonNull FlutterJNI flutterJNI) {
     this(context, flutterLoader, flutterJNI, null, true);
   }
 
@@ -191,29 +181,24 @@ public class FlutterEngine {
       @NonNull FlutterLoader flutterLoader,
       @NonNull FlutterJNI flutterJNI,
       @Nullable String[] dartVmArgs,
-      boolean automaticallyRegisterPlugins
-  ) {
+      boolean automaticallyRegisterPlugins) {
     this(
         context,
         flutterLoader,
         flutterJNI,
         new PlatformViewsController(),
         dartVmArgs,
-        automaticallyRegisterPlugins
-    );
+        automaticallyRegisterPlugins);
   }
 
-  /**
-   * Fully configurable {@code FlutterEngine} constructor.
-   */
+  /** Fully configurable {@code FlutterEngine} constructor. */
   public FlutterEngine(
       @NonNull Context context,
       @NonNull FlutterLoader flutterLoader,
       @NonNull FlutterJNI flutterJNI,
       @NonNull PlatformViewsController platformViewsController,
       @Nullable String[] dartVmArgs,
-      boolean automaticallyRegisterPlugins
-  ) {
+      boolean automaticallyRegisterPlugins) {
     this.flutterJNI = flutterJNI;
     flutterLoader.startInitialization(context.getApplicationContext());
     flutterLoader.ensureInitializationComplete(context, dartVmArgs);
@@ -224,7 +209,8 @@ public class FlutterEngine {
     this.dartExecutor = new DartExecutor(flutterJNI, context.getAssets());
     this.dartExecutor.onAttachedToJNI();
 
-    // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if possible.
+    // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if
+    // possible.
     this.renderer = new FlutterRenderer(flutterJNI);
 
     accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
@@ -239,11 +225,8 @@ public class FlutterEngine {
 
     this.platformViewsController = platformViewsController;
 
-    this.pluginRegistry = new FlutterEnginePluginRegistry(
-      context.getApplicationContext(),
-      this,
-      flutterLoader
-    );
+    this.pluginRegistry =
+        new FlutterEnginePluginRegistry(context.getApplicationContext(), this, flutterLoader);
 
     if (automaticallyRegisterPlugins) {
       registerPlugins();
@@ -267,34 +250,39 @@ public class FlutterEngine {
 
   /**
    * Registers all plugins that an app lists in its pubspec.yaml.
-   * <p>
-   * The Flutter tool generates a class called GeneratedPluginRegistrant, which includes the code
-   * necessary to register every plugin in the pubspec.yaml with a given {@code FlutterEngine}.
-   * The GeneratedPluginRegistrant must be generated per app, because each app uses different sets
-   * of plugins. Therefore, the Android embedding cannot place a compile-time dependency on this
+   *
+   * <p>The Flutter tool generates a class called GeneratedPluginRegistrant, which includes the code
+   * necessary to register every plugin in the pubspec.yaml with a given {@code FlutterEngine}. The
+   * GeneratedPluginRegistrant must be generated per app, because each app uses different sets of
+   * plugins. Therefore, the Android embedding cannot place a compile-time dependency on this
    * generated class. This method uses reflection to attempt to locate the generated file and then
    * use it at runtime.
-   * <p>
-   * This method fizzles if the GeneratedPluginRegistrant cannot be found or invoked. This situation
-   * should never occur, but if any eventuality comes up that prevents an app from using this
-   * behavior, that app can still write code that explicitly registers plugins.
+   *
+   * <p>This method fizzles if the GeneratedPluginRegistrant cannot be found or invoked. This
+   * situation should never occur, but if any eventuality comes up that prevents an app from using
+   * this behavior, that app can still write code that explicitly registers plugins.
    */
   private void registerPlugins() {
     try {
-      Class<?> generatedPluginRegistrant = Class.forName("io.flutter.plugins.GeneratedPluginRegistrant");
-      Method registrationMethod = generatedPluginRegistrant.getDeclaredMethod("registerWith", FlutterEngine.class);
+      Class<?> generatedPluginRegistrant =
+          Class.forName("io.flutter.plugins.GeneratedPluginRegistrant");
+      Method registrationMethod =
+          generatedPluginRegistrant.getDeclaredMethod("registerWith", FlutterEngine.class);
       registrationMethod.invoke(null, this);
     } catch (Exception e) {
-      Log.w(TAG, "Tried to automatically register plugins with FlutterEngine ("
-          + this + ") but could not find and invoke the GeneratedPluginRegistrant.");
+      Log.w(
+          TAG,
+          "Tried to automatically register plugins with FlutterEngine ("
+              + this
+              + ") but could not find and invoke the GeneratedPluginRegistrant.");
     }
   }
 
   /**
    * Cleans up all components within this {@code FlutterEngine} and destroys the associated Dart
    * Isolate. All state held by the Dart Isolate, such as the Flutter Elements tree, is lost.
-   * <p>
-   * This {@code FlutterEngine} instance should be discarded after invoking this method.
+   *
+   * <p>This {@code FlutterEngine} instance should be discarded after invoking this method.
    */
   public void destroy() {
     Log.v(TAG, "Destroying.");
@@ -306,16 +294,16 @@ public class FlutterEngine {
   }
 
   /**
-   * Adds a {@code listener} to be notified of Flutter engine lifecycle events, e.g.,
-   * {@code onPreEngineStart()}.
+   * Adds a {@code listener} to be notified of Flutter engine lifecycle events, e.g., {@code
+   * onPreEngineStart()}.
    */
   public void addEngineLifecycleListener(@NonNull EngineLifecycleListener listener) {
     engineLifecycleListeners.add(listener);
   }
 
   /**
-   * Removes a {@code listener} that was previously added with
-   * {@link #addEngineLifecycleListener(EngineLifecycleListener)}.
+   * Removes a {@code listener} that was previously added with {@link
+   * #addEngineLifecycleListener(EngineLifecycleListener)}.
    */
   public void removeEngineLifecycleListener(@NonNull EngineLifecycleListener listener) {
     engineLifecycleListeners.remove(listener);
@@ -323,12 +311,12 @@ public class FlutterEngine {
 
   /**
    * The Dart execution context associated with this {@code FlutterEngine}.
-   * <p>
-   * The {@link DartExecutor} can be used to start executing Dart code from a given entrypoint.
+   *
+   * <p>The {@link DartExecutor} can be used to start executing Dart code from a given entrypoint.
    * See {@link DartExecutor#executeDartEntrypoint(DartExecutor.DartEntrypoint)}.
-   * <p>
-   * Use the {@link DartExecutor} to connect any desired message channels and method channels
-   * to facilitate communication between Android and Dart/Flutter.
+   *
+   * <p>Use the {@link DartExecutor} to connect any desired message channels and method channels to
+   * facilitate communication between Android and Dart/Flutter.
    */
   @NonNull
   public DartExecutor getDartExecutor() {
@@ -337,59 +325,48 @@ public class FlutterEngine {
 
   /**
    * The rendering system associated with this {@code FlutterEngine}.
-   * <p>
-   * To render a Flutter UI that is produced by this {@code FlutterEngine}'s Dart code, attach
-   * a {@link RenderSurface} to this
-   * {@link FlutterRenderer}.
+   *
+   * <p>To render a Flutter UI that is produced by this {@code FlutterEngine}'s Dart code, attach a
+   * {@link RenderSurface} to this {@link FlutterRenderer}.
    */
   @NonNull
   public FlutterRenderer getRenderer() {
     return renderer;
   }
 
-  /**
-   * System channel that sends accessibility requests and events from Flutter to Android.
-   */
+  /** System channel that sends accessibility requests and events from Flutter to Android. */
   @NonNull
   public AccessibilityChannel getAccessibilityChannel() {
     return accessibilityChannel;
   }
 
-  /**
-   * System channel that sends key events from Android to Flutter.
-   */
+  /** System channel that sends key events from Android to Flutter. */
   @NonNull
   public KeyEventChannel getKeyEventChannel() {
     return keyEventChannel;
   }
 
-  /**
-   * System channel that sends Android lifecycle events to Flutter.
-   */
+  /** System channel that sends Android lifecycle events to Flutter. */
   @NonNull
   public LifecycleChannel getLifecycleChannel() {
     return lifecycleChannel;
   }
 
-  /**
-   * System channel that sends locale data from Android to Flutter.
-   */
+  /** System channel that sends locale data from Android to Flutter. */
   @NonNull
   public LocalizationChannel getLocalizationChannel() {
     return localizationChannel;
   }
 
-  /**
-   * System channel that sends Flutter navigation commands from Android to Flutter.
-   */
+  /** System channel that sends Flutter navigation commands from Android to Flutter. */
   @NonNull
   public NavigationChannel getNavigationChannel() {
     return navigationChannel;
   }
 
   /**
-   * System channel that sends platform-oriented requests and information to Flutter,
-   * e.g., requests to play sounds, requests for haptics, system chrome settings, etc.
+   * System channel that sends platform-oriented requests and information to Flutter, e.g., requests
+   * to play sounds, requests for haptics, system chrome settings, etc.
    */
   @NonNull
   public PlatformChannel getPlatformChannel() {
@@ -397,25 +374,21 @@ public class FlutterEngine {
   }
 
   /**
-   * System channel that sends platform/user settings from Android to Flutter, e.g.,
-   * time format, scale factor, etc.
+   * System channel that sends platform/user settings from Android to Flutter, e.g., time format,
+   * scale factor, etc.
    */
   @NonNull
   public SettingsChannel getSettingsChannel() {
     return settingsChannel;
   }
 
-  /**
-   * System channel that sends memory pressure warnings from Android to Flutter.
-   */
+  /** System channel that sends memory pressure warnings from Android to Flutter. */
   @NonNull
   public SystemChannel getSystemChannel() {
     return systemChannel;
   }
 
-  /**
-   * System channel that sends and receives text input requests and state.
-   */
+  /** System channel that sends and receives text input requests and state. */
   @NonNull
   public TextInputChannel getTextInputChannel() {
     return textInputChannel;
@@ -430,8 +403,8 @@ public class FlutterEngine {
   }
 
   /**
-   * {@code PlatformViewsController}, which controls all platform views running within
-   * this {@code FlutterEngine}.
+   * {@code PlatformViewsController}, which controls all platform views running within this {@code
+   * FlutterEngine}.
    */
   @NonNull
   public PlatformViewsController getPlatformViewsController() {
@@ -458,13 +431,9 @@ public class FlutterEngine {
     return pluginRegistry;
   }
 
-  /**
-   * Lifecycle callbacks for Flutter engine lifecycle events.
-   */
+  /** Lifecycle callbacks for Flutter engine lifecycle events. */
   public interface EngineLifecycleListener {
-    /**
-     * Lifecycle callback invoked before a hot restart of the Flutter engine.
-     */
+    /** Lifecycle callback invoked before a hot restart of the Flutter engine. */
     void onPreEngineRestart();
   }
 }

@@ -11,14 +11,12 @@ package io.flutter.embedding.engine.renderer;
 public interface FlutterUiDisplayListener {
   /**
    * Flutter started painting pixels to an Android {@code View} hierarchy.
-   * <p>
-   * This method will not be invoked if this listener is added after the {@link FlutterRenderer}
+   *
+   * <p>This method will not be invoked if this listener is added after the {@link FlutterRenderer}
    * has started painting pixels.
    */
   void onFlutterUiDisplayed();
 
-  /**
-   * Flutter stopped painting pixels to an Android {@code View} hierarchy.
-   */
+  /** Flutter stopped painting pixels to an Android {@code View} hierarchy. */
   void onFlutterUiNoLongerDisplayed();
 }

@@ -1,31 +1,23 @@
 package io.flutter.embedding.android;
 
-import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.support.annotation.NonNull;
-
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
-import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
-import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
-import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
-import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
-import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
-import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
-import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,10 +29,6 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.util.concurrent.atomic.AtomicReference;
-
-import io.flutter.embedding.engine.FlutterEngine;
 
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
@@ -58,7 +46,8 @@ public class FlutterViewTest {
   @Test
   public void attachToFlutterEngine_alertsPlatformViews() {
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
-    FlutterEngine flutterEngine = spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
     when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
 
     flutterView.attachToFlutterEngine(flutterEngine);
@@ -69,7 +58,8 @@ public class FlutterViewTest {
   @Test
   public void detachFromFlutterEngine_alertsPlatformViews() {
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
-    FlutterEngine flutterEngine = spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
     when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
 
     flutterView.attachToFlutterEngine(flutterEngine);
@@ -81,7 +71,8 @@ public class FlutterViewTest {
   @Test
   public void detachFromFlutterEngine_turnsOffA11y() {
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
-    FlutterEngine flutterEngine = spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
     FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
     when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
 
@@ -94,7 +85,8 @@ public class FlutterViewTest {
   @Test
   public void onConfigurationChanged_fizzlesWhenNullEngine() {
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
-    FlutterEngine flutterEngine = spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
 
     Configuration configuration = RuntimeEnvironment.application.getResources().getConfiguration();
     // 1 invocation of channels.
@@ -114,23 +106,29 @@ public class FlutterViewTest {
   @Test
   public void itSendsLightPlatformBrightnessToFlutter() {
     // Setup test.
-    AtomicReference<SettingsChannel.PlatformBrightness> reportedBrightness = new AtomicReference<>();
+    AtomicReference<SettingsChannel.PlatformBrightness> reportedBrightness =
+        new AtomicReference<>();
 
     // FYI - The default brightness is LIGHT, which is why we don't need to configure it.
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
-    FlutterEngine flutterEngine = spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
 
     SettingsChannel fakeSettingsChannel = mock(SettingsChannel.class);
     SettingsChannel.MessageBuilder fakeMessageBuilder = mock(SettingsChannel.MessageBuilder.class);
     when(fakeMessageBuilder.setTextScaleFactor(any(Float.class))).thenReturn(fakeMessageBuilder);
     when(fakeMessageBuilder.setUse24HourFormat(any(Boolean.class))).thenReturn(fakeMessageBuilder);
-    when(fakeMessageBuilder.setPlatformBrightness(any(SettingsChannel.PlatformBrightness.class))).thenAnswer(new Answer<SettingsChannel.MessageBuilder>() {
-     @Override
-     public SettingsChannel.MessageBuilder answer(InvocationOnMock invocation) throws Throwable {
-       reportedBrightness.set((SettingsChannel.PlatformBrightness) invocation.getArguments()[0]);
-       return fakeMessageBuilder;
-     }
-    });
+    when(fakeMessageBuilder.setPlatformBrightness(any(SettingsChannel.PlatformBrightness.class)))
+        .thenAnswer(
+            new Answer<SettingsChannel.MessageBuilder>() {
+              @Override
+              public SettingsChannel.MessageBuilder answer(InvocationOnMock invocation)
+                  throws Throwable {
+                reportedBrightness.set(
+                    (SettingsChannel.PlatformBrightness) invocation.getArguments()[0]);
+                return fakeMessageBuilder;
+              }
+            });
     when(fakeSettingsChannel.startMessage()).thenReturn(fakeMessageBuilder);
     when(flutterEngine.getSettingsChannel()).thenReturn(fakeSettingsChannel);
 
@@ -147,7 +145,8 @@ public class FlutterViewTest {
   @Test
   public void itSendsDarkPlatformBrightnessToFlutter() {
     // Setup test.
-    AtomicReference<SettingsChannel.PlatformBrightness> reportedBrightness = new AtomicReference<>();
+    AtomicReference<SettingsChannel.PlatformBrightness> reportedBrightness =
+        new AtomicReference<>();
 
     Context spiedContext = spy(RuntimeEnvironment.application);
 
@@ -155,23 +154,30 @@ public class FlutterViewTest {
     when(spiedContext.getResources()).thenReturn(spiedResources);
 
     Configuration spiedConfiguration = spy(spiedResources.getConfiguration());
-    spiedConfiguration.uiMode = (spiedResources.getConfiguration().uiMode | Configuration.UI_MODE_NIGHT_YES) & ~Configuration.UI_MODE_NIGHT_NO;
+    spiedConfiguration.uiMode =
+        (spiedResources.getConfiguration().uiMode | Configuration.UI_MODE_NIGHT_YES)
+            & ~Configuration.UI_MODE_NIGHT_NO;
     when(spiedResources.getConfiguration()).thenReturn(spiedConfiguration);
 
     FlutterView flutterView = new FlutterView(spiedContext);
-    FlutterEngine flutterEngine = spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterEngine flutterEngine =
+        spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
 
     SettingsChannel fakeSettingsChannel = mock(SettingsChannel.class);
     SettingsChannel.MessageBuilder fakeMessageBuilder = mock(SettingsChannel.MessageBuilder.class);
     when(fakeMessageBuilder.setTextScaleFactor(any(Float.class))).thenReturn(fakeMessageBuilder);
     when(fakeMessageBuilder.setUse24HourFormat(any(Boolean.class))).thenReturn(fakeMessageBuilder);
-    when(fakeMessageBuilder.setPlatformBrightness(any(SettingsChannel.PlatformBrightness.class))).thenAnswer(new Answer<SettingsChannel.MessageBuilder>() {
-      @Override
-      public SettingsChannel.MessageBuilder answer(InvocationOnMock invocation) throws Throwable {
-        reportedBrightness.set((SettingsChannel.PlatformBrightness) invocation.getArguments()[0]);
-        return fakeMessageBuilder;
-      }
-    });
+    when(fakeMessageBuilder.setPlatformBrightness(any(SettingsChannel.PlatformBrightness.class)))
+        .thenAnswer(
+            new Answer<SettingsChannel.MessageBuilder>() {
+              @Override
+              public SettingsChannel.MessageBuilder answer(InvocationOnMock invocation)
+                  throws Throwable {
+                reportedBrightness.set(
+                    (SettingsChannel.PlatformBrightness) invocation.getArguments()[0]);
+                return fakeMessageBuilder;
+              }
+            });
     when(fakeSettingsChannel.startMessage()).thenReturn(fakeMessageBuilder);
     when(flutterEngine.getSettingsChannel()).thenReturn(fakeSettingsChannel);
 

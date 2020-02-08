@@ -7,32 +7,27 @@ package io.flutter.embedding.engine.dart;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-
+import io.flutter.Log;
+import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.plugin.common.BinaryMessenger;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.flutter.Log;
-import io.flutter.embedding.engine.FlutterJNI;
-import io.flutter.plugin.common.BinaryMessenger;
-
 /**
  * Message conduit for 2-way communication between Android and Dart.
- * <p>
- * See {@link BinaryMessenger}, which sends messages from Android to Dart
- * <p>
- * See {@link PlatformMessageHandler}, which handles messages to Android from Dart
+ *
+ * <p>See {@link BinaryMessenger}, which sends messages from Android to Dart
+ *
+ * <p>See {@link PlatformMessageHandler}, which handles messages to Android from Dart
  */
 class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   private static final String TAG = "DartMessenger";
 
-  @NonNull
-  private final FlutterJNI flutterJNI;
-  @NonNull
-  private final Map<String, BinaryMessenger.BinaryMessageHandler> messageHandlers;
-  @NonNull
-  private final Map<Integer, BinaryMessenger.BinaryReply> pendingReplies;
+  @NonNull private final FlutterJNI flutterJNI;
+  @NonNull private final Map<String, BinaryMessenger.BinaryMessageHandler> messageHandlers;
+  @NonNull private final Map<Integer, BinaryMessenger.BinaryReply> pendingReplies;
   private int nextReplyId = 1;
 
   DartMessenger(@NonNull FlutterJNI flutterJNI) {
@@ -42,7 +37,8 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   }
 
   @Override
-  public void setMessageHandler(@NonNull String channel, @Nullable BinaryMessenger.BinaryMessageHandler handler) {
+  public void setMessageHandler(
+      @NonNull String channel, @Nullable BinaryMessenger.BinaryMessageHandler handler) {
     if (handler == null) {
       Log.v(TAG, "Removing handler for channel '" + channel + "'");
       messageHandlers.remove(channel);
@@ -63,8 +59,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   public void send(
       @NonNull String channel,
       @Nullable ByteBuffer message,
-      @Nullable BinaryMessenger.BinaryReply callback
-  ) {
+      @Nullable BinaryMessenger.BinaryReply callback) {
     Log.v(TAG, "Sending message with callback over channel '" + channel + "'");
     int replyId = 0;
     if (callback != null) {
@@ -80,10 +75,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
 
   @Override
   public void handleMessageFromDart(
-      @NonNull final String channel,
-      @Nullable byte[] message,
-      final int replyId
-  ) {
+      @NonNull final String channel, @Nullable byte[] message, final int replyId) {
     Log.v(TAG, "Received message from Dart over channel '" + channel + "'");
     BinaryMessenger.BinaryMessageHandler handler = messageHandlers.get(channel);
     if (handler != null) {
@@ -132,8 +124,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   }
 
   private static class Reply implements BinaryMessenger.BinaryReply {
-    @NonNull
-    private final FlutterJNI flutterJNI;
+    @NonNull private final FlutterJNI flutterJNI;
     private final int replyId;
     private final AtomicBoolean done = new AtomicBoolean(false);
 

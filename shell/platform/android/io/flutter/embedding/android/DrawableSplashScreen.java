@@ -15,8 +15,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 /**
- * {@link SplashScreen} that displays a given {@link Drawable}, which then fades its alpha
- * to zero when instructed to {@link #transitionToFlutter(Runnable)}.
+ * {@link SplashScreen} that displays a given {@link Drawable}, which then fades its alpha to zero
+ * when instructed to {@link #transitionToFlutter(Runnable)}.
  */
 public final class DrawableSplashScreen implements SplashScreen {
   private final Drawable drawable;
@@ -35,12 +35,17 @@ public final class DrawableSplashScreen implements SplashScreen {
   /**
    * Constructs a {@code DrawableSplashScreen} that displays the given {@code drawable} and
    * crossfades to Flutter content in the given {@code crossfadeDurationInMillis}.
+   *
    * <p>
+   *
    * @param drawable The {@code Drawable} to be displayed as a splash screen.
    * @param scaleType The {@link ImageView.ScaleType} to be applied to the {@code Drawable} when the
-   *                  {@code Drawable} is displayed full-screen.
+   *     {@code Drawable} is displayed full-screen.
    */
-  public DrawableSplashScreen(@NonNull Drawable drawable, @NonNull ImageView.ScaleType scaleType, long crossfadeDurationInMillis) {
+  public DrawableSplashScreen(
+      @NonNull Drawable drawable,
+      @NonNull ImageView.ScaleType scaleType,
+      long crossfadeDurationInMillis) {
     this.drawable = drawable;
     this.scaleType = scaleType;
     this.crossfadeDurationInMillis = crossfadeDurationInMillis;
@@ -61,27 +66,28 @@ public final class DrawableSplashScreen implements SplashScreen {
       return;
     }
 
-    splashView.animate()
+    splashView
+        .animate()
         .alpha(0.0f)
         .setDuration(crossfadeDurationInMillis)
-        .setListener(new Animator.AnimatorListener() {
-          @Override
-          public void onAnimationStart(Animator animation) {}
+        .setListener(
+            new Animator.AnimatorListener() {
+              @Override
+              public void onAnimationStart(Animator animation) {}
 
-          @Override
-          public void onAnimationEnd(Animator animation) {
-            onTransitionComplete.run();
-          }
+              @Override
+              public void onAnimationEnd(Animator animation) {
+                onTransitionComplete.run();
+              }
 
-          @Override
-          public void onAnimationCancel(Animator animation) {
-            onTransitionComplete.run();
-          }
+              @Override
+              public void onAnimationCancel(Animator animation) {
+                onTransitionComplete.run();
+              }
 
-          @Override
-          public void onAnimationRepeat(Animator animation) {}
-        }
-    );
+              @Override
+              public void onAnimationRepeat(Animator animation) {}
+            });
   }
 
   // Public for Android OS requirements. This View should not be used by external developers.
@@ -94,7 +100,8 @@ public final class DrawableSplashScreen implements SplashScreen {
       this(context, attrs, 0);
     }
 
-    public DrawableSplashScreenView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DrawableSplashScreenView(
+        @NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
       super(context, attrs, defStyleAttr);
     }
 
@@ -102,7 +109,8 @@ public final class DrawableSplashScreen implements SplashScreen {
       setSplashDrawable(drawable, ImageView.ScaleType.FIT_XY);
     }
 
-    public void setSplashDrawable(@Nullable Drawable drawable, @NonNull ImageView.ScaleType scaleType) {
+    public void setSplashDrawable(
+        @Nullable Drawable drawable, @NonNull ImageView.ScaleType scaleType) {
       setScaleType(scaleType);
       setImageDrawable(drawable);
     }

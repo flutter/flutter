@@ -6,20 +6,18 @@ package io.flutter;
 
 import android.support.annotation.NonNull;
 
-import io.flutter.BuildConfig;
-
 /**
- * Port of {@link android.util.Log} that only logs in {@link BuildConfig#DEBUG} mode and
+ * Port of {@link android.util.Log} that only logs in {@link io.flutter.BuildConfig#DEBUG} mode and
  * internally filters logs based on a {@link #logLevel}.
  */
 public class Log {
   private static int logLevel = android.util.Log.DEBUG;
 
   /**
-   * Sets a log cutoff such that a log level of lower priority than {@code logLevel} is
-   * filtered out.
-   * <p>
-   * See {@link android.util.Log} for log level constants.
+   * Sets a log cutoff such that a log level of lower priority than {@code logLevel} is filtered
+   * out.
+   *
+   * <p>See {@link android.util.Log} for log level constants.
    */
   public static void setLogLevel(int logLevel) {
     Log.logLevel = logLevel;

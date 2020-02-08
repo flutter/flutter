@@ -2,8 +2,8 @@ package io.flutter.plugins;
 
 import android.support.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.FlutterEngine;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A fake of the {@code GeneratedPluginRegistrant} normally built by the tool into Flutter apps.
@@ -39,8 +39,8 @@ public class GeneratedPluginRegistrant {
   /**
    * Returns a list of all the engines registered so far.
    *
-   * <p>CAUTION: This list is static and must be manually wiped in between test runs. See
-   * {@link #clearRegisteredEngines()}.
+   * <p>CAUTION: This list is static and must be manually wiped in between test runs. See {@link
+   * #clearRegisteredEngines()}.
    */
   public static List<FlutterEngine> getRegisteredEngines() {
     return new ArrayList<>(registeredEngines);

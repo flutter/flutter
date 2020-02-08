@@ -9,22 +9,21 @@ import java.util.Map;
 
 class PlatformViewRegistryImpl implements PlatformViewRegistry {
 
-    PlatformViewRegistryImpl() {
-        viewFactories = new HashMap<>();
-    }
+  PlatformViewRegistryImpl() {
+    viewFactories = new HashMap<>();
+  }
 
-    // Maps a platform view type id to its factory.
-    private final Map<String, PlatformViewFactory> viewFactories;
+  // Maps a platform view type id to its factory.
+  private final Map<String, PlatformViewFactory> viewFactories;
 
-    @Override
-    public boolean registerViewFactory(String viewTypeId, PlatformViewFactory factory) {
-        if (viewFactories.containsKey(viewTypeId))
-            return false;
-        viewFactories.put(viewTypeId, factory);
-        return true;
-    }
+  @Override
+  public boolean registerViewFactory(String viewTypeId, PlatformViewFactory factory) {
+    if (viewFactories.containsKey(viewTypeId)) return false;
+    viewFactories.put(viewTypeId, factory);
+    return true;
+  }
 
-    PlatformViewFactory getFactory(String viewTypeId) {
-        return viewFactories.get(viewTypeId);
-    }
+  PlatformViewFactory getFactory(String viewTypeId) {
+    return viewFactories.get(viewTypeId);
+  }
 }

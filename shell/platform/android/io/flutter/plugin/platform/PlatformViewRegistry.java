@@ -4,20 +4,19 @@
 
 package io.flutter.plugin.platform;
 
-
 /**
  * Registry for platform view factories.
- * <p>
- * Plugins can register factories for specific view types.
+ *
+ * <p>Plugins can register factories for specific view types.
  */
 public interface PlatformViewRegistry {
 
-    /**
-     * Registers a factory for a platform view.
-     *
-     * @param viewTypeId unique identifier for the platform view's type.
-     * @param factory    factory for creating platform views of the specified type.
-     * @return true if succeeded, false if a factory is already registered for viewTypeId.
-     */
-    boolean registerViewFactory(String viewTypeId, PlatformViewFactory factory);
+  /**
+   * Registers a factory for a platform view.
+   *
+   * @param viewTypeId unique identifier for the platform view's type.
+   * @param factory factory for creating platform views of the specified type.
+   * @return true if succeeded, false if a factory is already registered for viewTypeId.
+   */
+  boolean registerViewFactory(String viewTypeId, PlatformViewFactory factory);
 }

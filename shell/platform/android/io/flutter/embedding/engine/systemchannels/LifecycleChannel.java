@@ -5,23 +5,20 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import android.support.annotation.NonNull;
-
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.StringCodec;
 
-/**
- * TODO(mattcarroll): fill in javadoc for LifecycleChannel.
- */
+/** TODO(mattcarroll): fill in javadoc for LifecycleChannel. */
 public class LifecycleChannel {
   private static final String TAG = "LifecycleChannel";
 
-  @NonNull
-  public final BasicMessageChannel<String> channel;
+  @NonNull public final BasicMessageChannel<String> channel;
 
   public LifecycleChannel(@NonNull DartExecutor dartExecutor) {
-    this.channel = new BasicMessageChannel<>(dartExecutor, "flutter/lifecycle", StringCodec.INSTANCE);
+    this.channel =
+        new BasicMessageChannel<>(dartExecutor, "flutter/lifecycle", StringCodec.INSTANCE);
   }
 
   public void appIsInactive() {

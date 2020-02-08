@@ -7,29 +7,28 @@ package io.flutter.embedding.engine;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Static singleton cache that holds {@link FlutterEngine} instances identified by {@code String}s.
- * <p>
- * The ID of a given {@link FlutterEngine} can be whatever {@code String} is desired.
- * <p>
- * {@code FlutterEngineCache} is useful for storing pre-warmed {@link FlutterEngine} instances.
- * {@link io.flutter.embedding.android.FlutterActivity} and
- * {@link io.flutter.embedding.android.FlutterFragment} use the {@code FlutterEngineCache} singleton
- * internally when instructed to use a cached {@link FlutterEngine} based on a given ID. See
- * {@link io.flutter.embedding.android.FlutterActivity.CachedEngineIntentBuilder} and
- * {@link io.flutter.embedding.android.FlutterFragment#withCachedEngine(String)} for related APIs.
+ *
+ * <p>The ID of a given {@link FlutterEngine} can be whatever {@code String} is desired.
+ *
+ * <p>{@code FlutterEngineCache} is useful for storing pre-warmed {@link FlutterEngine} instances.
+ * {@link io.flutter.embedding.android.FlutterActivity} and {@link
+ * io.flutter.embedding.android.FlutterFragment} use the {@code FlutterEngineCache} singleton
+ * internally when instructed to use a cached {@link FlutterEngine} based on a given ID. See {@link
+ * io.flutter.embedding.android.FlutterActivity.CachedEngineIntentBuilder} and {@link
+ * io.flutter.embedding.android.FlutterFragment#withCachedEngine(String)} for related APIs.
  */
 public class FlutterEngineCache {
   private static FlutterEngineCache instance;
 
   /**
    * Returns the static singleton instance of {@code FlutterEngineCache}.
-   * <p>
-   * Creates a new instance if one does not yet exist.
+   *
+   * <p>Creates a new instance if one does not yet exist.
    */
   @NonNull
   public static FlutterEngineCache getInstance() {
@@ -45,16 +44,16 @@ public class FlutterEngineCache {
   /* package */ FlutterEngineCache() {}
 
   /**
-   * Returns {@code true} if a {@link FlutterEngine} in this cache is associated with the
-   * given {@code engineId}.
+   * Returns {@code true} if a {@link FlutterEngine} in this cache is associated with the given
+   * {@code engineId}.
    */
   public boolean contains(@NonNull String engineId) {
     return cachedEngines.containsKey(engineId);
   }
 
   /**
-   * Returns the {@link FlutterEngine} in this cache that is associated with the given
-   * {@code engineId}, or {@code null} is no such {@link FlutterEngine} exists.
+   * Returns the {@link FlutterEngine} in this cache that is associated with the given {@code
+   * engineId}, or {@code null} is no such {@link FlutterEngine} exists.
    */
   @Nullable
   public FlutterEngine get(@NonNull String engineId) {
@@ -62,10 +61,10 @@ public class FlutterEngineCache {
   }
 
   /**
-   * Places the given {@link FlutterEngine} in this cache and associates it with the given
-   * {@code engineId}.
-   * <p>
-   * If a {@link FlutterEngine} already exists in this cache for the given {@code engineId}, that
+   * Places the given {@link FlutterEngine} in this cache and associates it with the given {@code
+   * engineId}.
+   *
+   * <p>If a {@link FlutterEngine} already exists in this cache for the given {@code engineId}, that
    * {@link FlutterEngine} is removed from this cache.
    */
   public void put(@NonNull String engineId, @Nullable FlutterEngine engine) {
@@ -77,8 +76,8 @@ public class FlutterEngineCache {
   }
 
   /**
-   * Removes any {@link FlutterEngine} that is currently in the cache that is identified by
-   * the given {@code engineId}.
+   * Removes any {@link FlutterEngine} that is currently in the cache that is identified by the
+   * given {@code engineId}.
    */
   public void remove(@NonNull String engineId) {
     put(engineId, null);
