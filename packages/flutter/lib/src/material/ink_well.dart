@@ -71,11 +71,11 @@ abstract class InteractiveInkFeature extends InkFeature {
   /// shifts the coordinate space of the canvas to the space in which
   /// the ink circle is to be painted.
   ///
-  /// [center] is the [Offset] from origin of the canvas where center
+  /// [center] is the [Offset] from origin of the canvas where the center
   /// of the circle is drawn.
   ///
   /// [paint] takes a [Paint] object that describes the styles used to draw the ink circle.
-  /// For example, [paint] can specify properties like color, strokewidth, colorFiler.
+  /// For example, [paint] can specify properties like color, strokewidth, colorFilter.
   ///
   /// [radius] is the radius of ink circle to be drawn on canvas.
   ///
@@ -85,9 +85,9 @@ abstract class InteractiveInkFeature extends InkFeature {
   /// Clipping can happen in 3 different ways -
   ///  1. If [customBorder] is provided, it is used to determine the path
   ///     for clipping.
-  ///  2. If [customBorder] is null, and [borderRadius] is provided, canvas
-  ///     is clipped by a [RRect] created from [clipCallback] and [borderRadius].
-  ///  3. if [borderRadius] is the default [BorderRadius.zero]. The [Rect] provided
+  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
+  ///     is clipped by an [RRect] created from [clipCallback] and [borderRadius].
+  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect] provided
   ///      by [clipCallback] is used for clipping.
   ///
   /// [textDirection] is used by [customBorder] if it is non-null. This allows the [customBorder]'s path
@@ -111,7 +111,6 @@ abstract class InteractiveInkFeature extends InkFeature {
     assert(transform != null);
     assert(paint != null);
     assert(center != null);
-    assert(customBorder == null || textDirection != null, 'Must provide textDirection if customBorder is not null');
     assert(radius != null);
     assert(borderRadius != null);
 
