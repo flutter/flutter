@@ -696,18 +696,22 @@ abstract class IntelliJValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
+    if (pluginsPath == null) {
+      messages.add(ValidationMessage.error('Invalid IntelliJ version number.'));
+    } else {
+      messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
 
-    final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath);
-    plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
-        'Flutter', minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
-    plugins.validatePackage(messages, <String>['Dart'], 'Dart');
+      final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath);
+      plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
+          'Flutter', minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
+      plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
-    if (_hasIssues(messages)) {
-      messages.add(ValidationMessage(userMessages.intellijPluginInfo));
+      if (_hasIssues(messages)) {
+        messages.add(ValidationMessage(userMessages.intellijPluginInfo));
+      }
+
+      _validateIntelliJVersion(messages, kMinIdeaVersion);
     }
-
-    _validateIntelliJVersion(messages, kMinIdeaVersion);
 
     return ValidationResult(
       _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
@@ -844,37 +848,44 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     return validators;
   }
 
+  String get plistFile {
+    _plistFile ??= globals.fs.path.join(installPath, 'Contents', 'Info.plist');
+    return _plistFile;
+  }
+  String _plistFile;
+
   @override
   String get version {
-    if (_version == null) {
-      final String plistFile = globals.fs.path.join(installPath, 'Contents', 'Info.plist');
-      _version = PlistParser.instance.getValueFromFile(
+    _version ??= PlistParser.instance.getValueFromFile(
         plistFile,
         PlistParser.kCFBundleShortVersionStringKey,
       ) ?? 'unknown';
-    }
     return _version;
   }
   String _version;
 
   @override
   String get pluginsPath {
-    final String plistFile = globals.fs.path.join(installPath, 'Contents', 'Info.plist');
     final String altLocation = PlistParser.instance.getValueFromFile(plistFile, 'JetBrainsToolboxApp');
 
-    if (altLocation == null) {
-      final List<String> split = version.split('.');
-      final String major = split[0];
-      final String minor = split[1];
-      return globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        '$id$major.$minor',
-      );
+    if (altLocation != null) {
+      return altLocation + '.plugins';
     }
 
-    return altLocation + '.plugins';
+    final List<String> split = version.split('.');
+
+    if (split.length < 2) {
+      return null;
+    }
+
+    final String major = split[0];
+    final String minor = split[1];
+    return globals.fs.path.join(
+      globals.fsUtils.homeDirPath,
+      'Library',
+      'Application Support',
+      '$id$major.$minor',
+    );
   }
 }
 
