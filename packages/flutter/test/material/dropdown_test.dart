@@ -1915,6 +1915,62 @@ void main() {
     expect(tester.getCenter(item40.first).dy, tester.getCenter(item40.last).dy);
   });
 
+  testWidgets('DropdownButton menu items do not resize when its route is popped', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/44877.
+    const List<String> items = <String>[
+      'one',
+      'two',
+      'three',
+    ];
+    String item = items[0];
+    MediaQueryData mediaQuery;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            builder: (BuildContext context, Widget child) {
+              mediaQuery ??= MediaQuery.of(context);
+              return MediaQuery(
+                data: mediaQuery,
+                child: child,
+              );
+            },
+            home: Scaffold(
+              body: DropdownButton<String>(
+                value: item,
+                items: items.map((String item) => DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item),
+                )).toList(),
+                onChanged: (String newItem) {
+                  setState(() {
+                    item = newItem;
+                    mediaQuery = mediaQuery.copyWith(
+                      textScaleFactor: mediaQuery.textScaleFactor + 0.1,
+                    );
+                  });
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    // Verify that the first item is showing.
+    expect(find.text('one'), findsOneWidget);
+
+    // Select a different item to trigger setState, which updates mediaQuery
+    // and forces a performLayout on the popped _DropdownRoute. This operation
+    // should not cause an exception.
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('two').last);
+    await tester.pumpAndSettle();
+    expect(find.text('two'), findsOneWidget);
+  });
+
   testWidgets('DropdownButton hint is selected item', (WidgetTester tester) async {
     const double hintPaddingOffset = 8;
     const List<String> itemValues = <String>['item0', 'item1', 'item2', 'item3'];
