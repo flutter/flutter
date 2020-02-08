@@ -7,11 +7,6 @@ package io.flutter.embedding.engine.plugins.shim;
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -22,12 +17,15 @@ import io.flutter.plugin.platform.PlatformViewRegistry;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A {@link PluginRegistry.Registrar} that is shimmed let old plugins use the new Android embedding
  * and plugin API behind the scenes.
- * <p>
- * Instances of {@code ShimRegistrar}s are vended internally by a {@link ShimPluginRegistry}.
+ *
+ * <p>Instances of {@code ShimRegistrar}s are vended internally by a {@link ShimPluginRegistry}.
  */
 class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, ActivityAware {
   private static final String TAG = "ShimRegistrar";
@@ -35,8 +33,10 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
   private final Map<String, Object> globalRegistrarMap;
   private final String pluginId;
   private final Set<PluginRegistry.ViewDestroyListener> viewDestroyListeners = new HashSet<>();
-  private final Set<PluginRegistry.RequestPermissionsResultListener> requestPermissionsResultListeners = new HashSet<>();
-  private final Set<PluginRegistry.ActivityResultListener> activityResultListeners = new HashSet<>();
+  private final Set<PluginRegistry.RequestPermissionsResultListener>
+      requestPermissionsResultListeners = new HashSet<>();
+  private final Set<PluginRegistry.ActivityResultListener> activityResultListeners =
+      new HashSet<>();
   private final Set<PluginRegistry.NewIntentListener> newIntentListeners = new HashSet<>();
   private final Set<PluginRegistry.UserLeaveHintListener> userLeaveHintListeners = new HashSet<>();
   private FlutterPlugin.FlutterPluginBinding pluginBinding;
@@ -79,7 +79,8 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
 
   @Override
   public FlutterView view() {
-    throw new UnsupportedOperationException("The new embedding does not support the old FlutterView.");
+    throw new UnsupportedOperationException(
+        "The new embedding does not support the old FlutterView.");
   }
 
   @Override
@@ -99,7 +100,8 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
   }
 
   @Override
-  public PluginRegistry.Registrar addRequestPermissionsResultListener(PluginRegistry.RequestPermissionsResultListener listener) {
+  public PluginRegistry.Registrar addRequestPermissionsResultListener(
+      PluginRegistry.RequestPermissionsResultListener listener) {
     requestPermissionsResultListeners.add(listener);
 
     if (activityPluginBinding != null) {
@@ -110,7 +112,8 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
   }
 
   @Override
-  public PluginRegistry.Registrar addActivityResultListener(PluginRegistry.ActivityResultListener listener) {
+  public PluginRegistry.Registrar addActivityResultListener(
+      PluginRegistry.ActivityResultListener listener) {
     activityResultListeners.add(listener);
 
     if (activityPluginBinding != null) {
@@ -132,7 +135,8 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
   }
 
   @Override
-  public PluginRegistry.Registrar addUserLeaveHintListener(PluginRegistry.UserLeaveHintListener listener) {
+  public PluginRegistry.Registrar addUserLeaveHintListener(
+      PluginRegistry.UserLeaveHintListener listener) {
     userLeaveHintListeners.add(listener);
 
     if (activityPluginBinding != null) {
@@ -144,7 +148,8 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
 
   @Override
   @NonNull
-  public PluginRegistry.Registrar addViewDestroyListener(@NonNull PluginRegistry.ViewDestroyListener listener) {
+  public PluginRegistry.Registrar addViewDestroyListener(
+      @NonNull PluginRegistry.ViewDestroyListener listener) {
     viewDestroyListeners.add(listener);
     return this;
   }
@@ -195,7 +200,8 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
   }
 
   private void addExistingListenersToActivityPluginBinding() {
-    for (PluginRegistry.RequestPermissionsResultListener listener : requestPermissionsResultListeners) {
+    for (PluginRegistry.RequestPermissionsResultListener listener :
+        requestPermissionsResultListeners) {
       activityPluginBinding.addRequestPermissionsResultListener(listener);
     }
     for (PluginRegistry.ActivityResultListener listener : activityResultListeners) {

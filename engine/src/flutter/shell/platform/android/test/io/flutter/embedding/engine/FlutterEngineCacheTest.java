@@ -1,17 +1,17 @@
 package io.flutter.embedding.engine;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-@Config(manifest=Config.NONE)
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class FlutterEngineCacheTest {
   @Test

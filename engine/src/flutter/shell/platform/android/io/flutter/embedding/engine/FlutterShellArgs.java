@@ -7,16 +7,16 @@ package io.flutter.embedding.engine;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-
 import java.util.*;
 
 /**
  * Arguments that can be delivered to the Flutter shell when it is created.
- * <p>
- * The term "shell" refers to the native code that adapts Flutter to different platforms. Flutter's
- * Android Java code initializes a native "shell" and passes these arguments to that native shell
- * when it is initialized. See {@link io.flutter.view.FlutterMain#ensureInitializationComplete(Context, String[])}
- * for more information.
+ *
+ * <p>The term "shell" refers to the native code that adapts Flutter to different platforms.
+ * Flutter's Android Java code initializes a native "shell" and passes these arguments to that
+ * native shell when it is initialized. See {@link
+ * io.flutter.view.FlutterMain#ensureInitializationComplete(Context, String[])} for more
+ * information.
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class FlutterShellArgs {
@@ -36,8 +36,10 @@ public class FlutterShellArgs {
   public static final String ARG_SKIA_DETERMINISTIC_RENDERING = "--skia-deterministic-rendering";
   public static final String ARG_KEY_TRACE_SKIA = "trace-skia";
   public static final String ARG_TRACE_SKIA = "--trace-skia";
-  public static final String ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION = "dump-skp-on-shader-compilation";
-  public static final String ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION = "--dump-skp-on-shader-compilation";
+  public static final String ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
+      "dump-skp-on-shader-compilation";
+  public static final String ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
+      "--dump-skp-on-shader-compilation";
   public static final String ARG_KEY_CACHE_SKSL = "cache-sksl";
   public static final String ARG_CACHE_SKSL = "--cache-sksl";
   public static final String ARG_KEY_VERBOSE_LOGGING = "verbose-logging";
@@ -52,7 +54,8 @@ public class FlutterShellArgs {
     // Before adding more entries to this list, consider that arbitrary
     // Android applications can generate intents with extra data and that
     // there are many security-sensitive args in the binary.
-    // TODO(mattcarroll): I left this warning as-is, but we should clarify what exactly this warning is warning against.
+    // TODO(mattcarroll): I left this warning as-is, but we should clarify what exactly this warning
+    // is warning against.
     ArrayList<String> args = new ArrayList<>();
 
     if (intent.getBooleanExtra(ARG_KEY_TRACE_STARTUP, false)) {
@@ -104,34 +107,32 @@ public class FlutterShellArgs {
     return new FlutterShellArgs(args);
   }
 
-  @NonNull
-  private Set<String> args;
+  @NonNull private Set<String> args;
 
   /**
-   * Creates a set of Flutter shell arguments from a given {@code String[]} array.
-   * The given arguments are automatically de-duplicated.
+   * Creates a set of Flutter shell arguments from a given {@code String[]} array. The given
+   * arguments are automatically de-duplicated.
    */
   public FlutterShellArgs(@NonNull String[] args) {
     this.args = new HashSet<>(Arrays.asList(args));
   }
 
   /**
-   * Creates a set of Flutter shell arguments from a given {@code List<String>}.
-   * The given arguments are automatically de-duplicated.
+   * Creates a set of Flutter shell arguments from a given {@code List<String>}. The given arguments
+   * are automatically de-duplicated.
    */
   public FlutterShellArgs(@NonNull List<String> args) {
     this.args = new HashSet<>(args);
   }
 
-  /**
-   * Creates a set of Flutter shell arguments from a given {@code Set<String>}.
-   */
+  /** Creates a set of Flutter shell arguments from a given {@code Set<String>}. */
   public FlutterShellArgs(@NonNull Set<String> args) {
     this.args = new HashSet<>(args);
   }
 
   /**
    * Adds the given {@code arg} to this set of arguments.
+   *
    * @param arg argument to add
    */
   public void add(@NonNull String arg) {
@@ -140,6 +141,7 @@ public class FlutterShellArgs {
 
   /**
    * Removes the given {@code arg} from this set of arguments.
+   *
    * @param arg argument to remove
    */
   public void remove(@NonNull String arg) {
@@ -147,8 +149,8 @@ public class FlutterShellArgs {
   }
 
   /**
-   * Returns a new {@code String[]} array which contains each of the arguments
-   * within this {@code FlutterShellArgs}.
+   * Returns a new {@code String[]} array which contains each of the arguments within this {@code
+   * FlutterShellArgs}.
    *
    * @return array of arguments
    */

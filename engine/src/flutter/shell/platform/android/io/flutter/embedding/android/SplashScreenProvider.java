@@ -7,8 +7,7 @@ package io.flutter.embedding.android;
 import android.support.annotation.Nullable;
 
 /**
- * Provides a {@link SplashScreen} to display while Flutter initializes and renders its first
- * frame.
+ * Provides a {@link SplashScreen} to display while Flutter initializes and renders its first frame.
  */
 public interface SplashScreenProvider {
   /**

@@ -7,5 +7,5 @@ package io.flutter.util;
 // TODO(dnfield): remove this if/when we can use appcompat to support it.
 // java.util.function.Predicate isn't available until API24
 public interface Predicate<T> {
-    public abstract boolean test(T t);
+  public abstract boolean test(T t);
 }

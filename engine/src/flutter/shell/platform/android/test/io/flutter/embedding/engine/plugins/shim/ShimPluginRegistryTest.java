@@ -1,35 +1,30 @@
 package io.flutter.embedding.engine.plugins.shim;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.content.Context;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
+import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
-import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class ShimPluginRegistryTest {
 
@@ -54,7 +49,8 @@ public class ShimPluginRegistryTest {
     // This is the consumption side of the old plugins.
     Registrar registrarUnderTest = registryUnderTest.registrarFor("test");
 
-    ArgumentCaptor<FlutterPlugin> shimAggregateCaptor = ArgumentCaptor.forClass(FlutterPlugin.class);
+    ArgumentCaptor<FlutterPlugin> shimAggregateCaptor =
+        ArgumentCaptor.forClass(FlutterPlugin.class);
     // A single shim aggregate was added as a new plugin to the FlutterEngine's PluginRegistry.
     verify(mockPluginRegistry).add(shimAggregateCaptor.capture());
     // This is really a ShimRegistrarAggregate acting as a FlutterPlugin which is the
@@ -75,7 +71,8 @@ public class ShimPluginRegistryTest {
     Registrar registrarUnderTest1 = registryUnderTest.registrarFor("test1");
     Registrar registrarUnderTest2 = registryUnderTest.registrarFor("test2");
 
-    ArgumentCaptor<FlutterPlugin> shimAggregateCaptor = ArgumentCaptor.forClass(FlutterPlugin.class);
+    ArgumentCaptor<FlutterPlugin> shimAggregateCaptor =
+        ArgumentCaptor.forClass(FlutterPlugin.class);
     verify(mockPluginRegistry).add(shimAggregateCaptor.capture());
     // There's only one aggregate for many old plugins.
     FlutterPlugin shimAggregateUnderTest = shimAggregateCaptor.getValue();
@@ -94,7 +91,8 @@ public class ShimPluginRegistryTest {
     ShimPluginRegistry registryUnderTest = new ShimPluginRegistry(mockFlutterEngine);
     Registrar registrarUnderTest = registryUnderTest.registrarFor("test");
 
-    ArgumentCaptor<FlutterPlugin> shimAggregateCaptor = ArgumentCaptor.forClass(FlutterPlugin.class);
+    ArgumentCaptor<FlutterPlugin> shimAggregateCaptor =
+        ArgumentCaptor.forClass(FlutterPlugin.class);
     verify(mockPluginRegistry).add(shimAggregateCaptor.capture());
     FlutterPlugin shimAggregateAsPlugin = shimAggregateCaptor.getValue();
     ActivityAware shimAggregateAsActivityAware = (ActivityAware) shimAggregateCaptor.getValue();

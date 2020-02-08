@@ -7,21 +7,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.BinaryCodec;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class TextPlatformViewActivity extends FlutterActivity {
-  final static String TAG = "Scenarios";
+  static final String TAG = "Scenarios";
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +48,11 @@ public class TextPlatformViewActivity extends FlutterActivity {
 
   @Override
   public void configureFlutterEngine(FlutterEngine flutterEngine) {
-    flutterEngine.getPlatformViewsController()
-                 .getRegistry()
-                 .registerViewFactory(
-                   "scenarios/textPlatformView",
-                   new TextPlatformViewFactory());
+    flutterEngine
+        .getPlatformViewsController()
+        .getRegistry()
+        .registerViewFactory("scenarios/textPlatformView", new TextPlatformViewFactory());
   }
-
 
   private void writeTimelineData(Uri logFile) {
     if (logFile == null) {
@@ -66,20 +62,22 @@ public class TextPlatformViewActivity extends FlutterActivity {
       Log.e(TAG, "Could not write timeline data - no engine.");
       return;
     }
-    final BasicMessageChannel<ByteBuffer> channel = new BasicMessageChannel<>(
-        getFlutterEngine().getDartExecutor(), "write_timeline", BinaryCodec.INSTANCE);
-    channel.send(null, (ByteBuffer reply) -> {
-      try {
-        final FileDescriptor fd = getContentResolver()
-                                          .openAssetFileDescriptor(logFile, "w")
-                                          .getFileDescriptor();
-        final FileOutputStream outputStream = new FileOutputStream(fd);
-        outputStream.write(reply.array());
-        outputStream.close();
-      } catch (IOException ex) {
-        Log.e(TAG, "Could not write timeline file: " + ex.toString());
-      }
-      finish();
-    });
+    final BasicMessageChannel<ByteBuffer> channel =
+        new BasicMessageChannel<>(
+            getFlutterEngine().getDartExecutor(), "write_timeline", BinaryCodec.INSTANCE);
+    channel.send(
+        null,
+        (ByteBuffer reply) -> {
+          try {
+            final FileDescriptor fd =
+                getContentResolver().openAssetFileDescriptor(logFile, "w").getFileDescriptor();
+            final FileOutputStream outputStream = new FileOutputStream(fd);
+            outputStream.write(reply.array());
+            outputStream.close();
+          } catch (IOException ex) {
+            Log.e(TAG, "Could not write timeline file: " + ex.toString());
+          }
+          finish();
+        });
   }
 }

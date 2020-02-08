@@ -1,25 +1,23 @@
 package io.flutter.embedding.engine;
 
-import android.content.Context;
-import android.support.annotation.NonNull;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-import io.flutter.embedding.engine.loader.FlutterLoader;
-import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.plugin.platform.PlatformViewsController;
-
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+import io.flutter.embedding.engine.loader.FlutterLoader;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.platform.PlatformViewsController;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
 // Run with Robolectric so that Log calls don't crash.
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class FlutterEnginePluginRegistryTest {
   @Test
@@ -35,11 +33,8 @@ public class FlutterEnginePluginRegistryTest {
     FakeFlutterPlugin fakePlugin1 = new FakeFlutterPlugin();
     FakeFlutterPlugin fakePlugin2 = new FakeFlutterPlugin();
 
-    FlutterEnginePluginRegistry registry = new FlutterEnginePluginRegistry(
-        context,
-        flutterEngine,
-        flutterLoader
-    );
+    FlutterEnginePluginRegistry registry =
+        new FlutterEnginePluginRegistry(context, flutterEngine, flutterLoader);
 
     // Verify that the registry doesn't think it contains our plugin yet.
     assertFalse(registry.has(fakePlugin1.getClass()));

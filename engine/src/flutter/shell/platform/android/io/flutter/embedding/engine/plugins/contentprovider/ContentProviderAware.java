@@ -17,8 +17,8 @@ public interface ContentProviderAware {
   void onAttachedToContentProvider(@NonNull ContentProviderPluginBinding binding);
 
   /**
-   * Callback triggered when a {@code ContentProviderAware} {@link FlutterPlugin} is detached from
-   * a {@link ContentProvider}.
+   * Callback triggered when a {@code ContentProviderAware} {@link FlutterPlugin} is detached from a
+   * {@link ContentProvider}.
    */
   void onDetachedFromContentProvider();
 }

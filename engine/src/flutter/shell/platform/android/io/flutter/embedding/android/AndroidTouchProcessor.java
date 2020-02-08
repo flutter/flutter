@@ -5,27 +5,22 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.view.InputDevice;
 import android.view.MotionEvent;
-
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import io.flutter.embedding.engine.renderer.FlutterRenderer;
-
-/**
- * Sends touch information from Android to Flutter in a format that Flutter
- * understands.
- */
+/** Sends touch information from Android to Flutter in a format that Flutter understands. */
 public class AndroidTouchProcessor {
 
   // Must match the PointerChange enum in pointer.dart.
   @IntDef({
-      PointerChange.CANCEL,
-      PointerChange.ADD,
-      PointerChange.REMOVE,
-      PointerChange.HOVER,
-      PointerChange.DOWN,
-      PointerChange.MOVE,
-      PointerChange.UP
+    PointerChange.CANCEL,
+    PointerChange.ADD,
+    PointerChange.REMOVE,
+    PointerChange.HOVER,
+    PointerChange.DOWN,
+    PointerChange.MOVE,
+    PointerChange.UP
   })
   private @interface PointerChange {
     int CANCEL = 0;
@@ -39,11 +34,11 @@ public class AndroidTouchProcessor {
 
   // Must match the PointerDeviceKind enum in pointer.dart.
   @IntDef({
-      PointerDeviceKind.TOUCH,
-      PointerDeviceKind.MOUSE,
-      PointerDeviceKind.STYLUS,
-      PointerDeviceKind.INVERTED_STYLUS,
-      PointerDeviceKind.UNKNOWN
+    PointerDeviceKind.TOUCH,
+    PointerDeviceKind.MOUSE,
+    PointerDeviceKind.STYLUS,
+    PointerDeviceKind.INVERTED_STYLUS,
+    PointerDeviceKind.UNKNOWN
   })
   private @interface PointerDeviceKind {
     int TOUCH = 0;
@@ -54,11 +49,7 @@ public class AndroidTouchProcessor {
   }
 
   // Must match the PointerSignalKind enum in pointer.dart.
-  @IntDef({
-      PointerSignalKind.NONE,
-      PointerSignalKind.SCROLL,
-      PointerSignalKind.UNKNOWN
-  })
+  @IntDef({PointerSignalKind.NONE, PointerSignalKind.SCROLL, PointerSignalKind.UNKNOWN})
   private @interface PointerSignalKind {
     int NONE = 0;
     int SCROLL = 1;
@@ -73,37 +64,37 @@ public class AndroidTouchProcessor {
   // This flag indicates whether the original Android pointer events were batched together.
   private static final int POINTER_DATA_FLAG_BATCHED = 1;
 
-  @NonNull
-  private final FlutterRenderer renderer;
+  @NonNull private final FlutterRenderer renderer;
 
   private static final int _POINTER_BUTTON_PRIMARY = 1;
 
   /**
-   * Constructs an {@code AndroidTouchProcessor} that will send touch event data
-   * to the Flutter execution context represented by the given {@link FlutterRenderer}.
+   * Constructs an {@code AndroidTouchProcessor} that will send touch event data to the Flutter
+   * execution context represented by the given {@link FlutterRenderer}.
    */
-  // TODO(mattcarroll): consider moving packet behavior to a FlutterInteractionSurface instead of FlutterRenderer
+  // TODO(mattcarroll): consider moving packet behavior to a FlutterInteractionSurface instead of
+  // FlutterRenderer
   public AndroidTouchProcessor(@NonNull FlutterRenderer renderer) {
     this.renderer = renderer;
   }
 
-  /**
-   * Sends the given {@link MotionEvent} data to Flutter in a format that
-   * Flutter understands.
-   */
+  /** Sends the given {@link MotionEvent} data to Flutter in a format that Flutter understands. */
   public boolean onTouchEvent(@NonNull MotionEvent event) {
     int pointerCount = event.getPointerCount();
 
     // Prepare a data packet of the appropriate size and order.
-    ByteBuffer packet = ByteBuffer.allocateDirect(
-        pointerCount * POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD
-    );
+    ByteBuffer packet =
+        ByteBuffer.allocateDirect(pointerCount * POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD);
     packet.order(ByteOrder.LITTLE_ENDIAN);
 
     int maskedAction = event.getActionMasked();
     int pointerChange = getPointerChangeForAction(event.getActionMasked());
-    boolean updateForSinglePointer = maskedAction == MotionEvent.ACTION_DOWN || maskedAction == MotionEvent.ACTION_POINTER_DOWN;
-    boolean updateForMultiplePointers = !updateForSinglePointer && (maskedAction == MotionEvent.ACTION_UP || maskedAction == MotionEvent.ACTION_POINTER_UP);
+    boolean updateForSinglePointer =
+        maskedAction == MotionEvent.ACTION_DOWN || maskedAction == MotionEvent.ACTION_POINTER_DOWN;
+    boolean updateForMultiplePointers =
+        !updateForSinglePointer
+            && (maskedAction == MotionEvent.ACTION_UP
+                || maskedAction == MotionEvent.ACTION_POINTER_UP);
     if (updateForSinglePointer) {
       // ACTION_DOWN and ACTION_POINTER_DOWN always apply to a single pointer only.
       addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, packet);
@@ -144,24 +135,26 @@ public class AndroidTouchProcessor {
    * Sends the given generic {@link MotionEvent} data to Flutter in a format that Flutter
    * understands.
    *
-   * Generic motion events include joystick movement, mouse hover, track pad touches, scroll wheel
-   * movements, etc.
+   * <p>Generic motion events include joystick movement, mouse hover, track pad touches, scroll
+   * wheel movements, etc.
    */
   public boolean onGenericMotionEvent(@NonNull MotionEvent event) {
     // Method isFromSource is only available in API 18+ (Jelly Bean MR2)
     // Mouse hover support is not implemented for API < 18.
-    boolean isPointerEvent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
-        && event.isFromSource(InputDevice.SOURCE_CLASS_POINTER);
-    boolean isMovementEvent = (event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE
-        || event.getActionMasked() == MotionEvent.ACTION_SCROLL);
+    boolean isPointerEvent =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2
+            && event.isFromSource(InputDevice.SOURCE_CLASS_POINTER);
+    boolean isMovementEvent =
+        (event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE
+            || event.getActionMasked() == MotionEvent.ACTION_SCROLL);
     if (!isPointerEvent || !isMovementEvent) {
       return false;
     }
 
     int pointerChange = getPointerChangeForAction(event.getActionMasked());
-    ByteBuffer packet = ByteBuffer.allocateDirect(
-        event.getPointerCount() * POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD
-    );
+    ByteBuffer packet =
+        ByteBuffer.allocateDirect(
+            event.getPointerCount() * POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD);
     packet.order(ByteOrder.LITTLE_ENDIAN);
 
     // ACTION_HOVER_MOVE always applies to a single pointer only.
@@ -173,23 +166,20 @@ public class AndroidTouchProcessor {
     return true;
   }
 
-  // TODO(mattcarroll): consider creating a PointerPacket class instead of using a procedure that mutates inputs.
+  // TODO(mattcarroll): consider creating a PointerPacket class instead of using a procedure that
+  // mutates inputs.
   private void addPointerForIndex(
-      MotionEvent event,
-      int pointerIndex,
-      int pointerChange,
-      int pointerData,
-      ByteBuffer packet
-  ) {
+      MotionEvent event, int pointerIndex, int pointerChange, int pointerData, ByteBuffer packet) {
     if (pointerChange == -1) {
       return;
     }
 
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
 
-    int signalKind = event.getActionMasked() == MotionEvent.ACTION_SCROLL
-        ? PointerSignalKind.SCROLL
-        : PointerSignalKind.NONE;
+    int signalKind =
+        event.getActionMasked() == MotionEvent.ACTION_SCROLL
+            ? PointerSignalKind.SCROLL
+            : PointerSignalKind.NONE;
 
     long timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
 
@@ -201,17 +191,19 @@ public class AndroidTouchProcessor {
     packet.putLong(0); // pointer_identifier, will be generated in pointer_data_packet_converter.cc.
     packet.putDouble(event.getX(pointerIndex)); // physical_x
     packet.putDouble(event.getY(pointerIndex)); // physical_y
-    packet.putDouble(0.0); // physical_delta_x, will be generated in pointer_data_packet_converter.cc.
-    packet.putDouble(0.0); // physical_delta_y, will be generated in pointer_data_packet_converter.cc.
+    packet.putDouble(
+        0.0); // physical_delta_x, will be generated in pointer_data_packet_converter.cc.
+    packet.putDouble(
+        0.0); // physical_delta_y, will be generated in pointer_data_packet_converter.cc.
 
     long buttons;
     if (pointerKind == PointerDeviceKind.MOUSE) {
       buttons = event.getButtonState() & 0x1F;
       // TODO(dkwingsmt): Remove this fix after implementing touchpad gestures
       // https://github.com/flutter/flutter/issues/23604#issuecomment-524471152
-      if (buttons == 0 &&
-          event.getSource() == InputDevice.SOURCE_MOUSE &&
-          (pointerChange == PointerChange.DOWN || pointerChange == PointerChange.MOVE)) {
+      if (buttons == 0
+          && event.getSource() == InputDevice.SOURCE_MOUSE
+          && (pointerChange == PointerChange.DOWN || pointerChange == PointerChange.MOVE)) {
         buttons = _POINTER_BUTTON_PRIMARY;
       }
     } else if (pointerKind == PointerDeviceKind.STYLUS) {
@@ -229,7 +221,8 @@ public class AndroidTouchProcessor {
     double pressureMin = 0.0;
     double pressureMax = 1.0;
     if (event.getDevice() != null) {
-      InputDevice.MotionRange pressureRange = event.getDevice().getMotionRange(MotionEvent.AXIS_PRESSURE);
+      InputDevice.MotionRange pressureRange =
+          event.getDevice().getMotionRange(MotionEvent.AXIS_PRESSURE);
       if (pressureRange != null) {
         pressureMin = pressureRange.getMin();
         pressureMax = pressureRange.getMax();
@@ -268,8 +261,8 @@ public class AndroidTouchProcessor {
       packet.putDouble(-event.getAxisValue(MotionEvent.AXIS_HSCROLL)); // scroll_delta_x
       packet.putDouble(-event.getAxisValue(MotionEvent.AXIS_VSCROLL)); // scroll_delta_y
     } else {
-      packet.putDouble(0.0);  // scroll_delta_x
-      packet.putDouble(0.0);  // scroll_delta_x
+      packet.putDouble(0.0); // scroll_delta_x
+      packet.putDouble(0.0); // scroll_delta_x
     }
   }
 

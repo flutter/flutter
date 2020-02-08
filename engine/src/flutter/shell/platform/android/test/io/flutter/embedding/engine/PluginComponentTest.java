@@ -1,7 +1,15 @@
 package test.io.flutter.embedding.engine;
 
-import android.support.annotation.NonNull;
+import static junit.framework.TestCase.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import android.support.annotation.NonNull;
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.loader.FlutterLoader;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
@@ -10,17 +18,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.FlutterJNI;
-import io.flutter.embedding.engine.loader.FlutterLoader;
-import io.flutter.embedding.engine.plugins.FlutterPlugin;
-
-import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class PluginComponentTest {
   @Test
@@ -39,30 +37,32 @@ public class PluginComponentTest {
     // is queried for an asset path, it returns the real expected path based on real
     // FlutterLoader behavior.
     FlutterLoader flutterLoader = mock(FlutterLoader.class);
-    when(flutterLoader.getLookupKeyForAsset(any(String.class))).thenAnswer(new Answer<String>() {
-      @Override
-      public String answer(InvocationOnMock invocation) throws Throwable {
-        // Defer to a real FlutterLoader to return the asset path.
-        String fileNameOrSubpath = (String) invocation.getArguments()[0];
-        return FlutterLoader.getInstance().getLookupKeyForAsset(fileNameOrSubpath);
-      }
-    });
-    when(flutterLoader.getLookupKeyForAsset(any(String.class), any(String.class))).thenAnswer(new Answer<String>() {
-      @Override
-      public String answer(InvocationOnMock invocation) throws Throwable {
-        // Defer to a real FlutterLoader to return the asset path.
-        String fileNameOrSubpath = (String) invocation.getArguments()[0];
-        String packageName = (String) invocation.getArguments()[1];
-        return FlutterLoader.getInstance().getLookupKeyForAsset(fileNameOrSubpath, packageName);
-      }
-    });
+    when(flutterLoader.getLookupKeyForAsset(any(String.class)))
+        .thenAnswer(
+            new Answer<String>() {
+              @Override
+              public String answer(InvocationOnMock invocation) throws Throwable {
+                // Defer to a real FlutterLoader to return the asset path.
+                String fileNameOrSubpath = (String) invocation.getArguments()[0];
+                return FlutterLoader.getInstance().getLookupKeyForAsset(fileNameOrSubpath);
+              }
+            });
+    when(flutterLoader.getLookupKeyForAsset(any(String.class), any(String.class)))
+        .thenAnswer(
+            new Answer<String>() {
+              @Override
+              public String answer(InvocationOnMock invocation) throws Throwable {
+                // Defer to a real FlutterLoader to return the asset path.
+                String fileNameOrSubpath = (String) invocation.getArguments()[0];
+                String packageName = (String) invocation.getArguments()[1];
+                return FlutterLoader.getInstance()
+                    .getLookupKeyForAsset(fileNameOrSubpath, packageName);
+              }
+            });
 
     // Execute behavior under test.
-    FlutterEngine flutterEngine = new FlutterEngine(
-        RuntimeEnvironment.application,
-        flutterLoader,
-        flutterJNI
-    );
+    FlutterEngine flutterEngine =
+        new FlutterEngine(RuntimeEnvironment.application, flutterLoader, flutterJNI);
 
     // As soon as our plugin is registered it will look up asset paths and store them
     // for our verification.
@@ -71,9 +71,13 @@ public class PluginComponentTest {
 
     // Verify results.
     assertEquals("flutter_assets/fake_asset.jpg", plugin.getAssetPathBasedOnName());
-    assertEquals("flutter_assets/packages/fakepackage/fake_asset.jpg", plugin.getAssetPathBasedOnNameAndPackage());
+    assertEquals(
+        "flutter_assets/packages/fakepackage/fake_asset.jpg",
+        plugin.getAssetPathBasedOnNameAndPackage());
     assertEquals("flutter_assets/some/path/fake_asset.jpg", plugin.getAssetPathBasedOnSubpath());
-    assertEquals("flutter_assets/packages/fakepackage/some/path/fake_asset.jpg", plugin.getAssetPathBasedOnSubpathAndPackage());
+    assertEquals(
+        "flutter_assets/packages/fakepackage/some/path/fake_asset.jpg",
+        plugin.getAssetPathBasedOnSubpathAndPackage());
   }
 
   private static class PluginThatAccessesAssets implements FlutterPlugin {
@@ -100,21 +104,18 @@ public class PluginComponentTest {
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
-      assetPathBasedOnName = binding
-          .getFlutterAssets()
-          .getAssetFilePathByName("fake_asset.jpg");
+      assetPathBasedOnName = binding.getFlutterAssets().getAssetFilePathByName("fake_asset.jpg");
 
-      assetPathBasedOnNameAndPackage = binding
-          .getFlutterAssets()
-          .getAssetFilePathByName("fake_asset.jpg", "fakepackage");
+      assetPathBasedOnNameAndPackage =
+          binding.getFlutterAssets().getAssetFilePathByName("fake_asset.jpg", "fakepackage");
 
-      assetPathBasedOnSubpath = binding
-          .getFlutterAssets()
-          .getAssetFilePathByName("some/path/fake_asset.jpg");
+      assetPathBasedOnSubpath =
+          binding.getFlutterAssets().getAssetFilePathByName("some/path/fake_asset.jpg");
 
-      assetPathBasedOnSubpathAndPackage = binding
-          .getFlutterAssets()
-          .getAssetFilePathByName("some/path/fake_asset.jpg", "fakepackage");
+      assetPathBasedOnSubpathAndPackage =
+          binding
+              .getFlutterAssets()
+              .getAssetFilePathByName("some/path/fake_asset.jpg", "fakepackage");
     }
 
     @Override

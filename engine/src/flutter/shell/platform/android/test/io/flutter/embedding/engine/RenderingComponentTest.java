@@ -1,22 +1,20 @@
 package io.flutter.embedding.engine;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
-import io.flutter.embedding.engine.renderer.FlutterRenderer;
-import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@Config(manifest=Config.NONE)
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class RenderingComponentTest {
   @Test
@@ -26,20 +24,21 @@ public class RenderingComponentTest {
     FlutterRenderer flutterRenderer = new FlutterRenderer(flutterJNI);
 
     AtomicInteger listenerInvocationCount = new AtomicInteger(0);
-    FlutterUiDisplayListener listener = new FlutterUiDisplayListener() {
-      @Override
-      public void onFlutterUiDisplayed() {
-        // This is the behavior we're testing, but we also verify that this method
-        // was invoked to ensure that this test behavior executed.
-        flutterRenderer.removeIsDisplayingFlutterUiListener(this);
+    FlutterUiDisplayListener listener =
+        new FlutterUiDisplayListener() {
+          @Override
+          public void onFlutterUiDisplayed() {
+            // This is the behavior we're testing, but we also verify that this method
+            // was invoked to ensure that this test behavior executed.
+            flutterRenderer.removeIsDisplayingFlutterUiListener(this);
 
-        // Track the invocation to ensure this method is called once, and only once.
-        listenerInvocationCount.incrementAndGet();
-      }
+            // Track the invocation to ensure this method is called once, and only once.
+            listenerInvocationCount.incrementAndGet();
+          }
 
-      @Override
-      public void onFlutterUiNoLongerDisplayed() {}
-    };
+          @Override
+          public void onFlutterUiNoLongerDisplayed() {}
+        };
     flutterRenderer.addIsDisplayingFlutterUiListener(listener);
 
     // Execute behavior under test.
