@@ -436,6 +436,20 @@ deps = {
      'dep_type': 'cipd',
    },
 
+   'src/third_party/android_tools/google-java-format': {
+     'packages': [
+       {
+        'package': 'flutter/android/google-java-format',
+        'version': 'version:1.7-1'
+       }
+     ],
+     # We want to be able to format these as part of CI, and the CI step that
+     # checks formatting runs without downloading the rest of the Android build
+     # tooling. Therefore unlike all the other Android-related tools, we want to
+     # download this every time.
+     'dep_type': 'cipd',
+   },
+
   'src/third_party/android_tools/sdk/build-tools': {
      'packages': [
        {
