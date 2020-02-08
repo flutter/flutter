@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:collection' show HashSet;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
+import 'colors.dart';
 import 'flat_button.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -107,6 +109,8 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
   // Measure the width of the container and how many items fit inside in order
   // to decide which items to put in the overflow menu.
   void _measureItemsNextFrame() {
+    // TODO(justinmc): Disabling to avoid key errors.
+    return;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       // If the menu is empty, no need to measure it.
       if (_itemKeys.isEmpty) {
@@ -203,6 +207,23 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
     if (items.isEmpty) {
       return Container(width: 0.0, height: 0.0);
     }
+
+    return _TextSelectionToolbarROW(
+      // TODO(justinmc): These children should be all buttons. More button
+      // might need to be a separate parameter?
+      children: <Widget>[
+        Container(
+          width: 40,
+          height: 40,
+          color: Colors.blue,
+        ),
+        Container(
+          width: 40,
+          height: 40,
+          color: Colors.yellow,
+        ),
+      ],
+    );
 
     // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
     // frame for measurement.
@@ -367,6 +388,64 @@ class _TextSelectionToolbarContentOverflow extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TextSelectionToolbarROW extends MultiChildRenderObjectWidget {
+  _TextSelectionToolbarROW({
+    Key key,
+    @required this.children,
+  }) : super(key: key, children: children);
+
+  final List<Widget> children;
+
+  @override
+  _TextSelectionToolbarRB createRenderObject(BuildContext context) {
+    return _TextSelectionToolbarRB();
+  }
+
+  @override
+  _TextSelectionToolbarElement createElement() => _TextSelectionToolbarElement(this);
+}
+
+class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData> {
+
+  @override
+  void performLayout() {
+    if (firstChild == null) {
+      performResize();
+      return;
+    }
+
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      // TODO(justinmc): New plan: layout all children here and then only paint
+      // the ones that should be visible.
+      child.layout(constraints, parentUsesSize: true);
+      size = child.size;
+    });
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      // TODO(justinmc): Actually paint the correct children in row/column.
+      context.paintChild(child, offset);
+    });
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! MultiChildLayoutParentData) {
+      child.parentData = MultiChildLayoutParentData();
+    }
+  }
+}
+
+class _TextSelectionToolbarElement extends MultiChildRenderObjectElement {
+  _TextSelectionToolbarElement(_TextSelectionToolbarROW widget)
+    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
+      super(widget as MultiChildRenderObjectWidget);
 }
 
 /// Centers the toolbar around the given anchor, ensuring that it remains on
