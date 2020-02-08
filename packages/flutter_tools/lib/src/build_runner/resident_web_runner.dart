@@ -540,7 +540,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       final Uri generatedImport = packageUriMapper.map(generatedPath);
 
       final String entrypoint = <String>[
-        'import "${packageUriMapper.map(main)}" as entrypoint;',
+        'import "${packageUriMapper.map(main) ?? 'file://$main'}" as entrypoint;',
         'import "dart:ui" as ui;',
         if (hasWebPlugins)
           'import "package:flutter_web_plugins/flutter_web_plugins.dart";',

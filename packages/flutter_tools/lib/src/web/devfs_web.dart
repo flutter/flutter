@@ -133,7 +133,9 @@ class WebAssetServer implements AssetReader {
     // TODO(jonahwilliams): better path normalization in frontend_server to remove
     // this workaround.
     // NOTE: shelf removes trailing `/` for some reason.
-    String requestPath = '/${request.url.path}';
+    String requestPath = request.url.path.startsWith('/')
+      ?  request.url.path
+      : '/${request.url.path}';
     if (requestPath.startsWith(_drivePath)) {
       requestPath = requestPath.substring(3);
     }
