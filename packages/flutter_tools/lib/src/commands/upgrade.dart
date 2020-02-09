@@ -110,6 +110,7 @@ class UpgradeCommandRunner {
         'command with --force.'
       );
     }
+    recordState(gitTagVersion, flutterVersion.channel);
     await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
     final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
@@ -120,6 +121,14 @@ class UpgradeCommandRunner {
     } else {
       await flutterUpgradeContinue();
     }
+  }
+
+  void recordState(GitTagVersion currentVersion, String currentChannel) {
+    final Channel channel = getChannelForName(currentChannel);
+    if (channel == null) {
+      return;
+    }
+    globals.persistentToolState.updateLastActiveVersion(currentVersion, channel);
   }
 
   Future<void> flutterUpgradeContinue() async {

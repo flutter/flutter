@@ -43,6 +43,9 @@ abstract class PersistentToolState {
   ///
   /// If there was no active prior version, returns `null` instead.
   GitTagVersion lastActiveVersion(Channel channel);
+
+  /// Update the last active version for a given [channel].
+  void updateLastActiveVersion(GitTagVersion version, Channel channel);
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -69,11 +72,12 @@ class _DefaultPersistentToolState implements PersistentToolState {
 
   static const String _kFileName = '.flutter_tool_state';
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
-
-  static const String _kLastActiveMasterChannel = 'last-active-master-version';
-  static const String _kLastActiveDevVersion = 'last-active-dev-version';
-  static const String _kLastActiveBetaChannel = 'last-active-beta-version';
-  static const String _kLastActiveStableChannel = 'last-active-stable-version';
+  static const List<String> _lastActiveVersion = <String>[
+    'last-active-master-version',
+    'last-active-dev-version',
+    'last-active-beta-version',
+    'last-active-stable-version'
+  ];
 
   final Config _config;
 
@@ -84,21 +88,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
 
   @override
   GitTagVersion lastActiveVersion(Channel channel) {
-    String versionKey;
-    switch (channel) {
-      case Channel.master:
-        versionKey = _kLastActiveMasterChannel;
-        break;
-      case Channel.dev:
-        versionKey = _kLastActiveDevVersion;
-        break;
-      case Channel.beta:
-        versionKey = _kLastActiveBetaChannel;
-        break;
-      case Channel.stable:
-        versionKey = _kLastActiveStableChannel;
-        break;
-    }
+    final String versionKey = _versionKeyFor(channel);
     assert(versionKey != null);
     final String rawValue = _config.getValue(versionKey) as String;
     if (rawValue == null) {
@@ -111,5 +101,16 @@ class _DefaultPersistentToolState implements PersistentToolState {
   @override
   set redisplayWelcomeMessage(bool value) {
     _config.setValue(_kRedisplayWelcomeMessage, value);
+  }
+
+  @override
+  void updateLastActiveVersion(GitTagVersion version, Channel channel) {
+    final String versionKey = _versionKeyFor(channel);
+    assert(versionKey != null);
+    _config.setValue(versionKey, version.frameworkVersionFor(version.hash));
+  }
+
+  String _versionKeyFor(Channel channel) {
+    return _lastActiveVersion[channel.index];
   }
 }
