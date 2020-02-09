@@ -64,7 +64,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
       'BUILD=$buildFlag',
     ], trace: true);
   } on ArgumentError {
-    throwToolExit('make not found. Run \'flutter doctor\' for more information.');
+    throwToolExit("make not found. Run 'flutter doctor' for more information.");
   } finally {
     status.cancel();
   }

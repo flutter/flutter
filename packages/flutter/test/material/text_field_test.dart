@@ -139,7 +139,7 @@ void main() {
     'Third line of stuff';
   const String kMoreThanFourLines =
     kThreeLines +
-    '\nFourth line won\'t display and ends at';
+    "\nFourth line won't display and ends at";
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -914,7 +914,7 @@ void main() {
     expect(controller.selection.baseOffset, testValue.indexOf('h'));
   });
 
-  testWidgets('Slight movements in longpress don\'t hide/show handles', (WidgetTester tester) async {
+  testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
@@ -2322,7 +2322,7 @@ void main() {
     }
 
     const String hintPlaceholder = 'Placeholder';
-    const String multipleLineText = 'Here\'s a text, which is more than one line, to demostrate the multiple line hint text';
+    const String multipleLineText = "Here's a text, which is more than one line, to demostrate the multiple line hint text";
     await tester.pumpWidget(builder(null, hintPlaceholder));
 
     RenderBox findHintText(String hint) => tester.renderObject(find.text(hint));
@@ -7367,7 +7367,7 @@ void main() {
       expect(renderBox.size.height, greaterThanOrEqualTo(kMinInteractiveDimension));
     });
 
-    testWidgets('When text is very small, TextField still doesn\'t go below kMinInteractiveDimension height', (WidgetTester tester) async {
+    testWidgets("When text is very small, TextField still doesn't go below kMinInteractiveDimension height", (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(),
         home: const Scaffold(

@@ -50,7 +50,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ```dart
 /// Text(
-///   'Welcome to the present, we\'re running a real nation.',
+///   "Welcome to the present, we're running a real nation.",
 ///   style: TextStyle(fontStyle: FontStyle.italic),
 /// )
 /// ```
@@ -80,15 +80,15 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///     style: DefaultTextStyle.of(context).style,
 ///     children: <TextSpan>[
 ///       TextSpan(
-///         text: 'You don\'t have the votes.\n',
+///         text: "You don't have the votes.\n",
 ///         style: TextStyle(color: Colors.black.withOpacity(0.6)),
 ///       ),
 ///       TextSpan(
-///         text: 'You don\'t have the votes!\n',
+///         text: "You don't have the votes!\n",
 ///         style: TextStyle(color: Colors.black.withOpacity(0.8)),
 ///       ),
 ///       TextSpan(
-///         text: 'You\'re gonna need congressional approval and you don\'t have the votes!\n',
+///         text: "You're gonna need congressional approval and you don't have the votes!\n",
 ///         style: TextStyle(color: Colors.black.withOpacity(1.0)),
 ///       ),
 ///     ],
@@ -106,7 +106,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ```dart
 /// Text(
-///   'These are wise words, enterprising men quote \'em.',
+///   "These are wise words, enterprising men quote 'em.",
 ///   style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
 /// )
 /// ```
@@ -158,7 +158,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```dart
 /// RichText(
 ///   text: TextSpan(
-///     text: 'Don\'t tax the South ',
+///     text: "Don't tax the South ",
 ///     children: <TextSpan>[
 ///       TextSpan(
 ///         text: 'cuz',

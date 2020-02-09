@@ -29,7 +29,7 @@ void main() {
       '   No Material widget found.\n'
       '   ListTile widgets require a Material widget ancestor.\n'
       '   In material design, most widgets are conceptually "printed" on a\n'
-      '   sheet of material. In Flutter\'s material library, that material\n'
+      "   sheet of material. In Flutter's material library, that material\n"
       '   is represented by the Material widget. It is the Material widget\n'
       '   that renders ink splashes, for instance. Because of this, many\n'
       '   material library widgets require that there be a Material widget\n'

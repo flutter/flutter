@@ -1683,7 +1683,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           final String problemFunction = (targetFrameMatch != null && targetFrameMatch.groupCount > 0) ? targetFrameMatch.group(1) : stack[targetFrame].trim();
           // TODO(jacobr): this case is similar to displaying a single stack frame.
           yield ErrorDescription(
-            'These invalid constraints were provided to $runtimeType\'s layout() '
+            "These invalid constraints were provided to $runtimeType's layout() "
             'function by the following function, which probably computed the '
             'invalid constraints in question:\n'
             '  $problemFunction'

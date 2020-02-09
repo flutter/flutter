@@ -188,7 +188,7 @@ void main() {
       verifyNever(artifact1.update());
       verify(artifact2.update());
     });
-    testUsingContext('getter dyLdLibEntry concatenates the output of each artifact\'s dyLdLibEntry getter', () async {
+    testUsingContext("getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter", () async {
       final IosUsbArtifacts artifact1 = MockIosUsbArtifacts();
       final IosUsbArtifacts artifact2 = MockIosUsbArtifacts();
       final IosUsbArtifacts artifact3 = MockIosUsbArtifacts();

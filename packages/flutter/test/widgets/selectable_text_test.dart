@@ -132,7 +132,7 @@ void main() {
       'Third line of stuff';
   const String kMoreThanFourLines =
       kThreeLines +
-          '\nFourth line won\'t display and ends at';
+          "\nFourth line won't display and ends at";
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -525,7 +525,7 @@ void main() {
     expect(editableText.controller.selection.baseOffset, 9);
   });
 
-  testWidgets('Slight movements in longpress don\'t hide/show handles', (WidgetTester tester) async {
+  testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),

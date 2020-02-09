@@ -60,7 +60,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
-              'in the application\'s LICENSE file.',
+              "in the application's LICENSE file.",
         defaultsTo: false);
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);

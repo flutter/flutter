@@ -134,7 +134,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(
       !alwaysNeedsAddToScene,
       '$runtimeType with alwaysNeedsAddToScene set called markNeedsAddToScene.\n'
-      'The layer\'s alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.',
+      "The layer's alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.",
     );
 
     // Already marked. Short-circuit.
