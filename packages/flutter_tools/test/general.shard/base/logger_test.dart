@@ -112,7 +112,6 @@ void main() {
       stdio: stdio,
       outputPreferences: OutputPreferences.test(),
       timeoutConfiguration: const TimeoutConfiguration(),
-      platform: FakePlatform(),
     );
     logger.printStatus('message');
     logger.printError('error message');
@@ -125,7 +124,33 @@ void main() {
     FakeStopwatch mockStopwatch;
     FakeStopwatchFactory stopwatchFactory;
     int called;
-    const List<String> testPlatforms = <String>['linux', 'macos', 'windows', 'fuchsia'];
+    final List<Platform> testPlatforms = <Platform>[
+      FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{},
+        executableArguments: <String>[],
+      ),
+      FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{},
+        executableArguments: <String>[],
+      ),
+      FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{},
+        executableArguments: <String>[],
+      ),
+      FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{'WT_SESSION': ''},
+        executableArguments: <String>[],
+      ),
+      FakePlatform(
+        operatingSystem: 'fuchsia',
+        environment: <String, String>{},
+        executableArguments: <String>[],
+      ),
+    ];
     final RegExp secondDigits = RegExp(r'[0-9,.]*[0-9]m?s');
 
     setUp(() {
@@ -145,278 +170,297 @@ void main() {
       } while (doThis());
     }
 
-    for (final String testOs in testPlatforms) {
-      Platform currentPlatform() => FakePlatform(operatingSystem: testOs);
+    for (final Platform testPlatform in testPlatforms) {
+      group('(${testPlatform.operatingSystem})', () {
+        Platform platform;
+        Platform ansiPlatform;
+        AnsiTerminal terminal;
+        AnsiTerminal coloredTerminal;
+        AnsiStatus ansiStatus;
 
-      AnsiStatus createAnsiStatus() {
-        return AnsiStatus(
-          message: 'Hello world',
-          timeout: const Duration(seconds: 2),
-          padding: 20,
-          onFinish: () => called += 1,
-          stdio: mockStdio,
-          timeoutConfiguration: const TimeoutConfiguration(),
-          stopwatch: stopwatchFactory.createStopwatch(),
-          platform: currentPlatform(),
-        );
-      }
-      testWithoutContext('AnsiSpinner works for $testOs (1)', () async {
-        bool done = false;
-        mockStopwatch = FakeStopwatch();
-        FakeAsync().run((FakeAsync time) {
-          final AnsiSpinner ansiSpinner = AnsiSpinner(
-            timeout: const Duration(hours: 10),
+        setUp(() {
+          platform = FakePlatform.fromPlatform(testPlatform)..stdoutSupportsAnsi = false;
+          ansiPlatform = FakePlatform.fromPlatform(testPlatform)..stdoutSupportsAnsi = true;
+
+          terminal = AnsiTerminal(
+            stdio: mockStdio,
+            platform: platform,
+          );
+          coloredTerminal = AnsiTerminal(
+            stdio: mockStdio,
+            platform: ansiPlatform,
+          );
+
+          ansiStatus = AnsiStatus(
+            message: 'Hello world',
+            timeout: const Duration(seconds: 2),
+            padding: 20,
+            onFinish: () => called += 1,
             stdio: mockStdio,
             timeoutConfiguration: const TimeoutConfiguration(),
             stopwatch: stopwatchFactory.createStopwatch(),
-            platform: currentPlatform(),
-          )..start();
-          doWhileAsync(time, () => ansiSpinner.ticks < 10);
-          List<String> lines = outputStdout();
-          expect(lines[0], startsWith(
-            currentPlatform().isWindows
-              ? ' \b\\\b|\b/\b-\b\\\b|\b/\b-'
-              : ' \b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽\b⣻'
-            ),
+            terminal: terminal,
           );
-          expect(lines[0].endsWith('\n'), isFalse);
-          expect(lines.length, equals(1));
-
-          ansiSpinner.stop();
-          lines = outputStdout();
-
-          expect(lines[0], endsWith('\b \b'));
-          expect(lines.length, equals(1));
-
-          // Verify that stopping or canceling multiple times throws.
-          expect(ansiSpinner.stop, throwsAssertionError);
-          expect(ansiSpinner.cancel, throwsAssertionError);
-          done = true;
         });
-        expect(done, isTrue);
-      });
 
-      testWithoutContext('AnsiSpinner works for $testOs (2)', () async {
-        bool done = false;
-        mockStopwatch = FakeStopwatch();
-        FakeAsync().run((FakeAsync time) {
-          final AnsiSpinner ansiSpinner = AnsiSpinner(
-            timeout: const Duration(seconds: 2),
-            stdio: mockStdio,
-            timeoutConfiguration: const TimeoutConfiguration(),
-            stopwatch: mockStopwatch,
-            platform: FakePlatform(operatingSystem: testOs),
-          )..start();
-          mockStopwatch.elapsed = const Duration(seconds: 1);
-          doWhileAsync(time, () => ansiSpinner.ticks < 10); // one second
-
-          expect(ansiSpinner.seemsSlow, isFalse);
-          expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
-          mockStopwatch.elapsed = const Duration(seconds: 3);
-          doWhileAsync(time, () => ansiSpinner.ticks < 30); // three seconds
-
-          expect(ansiSpinner.seemsSlow, isTrue);
-          // Check the 2nd line to verify there's a newline before the warning
-          expect(outputStdout()[1], contains('This is taking an unexpectedly long time.'));
-          ansiSpinner.stop();
-          expect(outputStdout().join('\n'), isNot(contains('(!)')));
-          done = true;
-        });
-        expect(done, isTrue);
-      });
-
-      testWithoutContext('Stdout startProgress on colored terminal for $testOs', () async {
-        bool done = false;
-        FakeAsync().run((FakeAsync time) {
-          final Logger logger = StdoutLogger(
-            terminal: AnsiTerminal(
+        testWithoutContext('AnsiSpinner works (1)', () async {
+          bool done = false;
+          mockStopwatch = FakeStopwatch();
+          FakeAsync().run((FakeAsync time) {
+            final AnsiSpinner ansiSpinner = AnsiSpinner(
+              timeout: const Duration(hours: 10),
               stdio: mockStdio,
-              platform: FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
-            ),
-            stdio: mockStdio,
-            outputPreferences: OutputPreferences.test(showColor: true),
-            timeoutConfiguration: const TimeoutConfiguration(),
-            stopwatchFactory: stopwatchFactory,
-            platform: currentPlatform(),
-          );
-          final Status status = logger.startProgress(
-            'Hello',
-            progressId: null,
-            timeout: const TimeoutConfiguration().slowOperation,
-            progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
-          );
-          expect(outputStderr().length, equals(1));
-          expect(outputStderr().first, isEmpty);
-          // the 5 below is the margin that is always included between the message and the time.
-          expect(outputStdout().join('\n'),
-            matches(currentPlatform().isWindows ? r'^Hello {15} {5} {8}[\b]{8} {7}\\$' :
-                                                  r'^Hello {15} {5} {8}[\b]{8} {7}⣽$'));
-          status.stop();
-          expect(outputStdout().join('\n'),
-            matches(currentPlatform().isWindows ? r'^Hello {15} {5} {8}[\b]{8} {7}\\[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$' :
-                                                  r'^Hello {15} {5} {8}[\b]{8} {7}⣽[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$'));
-          done = true;
-        });
-        expect(done, isTrue);
-      });
+              timeoutConfiguration: const TimeoutConfiguration(),
+              stopwatch: stopwatchFactory.createStopwatch(),
+              terminal: terminal,
+            )..start();
+            doWhileAsync(time, () => ansiSpinner.ticks < 10);
+            List<String> lines = outputStdout();
+            expect(lines[0], startsWith(
+              terminal.supportsEmoji
+                ? ' \b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽\b⣻'
+                : ' \b\\\b|\b/\b-\b\\\b|\b/\b-'
+              ),
+            );
+            expect(lines[0].endsWith('\n'), isFalse);
+            expect(lines.length, equals(1));
 
-      testWithoutContext('Stdout startProgress on colored terminal pauses on $testOs', () async {
-        bool done = false;
-        FakeAsync().run((FakeAsync time) {
-          mockStopwatch.elapsed = const Duration(seconds: 5);
-          final Logger logger = StdoutLogger(
-            terminal: AnsiTerminal(
+            ansiSpinner.stop();
+            lines = outputStdout();
+
+            expect(lines[0], endsWith('\b \b'));
+            expect(lines.length, equals(1));
+
+            // Verify that stopping or canceling multiple times throws.
+            expect(ansiSpinner.stop, throwsAssertionError);
+            expect(ansiSpinner.cancel, throwsAssertionError);
+            done = true;
+          });
+          expect(done, isTrue);
+        });
+
+        testWithoutContext('AnsiSpinner works (2)', () async {
+          bool done = false;
+          mockStopwatch = FakeStopwatch();
+          FakeAsync().run((FakeAsync time) {
+            final AnsiSpinner ansiSpinner = AnsiSpinner(
+              timeout: const Duration(seconds: 2),
               stdio: mockStdio,
-              platform: FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
-            ),
-            stdio: mockStdio,
-            outputPreferences: OutputPreferences.test(showColor: true),
-            timeoutConfiguration: const TimeoutConfiguration(),
-            stopwatchFactory: stopwatchFactory,
-            platform: currentPlatform(),
-          );
-          final Status status = logger.startProgress(
-            'Knock Knock, Who\'s There',
-            timeout: const Duration(days: 10),
-            progressIndicatorPadding: 10,
-          );
-          logger.printStatus('Rude Interrupting Cow');
-          status.stop();
-          final String a = currentPlatform().isWindows ? r'\' : '⣽';
-          final String b = currentPlatform().isWindows ? '|' : '⣻';
+              timeoutConfiguration: const TimeoutConfiguration(),
+              stopwatch: mockStopwatch,
+              terminal: terminal,
+            )..start();
+            mockStopwatch.elapsed = const Duration(seconds: 1);
+            doWhileAsync(time, () => ansiSpinner.ticks < 10); // one second
 
-          expect(
-            outputStdout().join('\n'),
-            'Knock Knock, Who\'s There     ' // initial message
-            '        ' // placeholder so that spinner can backspace on its first tick
-            '\b\b\b\b\b\b\b\b       $a' // first tick
-            '\b\b\b\b\b\b\b\b        ' // clearing the spinner
-            '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
-            '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                             ' // clearing the message
-            '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b' // clearing the clearing of the message
-            'Rude Interrupting Cow\n' // message
-            'Knock Knock, Who\'s There     ' // message restoration
-            '        ' // placeholder so that spinner can backspace on its second tick
-            '\b\b\b\b\b\b\b\b       $b' // second tick
-            '\b\b\b\b\b\b\b\b        ' // clearing the spinner to put the time
-            '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
-            '    5.0s\n', // replacing it with the time
-          );
-          done = true;
+            expect(ansiSpinner.seemsSlow, isFalse);
+            expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
+            mockStopwatch.elapsed = const Duration(seconds: 3);
+            doWhileAsync(time, () => ansiSpinner.ticks < 30); // three seconds
+
+            expect(ansiSpinner.seemsSlow, isTrue);
+            // Check the 2nd line to verify there's a newline before the warning
+            expect(outputStdout()[1], contains('This is taking an unexpectedly long time.'));
+            ansiSpinner.stop();
+            expect(outputStdout().join('\n'), isNot(contains('(!)')));
+            done = true;
+          });
+          expect(done, isTrue);
         });
-        expect(done, isTrue);
-      });
 
-      testWithoutContext('AnsiStatus works for $testOs', () {
-        final AnsiStatus ansiStatus = createAnsiStatus();
-        bool done = false;
-        FakeAsync().run((FakeAsync time) {
-          ansiStatus.start();
-          mockStopwatch.elapsed = const Duration(seconds: 1);
-          doWhileAsync(time, () => ansiStatus.ticks < 10); // one second
+        testWithoutContext('Stdout startProgress on colored terminal', () async {
+          bool done = false;
+          FakeAsync().run((FakeAsync time) {
+            final Logger logger = StdoutLogger(
+              terminal: coloredTerminal,
+              stdio: mockStdio,
+              outputPreferences: OutputPreferences.test(showColor: true),
+              timeoutConfiguration: const TimeoutConfiguration(),
+              stopwatchFactory: stopwatchFactory,
+            );
+            final Status status = logger.startProgress(
+              'Hello',
+              progressId: null,
+              timeout: const TimeoutConfiguration().slowOperation,
+              progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
+            );
+            expect(outputStderr().length, equals(1));
+            expect(outputStderr().first, isEmpty);
+            // the 5 below is the margin that is always included between the message and the time.
+            expect(
+              outputStdout().join('\n'),
+              matches(terminal.supportsEmoji
+                ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽$'
+                : r'^Hello {15} {5} {8}[\b]{8} {7}\\$'),
+            );
+            status.stop();
+            expect(
+              outputStdout().join('\n'),
+              matches(
+                terminal.supportsEmoji
+                ? r'^Hello {15} {5} {8}[\b]{8} {7}⣽[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$'
+                : r'^Hello {15} {5} {8}[\b]{8} {7}\\[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$',
+              ),
+            );
+            done = true;
+          });
+          expect(done, isTrue);
+        });
 
-          expect(ansiStatus.seemsSlow, isFalse);
-          expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
-          expect(outputStdout().join('\n'), isNot(contains('(!)')));
-          mockStopwatch.elapsed = const Duration(seconds: 3);
-          doWhileAsync(time, () => ansiStatus.ticks < 30); // three seconds
+        testWithoutContext('Stdout startProgress on colored terminal pauses', () async {
+          bool done = false;
+          FakeAsync().run((FakeAsync time) {
+            mockStopwatch.elapsed = const Duration(seconds: 5);
+            final Logger logger = StdoutLogger(
+              terminal: coloredTerminal,
+              stdio: mockStdio,
+              outputPreferences: OutputPreferences.test(showColor: true),
+              timeoutConfiguration: const TimeoutConfiguration(),
+              stopwatchFactory: stopwatchFactory,
+            );
+            final Status status = logger.startProgress(
+              'Knock Knock, Who\'s There',
+              timeout: const Duration(days: 10),
+              progressIndicatorPadding: 10,
+            );
+            logger.printStatus('Rude Interrupting Cow');
+            status.stop();
+            final String a = terminal.supportsEmoji ? '⣽' : r'\';
+            final String b = terminal.supportsEmoji ? '⣻' : '|';
 
-          expect(ansiStatus.seemsSlow, isTrue);
-          expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
+            expect(
+              outputStdout().join('\n'),
+              'Knock Knock, Who\'s There     ' // initial message
+              '        ' // placeholder so that spinner can backspace on its first tick
+              '\b\b\b\b\b\b\b\b       $a' // first tick
+              '\b\b\b\b\b\b\b\b        ' // clearing the spinner
+              '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
+              '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b                             ' // clearing the message
+              '\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b' // clearing the clearing of the message
+              'Rude Interrupting Cow\n' // message
+              'Knock Knock, Who\'s There     ' // message restoration
+              '        ' // placeholder so that spinner can backspace on its second tick
+              '\b\b\b\b\b\b\b\b       $b' // second tick
+              '\b\b\b\b\b\b\b\b        ' // clearing the spinner to put the time
+              '\b\b\b\b\b\b\b\b' // clearing the clearing of the spinner
+              '    5.0s\n', // replacing it with the time
+            );
+            done = true;
+          });
+          expect(done, isTrue);
+        });
 
-          // Test that the number of '\b' is correct.
-          for (final String line in outputStdout()) {
-            int currLength = 0;
-            for (int i = 0; i < line.length; i += 1) {
-              currLength += line[i] == '\b' ? -1 : 1;
-              expect(currLength, isNonNegative, reason: 'The following line has overflow backtraces:\n' + jsonEncode(line));
+        testWithoutContext('AnsiStatus works', () {
+          bool done = false;
+          FakeAsync().run((FakeAsync time) {
+            ansiStatus.start();
+            mockStopwatch.elapsed = const Duration(seconds: 1);
+            doWhileAsync(time, () => ansiStatus.ticks < 10); // one second
+
+            expect(ansiStatus.seemsSlow, isFalse);
+            expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
+            expect(outputStdout().join('\n'), isNot(contains('(!)')));
+            mockStopwatch.elapsed = const Duration(seconds: 3);
+            doWhileAsync(time, () => ansiStatus.ticks < 30); // three seconds
+
+            expect(ansiStatus.seemsSlow, isTrue);
+            expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
+
+            // Test that the number of '\b' is correct.
+            for (final String line in outputStdout()) {
+              int currLength = 0;
+              for (int i = 0; i < line.length; i += 1) {
+                currLength += line[i] == '\b' ? -1 : 1;
+                expect(currLength, isNonNegative, reason: 'The following line has overflow backtraces:\n' + jsonEncode(line));
+              }
             }
-          }
 
-          ansiStatus.stop();
-          expect(outputStdout().join('\n'), contains('(!)'));
-          done = true;
+            ansiStatus.stop();
+            expect(outputStdout().join('\n'), contains('(!)'));
+            done = true;
+          });
+          expect(done, isTrue);
         });
-        expect(done, isTrue);
-      });
 
-      testWithoutContext('AnsiStatus works when canceled for $testOs', () async {
-        final AnsiStatus ansiStatus = createAnsiStatus();
-        bool done = false;
-        FakeAsync().run((FakeAsync time) {
-          ansiStatus.start();
-          mockStopwatch.elapsed = const Duration(seconds: 1);
-          doWhileAsync(time, () => ansiStatus.ticks < 10);
-          List<String> lines = outputStdout();
+        testWithoutContext('AnsiStatus works when canceled', () async {
+          bool done = false;
+          FakeAsync().run((FakeAsync time) {
+            ansiStatus.start();
+            mockStopwatch.elapsed = const Duration(seconds: 1);
+            doWhileAsync(time, () => ansiStatus.ticks < 10);
+            List<String> lines = outputStdout();
 
-          expect(lines[0], startsWith(testOs == 'windows'
-              ? 'Hello world                      \b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |'
-              : 'Hello world                      \b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻\b\b\b\b\b\b\b\b       ⢿\b\b\b\b\b\b\b\b       ⡿\b\b\b\b\b\b\b\b       ⣟\b\b\b\b\b\b\b\b       ⣯\b\b\b\b\b\b\b\b       ⣷\b\b\b\b\b\b\b\b       ⣾\b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻'));
-          expect(lines.length, equals(1));
-          expect(lines[0].endsWith('\n'), isFalse);
+            expect(lines[0], startsWith(
+              terminal.supportsEmoji
+              ? 'Hello world                      \b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻\b\b\b\b\b\b\b\b       ⢿\b\b\b\b\b\b\b\b       ⡿\b\b\b\b\b\b\b\b       ⣟\b\b\b\b\b\b\b\b       ⣯\b\b\b\b\b\b\b\b       ⣷\b\b\b\b\b\b\b\b       ⣾\b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻'
+              : 'Hello world                      \b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |',
+            ));
+            expect(lines.length, equals(1));
+            expect(lines[0].endsWith('\n'), isFalse);
 
-          // Verify a cancel does _not_ print the time and prints a newline.
-          ansiStatus.cancel();
-          lines = outputStdout();
-          final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
-          expect(matches, isEmpty);
-          final String leading = currentPlatform().isWindows ? '|' : '⣻';
+            // Verify a cancel does _not_ print the time and prints a newline.
+            ansiStatus.cancel();
+            lines = outputStdout();
+            final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
+            expect(matches, isEmpty);
+            final String leading = terminal.supportsEmoji ? '⣻' : '|';
 
-          expect(lines[0], endsWith('$leading\b\b\b\b\b\b\b\b        \b\b\b\b\b\b\b\b'));
-          expect(called, equals(1));
-          expect(lines.length, equals(2));
-          expect(lines[1], equals(''));
+            expect(lines[0], endsWith('$leading\b\b\b\b\b\b\b\b        \b\b\b\b\b\b\b\b'));
+            expect(called, equals(1));
+            expect(lines.length, equals(2));
+            expect(lines[1], equals(''));
 
-          // Verify that stopping or canceling multiple times throws.
-          expect(() { ansiStatus.cancel(); }, throwsAssertionError);
-          expect(() { ansiStatus.stop(); }, throwsAssertionError);
-          done = true;
+            // Verify that stopping or canceling multiple times throws.
+            expect(() { ansiStatus.cancel(); }, throwsAssertionError);
+            expect(() { ansiStatus.stop(); }, throwsAssertionError);
+            done = true;
+          });
+          expect(done, isTrue);
         });
-        expect(done, isTrue);
-      });
 
-      testWithoutContext('AnsiStatus works when stopped for $testOs', () async {
-        final AnsiStatus ansiStatus = createAnsiStatus();
-        bool done = false;
-        FakeAsync().run((FakeAsync time) {
-          ansiStatus.start();
-          mockStopwatch.elapsed = const Duration(seconds: 1);
-          doWhileAsync(time, () => ansiStatus.ticks < 10);
-          List<String> lines = outputStdout();
+        testWithoutContext('AnsiStatus works when stopped', () async {
+          bool done = false;
+          FakeAsync().run((FakeAsync time) {
+            ansiStatus.start();
+            mockStopwatch.elapsed = const Duration(seconds: 1);
+            doWhileAsync(time, () => ansiStatus.ticks < 10);
+            List<String> lines = outputStdout();
 
-          expect(lines, hasLength(1));
-          expect(lines[0],
-            currentPlatform().isWindows
-              ? 'Hello world                      \b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |'
-              : 'Hello world                      \b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻\b\b\b\b\b\b\b\b       ⢿\b\b\b\b\b\b\b\b       ⡿\b\b\b\b\b\b\b\b       ⣟\b\b\b\b\b\b\b\b       ⣯\b\b\b\b\b\b\b\b       ⣷\b\b\b\b\b\b\b\b       ⣾\b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻',
-          );
+            expect(lines, hasLength(1));
+            expect(
+              lines[0],
+              terminal.supportsEmoji
+                ? 'Hello world                      \b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻\b\b\b\b\b\b\b\b       ⢿\b\b\b\b\b\b\b\b       ⡿\b\b\b\b\b\b\b\b       ⣟\b\b\b\b\b\b\b\b       ⣯\b\b\b\b\b\b\b\b       ⣷\b\b\b\b\b\b\b\b       ⣾\b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻'
+                : 'Hello world                      \b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |',
+            );
 
-          // Verify a stop prints the time.
-          ansiStatus.stop();
-          lines = outputStdout();
-          expect(lines, hasLength(2));
-          expect(lines[0], matches(
-            currentPlatform().isWindows
-              ? r'Hello world               {8}[\b]{8} {7}\\[\b]{8} {7}|[\b]{8} {7}/[\b]{8} {7}-[\b]{8} {7}\\[\b]{8} {7}|[\b]{8} {7}/[\b]{8} {7}-[\b]{8} {7}\\[\b]{8} {7}|[\b]{8} {7} [\b]{8}[\d., ]{6}[\d]ms$'
-              : r'Hello world               {8}[\b]{8} {7}⣽[\b]{8} {7}⣻[\b]{8} {7}⢿[\b]{8} {7}⡿[\b]{8} {7}⣟[\b]{8} {7}⣯[\b]{8} {7}⣷[\b]{8} {7}⣾[\b]{8} {7}⣽[\b]{8} {7}⣻[\b]{8} {7} [\b]{8}[\d., ]{5}[\d]ms$'
-          ));
-          expect(lines[1], isEmpty);
-          final List<Match> times = secondDigits.allMatches(lines[0]).toList();
-          expect(times, isNotNull);
-          expect(times, hasLength(1));
-          final Match match = times.single;
+            // Verify a stop prints the time.
+            ansiStatus.stop();
+            lines = outputStdout();
+            expect(lines, hasLength(2));
+            expect(lines[0], matches(
+              terminal.supportsEmoji
+                ? r'Hello world               {8}[\b]{8} {7}⣽[\b]{8} {7}⣻[\b]{8} {7}⢿[\b]{8} {7}⡿[\b]{8} {7}⣟[\b]{8} {7}⣯[\b]{8} {7}⣷[\b]{8} {7}⣾[\b]{8} {7}⣽[\b]{8} {7}⣻[\b]{8} {7} [\b]{8}[\d., ]{5}[\d]ms$'
+                : r'Hello world               {8}[\b]{8} {7}\\[\b]{8} {7}|[\b]{8} {7}/[\b]{8} {7}-[\b]{8} {7}\\[\b]{8} {7}|[\b]{8} {7}/[\b]{8} {7}-[\b]{8} {7}\\[\b]{8} {7}|[\b]{8} {7} [\b]{8}[\d., ]{6}[\d]ms$',
+            ));
+            expect(lines[1], isEmpty);
+            final List<Match> times = secondDigits.allMatches(lines[0]).toList();
+            expect(times, isNotNull);
+            expect(times, hasLength(1));
+            final Match match = times.single;
 
-          expect(lines[0], endsWith(match.group(0)));
-          expect(called, equals(1));
-          expect(lines.length, equals(2));
-          expect(lines[1], equals(''));
+            expect(lines[0], endsWith(match.group(0)));
+            expect(called, equals(1));
+            expect(lines.length, equals(2));
+            expect(lines[1], equals(''));
 
-          // Verify that stopping or canceling multiple times throws.
-          expect(ansiStatus.stop, throwsAssertionError);
-          expect(ansiStatus.cancel, throwsAssertionError);
-          done = true;
+            // Verify that stopping or canceling multiple times throws.
+            expect(ansiStatus.stop, throwsAssertionError);
+            expect(ansiStatus.cancel, throwsAssertionError);
+            done = true;
+          });
+          expect(done, isTrue);
         });
-        expect(done, isTrue);
       });
     }
   });
@@ -453,7 +497,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printError('0123456789' * 15);
       final List<String> lines = outputStderr();
@@ -475,7 +518,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printError('0123456789' * 15, indent: 5);
       final List<String> lines = outputStderr();
@@ -500,7 +542,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printError('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStderr();
@@ -525,7 +566,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printError('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStderr();
@@ -550,7 +590,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printStatus('0123456789' * 15);
       final List<String> lines = outputStdout();
@@ -572,7 +611,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printStatus('0123456789' * 15, indent: 5);
       final List<String> lines = outputStdout();
@@ -597,7 +635,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printStatus('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStdout();
@@ -622,7 +659,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printStatus('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStdout();
@@ -647,7 +683,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printError('Pants on fire!');
       final List<String> lines = outputStderr();
@@ -666,7 +701,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences:  OutputPreferences.test(showColor: true),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printStatus('All good.');
 
@@ -685,7 +719,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printStatus(
         null,
@@ -710,7 +743,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.printStatus(
         null,
@@ -736,7 +768,6 @@ void main() {
           stdio: mockStdio,
           outputPreferences: OutputPreferences.test(showColor: false),
           timeoutConfiguration: const TimeoutConfiguration(),
-          platform: FakePlatform(),
         );
         final Status status = logger.startProgress(
           'Hello',
@@ -818,7 +849,6 @@ void main() {
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       );
       logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation)..stop();
       logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation)..stop();
@@ -843,7 +873,6 @@ void main() {
           stdio: mockStdio,
           outputPreferences: OutputPreferences.test(),
           timeoutConfiguration: const TimeoutConfiguration(),
-          platform: FakePlatform(),
         ),
         stopwatchFactory: FakeStopwatchFactory(),
       );

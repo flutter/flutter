@@ -204,9 +204,11 @@ void main() {
       Logger: () => StdoutLogger(
         outputPreferences: OutputPreferences.test(),
         stdio: mockStdio,
-        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       ),
       WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
@@ -283,10 +285,12 @@ void main() {
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
         outputPreferences: outputPreferences,
-        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
         stdio: mockStdio,
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       ),
     });
 
@@ -301,10 +305,12 @@ void main() {
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
         outputPreferences: outputPreferences,
-        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
         stdio: mockStdio,
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       ),
     });
 
@@ -320,10 +326,12 @@ void main() {
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
         outputPreferences: outputPreferences,
-        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
         stdio: mockStdio,
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       ),
     });
 
