@@ -9,6 +9,7 @@ import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'version.dart';
 
 /// A class that represents global (non-project-specific) internal state that
 /// must persist across tool invocations.
@@ -37,6 +38,11 @@ abstract class PersistentToolState {
   ///
   /// May give null if the value has not been set.
   bool redisplayWelcomeMessage;
+
+  /// Returns the last active version for a given [channel].
+  ///
+  /// If there was no active prior version, returns `null` instead.
+  GitTagVersion lastActiveVersion(Channel channel);
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -64,11 +70,42 @@ class _DefaultPersistentToolState implements PersistentToolState {
   static const String _kFileName = '.flutter_tool_state';
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
 
+  static const String _kLastActiveMasterChannel = 'last-active-master-version';
+  static const String _kLastActiveDevVersion = 'last-active-dev-version';
+  static const String _kLastActiveBetaChannel = 'last-active-beta-version';
+  static const String _kLastActiveStableChannel = 'last-active-stable-version';
+
   final Config _config;
 
   @override
   bool get redisplayWelcomeMessage {
     return _config.getValue(_kRedisplayWelcomeMessage) as bool;
+  }
+
+  @override
+  GitTagVersion lastActiveVersion(Channel channel) {
+    String versionKey;
+    switch (channel) {
+      case Channel.master:
+        versionKey = _kLastActiveMasterChannel;
+        break;
+      case Channel.dev:
+        versionKey = _kLastActiveDevVersion;
+        break;
+      case Channel.beta:
+        versionKey = _kLastActiveBetaChannel;
+        break;
+      case Channel.stable:
+        versionKey = _kLastActiveStableChannel;
+        break;
+    }
+    assert(versionKey != null);
+    final String rawValue = _config.getValue(versionKey) as String;
+    if (rawValue == null) {
+      return null;
+    }
+    // Note: if Version.parse fails it will also return null.
+    return GitTagVersion.parse(rawValue);
   }
 
   @override

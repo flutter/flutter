@@ -15,6 +15,32 @@ import 'cache.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 
+/// The names of each channel/branch ordered by stability.
+enum Channel {
+  master,
+  dev,
+  beta,
+  stable,
+}
+
+/// Retrieve a human-readable name for a given [channel].
+///
+/// Requires [FlutterVersion.officialChannels] to be correctly ordered.
+String getNameForChannel(Channel channel) {
+  return FlutterVersion.officialChannels.elementAt(channel.index);
+}
+
+/// Retrieve the [Channel] representation for a string [name].
+///
+/// Returns `null` if [name] is not in the list of official channels, according
+/// to [FlutterVersion.officialChannels].
+Channel getChannelForName(String name) {
+  if (FlutterVersion.officialChannels.contains(name)) {
+    return Channel.values[FlutterVersion.officialChannels.toList().indexOf(name)];
+  }
+  return null;
+}
+
 class FlutterVersion {
   FlutterVersion([this._clock = const SystemClock()]) {
     _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '));
