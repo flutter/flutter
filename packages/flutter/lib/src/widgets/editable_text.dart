@@ -342,10 +342,10 @@ class EditableText extends StatefulWidget {
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
-  /// [enableSuggestions], [paintCursorAboveText], [textAlign],
-  /// [dragStartBehavior], [scrollPadding], [dragStartBehavior],
-  /// [toolbarOptions], [rendererIgnoresPointer], and [readOnly] arguments must
-  /// not be null.
+  /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
+  /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
+  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer], and
+  /// [readOnly] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -389,6 +389,8 @@ class EditableText extends StatefulWidget {
     this.cursorOpacityAnimates = false,
     this.cursorOffset,
     this.paintCursorAboveText = false,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -417,6 +419,8 @@ class EditableText extends StatefulWidget {
        assert(cursorOpacityAnimates != null),
        assert(paintCursorAboveText != null),
        assert(backgroundCursorColor != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
@@ -979,6 +983,16 @@ class EditableText extends StatefulWidget {
   ///{@macro flutter.rendering.editable.paintCursorOnTop}
   final bool paintCursorAboveText;
 
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxHeightStyle] for details on available styles.
+  final ui.BoxHeightStyle selectionHeightStyle;
+
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxWidthStyle] for details on available styles.
+  final ui.BoxWidthStyle selectionWidthStyle;
+
   /// The appearance of the keyboard.
   ///
   /// This setting is only honored on iOS devices.
@@ -1204,13 +1218,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // TextInputClient implementation:
 
-  // _lastFormattedUnmodifiedTextEditingValue tracks the last value
-  // that the formatter ran on and is used to prevent double-formatting.
-  TextEditingValue _lastFormattedUnmodifiedTextEditingValue;
-  // _receivedRemoteTextEditingValue is the direct value last passed in
-  // updateEditingValue. This value does not get updated with the formatted
-  // version.
-  TextEditingValue _receivedRemoteTextEditingValue;
+  TextEditingValue _lastKnownRemoteTextEditingValue;
 
   @override
   TextEditingValue get currentTextEditingValue => _value;
@@ -1222,7 +1230,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.readOnly) {
       return;
     }
-    _receivedRemoteTextEditingValue = value;
     if (value.text != _value.text) {
       hideToolbar();
       _showCaretOnScreen();
@@ -1231,7 +1238,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _obscureLatestCharIndex = _value.selection.baseOffset;
       }
     }
-
+    _lastKnownRemoteTextEditingValue = value;
     _formatAndSetValue(value);
 
     // To keep the cursor from blinking while typing, we want to restart the
@@ -1258,7 +1265,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         break;
       default:
         // Finalize editing, but don't give up focus because this keyboard
-        // action does not imply the user is done inputting information.
+        //  action does not imply the user is done inputting information.
         _finalizeEditing(false);
         break;
     }
@@ -1358,8 +1365,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection)
       return;
     final TextEditingValue localValue = _value;
-    if (localValue == _receivedRemoteTextEditingValue)
+    if (localValue == _lastKnownRemoteTextEditingValue)
       return;
+    _lastKnownRemoteTextEditingValue = localValue;
     _textInputConnection.setEditingState(localValue);
   }
 
@@ -1420,7 +1428,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
-      _lastFormattedUnmodifiedTextEditingValue = localValue;
+      _lastKnownRemoteTextEditingValue = localValue;
       _textInputConnection = TextInput.attach(
         this,
         TextInputConfiguration(
@@ -1460,8 +1468,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection.close();
       _textInputConnection = null;
-      _lastFormattedUnmodifiedTextEditingValue = null;
-      _receivedRemoteTextEditingValue = null;
+      _lastKnownRemoteTextEditingValue = null;
     }
   }
 
@@ -1479,8 +1486,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection.connectionClosedReceived();
       _textInputConnection = null;
-      _lastFormattedUnmodifiedTextEditingValue = null;
-      _receivedRemoteTextEditingValue = null;
+      _lastKnownRemoteTextEditingValue = null;
       _finalizeEditing(true);
     }
   }
@@ -1624,21 +1630,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _formatAndSetValue(TextEditingValue value) {
-    // Check if the new value is the same as the current local value, or is the same
-    // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
-    final bool isRepeat = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    if (textChanged && !isRepeat && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
       for (final TextInputFormatter formatter in widget.inputFormatters)
         value = formatter.formatEditUpdate(_value, value);
       _value = value;
       _updateRemoteEditingValueIfNeeded();
-    } else if (!isRepeat || !textChanged) {
+    } else {
       _value = value;
     }
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
-    _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
   }
 
   void _onCursorColorTick() {
@@ -1906,6 +1908,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,
               cursorOffset: widget.cursorOffset,
+              selectionHeightStyle: widget.selectionHeightStyle,
+              selectionWidthStyle: widget.selectionWidthStyle,
               paintCursorAboveText: widget.paintCursorAboveText,
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
@@ -1974,9 +1978,11 @@ class _Editable extends LeafRenderObjectWidget {
     this.cursorWidth,
     this.cursorRadius,
     this.cursorOffset,
+    this.paintCursorAboveText,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
-    this.paintCursorAboveText,
     this.devicePixelRatio,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
@@ -2014,10 +2020,12 @@ class _Editable extends LeafRenderObjectWidget {
   final double cursorWidth;
   final Radius cursorRadius;
   final Offset cursorOffset;
+  final bool paintCursorAboveText;
+  final ui.BoxHeightStyle selectionHeightStyle;
+  final ui.BoxWidthStyle selectionWidthStyle;
   final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
-  final bool paintCursorAboveText;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -2051,6 +2059,8 @@ class _Editable extends LeafRenderObjectWidget {
       cursorRadius: cursorRadius,
       cursorOffset: cursorOffset,
       paintCursorAboveText: paintCursorAboveText,
+      selectionHeightStyle: selectionHeightStyle,
+      selectionWidthStyle: selectionWidthStyle,
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
@@ -2087,6 +2097,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius
       ..cursorOffset = cursorOffset
+      ..selectionHeightStyle = selectionHeightStyle
+      ..selectionWidthStyle = selectionWidthStyle
       ..textSelectionDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
       ..paintCursorAboveText = paintCursorAboveText;

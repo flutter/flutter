@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -808,12 +808,28 @@ class TextPainter {
 
   /// Returns a list of rects that bound the given selection.
   ///
+  /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
+  /// the shape of the [TextBox]s. These properties default to
+  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
   /// A given selection might have more than one rect if this text painter
   /// contains bidirectional text because logically contiguous text might not be
   /// visually contiguous.
-  List<TextBox> getBoxesForSelection(TextSelection selection) {
+  List<TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
     assert(!_needsLayout);
-    return _paragraph.getBoxesForRange(selection.start, selection.end);
+    assert(boxHeightStyle != null);
+    assert(boxWidthStyle != null);
+    return _paragraph.getBoxesForRange(
+      selection.start,
+      selection.end,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle
+    );
   }
 
   /// Returns the position within the text for the given pixel offset.

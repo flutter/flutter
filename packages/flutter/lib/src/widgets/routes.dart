@@ -256,30 +256,82 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.didChangeNext(nextRoute);
   }
 
+  // A callback method that disposes existing train hopping animation and
+  // removes its listener.
+  //
+  // This property is non-null if there is a train hopping in progress, and the
+  // caller must reset this property to null after it is called.
+  VoidCallback _trainHoppingListenerRemover;
+
   void _updateSecondaryAnimation(Route<dynamic> nextRoute) {
+    // There is an existing train hopping in progress. Unfortunately, we cannot
+    // dispose current train hopping animation until we replace it with a new
+    // animation.
+    final VoidCallback previousTrainHoppingListenerRemover = _trainHoppingListenerRemover;
+    _trainHoppingListenerRemover = null;
+
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       final Animation<double> current = _secondaryAnimation.parent;
       if (current != null) {
         final Animation<double> currentTrain = current is TrainHoppingAnimation ? current.currentTrain : current;
         final Animation<double> nextTrain = nextRoute._animation;
-        if (currentTrain.value == nextTrain.value) {
+        if (
+          currentTrain.value == nextTrain.value ||
+          nextTrain.status == AnimationStatus.completed ||
+          nextTrain.status == AnimationStatus.dismissed
+        ) {
           _setSecondaryAnimation(nextTrain, nextRoute.completed);
         } else {
+          // Two trains animate at different values. We have to do train hopping.
+          // There are three possibilities of train hopping:
+          //  1. We hop on the nextTrain when two trains meet in the middle using
+          //     TrainHoppingAnimation.
+          //  2. There is no chance to hop on nextTrain because two trains never
+          //     cross each other. We have to directly set the animation to
+          //     nextTrain once the nextTrain stops animating.
+          //  3. A new _updateSecondaryAnimation is called before train hopping
+          //     finishes. We leave a listener remover for the next call to
+          //     properly clean up the existing train hopping.
           TrainHoppingAnimation newAnimation;
+          void _jumpOnAnimationEnd(AnimationStatus status) {
+            switch (status) {
+              case AnimationStatus.completed:
+              case AnimationStatus.dismissed:
+                // The nextTrain has stopped animating without train hopping.
+                // Directly sets the secondary animation and disposes the
+                // TrainHoppingAnimation.
+                _setSecondaryAnimation(nextTrain, nextRoute.completed);
+                if (_trainHoppingListenerRemover != null) {
+                  _trainHoppingListenerRemover();
+                  _trainHoppingListenerRemover = null;
+                }
+                break;
+              case AnimationStatus.forward:
+              case AnimationStatus.reverse:
+                break;
+            }
+          }
+          _trainHoppingListenerRemover = () {
+            nextTrain.removeStatusListener(_jumpOnAnimationEnd);
+            newAnimation?.dispose();
+          };
+          nextTrain.addStatusListener(_jumpOnAnimationEnd);
           newAnimation = TrainHoppingAnimation(
             currentTrain,
             nextTrain,
             onSwitchedTrain: () {
               assert(_secondaryAnimation.parent == newAnimation);
               assert(newAnimation.currentTrain == nextRoute._animation);
+              // We can hop on the nextTrain, so we don't need to listen to
+              // whether the nextTrain has stopped.
               _setSecondaryAnimation(newAnimation.currentTrain, nextRoute.completed);
-              newAnimation.dispose();
+              if (_trainHoppingListenerRemover != null) {
+                _trainHoppingListenerRemover();
+                _trainHoppingListenerRemover = null;
+              }
             },
           );
           _setSecondaryAnimation(newAnimation, nextRoute.completed);
-        }
-        if (current is TrainHoppingAnimation) {
-          current.dispose();
         }
       } else {
         _setSecondaryAnimation(nextRoute._animation, nextRoute.completed);
@@ -287,11 +339,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     } else {
       _setSecondaryAnimation(kAlwaysDismissedAnimation);
     }
+    // Finally, we dispose any previous train hopping animation because it
+    // has been successfully updated at this point.
+    if (previousTrainHoppingListenerRemover != null) {
+      previousTrainHoppingListenerRemover();
+    }
   }
 
   void _setSecondaryAnimation(Animation<double> animation, [Future<dynamic> disposed]) {
     _secondaryAnimation.parent = animation;
-    // Release the reference to the next route's animation when that route
+    // Releases the reference to the next route's animation when that route
     // is disposed.
     disposed?.then((dynamic _) {
       if (_secondaryAnimation.parent == animation) {

@@ -26,12 +26,39 @@ void main() {
   String analyzerSeparator;
   FileSystem fileSystem;
   Platform platform;
-  Logger logger;
+  BufferLogger logger;
   AnsiTerminal terminal;
   ProcessManager processManager;
   Directory tempDir;
   String projectPath;
   File libMain;
+
+  Future<void> runCommand({
+    FlutterCommand command,
+    List<String> arguments,
+    List<String> statusTextContains,
+    List<String> errorTextContains,
+    bool toolExit = false,
+    String exitMessageContains,
+  }) async {
+    try {
+      arguments.insert(0, '--flutter-root=${Cache.flutterRoot}');
+      await createTestCommandRunner(command).run(arguments);
+      expect(toolExit, isFalse, reason: 'Expected ToolExit exception');
+    } on ToolExit catch (e) {
+      if (!toolExit) {
+        testLogger.clear();
+        rethrow;
+      }
+      if (exitMessageContains != null) {
+        expect(e.message, contains(exitMessageContains));
+      }
+    }
+    assertContains(logger.statusText, statusTextContains);
+    assertContains(logger.errorText, errorTextContains);
+
+    logger.clear();
+  }
 
   void _createDotPackages(String projectPath) {
     final StringBuffer flutterRootUri = StringBuffer('file://');
@@ -312,33 +339,6 @@ void assertContains(String text, List<String> patterns) {
       expect(text, contains(pattern));
     }
   }
-}
-
-Future<void> runCommand({
-  FlutterCommand command,
-  List<String> arguments,
-  List<String> statusTextContains,
-  List<String> errorTextContains,
-  bool toolExit = false,
-  String exitMessageContains,
-}) async {
-  try {
-    arguments.insert(0, '--flutter-root=${Cache.flutterRoot}');
-    await createTestCommandRunner(command).run(arguments);
-    expect(toolExit, isFalse, reason: 'Expected ToolExit exception');
-  } on ToolExit catch (e) {
-    if (!toolExit) {
-      testLogger.clear();
-      rethrow;
-    }
-    if (exitMessageContains != null) {
-      expect(e.message, contains(exitMessageContains));
-    }
-  }
-  assertContains(testLogger.statusText, statusTextContains);
-  assertContains(testLogger.errorText, errorTextContains);
-
-  testLogger.clear();
 }
 
 const String mainDartSrc = r'''

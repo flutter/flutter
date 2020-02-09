@@ -112,6 +112,13 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   final int length;             // The number of fields. Ranges from 1-3.
   final String originalString;  // Original un-parsed locale string.
 
+  String camelCase() {
+    return originalString
+      .split('_')
+      .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
+      .join('');
+  }
+
   @override
   bool operator ==(Object other) {
     return other is LocaleInfo
@@ -218,13 +225,6 @@ void checkCwdIsRepoRoot(String commandName) {
       'current working directory is: ${Directory.current.path}'
     );
   }
-}
-
-String camelCase(LocaleInfo locale) {
-  return locale.originalString
-    .split('_')
-    .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
-    .join('');
 }
 
 GeneratorOptions parseArgs(List<String> rawArgs) {
@@ -364,7 +364,7 @@ String generateClassDeclaration(
   String classNamePrefix,
   String superClass,
 ) {
-  final String camelCaseName = camelCase(locale);
+  final String camelCaseName = locale.camelCase();
   return '''
 
 /// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).

@@ -21,6 +21,8 @@ const AssetBundleFactory _kManifestFactory = _ManifestAssetBundleFactory();
 
 const String defaultManifestPath = 'pubspec.yaml';
 
+const String kFontManifestJson = 'FontManifest.json';
+
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
@@ -71,7 +73,6 @@ class _ManifestAssetBundle implements AssetBundle {
   DateTime _lastBuildTimestamp;
 
   static const String _assetManifestJson = 'AssetManifest.json';
-  static const String _fontManifestJson = 'FontManifest.json';
   static const String _fontSetMaterial = 'material';
   static const String _license = 'LICENSE';
 
@@ -242,7 +243,7 @@ class _ManifestAssetBundle implements AssetBundle {
 
     entries[_assetManifestJson] = _createAssetManifest(assetVariants);
 
-    entries[_fontManifestJson] = DevFSStringContent(json.encode(fonts));
+    entries[kFontManifestJson] = DevFSStringContent(json.encode(fonts));
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
     entries[_license] = _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);

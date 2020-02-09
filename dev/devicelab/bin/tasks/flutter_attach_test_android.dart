@@ -128,7 +128,7 @@ void main() {
         // If the next line fails, your device may not support regexp search.
         final String observatoryLine = await device.adb(<String>['logcat', '-e', 'Observatory listening on http:', '-m', '1', '-T', currentTime]);
         print('Found observatory line: $observatoryLine');
-        final String observatoryUri = RegExp('Observatory listening on ((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)').firstMatch(observatoryLine)[1];
+        final String observatoryUri = RegExp(r'Observatory listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)').firstMatch(observatoryLine)[1];
         print('Extracted observatory port: $observatoryUri');
 
         section('Launching attach with given port');
