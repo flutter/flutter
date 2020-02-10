@@ -21,6 +21,7 @@ class BuildMacosCommand extends BuildSubCommand {
     addSplitDebugInfoOption();
     usesTargetOption();
     addBuildModeFlags();
+    addDartObfuscationOption();
   }
 
   @override

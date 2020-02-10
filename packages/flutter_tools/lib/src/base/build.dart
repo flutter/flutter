@@ -94,6 +94,7 @@ class AOTSnapshotter {
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
     @required String splitDebugInfo,
+    @required String dartObfuscationInfo,
     bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
@@ -147,8 +148,15 @@ class AOTSnapshotter {
     // multiple debug files.
     final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
     final String debugFilename = 'app.$archName.symbols';
-    if (splitDebugInfo?.isNotEmpty ?? false) {
+    final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
+    if (shouldSplitDebugInfo) {
       globals.fs.directory(splitDebugInfo)
+        .createSync(recursive: true);
+    }
+    final String obfuscationFilename = 'app.$archName.map.json';
+    final bool shouldObfuscate = dartObfuscationInfo?.isNotEmpty ?? false;
+    if (shouldObfuscate) {
+      globals.fs.directory(dartObfuscationInfo)
         .createSync(recursive: true);
     }
 
@@ -157,9 +165,13 @@ class AOTSnapshotter {
       // Faster async/await
       '--no-causal-async-stacks',
       '--lazy-async-stacks',
-      if (splitDebugInfo?.isNotEmpty ?? false) ...<String>[
+      if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
         '--save-debugging-info=${globals.fs.path.join(splitDebugInfo, debugFilename)}'
+      ],
+      if (shouldObfuscate) ...<String>[
+        '--obfuscate',
+        '--save-obfuscation-map=${globals.fs.path.join(dartObfuscationInfo, obfuscationFilename)}',
       ]
     ]);
 

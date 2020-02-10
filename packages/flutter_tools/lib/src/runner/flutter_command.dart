@@ -108,6 +108,7 @@ class FlutterOptions {
   static const String kFileSystemRoot = 'filesystem-root';
   static const String kFileSystemScheme = 'filesystem-scheme';
   static const String kSplitDebugInfoOption = 'split-debug-info';
+  static const String kDartObfuscationOption = 'obfuscate';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -381,6 +382,17 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addDartObfuscationOption() {
+  argParser.addOption(FlutterOptions.kDartObfuscationOption,
+      help: 'In a release build, this flag removes identifiers and replaces them '
+        'with randomized values for the purposes of source code obfuscation. The '
+        'mapping between the values and the original identifiers is stored in a '
+        'separate file. The value of this flag should be a directory where the '
+        'obfuscation map can be stored for later use.',
+      valueHelp: '/project-name/v1.2.3/',
+    );
+  }
+
   void addTreeShakeIconsFlag() {
     argParser.addFlag('tree-shake-icons',
       negatable: true,
@@ -520,6 +532,9 @@ abstract class FlutterCommand extends Command<void> {
       treeShakeIcons: argParser.options.containsKey('tree-shake-icons')
           ? boolArg('tree-shake-icons')
           : kIconTreeShakerEnabledDefault,
+      dartObfuscation: argParser.options.containsKey(FlutterOptions.kDartObfuscationOption)
+          ? stringArg(FlutterOptions.kDartObfuscationOption)
+          : null,
     );
   }
 

@@ -40,6 +40,7 @@ abstract class AotAssemblyBase extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final String dartObfuscationInfo = environment.defines[kDartObfuscation];
     final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
       ?.split(' ')
       ?.map(getIOSArchForName)
@@ -63,6 +64,7 @@ abstract class AotAssemblyBase extends Target {
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
+        dartObfuscationInfo: dartObfuscationInfo,
       ));
     }
     final List<int> results = await Future.wait(pending);

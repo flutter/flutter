@@ -93,6 +93,7 @@ class AotBuilder {
             bitcode: bitcode,
             quiet: quiet,
             splitDebugInfo: null,
+            dartObfuscationInfo: null,
           ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
@@ -130,6 +131,7 @@ class AotBuilder {
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           bitcode: false,
           splitDebugInfo: null,
+          dartObfuscationInfo: null,
         );
         if (snapshotExitCode != 0) {
           status?.cancel();

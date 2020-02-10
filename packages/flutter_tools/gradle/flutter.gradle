@@ -607,6 +607,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('split-debug-info')) {
             splitDebugInfoValue = project.property('split-debug-info')
         }
+        String dartObfuscationValue = null
+        if (project.hasProperty('dart-obfuscation')) {
+            dartObfuscationValue = project.property('dart-obfuscation')
+        }
         Boolean treeShakeIconsOptionsValue = false
         if (project.hasProperty('tree-shake-icons')) {
             treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
@@ -647,6 +651,7 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
                 treeShakeIcons treeShakeIconsOptionsValue
+                dartObfuscation dartObfuscationValue
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -783,6 +788,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String splitDebugInfo
     @Optional @Input
     Boolean treeShakeIcons
+    @Optional @Input
+    String dartObfuscation
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -844,6 +851,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (treeShakeIcons == true) {
                 args "-dTreeShakeIcons=true"
+            }
+            if (dartObfuscation != null) {
+                args "-dDartObfuscation=${dartObfuscation}"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
