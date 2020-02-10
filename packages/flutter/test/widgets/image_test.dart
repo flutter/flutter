@@ -23,6 +23,10 @@ Future<ui.Image> createTestImage([List<int> bytes = kTransparentImage]) async {
 }
 
 void main() {
+  setUp(() {
+    DebouncingImageProvider.seenKeys.clear();
+  });
+
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestImageProvider imageProvider1 = TestImageProvider();
