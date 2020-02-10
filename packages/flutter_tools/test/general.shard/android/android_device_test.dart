@@ -679,6 +679,76 @@ flutter:
       ProcessManager: () => mockProcessManager,
     });
   });
+
+  group('logReader', () {
+    ProcessManager mockProcessManager;
+    AndroidSdk mockAndroidSdk;
+
+    setUp(() {
+      mockAndroidSdk = MockAndroidSdk();
+      mockProcessManager = MockProcessManager();
+
+      when(mockProcessManager.run(
+        argThat(contains('getprop')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('[ro.build.version.sdk]: [28]');
+        final ProcessResult result = ProcessResult(1, 0, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
+      });
+    });
+
+    testUsingContext('calls adb logcat with expected flags', () async {
+      const String kLastLogcatTimestamp = '11-27 15:39:04.506';
+      when(mockAndroidSdk.adbPath).thenReturn('adb');
+      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
+        .thenReturn(ProcessResult(0, 0, '$kLastLogcatTimestamp I/flutter: irrelevant', ''));
+
+      final Completer<void> logcatCompleter = Completer<void>();
+      when(mockProcessManager.start(argThat(contains('logcat'))))
+        .thenAnswer((_) {
+          logcatCompleter.complete();
+          return Future<Process>.value(createMockProcess());
+        });
+
+      final AndroidDevice device = AndroidDevice('1234');
+      final DeviceLogReader logReader = device.getLogReader();
+      logReader.logLines.listen((_) {});
+      await logcatCompleter.future;
+
+      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', kLastLogcatTimestamp]))
+        .called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('calls adb logcat with expected flags when the device logs are empty', () async {
+      when(mockAndroidSdk.adbPath).thenReturn('adb');
+      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
+        .thenReturn(ProcessResult(0, 0, '', ''));
+
+      final Completer<void> logcatCompleter = Completer<void>();
+      when(mockProcessManager.start(argThat(contains('logcat'))))
+        .thenAnswer((_) {
+          logcatCompleter.complete();
+          return Future<Process>.value(createMockProcess());
+        });
+
+      final AndroidDevice device = AndroidDevice('1234');
+      final DeviceLogReader logReader = device.getLogReader();
+      logReader.logLines.listen((_) {});
+      await logcatCompleter.future;
+
+      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', '']))
+        .called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
