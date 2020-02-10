@@ -451,19 +451,12 @@ task:
     CPU: 2
     MEMORY: 8G
   artifacts_cache:
-    folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    folder: bin/cache/{artifacts,pkg,dart-sdk}
+    fingerprint_script: echo $OS; cat bin/internal/engine.version; echo 2
     populate_script:
       - git fetch origin
       - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
       - flutter precache
-  flutter_pkg_cache:
-    folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/*.version
-    populate_script:
-      - git fetch origin
-      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-      - flutter precache --no-android --no-ios
   pub_cache:
     folder: $HOME/.pub-cache
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
