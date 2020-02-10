@@ -205,36 +205,42 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       return image.toByteData();
     });
 
-    // Find render objects for texts.
-    final Set<RenderObject> textRenderObjects = <RenderObject>{};
+    List<RenderObject> childrenByPredicate(RenderObject renderObject, bool Function(RenderObject) predicate) {
+      final List<RenderObject> result = <RenderObject>[];
 
-    void collectTextRenderObjects(RenderObject renderObject) {
-      if (renderObject is RenderParagraph || renderObject is RenderEditable) {
-        textRenderObjects.add(renderObject);
+      void collectChildrenByPredicate(RenderObject renderObject) {
+        if (predicate(renderObject)) {
+          result.add(renderObject);
+        }
+
+        renderObject.visitChildrenForSemantics(collectChildrenByPredicate);
       }
-      renderObject.visitChildrenForSemantics(collectTextRenderObjects);
+
+      collectChildrenByPredicate(renderObject);
+
+      return result;
     }
 
-    collectTextRenderObjects(tester.allRenderObjects.first);
+    // Find render objects for texts.
+
+    final Set<RenderObject> textRenderObjects = childrenByPredicate(
+      tester.allRenderObjects.first,
+      (RenderObject renderObject) => renderObject is RenderParagraph || renderObject is RenderEditable,
+    ).toSet();
 
     // Find text elements that contribute to semantics.
 
-    final Iterable<Element> textElements = find.byWidgetPredicate((Widget widget) => widget is Text || widget is EditableText)
+    final Iterable<Element> textElements = find
+        .byWidgetPredicate((Widget widget) => widget is Text || widget is EditableText)
         .evaluate();
 
     final List<Element> textElementsContributingToSemantics = <Element>[];
 
     bool hasTextRenderObjectAsChild(RenderObject renderObject) {
-      final List<RenderObject> textRenderObjectChildren = <RenderObject>[];
-
-      void collectTextRenderObjectChildren(RenderObject renderObject) {
-        if (textRenderObjects.contains(renderObject)) {
-          textRenderObjectChildren.add(renderObject);
-        }
-        renderObject.visitChildrenForSemantics(collectTextRenderObjectChildren);
-      }
-
-      collectTextRenderObjectChildren(renderObject);
+      final List<RenderObject> textRenderObjectChildren = childrenByPredicate(
+        renderObject,
+        (RenderObject childRenderObject) => textRenderObjects.contains(childRenderObject),
+      );
       return textRenderObjectChildren.isNotEmpty;
     }
 
