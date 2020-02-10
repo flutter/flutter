@@ -206,6 +206,18 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       return image.toByteData();
     });
 
+    // Find render objects for texts.
+    final Set<RenderObject> textRenderObjects = <RenderObject>{};
+
+    void collectTextRenderObjects(RenderObject renderObject) {
+      if (renderObject is RenderParagraph) {
+        textRenderObjects.add(renderObject);
+      }
+      renderObject.visitChildrenForSemantics(collectTextRenderObjects);
+    }
+
+    collectTextRenderObjects(tester.allRenderObjects.first);
+
     Future<Evaluation> evaluateNode(SemanticsNode node) async {
       Evaluation result = const Evaluation.pass();
       if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden))
