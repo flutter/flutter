@@ -37,7 +37,8 @@ class Rasterizer {
       final SurfaceFrame frame = surface.acquireFrame(layerTree.frameSize);
       surface.viewEmbedder.frameSize = layerTree.frameSize;
       final SkCanvas canvas = frame.skiaCanvas;
-      final Frame compositorFrame = context.acquireFrame(canvas, surface.viewEmbedder);
+      final Frame compositorFrame =
+          context.acquireFrame(canvas, surface.viewEmbedder);
 
       compositorFrame.raster(layerTree, ignoreRasterCache: true);
       surface.addToScene();
@@ -57,5 +58,9 @@ class Rasterizer {
       final ui.VoidCallback callback = _postFrameCallbacks[i];
       callback();
     }
+    for (int i = 0; i < _frameReferences.length; i++) {
+      _frameReferences[i].value = null;
+    }
+    _frameReferences.clear();
   }
 }
