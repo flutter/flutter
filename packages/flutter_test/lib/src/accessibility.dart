@@ -297,7 +297,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return const Evaluation.pass();
       }
       return Evaluation.fail(
-        '$element:\nExpected contrast ratio of at least '
+        '${element.renderObject.debugSemantics}:\nExpected contrast ratio of at least '
         '$targetContrastRatio but found ${contrastRatio.toStringAsFixed(2)} for a font size of $fontSize. '
         'The computed light color was: ${report.lightColor}, '
         'The computed dark color was: ${report.darkColor}\n'
