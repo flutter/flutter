@@ -166,6 +166,7 @@ void main() {
       '     Semantics\n'
       '     _FocusMarker\n'
       '     Focus\n'
+      '     _FocusTraversalGroupMarker\n'
       '     FocusTraversalGroup\n'
       '     Actions\n'
       '     _ShortcutsMarker\n'

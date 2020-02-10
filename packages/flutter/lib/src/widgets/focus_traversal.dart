@@ -1564,8 +1564,9 @@ class _FocusTraversalGroupMarker extends InheritedWidget {
 ///
 /// _This widget has been deprecated: use [FocusTraversalGroup] instead._
 @Deprecated(
-    'Use FocusTraversalGroup as a replacement for DefaultFocusTraversal. Be aware that FocusTraversalGroup does add an (unfocusable) Focus widget to the hierarchy that DefaultFocusTraversal does not. Use FocusTraversalGroup.of(context) as a replacement for DefaultFocusTraversal.of(context). '
-    'This feature was deprecated after v1.14.3.')
+  'Use FocusTraversalGroup as a replacement for DefaultFocusTraversal. Be aware that FocusTraversalGroup does add an (unfocusable) Focus widget to the hierarchy that DefaultFocusTraversal does not. Use FocusTraversalGroup.of(context) as a replacement for DefaultFocusTraversal.of(context). '
+  'This feature was deprecated after v1.14.3.'
+)
 class DefaultFocusTraversal extends InheritedWidget {
   /// Creates a [DefaultFocusTraversal] object.
   ///
