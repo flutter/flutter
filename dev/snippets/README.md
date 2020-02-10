@@ -16,13 +16,16 @@ in the source code into API documentation, as seen on https://api.flutter.dev/.
 
 ## Types of code blocks
 
-There's two kinds of code blocks.
+There are three kinds of code blocks.
 
-* snippets, which are more or less context-free code snippets that we
+* A `snippet`, which is a more or less context-free code snippet that we
   magically determine how to analyze, and
 
-* samples, which get placed into a full-fledged application, and can
-  be actually executed inline in the documentation using DartPad.
+* A `dartpad` sample, which gets placed into a full-fledged application, and can be actually executed inline in the documentation on the web page using DartPad.
+
+* A `sample`, which gets placed into a full-fledged application, but isn't placed into DartPad in the documentation because it doesn't make sense to do so.
+
+Ideally every sample is a DartPad sample, but some samples don't have any visual representation, and some just don't make sense that way (for example, sample code for setting the notification system UI color on Android won't do anything on the web).
 
 ### Snippet Tool
 
@@ -95,9 +98,9 @@ You can assume that the entire Flutter framework and most common
 
 ![Code sample image](assets/code_sample.png)
 
-The code `sample` tool can expand sample code into full Flutter applications.
+The code `sample` and `dartpad` tools can expand sample code into full Flutter applications.
 These sample applications can be directly copied and used to demonstrate the
-API's functionality in a sample application:
+API's functionality in a sample application, or used with the `flutter create` command to create a local project with the sample code. The `dartpad` samples are embedded into the API docs web page and are live applications in the API documentation.
 
 ```dart
 /// {@tool sample --template=stateless_widget_material}
@@ -129,21 +132,23 @@ API's functionality in a sample application:
 This uses the skeleton for [application](config/skeletons/sample.html)
 snippets.
 
-Code `sample` also allow for quick Flutter app generation using the following command:
+The `sample` and `dartpad` tools also allow for quick Flutter app generation using the following command:
 
 ```bash
 flutter create --sample=[directory.File.sampleNumber] [name_of_project_directory]
 ```
 
+This command is displayed as part of the sample in the API docs.
+
 #### Templates
 
 In order to support showing an entire app when you click on the right tab of
-the code sample UI, we have to be able to insert the `sample` block into the
+the code sample UI, we have to be able to insert the `sample` or `dartpad` block into the
 template and instantiate the right parts.
 
 To do this, there is a [config/templates](config/templates) directory that
 contains a list of templates. These templates represent an entire app that the
-`sample` can be placed into, basically a replacement for `lib/main.dart` in a
+`sample` or `dartpad` can be placed into, basically a replacement for `lib/main.dart` in a
 flutter app package.
 
 For more information about how to create, use, or update templates, see
@@ -161,7 +166,7 @@ A skeleton (in relation to this tool) is an HTML template into which the Dart
 code blocks and descriptions are interpolated.
 
 There is currently one skeleton for
-[application](config/skeletons/sample.html) samples and one for
+[application](config/skeletons/sample.html) samples, one for [dartpad](config/skeletons/dartpad-sample.html) and one for
 [snippet](config/skeletons/snippet.html) code samples, but there could be more.
 
 Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
@@ -189,3 +194,19 @@ generating a local copy of the API documentation.
 search bar will not work locally, so open `./dev/docs/doc/index.html` to
 navigate through the documentation, or search `./dev/docs/doc/flutter` for your
 page of interest.
+
+Note that generating the sample output will not allow you to run your code in DartPad, because DartPad pulls the code it runs from the appropriate docs server (master or stable).
+
+Copy your code and paste it into a regular DartPad instance to test if it runs in DartPad.  You can get the code that will be produced by the interpolation of your code into a template by running the sample analysis locally (see the next section), and pasting the output file into a dartpad at https://dartpad.dartlang.org.
+
+## Running sample analysis locally
+
+If all you want to do is analyze the sample code you have written locally, then generating the entire docs output takes a long time.
+
+Instead, you can run the analysis locally with this command from the Flutter root:
+
+```
+TMPDIR=/tmp bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart --temp=samples 
+```
+
+This will analyze the samples, and leave the output in /tmp/samples
