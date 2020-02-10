@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
+import 'dart:math' as math;
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
@@ -170,4 +171,73 @@ void main() async {
       pixelComparison: PixelComparison.precise,
     );
   }, timeout: const Timeout(Duration(seconds: 10)), testOn: 'chrome');
+
+  // NOTE: Chrome in --headless mode does not reproduce the bug that this test
+  //       attempts to reproduce. However, it's still good to have this test
+  //       for potential future regressions related to paint order.
+  test('draws text on top of canvas when transformed and clipped', () async {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontSize: 18,
+    ));
+
+    const String text = 'This text is intentionally very long to make sure that it '
+      'breaks into multiple lines.';
+    builder.addText(text);
+
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 100));
+
+    final Rect canvasSize = Offset.zero & Size(500, 500);
+
+    canvas = BitmapCanvas(canvasSize);
+    canvas.debugChildOverdraw = true;
+
+    final SurfacePaintData pathPaint = SurfacePaintData()
+      ..color = const Color(0xFF7F7F7F)
+      ..style = PaintingStyle.fill;
+
+    const double r = 200.0;
+    const double l = 50.0;
+
+    final Path path = (Path()
+      ..moveTo(-l, -l)
+      ..lineTo(0, -r)
+      ..lineTo(l, -l)
+      ..lineTo(r, 0)
+      ..lineTo(l, l)
+      ..lineTo(0, r)
+      ..lineTo(-l, l)
+      ..lineTo(-r, 0)
+      ..close()).shift(const Offset(250, 250));
+
+    canvas.drawPath(path, pathPaint);
+    canvas.drawParagraph(paragraph, const Offset(180, 50));
+
+    expect(
+      canvas.rootElement.querySelectorAll('p').map<String>((e) => e.innerText).toList(),
+      <String>[text],
+      reason: 'Expected to render text using HTML',
+    );
+
+    final SceneBuilder sb = SceneBuilder();
+    sb.pushTransform(Matrix4.rotationZ(math.pi / 2).storage);
+    sb.pushOffset(0, -500);
+    sb.pushClipRect(canvasSize);
+    sb.pop();
+    sb.pop();
+    sb.pop();
+    final SurfaceScene scene = sb.build();
+    final html.Element sceneElement = scene.webOnlyRootElement;
+
+    sceneElement.querySelector('flt-clip').append(canvas.rootElement);
+    html.document.querySelector('flt-scene-host').append(sceneElement);
+
+    await matchGoldenFile(
+      'bitmap_canvas_draws_text_on_top_of_canvas.png',
+      region: canvasSize,
+      maxDiffRatePercent: 0.0,
+      pixelComparison: PixelComparison.precise,
+    );
+  });
 }
