@@ -807,7 +807,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
-/// {@tool sample --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
 /// The [body] is a [Text] placed in a [Center] in order to center the text
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
@@ -836,7 +836,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
 /// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
 /// order to center the text within the [Scaffold]. The [FloatingActionButton]
@@ -866,7 +866,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
 /// to center the text within the [Scaffold]. The [FloatingActionButton] is
@@ -1098,12 +1098,14 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   ///
-  /// To open the drawer programmatically, use the [ScaffoldState.openDrawer]
-  /// function.
+  /// To open the drawer, use the [ScaffoldState.openDrawer] function.
   ///
-  /// {@tool sample --template=stateful_widget_material}
-  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
-  /// to 0. Then, use [ScaffoldState.openDrawer] to open the drawer.
+  /// To close the drawer, use [Navigator.pop].
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth] to 0.
+  /// Then, use [ScaffoldState.openDrawer] to open the drawer and
+  /// [Navigator.pop] to close it.
   ///
   /// ```dart
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -1112,19 +1114,34 @@ class Scaffold extends StatefulWidget {
   ///   _scaffoldKey.currentState.openDrawer();
   /// }
   ///
+  /// void _closeDrawer() {
+  ///   Navigator.of(context).pop();
+  /// }
+  ///
   /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     key: _scaffoldKey,
-  ///     appBar: AppBar(title: Text('Drawer Demo')),
+  ///     appBar: AppBar(title: const Text('Drawer Demo')),
   ///     body: Center(
   ///       child: RaisedButton(
   ///         onPressed: _openDrawer,
-  ///         child: Text('Open Drawer'),
+  ///         child: const Text('Open Drawer'),
   ///       ),
   ///     ),
   ///     drawer: Drawer(
-  ///       child: Center(child: Text('This is the Drawer')),
+  ///       child: Center(
+  ///         child: Column(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             const Text('This is the Drawer'),
+  ///             RaisedButton(
+  ///               onPressed: _closeDrawer,
+  ///               child: const Text('Close Drawer'),
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
   ///     ),
   ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
   ///   );
@@ -1139,18 +1156,24 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   ///
-  /// To open the drawer programmatically, use the [ScaffoldState.openEndDrawer]
-  /// function.
+  /// To open the drawer, use the [ScaffoldState.openEndDrawer] function.
   ///
-  /// {@tool sample --template=stateful_widget_material}
+  /// To close the drawer, use [Navigator.pop].
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
   /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
-  /// to 0. Then, use [ScaffoldState.openEndDrawer] to open the drawer.
+  /// to 0. Then, use [ScaffoldState.openEndDrawer] to open the drawer and
+  /// [Navigator.pop] to close it.
   ///
   /// ```dart
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openEndDrawer() {
   ///   _scaffoldKey.currentState.openEndDrawer();
+  /// }
+  ///
+  /// void _closeEndDrawer() {
+  ///   Navigator.of(context).pop();
   /// }
   ///
   /// @override
@@ -1165,7 +1188,18 @@ class Scaffold extends StatefulWidget {
   ///       ),
   ///     ),
   ///     endDrawer: Drawer(
-  ///       child: Center(child: Text('This is the Drawer')),
+  ///       child: Center(
+  ///         child: Column(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             const Text('This is the Drawer'),
+  ///             RaisedButton(
+  ///               onPressed: _closeEndDrawer,
+  ///               child: const Text('Close Drawer'),
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
   ///     ),
   ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
   ///   );
@@ -1271,7 +1305,7 @@ class Scaffold extends StatefulWidget {
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
-  /// {@tool sample --template=freeform}
+  /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
   ///
@@ -1324,7 +1358,7 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material}
   /// When the [Scaffold] is actually created in the same `build` function, the
   /// `context` argument to the `build` function can't be used to find the
   /// [Scaffold] (since it's "above" the widget being returned in the widget
@@ -1879,9 +1913,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// of the app. Modal bottom sheets can be created and displayed with the
   /// [showModalBottomSheet] function.
   ///
-  /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_bottom_sheet.mp4}
-  ///
-  /// {@tool sample --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   ///
   /// This example demonstrates how to use `showBottomSheet` to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to

@@ -70,7 +70,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
 /// This will ensure we discard any resources used by the object.
-/// {@tool sample --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example creates a [TextField] with a [TextEditingController] whose
 /// change listener forces the entered text to be lower case and keeps the
 /// cursor at the end of the input.
@@ -872,7 +872,7 @@ class EditableText extends StatefulWidget {
   /// field.
   /// {@endtemplate}
   ///
-  /// {@tool sample --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material}
   /// When a non-completion action is pressed, such as "next" or "previous", it
   /// is often desirable to move the focus to the next or previous field.  To do
   /// this, handle it as in this example, by calling [FocusNode.focusNext] in
