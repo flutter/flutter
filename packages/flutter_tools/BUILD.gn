@@ -46,6 +46,7 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/stack_trace",
     "//third_party/dart-pkg/pub/test",
     "//third_party/dart-pkg/pub/usage",
+    "//third_party/dart-pkg/pub/vm_service",
     "//third_party/dart-pkg/pub/web_socket_channel",
     "//third_party/dart-pkg/pub/webkit_inspection_protocol",
     "//third_party/dart-pkg/pub/xml",
