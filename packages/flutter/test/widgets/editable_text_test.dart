@@ -4194,14 +4194,12 @@ void main() {
         showSelectionHandles: true,
         autofocus: true,
         focusNode: FocusNode(),
-        style: Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
         cursorColor: Colors.blue,
         backgroundCursorColor: Colors.grey,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
         textAlign: TextAlign.right,
-        onSelectionChanged: (TextSelection newSelection, SelectionChangedCause newCause) {
-        },
       ),
     ));
 
