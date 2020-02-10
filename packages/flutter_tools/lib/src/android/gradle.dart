@@ -642,7 +642,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 
   for (final String buildMode in buildModes) {
     globals.printStatus('''
-      ${buildMode}Implementation \'$androidPackage:flutter_$buildMode:$buildNumber\'''');
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber\'''');
   }
 
   globals.printStatus('''

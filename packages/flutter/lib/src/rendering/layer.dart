@@ -30,8 +30,8 @@ class AnnotationEntry<T> {
   /// The annotation object that is found.
   final T annotation;
 
-  /// The target location described by the local coordinate space of the layer
-  /// that contains the annotation.
+  /// The target location described by the local coordinate space of the
+  /// annotation object.
   final Offset localPosition;
 
   @override
@@ -2470,16 +2470,15 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// met.
   final T value;
 
-  /// The size of an optional clipping rectangle, used to control whether a
-  /// position is contained by the annotation.
+  /// The size of the annotated object.
   ///
-  /// If [size] is provided, then the annotation is only added if the target
+  /// If [size] is provided, then the annotation is found only if the target
   /// position is contained by the rectangle formed by [size] and [offset].
   /// Otherwise no such restriction is applied, and clipping can only be done by
   /// the ancestor layers.
   final Size size;
 
-  /// The offset of the optional clipping rectangle that is indicated by [size].
+  /// The position of the annotated object.
   ///
   /// The [offset] defaults to [Offset.zero] if not provided, and is ignored if
   /// [size] is not set.
@@ -2549,7 +2548,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
       final S typedValue = untypedValue as S;
       result.add(AnnotationEntry<S>(
         annotation: typedValue,
-        localPosition: localPosition,
+        localPosition: localPosition - offset,
       ));
     }
     return isAbsorbed;

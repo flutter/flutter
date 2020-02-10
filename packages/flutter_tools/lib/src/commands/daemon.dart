@@ -1000,6 +1000,10 @@ class NotifyingLogger extends Logger {
 
   @override
   bool get hasTerminal => false;
+
+  // This method is only relevant for terminals.
+  @override
+  void clear() { }
 }
 
 /// A running application, started by this daemon.
@@ -1230,6 +1234,10 @@ class _AppRunLogger extends Logger {
 
   @override
   bool get hasTerminal => false;
+
+  // This method is only relevant for terminals.
+  @override
+  void clear() { }
 }
 
 class LogMessage {

@@ -715,6 +715,39 @@ void main() {
       ]);
     }, overrides: contextOverrides);
 
+    testUsingContext('builds shared library for android-arm without dwarf stack traces due to empty string', () async {
+      globals.fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = globals.fs.path.join('build', 'foo');
+      globals.fs.directory(outputPath).createSync(recursive: true);
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+        bitcode: false,
+        splitDebugInfo: '',
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
+      expect(genSnapshot.snapshotType.mode, BuildMode.release);
+      expect(genSnapshot.additionalArgs, <String>[
+        '--deterministic',
+        '--snapshot_kind=app-aot-elf',
+        '--elf=build/foo/app.so',
+        '--strip',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
     testUsingContext('builds shared library for android-arm64', () async {
       globals.fs.file('main.dill').writeAsStringSync('binary magic');
 
