@@ -588,8 +588,8 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
 
 final RegExp _obsRegExp =
   RegExp('An Observatory debugger .* is available at: ');
-final RegExp _obsPortRegExp = RegExp('(\\S+:(\\d+)/\\S*)\$');
-final RegExp _obsUriRegExp = RegExp('((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)');
+final RegExp _obsPortRegExp = RegExp(r'(\S+:(\d+)/\S*)$');
+final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
 /// Tries to extract a port from the string.
 ///
@@ -638,6 +638,13 @@ void checkFileExists(String file) {
 void checkFileNotExists(String file) {
   if (exists(File(file))) {
     throw FileSystemException('Expected file to not exist.', file);
+  }
+}
+
+/// Checks that the directory exists, otherwise throws a [FileSystemException].
+void checkDirectoryExists(String directory) {
+  if (!exists(Directory(directory))) {
+    throw FileSystemException('Expected directory to exist.', directory);
   }
 }
 

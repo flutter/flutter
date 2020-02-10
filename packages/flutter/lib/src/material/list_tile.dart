@@ -317,7 +317,7 @@ enum ListTileControlAffinity {
 /// you're looking for, it's easy to create custom list items with a
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// Here is an example of a custom list item that resembles a Youtube related
 /// video list item created with [Expanded] and [Container] widgets.
@@ -438,7 +438,7 @@ enum ListTileControlAffinity {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
@@ -469,7 +469,7 @@ enum ListTileControlAffinity {
 ///       crossAxisAlignment: CrossAxisAlignment.start,
 ///       children: <Widget>[
 ///         Expanded(
-///           flex: 2,
+///           flex: 1,
 ///           child: Column(
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             children: <Widget>[
@@ -508,7 +508,7 @@ enum ListTileControlAffinity {
 ///                 ),
 ///               ),
 ///               Text(
-///                 '$publishDate · $readDuration ★',
+///                 '$publishDate - $readDuration',
 ///                 style: const TextStyle(
 ///                   fontSize: 12.0,
 ///                   color: Colors.black54,

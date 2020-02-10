@@ -35,6 +35,7 @@ dependencies:
   webkit_inspection_protocol: 0.5.0
   xml: 3.5.0
   yaml: 2.2.0
+  native_stack_traces: 0.2.2
   flutter_goldens_client:
     path: ../flutter_goldens_client
 
@@ -127,4 +128,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 0742
+# PUBSPEC CHECKSUM: 557d

@@ -690,7 +690,7 @@ void main() {
       root.findAllAnnotations<int>(position).entries.toList(),
       _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
-        const AnnotationEntry<int>(annotation: 1, localPosition: position),
+        const AnnotationEntry<int>(annotation: 1, localPosition: Offset(10, 10)),
         const AnnotationEntry<int>(annotation: 1000, localPosition: position),
       ]),
     );

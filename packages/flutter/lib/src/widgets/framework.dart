@@ -533,14 +533,6 @@ abstract class Widget extends DiagnosticableTree {
   static int _debugConcreteSubtype(Widget widget) {
     return widget is StatefulWidget ? 1 :
            widget is StatelessWidget ? 2 :
-           widget is InheritedModel ? 3 :
-           widget is InheritedWidget ? 4 :
-           widget is ParentDataWidget ? 5 :
-           widget is ProxyWidget ? 6 :
-           widget is LeafRenderObjectWidget ? 7 :
-           widget is SingleChildRenderObjectWidget? 8 :
-           widget is MultiChildRenderObjectWidget ? 9 :
-           widget is RenderObjectWidget ? 10 :
            0;
     }
 }
@@ -2931,14 +2923,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   static int _debugConcreteSubtype(Element element) {
     return element is StatefulElement ? 1 :
            element is StatelessElement ? 2 :
-           element is InheritedModelElement ? 3 :
-           element is InheritedElement ? 4 :
-           element is ParentDataElement ? 5 :
-           element is ProxyElement ? 6 :
-           element is LeafRenderObjectElement ? 7 :
-           element is SingleChildRenderObjectElement ? 8 :
-           element is MultiChildRenderObjectElement ? 9 :
-           element is RenderObjectElement ? 10 :
            0;
   }
 
