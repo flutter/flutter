@@ -43,8 +43,8 @@ Channel getChannelForName(String name) {
 
 class FlutterVersion {
   FlutterVersion([this._clock = const SystemClock()]) {
-    _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '));
-    _gitTagVersion = GitTagVersion.determine();
+    _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '), processUtils);
+    _gitTagVersion = GitTagVersion.determine(processUtils);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
@@ -86,11 +86,11 @@ class FlutterVersion {
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel {
     if (_channel == null) {
-      final String channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
+      final String channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}', processUtils);
       final int slash = channel.indexOf('/');
       if (slash != -1) {
         final String remote = channel.substring(0, slash);
-        _repositoryUrl = _runGit('git ls-remote --get-url $remote');
+        _repositoryUrl = _runGit('git ls-remote --get-url $remote', processUtils);
         _channel = channel.substring(slash + 1);
       } else if (channel.isEmpty) {
         _channel = 'unknown';
@@ -114,7 +114,7 @@ class FlutterVersion {
 
   String _frameworkAge;
   String get frameworkAge {
-    return _frameworkAge ??= _runGit(gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '));
+    return _frameworkAge ??= _runGit(gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '), processUtils);
   }
 
   String _frameworkVersion;
@@ -252,7 +252,7 @@ class FlutterVersion {
   /// the branch name will be returned as `'[user-branch]'`.
   String getBranchName({ bool redactUnknownBranches = false }) {
     _branch ??= () {
-      final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
+      final String branch = _runGit('git rev-parse --abbrev-ref HEAD', processUtils);
       return branch == 'HEAD' ? channel : branch;
     }();
     if (redactUnknownBranches || _branch.isEmpty) {
@@ -625,7 +625,7 @@ String _runSync(List<String> command, { bool lenient = true }) {
   return '';
 }
 
-String _runGit(String command) {
+String _runGit(String command, ProcessUtils processUtils) {
   return processUtils.runSync(
     command.split(' '),
     workingDirectory: Cache.flutterRoot,
@@ -684,8 +684,18 @@ class GitTagVersion {
   /// The git hash (or an abbreviation thereof) for this commit.
   final String hash;
 
-  static GitTagVersion determine() {
-    return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags'));
+  /// Whether [other] is equivalent to this version.
+  bool isEquivalent(GitTagVersion other) {
+    return other.x == x &&
+           other.y == y &&
+           other.z == z &&
+        other.hash == hash &&
+      other.hotfix == hotfix &&
+     other.commits == commits;
+  }
+
+  static GitTagVersion determine(ProcessUtils processUtils) {
+    return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags', processUtils));
   }
 
   static GitTagVersion parse(String version) {

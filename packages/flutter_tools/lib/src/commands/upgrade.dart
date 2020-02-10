@@ -53,7 +53,7 @@ class UpgradeCommand extends FlutterCommand {
     return _commandRunner.runCommand(
       boolArg('force'),
       boolArg('continue'),
-      GitTagVersion.determine(),
+      GitTagVersion.determine(processUtils),
       globals.flutterVersion,
     );
   }

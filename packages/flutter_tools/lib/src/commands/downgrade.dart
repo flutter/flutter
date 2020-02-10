@@ -31,16 +31,16 @@ class DowngradeCommand extends FlutterCommand {
     Logger logger,
     ProcessManager processManager,
     FlutterVersion flutterVersion,
-    AnsiTerminal ansiTerminal,
+    AnsiTerminal terminal,
     Stdio stdio,
-  }) : _ansiTerminal = ansiTerminal,
+  }) : _terminal = terminal,
        _flutterVersion = flutterVersion,
        _persistentToolState = persistentToolState,
        _processManager = processManager,
        _stdio = stdio,
        _logger = logger;
 
-  AnsiTerminal _ansiTerminal;
+  AnsiTerminal _terminal;
   FlutterVersion _flutterVersion;
   PersistentToolState _persistentToolState;
   ProcessUtils _processUtils;
@@ -59,7 +59,7 @@ class DowngradeCommand extends FlutterCommand {
     // Note: commands do not necessarily have access to the correct zone injected
     // values when being created. Fields must be lazily instantiated in runCommand,
     // at least until the zone injection is refactored.
-    _ansiTerminal ??= globals.terminal;
+    _terminal ??= globals.terminal;
     _logger ??= globals.logger;
     _flutterVersion ??= globals.flutterVersion;
     _persistentToolState ??= globals.persistentToolState;
@@ -75,8 +75,10 @@ class DowngradeCommand extends FlutterCommand {
         'to switch to an official channel.');
     }
     final GitTagVersion lastFlutterVesion = _persistentToolState.lastActiveVersion(channel);
-    final GitTagVersion currentFlutterVersion = GitTagVersion.determine();
-    if (lastFlutterVesion == null || currentFlutterVersion == lastFlutterVesion) {
+    final GitTagVersion currentFlutterVersion = GitTagVersion.determine(_processUtils);
+    if (lastFlutterVesion == null ||
+        currentFlutterVersion.isEquivalent(lastFlutterVesion) ||
+        lastFlutterVesion.isEquivalent(const GitTagVersion.unknown())) { // condition detections unknown version.
       throwToolExit(
         'There is no previously recorded version for channel "$currentChannel."'
       );
@@ -85,8 +87,8 @@ class DowngradeCommand extends FlutterCommand {
     // If there is a terminal attached, prompt the user to confirm the downgrade.
     final String humanReadableVersion = lastFlutterVesion.frameworkVersionFor(lastFlutterVesion.hash);
     if (_stdio.hasTerminal) {
-      _ansiTerminal.usesTerminalUi = true;
-      final String result = await _ansiTerminal.promptForCharInput(
+      _terminal.usesTerminalUi = true;
+      final String result = await _terminal.promptForCharInput(
         const <String>['y', 'n'],
         prompt: 'Downgrade flutter to version $humanReadableVersion?',
         logger: _logger,
