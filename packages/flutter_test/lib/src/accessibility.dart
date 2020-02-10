@@ -251,12 +251,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     }
 
     Future<Evaluation> evaluateElement(Element element) async {
-      // We need to look up the inherited text properties to determine the
-      // contrast ratio based on text size/weight.
-
-      double fontSize;
-      bool isBold;
-
+      // Determine the rectangle within which we will test the color contrast.
       final RenderBox renderObject = element.renderObject as RenderBox;
 
       final Rect originalPaintBounds = renderObject.paintBounds;
@@ -268,7 +263,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
       );
 
+      // We need to look up the inherited text properties to determine the
+      // contrast ratio based on text size/weight.
       final Widget widget = element.widget;
+      double fontSize;
+      bool isBold;
+
       final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
       if (widget is Text) {
         TextStyle effectiveTextStyle = widget.style;
@@ -284,6 +284,14 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         assert(false);
       }
 
+      double targetContrastRatio;
+      const double tolerance = 0.01;
+      if ((isBold && fontSize > kBoldTextMinimumSize) || (fontSize ?? 12.0) > kLargeTextMinimumSize) {
+        targetContrastRatio = kMinimumRatioLargeText;
+      } else {
+        targetContrastRatio = kMinimumRatioNormalText;
+      }
+
       final List<int> subset = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
       final _ContrastReport report = _ContrastReport(subset);
 
@@ -292,14 +300,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return const Evaluation.pass();
       }
       final double contrastRatio = report.contrastRatio();
-      const double delta = -0.01;
-      double targetContrastRatio;
-      if ((isBold && fontSize > kBoldTextMinimumSize) || (fontSize ?? 12.0) > kLargeTextMinimumSize) {
-        targetContrastRatio = kMinimumRatioLargeText;
-      } else {
-        targetContrastRatio = kMinimumRatioNormalText;
-      }
-      if (contrastRatio - targetContrastRatio >= delta) {
+      if (contrastRatio >= targetContrastRatio - tolerance) {
         return const Evaluation.pass();
       }
       return Evaluation.fail(
