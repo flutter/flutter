@@ -129,7 +129,7 @@ class WebAssetServer implements AssetReader {
       return shelf.Response.notFound('');
     }
 
-    // NOTE: shelf removes trailing `/` for some reason.
+    // NOTE: shelf removes leading `/` for some reason.
     final String requestPath = request.url.path.startsWith('/')
       ?  request.url.path
       : '/${request.url.path}';
@@ -248,9 +248,8 @@ class WebAssetServer implements AssetReader {
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
     // If this is a dart file, it must be on the local file system and is
-    // likely coming from a source map request. Attempt to look in the
-    // local filesystem for it, and return a 404 if it is not found. The tool
-    // doesn't currently consider the case of Dart files as assets.
+    // likely coming from a source map request. The tool doesn't currently
+    // consider the case of Dart files as assets.
     final File dartFile = globals.fs.file(globals.fs.currentDirectory.uri.resolve(path));
     if (dartFile.existsSync()) {
       return dartFile;

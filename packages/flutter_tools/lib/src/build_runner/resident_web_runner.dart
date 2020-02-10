@@ -48,7 +48,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required List<String> dartDefines,
     @required UrlTunneller urlTunneller,
   }) {
-    return _ExperimentalResidentWebRunner(
+    return _ResidentWebRunner(
       device,
       target: target,
       flutterProject: flutterProject,
@@ -337,8 +337,8 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 }
 
-class _ExperimentalResidentWebRunner extends ResidentWebRunner {
-  _ExperimentalResidentWebRunner(
+class _ResidentWebRunner extends ResidentWebRunner {
+  _ResidentWebRunner(
     FlutterDevice device, {
     String target,
     @required FlutterProject flutterProject,

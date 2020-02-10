@@ -463,7 +463,9 @@ abstract class ResidentCompiler {
     List<String> dartDefines,
   }) = DefaultResidentCompiler;
 
-  // TODO(jonahwilliams): remove this hack.
+  // TODO(jonahwilliams): find a better way to configure additional file system
+  // roots from the runner.
+  // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
 
 

@@ -4,6 +4,9 @@
 
 import 'package:meta/meta.dart';
 
+// This logic is taken directly from https://github.com/dart-lang/build/blob/master/build_web_compilers/lib/src/dev_compiler_bootstrap.dart#L272
+// It should be fairly stable, but is otherwise required to interact with the client.js script
+// vendored with DWDS.
 const String _currentDirectoryScript = r'''
 var _currentDirectory = (function () {
   var _url;
@@ -85,7 +88,7 @@ window.\$hotReloadHook = function(modules) {
         // once we've reloaded every module, trigger the hot reload.
         if (reloadCount == modules.length) {
           require(["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
-            // See L81 below for an explanation.
+            // See the doc comment under in generateMainModule.
             window.\$dartRunMain = app[Object.keys(app)[0]].main;
             window.\$hotReload(resolve);
           });
@@ -99,6 +102,14 @@ window.\$hotReloadHook = function(modules) {
 
 /// Generate a synthetic main module which captures the application's main
 /// method.
+///
+/// RE: Object.keys usage in app.main:
+/// This attaches the main entrypoint and hot reload functionality to the window.
+/// The app module will have a single property which contains the actual application
+/// code. The property name is based off of the entrypoint that is generated, for example
+/// the file `foo/bar/baz.dart` will generate a property named approximately
+/// `foo__bar__baz`. Rather than attempt to guess, we assume the first property of
+/// this object is the module.
 String generateMainModule({@required String entrypoint}) {
   return '''/* ENTRYPOINT_EXTENTION_MARKER */
 // baseUrlScript
@@ -178,12 +189,7 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
   dart_sdk._debugger.registerDevtoolsFormatter();
   let voidToNull = () => (voidToNull = dart_sdk.dart.constFn(dart_sdk.dart.fnType(dart_sdk.core.Null, [dart_sdk.dart.void])))();
 
-  // Attach the main entrypoint and hot reload functionality to the window.
-  // The app module will have a single property which contains the actual application
-  // code. The property name is based off of the entrypoint that is generated, for example
-  // the file `foo/bar/baz.dart` will generate a property named approximately
-  // `foo__bar__baz`. Rather than attempt to guess, we assume the first property of
-  // this object is the module.
+  // See the generateMainModule doc comment.
   var child = {};
   child.main = app[Object.keys(app)[0]].main;
   if (window.\$hotReload == null) {
