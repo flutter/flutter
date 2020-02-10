@@ -31,22 +31,19 @@ class SymbolizeCommand extends FlutterCommand {
     argParser.addOption(
       'debug-info',
       abbr: 'd',
-      valueHelp: '/out/android/app.arm64.debug',
-      help: 'A file path to the debug file generated for the version of the '
-        ' application whose stack trace the tool will attempt to symbolicate.'
+      valueHelp: '/out/android/app.arm64.symbols',
+      help: 'A path to the symbols file generated with "--split-debug-info".'
     );
     argParser.addOption(
       'input',
       abbr: 'i',
       valueHelp: '/crashes/stack_trace.err',
-      help: 'A file path containing a Dart stack trace. Only supported when '
-        'paired with the "--output" option.'
+      help: 'A file path containing a Dart stack trace.'
     );
     argParser.addOption(
       'output',
       abbr: 'o',
-      valueHelp: 'A file path for a symbolicated stack trace to be written to. '
-        'Only supported when paired with the "--input" option.'
+      valueHelp: 'A file path for a symbolicated stack trace to be written to.'
     );
   }
 
