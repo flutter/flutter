@@ -36,58 +36,122 @@ class CommandHelp {
   final OutputPreferences _outputPreferences;
 
   CommandHelpOption _L;
-  CommandHelpOption get L => _L ??= _makeOption('L', 'Dump layer tree to the console.', 'debugDumpLayerTree');
+  CommandHelpOption get L => _L ??= _makeOption(
+    'L',
+    'Dump layer tree to the console.',
+    'debugDumpLayerTree',
+  );
 
   CommandHelpOption _P;
-  CommandHelpOption get P => _P ??= _makeOption('P', 'Toggle performance overlay.', 'WidgetsApp.showPerformanceOverlay');
+  CommandHelpOption get P => _P ??= _makeOption(
+    'P',
+    'Toggle performance overlay.',
+    'WidgetsApp.showPerformanceOverlay',
+  );
 
   CommandHelpOption _R;
-  CommandHelpOption get R => _R ??= _makeOption('R', 'Hot restart.');
+  CommandHelpOption get R => _R ??= _makeOption(
+    'R',
+    'Hot restart.',
+  );
 
   CommandHelpOption _S;
-  CommandHelpOption get S => _S ??= _makeOption('S', 'Dump accessibility tree in traversal order.', 'debugDumpSemantics');
+  CommandHelpOption get S => _S ??= _makeOption(
+    'S',
+    'Dump accessibility tree in traversal order.',
+    'debugDumpSemantics',
+  );
 
   CommandHelpOption _U;
-  CommandHelpOption get U => _U ??= _makeOption('U', 'Dump accessibility tree in inverse hit test order.', 'debugDumpSemantics');
+  CommandHelpOption get U => _U ??= _makeOption(
+    'U',
+    'Dump accessibility tree in inverse hit test order.',
+    'debugDumpSemantics',
+  );
 
   CommandHelpOption _a;
-  CommandHelpOption get a => _a ??= _makeOption('a', 'Toggle timeline events for all widget build methods.', 'debugProfileWidgetBuilds');
+  CommandHelpOption get a => _a ??= _makeOption(
+    'a',
+    'Toggle timeline events for all widget build methods.',
+    'debugProfileWidgetBuilds',
+  );
 
   CommandHelpOption _c;
-  CommandHelpOption get c => _c ??= _makeOption('c', 'Clear the screen');
+  CommandHelpOption get c => _c ??= _makeOption(
+    'c',
+    'Clear the screen',
+  );
 
   CommandHelpOption _d;
-  CommandHelpOption get d => _d ??= _makeOption('d', 'Detach (terminate "flutter run" but leave application running).');
+  CommandHelpOption get d => _d ??= _makeOption(
+    'd',
+    'Detach (terminate "flutter run" but leave application running).',
+  );
 
   CommandHelpOption _h;
-  CommandHelpOption get h => _h ??= _makeOption('h', 'Repeat this help message.');
+  CommandHelpOption get h => _h ??= _makeOption(
+    'h',
+    'Repeat this help message.',
+  );
 
   CommandHelpOption _i;
-  CommandHelpOption get i => _i ??= _makeOption('i', 'Toggle widget inspector.', 'WidgetsApp.showWidgetInspectorOverride');
+  CommandHelpOption get i => _i ??= _makeOption(
+    'i',
+    'Toggle widget inspector.',
+    'WidgetsApp.showWidgetInspectorOverride',
+  );
 
   CommandHelpOption _o;
-  CommandHelpOption get o => _o ??= _makeOption('o', 'Simulate different operating systems.', 'defaultTargetPlatform');
+  CommandHelpOption get o => _o ??= _makeOption(
+    'o',
+    'Simulate different operating systems.',
+    'defaultTargetPlatform',
+  );
 
   CommandHelpOption _p;
-  CommandHelpOption get p => _p ??= _makeOption('p', 'Toggle the display of construction lines.', 'debugPaintSizeEnabled');
+  CommandHelpOption get p => _p ??= _makeOption(
+    'p',
+    'Toggle the display of construction lines.',
+    'debugPaintSizeEnabled',
+  );
 
   CommandHelpOption _q;
-  CommandHelpOption get q => _q ??= _makeOption('q', 'Quit (terminate the application on the device).');
+  CommandHelpOption get q => _q ??= _makeOption(
+    'q',
+    'Quit (terminate the application on the device).',
+  );
 
   CommandHelpOption _r;
-  CommandHelpOption get r => _r ??= _makeOption('r', 'Hot reload. $fire$fire$fire');
+  CommandHelpOption get r => _r ??= _makeOption(
+    'r',
+    'Hot reload. $fire$fire$fire',
+  );
 
   CommandHelpOption _s;
-  CommandHelpOption get s => _s ??= _makeOption('s', 'Save a screenshot to flutter.png.');
+  CommandHelpOption get s => _s ??= _makeOption(
+    's',
+    'Save a screenshot to flutter.png.',
+  );
 
   CommandHelpOption _t;
-  CommandHelpOption get t => _t ??= _makeOption('t', 'Dump rendering tree to the console.', 'debugDumpRenderTree');
+  CommandHelpOption get t => _t ??= _makeOption(
+    't',
+    'Dump rendering tree to the console.',
+    'debugDumpRenderTree',
+  );
 
   CommandHelpOption _w;
-  CommandHelpOption get w => _w ??= _makeOption('w', 'Dump widget hierarchy to the console.', 'debugDumpApp');
+  CommandHelpOption get w => _w ??= _makeOption(
+    'w',
+    'Dump widget hierarchy to the console.',
+    'debugDumpApp',
+  );
 
   CommandHelpOption _z;
-  CommandHelpOption get z => _z ??= _makeOption('z', 'Toggle elevation checker.');
+  CommandHelpOption get z => _z ??= _makeOption(
+    'z',
+    'Toggle elevation checker.',
+  );
 
   CommandHelpOption _makeOption(String key, String description, [
     String inParenthesis = '',
@@ -142,25 +206,30 @@ class CommandHelpOption {
   String toString() {
     final StringBuffer message = StringBuffer();
     message.writeAll(<String>[_terminal.bolden(key), description], ' ');
-
-    if (_hasTextInParenthesis) {
-      bool wrap = false;
-      final int maxWidth = math.max(_outputPreferences.wrapColumn ?? 0,  maxLineWidth);
-      int width = maxWidth - (_platform.stdoutSupportsAnsi ? _rawMessageLength + 1 : message.length);
-      final String parentheticalText = '($inParenthesis)';
-      if (width < parentheticalText.length) {
-        width = maxWidth;
-        wrap = true;
-      }
-
-      if (wrap) {
-        message.write('\n');
-      }
-      // pad according to the raw text
-      message.write(''.padLeft(width - parentheticalText.length));
-
-      message.write(_terminal.color(parentheticalText, TerminalColor.grey));
+    if (!_hasTextInParenthesis) {
+      return message.toString();
     }
+
+    bool wrap = false;
+    final int maxWidth = math.max(
+      _outputPreferences.wrapColumn ?? 0,
+      maxLineWidth,
+    );
+    final int adjustedMessageLength = _platform.stdoutSupportsAnsi
+      ? _rawMessageLength + 1
+      : message.length;
+    int width = maxWidth - adjustedMessageLength;
+    final String parentheticalText = '($inParenthesis)';
+    if (width < parentheticalText.length) {
+      width = maxWidth;
+      wrap = true;
+    }
+    if (wrap) {
+      message.write('\n');
+    }
+    // pad according to the raw text
+    message.write(''.padLeft(width - parentheticalText.length));
+    message.write(_terminal.color(parentheticalText, TerminalColor.grey));
     return message.toString();
   }
 

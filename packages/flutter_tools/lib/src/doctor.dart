@@ -258,8 +258,7 @@ class Doctor {
         slowWarningCallback: () => validator.slowWarning,
         timeoutConfiguration: timeoutConfiguration,
         stopwatch: Stopwatch(),
-        supportsColor: globals.terminal.supportsColor,
-        platform: globals.platform,
+        terminal: globals.terminal,
       );
       ValidationResult result;
       try {

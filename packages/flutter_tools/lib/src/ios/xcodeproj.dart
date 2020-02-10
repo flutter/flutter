@@ -314,9 +314,8 @@ class XcodeProjectInterpreter {
     final Status status = Status.withSpinner(
       timeout: const TimeoutConfiguration().fastOperation,
       timeoutConfiguration: const TimeoutConfiguration(),
-      platform: _platform,
       stopwatch: Stopwatch(),
-      supportsColor: _terminal.supportsColor,
+      terminal: _terminal,
     );
     final List<String> showBuildSettingsCommand = <String>[
       _executable,
