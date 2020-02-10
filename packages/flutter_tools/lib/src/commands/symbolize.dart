@@ -7,8 +7,6 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:native_stack_traces/native_stack_traces.dart';
-import 'package:native_stack_traces/src/elf.dart'; // ignore: implementation_imports
-import 'package:native_stack_traces/src/reader.dart'; // ignore: implementation_imports
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -26,7 +24,7 @@ class SymbolizeCommand extends FlutterCommand {
   SymbolizeCommand({
     @required Stdio stdio,
     @required FileSystem fileSystem,
-    DwarfSymbolicationService dwarfSymbolicationService = const DwarfSymbolicationService(),
+    DwarfSymbolizationService dwarfSymbolicationService = const DwarfSymbolizationService(),
   }) : _stdio = stdio,
        _fileSystem = fileSystem,
        _dwarfSymbolicationService = dwarfSymbolicationService {
@@ -54,10 +52,10 @@ class SymbolizeCommand extends FlutterCommand {
 
   final Stdio _stdio;
   final FileSystem _fileSystem;
-  final DwarfSymbolicationService _dwarfSymbolicationService;
+  final DwarfSymbolizationService _dwarfSymbolicationService;
 
   @override
-  String get description => 'symbolicate a stack trace from an AOT compiled flutter application.';
+  String get description => 'Symbolize a stack trace from an AOT compiled flutter application.';
 
   @override
   String get name => 'symbolize';
@@ -119,8 +117,8 @@ class SymbolizeCommand extends FlutterCommand {
 }
 
 /// A service which decodes stack traces from Dart applications.
-class DwarfSymbolicationService {
-  const DwarfSymbolicationService();
+class DwarfSymbolizationService {
+  const DwarfSymbolizationService();
 
   /// Decode a stack trace from [input] and place the results in [output].
   ///
@@ -134,23 +132,34 @@ class DwarfSymbolicationService {
     @required IOSink output,
     @required Uint8List symbols,
   }) async {
-    final Dwarf dwarf = Dwarf.fromElf(Elf.fromReader(Reader.fromTypedData(symbols)));
+    final Dwarf dwarf = Dwarf.fromBytes(symbols);
     if (dwarf == null) {
       throwToolExit('Failed to decode symbols file');
     }
 
     final Completer<void> onDone = Completer<void>();
-    input
+    StreamSubscription<void> subscription;
+    subscription = input
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
       .transform(DwarfStackTraceDecoder(dwarf, includeInternalFrames: true))
-      .listen(output.writeln, onDone: onDone.complete, onError: onDone.completeError);
+      .listen((String line) {
+        try {
+          output.writeln(line);
+        } on Exception catch(e, s) {
+          subscription.cancel().whenComplete(() {
+          if (!onDone.isCompleted) {
+            onDone.completeError(e, s);
+          }
+          });
+        }
+      }, onDone: onDone.complete, onError: onDone.completeError);
 
     try {
       await onDone.future;
       await output.close();
     } on Exception catch (err) {
-      throwToolExit('Failed to symbolicated stack trace:\n $err');
+      throwToolExit('Failed to symbolize stack trace:\n $err');
     }
   }
 }
