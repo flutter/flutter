@@ -135,7 +135,7 @@ class MessageLoopTaskQueues
 
   bool HasPendingTasksUnlocked(TaskQueueId queue_id) const;
 
-  const DelayedTask& PeekNextTaskUnlocked(TaskQueueId queue_id,
+  const DelayedTask& PeekNextTaskUnlocked(TaskQueueId owner,
                                           TaskQueueId& top_queue_id) const;
 
   fml::TimePoint GetNextWakeTimeUnlocked(TaskQueueId queue_id) const;

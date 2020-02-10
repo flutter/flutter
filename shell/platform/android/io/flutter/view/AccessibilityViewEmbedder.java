@@ -364,7 +364,7 @@ final class AccessibilityViewEmbedder {
       MotionEvent.PointerCoords originCoords = new MotionEvent.PointerCoords();
       event.getPointerCoords(i, originCoords);
 
-      pointerCoords[i] = new MotionEvent.PointerCoords((originCoords));
+      pointerCoords[i] = new MotionEvent.PointerCoords(originCoords);
       pointerCoords[i].x -= displayBounds.left;
       pointerCoords[i].y -= displayBounds.top;
     }
@@ -399,7 +399,7 @@ final class AccessibilityViewEmbedder {
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
+      if (!(o instanceof ViewAndId)) return false;
       ViewAndId viewAndId = (ViewAndId) o;
       return id == viewAndId.id && view.equals(viewAndId.view);
     }
