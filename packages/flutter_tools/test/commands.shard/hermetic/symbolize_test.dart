@@ -33,7 +33,7 @@ void main() {
     command = SymbolizeCommand(
       stdio: stdio,
       fileSystem: fileSystem,
-      dwarfSymbolicationService: mockDwarfSymbolizationService,
+      dwarfSymbolizationService: mockDwarfSymbolizationService,
     );
     applyMocksToCommand(command);
   });
