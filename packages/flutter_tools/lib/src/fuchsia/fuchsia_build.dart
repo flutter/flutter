@@ -85,7 +85,7 @@ Future<void> _genSnapshot(
   final String appName = fuchsiaProject.project.manifest.appName;
   final String dilPath = globals.fs.path.join(outDir, '$appName.dil');
 
-  final String elf = globals.fs.path.join('elf.aotsnapshot');
+  final String elf = globals.fs.path.join(outDir, 'elf.aotsnapshot');
 
   final String genSnapshot = globals.artifacts.getArtifactPath(
     Artifact.genSnapshot,
