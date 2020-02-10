@@ -276,11 +276,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       }
 
       final List<int> subset = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
-      // Node was too far off screen.
-      if (subset.isEmpty) {
-        return const Evaluation.pass();
-      }
       final _ContrastReport report = _ContrastReport(subset);
+
       // If rectangle is empty, pass the test.
       if (report.isEmptyRect) {
         return const Evaluation.pass();
@@ -312,27 +309,6 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     }
 
     return result;
-  }
-
-  // Skip routes which might have labels, and nodes without any text.
-  bool _shouldSkipNode(SemanticsData data) {
-    if (data.hasFlag(ui.SemanticsFlag.scopesRoute))
-      return true;
-    if (data.label?.trim()?.isEmpty == true && data.value?.trim()?.isEmpty == true)
-      return true;
-    return false;
-  }
-
-  // Returns a rect that is entirely on screen, or null if it is too far off.
-  //
-  // Given a pixel buffer based on the physical window size, can we actually
-  // get all the data from this node? allow a small delta overlap before
-  // culling the node.
-  bool _isNodeOffScreen(Rect paintBounds, ui.Window window) {
-    return paintBounds.top < -50.0
-      || paintBounds.left <  -50.0
-      || paintBounds.bottom > (window.physicalSize.height * window.devicePixelRatio) + 50.0
-      || paintBounds.right > (window.physicalSize.width * window.devicePixelRatio)  + 50.0;
   }
 
   @override
