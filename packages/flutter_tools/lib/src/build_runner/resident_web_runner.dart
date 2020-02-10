@@ -403,7 +403,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
     );
     final Uri url = await device.devFS.create();
     if (debuggingOptions.buildInfo.isDebug) {
-      await _updateDevFS(fullRestart: true);
+      final UpdateFSReport report = await _updateDevFS(fullRestart: true);
+      if (!report.success) {
+        globals.printError('Failed to compile application.');
+        return 1;
+      }
       device.generator.accept();
     } else {
        await buildWeb(

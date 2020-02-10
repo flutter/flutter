@@ -428,6 +428,35 @@ void main() {
   }, overrides: <Type, Generator>{
   }));
 
+  test('Exits when initial compile fails', () => testbed.run(() async {
+    _setupMocks();
+    when(mockWebDevFS.update(
+      mainPath: anyNamed('mainPath'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      trackWidgetCreation: true,
+    )).thenAnswer((Invocation _) async {
+      return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
+    });
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+
+    expect(await residentWebRunner.run(), 1);
+    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+  }, overrides: <Type, Generator>{
+    Usage: () => MockFlutterUsage(),
+  }));
+
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
