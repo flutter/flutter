@@ -40,9 +40,6 @@ dartdevc:
     _js_helper:
       uri: "../dart-sdk/lib/_internal/js_dev_runtime/private/js_helper.dart"
 
-    _js_mirrors:
-      uri: "../dart-sdk/lib/_internal/js_dev_runtime/private/js_mirrors.dart"
-
     _js_primitives:
       uri: "../dart-sdk/lib/_internal/js_dev_runtime/private/js_primitives.dart"
 
@@ -80,11 +77,6 @@ dartdevc:
     isolate:
       uri: "../dart-sdk/lib/isolate/isolate.dart"
       patches: "../dart-sdk/lib/_internal/js_dev_runtime/patch/isolate_patch.dart"
-      supported: false
-
-    mirrors:
-      uri: "../dart-sdk/lib/mirrors/mirrors.dart"
-      patches: "../dart-sdk/lib/_internal/js_dev_runtime/patch/mirrors_patch.dart"
       supported: false
 
     math:
@@ -193,11 +185,6 @@ dart2js:
     math:
       uri: "../dart-sdk/lib/math/math.dart"
       patches: "../dart-sdk/lib/_internal/js_runtime/lib/math_patch.dart"
-
-    mirrors:
-      uri: "../dart-sdk/lib/mirrors/mirrors.dart"
-      patches: "../dart-sdk/lib/_internal/js_runtime/lib/mirrors_patch_cfe.dart"
-      supported: false
 
     typed_data:
       uri: "../dart-sdk/lib/typed_data/typed_data.dart"
