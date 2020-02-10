@@ -256,14 +256,18 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
       double fontSize;
       bool isBold;
-      Rect paintBounds;
 
       final RenderBox renderObject = element.renderObject as RenderBox;
-      element.renderObject.paintBounds;
-      paintBounds = Rect.fromPoints(
-        renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
-        renderObject.localToGlobal(element.renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
+
+      final Rect originalPaintBounds = renderObject.paintBounds;
+
+      final Rect inflatedPaintBounds = originalPaintBounds.inflate(4.0);
+
+      final Rect paintBounds = Rect.fromPoints(
+        renderObject.localToGlobal(inflatedPaintBounds.topLeft),
+        renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
       );
+
       final Widget widget = element.widget;
       final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
       if (widget is Text) {
