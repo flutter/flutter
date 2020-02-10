@@ -572,6 +572,7 @@ task:
       depends_on:
         - analyze-linux
       script:
+        - echo "CIRRUS_BASE_BRANCH is ${CIRRUS_BASE_BRANCH}"
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - ./bin/flutter precache
         - dart --enable-asserts ./dev/bots/codesign.dart
