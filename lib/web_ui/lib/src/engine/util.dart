@@ -54,73 +54,52 @@ String matrix4ToCssTransform(Matrix4 matrix) {
   return float64ListToCssTransform(matrix.storage);
 }
 
-/// Converts [matrix] to CSS transform value.
-String matrix4ToCssTransform3d(Matrix4 matrix) {
-  return float64ListToCssTransform3d(matrix.storage);
-}
-
 /// Applies a transform to the [element].
 ///
-/// There are several ways to transform an element. This function chooses
-/// between CSS "transform", "left", "top" or no transform, depending on the
-/// [matrix4] and the current device's screen properties. This function
-/// attempts to avoid issues with text blurriness on low pixel density screens.
+/// See [float64ListToCssTransform] for details on how the CSS value is chosen.
+void setElementTransform(html.Element element, Float64List matrix4) {
+  element.style
+    ..transformOrigin = '0 0 0'
+    ..transform = float64ListToCssTransform(matrix4);
+}
+
+/// Converts [matrix] to CSS transform value.
+///
+/// To avoid blurry text on some screens this function uses a 2D CSS transform
+/// if it detects that [matrix] is a 2D transform. Otherwise, it uses a 3D CSS
+/// transform.
 ///
 /// See also:
 ///  * https://github.com/flutter/flutter/issues/32274
 ///  * https://bugs.chromium.org/p/chromium/issues/detail?id=1040222
-void setElementTransform(html.Element element, Float64List matrix4) {
-  final TransformKind transformKind = transformKindOf(matrix4);
-
-  // On low device-pixel ratio screens using CSS "transform" causes text blurriness
-  // at least on Blink browsers. We therefore prefer using CSS "left" and "top" instead.
-  final bool isHighDevicePixelRatioScreen =
-      EngineWindow.browserDevicePixelRatio > 1.0;
-
-  if (transformKind == TransformKind.scaleAndTranslate2d) {
-    final String cssTransform = float64ListToCssTransform2d(matrix4);
-    element.style
-      ..transformOrigin = '0 0 0'
-      ..transform = cssTransform
-      ..top = null
-      ..left = null;
-  } else if (transformKind == TransformKind.complex || isHighDevicePixelRatioScreen) {
-    final String cssTransform = float64ListToCssTransform3d(matrix4);
-    element.style
-      ..transformOrigin = '0 0 0'
-      ..transform = cssTransform
-      ..top = null
-      ..left = null;
-  } else if (transformKind == TransformKind.translation2d) {
-    final double ty = matrix4[13];
-    final double tx = matrix4[12];
-    element.style
-      ..transformOrigin = null
-      ..transform = null
-      ..left = '${tx}px'
-      ..top = '${ty}px';
+String float64ListToCssTransform(Float64List matrix) {
+  assert(matrix.length == 16);
+  final TransformKind transformKind = transformKindOf(matrix);
+  if (transformKind == TransformKind.transform2d) {
+    return float64ListToCssTransform2d(matrix);
+  } else if (transformKind == TransformKind.complex) {
+    return float64ListToCssTransform3d(matrix);
   } else {
     assert(transformKind == TransformKind.identity);
-    element.style
-      ..transformOrigin = null
-      ..transform = null
-      ..left = null
-      ..top = null;
+    return null;
   }
 }
 
 /// The kind of effect a transform matrix performs.
 enum TransformKind {
   /// No effect.
+  ///
+  /// We do not want to set any CSS properties in this case.
   identity,
 
-  /// A transform that contains only 2d scale and transform.
-  scaleAndTranslate2d,
-
-  /// A translation along either X or Y axes, or both.
-  translation2d,
+  /// A transform that contains only 2d scale, rotation, and translation.
+  ///
+  /// We prefer to use "matrix" instead of "matrix3d" in this case.
+  transform2d,
 
   /// All other kinds of transforms.
+  ///
+  /// In this case we will use "matrix3d".
   complex,
 }
 
@@ -128,41 +107,46 @@ enum TransformKind {
 TransformKind transformKindOf(Float64List matrix) {
   assert(matrix.length == 16);
   final Float64List m = matrix;
-  final double ty = m[13];
-  final double tx = m[12];
 
   // If matrix contains scaling, rotation, z translation or
   // perspective transform, it is not considered simple.
   final bool isSimple2dTransform =
-      // m[0] - scale x is simple
-      m[1] == 0.0 &&
-      m[2] == 0.0 &&
-      m[3] == 0.0 &&
-      m[4] == 0.0 &&
-      // m[5] - scale y is simple
-      m[6] == 0.0 &&
-      m[7] == 0.0 &&
-      m[8] == 0.0 &&
-      m[9] == 0.0 &&
-      m[10] == 1.0 &&
-      m[11] == 0.0 &&
-      // m[12] - x translation is simple
-      // m[13] - y translation is simple
+      m[15] == 1.0 &&  // start reading from the last element to eliminate range checks in subsequent reads.
       m[14] == 0.0 && // z translation is NOT simple
-      m[15] == 1.0;
+      // m[13] - y translation is simple
+      // m[12] - x translation is simple
+      m[11] == 0.0 &&
+      m[10] == 1.0 &&
+      m[9] == 0.0 &&
+      m[8] == 0.0 &&
+      m[7] == 0.0 &&
+      m[6] == 0.0 &&
+      // m[5] - scale y is simple
+      // m[4] - 2D rotation is simple
+      m[3] == 0.0 &&
+      m[2] == 0.0;
+      // m[1] - 2D rotation is simple
+      // m[0] - scale x is simple
 
   if (!isSimple2dTransform) {
     return TransformKind.complex;
   }
 
-  if (m[0] == 1.0 && m[5] == 1.0) {
-    if (ty != 0.0 || tx != 0.0) {
-      return TransformKind.translation2d;
-    } else {
-      return TransformKind.identity;
-    }
+  // From this point on we're sure the transform is 2D, but we don't know if
+  // it's identity or not. To check, we need to look at the remaining elements
+  // that were not checked above.
+  final bool isIdentityTransform =
+      m[0] == 1.0 &&
+      m[1] == 0.0 &&
+      m[4] == 0.0 &&
+      m[5] == 1.0 &&
+      m[12] == 0.0 &&
+      m[13] == 0.0;
+
+  if (isIdentityTransform) {
+    return TransformKind.identity;
   } else {
-    return TransformKind.scaleAndTranslate2d;
+    return TransformKind.transform2d;
   }
 }
 
@@ -172,44 +156,19 @@ bool isIdentityFloat64ListTransform(Float64List matrix) {
   return transformKindOf(matrix) == TransformKind.identity;
 }
 
-/// Converts [matrix] to CSS transform value.
+/// Converts [matrix] to CSS transform 2D matrix value.
+///
+/// The [matrix] must not be a [TransformKind.complex] transform, because CSS
+/// `matrix` can only express 2D transforms. [TransformKind.identity] is
+/// permitted. However, it is inefficient to construct a matrix for an identity
+/// transform. Consider removing the CSS `transform` property from elements
+/// that apply identity transform.
 String float64ListToCssTransform2d(Float64List matrix) {
-  assert (transformKindOf(matrix) == TransformKind.scaleAndTranslate2d);
-  return 'matrix(${matrix[0]},0,0,${matrix[5]},${matrix[12]},${matrix[13]})';
+  assert (transformKindOf(matrix) != TransformKind.complex);
+  return 'matrix(${matrix[0]},${matrix[1]},${matrix[4]},${matrix[5]},${matrix[12]},${matrix[13]})';
 }
 
-/// Converts [matrix] to CSS transform value.
-String float64ListToCssTransform(Float64List matrix) {
-  assert(matrix.length == 16);
-  final Float64List m = matrix;
-  if (m[1] == 0.0 &&
-      m[2] == 0.0 &&
-      m[3] == 0.0 &&
-      m[4] == 0.0 &&
-      m[6] == 0.0 &&
-      m[7] == 0.0 &&
-      m[8] == 0.0 &&
-      m[9] == 0.0 &&
-      m[10] == 1.0 &&
-      m[11] == 0.0 &&
-      // 12 can be anything (translation)
-      // 13 can be anything (translation)
-      m[14] == 0.0 &&
-      m[15] == 1.0) {
-    final double tx = m[12];
-    final double ty = m[13];
-    if (m[0] == 1.0 &&
-          m[5] == 1.0) {
-        return 'translate(${tx}px, ${ty}px)';
-    } else {
-      return 'matrix(${m[0]},0,0,${m[5]},${tx},${ty})';
-    }
-  } else {
-    return 'matrix3d(${m[0]},${m[1]},${m[2]},${m[3]},${m[4]},${m[5]},${m[6]},${m[7]},${m[8]},${m[9]},${m[10]},${m[11]},${m[12]},${m[13]},${m[14]},${m[15]})';
-  }
-}
-
-/// Converts [matrix] to CSS transform value.
+/// Converts [matrix] to a 3D CSS transform value.
 String float64ListToCssTransform3d(Float64List matrix) {
   assert(matrix.length == 16);
   final Float64List m = matrix;
@@ -457,4 +416,20 @@ Float32List offsetListToFloat32List(List<ui.Offset> offsetList) {
     floatList[destIndex + 1] = offsetList[i].dy;
   }
   return floatList;
+}
+
+/// Apply this function to container elements in the HTML render tree (this is
+/// not relevant to semantics tree).
+///
+/// On WebKit browsers this will apply `z-order: 0` to ensure that clips are
+/// applied correctly. Otherwise, the browser will refuse to clip its contents.
+///
+/// Other possible fixes that were rejected:
+///
+/// * Use 3D transform instead of 2D: this does not work because it causes text
+///   blurriness: https://github.com/flutter/flutter/issues/32274
+void applyWebkitClipFix(html.Element containerElement) {
+  if (browserEngine == BrowserEngine.webkit) {
+    containerElement.style.zIndex = '0';
+  }
 }

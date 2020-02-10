@@ -356,7 +356,7 @@ void main() {
       ));
 
       // setEditableSizeAndTransform calls placeElement, so expecting geometry to be applied.
-      expect(editingElement.domElement.style.transform, 'translate(14px, 15px)');
+      expect(editingElement.domElement.style.transform, 'matrix(1, 0, 0, 1, 14, 15)');
       expect(editingElement.domElement.style.width, '13px');
       expect(editingElement.domElement.style.height, '12px');
     });
