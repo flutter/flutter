@@ -196,9 +196,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// the amount of space that has been scrolled beforehand has not exceeded the
 /// main axis extent of the viewport.
 ///
-/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_sizes_child.mp4}
-///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] sizes its [child] to fill the
 /// remaining extent of the viewport in both axes. The icon is centered in the
@@ -234,9 +232,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// [SliverFillRemaining] will defer to the size of its [child] if the
 /// child's size exceeds the remaining space in the viewport.
 ///
-/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_defers_to_child.mp4}
-///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
 /// because the child's extent exceeds that of the remaining extent of the
@@ -278,9 +274,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// [SliverFillRemaining] will defer to the size of its [child] if the
 /// [precedingScrollExtent] exceeded the length of the viewport's main axis.
 ///
-/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_scrolled_beyond.mp4}
-///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
 /// because the [precedingScrollExtent] of the [SliverConstraints] has gone
@@ -335,6 +329,9 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// overscroll area when [fillOverscroll] is true. This sample also features a
 /// button that is pinned to the bottom of the sliver, regardless of size or
 /// overscroll behavior. Try switching [fillOverscroll] to see the difference.
+///
+/// This sample only shows the overscroll behavior on devices that support
+/// overscroll.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {

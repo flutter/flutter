@@ -455,9 +455,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
-/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_modal_bottom_sheet.mp4}
-///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This example demonstrates how to use `showModalBottomSheet` to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
