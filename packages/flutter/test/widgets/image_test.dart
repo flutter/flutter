@@ -1493,6 +1493,13 @@ class TestImage implements ui.Image {
 class DebouncingImageProvider extends ImageProvider<Object> {
   DebouncingImageProvider(this.imageProvider, this.seenKeys);
 
+  /// A set of keys that will only get resolved the _first_ time they are seen.
+  ///
+  /// If an ImageProvider produces the same key for two different image
+  /// configurations, it should only actually resolve once using this provider.
+  /// However, if it does care about image configuration, it should make the
+  /// property or properties it cares about part of the key material it
+  /// produces.
   final Set<Object> seenKeys;
   final ImageProvider<Object> imageProvider;
 
