@@ -200,6 +200,7 @@ class EngineWindow extends ui.Window {
         final MethodCall decoded = codec.decodeMethodCall(data);
         final Map<String, dynamic> message = decoded.arguments;
         switch (decoded.method) {
+          case 'routeUpdated':
           case 'routePushed':
           case 'routeReplaced':
             _browserHistory.setRouteName(message['routeName']);
