@@ -1379,9 +1379,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   // The node that has requested to have the primary focus, but hasn't been
   // given it yet.
   FocusNode _nextFocus;
+
   // The set of nodes that need to notify their listeners of changes at the next
   // update.
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
+
+  // The node that has been marked as needing to be unfocused during the next
+  // focus update.
   FocusNode _unfocusedNode;
 
   void _markDetached(FocusNode node) {
