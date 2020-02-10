@@ -143,6 +143,9 @@ abstract class ResidentWebRunner extends ResidentRunner {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
     } on FileSystemException {
       // Best effort to clean up temp dirs.
+      globals.printTrace(
+        'Failed to clean up temp directory: ${_generatedEntrypointDirectory.path}',
+      );
     }
     if (ChromeLauncher.hasChromeInstance) {
       final Chrome chrome = await ChromeLauncher.connectedInstance;
@@ -443,20 +446,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     );
 
     String reloadModules;
-    if (!debuggingOptions.buildInfo.isDebug) {
-      try {
-        await buildWeb(
-          flutterProject,
-          target,
-          debuggingOptions.buildInfo,
-          debuggingOptions.initializePlatform,
-          dartDefines,
-          false,
-        );
-      } on ToolExit {
-        return OperationResult(1, 'Failed to recompile application.');
-      }
-    } else {
+    if (debuggingOptions.buildInfo.isDebug) {
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS(fullRestart: false);
       if (report.success) {
@@ -469,6 +459,19 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       reloadModules = report.invalidatedModules
         .map((String module) => '"$module"')
         .join(',');
+    } else {
+      try {
+        await buildWeb(
+          flutterProject,
+          target,
+          debuggingOptions.buildInfo,
+          debuggingOptions.initializePlatform,
+          dartDefines,
+          false,
+        );
+      } on ToolExit {
+        return OperationResult(1, 'Failed to recompile application.');
+      }
     }
 
     try {
@@ -480,7 +483,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
         await _wipConnection?.sendCommand('Page.reload', <String, Object>{
           'ignoreCache': !debuggingOptions.buildInfo.isDebug,
         });
-      }  else {
+      } else {
         await _wipConnection?.debugger
             ?.sendCommand('Runtime.evaluate', params: <String, Object>{
           'expression': 'window.\$hotReloadHook([$reloadModules])',
@@ -497,7 +500,6 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
 
     final String verb = fullRestart ? 'Restarted' : 'Reloaded';
     globals.printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
@@ -535,9 +537,10 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
         .childFile('generated_plugin_registrant.dart')
         .absolute.path;
       final Uri generatedImport = packageUriMapper.map(generatedPath);
+      final String importedEntrypoint = packageUriMapper.map(main).toString() ?? 'file://$main';
 
       final String entrypoint = <String>[
-        'import "${packageUriMapper.map(main) ?? 'file://$main'}" as entrypoint;',
+        'import "$importedEntrypoint" as entrypoint;',
         'import "dart:ui" as ui;',
         if (hasWebPlugins)
           'import "package:flutter_web_plugins/flutter_web_plugins.dart";',
@@ -658,7 +661,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
         });
       }
     }
-     if (websocketUri != null) {
+    if (websocketUri != null) {
       globals.printStatus('Debug service listening on $websocketUri');
     }
     appStartedCompleter?.complete();

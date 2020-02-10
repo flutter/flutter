@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/client.dart';
+import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
@@ -41,7 +41,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       .createSync();
     final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
     final bool hasWebPlugins = findPlugins(flutterProject)
-        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+      .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final BuildDaemonClient client = await const BuildDaemonCreator().startBuildDaemon(
       projectDirectory.path,
       release: mode == BuildMode.release,
@@ -62,6 +62,9 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     await for (final BuildResults results in client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
         return result.target == 'web';
+      }, orElse: () {
+        // Assume build failed if we lack any results.
+        return DefaultBuildResult((DefaultBuildResultBuilder b) => b.status == BuildStatus.failed);
       });
       if (result.status == BuildStatus.failed) {
         success = false;
@@ -71,34 +74,35 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         break;
       }
     }
-    if (success && testOutputDir != null) {
-      final Directory rootDirectory = projectDirectory
-        .childDirectory('.dart_tool')
-        .childDirectory('build')
-        .childDirectory('flutter_web');
+    if (!success || testOutputDir == null) {
+      return success;
+    }
+    final Directory rootDirectory = projectDirectory
+      .childDirectory('.dart_tool')
+      .childDirectory('build')
+      .childDirectory('flutter_web');
 
-      final Iterable<Directory> childDirectories = rootDirectory
-        .listSync()
-        .whereType<Directory>();
-      for (final Directory childDirectory in childDirectories) {
-        final String path = globals.fs.path.join(
-          testOutputDir,
-          'packages',
-          globals.fs.path.basename(childDirectory.path),
-        );
-        globals.fsUtils.copyDirectorySync(
-          childDirectory.childDirectory('lib'),
-          globals.fs.directory(path),
-        );
-      }
-      final Directory outputDirectory = rootDirectory
-        .childDirectory(projectName)
-        .childDirectory('test');
+    final Iterable<Directory> childDirectories = rootDirectory
+      .listSync()
+      .whereType<Directory>();
+    for (final Directory childDirectory in childDirectories) {
+      final String path = globals.fs.path.join(
+        testOutputDir,
+        'packages',
+        globals.fs.path.basename(childDirectory.path),
+      );
       globals.fsUtils.copyDirectorySync(
-        outputDirectory,
-        globals.fs.directory(globals.fs.path.join(testOutputDir)),
+        childDirectory.childDirectory('lib'),
+        globals.fs.directory(path),
       );
     }
+    final Directory outputDirectory = rootDirectory
+      .childDirectory(projectName)
+      .childDirectory('test');
+    globals.fsUtils.copyDirectorySync(
+      outputDirectory,
+      globals.fs.directory(globals.fs.path.join(testOutputDir)),
+    );
     return success;
   }
 }
@@ -147,7 +151,8 @@ class BuildDaemonCreator {
       throwToolExit(
         'Incompatible options with current running build daemon.\n\n'
         'Please stop other flutter_tool instances running in this directory '
-        'before starting a new instance with these options.');
+        'before starting a new instance with these options.'
+      );
     }
     return null;
   }
@@ -182,8 +187,21 @@ class BuildDaemonCreator {
     bool initializePlatform,
     WebTestTargetManifest testTargets,
   }) {
-    final String flutterToolsPackages = globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
-    final String buildScript = globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
+    final String flutterToolsPackages = globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      '.packages',
+    );
+    final String buildScript = globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      'lib',
+      'src',
+      'build_runner',
+      'build_script.dart',
+    );
     final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
 
     // On Windows we need to call the snapshot directly otherwise
@@ -239,11 +257,5 @@ class BuildDaemonCreator {
       },
       buildMode: daemon.BuildMode.Manual,
     );
-  }
-
-  /// Retrieve the asset server port for the current daemon.
-  int assetServerPort(Directory workingDirectory) {
-    final String portFilePath = globals.fs.path.join(daemon.daemonWorkspace(workingDirectory.path), '.asset_server_port');
-    return int.tryParse(globals.fs.file(portFilePath).readAsStringSync());
   }
 }

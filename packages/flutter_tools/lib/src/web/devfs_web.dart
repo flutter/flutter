@@ -57,38 +57,38 @@ class WebAssetServer implements AssetReader {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
-      final Packages packages =
-          await loadPackagesFile(Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
+      final Packages packages = await loadPackagesFile(
+        Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
       final WebAssetServer server = WebAssetServer(httpServer, packages, address);
 
-      // In debug builds, spin up DWDS and the full asset server.
-      if (buildMode == BuildMode.debug) {
-        final Dwds dwds = await Dwds.start(
-          assetReader: server,
-          buildResults: const Stream<BuildResult>.empty(),
-          chromeConnection: () async {
-            final Chrome chrome = await ChromeLauncher.connectedInstance;
-            return chrome.chromeConnection;
-          },
-          urlEncoder: urlTunneller,
-          enableDebugging: true,
-          logWriter: (Level logLevel, String message) => globals.printTrace(message)
-        );
-        shelf.Pipeline pipeline = const shelf.Pipeline();
-        if (enableDwds) {
-          pipeline = pipeline.addMiddleware(dwds.middleware);
-        }
-        final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
-        final shelf.Cascade cascade = shelf.Cascade()
-          .add(dwds.handler)
-          .add(dwdsHandler);
-        shelf.serveRequests(httpServer, cascade.handler);
-        server.dwds = dwds;
+      // In release builds deploy a simpler proxy server.
+      if (buildMode != BuildMode.debug) {
+        final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer();
+        shelf.serveRequests(httpServer, releaseAssetServer.handle);
         return server;
       }
-      // Otherwise fall back to a simpler proxy server.
-      final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer();
-      shelf.serveRequests(httpServer, releaseAssetServer.handle);
+      // In debug builds, spin up DWDS and the full asset server.
+      final Dwds dwds = await Dwds.start(
+        assetReader: server,
+        buildResults: const Stream<BuildResult>.empty(),
+        chromeConnection: () async {
+          final Chrome chrome = await ChromeLauncher.connectedInstance;
+          return chrome.chromeConnection;
+        },
+        urlEncoder: urlTunneller,
+        enableDebugging: true,
+        logWriter: (Level logLevel, String message) => globals.printTrace(message)
+      );
+      shelf.Pipeline pipeline = const shelf.Pipeline();
+      if (enableDwds) {
+        pipeline = pipeline.addMiddleware(dwds.middleware);
+      }
+      final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
+      final shelf.Cascade cascade = shelf.Cascade()
+        .add(dwds.handler)
+        .add(dwdsHandler);
+      shelf.serveRequests(httpServer, cascade.handler);
+      server.dwds = dwds;
       return server;
     } on SocketException catch (err) {
       throwToolExit('Failed to bind web development server:\n$err');
@@ -119,8 +119,8 @@ class WebAssetServer implements AssetReader {
     // If the response is `/`, then we are requesting the index file.
     if (request.url.path == '/' || request.url.path.isEmpty) {
       final File indexFile = globals.fs.currentDirectory
-          .childDirectory('web')
-          .childFile('index.html');
+        .childDirectory('web')
+        .childFile('index.html');
       if (indexFile.existsSync()) {
         headers[HttpHeaders.contentTypeHeader] = 'text/html';
         headers[HttpHeaders.contentLengthHeader] = indexFile.lengthSync().toString();
@@ -157,8 +157,10 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final String assetPath = requestPath.replaceFirst('/assets/', '');
-      file = globals.fs.file(globals.fs.path
-          .join(getAssetBuildDirectory(), globals.fs.path.relative(assetPath)));
+      file = globals.fs.file(
+        globals.fs.path.join(getAssetBuildDirectory(),
+        globals.fs.path.relative(assetPath)),
+      );
     }
 
     if (!file.existsSync()) {
@@ -198,19 +200,15 @@ class WebAssetServer implements AssetReader {
     final List<String> modules = <String>[];
     final Uint8List codeBytes = codeFile.readAsBytesSync();
     final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
-    final Map<String, dynamic> manifest =
-        castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
+    final Map<String, dynamic> manifest = castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
     for (final String filePath in manifest.keys) {
       if (filePath == null) {
         globals.printTrace('Invalid manfiest file: $filePath');
         continue;
       }
-      final Map<String, dynamic> offsets =
-          castStringKeyedMap(manifest[filePath]);
-      final List<int> codeOffsets =
-          (offsets['code'] as List<dynamic>).cast<int>();
-      final List<int> sourcemapOffsets =
-          (offsets['sourcemap'] as List<dynamic>).cast<int>();
+      final Map<String, dynamic> offsets = castStringKeyedMap(manifest[filePath]);
+      final List<int> codeOffsets = (offsets['code'] as List<dynamic>).cast<int>();
+      final List<int> sourcemapOffsets = (offsets['sourcemap'] as List<dynamic>).cast<int>();
       if (codeOffsets.length != 2 || sourcemapOffsets.length != 2) {
         globals.printTrace('Invalid manifest byte offsets: $offsets');
         continue;
@@ -232,8 +230,7 @@ class WebAssetServer implements AssetReader {
       final int sourcemapStart = sourcemapOffsets[0];
       final int sourcemapEnd = sourcemapOffsets[1];
       if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
-        globals
-            .printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
+        globals.printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
         continue;
       }
       final Uint8List sourcemapView = Uint8List.view(
@@ -259,28 +256,26 @@ class WebAssetServer implements AssetReader {
     if (segments.first.isEmpty) {
       segments.removeAt(0);
     }
-    // If both of the lookups above failed, the file might have been a package
-    // file which is signaled by a `/packages/<package>/<path>` request.
+    // The file might have been a package file which is signaled by a
+    // `/packages/<package>/<path>` request.
     if (!file.existsSync() && segments.first == 'packages') {
       file = globals.fs.file(_packages.resolve(Uri(
-          scheme: 'package', pathSegments: segments.skip(1))));
+        scheme: 'package', pathSegments: segments.skip(1))));
     }
-    // If it isn't a project source or an asset, it must be a dart SDK source.
-    // or a flutter web SDK source.
+    // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
     if (!file.existsSync()) {
       final Directory dartSdkParent = globals.fs
-          .directory(
-              globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath))
-          .parent;
+        .directory(globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath))
+        .parent;
       file = globals.fs.file(globals.fs.path
-          .joinAll(<String>[dartSdkParent.path, ...segments]));
+        .joinAll(<String>[dartSdkParent.path, ...segments]));
     }
 
     if (!file.existsSync()) {
-      final String flutterWebSdk =
-          globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
-      file = globals.fs.file(globals.fs.path
-          .joinAll(<String>[flutterWebSdk, ...segments]));
+      final String flutterWebSdk = globals.artifacts
+        .getArtifactPath(Artifact.flutterWebSdk);
+      file = globals.fs
+        .file(globals.fs.path.joinAll(<String>[flutterWebSdk, ...segments]));
     }
 
     return file;
@@ -342,10 +337,15 @@ class WebDevFS implements DevFS {
       final DebugConnection debugConnection = useDebugExtension
         ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
         : await dwds.debugConnection(appConnection);
-      if (!firstConnection.isCompleted) {
-        firstConnection.complete(ConnectionResult(appConnection, debugConnection));
-      } else {
+      if (firstConnection.isCompleted) {
         appConnection.runMain();
+      } else {
+        firstConnection.complete(ConnectionResult(appConnection, debugConnection));
+      }
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      globals.printError('Unknown error while waiting for debug connection:$error\n$stackTrace');
+      if (!firstConnection.isCompleted) {
+        firstConnection.completeError(error, stackTrace);
       }
     });
     return firstConnection.future;
@@ -419,27 +419,30 @@ class WebDevFS implements DevFS {
       webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
-          '/main.dart.js',
-          generateBootstrapScript(
-            requireUrl: _filePathToUriFragment(requireJS.path),
-            mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
-            entrypoint: '/$entrypoint.lib.js',
-          ));
+        '/main.dart.js',
+        generateBootstrapScript(
+          requireUrl: _filePathToUriFragment(requireJS.path),
+          mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
+          entrypoint: '/$entrypoint.lib.js',
+        ),
+      );
       webAssetServer.writeFile(
-          '/main_module.bootstrap.js',
-          generateMainModule(
-            entrypoint: '/$entrypoint.lib.js',
-          ));
+        '/main_module.bootstrap.js',
+        generateMainModule(
+          entrypoint: '/$entrypoint.lib.js',
+        ),
+      );
       // TODO(jonahwilliams): switch to DWDS provided APIs when they are ready.
       webAssetServer.writeFile('/basic.digests', '{}');
       webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
-      webAssetServer.writeFile(
-          '/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
+      webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
       // be shared.
       if (bundle != null) {
         await writeBundle(
-            globals.fs.directory(getAssetBuildDirectory()), bundle.entries);
+          globals.fs.directory(getAssetBuildDirectory()),
+          bundle.entries,
+        );
       }
     }
     final DateTime candidateCompileTime = DateTime.now();
@@ -455,8 +458,7 @@ class WebDevFS implements DevFS {
      'org-dartlang-app:///' + globals.fs.path.basename(mainPath),
       invalidatedFiles,
       outputPath: dillOutputPath ??
-          getDefaultApplicationKernelPath(
-              trackWidgetCreation: trackWidgetCreation),
+        getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath: packagesFilePath,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
@@ -481,10 +483,10 @@ class WebDevFS implements DevFS {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
     return UpdateFSReport(
-        success: true,
-        syncedBytes: codeFile.lengthSync(),
-        invalidatedSourcesCount: invalidatedFiles.length)
-      ..invalidatedModules = modules.map(_filePathToUriFragment).toList();
+      success: true,
+      syncedBytes: codeFile.lengthSync(),
+      invalidatedSourcesCount: invalidatedFiles.length,
+    )..invalidatedModules = modules.map(_filePathToUriFragment).toList();
   }
 
   @visibleForTesting
@@ -535,7 +537,6 @@ String _filePathToUriFragment(String path) {
   }
   return path;
 }
-
 
 class ReleaseAssetServer {
   // Locations where source files, assets, or source maps may be located.
