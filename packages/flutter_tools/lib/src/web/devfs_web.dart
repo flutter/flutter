@@ -251,34 +251,42 @@ class WebAssetServer implements AssetReader {
     // likely coming from a source map request. Attempt to look in the
     // local filesystem for it, and return a 404 if it is not found. The tool
     // doesn't currently consider the case of Dart files as assets.
-    File file = globals.fs.file(globals.fs.currentDirectory.uri.resolve(path));
+    final File dartFile = globals.fs.file(globals.fs.currentDirectory.uri.resolve(path));
+    if (dartFile.existsSync()) {
+      return dartFile;
+    }
+
     final List<String> segments = path.split('/');
     if (segments.first.isEmpty) {
       segments.removeAt(0);
     }
+
     // The file might have been a package file which is signaled by a
     // `/packages/<package>/<path>` request.
-    if (!file.existsSync() && segments.first == 'packages') {
-      file = globals.fs.file(_packages.resolve(Uri(
+    if (segments.first == 'packages') {
+      final File packageFile = globals.fs.file(_packages.resolve(Uri(
         scheme: 'package', pathSegments: segments.skip(1))));
+      if (packageFile.existsSync()) {
+        return packageFile;
+      }
     }
+
     // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
-    if (!file.existsSync()) {
-      final Directory dartSdkParent = globals.fs
-        .directory(globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath))
-        .parent;
-      file = globals.fs.file(globals.fs.path
-        .joinAll(<String>[dartSdkParent.path, ...segments]));
+    final Directory dartSdkParent = globals.fs
+      .directory(globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath))
+      .parent;
+    final File dartSdkFile = globals.fs.file(globals.fs.path
+      .joinAll(<String>[dartSdkParent.path, ...segments]));
+    if (dartSdkFile.existsSync()) {
+      return dartSdkFile;
     }
 
-    if (!file.existsSync()) {
-      final String flutterWebSdk = globals.artifacts
-        .getArtifactPath(Artifact.flutterWebSdk);
-      file = globals.fs
-        .file(globals.fs.path.joinAll(<String>[flutterWebSdk, ...segments]));
-    }
+    final String flutterWebSdk = globals.artifacts
+      .getArtifactPath(Artifact.flutterWebSdk);
+    final File webSdkFile = globals.fs
+      .file(globals.fs.path.joinAll(<String>[flutterWebSdk, ...segments]));
 
-    return file;
+    return webSdkFile;
   }
 
   @override
