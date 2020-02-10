@@ -75,5 +75,15 @@ void main() {
       emptyCallback,
     );
     expect(_strategy.path, '/bar/baz2');
+
+    engine.window.sendPlatformMessage(
+      'flutter/navigation',
+      codec.encodeMethodCall(const engine.MethodCall(
+        'routeUpdated',
+        <String, dynamic>{'previousRouteName': '/bar/baz2', 'routeName': '/foo/foo/2'},
+      )),
+      emptyCallback,
+    );
+    expect(_strategy.path, '/foo/foo/2');
   });
 }
