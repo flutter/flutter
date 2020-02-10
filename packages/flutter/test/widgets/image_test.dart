@@ -23,10 +23,6 @@ Future<ui.Image> createTestImage([List<int> bytes = kTransparentImage]) async {
 }
 
 void main() {
-  setUp(() {
-    DebouncingImageProvider.seenKeys.clear();
-  });
-
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestImageProvider imageProvider1 = TestImageProvider();
@@ -192,7 +188,8 @@ void main() {
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
     final ConfigurationKeyedTestImageProvider imageProvider = ConfigurationKeyedTestImageProvider();
-    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider);
+    final Set<Object> seenKeys = <Object>{};
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider, seenKeys);
 
     // Of the two nested MediaQuery objects, the innermost one,
     // mediaQuery2, should define the configuration of the imageProvider.
@@ -253,7 +250,8 @@ void main() {
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
     final ConfigurationKeyedTestImageProvider imageProvider = ConfigurationKeyedTestImageProvider();
-    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider);
+    final Set<Object> seenKeys = <Object>{};
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider, seenKeys);
 
     // This is just a variation on the previous test. In this version the location
     // of the Image changes and the MediaQuery widgets do not.
@@ -323,7 +321,8 @@ void main() {
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
     final TestImageProvider imageProvider = TestImageProvider();
-    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider);
+    final Set<Object> seenKeys = <Object>{};
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider, seenKeys);
 
     // Of the two nested MediaQuery objects, the innermost one,
     // mediaQuery2, should define the configuration of the imageProvider.
@@ -384,7 +383,8 @@ void main() {
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
     final TestImageProvider imageProvider = TestImageProvider();
-    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider);
+    final Set<Object> seenKeys = <Object>{};
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider, seenKeys);
 
     // This is just a variation on the previous test. In this version the location
     // of the Image changes and the MediaQuery widgets do not.
@@ -1491,10 +1491,9 @@ class TestImage implements ui.Image {
 }
 
 class DebouncingImageProvider extends ImageProvider<Object> {
-  DebouncingImageProvider(this.imageProvider);
+  DebouncingImageProvider(this.imageProvider, this.seenKeys);
 
-  static Set<Object> seenKeys = <Object>{};
-
+  final Set<Object> seenKeys;
   final ImageProvider<Object> imageProvider;
 
   @override
