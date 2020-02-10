@@ -10,8 +10,8 @@ import 'src/base/context.dart';
 // avoid introducing the dependency into google3. Not all build* packages
 // are synced internally.
 import 'src/build_runner/build_runner.dart';
-import 'src/build_runner/build_runner_compilation_delegate.dart';
 import 'src/build_runner/resident_web_runner.dart';
+import 'src/build_runner/web_compilation_delegate.dart';
 
 import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
