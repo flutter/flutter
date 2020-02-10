@@ -231,73 +231,45 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       }
     }
 
-    Future<Evaluation> evaluateNode(SemanticsNode node) async {
-      Evaluation result = const Evaluation.pass();
-      if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden))
-        return result;
-      final SemanticsData data = node.getSemanticsData();
-      final List<SemanticsNode> children = <SemanticsNode>[];
-      node.visitChildren((SemanticsNode child) {
-        children.add(child);
-        return true;
-      });
-      for (final SemanticsNode child in children) {
-        result += await evaluateNode(child);
-      }
-      if (_shouldSkipNode(data)) {
-        return result;
-      }
-
+    Future<Evaluation> evaluateElement(Element element) async {
       // We need to look up the inherited text properties to determine the
       // contrast ratio based on text size/weight.
+
       double fontSize;
       bool isBold;
-      final String text = (data.label?.isEmpty == true) ? data.value : data.label;
-      final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
       Rect paintBounds;
-      if (elements.length == 1) {
-        final Element element = elements.single;
-        final RenderBox renderObject = element.renderObject as RenderBox;
-        element.renderObject.paintBounds;
-        paintBounds = Rect.fromPoints(
-          renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
-          renderObject.localToGlobal(element.renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
-        );
-        final Widget widget = element.widget;
-        final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
-        if (widget is Text) {
-          TextStyle effectiveTextStyle = widget.style;
-          if (widget.style == null || widget.style.inherit) {
-            effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
-          }
-          fontSize = effectiveTextStyle.fontSize;
-          isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
-        } else if (widget is EditableText) {
-          isBold = widget.style.fontWeight == FontWeight.bold;
-          fontSize = widget.style.fontSize;
-        } else {
-          assert(false);
+
+      final RenderBox renderObject = element.renderObject as RenderBox;
+      element.renderObject.paintBounds;
+      paintBounds = Rect.fromPoints(
+        renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
+        renderObject.localToGlobal(element.renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
+      );
+      final Widget widget = element.widget;
+      final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
+      if (widget is Text) {
+        TextStyle effectiveTextStyle = widget.style;
+        if (widget.style == null || widget.style.inherit) {
+          effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
         }
-      } else if (elements.length > 1) {
-        return Evaluation.fail('Multiple nodes with the same label: ${data.label}\n');
+        fontSize = effectiveTextStyle.fontSize;
+        isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
+      } else if (widget is EditableText) {
+        isBold = widget.style.fontWeight == FontWeight.bold;
+        fontSize = widget.style.fontSize;
       } else {
-        // If we can't find the text node then assume the label does not
-        // correspond to actual text.
-        return result;
+        assert(false);
       }
 
-      if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
-        return result;
-      }
       final List<int> subset = _colorsWithinRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
       if (subset.isEmpty) {
-        return result;
+        return const Evaluation.pass();
       }
       final _ContrastReport report = _ContrastReport(subset);
       // If rectangle is empty, pass the test.
       if (report.isEmptyRect) {
-        return result;
+        return const Evaluation.pass();
       }
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
@@ -308,17 +280,24 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         targetContrastRatio = kMinimumRatioNormalText;
       }
       if (contrastRatio - targetContrastRatio >= delta) {
-        return result + const Evaluation.pass();
+        return const Evaluation.pass();
       }
-      return result + Evaluation.fail(
-        '$node:\nExpected contrast ratio of at least '
+      return Evaluation.fail(
+        '$element:\nExpected contrast ratio of at least '
         '$targetContrastRatio but found ${contrastRatio.toStringAsFixed(2)} for a font size of $fontSize. '
         'The computed light color was: ${report.lightColor}, '
         'The computed dark color was: ${report.darkColor}\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html'
       );
     }
-    return evaluateNode(root);
+
+    Evaluation result = const Evaluation.pass();
+
+    for (final Element element in textElementsContributingToSemantics) {
+      result = result + await evaluateElement(element);
+    }
+
+    return result;
   }
 
   // Skip routes which might have labels, and nodes without any text.
