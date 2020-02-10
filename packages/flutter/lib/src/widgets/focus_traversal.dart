@@ -19,9 +19,10 @@ import 'scrollable.dart';
 
 // BuildContext/Element doesn't have a parent accessor, but it can be simulated
 // with visitAncestorElements. _getAncestor is needed because
-// context.getElementForInheritedWidgetOfExactType will return itself it happens
-// to be of the correct type. _getAncestor should be O(1), since we always
-// return false at a specific ancestor. By default it returns the parent.
+// context.getElementForInheritedWidgetOfExactType will return itself if it
+// happens to be of the correct type. _getAncestor should be O(count), since we
+// always return false at a specific ancestor. By default it returns the parent,
+// which is O(1).
 BuildContext _getAncestor(BuildContext context, {int count = 1}) {
   BuildContext target;
   context.visitAncestorElements((Element ancestor) {
@@ -145,8 +146,8 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
     return candidate;
   }
 
-  /// Returns the first node in the given [direction] that should receive focus
-  /// if there is no current focus in the scope to which the [currentNode]
+  /// Returns the first node in the given `direction` that should receive focus
+  /// if there is no current focus in the scope to which the `currentNode`
   /// belongs.
   ///
   /// This is typically used by [inDirection] to determine which node to focus
@@ -256,9 +257,8 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
       if (node == groupNode) {
         // To find the parent of the group node, we need to skip over the parent
         // of the Focus node in _FocusTraversalGroupState.build, and start
-        // looking with that node's parent, since
-        // getElementForInheritedWidgetOfExactType will return the context it
-        // was called on if it matches the type.
+        // looking with that node's parent, since _getMarker will return the
+        // context it was called on if it matches the type.
         final BuildContext parentContext = _getAncestor(groupNode.context, count: 2);
         final _FocusTraversalGroupMarker parentMarker = _getMarker(parentContext);
         final FocusNode parentNode = parentMarker?.focusNode;
@@ -300,10 +300,14 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
     }
 
     visitGroups(groups[scopeGroupMarker?.focusNode]);
-    assert(sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
-        'sorted descendants contains more nodes than it should: (${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())})');
-    assert(scope.traversalDescendants.toSet().difference(sortedDescendants.toSet()).isEmpty,
-        'sorted descendants are missing some nodes: (${scope.traversalDescendants.toSet().difference(sortedDescendants.toSet())})');
+    assert(
+      sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
+      'sorted descendants contains more nodes than it should: (${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())})'
+    );
+    assert(
+      scope.traversalDescendants.toSet().difference(sortedDescendants.toSet()).isEmpty,
+      'sorted descendants are missing some nodes: (${scope.traversalDescendants.toSet().difference(sortedDescendants.toSet())})'
+    );
     return sortedDescendants;
   }
 
@@ -820,10 +824,9 @@ class _ReadingOrderSortData extends Diagnosticable {
 
   /// Finds the common Directional ancestor of an entire list of groups.
   static TextDirection commonDirectionalityOf(List<_ReadingOrderSortData> list) {
-    final List<List<Directionality>> allAncestors = list.map<List<Directionality>>((_ReadingOrderSortData member) => member.directionalAncestors.toList()).toList();
+    final Iterable<Set<Directionality>> allAncestors = list.map<Set<Directionality>>((_ReadingOrderSortData member) => member.directionalAncestors.toSet());
     Set<Directionality> common;
-    for (final List<Directionality> ancestorList in allAncestors) {
-      final Set<Directionality> ancestorSet = ancestorList.toSet();
+    for (final Set<Directionality> ancestorSet in allAncestors) {
       common ??= ancestorSet;
       common = common.intersection(ancestorSet);
     }
@@ -1086,6 +1089,9 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 /// will assert, since the ordering between such keys is undefined. To avoid
 /// collisions, use a [FocusTraversalGroup] to group similarly ordered widgets
 /// together.
+///
+/// When overriding, [doCompare] must be overridden instead of [compareTo],
+/// which calls [doCompare] to do the actual comparison.
 /// {@endtemplate}
 ///
 /// See also:
@@ -1104,6 +1110,17 @@ abstract class FocusOrder extends Diagnosticable implements Comparable<FocusOrde
   /// const constructors so that they can be used in const expressions.
   const FocusOrder();
 
+  /// Compares this object to another [Comparable].
+  ///
+  /// When overriding [FocusOrder], implement [doCompare] instead of this
+  /// function to do the actual comparison.
+  ///
+  /// Returns a value like a [Comparator] when comparing `this` to [other].
+  /// That is, it returns a negative integer if `this` is ordered before [other],
+  /// a positive integer if `this` is ordered after [other],
+  /// and zero if `this` and [other] are ordered together.
+  ///
+  /// The [other] argument must be a value that is comparable to this object.
   @override
   @nonVirtual
   int compareTo(FocusOrder other) {
@@ -1114,14 +1131,15 @@ abstract class FocusOrder extends Diagnosticable implements Comparable<FocusOrde
     return doCompare(other);
   }
 
-  /// The subclass implementation called by [compareTo].
+  /// The subclass implementation called by [compareTo] to compare orders.
   ///
   /// The argument is guaranteed to be of the same [runtimeType] as this object.
   ///
   /// The method should return a negative number if this object comes earlier in
-  /// the sort order than the argument; and a positive number if it comes later
-  /// in the sort order. Returning zero causes the system to use default sort
-  /// order.
+  /// the sort order than the `other` argument; and a positive number if it
+  /// comes later in the sort order than `other`. Returning zero causes the
+  /// system to fall back to the secondary sort order defined by
+  /// [OrderedTraversalPolicy.secondary]
   @protected
   int doCompare(covariant FocusOrder other);
 }
@@ -1213,7 +1231,7 @@ class _OrderedFocusInfo {
 ///
 /// {@macro flutter.widgets.focusorder.comparable}
 ///
-/// {@tool sample --template=stateless_widget_scaffold_center}
+/// {@tool dartpad --template=stateless_widget_scaffold_center}
 /// This sample shows how to assign a traversal order to a widget. In the
 /// example, the focus order goes from bottom right (the "One" button) to top
 /// left (the "Six" button).
