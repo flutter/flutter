@@ -218,6 +218,19 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
     collectTextRenderObjects(tester.allRenderObjects.first);
 
+    // Find text elements that contribute to semantics.
+
+    final Iterable<Element> textElements = find.byWidgetPredicate((Widget widget) => widget is Text || widget is EditableText)
+        .evaluate();
+
+    final List<Element> textElementsContributingToSemantics = <Element>[];
+
+    for (final Element element in textElements) {
+      if (textRenderObjects.contains(element.renderObject)) {
+        textElementsContributingToSemantics.add(element);
+      }
+    }
+
     Future<Evaluation> evaluateNode(SemanticsNode node) async {
       Evaluation result = const Evaluation.pass();
       if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden))
