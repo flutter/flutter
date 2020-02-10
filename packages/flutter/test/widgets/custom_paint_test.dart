@@ -223,4 +223,9 @@ void main() {
     expect(renderCustom.isComplex, false);
     expect(renderCustom.willChange, true);
   });
+
+  test('Raster cache hints cannot be set with null painters', () {
+    expect(() => CustomPaint(isComplex: true), throwsAssertionError);
+    expect(() => CustomPaint(willChange: true), throwsAssertionError);
+  });
 }
