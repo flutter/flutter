@@ -193,6 +193,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
   static const double kMinimumRatioLargeText = 3.0;
 
+  /// Tolerance for minimum contrast ratio.
+  ///
+  /// Any contrast ratio greater than the required minimum contrast ratio
+  /// or within a distance of [tolerance] from it passes the test.
+  static const double tolerance = 0.01;
+
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
     final RenderView renderView = tester.binding.renderView;
@@ -285,7 +291,6 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       }
 
       double targetContrastRatio;
-      const double tolerance = 0.01;
       if ((isBold && fontSize > kBoldTextMinimumSize) || (fontSize ?? 12.0) > kLargeTextMinimumSize) {
         targetContrastRatio = kMinimumRatioLargeText;
       } else {
