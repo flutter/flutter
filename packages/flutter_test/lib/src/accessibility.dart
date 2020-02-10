@@ -210,7 +210,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final Set<RenderObject> textRenderObjects = <RenderObject>{};
 
     void collectTextRenderObjects(RenderObject renderObject) {
-      if (renderObject is RenderParagraph) {
+      if (renderObject is RenderParagraph || renderObject is RenderEditable) {
         textRenderObjects.add(renderObject);
       }
       renderObject.visitChildrenForSemantics(collectTextRenderObjects);
@@ -225,8 +225,22 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
     final List<Element> textElementsContributingToSemantics = <Element>[];
 
+    bool hasTextRenderObjectAsChild(RenderObject renderObject) {
+      final List<RenderObject> textRenderObjectChildren = <RenderObject>[];
+
+      void collectTextRenderObjectChildren(RenderObject renderObject) {
+        if (textRenderObjects.contains(renderObject)) {
+          textRenderObjectChildren.add(renderObject);
+        }
+        renderObject.visitChildrenForSemantics(collectTextRenderObjectChildren);
+      }
+
+      collectTextRenderObjectChildren(renderObject);
+      return textRenderObjectChildren.isNotEmpty;
+    }
+
     for (final Element element in textElements) {
-      if (textRenderObjects.contains(element.renderObject)) {
+      if (hasTextRenderObjectAsChild(element.renderObject)) {
         textElementsContributingToSemantics.add(element);
       }
     }
