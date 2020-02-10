@@ -349,7 +349,7 @@ void main() {
 
     // This is the same widget hierarchy as before except that the
     // two MediaQuery objects have exchanged places. The imageProvider
-    // should be resolved again, with the new innermost MediaQuery.
+    // should not be resolved again, because it does not key to configuration.
     await tester.pumpWidget(
       MediaQuery(
         key: mediaQueryKey2,
