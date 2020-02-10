@@ -24,10 +24,10 @@ class SymbolizeCommand extends FlutterCommand {
   SymbolizeCommand({
     @required Stdio stdio,
     @required FileSystem fileSystem,
-    DwarfSymbolizationService dwarfSymbolicationService = const DwarfSymbolizationService(),
+    DwarfSymbolizationService dwarfSymbolizationService = const DwarfSymbolizationService(),
   }) : _stdio = stdio,
        _fileSystem = fileSystem,
-       _dwarfSymbolicationService = dwarfSymbolicationService {
+       _dwarfSymbolizationService = dwarfSymbolizationService {
     argParser.addOption(
       'debug-info',
       abbr: 'd',
@@ -49,7 +49,7 @@ class SymbolizeCommand extends FlutterCommand {
 
   final Stdio _stdio;
   final FileSystem _fileSystem;
-  final DwarfSymbolizationService _dwarfSymbolicationService;
+  final DwarfSymbolizationService _dwarfSymbolizationService;
 
   @override
   String get description => 'Symbolize a stack trace from an AOT compiled flutter application.';
@@ -103,7 +103,7 @@ class SymbolizeCommand extends FlutterCommand {
     }
 
     final Uint8List symbols = _fileSystem.file(stringArg('debug-info')).readAsBytesSync();
-    await _dwarfSymbolicationService.decode(
+    await _dwarfSymbolizationService.decode(
       input: input,
       output: output,
       symbols: symbols,
@@ -145,9 +145,9 @@ class DwarfSymbolizationService {
           output.writeln(line);
         } on Exception catch(e, s) {
           subscription.cancel().whenComplete(() {
-          if (!onDone.isCompleted) {
-            onDone.completeError(e, s);
-          }
+            if (!onDone.isCompleted) {
+              onDone.completeError(e, s);
+            }
           });
         }
       }, onDone: onDone.complete, onError: onDone.completeError);
