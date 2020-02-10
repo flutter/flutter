@@ -675,7 +675,6 @@ class SkiaGoldDigest {
         <String, List<String>>{
           'Platform': <String>[],
           'Browser' : <String>[],
-          'Device' : <String>[],
         }),
       testName: json['test'] as String,
       status: json['status'] as String,
