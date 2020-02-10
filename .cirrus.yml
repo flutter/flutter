@@ -590,7 +590,7 @@ task:
         - dart --enable-asserts ./dev/bots/codesign.dart
   cleanup_before_cache_upload_script:
      # Remove volatile file to avoid unnecessary Cirrus cache invalidation.
-    - rm bin/cache/flutter_version_check.stamp
+    - rm -f bin/cache/flutter_version_check.stamp
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or
   # stable). Note: tagging a commit and pushing to a release branch are
