@@ -317,6 +317,9 @@ public final class FlutterActivityDelegate
     if (intent.getBooleanExtra("disable-service-auth-codes", false)) {
       args.add("--disable-service-auth-codes");
     }
+    if (intent.getBooleanExtra("endless-trace-buffer", false)) {
+      args.add("--endless-trace-buffer");
+    }
     // NOTE: all flags provided with this argument are subject to filtering
     // based on a whitelist in shell/common/switches.cc. If any flag provided
     // is not present in the whitelist, the process will immediately
