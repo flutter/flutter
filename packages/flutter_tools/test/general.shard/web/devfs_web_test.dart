@@ -133,13 +133,13 @@ void main() {
     final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
     final File manifest = globals.fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/C:/foo.js': <String, Object>{
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
       }}));
     webAssetServer.write(source, manifest, sourcemap);
     final Response response = await webAssetServer
-      .handleRequest(Request('GET', Uri.parse('http://C:/foo.js')));
+      .handleRequest(Request('GET', Uri.parse('http://localhost/foo.js')));
 
     expect(response.headers, allOf(<Matcher>[
       containsPair('content-length', source.lengthSync().toString()),
