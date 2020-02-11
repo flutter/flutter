@@ -12,6 +12,14 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
+
+  DevicesCommand() {
+    argParser.addFlag('machine',
+      negatable: false,
+      help: 'Output device information in machine readable structured JSON format',
+    );
+  }
+
   @override
   final String name = 'devices';
 
@@ -42,6 +50,8 @@ class DevicesCommand extends FlutterCommand {
           globals.printStatus('• $diagnostic', hangingIndent: 2);
         }
       }
+    } else if(boolArg('machine')) {
+      await Device.printDevicesAsJson(devices);
     } else {
       globals.printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
       await Device.printDevices(devices);

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter_tools/src/convert.dart';
 import 'package:meta/meta.dart';
 
 import 'android/android_device_discovery.dart';
@@ -497,6 +498,33 @@ abstract class Device {
   static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(globals.printStatus);
   }
+
+  static Future<void> printDevicesAsJson(List<Device> devices) async {
+    globals.printStatus(
+      const JsonEncoder.withIndent('  ').convert(
+        await Future.wait(devices.map((Device d) => d.toJson()))
+      )
+    );
+  }
+
+  Future<Map<String, Object>> toJson() async =>
+    <String, Object>{
+      'name': name,
+      'id': id,
+      'isSupported': isSupported(),
+      'targetPlatform': getNameForTargetPlatform(await targetPlatform),
+      'emulator': await isLocalEmulator,
+      'sdk': await sdkNameAndVersion,
+      'capabilities': <String, Object>{
+        'hotReload': supportsHotReload,
+        'hotRestart': supportsHotRestart,
+        'screenshot': supportsScreenshot,
+        'fastStart': supportsFastStart,
+        'flutterExit': supportsFlutterExit,
+        'hwRendering': await supportsHardwareRendering,
+        'startPaused': supportsStartPaused,
+      }
+    };
 
   /// Clean up resources allocated by device
   ///
