@@ -260,8 +260,17 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final SimpleDialogOption dialogOption = tester.renderObject(find.byType(SimpleDialogOption));
-    expect(dialogOption.padding, customPadding);
+    final Size dialogSize = tester.getSize(
+      find.descendant(
+        of: find.byType(SimpleDialog),
+        matching: find.byType(Material),
+      ).first,
+    );
+    final Size optionSize = tester.getSize(
+      find.text('First option'),
+    );
+
+    expect(optionSize.width, dialogSize.width - (10.0 * 2));
   });
 
   testWidgets('Barrier dismissible', (WidgetTester tester) async {
