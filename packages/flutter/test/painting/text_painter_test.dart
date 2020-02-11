@@ -730,6 +730,13 @@ void main() {
     expect(painter.inlinePlaceholderBoxes[13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
   }, skip: isBrowser);
 
+  test('TextPainter set TextHeightBehavior null test', () {
+    final TextPainter painter = TextPainter(textHeightBehavior: TextHeightBehavior())
+      ..textDirection = TextDirection.ltr;
+
+    painter.textHeightBehavior = null;
+  });
+
   test('TextPainter line metrics', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
