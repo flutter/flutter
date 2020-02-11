@@ -450,7 +450,7 @@ void main() {
     expect(testLogger.errorText, contains('Error'));
   }));
 
-  test('ResidentRunner can\'t take screenshot on device without support', () => testbed.run(() {
+  test("ResidentRunner can't take screenshot on device without support", () => testbed.run(() {
     when(mockDevice.supportsScreenshot).thenReturn(false);
 
     expect(() => residentRunner.screenshot(mockFlutterDevice),

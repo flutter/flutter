@@ -330,7 +330,7 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
           assert(count > 0);
           if (count == 1)
             return null;
-          return '  $name: uses \'package:test\' $count times.';
+          return "  $name: uses 'package:test' $count times.";
         }
         if (name.startsWith('packages/flutter_test/')) {
           // flutter_test has deep ties to package:test
@@ -341,7 +341,7 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
           if (count == 1)
             return null;
         }
-        return '  $name: uses \'package:test\' directly';
+        return "  $name: uses 'package:test' directly";
       }
       return null;
     })
@@ -354,11 +354,11 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
     final String s1 = errors.length == 1 ? 's' : '';
     final String s2 = errors.length == 1 ? '' : 's';
     exitWithError(<String>[
-      '${bold}The following file$s2 use$s1 \'package:test\' incorrectly:$reset',
+      "${bold}The following file$s2 use$s1 'package:test' incorrectly:$reset",
       ...errors,
-      'Rather than depending on \'package:test\' directly, use one of the shims:',
+      "Rather than depending on 'package:test' directly, use one of the shims:",
       ...shims,
-      'This insulates us from breaking changes in \'package:test\'.'
+      "This insulates us from breaking changes in 'package:test'."
     ]);
   }
 }

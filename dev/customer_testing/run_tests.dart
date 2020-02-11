@@ -85,7 +85,7 @@ Future<bool> run(List<String> arguments) async {
       if (parsedArguments.rest.isEmpty) {
         print('Error: No file arguments specified.');
       } else if (files.isEmpty) {
-        print('Error: File arguments ("${parsedArguments.rest.join("\", \"")}") did not identify any real files.');
+        print('Error: File arguments ("${parsedArguments.rest.join('", "')}") did not identify any real files.');
       }
     }
     return help;

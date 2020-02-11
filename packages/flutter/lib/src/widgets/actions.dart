@@ -329,7 +329,7 @@ class Actions extends InheritedWidget {
       }
       if (action == null) {
         throw FlutterError('Unable to find an action for an intent in the $Actions widget in the context.\n'
-            '$Actions.invoke() was called on an $Actions widget that doesn\'t '
+            "$Actions.invoke() was called on an $Actions widget that doesn't "
             'contain a mapping for the given intent.\n'
             'The context used was:\n'
             '  $context\n'
