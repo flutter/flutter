@@ -71,12 +71,18 @@ task:
   pub_cache:
     folder: $HOME/.pub-cache
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
-  flutter_pkg_cache:
-    folder: bin/cache/pkg
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter update-packages
+  all_flutter_cache:
+    folder: bin/cache/
     fingerprint_script: echo $OS; cat bin/internal/*.version
-  artifacts_cache:
-    folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/*.version
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter precache
+      - flutter doctor -v
   setup_script:
     - date
     - git clean -xffd --exclude=bin/cache/
@@ -84,7 +90,7 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - flutter update-packages
+    - flutter update-packages --offline
     - ./dev/bots/accept_android_sdk_licenses.sh
     - date
   on_failure:
@@ -268,6 +274,9 @@ task:
         ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
       script:
         - ./dev/bots/deploy_gallery.sh
+  cleanup_before_cache_upload_script:
+     # Remove volatile file to avoid unnecessary Cirrus cache invalidation.
+    - rm -f bin/cache/flutter_version_check.stamp
 
 # WINDOWS SHARDS
 task:
@@ -285,19 +294,25 @@ task:
     folder: $APPDATA\Pub\Cache
     fingerprint_script:
       - ps: $Environment:OS; Get-ChildItem -Path "$Environment:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
-  flutter_pkg_cache:
-    folder: bin\cache\pkg
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter update-packages
+  all_flutter_cache:
+    folder: bin\cache\
     fingerprint_script: echo %OS% & type bin\internal\*.version
-  artifacts_cache:
-    folder: bin\cache\artifacts
-    fingerprint_script: echo %OS% & type bin\internal\*.version
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter precache
+      - flutter doctor -v
   setup_script:
-    - git clean -xffd --exclude=bin\cache\
+    - git clean -xffd --exclude=bin/cache/
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - flutter update-packages
+    - flutter update-packages --offline
     - git fetch origin master
   matrix:
     - name: framework_tests-widgets-windows
@@ -436,6 +451,9 @@ task:
         - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
         - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
         - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
+  cleanup_before_cache_upload_script:
+     # Remove volatile file to avoid unnecessary Cirrus cache invalidation.
+    - del /f bin\cache\flutter_version_check.stamp
 
 # MACOS SHARDS
 task:
