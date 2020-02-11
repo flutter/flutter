@@ -267,9 +267,7 @@ void main() {
         const Key firstBox = Key('C');
         const Key secondBox = Key('B');
         const Key thirdBox = Key('A');
-        
         final ScrollController customController = ScrollController();
-
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -277,12 +275,12 @@ void main() {
                 height: 200,
                 child: ReorderableListView(
                   scrollController: customController,
+                  onReorder: (int oldIndex, int newIndex) { },
                   children: const <Widget>[
                     SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: firstBox),
                     SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: secondBox),
                     SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: thirdBox),
                   ],
-                  onReorder: (int oldIndex, int newIndex) { },
                 ),
               ),
             ),
@@ -296,17 +294,13 @@ void main() {
           duration: const Duration(milliseconds: 200), 
           curve: Curves.linear
         );
-
         await tester.pumpAndSettle();
-
         Offset listViewTopLeft = tester.getTopLeft(
           find.byType(ReorderableListView),
         );
-
         Offset firstBoxTopLeft = tester.getTopLeft(
           find.byKey(firstBox)
         );
-
         expect(firstBoxTopLeft.dy, listViewTopLeft.dy - 40.0);
 
         // Drag the UI to see if the scroll controller updates accordingly
@@ -314,15 +308,12 @@ void main() {
           find.text('B'), 
           const Offset(0.0, -100.0),
         );
-
         listViewTopLeft = tester.getTopLeft(
           find.byType(ReorderableListView),
         );
-
         firstBoxTopLeft = tester.getTopLeft(
           find.byKey(firstBox),
         );
-        
         // Initial scroll controller offset: 40.0
         // Drag UI by 100.0 upwards vertically
         // First 20.0 px always ignored, so scroll offset is only

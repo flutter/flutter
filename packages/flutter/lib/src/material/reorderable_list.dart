@@ -88,7 +88,8 @@ class ReorderableListView extends StatefulWidget {
   /// List [children] can only drag along this [Axis].
   final Axis scrollDirection;
 
-  /// Controls scrolls and measures scroll progress.
+  /// Creates a ScrollPosition to manage and determine which portion
+  /// of the content is visible in a scroll view.
   final ScrollController scrollController;
 
   /// The amount of space by which to inset the [children].
