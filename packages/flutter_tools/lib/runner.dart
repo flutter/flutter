@@ -9,7 +9,6 @@ import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:meta/meta.dart';
 
-import 'src/base/bot_detector.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
@@ -35,8 +34,8 @@ Future<int> run(
   bool reportCrashes,
   String flutterVersion,
   Map<Type, Generator> overrides,
-}) {
-  reportCrashes ??= !isRunningOnBot(globals.platform);
+}) async {
+  reportCrashes ??= !await globals.isRunningOnBot;
 
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
