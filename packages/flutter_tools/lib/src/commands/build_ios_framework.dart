@@ -37,13 +37,13 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     FlutterVersion flutterVersion, // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
     @required AotBuilder aotBuilder,
     @required BundleBuilder bundleBuilder,
-    @required Cache cache,
-    @required Platform platform
+    Cache cache,
+    Platform platform
   }) : _flutterVersion = flutterVersion,
        _aotBuilder = aotBuilder,
        _bundleBuilder = bundleBuilder,
-       _cache = cache,
-       _platform = platform {
+       _injectedCache = cache,
+       _injectedPlatform = platform {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesFlavorOption();
@@ -84,13 +84,22 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         abbr: 'o',
         valueHelp: 'path/to/directory/',
         help: 'Location to write the frameworks.',
+      )
+      ..addFlag('force',
+        abbr: 'f',
+        help: 'Force Flutter.podspec creation on the master channel. For testing only.',
+        hide: true
       );
   }
 
   final AotBuilder _aotBuilder;
   final BundleBuilder _bundleBuilder;
-  final Cache _cache;
-  final Platform _platform;
+
+  Cache get _cache => _injectedCache ?? globals.cache;
+  final Cache _injectedCache;
+
+  Platform get _platform => _injectedPlatform ?? globals.platform;
+  final Platform _injectedPlatform;
 
   FlutterVersion _flutterVersion;
 
@@ -180,7 +189,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       if (boolArg('cocoapods')) {
         // FlutterVersion.instance kicks off git processing which can sometimes fail, so don't try it until needed.
         _flutterVersion ??= globals.flutterVersion;
-        produceFlutterPodspec(mode, modeDirectory);
+        produceFlutterPodspec(mode, modeDirectory, force: boolArg('force'));
       } else {
         // Copy Flutter.framework.
         await _produceFlutterFramework(mode, modeDirectory);
@@ -218,11 +227,11 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   /// Create podspec that will download and unzip remote engine assets so host apps can leverage CocoaPods
   /// vendored framework caching.
   @visibleForTesting
-  void produceFlutterPodspec(BuildMode mode, Directory modeDirectory) {
+  void produceFlutterPodspec(BuildMode mode, Directory modeDirectory, { bool force = false }) {
     final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...', timeout: timeoutConfiguration.fastOperation);
     try {
       final GitTagVersion gitTagVersion = _flutterVersion.gitTagVersion;
-      if (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0) {
+      if (!force && (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0)) {
         throwToolExit(
             '--cocoapods is only supported on the dev, beta, or stable channels. Detected version is ${_flutterVersion.frameworkVersion}');
       }

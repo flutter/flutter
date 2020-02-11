@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,11 +23,20 @@ void main() {
     return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
   };
 
-  group(ImageProvider, () {
-    setUpAll(() {
-      TestRenderingFlutterBinding(); // initializes the imageCache
-    });
+  setUpAll(() {
+    TestRenderingFlutterBinding(); // initializes the imageCache
+  });
 
+  FlutterExceptionHandler oldError;
+  setUp(() {
+    oldError = FlutterError.onError;
+  });
+
+  tearDown(() {
+    FlutterError.onError = oldError;
+  });
+
+  group('ImageProvider', () {
     group('Image cache', () {
       tearDown(() {
         imageCache.clear();
@@ -145,6 +155,21 @@ void main() {
         expect(await caughtError.future, true);
       });
       expect(uncaught, false);
+    });
+
+    test('File image with empty file throws expected error - (image cache)', () async {
+      final Completer<StateError> error = Completer<StateError>();
+      FlutterError.onError = (FlutterErrorDetails details) {
+        print(details.exception);
+        error.complete(details.exception as StateError);
+      };
+      final MemoryFileSystem fs = MemoryFileSystem();
+      final File file = fs.file('/empty.png')..createSync(recursive: true);
+      final FileImage provider = FileImage(file);
+
+      provider.resolve(ImageConfiguration.empty);
+
+      expect(await error.future, isStateError);
     });
 
     group(NetworkImage, () {
@@ -358,6 +383,20 @@ void main() {
     };
 
     resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
+  });
+
+  test('File image with empty file throws expected error (load)', () async {
+    final Completer<StateError> error = Completer<StateError>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error.complete(details.exception as StateError);
+    };
+    final MemoryFileSystem fs = MemoryFileSystem();
+    final File file = fs.file('/empty.png')..createSync(recursive: true);
+    final FileImage provider = FileImage(file);
+
+    expect(provider.load(provider, null), isA<MultiFrameImageStreamCompleter>());
+
+    expect(await error.future, isStateError);
   });
 }
 

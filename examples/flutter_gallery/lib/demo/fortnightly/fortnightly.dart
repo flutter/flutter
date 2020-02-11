@@ -66,11 +66,11 @@ class ShortAppBar extends StatelessWidget {
 }
 
 class FruitPage extends StatelessWidget {
-  static final String paragraph1 = '''Have you ever held a quince? It\'s strange;
- covered in a fuzz somewhere between peach skin and a spider web. And it\'s
- hard as soft lumber. You\'d be forgiven for thinking it\'s veneered Larch-wood.
- But inhale the aroma and you\'ll instantly know you have something wonderful.
- Its scent can fill a room for days. And all this before you\'ve even cooked it.
+  static final String paragraph1 = '''Have you ever held a quince? It's strange;
+ covered in a fuzz somewhere between peach skin and a spider web. And it's
+ hard as soft lumber. You'd be forgiven for thinking it's veneered Larch-wood.
+ But inhale the aroma and you'll instantly know you have something wonderful.
+ Its scent can fill a room for days. And all this before you've even cooked it.
 '''.replaceAll('\n', '');
 
   static final String paragraph2 = '''Pomegranates on the other hand have become

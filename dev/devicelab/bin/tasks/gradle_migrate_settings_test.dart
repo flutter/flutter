@@ -73,7 +73,7 @@ Future<void> main() async {
 
       section('Override settings.gradle V2');
 
-      const String deprecatedFileContentV2 = '''
+      const String deprecatedFileContentV2 = r'''
 include ':app'
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
@@ -86,8 +86,8 @@ if (pluginsFile.exists()) {
 
 plugins.each { name, path ->
     def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include ":\$name"
-    project(":\$name").projectDir = pluginDirectory
+    include ":$name"
+    project(":$name").projectDir = pluginDirectory
 }
 ''';
       settingsGradle.writeAsStringSync(deprecatedFileContentV2, flush: true);
