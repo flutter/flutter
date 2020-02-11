@@ -91,9 +91,9 @@ class ReorderableListView extends StatefulWidget {
   /// Creates a [ScrollPosition] to manage and determine which portion
   /// of the content is visible in the scroll view.
   ///
-  /// This can be used in many ways, such as setting an initial scroll offset, 
-  /// (via [ScrollController.initialScrollOffset]), reading the current scroll position 
-  /// (via [ScrollController.offset]), or changing it (via [ScrollController.jumpTo] or 
+  /// This can be used in many ways, such as setting an initial scroll offset,
+  /// (via [ScrollController.initialScrollOffset]), reading the current scroll position
+  /// (via [ScrollController.offset]), or changing it (via [ScrollController.jumpTo] or
   /// [ScrollController.animateTo]).
   final ScrollController scrollController;
 
