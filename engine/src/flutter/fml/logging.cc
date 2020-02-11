@@ -11,7 +11,8 @@
 
 #if defined(OS_ANDROID)
 #include <android/log.h>
-#elif defined(OS_IOS)
+#elif defined(OS_MACOSX)
+#include <os/log.h>
 #include <syslog.h>
 #endif
 
@@ -81,8 +82,37 @@ LogMessage::~LogMessage() {
       break;
   }
   __android_log_write(priority, "flutter", stream_.str().c_str());
-#elif defined(OS_IOS)
-  syslog(LOG_ALERT, "%s", stream_.str().c_str());
+#elif defined(OS_MACOSX)
+  const char* chars = stream_.str().c_str();
+  // Unified logging (os_log) became available in iOS 9.0 and syslog stopped
+  // working in iOS 13.0. idevicesyslog made device syslog available on the
+  // connected host, but there is no known API to view device unified logging on
+  // the host. Flutter tool will continue to observe syslog on devices older
+  // than iOS 13.0 since it provides more logging context, particularly for
+  // application crashes.
+  if (__builtin_available(iOS 13.0, macOS 10.11, *)) {
+    os_log_t engine_log = os_log_create("io.flutter", "engine");
+    switch (severity_) {
+      // TODO(flutter/flutter#45931): LogSeverity LOG_INFO and LOG_WARNING
+      // collide with syslog log level macros.
+      case 0 /* LOG_INFO */:
+        os_log_debug(engine_log, "%s", chars);
+        break;
+      case 1 /* LOG_WARNING */:
+      case LOG_ERROR:
+        os_log_error(engine_log, "%s", chars);
+        break;
+      case LOG_FATAL:
+        os_log_fault(engine_log, "%s", chars);
+        break;
+      default:
+        os_log(engine_log, "%s", chars);
+        break;
+    }
+  } else {
+    syslog(LOG_ALERT, "%s", chars);
+  }
+
 #else
   std::cerr << stream_.str();
   std::cerr.flush();
