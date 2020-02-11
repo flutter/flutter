@@ -75,7 +75,9 @@ class Depfile {
     for (final File outputFile in files) {
       if (globals.platform.isWindows) {
         // Paths in a depfile have to be escaped on windows.
-        final String escapedPath = outputFile.path.replaceAll(r'\', r'\\');
+        final String escapedPath = outputFile.path
+          .replaceAll(r'\', r'\\')
+          .replaceAll(r' ', r'\ ');
         buffer.write(' $escapedPath');
       } else {
         buffer.write(' ${outputFile.path}');
