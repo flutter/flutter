@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -238,8 +237,14 @@ import java.util.Arrays;
    *
    * <p>{@code inflater} and {@code container} may be null when invoked from an {@code Activity}.
    *
-   * <p>This method creates a new {@link FlutterView}, adds a {@link FlutterUiDisplayListener} to
-   * it, and then returns it.
+   * <p>This method:
+   *
+   * <ol>
+   *   <li>creates a new {@link FlutterView} in a {@code View} hierarchy
+   *   <li>adds a {@link FlutterUiDisplayListener} to it
+   *   <li>attaches a {@link FlutterEngine} to the new {@link FlutterView}
+   *   <li>returns the new {@code View} hierarchy
+   * </ol>
    */
   @NonNull
   View onCreateView(
@@ -261,6 +266,9 @@ import java.util.Arrays;
     }
     flutterSplashView.displayFlutterViewWithSplash(flutterView, host.provideSplashScreen());
 
+    Log.v(TAG, "Attaching FlutterEngine to FlutterView.");
+    flutterView.attachToFlutterEngine(flutterEngine);
+
     return flutterSplashView;
   }
 
@@ -281,31 +289,13 @@ import java.util.Arrays;
    * <p>
    *
    * <ol>
-   *   <li>Attaches the {@link FlutterEngine} owned by this delegate to the {@link FlutterView}
-   *       owned by this delegate.
    *   <li>Begins executing Dart code, if it is not already executing.
    * </ol>
    */
   void onStart() {
     Log.v(TAG, "onStart()");
     ensureAlive();
-
-    // We post() the code that attaches the FlutterEngine to our FlutterView because there is
-    // some kind of blocking logic on the native side when the surface is connected. That lag
-    // causes launching Activitys to wait a second or two before launching. By post()'ing this
-    // behavior we are able to move this blocking logic to after the Activity's launch.
-    // TODO(mattcarroll): figure out how to avoid blocking the MAIN thread when connecting a surface
-    new Handler()
-        .post(
-            new Runnable() {
-              @Override
-              public void run() {
-                Log.v(TAG, "Attaching FlutterEngine to FlutterView.");
-                flutterView.attachToFlutterEngine(flutterEngine);
-
-                doInitialFlutterViewRun();
-              }
-            });
+    doInitialFlutterViewRun();
   }
 
   /**
@@ -418,7 +408,6 @@ import java.util.Arrays;
     Log.v(TAG, "onStop()");
     ensureAlive();
     flutterEngine.getLifecycleChannel().appIsPaused();
-    flutterView.detachFromFlutterEngine();
   }
 
   /**
@@ -429,6 +418,8 @@ import java.util.Arrays;
   void onDestroyView() {
     Log.v(TAG, "onDestroyView()");
     ensureAlive();
+
+    flutterView.detachFromFlutterEngine();
     flutterView.removeOnFirstFrameRenderedListener(flutterUiDisplayListener);
   }
 
