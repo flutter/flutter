@@ -375,8 +375,7 @@ abstract class FlutterCommand extends Command<void> {
         'symbol files can be stored for later use. These symbol files contain '
         'the information needed to symbolize Dart stack traces. For an app built '
         'with this flag, the \'flutter symbolize\' command with the right program '
-        'symbol file is required to obtain a human readable stack trace. This '
-        'command is tracked by https://github.com/flutter/flutter/issues/50206',
+        'symbol file is required to obtain a human readable stack trace.',
       valueHelp: '/project-name/v1.2.3/',
     );
   }

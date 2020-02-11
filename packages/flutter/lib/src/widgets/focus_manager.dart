@@ -239,7 +239,7 @@ class FocusAttachment {
 /// [ReadingOrderTraversalPolicy], and [DirectionalFocusTraversalPolicyMixin],
 /// but custom policies can be built based upon these policies.
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 /// This example shows how a FocusNode should be managed if not using the
 /// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
 /// example using [Focus] and [FocusScope] widgets.
@@ -1166,6 +1166,15 @@ enum FocusHighlightStrategy {
 /// current focus in that [FocusScopeNode] is null, it will stop there, and no
 /// [FocusNode] will have focus.
 ///
+/// If you would like notification whenever the [primaryFocus] changes, register
+/// a listener with [addListener]. When you no longer want to receive events, as
+/// when your object is about to be disposed, you must unregister with
+/// [removeListener] to avoid memory leaks. Removing listeners is typically done
+/// in [State.dispose] on stateful widgets.
+///
+/// The [highlightMode] changes are notified separately via
+/// [addHighlightModeListener] and removed with [removeHighlightModeListener].
+///
 /// See also:
 ///
 ///  * [FocusNode], which is a node in the focus tree that can receive focus.
@@ -1177,7 +1186,7 @@ enum FocusHighlightStrategy {
 ///    a given [BuildContext].
 ///  * The [focusManager] and [primaryFocus] global accessors, for convenient
 ///    access from anywhere to the current focus manager state.
-class FocusManager with DiagnosticableTreeMixin {
+class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagnosticable {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
@@ -1443,6 +1452,9 @@ class FocusManager with DiagnosticableTreeMixin {
       node._notify();
     }
     _dirtyNodes.clear();
+    if (previousFocus != _primaryFocus) {
+      notifyListeners();
+    }
     assert(() {
       if (_kDebugFocus) {
         debugDumpFocusTree();

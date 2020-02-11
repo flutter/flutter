@@ -360,6 +360,63 @@ void main() {
     }
   });
 
+  testWidgets('Dropdown form field uses form field state', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String value;
+    await tester.pumpWidget(
+        StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MaterialApp(
+                home: Material(
+                  child: Form(
+                    key: formKey,
+                    child: DropdownButtonFormField<String>(
+                      key: buttonKey,
+                      value: value,
+                      hint: const Text('Select Value'),
+                      decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.fastfood)
+                      ),
+                      items: menuItems.map((String val) {
+                        return DropdownMenuItem<String>(
+                            value: val,
+                            child: Text(val)
+                        );
+                      }).toList(),
+                      validator: (String v) => v == null ? 'Must select value' : null,
+                      onChanged: (String newValue) {},
+                      onSaved: (String v) {
+                        setState(() {
+                          value = v;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              );
+            }
+        )
+    );
+    int getIndex() {
+      final IndexedStack stack = tester.element(find.byType(IndexedStack)).widget as IndexedStack;
+      return stack.index;
+    }
+    // Initial value of null displays hint
+    expect(value, equals(null));
+    expect(getIndex(), 4);
+    await tester.tap(find.text('Select Value'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+    expect(getIndex(), 2);
+    // Changes only made to FormField state until form saved
+    expect(value, equals(null));
+    final FormState form = formKey.currentState;
+    form.save();
+    expect(value, equals('three'));
+  });
+
   testWidgets('Dropdown in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12053
     // Positions a DropdownButton at the left and right edges of the screen,
@@ -1856,6 +1913,62 @@ void main() {
     // The vertical center of the selectedItem (item40) should
     // line up with its button counterpart.
     expect(tester.getCenter(item40.first).dy, tester.getCenter(item40.last).dy);
+  });
+
+  testWidgets('DropdownButton menu items do not resize when its route is popped', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/44877.
+    const List<String> items = <String>[
+      'one',
+      'two',
+      'three',
+    ];
+    String item = items[0];
+    MediaQueryData mediaQuery;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            builder: (BuildContext context, Widget child) {
+              mediaQuery ??= MediaQuery.of(context);
+              return MediaQuery(
+                data: mediaQuery,
+                child: child,
+              );
+            },
+            home: Scaffold(
+              body: DropdownButton<String>(
+                value: item,
+                items: items.map((String item) => DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item),
+                )).toList(),
+                onChanged: (String newItem) {
+                  setState(() {
+                    item = newItem;
+                    mediaQuery = mediaQuery.copyWith(
+                      textScaleFactor: mediaQuery.textScaleFactor + 0.1,
+                    );
+                  });
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    // Verify that the first item is showing.
+    expect(find.text('one'), findsOneWidget);
+
+    // Select a different item to trigger setState, which updates mediaQuery
+    // and forces a performLayout on the popped _DropdownRoute. This operation
+    // should not cause an exception.
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('two').last);
+    await tester.pumpAndSettle();
+    expect(find.text('two'), findsOneWidget);
   });
 
   testWidgets('DropdownButton hint is selected item', (WidgetTester tester) async {
