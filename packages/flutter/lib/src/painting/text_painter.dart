@@ -346,7 +346,6 @@ class TextPainter {
   ui.TextHeightBehavior get textHeightBehavior => _textHeightBehavior;
   ui.TextHeightBehavior _textHeightBehavior;
   set textHeightBehavior(ui.TextHeightBehavior value) {
-    assert(value != null);
     if (_textHeightBehavior == value)
       return;
     _textHeightBehavior = value;
