@@ -7,10 +7,13 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
@@ -18,6 +21,8 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 class MockPeer implements rpc.Peer {
+
+  Function _versionFn = (dynamic _) => null;
 
   @override
   rpc.ErrorCallback get onUnhandledError => null;
@@ -50,6 +55,9 @@ class MockPeer implements rpc.Peer {
   @override
   void registerMethod(String name, Function callback) {
     registeredMethods.add(name);
+    if (name == 'flutterVersion') {
+      _versionFn = callback;
+    }
   }
 
   @override
@@ -155,6 +163,9 @@ class MockPeer implements rpc.Peer {
         ] : <dynamic>[],
       };
     }
+    if (method == 'flutterVersion') {
+      return _versionFn(parameters);
+    }
     return null;
   }
 
@@ -166,7 +177,9 @@ class MockPeer implements rpc.Peer {
 
 void main() {
   MockStdio mockStdio;
+  final MockFlutterVersion mockVersion = MockFlutterVersion();
   group('VMService', () {
+
     setUp(() {
       mockStdio = MockStdio();
     });
@@ -188,8 +201,15 @@ void main() {
         expect(mockStdio.writtenToStderr.join(''), '');
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: OutputPreferences.test(),
+        stdio: mockStdio,
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
       WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
 
@@ -263,8 +283,15 @@ void main() {
         expect(mockStdio.writtenToStderr.join(''), '');
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
     });
 
     testUsingContext('registers hot UI method', () {
@@ -276,8 +303,15 @@ void main() {
         expect(mockPeer.registeredMethods, contains('reloadMethod'));
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
     });
 
     testUsingContext('registers flutterMemoryInfo service', () {
@@ -290,10 +324,34 @@ void main() {
         expect(mockPeer.registeredMethods, contains('flutterMemoryInfo'));
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
+    });
+
+    testUsingContext('returns correct FlutterVersion', () {
+      FakeAsync().run((FakeAsync time) async {
+        final MockPeer mockPeer = MockPeer();
+        VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
+
+        expect(mockPeer.registeredMethods, contains('flutterVersion'));
+        expect(await mockPeer.sendRequest('flutterVersion'), equals(mockVersion.toJson()));
+      });
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => mockVersion,
     });
   });
 }
 
 class MockDevice extends Mock implements Device {}
+
+class MockFlutterVersion extends Mock implements FlutterVersion {
+  @override
+  Map<String, Object> toJson() => const <String, Object>{'Mock': 'Version'};
+}

@@ -4,15 +4,14 @@
 
 import 'dart:async';
 
-import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +30,7 @@ import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
 import '../common/wait.dart';
+import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'wait_conditions.dart';
 
 const String _extensionMethodName = 'driver';
@@ -56,6 +56,9 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
       name: _extensionMethodName,
       callback: extension.call,
     );
+    if (kIsWeb) {
+      registerWebServiceExtension(extension.call);
+    }
   }
 
   @override
@@ -67,7 +70,11 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
 /// Enables Flutter Driver VM service extension.
 ///
 /// This extension is required for tests that use `package:flutter_driver` to
-/// drive applications from a separate process.
+/// drive applications from a separate process. In order to allow the driver
+/// to interact with the application, this method changes the behavior of the
+/// framework in several ways - including keyboard interaction and text
+/// editing. Applications intended for release should never include this
+/// method.
 ///
 /// Call this function prior to running your application, e.g. before you call
 /// `runApp`.
@@ -542,9 +549,30 @@ class FlutterDriverExtension {
   Future<GetTextResult> _getText(Command command) async {
     final GetText getTextCommand = command as GetText;
     final Finder target = await _waitForElement(_createFinder(getTextCommand.finder));
-    // TODO(yjbanov): support more ways to read text
-    final Text text = target.evaluate().single.widget as Text;
-    return GetTextResult(text.data);
+
+    final Widget widget = target.evaluate().single.widget;
+    String text;
+
+    if (widget.runtimeType == Text) {
+      text = (widget as Text).data;
+    } else if (widget.runtimeType == RichText) {
+      final RichText richText = widget as RichText;
+      if (richText.text.runtimeType == TextSpan) {
+        text = (richText.text as TextSpan).text;
+      }
+    } else if (widget.runtimeType == TextField) {
+      text = (widget as TextField).controller.text;
+    } else if (widget.runtimeType == TextFormField) {
+      text = (widget as TextFormField).controller.text;
+    } else if (widget.runtimeType == EditableText) {
+      text = (widget as EditableText).controller.text;
+    }
+
+    if (text == null) {
+      throw UnsupportedError('Type ${widget.runtimeType.toString()} is currently not supported by getText');
+    }
+
+    return GetTextResult(text);
   }
 
   Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {

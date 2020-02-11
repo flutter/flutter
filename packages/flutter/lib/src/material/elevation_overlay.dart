@@ -14,7 +14,9 @@ import 'theme.dart';
 /// This is an internal implementation class and should not be exported by
 /// the material package.
 class ElevationOverlay {
-
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   ElevationOverlay._();
 
   /// Applies an elevation overlay color to a surface color to indicate

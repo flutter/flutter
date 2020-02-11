@@ -163,6 +163,25 @@ void main() {
       expect(child2.hasFocus, isTrue);
       expect(child2.hasPrimaryFocus, isTrue);
     });
+    testWidgets('Requesting focus before adding to tree results in a request after adding', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode();
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode child = FocusNode();
+      child.requestFocus();
+      expect(child.hasPrimaryFocus, isFalse); // not attached yet.
+
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      await tester.pump();
+      expect(scope.focusedChild, isNull);
+      expect(child.hasPrimaryFocus, isFalse); // not attached yet.
+
+      final FocusAttachment childAttachment = child.attach(context);
+      expect(child.hasPrimaryFocus, isFalse); // not parented yet.
+      childAttachment.reparent(parent: scope);
+      await tester.pump();
+      expect(child.hasPrimaryFocus, isTrue); // now attached and parented, so focus finally happened.
+    });
     testWidgets('Autofocus works.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
@@ -725,5 +744,93 @@ void main() {
     parent1.requestFocus();
     await tester.pump();
     expect(parent1.focusedChild, equals(child2));
+  });
+  testWidgets('Focus changes notify listeners.', (WidgetTester tester) async {
+    final BuildContext context = await setupWidget(tester);
+    final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+    final FocusAttachment parent1Attachment = parent1.attach(context);
+    final FocusNode child1 = FocusNode(debugLabel: 'child1');
+    final FocusAttachment child1Attachment = child1.attach(context);
+    final FocusNode child2 = FocusNode(debugLabel: 'child2');
+    final FocusAttachment child2Attachment = child2.attach(context);
+    parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+    child1Attachment.reparent(parent: parent1);
+    child2Attachment.reparent(parent: child1);
+
+    int notifyCount = 0;
+    void handleFocusChange() {
+      notifyCount++;
+    }
+    tester.binding.focusManager.addListener(handleFocusChange);
+
+    parent1.autofocus(child2);
+    expect(notifyCount, equals(0));
+    await tester.pump();
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+
+    child1.requestFocus();
+    child2.requestFocus();
+    child1.requestFocus();
+    await tester.pump();
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+
+    child2.requestFocus();
+    await tester.pump();
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+
+    child2.unfocus();
+    await tester.pump();
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+
+    tester.binding.focusManager.removeListener(handleFocusChange);
+  });
+  testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {
+    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    final FocusNode nodeB = FocusNode(debugLabel: 'b');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA , child: const Text('a')),
+            Focus(focusNode: nodeB, child: const Text('b')),
+          ],
+        ),
+      ),
+    );
+    int notifyCount = 0;
+    void handleFocusChange() {
+      notifyCount++;
+    }
+    tester.binding.focusManager.addListener(handleFocusChange);
+
+    nodeA.requestFocus();
+    await tester.pump();
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeB, child: const Text('b')),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(nodeA.hasPrimaryFocus, isFalse);
+    expect(nodeB.hasPrimaryFocus, isFalse);
+    expect(notifyCount, equals(1));
+    notifyCount = 0;
+
+    tester.binding.focusManager.removeListener(handleFocusChange);
   });
 }

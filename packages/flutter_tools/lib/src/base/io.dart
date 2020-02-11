@@ -33,6 +33,7 @@ import 'dart:io' as io
     InternetAddressType,
     IOSink,
     NetworkInterface,
+    pid,
     Process,
     ProcessInfo,
     ProcessSignal,
@@ -45,8 +46,8 @@ import 'dart:io' as io
 
 import 'package:meta/meta.dart';
 
+import '../globals.dart' as globals;
 import 'context.dart';
-import 'platform.dart';
 import 'process.dart';
 
 export 'dart:io'
@@ -180,7 +181,7 @@ class ProcessSignal {
   ///
   /// This is implemented by sending the signal using [Process.killPid].
   bool send(int pid) {
-    assert(!platform.isWindows || this == ProcessSignal.SIGTERM);
+    assert(!globals.platform.isWindows || this == ProcessSignal.SIGTERM);
     return io.Process.killPid(pid, _delegate);
   }
 
@@ -197,18 +198,24 @@ class _PosixProcessSignal extends ProcessSignal {
 
   @override
   Stream<ProcessSignal> watch() {
-    if (platform.isWindows) {
+    if (globals.platform.isWindows) {
       return const Stream<ProcessSignal>.empty();
     }
     return super.watch();
   }
 }
 
+/// A class that wraps stdout, stderr, and stdin, and exposes the allowed
+/// operations.
 class Stdio {
   const Stdio();
 
   Stream<List<int>> get stdin => io.stdin;
+
+  @visibleForTesting
   io.Stdout get stdout => io.stdout;
+
+  @visibleForTesting
   io.IOSink get stderr => io.stderr;
 
   bool get hasTerminal => io.stdout.hasTerminal;
@@ -245,13 +252,50 @@ class Stdio {
   int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
   int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
   bool get supportsAnsiEscapes => hasTerminal && io.stdout.supportsAnsiEscapes;
+
+  /// Writes [message] to [stderr], falling back on [fallback] if the write
+  /// throws any exception. The default fallback calls [print] on [message].
+  void stderrWrite(
+    String message, {
+    void Function(String, dynamic, StackTrace) fallback,
+  }) => _stdioWrite(stderr, message, fallback: fallback);
+
+  /// Writes [message] to [stdout], falling back on [fallback] if the write
+  /// throws any exception. The default fallback calls [print] on [message].
+  void stdoutWrite(
+    String message, {
+    void Function(String, dynamic, StackTrace) fallback,
+  }) => _stdioWrite(stdout, message, fallback: fallback);
+
+  // Helper for safeStderrWrite and safeStdoutWrite.
+  void _stdioWrite(io.IOSink sink, String message, {
+    void Function(String, dynamic, StackTrace) fallback,
+  }) {
+    try {
+      sink.write(message);
+    } catch (err, stack) {
+      if (fallback == null) {
+        print(message);
+      } else {
+        fallback(message, err, stack);
+      }
+    }
+  }
+
+  /// Adds [stream] to [stdout].
+  Future<void> addStdoutStream(Stream<List<int>> stream) => stdout.addStream(stream);
+
+  /// Adds [srtream] to [stderr].
+  Future<void> addStderrStream(Stream<List<int>> stream) => stderr.addStream(stream);
 }
 
-Stdio get stdio => context.get<Stdio>() ?? const Stdio();
-io.Stdout get stdout => stdio.stdout;
-Stream<List<int>> get stdin => stdio.stdin;
-io.IOSink get stderr => stdio.stderr;
-bool get stdinHasTerminal => stdio.stdinHasTerminal;
+// TODO(zra): Move pid and writePidFile into `ProcessInfo`.
+void writePidFile(String pidFile) {
+  if (pidFile != null) {
+    // Write our pid to the file.
+    globals.fs.file(pidFile).writeAsStringSync(io.pid.toString());
+  }
+}
 
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {

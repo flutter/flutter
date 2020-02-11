@@ -741,6 +741,9 @@ void main() {
 
     painter.layout(maxWidth: 300);
 
+    expect(painter.text, const TextSpan(text: text));
+    expect(painter.preferredLineHeight, 14);
+
     final List<ui.LineMetrics> lines = painter.computeLineMetrics();
 
     expect(lines.length, 4);
@@ -749,7 +752,7 @@ void main() {
     // be removed when it is no longer useful.
     if (lines[1].hardBreak == true) {
       print('LineMetrics called: ${lines.length}');
-      for (ui.LineMetrics line in lines) {
+      for (final ui.LineMetrics line in lines) {
         print('${line.lineNumber}: ${line.hardBreak}');
       }
     }
@@ -798,5 +801,10 @@ void main() {
     expect(lines[1].lineNumber, 1);
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
-  }, skip: !isLinux);
+
+  // Disable this test, this is causing a large amount of flaking and
+  // does not have a clear cause. This may or may not be a dart compiler
+  // issue or similar. See https://github.com/flutter/flutter/issues/43763
+  // for more info.
+  }, skip: true);
 }

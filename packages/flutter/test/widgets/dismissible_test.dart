@@ -208,7 +208,7 @@ Future<void> rollbackElement(WidgetTester tester, Finder finder, { @required Axi
 }
 
 class Test1215DismissibleWidget extends StatelessWidget {
-  const Test1215DismissibleWidget(this.text);
+  const Test1215DismissibleWidget(this.text, { Key key }) : super(key: key);
 
   final String text;
 

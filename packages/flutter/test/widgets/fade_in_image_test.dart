@@ -78,7 +78,7 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
   final List<FadeInImageElements> elements = <FadeInImageElements>[];
   final Iterable<Element> rawImageElements = tester.elementList(find.byType(RawImage));
   ComponentElement fadeInImageElement;
-  for (Element rawImageElement in rawImageElements) {
+  for (final Element rawImageElement in rawImageElements) {
     Element fadeTransitionElement;
     rawImageElement.visitAncestorElements((Element ancestor) {
       if (ancestor.widget is FadeTransition) {

@@ -46,7 +46,7 @@ void main() {
           ) {
             stdout.add(line);
           }
-          if (line.contains('To quit, press "q".')) {
+          if (line.contains('Quit (terminate the application on the device).')) {
             ready.complete();
           }
         });
@@ -96,8 +96,8 @@ void main() {
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line == 'To quit, press "q".',
-        'To quit, press "q".',
+        (String line) => line.contains('Quit (terminate the application on the device).'),
+        'q Quit (terminate the application on the device)',
       );
 
       _findNextMatcherInList(

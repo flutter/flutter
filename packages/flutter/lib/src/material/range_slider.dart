@@ -155,7 +155,7 @@ class RangeSlider extends StatefulWidget {
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// RangeSlider(
@@ -187,7 +187,7 @@ class RangeSlider extends StatefulWidget {
   /// The values passed will be the last [values] that the slider had before the
   /// change began.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// RangeSlider(
@@ -222,7 +222,7 @@ class RangeSlider extends StatefulWidget {
   /// [onChanged] for that). Rather, it should be used to know when the user has
   /// completed selecting a new [values] by ending a drag or a click.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// RangeSlider(
@@ -273,7 +273,7 @@ class RangeSlider extends StatefulWidget {
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
   /// Each label is rendered using the active [ThemeData]'s
-  /// [ThemeData.textTheme.body2] text style, with the
+  /// [ThemeData.textTheme.bodyText1] text style, with the
   /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text
   /// style can be overridden with [SliderThemeData.valueIndicatorTextStyle].
   ///
@@ -310,7 +310,7 @@ class RangeSlider extends StatefulWidget {
   /// This is used by accessibility frameworks like TalkBack on Android to
   /// inform users what the currently selected value is with more context.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// In the example below, a slider for currency values is configured to
   /// announce a value with a currency label.
@@ -564,7 +564,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
       rangeValueIndicatorShape: sliderTheme.rangeValueIndicatorShape ?? _defaultValueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2.copyWith(
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
       minThumbSeparation: sliderTheme.minThumbSeparation ?? _defaultMinThumbSeparation,

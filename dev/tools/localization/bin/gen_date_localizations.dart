@@ -139,17 +139,17 @@ String _jsonToMap(dynamic json) {
   if (json == null || json is num || json is bool)
     return '$json';
 
-  if (json is String) {
-    if (currentLocale == 'kn')
-      return generateEncodedString(json);
-    else if (json.contains("'"))
-      return 'r"""$json"""';
-    else
-      return "r'''$json'''";
-  }
+  if (json is String)
+    return generateEncodedString(currentLocale, json);
 
-  if (json is Iterable)
-    return '<dynamic>[${json.map<String>(_jsonToMap).join(',')}]';
+  if (json is Iterable) {
+    final StringBuffer buffer = StringBuffer('<dynamic>[');
+    for (final dynamic value in json) {
+      buffer.writeln('${_jsonToMap(value)},');
+    }
+    buffer.write(']');
+    return buffer.toString();
+  }
 
   if (json is Map<String, dynamic>) {
     final StringBuffer buffer = StringBuffer('<String, dynamic>{');
@@ -167,7 +167,7 @@ Set<String> _supportedLocales() {
   final Set<String> supportedLocales = <String>{};
   final RegExp filenameRE = RegExp(r'(?:material|cupertino)_(\w+)\.arb$');
   final Directory supportedLocalesDirectory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
-  for (FileSystemEntity entity in supportedLocalesDirectory.listSync()) {
+  for (final FileSystemEntity entity in supportedLocalesDirectory.listSync()) {
     final String filePath = entity.path;
     if (FileSystemEntity.isFileSync(filePath) && filenameRE.hasMatch(filePath))
       supportedLocales.add(filenameRE.firstMatch(filePath)[1]);
@@ -181,7 +181,7 @@ Map<String, File> _listIntlData(Directory directory) {
     .listSync()
     .whereType<File>()
     .where((File file) => file.path.endsWith('.json'));
-  for (File file in files) {
+  for (final File file in files) {
     final String locale = path.basenameWithoutExtension(file.path);
     localeFiles[locale] = file;
   }

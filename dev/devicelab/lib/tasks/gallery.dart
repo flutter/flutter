@@ -50,7 +50,7 @@ class GalleryTransitionTest {
       file('${galleryDirectory.path}/build/transition_durations.timeline.json').readAsStringSync(),
     ) as Map<String, dynamic>;
     final Map<String, List<int>> transitions = <String, List<int>>{};
-    for (String key in original.keys) {
+    for (final String key in original.keys) {
       transitions[key.replaceAll('/', '')] = List<int>.from(original[key] as List<dynamic>);
     }
 

@@ -10,6 +10,7 @@ import 'package:file/local.dart' as local;
 import 'package:path/path.dart' as path;
 
 import '../gen_l10n.dart';
+import '../gen_l10n_types.dart';
 import '../localizations_utils.dart';
 
 Future<void> main(List<String> arguments) async {
@@ -46,6 +47,15 @@ Future<void> main(List<String> arguments) async {
     help: 'The Dart class name to use for the output localization and '
       'localizations delegate classes.',
   );
+  parser.addOption(
+    'preferred-supported-locales',
+    help: 'The list of preferred supported locales for the application. '
+      'By default, the tool will generate the supported locales list in '
+      'alphabetical order. Use this flag if you would like to default to '
+      'a different locale. \n\n'
+      'For example, pass in [\'en_US\'] if you would like your app to '
+      'default to American English if a device supports it.',
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -53,10 +63,14 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
+  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final String flutterBin = Platform.isWindows ? 'flutter.bat' : 'flutter';
+  final String flutterPath = flutterRoot == null ? flutterBin : path.join(flutterRoot, 'bin', flutterBin);
   final String arbPathString = results['arb-dir'] as String;
   final String outputFileString = results['output-localization-file'] as String;
   final String templateArbFileName = results['template-arb-file'] as String;
   final String classNameString = results['output-class'] as String;
+  final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
@@ -67,6 +81,7 @@ Future<void> main(List<String> arguments) async {
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
         classNameString: classNameString,
+        preferredSupportedLocaleString: preferredSupportedLocaleString,
       )
       ..parseArbFiles()
       ..generateClassMethods()
@@ -79,13 +94,13 @@ Future<void> main(List<String> arguments) async {
     exitWithError(e.message);
   }
 
-  final ProcessResult pubGetResult = await Process.run('flutter', <String>['pub', 'get']);
+  final ProcessResult pubGetResult = await Process.run(flutterPath, <String>['pub', 'get']);
   if (pubGetResult.exitCode != 0) {
     stderr.write(pubGetResult.stderr);
     exit(1);
   }
 
-  final ProcessResult generateFromArbResult = await Process.run('flutter', <String>[
+  final ProcessResult generateFromArbResult = await Process.run(flutterPath, <String>[
     'pub',
     'run',
     'intl_translation:generate_from_arb',

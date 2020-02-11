@@ -23,7 +23,7 @@ import 'image.dart';
 /// The [child] is not clipped. To clip a child to the shape of a particular
 /// [ShapeDecoration], consider using a [ClipPath] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
@@ -230,7 +230,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///
 /// ## Example
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example shows a 48x48 amber square (placed inside a [Center] widget in
 /// case the parent widget has its own opinions regarding the size that the
 /// [Container] should take), with a margin so that it stays away from
@@ -250,7 +250,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how to use many of the features of [Container] at once.
 /// The [constraints] are set to fit the font size plus ample headroom
@@ -266,7 +266,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// ```dart
 /// Container(
 ///   constraints: BoxConstraints.expand(
-///     height: Theme.of(context).textTheme.display1.fontSize * 1.1 + 200.0,
+///     height: Theme.of(context).textTheme.headline4.fontSize * 1.1 + 200.0,
 ///   ),
 ///   padding: const EdgeInsets.all(8.0),
 ///   color: Colors.blue[600],
@@ -274,7 +274,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   child: Text('Hello World',
 ///     style: Theme.of(context)
 ///         .textTheme
-///         .display1
+///         .headline4
 ///         .copyWith(color: Colors.white)),
 ///   transform: Matrix4.rotationZ(0.1),
 /// )

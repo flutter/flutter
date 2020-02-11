@@ -157,5 +157,27 @@ void main() {
 
       expect(plugin.platforms, <String, PluginPlatform> {});
     });
+
+    test('error on empty platforms', () {
+      const String pluginYamlRaw = 'platforms:\n';
+
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+            () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
+        throwsToolExit(message: 'Invalid "platforms" specification.'),
+      );
+    });
+
+    test('error on empty platform', () {
+      const String pluginYamlRaw =
+          'platforms:\n'
+          ' android:\n';
+
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+            () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
+        throwsToolExit(message: 'Invalid "android" plugin specification.'),
+      );
+    });
   });
 }

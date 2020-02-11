@@ -123,7 +123,7 @@ class BouncingScrollSimulation extends Simulation {
 
   @override
   String toString() {
-    return '$runtimeType(leadingExtent: $leadingExtent, trailingExtent: $trailingExtent)';
+    return '${objectRuntimeType(this, 'BouncingScrollSimulation')}(leadingExtent: $leadingExtent, trailingExtent: $trailingExtent)';
   }
 }
 

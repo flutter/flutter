@@ -17,7 +17,7 @@ import 'bundle.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'dart/package_map.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'vmservice.dart';
 
 class DevFSConfig {
@@ -68,7 +68,7 @@ class DevFSFileContent extends DevFSContent {
     }
     if (file is Link) {
       // The link target.
-      return fs.file(file.resolveSymbolicLinksSync());
+      return globals.fs.file(file.resolveSymbolicLinksSync());
     }
     return file as File;
   }
@@ -89,7 +89,7 @@ class DevFSFileContent extends DevFSContent {
     if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
-      final File linkTarget = fs.file(resolved);
+      final File linkTarget = globals.fs.file(resolved);
       // Stat the link target.
       final FileStat fileStat = linkTarget.statSync();
       if (fileStat.type == FileSystemEntityType.notFound) {
@@ -100,7 +100,7 @@ class DevFSFileContent extends DevFSContent {
       }
     }
     if (_fileStat == null) {
-      printError('Unable to get status of file "${file.path}": file not found.');
+      globals.printError('Unable to get status of file "${file.path}": file not found.');
     }
   }
 
@@ -252,7 +252,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
         },
       );
     } catch (error) {
-      printTrace('DevFS: Failed to write $deviceUri: $error');
+      globals.printTrace('DevFS: Failed to write $deviceUri: $error');
     }
   }
 }
@@ -316,15 +316,15 @@ class _DevFSHttpWriter {
         await request.addStream(contents);
         final HttpClientResponse response = await request.close();
         response.listen((_) => null,
-            onError: (dynamic error) { printTrace('error: $error'); },
+            onError: (dynamic error) { globals.printTrace('error: $error'); },
             cancelOnError: true);
         break;
       } catch (error, trace) {
         if (!_completer.isCompleted) {
-          printTrace('Error writing "$deviceUri" to DevFS: $error');
+          globals.printTrace('Error writing "$deviceUri" to DevFS: $error');
           if (retry > 0) {
             retry--;
-            printTrace('trying again in a few - $retry more attempts left');
+            globals.printTrace('trying again in a few - $retry more attempts left');
             await Future<void>.delayed(const Duration(milliseconds: 500));
             continue;
           }
@@ -382,7 +382,7 @@ class DevFS {
     String packagesFilePath,
   }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
        _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol),
-       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
+       _packagesFilePath = packagesFilePath ?? globals.fs.path.join(rootDirectory.path, kPackagesFileName);
 
   DevFS.operations(
     this._operations,
@@ -390,7 +390,7 @@ class DevFS {
     this.rootDirectory, {
     String packagesFilePath,
   }) : _httpWriter = null,
-       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
+       _packagesFilePath = packagesFilePath ?? globals.fs.path.join(rootDirectory.path, kPackagesFileName);
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;
@@ -415,7 +415,7 @@ class DevFS {
   }
 
   Future<Uri> create() async {
-    printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
+    globals.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       _baseUri = await _operations.create(fsName);
     } on rpc.RpcException catch (rpcException) {
@@ -423,18 +423,18 @@ class DevFS {
       if (rpcException.code != 1001) {
         rethrow;
       }
-      printTrace('DevFS: Creating failed. Destroying and trying again');
+      globals.printTrace('DevFS: Creating failed. Destroying and trying again');
       await destroy();
       _baseUri = await _operations.create(fsName);
     }
-    printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
+    globals.printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
     return _baseUri;
   }
 
   Future<void> destroy() async {
-    printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
+    globals.printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
     await _operations.destroy(fsName);
-    printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
+    globals.printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
   /// Updates files on the device.
@@ -465,12 +465,12 @@ class DevFS {
 
     int syncedBytes = 0;
     if (bundle != null && !skipAssets) {
-      printTrace('Scanning asset files');
+      globals.printTrace('Scanning asset files');
       // We write the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
+        final Uri deviceUri = globals.fs.path.toUri(globals.fs.path.join(assetDirectory, archivePath));
         if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
           archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
         }
@@ -488,7 +488,7 @@ class DevFS {
     if (fullRestart) {
       generator.reset();
     }
-    printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+    globals.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
@@ -508,32 +508,32 @@ class DevFS {
     if (!bundleFirstUpload) {
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final Uri entryUri = fs.path.toUri(projectRootPath != null
-          ? fs.path.relative(pathToReload, from: projectRootPath)
+        final Uri entryUri = globals.fs.path.toUri(projectRootPath != null
+          ? globals.fs.path.relative(pathToReload, from: projectRootPath)
           : pathToReload,
         );
-        final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
+        final DevFSFileContent content = DevFSFileContent(globals.fs.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
     }
-    printTrace('Updating files');
+    globals.printTrace('Updating files');
     if (dirtyEntries.isNotEmpty) {
       try {
         await _httpWriter.write(dirtyEntries);
       } on SocketException catch (socketException, stackTrace) {
-        printTrace('DevFS sync failed. Lost connection to device: $socketException');
+        globals.printTrace('DevFS sync failed. Lost connection to device: $socketException');
         throw DevFSException('Lost connection to device.', socketException, stackTrace);
       } catch (exception, stackTrace) {
-        printError('Could not update files on device: $exception');
+        globals.printError('Could not update files on device: $exception');
         throw DevFSException('Sync failed', exception, stackTrace);
       }
     }
-    printTrace('DevFS: Sync finished');
+    globals.printTrace('DevFS: Sync finished');
     return UpdateFSReport(success: true, syncedBytes: syncedBytes,
          invalidatedSourcesCount: invalidatedFiles.length);
   }
 }
 
 /// Converts a platform-specific file path to a platform-independent URL path.
-String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';
+String _asUriPath(String filePath) => globals.fs.path.toUri(filePath).path + '/';

@@ -16,6 +16,7 @@ import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
   BuildAppBundleCommand({bool verboseHelp = false}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags();
     usesFlavorOption();
@@ -83,6 +84,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

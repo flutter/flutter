@@ -149,4 +149,3 @@ if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
     deploy 5 docs-flutter-dev
   fi
 fi
-

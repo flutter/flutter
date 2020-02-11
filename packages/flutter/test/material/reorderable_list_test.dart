@@ -316,7 +316,7 @@ void main() {
         testWidgets('Provides the correct accessibility actions in LTR and RTL modes', (WidgetTester tester) async {
           // The a11y actions for a vertical list are the same in LTR and RTL modes.
           final SemanticsHandle handle = tester.ensureSemantics();
-          for (TextDirection direction in TextDirection.values) {
+          for (final TextDirection direction in TextDirection.values) {
             await tester.pumpWidget(build());
 
             // The first item can be moved down or to the end.

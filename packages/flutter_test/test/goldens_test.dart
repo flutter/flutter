@@ -53,7 +53,7 @@ void main() {
 
   void test(String description, FutureOr<void> body()) {
     test_package.test(description, () {
-      return io.IOOverrides.runZoned<FutureOr<void>>(
+      io.IOOverrides.runZoned<FutureOr<void>>(
         body,
         createDirectory: (String path) => fs.directory(path),
         createFile: (String path) => fs.file(path),
@@ -76,7 +76,7 @@ void main() {
   group('goldenFileComparator', () {
     test('is initialized by test framework', () {
       expect(goldenFileComparator, isNotNull);
-      expect(goldenFileComparator, isInstanceOf<LocalFileComparator>());
+      expect(goldenFileComparator, isA<LocalFileComparator>());
       final LocalFileComparator comparator = goldenFileComparator as LocalFileComparator;
       expect(comparator.basedir.path, contains('flutter_test'));
     });

@@ -38,7 +38,7 @@ abstract class TickerProvider {
   Ticker createTicker(TickerCallback onTick);
 }
 
-// TODO(jacobr): make Ticker Diagnosticable to simplify reporting errors
+// TODO(jacobr): make Ticker use DiagnosticableMixin to simplify reporting errors
 // related to a ticker.
 /// Calls its callback once per animation frame.
 ///
@@ -322,7 +322,7 @@ class Ticker {
   @override
   String toString({ bool debugIncludeStack = false }) {
     final StringBuffer buffer = StringBuffer();
-    buffer.write('$runtimeType(');
+    buffer.write('${objectRuntimeType(this, 'Ticker')}(');
     assert(() {
       buffer.write(debugLabel ?? '');
       return true;

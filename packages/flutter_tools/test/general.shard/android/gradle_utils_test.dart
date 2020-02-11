@@ -6,9 +6,9 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -42,7 +42,7 @@ void main() {
     });
 
     testUsingContext('injects the wrapper when all files are missing', () {
-      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
       gradleUtils.injectGradleWrapperIfNeeded(sampleAppAndroid);
@@ -78,7 +78,7 @@ void main() {
     });
 
     testUsingContext('injects the wrapper when some files are missing', () {
-      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
       // There's an existing gradlew
@@ -128,7 +128,7 @@ void main() {
     });
 
     testUsingContext('throws ToolExit if gradle.properties doesn\'t exist', () {
-      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
       expect(() {
@@ -162,7 +162,7 @@ void main() {
     });
 
     testUsingContext('does not update gradle.properties if it already uses R8', () {
-      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
       sampleAppAndroid.childFile('gradle.properties')
         .writeAsStringSync('android.enableR8=true');
@@ -179,7 +179,7 @@ void main() {
     });
 
     testUsingContext('sets android.enableR8=true', () {
-      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
       sampleAppAndroid.childFile('gradle.properties')
         .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M\n');
@@ -200,7 +200,7 @@ void main() {
     });
 
     testUsingContext('appends android.enableR8=true to the new line', () {
-      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
       sampleAppAndroid.childFile('gradle.properties')
         .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M');
@@ -222,7 +222,7 @@ void main() {
   });
 
   group('GradleUtils.getExecutable', () {
-    final String gradlewFilename = platform.isWindows ? 'gradlew.bat' : 'gradlew';
+    final String gradlewFilename = globals.platform.isWindows ? 'gradlew.bat' : 'gradlew';
 
     MemoryFileSystem memoryFileSystem;
     OperatingSystemUtils operatingSystemUtils;
@@ -235,7 +235,7 @@ void main() {
     });
 
     testUsingContext('returns the gradlew path', () {
-      final Directory androidDirectory = fs.directory('/android')..createSync();
+      final Directory androidDirectory = globals.fs.directory('/android')..createSync();
       androidDirectory.childFile('gradlew')..createSync();
       androidDirectory.childFile('gradlew.bat')..createSync();
       androidDirectory.childFile('gradle.properties').createSync();

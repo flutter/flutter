@@ -77,7 +77,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   /// May only be called by subclasses.
   @protected
   void notifyListeners() {
-    for (VoidCallback callback in _listeners) {
+    for (final VoidCallback callback in _listeners) {
       callback();
     }
   }
@@ -446,7 +446,7 @@ class _FocusDemoState extends State<FocusDemo> {
             debugLabel: 'Scope',
             autofocus: true,
             child: DefaultTextStyle(
-              style: textTheme.display1,
+              style: textTheme.headline4,
               child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Actions Demo'),

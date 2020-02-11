@@ -70,13 +70,17 @@ void main() {
   });
 
   test('exit throws a StateError if called without being overriden', () {
-    expect(() => exit(0), throwsA(isInstanceOf<AssertionError>()));
+    expect(() => exit(0), throwsAssertionError);
   });
 
   test('exit does not throw a StateError if overriden', () {
-    setExitFunctionForTests((int value) {});
+    try {
+      setExitFunctionForTests((int value) {});
 
-    expect(() => exit(0), returnsNormally);
+      expect(() => exit(0), returnsNormally);
+    } finally {
+      restoreExitFunction();
+    }
   });
 
   test('test_api defines the Declarer in a known place', () {

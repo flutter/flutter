@@ -124,7 +124,7 @@ enum AnimationBehavior {
 /// This can be used to write code such as the `fadeOutAndUpdateState` method
 /// below.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here is a stateful `Foo` widget. Its [State] uses the
 /// [SingleTickerProviderStateMixin] to implement the necessary
@@ -175,7 +175,7 @@ enum AnimationBehavior {
 /// }
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following method (for a [State] subclass) drives two animation
 /// controllers using Dart's asynchronous syntax for awaiting [Future] objects:
@@ -248,7 +248,8 @@ class AnimationController extends Animation<double>
     _internalSetValue(value ?? lowerBound);
   }
 
-  /// Creates an animation controller with no upper or lower bound for its value.
+  /// Creates an animation controller with no upper or lower bound for its
+  /// value.
   ///
   /// * [value] is the initial value of the animation.
   ///
@@ -340,7 +341,8 @@ class AnimationController extends Animation<double>
   /// Stops the animation controller and sets the current value of the
   /// animation.
   ///
-  /// The new value is clamped to the range set by [lowerBound] and [upperBound].
+  /// The new value is clamped to the range set by [lowerBound] and
+  /// [upperBound].
   ///
   /// Value listeners are notified even if this does not change the value.
   /// Status listeners are notified if the animation was previously playing.

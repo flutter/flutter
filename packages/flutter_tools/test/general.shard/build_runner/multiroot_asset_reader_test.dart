@@ -7,8 +7,8 @@ import 'dart:io';
 
 import 'package:build/build.dart';
 import 'package:build_runner_core/build_runner_core.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_runner/web_compilation_delegate.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:glob/glob.dart';
 
 import '../../src/common.dart';
@@ -22,15 +22,15 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
-        final PackageNode root = PackageNode('foobar', fs.currentDirectory.path, DependencyType.path);
+        final PackageNode root = PackageNode('foobar', globals.fs.currentDirectory.path, DependencyType.path);
         packageGraph = FakePackageGraph(root, <String, PackageNode>{'foobar': root});
-        fs.file(fs.path.join('lib', 'main.dart'))
+        globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('main');
-        fs.file(fs.path.join('.dart_tool', 'build', 'generated', 'foobar', 'lib', 'bar.dart'))
+        globals.fs.file(globals.fs.path.join('.dart_tool', 'build', 'generated', 'foobar', 'lib', 'bar.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('bar');
-        fs.file('pubspec.yaml')
+        globals.fs.file('pubspec.yaml')
           ..createSync()
           ..writeAsStringSync('name: foobar');
       });
@@ -40,7 +40,7 @@ void main() {
       await IOOverrides.runWithIOOverrides(() async {
         final MultirootFileBasedAssetReader reader = MultirootFileBasedAssetReader(
           packageGraph,
-          fs.directory(fs.path.join('.dart_tool', 'build', 'generated')),
+          globals.fs.directory(globals.fs.path.join('.dart_tool', 'build', 'generated')),
         );
         expect(await reader.canRead(AssetId('foobar', 'lib/bar.dart')), true);
         expect(await reader.canRead(AssetId('foobar', 'lib/main.dart')), true);
@@ -56,7 +56,7 @@ void main() {
           AssetId('foobar', 'lib/bar.dart'),
           AssetId('foobar', 'lib/main.dart'),
         ]));
-      }, FlutterIOOverrides(fileSystem: fs));
+      }, FlutterIOOverrides(fileSystem: globals.fs));
      // Some component of either dart:io or build_runner normalizes file uris
      // into file paths for windows. This doesn't seem to work with IOOverrides
      // leaving all filepaths on windows with forward slashes.

@@ -529,12 +529,12 @@ class PageTransitionsTheme extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    if (identical(builders, other.builders))
+    if (other is PageTransitionsTheme && identical(builders, other.builders))
       return true;
     return other is PageTransitionsTheme
         && listEquals<PageTransitionsBuilder>(_all(other.builders), _all(builders));

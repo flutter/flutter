@@ -456,10 +456,10 @@ class _PathMatcher extends Matcher {
     }
     final Path path = object as Path;
     final List<String> errors = <String>[
-      for (Offset offset in includes)
+      for (final Offset offset in includes)
         if (!path.contains(offset))
           'Offset $offset should be inside the path, but is not.',
-      for (Offset offset in excludes)
+      for (final Offset offset in excludes)
         if (path.contains(offset))
           'Offset $offset should be outside the path, but is not.',
     ];
@@ -546,7 +546,7 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
     if (!result) {
       if (canvas.invocations.isNotEmpty) {
         description.write('The complete display list was:');
-        for (RecordedInvocation call in canvas.invocations)
+        for (final RecordedInvocation call in canvas.invocations)
           description.write('\n  * $call');
       }
       matchState[this] = '$prefixMessage\n$description';
@@ -583,7 +583,7 @@ class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher
   @override
   bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
     int count = 0;
-    for (RecordedInvocation call in calls) {
+    for (final RecordedInvocation call in calls) {
       if (call.invocation.isMethod && call.invocation.memberName == _methodName) {
         count++;
       }
@@ -651,7 +651,7 @@ class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
     if (!result) {
       if (canvas.invocations.isNotEmpty) {
         description.write('The complete display list was:');
-        for (RecordedInvocation call in canvas.invocations)
+        for (final RecordedInvocation call in canvas.invocations)
           description.write('\n  * $call');
       }
       matchState[this] = '$prefixMessage\n$description';
@@ -1159,13 +1159,13 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
     super.verifyArguments(arguments);
     final Path pathArgument = arguments[0] as Path;
     if (includes != null) {
-      for (Offset offset in includes) {
+      for (final Offset offset in includes) {
         if (!pathArgument.contains(offset))
           throw 'It called $methodName with a path that unexpectedly did not contain $offset.';
       }
     }
     if (excludes != null) {
-      for (Offset offset in excludes) {
+      for (final Offset offset in excludes) {
         if (pathArgument.contains(offset))
           throw 'It called $methodName with a path that unexpectedly contained $offset.';
       }
@@ -1243,13 +1243,13 @@ class _ShadowPredicate extends _PaintPredicate {
       throw 'It called $methodName with ${arguments.length} arguments; expected 4.';
     final Path pathArgument = arguments[0] as Path;
     if (includes != null) {
-      for (Offset offset in includes) {
+      for (final Offset offset in includes) {
         if (!pathArgument.contains(offset))
           throw 'It called $methodName with a path that unexpectedly did not contain $offset.';
       }
     }
     if (excludes != null) {
-      for (Offset offset in excludes) {
+      for (final Offset offset in excludes) {
         if (pathArgument.contains(offset))
           throw 'It called $methodName with a path that unexpectedly contained $offset.';
       }

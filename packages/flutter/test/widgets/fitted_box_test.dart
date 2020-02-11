@@ -407,10 +407,10 @@ void main() {
 
   testWidgets('FittedBox layers - none - clip', (WidgetTester tester) async {
     final List<double> values = <double>[10.0, 50.0, 100.0];
-    for (double a in values) {
-      for (double b in values) {
-        for (double c in values) {
-          for (double d in values) {
+    for (final double a in values) {
+      for (final double b in values) {
+        for (final double c in values) {
+          for (final double d in values) {
             await tester.pumpWidget(
               Center(
                 child: SizedBox(
