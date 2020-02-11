@@ -98,8 +98,7 @@ void main() {
     expect(_getIcon(tester).color, _kRegularActionColor);
   });
 
-  testWidgets('icon and textStyle colors are correct for destructive actions',
-      (WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct for destructive actions', (WidgetTester tester) async {
     await tester.pumpWidget(_getApp(isDestructiveAction: true));
     expect(_getTextStyle(tester).color, _kDestructiveActionColor);
     expect(_getIcon(tester).color, _kDestructiveActionColor);

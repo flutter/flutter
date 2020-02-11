@@ -22,10 +22,15 @@ class CupertinoContextMenuAction extends StatefulWidget {
     this.isDestructiveAction = false,
     this.onPressed,
     this.trailing,
-  })  : assert(child != null),
-        assert(isDefaultAction != null),
-        assert(isDestructiveAction != null),
-        super(key: key);
+    @Deprecated(
+      'Use `trailing` instead.'
+      'This feature was deprecated after v1.15.2'
+    )
+    this.trailingIcon, // ignore: deprecated_member_use_from_same_package
+  }) : assert(child != null),
+       assert(isDefaultAction != null),
+       assert(isDestructiveAction != null),
+       super(key: key);
 
   /// The widget that will be placed inside the action.
   final Widget child;
@@ -46,6 +51,12 @@ class CupertinoContextMenuAction extends StatefulWidget {
   /// Will be colored in the same way as the [TextStyle] used for [child] (for
   /// example, if using [isDestructiveAction]).
   final Widget trailing;
+
+  /// An optional icon to display to the right of the child.
+  ///
+  /// Will be colored in the same way as the [TextStyle] used for [child] (for
+  /// example, if using [isDestructiveAction]).
+  final IconData trailingIcon;
 
   @override
   _CupertinoContextMenuActionState createState() => _CupertinoContextMenuActionState();
