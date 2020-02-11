@@ -281,6 +281,67 @@ class PlatformViewOpacityScenario extends PlatformViewScenario {
   }
 }
 
+/// A simple platform view for testing touch events from iOS.
+class PlatformViewForTouchIOSScenario extends Scenario
+    with _BasePlatformViewScenarioMixin {
+
+  int _viewId;
+  bool _accept;
+  /// Creates the PlatformView scenario.
+  ///
+  /// The [window] parameter must not be null.
+  PlatformViewForTouchIOSScenario(Window window, String text, {int id = 0, bool accept, bool rejectUntilTouchesEnded = false})
+      : assert(window != null),
+       _accept = accept,
+      _viewId = id,
+        super(window) {
+    if (rejectUntilTouchesEnded) {
+      createPlatformView(window, text, id, viewType: 'scenarios/textPlatformView_blockPolicyUntilTouchesEnded');
+    } else {
+      createPlatformView(window, text, id);
+    }
+  }
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+
+    builder.pushOffset(0, 0);
+    finishBuilderByAddingPlatformViewAndPicture(builder, 11);
+  }
+
+  @override
+  void onPointerDataPacket(PointerDataPacket packet) {
+    if (packet.data.first.change == PointerChange.add) {
+    String method = 'rejectGesture';
+    if (_accept) {
+      method = 'acceptGesture';
+    }
+    const int _valueString = 7;
+    const int _valueInt32 = 3;
+    const int _valueMap = 13;
+    final Uint8List message = Uint8List.fromList(<int>[
+      _valueString,
+      method.length,
+      ...utf8.encode(method),
+      _valueMap,
+      1,
+      _valueString,
+      'id'.length,
+      ...utf8.encode('id'),
+      _valueInt32,
+      ..._to32(_viewId),
+    ]);
+    window.sendPlatformMessage(
+      'flutter/platform_views',
+      message.buffer.asByteData(),
+      (ByteData response) {},
+    );
+    }
+
+  }
+}
+
 mixin _BasePlatformViewScenarioMixin on Scenario {
   int _textureId;
 
@@ -289,7 +350,7 @@ mixin _BasePlatformViewScenarioMixin on Scenario {
   /// It prepare a TextPlatformView so it can be added to the SceneBuilder in `onBeginFrame`.
   /// Call this method in the constructor of the platform view related scenarios
   /// to perform necessary set up.
-  void createPlatformView(Window window, String text, int id) {
+  void createPlatformView(Window window, String text, int id, {String viewType = 'scenarios/textPlatformView'}) {
     const int _valueInt32 = 3;
     const int _valueFloat64 = 6;
     const int _valueString = 7;
@@ -313,8 +374,8 @@ mixin _BasePlatformViewScenarioMixin on Scenario {
       'viewType'.length,
       ...utf8.encode('viewType'),
       _valueString,
-      'scenarios/textPlatformView'.length,
-      ...utf8.encode('scenarios/textPlatformView'),
+      viewType.length,
+      ...utf8.encode(viewType),
       if (Platform.isAndroid) ...<int>[
         _valueString,
         'width'.length,

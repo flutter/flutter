@@ -50,6 +50,7 @@
 		6816DBAC2318696600A51400 /* golden_platform_view_opacity_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 6816DBA72318696600A51400 /* golden_platform_view_opacity_iPhone SE_simulator.png */; };
 		6816DBAD2318696600A51400 /* golden_platform_view_cliprect_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 6816DBA82318696600A51400 /* golden_platform_view_cliprect_iPhone SE_simulator.png */; };
 		6816DBAE2318696600A51400 /* golden_platform_view_cliprrect_iPhone SE_simulator.png in Resources */ = {isa = PBXBuildFile; fileRef = 6816DBA92318696600A51400 /* golden_platform_view_cliprrect_iPhone SE_simulator.png */; };
+		68A5B63423EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -156,6 +157,7 @@
 		6816DBA72318696600A51400 /* golden_platform_view_opacity_iPhone SE_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_opacity_iPhone SE_simulator.png"; sourceTree = "<group>"; };
 		6816DBA82318696600A51400 /* golden_platform_view_cliprect_iPhone SE_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprect_iPhone SE_simulator.png"; sourceTree = "<group>"; };
 		6816DBA92318696600A51400 /* golden_platform_view_cliprrect_iPhone SE_simulator.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "golden_platform_view_cliprrect_iPhone SE_simulator.png"; sourceTree = "<group>"; };
+		68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlatformViewGestureRecognizerTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -269,6 +271,7 @@
 				6816DBA02317573300A51400 /* GoldenImage.m */,
 				6816DBA22318358200A51400 /* PlatformViewGoldenTestManager.h */,
 				6816DBA32318358200A51400 /* PlatformViewGoldenTestManager.m */,
+				68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */,
 			);
 			path = ScenariosUITests;
 			sourceTree = "<group>";
@@ -458,6 +461,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68A5B63423EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m in Sources */,
 				6816DBA12317573300A51400 /* GoldenImage.m in Sources */,
 				6816DB9E231750ED00A51400 /* GoldenPlatformViewTests.m in Sources */,
 				6816DBA42318358200A51400 /* PlatformViewGoldenTestManager.m in Sources */,
