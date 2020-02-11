@@ -547,9 +547,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       if (snackBarSize == Size.zero) {
         snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
       }
-      final double snackBarYOffsetBase = floatingActionButtonRect != null && isSnackBarFloating
-        ? floatingActionButtonRect.top
-        : contentBottom;
+
+      double snackBarYOffsetBase;
+      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating)
+        snackBarYOffsetBase = floatingActionButtonRect.top;
+      else
+        snackBarYOffsetBase = contentBottom;
+
       positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
     }
 
