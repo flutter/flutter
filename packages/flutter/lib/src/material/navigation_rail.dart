@@ -248,7 +248,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     super.initState();
     _initControllers();
     _offstageLabelKeys = widget.destinations.map((NavigationRailDestination destination) => GlobalKey()).toList();
-    SchedulerBinding.instance.addPostFrameCallback(_resize);
+    _labelsMeasured = false;
+    _measureLabelsAndResize(false);
   }
 
   @override
@@ -262,10 +263,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     print('didUpdateWidget()');
     super.didUpdateWidget(oldWidget);
 
-    setState(() {
-      _labelsMeasured = false;
-      SchedulerBinding.instance.addPostFrameCallback(_resize);
-    });
+    if (widget.destinations != oldWidget.destinations) {
+      _measureLabelsAndResize(true);
+    }
 
     if (widget.extended != oldWidget.extended) {
       if (widget.extended) {
@@ -290,23 +290,23 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     print('build()');
-    final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
     final Widget leading = widget.leading;
     final Widget trailing = widget.trailing;
     final double railWidth = _labelSizes == null ? _railWidth : max(_railWidth, _labelSizes.map((e) => e.width).reduce(max));
-    final double currentWidth = railWidth;
+    final double currentWidth = railWidth + _extendedAnimation.value * (_extendedRailWidth - _railWidth) * railWidth / _railWidth;
     final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment();
     final IconThemeData selectedIconTheme = widget.selectedIconTheme ?? widget.iconTheme;
     final TextStyle selectedLabelTextStyle = widget.selectedLabelTextStyle ?? widget.labelTextStyle;
 
     if (!_labelsMeasured) {
-        return Stack(
+      return SizedBox(
+        width: railWidth,
+        child: Stack(
           overflow: Overflow.visible,
           children: <Widget>[
             for (int i = 0; i < widget.destinations.length; i++)
-              // Change this to KeyedSubtree to get a non-zero width.
               Offstage(
-                child: Container(
+                child: KeyedSubtree(
                   key: _offstageLabelKeys[i],
                   child: DefaultTextStyle(
                     style: widget.currentIndex == i ? selectedLabelTextStyle : widget.labelTextStyle,
@@ -315,14 +315,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                 ),
               ),
           ],
-        );
-//        return Offstage(
-//          key: _offstageLabelKeys[0],
-//          child: DefaultTextStyle(
-//            style: widget.currentIndex == 0 ? selectedLabelTextStyle : widget.labelTextStyle,
-//            child: widget.destinations[0].label,
-//          ),
-//        ),
+        ),
+      );
     } else {
       return _ExtendedNavigationRailAnimation(
         animation: _extendedAnimation,
@@ -413,21 +407,27 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     }
   }
 
+  void _measureLabelsAndResize(bool shouldSetState) {
+    if (widget.labelType != NavigationRailLabelType.none) {
+      SchedulerBinding.instance.addPostFrameCallback(_resize);
+      if (shouldSetState) {
+        setState(() {
+          _labelsMeasured = false;
+        });
+      }
+    }
+  }
+
   void _resize(Duration duration) {
     print('_resize()');
+    if (_labelsMeasured == false) {
+      final List<Size> labelSizes = _offstageLabelKeys.map((GlobalKey key) => (key.currentContext.findRenderObject() as RenderBox).size).toList();
 
-    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).size.width);
-//    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).getMinIntrinsicWidth(0));
-//    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).getMinIntrinsicWidth(double.infinity));
-//    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).getMaxIntrinsicWidth(0));
-//    print((_offstageLabelKeys[0].currentContext.findRenderObject() as RenderBox).getMaxIntrinsicWidth(double.infinity));
-
-    final List<Size> labelSizes = _offstageLabelKeys.map((e) => (e.currentContext.findRenderObject() as RenderBox).size).toList();
-
-    setState(() {
-      _labelsMeasured = true;
-      _labelSizes = labelSizes;
-    });
+      setState(() {
+        _labelsMeasured = true;
+        _labelSizes = labelSizes;
+      });
+    }
   }
 
   MainAxisAlignment _resolveGroupAlignment() {
@@ -476,7 +476,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   void _resetState() {
     _disposeControllers();
     _initControllers();
-    _offstageLabelKeys = widget.destinations.map((e) => GlobalKey()).toList();
+//    _offstageLabelKeys = widget.destinations.map((e) => GlobalKey()).toList();
   }
 
   void _rebuild() {
