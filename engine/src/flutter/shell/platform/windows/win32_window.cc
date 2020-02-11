@@ -4,9 +4,16 @@
 
 #include "flutter/shell/platform/windows/win32_window.h"
 
+#include "dpi_utils.h"
+
 namespace flutter {
 
-Win32Window::Win32Window() {}
+Win32Window::Win32Window() {
+  // Get the DPI of the primary monitor as the initial DPI. If Per-Monitor V2 is
+  // supported, |current_dpi_| should be updated in the
+  // kWmDpiChangedBeforeParent message.
+  current_dpi_ = GetDpiForHWND(nullptr);
+}
 
 Win32Window::~Win32Window() {
   Destroy();
@@ -74,7 +81,6 @@ LRESULT CALLBACK Win32Window::WndProc(HWND const window,
                      reinterpret_cast<LONG_PTR>(cs->lpCreateParams));
 
     auto that = static_cast<Win32Window*>(cs->lpCreateParams);
-    that->current_dpi_ = that->dpi_helper_->GetDpi(window);
     that->window_handle_ = window;
   } else if (Win32Window* that = GetThisFromHandle(window)) {
     return that->MessageHandler(window, message, wparam, lparam);
@@ -106,12 +112,10 @@ Win32Window::MessageHandler(HWND hwnd,
   UINT button_pressed = 0;
   if (window != nullptr) {
     switch (message) {
-      case WM_DPICHANGED:
-        return HandleDpiChange(window_handle_, wparam, lparam, true);
-        break;
       case kWmDpiChangedBeforeParent:
-        return HandleDpiChange(window_handle_, wparam, lparam, false);
-        break;
+        current_dpi_ = GetDpiForHWND(window_handle_);
+        window->OnDpiScale(current_dpi_);
+        return 0;
       case WM_SIZE:
         width = LOWORD(lparam);
         height = HIWORD(lparam);
@@ -246,40 +250,6 @@ void Win32Window::Destroy() {
   }
 
   UnregisterClass(window_class_name_.c_str(), nullptr);
-}
-
-// DPI Change handler. on WM_DPICHANGE resize the window
-LRESULT
-Win32Window::HandleDpiChange(HWND hwnd,
-                             WPARAM wparam,
-                             LPARAM lparam,
-                             bool toplevel) {
-  if (hwnd != nullptr) {
-    auto window =
-        reinterpret_cast<Win32Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-
-    UINT uDpi = HIWORD(wparam);
-
-    // The DPI is only passed for DPI change messages on top level windows,
-    // hence call function to get DPI if needed.
-    if (uDpi == 0) {
-      uDpi = dpi_helper_->GetDpi(hwnd);
-    }
-    current_dpi_ = uDpi;
-    window->OnDpiScale(uDpi);
-
-    if (toplevel) {
-      // Resize the window only for toplevel windows which have a suggested
-      // size.
-      auto lprcNewScale = reinterpret_cast<RECT*>(lparam);
-      LONG newWidth = lprcNewScale->right - lprcNewScale->left;
-      LONG newHeight = lprcNewScale->bottom - lprcNewScale->top;
-
-      SetWindowPos(hwnd, nullptr, lprcNewScale->left, lprcNewScale->top,
-                   newWidth, newHeight, SWP_NOZORDER | SWP_NOACTIVATE);
-    }
-  }
-  return 0;
 }
 
 void Win32Window::HandleResize(UINT width, UINT height) {
