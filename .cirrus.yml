@@ -456,7 +456,8 @@ task:
     - date
     - which flutter
     - bundle --version
-    - sudo bundle install --system --gemfile=dev/ci/mac/Gemfile
+    - bundle config set system 'true'
+    - sudo bundle install --gemfile=dev/ci/mac/Gemfile
     - git clean -xffd --exclude=bin/cache/
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
