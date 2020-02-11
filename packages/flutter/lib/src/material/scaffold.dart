@@ -1014,7 +1014,6 @@ class Scaffold extends StatefulWidget {
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
-    this.shouldSnackBarIgnoreFABRect = false,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1325,7 +1324,7 @@ class Scaffold extends StatefulWidget {
     'is present when it is not. This parameter will be removed. '
     'This feature was deprecated after v1.15.3.'
   )
-  final bool shouldSnackBarIgnoreFABRect;
+  static bool shouldSnackBarIgnoreFABRect = false;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -2518,7 +2517,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
-                shouldSnackBarIgnoreFABRect: widget.shouldSnackBarIgnoreFABRect,
+                shouldSnackBarIgnoreFABRect: Scaffold.shouldSnackBarIgnoreFABRect,
               ),
             );
           }),

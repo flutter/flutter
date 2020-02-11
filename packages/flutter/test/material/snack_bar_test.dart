@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(shihaohong): remove ignoring deprecated member use analysis
+// when Scaffold.shouldSnackBarIgnoreFABRect parameter is removed.
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1071,13 +1075,14 @@ void main() {
         '$behavior should align SnackBar with the bottom of Scaffold '
         'when Scaffold has no other elements',
         (WidgetTester tester) async {
+          // TODO(shihaohong): Remove this flag once the migration to fix
+          // SnackBarBehavior.floating is complete.
+          Scaffold.shouldSnackBarIgnoreFABRect = true;
+
           await tester.pumpWidget(
             MaterialApp(
               home: Scaffold(
                 body: Container(),
-                // TODO(shihaohong): Remove this flag once the migration to fix
-                // SnackBarBehavior.floating is complete.
-                shouldSnackBarIgnoreFABRect: true,
               ),
             ),
           );
@@ -1096,6 +1101,9 @@ void main() {
           final Offset scaffoldBottomLeft = tester.getBottomLeft(find.byType(Scaffold));
 
           expect(snackBarBottomLeft, equals(scaffoldBottomLeft));
+          // TODO(shihaohong): Remove this flag once the migration to fix
+          // SnackBarBehavior.floating is complete.
+          Scaffold.shouldSnackBarIgnoreFABRect = false;
         },
       );
 
@@ -1103,15 +1111,15 @@ void main() {
         '$behavior should align SnackBar with the top of BottomNavigationBar '
         'when Scaffold has no FloatingActionButton',
         (WidgetTester tester) async {
+          // TODO(shihaohong): Remove this flag once the migration to fix
+          // SnackBarBehavior.floating is complete.
+          Scaffold.shouldSnackBarIgnoreFABRect = true;
           final UniqueKey boxKey = UniqueKey();
           await tester.pumpWidget(
             MaterialApp(
               home: Scaffold(
                 body: Container(),
                 bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 60),
-                // TODO(shihaohong): Remove this flag once the migration to fix
-                // SnackBarBehavior.floating is complete.
-                shouldSnackBarIgnoreFABRect: true,
               ),
             ),
           );
@@ -1130,6 +1138,9 @@ void main() {
           final Offset bottomNavigationBarTopLeft = tester.getTopLeft(find.byKey(boxKey));
 
           expect(snackBarBottomLeft, equals(bottomNavigationBarTopLeft));
+          // TODO(shihaohong): Remove this flag once the migration to fix
+          // SnackBarBehavior.floating is complete.
+          Scaffold.shouldSnackBarIgnoreFABRect = false;
         },
       );
 
