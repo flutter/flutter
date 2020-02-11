@@ -229,7 +229,7 @@ class XCDevice {
 
   Future<List<dynamic>> _getAllDevices({bool useCache = false}) async {
     if (!isInstalled) {
-      _logger.printTrace('Xcode not found. Run \'flutter doctor\' for more information.');
+      _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
     }
     if (useCache && _cachedListResults != null) {

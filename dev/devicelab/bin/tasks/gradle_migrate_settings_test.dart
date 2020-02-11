@@ -53,7 +53,7 @@ Future<void> main() async {
         );
       });
 
-      const String newFileContent = 'include \':app\'';
+      const String newFileContent = "include ':app'";
 
       final File settingsGradle = File(path.join(projectDir.path, 'android', 'settings.gradle'));
       final File newSettingsGradle = File(path.join(projectDir.path, 'android', 'settings_aar.gradle'));

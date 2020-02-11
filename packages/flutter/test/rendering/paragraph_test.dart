@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-const String _kText = 'I polished up that handle so carefullee\nThat now I am the Ruler of the Queen\'s Navee!';
+const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
 
 void main() {
   test('getOffsetForCaret control test', () {
@@ -88,7 +88,7 @@ void main() {
     expect(range50.textInside(_kText), equals(' '));
 
     final TextRange range85 = paragraph.getWordBoundary(const TextPosition(offset: 75));
-    expect(range85.textInside(_kText), equals('Queen\'s'));
+    expect(range85.textInside(_kText), equals("Queen's"));
   }, skip: isBrowser);
 
   test('overflow test', () {
@@ -170,7 +170,7 @@ void main() {
   test('maxLines', () {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
-        text: 'How do you write like you\'re running out of time? Write day and night like you\'re running out of time?',
+        text: "How do you write like you're running out of time? Write day and night like you're running out of time?",
             // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
             // 0          1          2       3       4      5     6         7         8    9       10      11     12
         style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),

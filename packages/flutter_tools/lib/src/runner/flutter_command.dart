@@ -308,8 +308,8 @@ abstract class FlutterCommand extends Command<void> {
         help: 'An identifier used as an internal version number.\n'
               'Each build must have a unique identifier to differentiate it from previous builds.\n'
               'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
-              'On Android it is used as \'versionCode\'.\n'
-              'On Xcode builds it is used as \'CFBundleVersion\'',
+              "On Android it is used as 'versionCode'.\n"
+              "On Xcode builds it is used as 'CFBundleVersion'",
     );
   }
 
@@ -317,8 +317,8 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption('build-name',
         help: 'A "x.y.z" string used as the version number shown to users.\n'
               'For each new version of your app, you will provide a version number to differentiate it from previous versions.\n'
-              'On Android it is used as \'versionName\'.\n'
-              'On Xcode builds it is used as \'CFBundleShortVersionString\'',
+              "On Android it is used as 'versionName'.\n"
+              "On Xcode builds it is used as 'CFBundleShortVersionString'",
         valueHelp: 'x.y.z');
   }
 
@@ -341,7 +341,7 @@ abstract class FlutterCommand extends Command<void> {
       defaultsTo: null,
       hide: hide,
       help: 'Restricts commands to a subset of the available isolates (running instances of Flutter).\n'
-            'Normally there\'s only one, but when adding Flutter to a pre-existing app it\'s possible to create multiple.');
+            "Normally there's only one, but when adding Flutter to a pre-existing app it's possible to create multiple.");
   }
 
   void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false, bool excludeDebug = false }) {
@@ -374,7 +374,7 @@ abstract class FlutterCommand extends Command<void> {
         'application. The value of the flag should be a directory where program '
         'symbol files can be stored for later use. These symbol files contain '
         'the information needed to symbolize Dart stack traces. For an app built '
-        'with this flag, the \'flutter symbolize\' command with the right program '
+        "with this flag, the 'flutter symbolize' command with the right program "
         'symbol file is required to obtain a human readable stack trace.',
       valueHelp: '/project-name/v1.2.3/',
     );

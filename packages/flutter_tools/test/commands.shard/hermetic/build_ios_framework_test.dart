@@ -182,7 +182,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains('\'1.13.1113\''));
+            expect(podspecContents, contains("'1.13.1113'"));
             expect(podspecContents, contains('# $frameworkVersion'));
             expect(podspecContents, contains(licenseText));
           }, overrides: <Type, Generator>{
@@ -202,7 +202,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains('\'$storageBaseUrl/flutter_infra/flutter/$engineRevision/ios/artifacts.zip\''));
+            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra/flutter/$engineRevision/ios/artifacts.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),
@@ -220,7 +220,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains('\'$storageBaseUrl/flutter_infra/flutter/$engineRevision/ios-profile/artifacts.zip\''));
+            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra/flutter/$engineRevision/ios-profile/artifacts.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),
@@ -238,7 +238,7 @@ void main() {
 
             final File expectedPodspec = outputDirectory.childFile('Flutter.podspec');
             final String podspecContents = expectedPodspec.readAsStringSync();
-            expect(podspecContents, contains('\'$storageBaseUrl/flutter_infra/flutter/$engineRevision/ios-release/artifacts.zip\''));
+            expect(podspecContents, contains("'$storageBaseUrl/flutter_infra/flutter/$engineRevision/ios-release/artifacts.zip'"));
           }, overrides: <Type, Generator>{
             FileSystem: () => memoryFileSystem,
             ProcessManager: () => FakeProcessManager.any(),

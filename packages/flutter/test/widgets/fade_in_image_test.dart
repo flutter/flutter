@@ -251,7 +251,7 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
     });
 
-    testWidgets('doesn\'t interrupt in-progress animation when animation values are updated', (WidgetTester tester) async {
+    testWidgets("doesn't interrupt in-progress animation when animation values are updated", (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
 

@@ -3043,7 +3043,7 @@ void main() {
             );
             break;
           default:
-            throw TestFailure('HandlePositionInViewport can\'t be null.');
+            throw TestFailure("HandlePositionInViewport can't be null.");
         }
       }
       expect(state.selectionOverlay.handlesAreVisible, isTrue);
@@ -3923,7 +3923,7 @@ void main() {
             );
             break;
           default:
-            throw TestFailure('HandlePositionInViewport can\'t be null.');
+            throw TestFailure("HandlePositionInViewport can't be null.");
         }
       }
       expect(state.selectionOverlay.handlesAreVisible, isTrue);
@@ -3969,7 +3969,7 @@ void main() {
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
   }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('scrolling doesn\'t bounce', (WidgetTester tester) async {
+  testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
     // 3 lines of text, where the last line overflows and requires scrolling.
     const String testText = 'XXXXX\nXXXXX\nXXXXX';
     final TextEditingController controller = TextEditingController(text: testText);

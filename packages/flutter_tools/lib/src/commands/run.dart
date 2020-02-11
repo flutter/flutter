@@ -120,7 +120,7 @@ class RunCommand extends RunCommandBase {
               'or just dump the trace as soon as the application is running. The first frame '
               'is detected by looking for a Timeline event with the name '
               '"${Tracing.firstUsefulFrameEventName}". '
-              'By default, the widgets library\'s binding takes care of sending this event. ',
+              "By default, the widgets library's binding takes care of sending this event. ",
       )
       ..addFlag('use-test-fonts',
         negatable: true,

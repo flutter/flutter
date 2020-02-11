@@ -170,7 +170,7 @@ public class DummyPluginAClass {
           File(path.join(exampleApp.path, '.flutter-plugins-dependencies'));
 
       if (!flutterPluginsDependenciesFile.existsSync()) {
-        return TaskResult.failure('${flutterPluginsDependenciesFile.path} doesn\'t exist');
+        return TaskResult.failure("${flutterPluginsDependenciesFile.path} doesn't exist");
       }
 
       final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile.readAsStringSync();

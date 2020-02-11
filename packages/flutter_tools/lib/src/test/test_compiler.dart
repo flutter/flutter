@@ -171,7 +171,7 @@ class TestCompiler {
     if (_suppressOutput) {
       return;
     }
-    if (message.startsWith('Error: Could not resolve the package \'flutter_test\'')) {
+    if (message.startsWith("Error: Could not resolve the package 'flutter_test'")) {
       globals.printTrace(message);
       globals.printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
         emphasis: emphasis,

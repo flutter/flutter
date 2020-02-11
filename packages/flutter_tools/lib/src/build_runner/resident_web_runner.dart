@@ -184,7 +184,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
       TerminalColor.red,
     );
     globals.printStatus(
-        'Warning: Flutter\'s support for web development is not stable yet and hasn\'t');
+        "Warning: Flutter's support for web development is not stable yet and hasn't");
     globals.printStatus('been thoroughly tested in production environments.');
     globals.printStatus('For more information see https://flutter.dev/web');
     globals.printStatus('');
