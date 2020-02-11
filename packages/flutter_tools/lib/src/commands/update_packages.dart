@@ -75,6 +75,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'verifies the package checksum without changing or updating deps',
         defaultsTo: false,
         negatable: false,
+      )
+      ..addFlag(
+        'offline',
+        help: 'Use cached packages instead of accessing the network',
+        defaultsTo: false,
+        negatable: false,
       );
   }
 
@@ -129,6 +135,13 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isPrintTransitiveClosure = boolArg('transitive-closure');
     final bool isVerifyOnly = boolArg('verify-only');
     final bool isConsumerOnly = boolArg('consumer-only');
+    final bool offline = boolArg('offline');
+
+    if (upgrade && offline) {
+      throwToolExit(
+          '--force-upgrade cannot be used with the --offline flag'
+      );
+    }
 
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
     if (isConsumerOnly) {
@@ -268,6 +281,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           directory: tempDir.path,
           upgrade: true,
           checkLastModified: false,
+          offline: offline,
         );
         // Then we run "pub deps --style=compact" on the result. We pipe all the
         // output to tree.fill(), which parses it so that it can create a graph
@@ -335,7 +349,12 @@ class UpdatePackagesCommand extends FlutterCommand {
     int count = 0;
 
     for (final Directory dir in packages) {
-      await pub.get(context: PubContext.updatePackages, directory: dir.path, checkLastModified: false);
+      await pub.get(
+        context: PubContext.updatePackages,
+        directory: dir.path,
+        checkLastModified: false,
+        offline: offline,
+      );
       count += 1;
     }
 

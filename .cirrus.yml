@@ -438,8 +438,6 @@ task:
         - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
 # MACOS SHARDS
-# Mac doesn't use caches because they apparently take longer to populate and save
-# than just fetching the data in the first place.
 task:
   osx_instance:
     image: catalina-flutter # see https://cirrus-ci.org/guide/macOS/ for list of images (we should update regularly)
@@ -452,6 +450,21 @@ task:
     COCOAPODS_DISABLE_STATS: true
     CPU: 2
     MEMORY: 8G
+  all_flutter_cache:
+    folder: bin/cache/
+    fingerprint_script: echo $OS; cat bin/internal/*.version
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter precache
+      - flutter doctor -v
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+    populate_script:
+      - git fetch origin
+      - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+      - flutter update-packages
   setup_script:
     - date
     - which flutter
@@ -463,7 +476,7 @@ task:
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
     - flutter doctor -v
-    - flutter update-packages
+    - flutter update-packages --offline
     - date
     - which flutter
   on_failure:
@@ -575,7 +588,9 @@ task:
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/codesign.dart
-
+  cleanup_before_cache_upload_script:
+     # Remove volatile file to avoid unnecessary Cirrus cache invalidation.
+    - rm -f bin/cache/flutter_version_check.stamp
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or
   # stable). Note: tagging a commit and pushing to a release branch are
