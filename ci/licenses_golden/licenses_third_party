@@ -1,4 +1,4 @@
-Signature: d99776a23da4529101114c79bd278468
+Signature: 28030680e72e1c9f7c1005f9db0327a9
 
 UNUSED LICENSES:
 
@@ -8130,7 +8130,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/async_pat
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/core_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/isolate_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/math_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/mirrors_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/foreign_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/interceptors.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/isolate_helper.dart
@@ -8255,7 +8254,6 @@ FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/asyn
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/core_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/isolate_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/math_patch.dart
-FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/mirrors_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/foreign_helper.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/interceptors.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/isolate_helper.dart
@@ -8275,7 +8273,6 @@ FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_array.d
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_number.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_string.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/math_patch.dart
-FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/mirrors_patch_cfe.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/native_helper.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/regexp_helper.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/string_helper.dart
@@ -8478,7 +8475,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_run
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/types.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/utils.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/debugger.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/js_mirrors.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/developer_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/preambles/d8.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/preambles/jsshell.js
@@ -8504,7 +8500,6 @@ FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/dd
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/types.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/utils.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/debugger.dart
-FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/js_mirrors.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/developer_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/preambles/d8.js
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/preambles/jsshell.js
