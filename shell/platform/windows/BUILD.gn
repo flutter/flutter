@@ -41,6 +41,8 @@ source_set("flutter_windows_source") {
   sources = [
     "angle_surface_manager.cc",
     "angle_surface_manager.h",
+    "dpi_utils.cc",
+    "dpi_utils.h",
     "flutter_windows.cc",
     "key_event_handler.cc",
     "key_event_handler.h",
@@ -49,8 +51,6 @@ source_set("flutter_windows_source") {
     "platform_handler.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
-    "win32_dpi_helper.cc",
-    "win32_dpi_helper.h",
     "win32_flutter_window.cc",
     "win32_flutter_window.h",
     "win32_task_runner.cc",
@@ -109,8 +109,12 @@ executable("flutter_windows_unittests") {
   testonly = true
 
   sources = [
+    "dpi_utils_unittests.cc",
     "testing/win32_flutter_window_test.cc",
     "testing/win32_flutter_window_test.h",
+    "testing/win32_window_test.cc",
+    "testing/win32_window_test.h",
+    "win32_flutter_window_unittests.cc",
     "win32_window_unittests.cc",
   ]
 

@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/key_event_handler.h"
 #include "flutter/shell/platform/windows/keyboard_hook_handler.h"
 #include "flutter/shell/platform/windows/platform_handler.h"
@@ -180,6 +181,14 @@ FlutterDesktopViewRef FlutterDesktopGetView(
 
 HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
   return view->window->GetWindowHandle();
+}
+
+UINT FlutterDesktopGetDpiForHWND(HWND hwnd) {
+  return flutter::GetDpiForHWND(hwnd);
+}
+
+UINT FlutterDesktopGetDpiForMonitor(HMONITOR monitor) {
+  return flutter::GetDpiForMonitor(monitor);
 }
 
 FlutterDesktopEngineRef FlutterDesktopRunEngine(const char* assets_path,

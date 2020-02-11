@@ -11,8 +11,6 @@
 #include <memory>
 #include <string>
 
-#include "flutter/shell/platform/windows/win32_dpi_helper.h"
-
 namespace flutter {
 
 // Struct holding the mouse state. The engine doesn't keep track of which mouse
@@ -168,11 +166,6 @@ class Win32Window {
 
   // Member variable to hold the window title.
   std::wstring window_class_name_;
-
-  // Member variable referencing an instance of dpi_helper used to abstract some
-  // aspects of win32 High DPI handling across different OS versions.
-  std::unique_ptr<Win32DpiHelper> dpi_helper_ =
-      std::make_unique<Win32DpiHelper>();
 
   // Set to true to be notified when the mouse leaves the window.
   bool tracking_mouse_leave_ = false;
