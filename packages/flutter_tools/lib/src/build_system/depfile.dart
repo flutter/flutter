@@ -73,13 +73,15 @@ class Depfile {
 
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
     for (final File outputFile in files) {
-      // Escape file spaces.
-      final String path = outputFile.path.replaceAll(r' ', r'\ ');
       if (globals.platform.isWindows) {
-        // Foward slashes in a depfile have to be escaped on windows.
-        final String escapedPath = path.replaceAll(r'\', r'\\');
-        buffer.write(' $escapedPath');
+        // Foward slashes and spaces in a depfile have to be escaped on windows.
+        final String path = outputFile.path
+          .replaceAll(r'\', r'\\')
+          .replaceAll(r' ', r'\ ');
+        buffer.write(' $path');
       } else {
+        final String path = outputFile.path
+          .replaceAll(r' ', r'\ ');
         buffer.write(' $path');
       }
     }
