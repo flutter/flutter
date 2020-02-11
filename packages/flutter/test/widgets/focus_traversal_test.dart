@@ -12,15 +12,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  group(WidgetOrderFocusTraversalPolicy, () {
+  group(WidgetOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       final GlobalKey key3 = GlobalKey(debugLabel: '3');
       final GlobalKey key4 = GlobalKey(debugLabel: '4');
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
-      await tester.pumpWidget(DefaultFocusTraversal(
-        policy: WidgetOrderFocusTraversalPolicy(),
+      await tester.pumpWidget(FocusTraversalGroup(
+        policy: WidgetOrderTraversalPolicy(),
         child: FocusScope(
           key: key1,
           child: Column(
@@ -64,8 +64,8 @@ void main() {
       bool focus3;
       bool focus5;
       await tester.pumpWidget(
-        DefaultFocusTraversal(
-          policy: WidgetOrderFocusTraversalPolicy(),
+        FocusTraversalGroup(
+          policy: WidgetOrderTraversalPolicy(),
           child: FocusScope(
             debugLabel: 'key1',
             key: key1,
@@ -177,8 +177,8 @@ void main() {
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
       final GlobalKey key6 = GlobalKey(debugLabel: '6');
       await tester.pumpWidget(
-        DefaultFocusTraversal(
-          policy: WidgetOrderFocusTraversalPolicy(),
+        FocusTraversalGroup(
+          policy: WidgetOrderTraversalPolicy(),
           child: FocusScope(
             key: key1,
             child: Column(
@@ -250,8 +250,8 @@ void main() {
       final FocusNode testNode2 = FocusNode(debugLabel: 'Second Focus Node');
       await tester.pumpWidget(
         MaterialApp(
-          home: DefaultFocusTraversal(
-            policy: WidgetOrderFocusTraversalPolicy(),
+          home: FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
             child: Center(
               child: Builder(builder: (BuildContext context) {
                 return MaterialButton(
@@ -317,7 +317,7 @@ void main() {
       final GlobalKey key3 = GlobalKey(debugLabel: '3');
       final GlobalKey key4 = GlobalKey(debugLabel: '4');
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
-      await tester.pumpWidget(DefaultFocusTraversal(
+      await tester.pumpWidget(FocusTraversalGroup(
         policy: ReadingOrderTraversalPolicy(),
         child: FocusScope(
           key: key1,
@@ -364,7 +364,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
+          child: FocusTraversalGroup(
             policy: ReadingOrderTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'key1',
@@ -473,7 +473,7 @@ void main() {
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
       final GlobalKey key6 = GlobalKey(debugLabel: '6');
       await tester.pumpWidget(
-        DefaultFocusTraversal(
+        FocusTraversalGroup(
           policy: ReadingOrderTraversalPolicy(),
           child: FocusScope(
             key: key1,
@@ -538,6 +538,579 @@ void main() {
       expect(secondFocusNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
     });
+
+    testWidgets('Focus order is correct in the presence of different directionalities.', (WidgetTester tester) async {
+      const int nodeCount = 10;
+      final FocusScopeNode scopeNode = FocusScopeNode();
+      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      Widget buildTest(TextDirection topDirection) {
+        return Directionality(
+          textDirection: topDirection,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: FocusScope(
+              node: scopeNode,
+              child: Column(
+                children: <Widget>[
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Row(children: <Widget>[
+                      Focus(
+                        focusNode: nodes[0],
+                        child: Container(width: 10, height: 10),
+                      ),
+                      Focus(
+                        focusNode: nodes[1],
+                        child: Container(width: 10, height: 10),
+                      ),
+                      Focus(
+                        focusNode: nodes[2],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ]),
+                  ),
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Row(children: <Widget>[
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Focus(
+                          focusNode: nodes[3],
+                          child: Container(width: 10, height: 10),
+                        ),
+                      ),
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Focus(
+                          focusNode: nodes[4],
+                          child: Container(width: 10, height: 10),
+                        ),
+                      ),
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Focus(
+                          focusNode: nodes[5],
+                          child: Container(width: 10, height: 10),
+                        ),
+                      ),
+                    ]),
+                  ),
+                  Row(children: <Widget>[
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Focus(
+                        focusNode: nodes[6],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ),
+                    Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Focus(
+                        focusNode: nodes[7],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ),
+                    Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Focus(
+                        focusNode: nodes[8],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ),
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: Focus(
+                        focusNode: nodes[9],
+                        child: Container(width: 10, height: 10),
+                      ),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildTest(TextDirection.rtl));
+
+      // The last four *are* correct: the Row is sensitive to the directionality
+      // too, so it swaps the positions of 7 and 8.
+      final List<int> order = <int>[];
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(<int>[0, 1, 2, 4, 3, 5, 6, 7, 8, 9]));
+
+      await tester.pumpWidget(buildTest(TextDirection.ltr));
+
+      order.clear();
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(<int>[0, 1, 2, 4, 3, 5, 6, 8, 7, 9]));
+    });
+
+    testWidgets('Focus order is reading order regardless of widget order, even when overlapping.', (WidgetTester tester) async {
+      const int nodeCount = 10;
+      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Stack(
+              alignment: const Alignment(-1, -1),
+              children: List<Widget>.generate(nodeCount, (int index) {
+                // Boxes that all have the same upper left origin corner.
+                return Focus(
+                  focusNode: nodes[index],
+                  child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+
+      final List<int> order = <int>[];
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(<int>[9, 8, 7, 6, 5, 4, 3, 2, 1, 0]));
+
+      // Concentric boxes.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Stack(
+              alignment: const Alignment(0, 0),
+              children: List<Widget>.generate(nodeCount, (int index) {
+                return Focus(
+                  focusNode: nodes[index],
+                  child: Container(width: 10.0 * (index + 1), height: 10.0 * (index + 1)),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+
+      order.clear();
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(<int>[9, 8, 7, 6, 5, 4, 3, 2, 1, 0]));
+
+      // Stacked (vertically) and centered (horizontally, on each other)
+      // widgets, not overlapping.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Stack(
+              alignment: const Alignment(0, 0),
+              children: List<Widget>.generate(nodeCount, (int index) {
+                return Positioned(
+                  top: 5.0 * index * (index + 1),
+                  left: 5.0 * (9 - index),
+                  child: Focus(
+                    focusNode: nodes[index],
+                    child: Container(
+                      decoration: BoxDecoration(border: Border.all()),
+                      width: 10.0 * (index + 1),
+                      height: 10.0 * (index + 1),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+
+      order.clear();
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]));
+    });
+  });
+
+  group(OrderedTraversalPolicy, () {
+    testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      await tester.pumpWidget(FocusTraversalGroup(
+        policy: OrderedTraversalPolicy(secondary: ReadingOrderTraversalPolicy()),
+        child: FocusScope(
+          child: Column(
+            children: <Widget>[
+              FocusTraversalOrder(
+                order: const NumericFocusOrder(2),
+                child: Focus(
+                  child: Container(key: key1, width: 100, height: 100),
+                ),
+              ),
+              FocusTraversalOrder(
+                order: const NumericFocusOrder(1),
+                child: Focus(
+                  child: Container(key: key2, width: 100, height: 100),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      final Element firstChild = tester.element(find.byKey(key1));
+      final Element secondChild = tester.element(find.byKey(key2));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusNode secondFocusNode = Focus.of(secondChild);
+      final FocusNode scope = Focus.of(firstChild).enclosingScope;
+      secondFocusNode.nextFocus();
+
+      await tester.pump();
+
+      expect(firstFocusNode.hasFocus, isFalse);
+      expect(secondFocusNode.hasFocus, isTrue);
+      expect(scope.hasFocus, isTrue);
+    });
+
+    testWidgets('Fall back to the secondary sort if no FocusTraversalOrder exists.', (WidgetTester tester) async {
+      const int nodeCount = 10;
+      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
+            child: FocusScope(
+              child: Row(
+                children: List<Widget>.generate(
+                  nodeCount,
+                  (int index) => Focus(
+                    focusNode: nodes[index],
+                    child: Container(width: 10, height: 10),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Because it should be using widget order, this shouldn't be affected by
+      // the directionality.
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        expect(nodes[i].hasPrimaryFocus, isTrue, reason: "node $i doesn't have focus, but should");
+      }
+
+      // Now check backwards.
+      for (int i = nodeCount - 1; i > 0; --i) {
+        nodes.first.previousFocus();
+        await tester.pump();
+        expect(nodes[i - 1].hasPrimaryFocus, isTrue, reason: "node ${i - 1} doesn't have focus, but should");
+      }
+    });
+
+    testWidgets('Move focus to next/previous node using numerical order.', (WidgetTester tester) async {
+      const int nodeCount = 10;
+      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
+            child: FocusScope(
+              child: Row(
+                children: List<Widget>.generate(
+                  nodeCount,
+                  (int index) => FocusTraversalOrder(
+                    order: NumericFocusOrder(nodeCount - index.toDouble()),
+                    child: Focus(
+                      focusNode: nodes[index],
+                      child: Container(width: 10, height: 10),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The orders are assigned to be backwards from normal, so should go backwards.
+      for (int i = nodeCount - 1; i >= 0; --i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        expect(nodes[i].hasPrimaryFocus, isTrue, reason: "node $i doesn't have focus, but should");
+      }
+
+      // Now check backwards.
+      for (int i = 1; i < nodeCount; ++i) {
+        nodes.first.previousFocus();
+        await tester.pump();
+        expect(nodes[i].hasPrimaryFocus, isTrue, reason: "node $i doesn't have focus, but should");
+      }
+    });
+
+    testWidgets('Move focus to next/previous node using lexical order.', (WidgetTester tester) async {
+      const int nodeCount = 10;
+
+      /// Generate ['J' ... 'A'];
+      final List<String> keys = List<String>.generate(nodeCount, (int index) => String.fromCharCode('A'.codeUnits[0] + nodeCount - index - 1));
+      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node ${keys[index]}'));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
+            child: FocusScope(
+              child: Row(
+                children: List<Widget>.generate(
+                  nodeCount,
+                  (int index) => FocusTraversalOrder(
+                    order: LexicalFocusOrder(keys[index]),
+                    child: Focus(
+                      focusNode: nodes[index],
+                      child: Container(width: 10, height: 10),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The orders are assigned to be backwards from normal, so should go backwards.
+      for (int i = nodeCount - 1; i >= 0; --i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        expect(nodes[i].hasPrimaryFocus, isTrue, reason: "node $i doesn't have focus, but should");
+      }
+
+      // Now check backwards.
+      for (int i = 1; i < nodeCount; ++i) {
+        nodes.first.previousFocus();
+        await tester.pump();
+        expect(nodes[i].hasPrimaryFocus, isTrue, reason: "node $i doesn't have focus, but should");
+      }
+    });
+
+    testWidgets('Focus order is correct in the presence of FocusTraversalPolicyGroups.', (WidgetTester tester) async {
+      const int nodeCount = 10;
+      final FocusScopeNode scopeNode = FocusScopeNode();
+      final List<FocusNode> nodes = List<FocusNode>.generate(nodeCount, (int index) => FocusNode(debugLabel: 'Node $index'));
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
+            child: FocusScope(
+              node: scopeNode,
+              child: FocusTraversalGroup(
+                policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
+                child: Row(
+                  children: <Widget>[
+                    FocusTraversalOrder(
+                      order: const NumericFocusOrder(0),
+                      child: FocusTraversalGroup(
+                        policy: WidgetOrderTraversalPolicy(),
+                        child: Row(children: <Widget>[
+                          FocusTraversalOrder(
+                            order: const NumericFocusOrder(9),
+                            child: Focus(
+                              focusNode: nodes[9],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                          FocusTraversalOrder(
+                            order: const NumericFocusOrder(8),
+                            child: Focus(
+                              focusNode: nodes[8],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                          FocusTraversalOrder(
+                            order: const NumericFocusOrder(7),
+                            child: Focus(
+                              focusNode: nodes[7],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ),
+                    FocusTraversalOrder(
+                      order: const NumericFocusOrder(1),
+                      child: FocusTraversalGroup(
+                        policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
+                        child: Row(children: <Widget>[
+                          FocusTraversalOrder(
+                            order: const NumericFocusOrder(4),
+                            child: Focus(
+                              focusNode: nodes[4],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                          FocusTraversalOrder(
+                            order: const NumericFocusOrder(5),
+                            child: Focus(
+                              focusNode: nodes[5],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                          FocusTraversalOrder(
+                            order: const NumericFocusOrder(6),
+                            child: Focus(
+                              focusNode: nodes[6],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ),
+                    FocusTraversalOrder(
+                      order: const NumericFocusOrder(2),
+                      child: FocusTraversalGroup(
+                        policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
+                        child: Row(children: <Widget>[
+                          FocusTraversalOrder(
+                            order: const LexicalFocusOrder('D'),
+                            child: Focus(
+                              focusNode: nodes[3],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                          FocusTraversalOrder(
+                            order: const LexicalFocusOrder('C'),
+                            child: Focus(
+                              focusNode: nodes[2],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                          FocusTraversalOrder(
+                            order: const LexicalFocusOrder('B'),
+                            child: Focus(
+                              focusNode: nodes[1],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                          FocusTraversalOrder(
+                            order: const LexicalFocusOrder('A'),
+                            child: Focus(
+                              focusNode: nodes[0],
+                              child: Container(width: 10, height: 10),
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final List<int> expectedOrder = <int>[9, 8, 7, 4, 5, 6, 0, 1, 2, 3];
+      final List<int> order = <int>[];
+      for (int i = 0; i < nodeCount; ++i) {
+        nodes.first.nextFocus();
+        await tester.pump();
+        order.add(nodes.indexOf(primaryFocus));
+      }
+      expect(order, orderedEquals(expectedOrder));
+    });
+
+    testWidgets('Find the initial focus when a route is pushed or popped.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final FocusNode testNode1 = FocusNode(debugLabel: 'First Focus Node');
+      final FocusNode testNode2 = FocusNode(debugLabel: 'Second Focus Node');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
+            child: Center(
+              child: Builder(builder: (BuildContext context) {
+                return FocusTraversalOrder(
+                  order: const NumericFocusOrder(0),
+                  child: MaterialButton(
+                    key: key1,
+                    focusNode: testNode1,
+                    autofocus: true,
+                    onPressed: () {
+                      Navigator.of(context).push<void>(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return Center(
+                              child: FocusTraversalOrder(
+                                order: const NumericFocusOrder(0),
+                                child: MaterialButton(
+                                  key: key2,
+                                  focusNode: testNode2,
+                                  autofocus: true,
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Go Back'),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text('Go Forward'),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+
+      final Element firstChild = tester.element(find.text('Go Forward'));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusNode scope = Focus.of(firstChild).enclosingScope;
+      await tester.pump();
+
+      expect(firstFocusNode.hasFocus, isTrue);
+      expect(scope.hasFocus, isTrue);
+
+      await tester.tap(find.text('Go Forward'));
+      await tester.pumpAndSettle();
+
+      final Element secondChild = tester.element(find.text('Go Back'));
+      final FocusNode secondFocusNode = Focus.of(secondChild);
+
+      expect(firstFocusNode.hasFocus, isFalse);
+      expect(secondFocusNode.hasFocus, isTrue);
+
+      await tester.tap(find.text('Go Back'));
+      await tester.pumpAndSettle();
+
+      expect(firstFocusNode.hasFocus, isTrue);
+      expect(scope.hasFocus, isTrue);
+    });
   });
 
   group(DirectionalFocusTraversalPolicyMixin, () {
@@ -553,8 +1126,8 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
-            policy: WidgetOrderFocusTraversalPolicy(),
+          child: FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'Scope',
               child: Column(
@@ -706,8 +1279,8 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
-            policy: WidgetOrderFocusTraversalPolicy(),
+          child: FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'Scope',
               child: Column(
@@ -827,8 +1400,8 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: DefaultFocusTraversal(
-            policy: WidgetOrderFocusTraversalPolicy(),
+          child: FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'scope',
               child: Column(
@@ -871,7 +1444,7 @@ void main() {
 
       await tester.pump();
 
-      final FocusTraversalPolicy policy = DefaultFocusTraversal.of(upperLeftKey.currentContext);
+      final FocusTraversalPolicy policy = FocusTraversalGroup.of(upperLeftKey.currentContext);
 
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.up), equals(lowerLeftNode));
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.down), equals(upperLeftNode));
@@ -885,7 +1458,7 @@ void main() {
       final FocusNode focusBottom = FocusNode(debugLabel: 'bottom');
 
       final FocusTraversalPolicy policy = ReadingOrderTraversalPolicy();
-      await tester.pumpWidget(DefaultFocusTraversal(
+      await tester.pumpWidget(FocusTraversalGroup(
         policy: policy,
         child: FocusScope(
           debugLabel: 'Scope',
@@ -909,7 +1482,7 @@ void main() {
       expect(focusBottom.hasFocus, isTrue);
 
       // Remove center focus node.
-      await tester.pumpWidget(DefaultFocusTraversal(
+      await tester.pumpWidget(FocusTraversalGroup(
         policy: policy,
         child: FocusScope(
           debugLabel: 'Scope',
