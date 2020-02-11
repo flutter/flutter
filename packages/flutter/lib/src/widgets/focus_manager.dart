@@ -672,11 +672,17 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       _manager?.primaryFocus?.unfocus(focusPrevious: focusPrevious);
     }
     _manager?._willUnfocusNode(this);
-    final FocusScopeNode scope = enclosingScope;
+    FocusScopeNode scope = enclosingScope;
     if (scope != null) {
       scope._focusedChildren.remove(this);
       if (focusPrevious) {
-        scope._doRequestFocus();
+        while (scope != null && !scope.canRequestFocus) {
+          // This scope is not focusable, we should clears its previously
+          // focused children and move up the tree.
+          scope._focusedChildren.clear();
+          scope = scope.enclosingScope;
+        }
+        scope?._doRequestFocus();
       }
     }
   }
@@ -953,7 +959,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         '${hasFocus && hasDebugLabel ? ' ' : ''}'
         '${hasFocus && !hasPrimaryFocus ? '[IN FOCUS PATH]' : ''}'
         '${hasPrimaryFocus ? '[PRIMARY FOCUS]' : ''}';
-    return '${describeIdentity(this)}${extraData.isNotEmpty ? '($extraData)' : ''}';
+    return 'focus#${shortHash(this)}';
   }
 }
 
@@ -1070,6 +1076,10 @@ class FocusScopeNode extends FocusNode {
 
   @override
   void _doRequestFocus() {
+    // It is possible previously focused child is no longer focusable. We have
+    // to find the first focusable child
+    while (focusedChild != null && !focusedChild.canRequestFocus)
+      _focusedChildren.removeLast();
     // Start with the primary focus as the focused child of this scope, if there
     // is one. Otherwise start with this node itself.
     FocusNode primaryFocus = focusedChild ?? this;
