@@ -841,8 +841,8 @@ class BoxParentData extends ParentData {
   String toString() => 'offset=$offset';
 }
 
-/// Abstract ParentData subclass for RenderBox subclasses that want the
-/// ContainerRenderObjectMixin.
+/// Abstract [ParentData] subclass for [RenderBox] subclasses that want the
+/// [ContainerRenderObjectMixin].
 ///
 /// This is a convenience class that mixes in the relevant classes with
 /// the relevant type arguments.

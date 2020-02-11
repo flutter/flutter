@@ -303,7 +303,7 @@ class NestedScrollView extends StatefulWidget {
 /// [NestedScrollView], you can get its [NestedScrollViewState] by supplying a
 /// `GlobalKey<NestedScrollViewState>` to the [NestedScrollView.key] parameter).
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// [NestedScrollViewState] can be obtained using a [GlobalKey].
 /// Using the following setup, you can access the inner scroll controller
 /// using `globalKey.currentState.innerController`.

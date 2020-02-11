@@ -372,7 +372,7 @@ class CompleterIOSink extends MemoryIOSink {
       _completer.complete(throwOnAdd ? <int>[] : data);
     }
     if (throwOnAdd) {
-      throw 'CompleterIOSink Error';
+      throw Exception('CompleterIOSink Error');
     }
     super.add(data);
   }

@@ -428,4 +428,24 @@ void main() {
     expect(trace, isNotNull);
     expect(trace.value, stack);
   });
+
+  test('RepetitiveStackFrameFilter does not go out of range', () {
+    const RepetitiveStackFrameFilter filter = RepetitiveStackFrameFilter(
+      frames: <PartialStackFrame>[
+        PartialStackFrame(className: 'TestClass', method: 'test1', package: 'package:test/blah.dart'),
+        PartialStackFrame(className: 'TestClass', method: 'test2', package: 'package:test/blah.dart'),
+        PartialStackFrame(className: 'TestClass', method: 'test3', package: 'package:test/blah.dart'),
+      ],
+      replacement: 'test',
+    );
+    final List<String> reasons = List<String>(2);
+    filter.filter(
+      const <StackFrame>[
+        StackFrame(className: 'TestClass', method: 'test1', packageScheme: 'package', package: 'test', packagePath: 'blah.dart', line: 1, column: 1, number: 0, source: ''),
+        StackFrame(className: 'TestClass', method: 'test2', packageScheme: 'package', package: 'test', packagePath: 'blah.dart', line: 1, column: 1, number: 0, source: ''),
+      ],
+      reasons,
+    );
+    expect(reasons, List<String>(2));
+  });
 }

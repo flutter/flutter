@@ -574,11 +574,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
-/// Here's an illustration (implemented below) of what using this widget looks
-/// like, using a [curve] of [Curves.fastOutSlowIn].
-/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
-///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following example (depicted above) transitions an AnimatedContainer
 /// between two states. It adjusts the [height], [width], [color], and
@@ -1378,9 +1374,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 ///
-/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
-///
-/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] and a
 /// [FloatingActionButton]. Pressing the button animates the lists' opacity.
 ///

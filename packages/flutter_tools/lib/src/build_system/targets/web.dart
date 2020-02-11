@@ -11,7 +11,6 @@ import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
-import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
@@ -156,9 +155,7 @@ class Dart2JSTarget extends Target {
     final bool csp = environment.defines[kCspMode] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
-    final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
-      ? PackageMap.globalGeneratedPackagesPath
-      : PackageMap.globalPackagesPath;
+    final String packageFile = PackageMap.globalPackagesPath;
     final File outputFile = environment.buildDir.childFile('main.dart.js');
 
     final ProcessResult result = await globals.processManager.run(<String>[
@@ -314,7 +311,7 @@ class WebServiceWorker extends Target {
       for (File file in contents)
         // Do not force caching of source maps.
         if (!file.path.endsWith('main.dart.js.map'))
-        '/${globals.fs.path.relative(file.path, from: environment.outputDir.path)}':
+        '/${globals.fs.path.toUri(globals.fs.path.relative(file.path, from: environment.outputDir.path)).toString()}':
           md5.convert(await file.readAsBytes()).toString(),
     };
     final File serviceWorkerFile = environment.outputDir
@@ -361,9 +358,7 @@ self.addEventListener('fetch', function (event) {
         if (response) {
           return response;
         }
-        return fetch(event.request, {
-          credentials: 'include'
-        });
+        return fetch(event.request);
       })
   );
 });

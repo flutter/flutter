@@ -126,7 +126,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
 
   @override
   void filter(List<StackFrame> stackFrames, List<String> reasons) {
-    for (int index = 0; index < stackFrames.length; index += 1) {
+    for (int index = 0; index < stackFrames.length - numFrames; index += 1) {
       if (_matchesFrames(stackFrames.skip(index).take(numFrames).toList())) {
         reasons.setRange(index, index + numFrames, _replacements);
         index += numFrames - 1;
@@ -135,6 +135,9 @@ class RepetitiveStackFrameFilter extends StackFilter {
   }
 
   bool _matchesFrames(List<StackFrame> stackFrames) {
+    if (stackFrames.length < numFrames) {
+      return false;
+    }
     for (int index = 0; index < stackFrames.length; index++) {
       if (!frames[index].matches(stackFrames[index])) {
         return false;

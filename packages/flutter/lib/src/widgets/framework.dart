@@ -533,14 +533,6 @@ abstract class Widget extends DiagnosticableTree {
   static int _debugConcreteSubtype(Widget widget) {
     return widget is StatefulWidget ? 1 :
            widget is StatelessWidget ? 2 :
-           widget is InheritedModel ? 3 :
-           widget is InheritedWidget ? 4 :
-           widget is ParentDataWidget ? 5 :
-           widget is ProxyWidget ? 6 :
-           widget is LeafRenderObjectWidget ? 7 :
-           widget is SingleChildRenderObjectWidget? 8 :
-           widget is MultiChildRenderObjectWidget ? 9 :
-           widget is RenderObjectWidget ? 10 :
            0;
     }
 }
@@ -1782,9 +1774,14 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   LeafRenderObjectElement createElement() => LeafRenderObjectElement(this);
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have a single child slot. (This superclass only provides the storage
 /// for that child, it doesn't actually provide the updating logic.)
+///
+/// Typically, the render object assigned to this widget will make use of
+/// [RenderObjectWithChildMixin] to implement a single-child model. The mixin
+/// exposes a [RenderObjectWithChildMixin.child] property that allows
+/// retrieving the render object belonging to the [child] widget.
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1799,10 +1796,20 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   SingleChildRenderObjectElement createElement() => SingleChildRenderObjectElement(this);
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have a single list of children. (This superclass only provides the
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
+///
+/// This will return a [RenderObject] mixing in [ContainerRenderObjectMixin],
+/// which provides the necessary functionality to visit the children of the
+/// container render object (the render object belonging to the [children] widgets).
+/// Typically, this is a [RenderBox] with [RenderBoxContainerDefaultsMixin].
+///
+/// See also:
+///
+///  * [Stack], which uses [MultiChildRenderObjectWidget].
+///  * [RenderStack], for an example implementation of the associated render object.
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   ///
@@ -2916,14 +2923,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   static int _debugConcreteSubtype(Element element) {
     return element is StatefulElement ? 1 :
            element is StatelessElement ? 2 :
-           element is InheritedModelElement ? 3 :
-           element is InheritedElement ? 4 :
-           element is ParentDataElement ? 5 :
-           element is ProxyElement ? 6 :
-           element is LeafRenderObjectElement ? 7 :
-           element is SingleChildRenderObjectElement ? 8 :
-           element is MultiChildRenderObjectElement ? 9 :
-           element is RenderObjectElement ? 10 :
            0;
   }
 

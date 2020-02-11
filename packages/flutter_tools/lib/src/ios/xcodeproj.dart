@@ -167,6 +167,11 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
   }
 
+  // This is an optional path to split debug info
+  if (buildInfo.splitDebugInfoPath != null) {
+    xcodeBuildSettings.add('SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
+  }
+
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
 
@@ -214,6 +219,10 @@ List<String> _xcodeBuildSettingsLines({
 
   if (buildInfo.trackWidgetCreation) {
     xcodeBuildSettings.add('TRACK_WIDGET_CREATION=true');
+  }
+
+  if (buildInfo.treeShakeIcons) {
+    xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
   }
 
   return xcodeBuildSettings;
@@ -305,9 +314,8 @@ class XcodeProjectInterpreter {
     final Status status = Status.withSpinner(
       timeout: const TimeoutConfiguration().fastOperation,
       timeoutConfiguration: const TimeoutConfiguration(),
-      platform: _platform,
       stopwatch: Stopwatch(),
-      supportsColor: _terminal.supportsColor,
+      terminal: _terminal,
     );
     final List<String> showBuildSettingsCommand = <String>[
       _executable,

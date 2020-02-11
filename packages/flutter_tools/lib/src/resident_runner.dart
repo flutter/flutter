@@ -94,13 +94,6 @@ class FlutterDevice {
           .absolute.uri.toString(),
         dartDefines: dartDefines,
       );
-    } else if (flutterProject.hasBuilders) {
-      generator = await CodeGeneratingResidentCompiler.create(
-        targetPlatform: targetPlatform,
-        buildMode: buildMode,
-        flutterProject: flutterProject,
-        dartDefines: dartDefines,
-      );
     } else {
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(
@@ -116,6 +109,12 @@ class FlutterDevice {
         experimentalFlags: experimentalFlags,
         dartDefines: dartDefines,
       );
+      if (flutterProject.hasBuilders) {
+        generator = await CodeGeneratingResidentCompiler.create(
+          residentCompiler: generator,
+          flutterProject: flutterProject,
+        );
+      }
     }
     return FlutterDevice(
       device,
@@ -1052,9 +1051,6 @@ abstract class ResidentRunner {
       commandHelp.P.print();
       commandHelp.a.print();
     }
-    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
-      commandHelp.s.print();
-    }
   }
 
   /// Called when a signal has requested we exit.
@@ -1062,6 +1058,9 @@ abstract class ResidentRunner {
 
   /// Called right before we exit.
   Future<void> cleanupAtFinish();
+
+  // Clears the screen.
+  void clearScreen() => globals.logger.clear();
 }
 
 class OperationResult {
@@ -1167,6 +1166,9 @@ class TerminalHandler {
           return true;
         }
         return false;
+      case 'c':
+        residentRunner.clearScreen();
+        return true;
       case 'd':
       case 'D':
         await residentRunner.detach();
