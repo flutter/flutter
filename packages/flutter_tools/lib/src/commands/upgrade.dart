@@ -184,8 +184,8 @@ class UpgradeCommandRunner {
     } catch (e) {
       throwToolExit(
         'Unable to upgrade Flutter: no origin repository configured. '
-        'Run \'git remote add origin '
-        'https://github.com/flutter/flutter\' in ${Cache.flutterRoot}',
+        "Run 'git remote add origin "
+        "https://github.com/flutter/flutter' in ${Cache.flutterRoot}",
       );
     }
   }

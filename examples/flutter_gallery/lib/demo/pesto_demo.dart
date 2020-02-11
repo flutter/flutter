@@ -610,7 +610,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
     author: 'Ali Connors',
     ingredientsImagePath: 'food/icons/main.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'With this pesto recipe, you can quickly whip up a meal to satisfy your savory needs. And if you\'re feeling festive, you can add bacon to taste.',
+    description: "With this pesto recipe, you can quickly whip up a meal to satisfy your savory needs. And if you're feeling festive, you can add bacon to taste.",
     imagePath: 'food/pesto_pasta.png',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: <RecipeIngredient>[
@@ -634,7 +634,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
     author: 'Sandra Adams',
     ingredientsImagePath: 'food/icons/main.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Sometimes when you\'re craving some cheer in your life you can jumpstart your day with some cherry pie. Dessert for breakfast is perfectly acceptable.',
+    description: "Sometimes when you're craving some cheer in your life you can jumpstart your day with some cherry pie. Dessert for breakfast is perfectly acceptable.",
     imagePath: 'food/cherry_pie.png',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: <RecipeIngredient>[
@@ -654,7 +654,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
     author: 'Peter Carlsson',
     ingredientsImagePath: 'food/icons/spicy.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Everyone\'s favorite leafy green is back. Paired with fresh sliced onion, it\'s ready to tackle any dish, whether it be a salad or an egg scramble.',
+    description: "Everyone's favorite leafy green is back. Paired with fresh sliced onion, it's ready to tackle any dish, whether it be a salad or an egg scramble.",
     imagePath: 'food/spinach_onion_salad.png',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: <RecipeIngredient>[
@@ -694,7 +694,7 @@ const List<Recipe> kPestoRecipes = <Recipe>[
     author: 'Trevor Hansen',
     ingredientsImagePath: 'food/icons/quick.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'You \'feta\' believe this is a crowd-pleaser! Flaky phyllo pastry surrounds a delicious mixture of spinach and cheeses to create the perfect appetizer.',
+    description: "You 'feta' believe this is a crowd-pleaser! Flaky phyllo pastry surrounds a delicious mixture of spinach and cheeses to create the perfect appetizer.",
     imagePath: 'food/spanakopita.png',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: <RecipeIngredient>[

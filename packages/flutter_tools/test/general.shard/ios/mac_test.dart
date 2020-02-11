@@ -202,7 +202,7 @@ Error launching application on iPhone.''',
       await diagnoseXcodeBuildFailure(buildResult);
       expect(
         testLogger.errorText,
-        contains('No Provisioning Profile was found for your project\'s Bundle Identifier or your \ndevice.'),
+        contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
       );
     }, overrides: noColorTerminalOverride);
 

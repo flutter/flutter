@@ -145,7 +145,7 @@ void main() {
   }));
 
 
-  test('can\'t substitute foo', () => testbed.run(() {
+  test("can't substitute foo", () => testbed.run(() {
     const Source invalidBase = Source.pattern('foo');
 
     expect(() => invalidBase.accept(visitor), throwsA(isA<InvalidPatternException>()));

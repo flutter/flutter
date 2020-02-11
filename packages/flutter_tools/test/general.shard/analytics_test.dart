@@ -46,7 +46,7 @@ void main() {
     });
 
     // Ensure we don't send anything when analytics is disabled.
-    testUsingContext('doesn\'t send when disabled', () async {
+    testUsingContext("doesn't send when disabled", () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
@@ -73,7 +73,7 @@ void main() {
     });
 
     // Ensure we don't send for the 'flutter config' command.
-    testUsingContext('config doesn\'t send', () async {
+    testUsingContext("config doesn't send", () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
@@ -272,7 +272,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testUsingContext('don\'t send on bots', () async {
+    testUsingContext("don't send on bots", () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
@@ -286,7 +286,7 @@ void main() {
       ),
     });
 
-    testUsingContext('don\'t send on bots even when opted in', () async {
+    testUsingContext("don't send on bots even when opted in", () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
       flutterUsage.enabled = true;
