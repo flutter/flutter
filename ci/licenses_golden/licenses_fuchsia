@@ -1,4 +1,4 @@
-Signature: 6fcf784334b20c09c7ac8614436f2cb8
+Signature: 09932dd69984436b27d6bb1c9f8af60b
 
 UNUSED LICENSES:
 
@@ -524,6 +524,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
@@ -1500,6 +1501,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/channel.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/channelcontrol.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/cookie.fidl
@@ -2219,6 +2221,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
@@ -3020,6 +3023,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device_watcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/stream.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/server.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/url.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/stream.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/stream.cc
 ----------------------------------------------------------------------------------------------------
