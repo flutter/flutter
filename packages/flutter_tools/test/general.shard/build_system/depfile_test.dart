@@ -83,6 +83,22 @@ C:\\a.txt: C:\\b.txt
     Platform: () => FakePlatform(operatingSystem: 'windows'),
   }));
 
+  test('Can escape depfile with spaces in directory names', () => testbed.run(() {
+    final File inputFile = globals.fs.directory(r'Hello Flutter').childFile('a.txt').absolute
+      ..createSync(recursive: true);
+    final File outputFile = globals.fs.directory(r'Hello Flutter').childFile('b.txt').absolute
+      ..createSync();
+    final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
+    final File outputDepfile = globals.fs.file('depfile');
+    depfile.writeToFile(outputDepfile);
+
+    expect(outputDepfile.readAsStringSync(), contains(r'/Hello\ Flutter/a.txt'));
+    expect(outputDepfile.readAsStringSync(), contains(r'/Hello\ Flutter/b.txt'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.posix),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  }));
+
 
   test('Resillient to weird whitespace', () => testbed.run(() {
     final File depfileSource = globals.fs.file('example.d')..writeAsStringSync(r'''

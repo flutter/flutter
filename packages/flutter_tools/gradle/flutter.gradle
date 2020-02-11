@@ -898,6 +898,9 @@ class FlutterTask extends BaseFlutterTask {
         for (File depfile in getDependenciesFiles()) {
           sources += readDependencies(depfile)
         }
+        sources.collect {
+            println it
+        }
         return sources + project.files('pubspec.yaml')
     }
 
