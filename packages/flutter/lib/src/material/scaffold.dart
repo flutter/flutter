@@ -2247,14 +2247,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         ),
       );
 
-      if (newConfiguration?.animator != oldConfiguration?.animator)
+      if (newConfiguration?.animator != oldConfiguration?.animator) {
         _fabStatuses[key].animator = newConfiguration?.animator
             ?? _kDefaultFloatingActionButtonAnimator;
-      if (newConfiguration?.location != oldConfiguration?.location)
+      }
+
+      if (newConfiguration?.location != oldConfiguration?.location) {
         _moveFloatingActionButton(
           _fabStatuses[key],
           newConfiguration?.location ?? _kDefaultFloatingActionButtonLocation,
         );
+      }
     }
 
     if (widget.bottomSheet != oldWidget.bottomSheet) {
