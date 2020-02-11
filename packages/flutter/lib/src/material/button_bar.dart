@@ -149,7 +149,7 @@ class ButtonBar extends StatelessWidget {
   ///
   /// If the [children] do not fit into a single row, they are
   /// arranged into a column. This parameter provides additional
-  /// spacing in between buttons when it does overflow.
+  /// vertical space in between buttons when it does overflow.
   ///
   /// If null then no spacing will be added in between buttons
   /// in an overflow state.

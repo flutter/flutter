@@ -223,6 +223,7 @@ class AlertDialog extends StatelessWidget {
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
     this.actionsOverflowDirection,
+    this.actionsOverflowButtonSpacing,
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
@@ -342,6 +343,16 @@ class AlertDialog extends StatelessWidget {
   /// * [ButtonBar], which [actions] configures to lay itself out.
   final VerticalDirection actionsOverflowDirection;
 
+  /// The spacing between [actions] when the button bar overflows.
+  ///
+  /// If the widgets in [actions] do not fit into a single row, they are
+  /// arranged into a column. This parameter provides additional
+  /// vertical space in between buttons when it does overflow.
+  ///
+  /// If null then no spacing will be added in between buttons
+  /// in an overflow state.
+  final double actionsOverflowButtonSpacing;
+
   /// The padding that surrounds each button in [actions].
   ///
   /// This is different from [actionsPadding], which defines the padding
@@ -445,6 +456,7 @@ class AlertDialog extends StatelessWidget {
         child: ButtonBar(
           buttonPadding: buttonPadding,
           overflowDirection: actionsOverflowDirection,
+          overflowButtonSpacing: actionsOverflowButtonSpacing,
           children: actions,
         ),
       );
