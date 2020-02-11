@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/plugins.dart';
+
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
@@ -39,6 +41,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
   writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
+  createPluginSymlinks(windowsProject.project);
 
   final String vcvarsScript = visualStudio.vcvarsPath;
   if (vcvarsScript == null) {
