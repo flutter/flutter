@@ -262,7 +262,7 @@ Future<void> main() async {
           outputPath,
           mode,
           'device_info.xcframework',
-          'ios-armv7_arm64',
+          'ios-x86_64-simulator',
           'device_info.framework',
           'Headers',
           'DeviceInfoPlugin.h',
