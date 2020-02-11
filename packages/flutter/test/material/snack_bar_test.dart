@@ -1075,6 +1075,9 @@ void main() {
             MaterialApp(
               home: Scaffold(
                 body: Container(),
+                // TODO(shihaohong): Remove this flag once the migration to fix
+                // SnackBarBehavior.floating is complete.
+                shouldSnackBarIgnoreFABRect: true,
               ),
             ),
           );
@@ -1106,6 +1109,9 @@ void main() {
               home: Scaffold(
                 body: Container(),
                 bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 60),
+                // TODO(shihaohong): Remove this flag once the migration to fix
+                // SnackBarBehavior.floating is complete.
+                shouldSnackBarIgnoreFABRect: true,
               ),
             ),
           );

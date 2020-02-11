@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(shihaohong): remove ignoring deprecated member use analysis
+// when Scaffold.shouldSnackBarIgnoreFABRect parameter is removed.
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
@@ -394,13 +398,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.isSnackBarFloating,
     @required this.extendBody,
     @required this.extendBodyBehindAppBar,
+    @required this.shouldSnackBarIgnoreFABRect,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
        assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null),
        assert(extendBody != null),
-       assert(extendBodyBehindAppBar != null);
+       assert(extendBodyBehindAppBar != null),
+       assert(shouldSnackBarIgnoreFABRect != null);
 
   final bool extendBody;
   final bool extendBodyBehindAppBar;
@@ -414,6 +420,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final bool isSnackBarFloating;
+  final bool shouldSnackBarIgnoreFABRect;
 
   @override
   void performLayout(Size size) {
@@ -549,10 +556,16 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }
 
       double snackBarYOffsetBase;
-      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating)
-        snackBarYOffsetBase = floatingActionButtonRect.top;
-      else
-        snackBarYOffsetBase = contentBottom;
+      if (shouldSnackBarIgnoreFABRect) {
+        if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating)
+          snackBarYOffsetBase = floatingActionButtonRect.top;
+        else
+          snackBarYOffsetBase = contentBottom;
+      } else {
+        snackBarYOffsetBase = floatingActionButtonRect != null && isSnackBarFloating
+          ? floatingActionButtonRect.top
+          : contentBottom;
+      }
 
       positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
     }
@@ -1001,6 +1014,7 @@ class Scaffold extends StatefulWidget {
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
+    this.shouldSnackBarIgnoreFABRect = false,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1302,6 +1316,16 @@ class Scaffold extends StatefulWidget {
   /// example, if `TextDirection.of(context)` is set to [TextDirection.ltr],
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double drawerEdgeDragWidth;
+
+  /// This flag is deprecated and fixes and issue with incorrect clipping
+  /// and positioning of the [SnackBar] set to [SnackBarBehavior.floating].
+  @Deprecated(
+    'Fixes a bug that that fixes clipping and positioning of SnackBar '
+    'as it incorrectly offsets itself assuming a floating action button '
+    'is present when it is not. This parameter will be removed. '
+    'This feature was deprecated after v1.15.3.'
+  )
+  final bool shouldSnackBarIgnoreFABRect;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -2494,6 +2518,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
+                shouldSnackBarIgnoreFABRect: widget.shouldSnackBarIgnoreFABRect,
               ),
             );
           }),
