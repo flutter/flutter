@@ -123,7 +123,8 @@ RUN gem install bundler -N
 COPY ci/docker_linux/Gemfile /Gemfile
 COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 
-RUN bundle install --system
+RUN bundle config set system 'true' && \
+  bundle install --system
 
 # Install goldctl, for Golden testing
 # Last updated 2020-02-04 (update to rebuild Dockerfile with latest goldctl)
