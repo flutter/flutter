@@ -5,8 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'navigator.dart';
-
 /// Messages for route change notifications.
 class RouteNotificationMessages {
   // This class is not meant to be instantiated or extended; this constructor
