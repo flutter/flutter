@@ -735,7 +735,7 @@ void main() {
     final TextPainter painter = TextPainter(textHeightBehavior: null)
       ..textDirection = TextDirection.ltr;
 
-    painter.textHeightBehavior = TextHeightBehavior();
+    painter.textHeightBehavior = const TextHeightBehavior();
     painter.textHeightBehavior = null;
   });
 
