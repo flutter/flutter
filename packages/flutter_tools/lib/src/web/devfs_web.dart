@@ -341,13 +341,19 @@ class WebDevFS implements DevFS {
   Future<ConnectionResult> connect(bool useDebugExtension) {
     final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
     _connectedApps = dwds.connectedApps.listen((AppConnection appConnection) async {
-      final DebugConnection debugConnection = useDebugExtension
-        ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
-        : await dwds.debugConnection(appConnection);
-      if (firstConnection.isCompleted) {
-        appConnection.runMain();
-      } else {
-        firstConnection.complete(ConnectionResult(appConnection, debugConnection));
+      try {
+        final DebugConnection debugConnection = useDebugExtension
+          ? await (_cachedExtensionFuture ??= dwds.extensionDebugConnections.stream.first)
+          : await dwds.debugConnection(appConnection);
+        if (firstConnection.isCompleted) {
+          appConnection.runMain();
+        } else {
+          firstConnection.complete(ConnectionResult(appConnection, debugConnection));
+        }
+      } on Exception catch (error, stackTrace) {
+        if (!firstConnection.isCompleted) {
+          firstConnection.completeError(error, stackTrace);
+        }
       }
     }, onError: (dynamic error, StackTrace stackTrace) {
       globals.printError('Unknown error while waiting for debug connection:$error\n$stackTrace');
