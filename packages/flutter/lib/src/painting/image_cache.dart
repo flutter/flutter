@@ -270,7 +270,6 @@ class ImageCache {
     _liveImages.clear();
   }
 
-
   // Remove images from the cache until both the length and bytes are below
   // maximum, or the cache is empty.
   void _checkCacheSize() {
