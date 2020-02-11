@@ -129,7 +129,11 @@ void VulkanSurfacePool::SubmitSurface(
   const flutter::LayerRasterCacheKey& retained_key =
       vulkan_surface->GetRetainedKey();
 
-  if (retained_key.id() != 0) {
+  // TODO(https://bugs.fuchsia.dev/p/fuchsia/issues/detail?id=44141): Re-enable
+  // retained surfaces after we find out why textures are being prematurely
+  // recycled.
+  const bool kUseRetainedSurfaces = false;
+  if (kUseRetainedSurfaces && retained_key.id() != 0) {
     // Add the surface to |retained_surfaces_| if its retained key has a valid
     // layer id (|retained_key.id()|).
     //
