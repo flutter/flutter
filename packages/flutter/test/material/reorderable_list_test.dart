@@ -290,8 +290,8 @@ void main() {
         // Check initial scroll offset of first list item relative to
         // the offset of the list view.
         customController.animateTo(
-          40.0, 
-          duration: const Duration(milliseconds: 200), 
+          40.0,
+          duration: const Duration(milliseconds: 200),
           curve: Curves.linear
         );
         await tester.pumpAndSettle();
@@ -305,7 +305,7 @@ void main() {
 
         // Drag the UI to see if the scroll controller updates accordingly
         await tester.drag(
-          find.text('B'), 
+          find.text('B'),
           const Offset(0.0, -100.0),
         );
         listViewTopLeft = tester.getTopLeft(
