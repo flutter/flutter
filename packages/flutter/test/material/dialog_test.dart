@@ -244,7 +244,7 @@ void main() {
   });
 
   testWidgets('Custom padding on SimpleDialogOption', (WidgetTester tester) async {
-    const EdgeInsets customPadding = EdgeInsets.all(10);
+    const EdgeInsets customPadding = EdgeInsets.fromLTRB(4, 10, 8, 6);
     final SimpleDialog dialog = SimpleDialog(
       title: const Text('Title'),
       children: <Widget>[
@@ -260,17 +260,13 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Size dialogSize = tester.getSize(
-      find.descendant(
-        of: find.byType(SimpleDialog),
-        matching: find.byType(Material),
-      ).first,
-    );
-    final Size optionSize = tester.getSize(
-      find.text('First option'),
-    );
+    final Rect dialogRect = tester.getRect(find.byType(SimpleDialogOption));
+    final Rect textRect = tester.getRect(find.text('First option'));
 
-    expect(optionSize.width, dialogSize.width - (10.0 * 2));
+    expect(textRect.left, dialogRect.left + customPadding.left);
+    expect(textRect.top, dialogRect.top + customPadding.top);
+    expect(textRect.right, dialogRect.right - customPadding.right);
+    expect(textRect.bottom, dialogRect.bottom - customPadding.bottom);
   });
 
   testWidgets('Barrier dismissible', (WidgetTester tester) async {
