@@ -796,7 +796,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
   // Given the viewport boundaries, return a Quad representing the boundaries
   // for translation values.
-  static Quad _getTranslationBoundaries(Rect viewportBoundaries, double scale, Matrix3 rotation) {
+  static Quad _getTranslationBoundaries(Rect viewportBoundaries, Matrix3 rotationAndScale) {
     // Translation is reversed (a positive translation moves the scene to the
     // right, viewport to the left).
     final Rect rect = Rect.fromLTRB(
@@ -806,10 +806,10 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       -viewportBoundaries.top,
     );
     return Quad.points(
-      rotation.transform(Vector3(rect.topLeft.dx, rect.topLeft.dy, 0)),
-      rotation.transform(Vector3(rect.topRight.dx, rect.topRight.dy, 0)),
-      rotation.transform(Vector3(rect.bottomRight.dx, rect.bottomRight.dy, 0)),
-      rotation.transform(Vector3(rect.bottomLeft.dx, rect.bottomLeft.dy, 0)),
+      rotationAndScale.transform(Vector3(rect.topLeft.dx, rect.topLeft.dy, 0)),
+      rotationAndScale.transform(Vector3(rect.topRight.dx, rect.topRight.dy, 0)),
+      rotationAndScale.transform(Vector3(rect.bottomRight.dx, rect.bottomRight.dy, 0)),
+      rotationAndScale.transform(Vector3(rect.bottomLeft.dx, rect.bottomLeft.dy, 0)),
     );
   }
 
@@ -826,7 +826,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     // Clamp translation so the viewport remains inside _boundaryRect.
     final double scale = widget.transformationController.value.getMaxScaleOnAxis();
     final Size scaledSize = widget.size / scale;
-    // Add 1 pixel because Rect.contains excludes its bottom and right edges.
     final Rect viewportBoundaries = Rect.fromLTRB(
       _boundaryRect.left,
       _boundaryRect.top,
@@ -836,7 +835,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
     final Quad translationBoundaries = _getTranslationBoundaries(
       viewportBoundaries,
-      scale,
       matrix.getRotation(),
     );
     // TODO(justinmc): Can I simplify the aabb calculation like quadToRect?
