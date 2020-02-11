@@ -1177,7 +1177,6 @@ class TextStyle extends Diagnosticable {
       color,
       backgroundColor,
       fontFamily,
-      fontFamilyFallback,
       fontSize,
       fontWeight,
       fontStyle,
@@ -1191,8 +1190,9 @@ class TextStyle extends Diagnosticable {
       decoration,
       decorationColor,
       decorationStyle,
-      shadows,
-      fontFeatures,
+      hashList(shadows),
+      hashList(fontFeatures),
+      hashList(fontFamilyFallback),
     );
   }
 
