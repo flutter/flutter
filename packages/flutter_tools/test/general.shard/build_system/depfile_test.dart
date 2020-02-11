@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -65,6 +66,39 @@ C:\\a.txt: C:\\b.txt
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
   }));
+
+  test('Can escape depfile with windows file paths and spaces in directory names', () => testbed.run(() {
+    final File inputFile = globals.fs.directory(r'Hello Flutter').childFile('a.txt').absolute
+      ..createSync(recursive: true);
+    final File outputFile = globals.fs.directory(r'Hello Flutter').childFile('b.txt').absolute
+      ..createSync();
+    final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
+    final File outputDepfile = globals.fs.file('depfile');
+    depfile.writeToFile(outputDepfile);
+
+    expect(outputDepfile.readAsStringSync(), contains(r'C:\\Hello\ Flutter\\a.txt'));
+    expect(outputDepfile.readAsStringSync(), contains(r'C:\\Hello\ Flutter\\b.txt'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    Platform: () => FakePlatform(operatingSystem: 'windows'),
+  }));
+
+  test('Can escape depfile with spaces in directory names', () => testbed.run(() {
+    final File inputFile = globals.fs.directory(r'Hello Flutter').childFile('a.txt').absolute
+      ..createSync(recursive: true);
+    final File outputFile = globals.fs.directory(r'Hello Flutter').childFile('b.txt').absolute
+      ..createSync();
+    final Depfile depfile = Depfile(<File>[inputFile], <File>[outputFile]);
+    final File outputDepfile = globals.fs.file('depfile');
+    depfile.writeToFile(outputDepfile);
+
+    expect(outputDepfile.readAsStringSync(), contains(r'/Hello\ Flutter/a.txt'));
+    expect(outputDepfile.readAsStringSync(), contains(r'/Hello\ Flutter/b.txt'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.posix),
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  }));
+
 
   test('Resillient to weird whitespace', () => testbed.run(() {
     final File depfileSource = globals.fs.file('example.d')..writeAsStringSync(r'''
