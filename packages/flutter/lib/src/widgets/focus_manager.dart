@@ -959,7 +959,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         '${hasFocus && hasDebugLabel ? ' ' : ''}'
         '${hasFocus && !hasPrimaryFocus ? '[IN FOCUS PATH]' : ''}'
         '${hasPrimaryFocus ? '[PRIMARY FOCUS]' : ''}';
-    return 'focus#${shortHash(this)}';
+    return '${describeIdentity(this)}${extraData.isNotEmpty ? '($extraData)' : ''}';
   }
 }
 
