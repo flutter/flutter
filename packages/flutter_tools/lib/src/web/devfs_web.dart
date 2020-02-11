@@ -225,7 +225,7 @@ class WebAssetServer implements AssetReader {
         codeStart,
         codeEnd - codeStart,
       );
-      _files[_filePathToUriFragment(filePath)] = byteView;
+      _files[filePath] = byteView;
 
       final int sourcemapStart = sourcemapOffsets[0];
       final int sourcemapEnd = sourcemapOffsets[1];
@@ -238,7 +238,7 @@ class WebAssetServer implements AssetReader {
         sourcemapStart,
         sourcemapEnd - sourcemapStart,
       );
-      _sourcemaps['${_filePathToUriFragment(filePath)}.map'] = sourcemapView;
+      _sourcemaps['$filePath.map'] = sourcemapView;
 
       modules.add(filePath);
     }
@@ -493,7 +493,7 @@ class WebDevFS implements DevFS {
       success: true,
       syncedBytes: codeFile.lengthSync(),
       invalidatedSourcesCount: invalidatedFiles.length,
-    )..invalidatedModules = modules.map(_filePathToUriFragment).toList();
+    )..invalidatedModules = modules;
   }
 
   @visibleForTesting
