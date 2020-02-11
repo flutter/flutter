@@ -1269,6 +1269,7 @@ void main() {
       expect(focusNodeOnPageOne.hasFocus, isFalse);
       expect(focusNodeOnPageTwo.hasFocus, isTrue);
 
+      // Uses keyboard to focused a child.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
       expect(focusNodeOnPageTwo.hasFocus, isTrue);
