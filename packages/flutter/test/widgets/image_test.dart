@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -28,7 +29,7 @@ void main() {
   setUp(() {
     originalCacheSize = imageCache.maximumSize;
     imageCache.clear();
-    (imageCache as FlutterImageCache).clearWeakImages();
+    imageCache.clearLiveImages();
   });
 
   tearDown(() {
@@ -1380,16 +1381,13 @@ void main() {
   testWidgets('Same image provider in multiple parts of the tree, no cache room left', (WidgetTester tester) async {
     imageCache.maximumSize = 0;
 
-    expect(imageCache, isA<FlutterImageCache>());
-    final FlutterImageCache flutterImageCache = imageCache as FlutterImageCache;
-
     final ui.Image image = await tester.runAsync(createTestImage);
     final TestImageProvider provider1 = TestImageProvider();
     final TestImageProvider provider2 = TestImageProvider();
 
     expect(provider1.loadCallCount, 0);
     expect(provider2.loadCallCount, 0);
-    expect(flutterImageCache.weakImageCount, 0);
+    expect(imageCache.liveImageCount, 0);
 
     await tester.pumpWidget(Column(
       children: <Widget>[
@@ -1401,13 +1399,13 @@ void main() {
       ],
     ));
 
-    expect(flutterImageCache.weakImageCount, 2);
-    expect(flutterImageCache.locationForKey(provider1).weak, true);
-    expect(flutterImageCache.locationForKey(provider1).pending, false);
-    expect(flutterImageCache.locationForKey(provider1).strong, false);
-    expect(flutterImageCache.locationForKey(provider2).weak, true);
-    expect(flutterImageCache.locationForKey(provider2).pending, false);
-    expect(flutterImageCache.locationForKey(provider2).strong, false);
+    expect(imageCache.liveImageCount, 2);
+    expect(imageCache.locationForKey(provider1).live, true);
+    expect(imageCache.locationForKey(provider1).pending, false);
+    expect(imageCache.locationForKey(provider1).completed, false);
+    expect(imageCache.locationForKey(provider2).live, true);
+    expect(imageCache.locationForKey(provider2).pending, false);
+    expect(imageCache.locationForKey(provider2).completed, false);
 
     expect(provider1.loadCallCount, 1);
     expect(provider2.loadCallCount, 1);
@@ -1418,27 +1416,26 @@ void main() {
     provider2.complete(image);
     await tester.idle();
 
-    expect(flutterImageCache.weakImageCount, 2);
+    expect(imageCache.liveImageCount, 2);
     expect(imageCache.currentSize, 0);
 
     await tester.pumpWidget(Image(image: provider2));
     await tester.idle();
-    expect(flutterImageCache.locationForKey(provider1).untracked, true);
-    expect(flutterImageCache.locationForKey(provider2).weak, true);
-    expect(flutterImageCache.locationForKey(provider2).pending, false);
-    expect(flutterImageCache.locationForKey(provider2).strong, false);
-    expect(flutterImageCache.weakImageCount, 1);
+    expect(imageCache.locationForKey(provider1).untracked, true);
+    expect(imageCache.locationForKey(provider2).live, true);
+    expect(imageCache.locationForKey(provider2).pending, false);
+    expect(imageCache.locationForKey(provider2).completed, false);
+    expect(imageCache.liveImageCount, 1);
 
     await tester.pumpWidget(const SizedBox());
     await tester.idle();
     expect(provider1.loadCallCount, 1);
     expect(provider2.loadCallCount, 1);
-    expect(flutterImageCache.weakImageCount, 0);
+    expect(imageCache.liveImageCount, 0);
   });
 
   testWidgets('precacheImage does not hold weak ref for more than a frame', (WidgetTester tester) async {
     imageCache.maximumSize = 0;
-    final FlutterImageCache flutterImageCache = imageCache as FlutterImageCache;
     final TestImageProvider provider = TestImageProvider();
     Future<void> precache;
     await tester.pumpWidget(
@@ -1453,17 +1450,14 @@ void main() {
     await precache;
 
     // Should have ended up with only a weak ref, not in cache because cache size is 0
-    expect(flutterImageCache.weakImageCount, 1);
-    expect(flutterImageCache.containsKey(provider), false);
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.containsKey(provider), false);
 
-    final ImageCacheLocation providerLocation = await provider.findCacheLocation(
-      configuration: ImageConfiguration.empty,
-      cache: flutterImageCache,
-    );
+    final ImageCacheLocation providerLocation = await provider.findCacheLocation(configuration: ImageConfiguration.empty);
 
     expect(providerLocation, isNotNull);
-    expect(providerLocation.weak, true);
-    expect(providerLocation.strong, false);
+    expect(providerLocation.live, true);
+    expect(providerLocation.completed, false);
     expect(providerLocation.pending, false);
 
     // Check that a second resolve of the same image is synchronous.
@@ -1472,22 +1466,26 @@ void main() {
     bool isSync;
     final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
 
+    // Still have live ref because frame has not pumped yet.
     await tester.pump();
-    // Weak ref should be gone.
-    expect(flutterImageCache.weakImageCount, 0);
-    expect(flutterImageCache.currentSize, 0);
+    expect(imageCache.liveImageCount, 1);
+
+    SchedulerBinding.instance.scheduleFrame();
+    await tester.pump();
+    // Live ref should be gone - we didn't listen to the stream.
+    expect(imageCache.liveImageCount, 0);
+    expect(imageCache.currentSize, 0);
 
     stream.addListener(listener);
-    expect(isSync, true); // because the stream still has us.
+    expect(isSync, true); // because the stream still has the image.
 
-    expect(flutterImageCache.weakImageCount, 0);
-    expect(flutterImageCache.currentSize, 0);
+    expect(imageCache.liveImageCount, 0);
+    expect(imageCache.currentSize, 0);
 
     expect(provider.loadCallCount, 1);
   });
 
   testWidgets('precacheImage allows time to take over weak refernce', (WidgetTester tester) async {
-    final FlutterImageCache flutterImageCache = imageCache as FlutterImageCache;
     final TestImageProvider provider = TestImageProvider();
     Future<void> precache;
     await tester.pumpWidget(
@@ -1502,9 +1500,9 @@ void main() {
     await precache;
 
     // Should have ended up in the cache and have a weak reference.
-    expect(flutterImageCache.weakImageCount, 1);
-    expect(flutterImageCache.currentSize, 1);
-    expect(flutterImageCache.containsKey(provider), true);
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
 
     // Check that a second resolve of the same image is synchronous.
     expect(provider._lastResolvedConfiguration, isNotNull);
@@ -1513,26 +1511,28 @@ void main() {
     final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
 
     // Should have ended up in the cache and still have a weak reference.
-    expect(flutterImageCache.weakImageCount, 1);
-    expect(flutterImageCache.currentSize, 1);
-    expect(flutterImageCache.containsKey(provider), true);
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
 
     stream.addListener(listener);
     expect(isSync, true);
 
-    expect(flutterImageCache.weakImageCount, 1);
-    expect(flutterImageCache.currentSize, 1);
-    expect(flutterImageCache.containsKey(provider), true);
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
+
+    SchedulerBinding.instance.scheduleFrame();
     await tester.pump();
 
-    expect(flutterImageCache.weakImageCount, 1);
-    expect(flutterImageCache.currentSize, 1);
-    expect(flutterImageCache.containsKey(provider), true);
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
     stream.removeListener(listener);
 
-    expect(flutterImageCache.weakImageCount, 0);
-    expect(flutterImageCache.currentSize, 1);
-    expect(flutterImageCache.containsKey(provider), true);
+    expect(imageCache.liveImageCount, 0);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
     expect(provider.loadCallCount, 1);
   });
 }

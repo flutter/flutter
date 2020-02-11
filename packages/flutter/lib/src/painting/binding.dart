@@ -65,11 +65,9 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
 
   /// Creates the [ImageCache] singleton (accessible via [imageCache]).
   ///
-  /// This method can be overridden to provide a custom image cache. By default,
-  /// the framework uses a [FlutterImageCache] which exposes additional
-  /// information about the cache dimensions beyond the [ImageCache] interface.
+  /// This method can be overridden to provide a custom image cache.
   @protected
-  ImageCache createImageCache() => FlutterImageCache();
+  ImageCache createImageCache() => ImageCache();
 
   /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
   ///
@@ -98,6 +96,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   void evict(String asset) {
     super.evict(asset);
     imageCache.clear();
+    imageCache.clearLiveImages();
   }
 
   /// Listenable that notifies when the available fonts on the system have

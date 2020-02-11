@@ -333,7 +333,7 @@ abstract class ImageProvider<T> {
   }
 
   /// Checks if this [ImageProvider] has a matching key in the
-  /// [FlutterImageCache].
+  /// [PaintingBinding.imageCache]
   ///
   /// The `cache` and `configuration` parameters must not be null. If the
   /// `handleError` parameter is null, errors will be reported to
@@ -343,10 +343,8 @@ abstract class ImageProvider<T> {
   Future<ImageCacheLocation> findCacheLocation({
     @required ImageConfiguration configuration,
     ImageErrorListener handleError,
-    @required FlutterImageCache cache,
   }) {
     assert(configuration != null);
-    assert(cache != null);
     final Completer<ImageCacheLocation> completer = Completer<ImageCacheLocation>();
     bool didError = false;
     final ImageErrorListener errorHandler = (dynamic exception, StackTrace stack) {
@@ -362,7 +360,6 @@ abstract class ImageProvider<T> {
           informationCollector: () sync* {
             yield DiagnosticsProperty<ImageProvider>('Image provider', this);
             yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
-            yield DiagnosticsProperty<FlutterImageCache>('Image cache', cache);
           },
           exception: exception,
           stack: stack,
@@ -396,7 +393,7 @@ abstract class ImageProvider<T> {
         return;
       }
       key.then<void>((T key) {
-        completer.complete(cache.locationForKey(key));
+        completer.complete(PaintingBinding.instance.imageCache.locationForKey(key));
       }).catchError(errorHandler);
     });
 

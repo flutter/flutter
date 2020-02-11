@@ -16,7 +16,7 @@ void main() {
 
     tearDown(() {
       imageCache.clear();
-      (imageCache as FlutterImageCache).clearWeakImages();
+      imageCache.clearLiveImages();
       imageCache.maximumSize = 1000;
       imageCache.maximumSizeBytes = 10485760;
     });
@@ -170,15 +170,14 @@ void main() {
         return completer1;
       }) as TestImageStreamCompleter;
 
-      final FlutterImageCache flutterImageCache = imageCache as FlutterImageCache;
-      expect(flutterImageCache.locationForKey(testImage).pending, true);
-      expect(flutterImageCache.locationForKey(testImage).weak, true);
-      flutterImageCache.clear();
-      expect(flutterImageCache.locationForKey(testImage).pending, false);
-      expect(flutterImageCache.locationForKey(testImage).weak, true);
-      flutterImageCache.clearWeakImages();
-      expect(flutterImageCache.locationForKey(testImage).pending, false);
-      expect(flutterImageCache.locationForKey(testImage).weak, false);
+      expect(imageCache.locationForKey(testImage).pending, true);
+      expect(imageCache.locationForKey(testImage).live, true);
+      imageCache.clear();
+      expect(imageCache.locationForKey(testImage).pending, false);
+      expect(imageCache.locationForKey(testImage).live, true);
+      imageCache.clearLiveImages();
+      expect(imageCache.locationForKey(testImage).pending, false);
+      expect(imageCache.locationForKey(testImage).live, false);
 
       final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
         return completer2;

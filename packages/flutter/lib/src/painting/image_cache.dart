@@ -4,8 +4,6 @@
 
 import 'dart:ui' show hashValues;
 
-import 'package:flutter/foundation.dart';
-
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
@@ -71,6 +69,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
+  final Map<Object, ImageStreamCompleter> _liveImages = <Object, ImageStreamCompleter>{};
 
   /// Maximum number of entries to store in the cache.
   ///
@@ -173,17 +172,6 @@ class ImageCache {
     return false;
   }
 
-  /// This method exists so that [FlutterImageCache] can check its weak cache
-  /// without changes to this class's public API.
-  @protected
-  ImageStreamCompleter _checkOtherResults(Object key) => null;
-
-  /// This method exists so that [FlutterImageCache] can add to its weak cache
-  /// once an [ImageStreamCompleter] has been created by this cache.
-  @protected
-  void _onImageStreamCompleterCreated(Object key, ImageStreamCompleter completer) {}
-
-
   /// Returns the previously cached [ImageStream] for the given key, if available;
   /// if not, calls the given callback to obtain it first. In either case, the
   /// key is moved to the "most recently used" position.
@@ -209,14 +197,17 @@ class ImageCache {
       return image.completer;
     }
 
-    result = _checkOtherResults(key);
+    result = _liveImages[key];
     if (result != null) {
       return result;
     }
 
     try {
       result = loader();
-      _onImageStreamCompleterCreated(key, result);
+      _liveImages[key] = result;
+      result.addOnLastListenerRemovedCallback(() {
+        _liveImages.remove(key);
+      });
     } catch (error, stackTrace) {
       if (onError != null) {
         onError(error, stackTrace);
@@ -249,10 +240,36 @@ class ImageCache {
     return result;
   }
 
+  /// The [ImageCacheLocation] information for the given `key`.
+  ImageCacheLocation locationForKey(Object key) => ImageCacheLocation._(
+    pending: _pendingImages.containsKey(key),
+    completed: _cache.containsKey(key),
+    live: _liveImages.containsKey(key),
+  );
+
   /// Returns whether this `key` has been previously added by [putIfAbsent].
   bool containsKey(Object key) {
     return _pendingImages[key] != null || _cache[key] != null;
   }
+
+  /// The number of live images being held by the [ImageCache]. Compare with
+  /// [ImageCache.currentSize] for completed held images.
+  int get liveImageCount => _liveImages.length;
+
+  /// The number of images being tracked as pending in the [ImageCache]. Compare
+  /// with [ImageCache.currentSize] for completedly held images.
+  int get pendingImageCount => _pendingImages.length;
+
+  /// Clears any live references to images in this cache.
+  ///
+  /// This is called after a hot reload to evict any stale references to image
+  /// data for assets that have changed. Calling this method does not relieve
+  /// memory pressure, since the live image caching only tracks image instances
+  /// that are also being held by at least one other object.
+  void clearLiveImages() {
+    _liveImages.clear();
+  }
+
 
   // Remove images from the cache until both the length and bytes are below
   // maximum, or the cache is empty.
@@ -269,46 +286,48 @@ class ImageCache {
   }
 }
 
-/// A class that provides information about how the [FlutterImageCache] is
+/// A class that provides information about how the [ImageCache] is
 /// tracking an image.
 ///
-/// A [pending] image is one that has not completed yet. It may also be [weak]ly
-/// tracked, but not [strong].
+/// A [pending] image is one that has not completed yet. It may also be tracked
+/// as [live] because something is listening to it, but it has not yet
+/// [completed].
 ///
-/// A [strong] image is being held in the LRU cache, and is subject to eviction
+/// A [completed] image is being held in the LRU cache, and is subject to eviction
 /// based on [ImageCache.maximumSizeBytes] and [ImageCache.maximumSize]. It may
-/// also be [weak]ly tracked, but not [pending].
+/// [live], but not [pending].
 ///
-/// A [weak] image is being held until its [ImageStreamCompleter] has no more
-/// listeners. It may also be [pending] or [strong].
+/// A [live] image is being held until its [ImageStreamCompleter] has no more
+/// listeners. It may also be [pending] or [completed].
+///
 /// An [untracked] image is not being cached.
 ///
-/// To obtain an [ImageCacheLocation], use [FlutterImageCache.locationForKey] or
+/// To obtain an [ImageCacheLocation], use [ImageCache.locationForKey] or
 /// [ImageProvider.findCacheLocation].
 class ImageCacheLocation {
   const ImageCacheLocation._({
     this.pending = false,
-    this.strong = false,
-    this.weak = false,
-  }) : assert(!pending || !strong);
+    this.completed = false,
+    this.live = false,
+  }) : assert(!pending || !completed);
 
-  /// An image that has been submitted to [FlutterImageCache.putIfAbsent], but
+  /// An image that has been submitted to [ImageCache.putIfAbsent], but
   /// not yet completed.
   final bool pending;
 
-  /// An image that has been submitted to [FlutterImageCache.putIfAbsent], has
+  /// An image that has been submitted to [ImageCache.putIfAbsent], has
   /// completed, fits based on the sizing rules of the cache, and has not been
   /// evicted.
-  final bool strong;
+  final bool completed;
 
-  /// An image that has been submitted to [FlutterImageCache.putIfAbsent], has
+  /// An image that has been submitted to [ImageCache.putIfAbsent], has
   /// completed, and has at least one listener on its [ImageStreamCompleter].
-  final bool weak;
+  final bool live;
 
   /// An image that either has not been submitted to
-  /// [FlutterImageCache.putIfAbsent] or has otherwise been evicted from the
-  /// [strong] and [weak] caches.
-  bool get untracked => !pending && !strong && !weak;
+  /// [ImageCache.putIfAbsent] or has otherwise been evicted from the
+  /// [completed] and [live] caches.
+  bool get untracked => !pending && !completed && !live;
 
   @override
   bool operator ==(Object other) {
@@ -317,60 +336,12 @@ class ImageCacheLocation {
     }
     return other is ImageCacheLocation
         && other.pending == pending
-        && other.strong == strong
-        && other.weak == weak;
+        && other.completed == completed
+        && other.live == live;
   }
 
   @override
-  int get hashCode => hashValues(pending, strong, weak);
-}
-
-/// An [ImageCache] that adds weak tracking of images that have at least one
-/// listener on their [ImageStreamCompleter].
-///
-/// This cache also exposes internal dimensions of the implementation, such as
-/// checking whether an image for a given key is pending, weak, or completed.
-/// See [ImageCacheLocation] for more details.
-class FlutterImageCache extends ImageCache {
-  final Map<Object, ImageStreamCompleter> _weakCache = <Object, ImageStreamCompleter>{};
-
-  @override
-  ImageStreamCompleter _checkOtherResults(Object key) {
-    // We are weakly holding the image until there are no listeners.
-    // This does not respect the size parameters of the cache, because this
-    // indicates these images are visible on the screen or held by someone else.
-    return _weakCache[key];
-  }
-
-  @override
-  void _onImageStreamCompleterCreated(Object key, ImageStreamCompleter completer) {
-    _weakCache[key] = completer;
-    completer.addOnLastListenerRemovedCallback(() {
-      _weakCache.remove(key);
-    });
-  }
-
-  /// The [ImageCacheLocation] information for the given `key`.
-  ImageCacheLocation locationForKey(Object key) => ImageCacheLocation._(
-    pending: _pendingImages.containsKey(key),
-    strong: _cache.containsKey(key),
-    weak: _weakCache.containsKey(key),
-  );
-
-  /// The number of images being weakly held by the [ImageCache]. Compare with
-  /// [ImageCache.currentSize] for strongly held images.
-  int get weakImageCount => _weakCache.length;
-
-  /// The number of images being tracked as pending in the [ImageCache]. Compare
-  /// with [ImageCache.currentSize] for strongly held images.
-  int get pendingImageCount => _pendingImages.length;
-
-  /// Clears any weak references to images in this cache.
-  ///
-  /// This should not ordinarily be called by applications.
-  void clearWeakImages() {
-    _weakCache.clear();
-  }
+  int get hashCode => hashValues(pending, completed, live);
 }
 
 class _CachedImage {

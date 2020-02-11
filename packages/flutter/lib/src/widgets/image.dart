@@ -73,15 +73,13 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// too large, or some other criteria implemented by a custom [ImageCache]
 /// implementation.
 ///
-/// The [FlutterImageCache] is used as the default framework implementation, and
-/// it will weakly hold a reference to all images passed to [putIfAbsent] as
+/// The [ImageCache] holds a reference to all images passed to [putIfAbsent] as
 /// long as their [ImageStreamCompleter] has at least one listener. This method
-/// will wait one frame after its future completes before releasing its own
-/// listener, to give callers a chance to listen to the stream if necessary. A
-/// caller can determine if the image ended up in the cache by calling
-/// [ImageProvider.findCacheLocation], if and only if the
-/// `PaintingBinding.instance.imageCache is FlutterImageCache`. If it is only
-/// [ImageCacheLocation.weak]ly held, and the caller wishes to keep the resolved
+/// will wait until the end of the frame after its future completes before
+/// releasing its own listener. This gives callers a chance to listen to the
+/// stream if necessary. A caller can determine if the image ended up in the
+/// cache by calling [ImageProvider.findCacheLocation]. If it is only held as
+/// [ImageCacheLocation.live], and the caller wishes to keep the resolved
 /// image in memory, the caller should immediately call `provider.resolve` and
 /// add a listener to the returned [ImageStream]. The image will remain pinned
 /// in memory at least until the caller removes its listener from the stream,
@@ -117,9 +115,9 @@ Future<void> precacheImage(
       if (!completer.isCompleted) {
         completer.complete();
       }
-      // Give callers at least one frame to subscribe to the image stream
-      // so that FlutterImageCache can weakly hold it without losing it.
-      SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
+      // Give callers until at least the end of the frame to subscribe to the
+      // image stream.
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         stream.removeListener(listener);
       });
     },
