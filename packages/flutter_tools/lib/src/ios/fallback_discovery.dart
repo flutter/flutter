@@ -133,9 +133,9 @@ class FallbackDiscovery {
         final VM vm = await vmService.getVM();
         for (final IsolateRef isolateRefs in vm.isolates) {
           final dynamic isolateResponse = await vmService.getIsolate(isolateRefs.id);
-          if (isolateResponse is! Isolate) {
+          if (isolateResponse is Sentinel) {
             // Might have been a Sentinel. Try again later.
-            throw Exception();
+            throw Exception('Expected Isolate but found Sentinel: $isolateResponse');
           }
           final LibraryRef library = (isolateResponse as Isolate).rootLib;
           if (library.uri.startsWith('package:$packageName')) {
