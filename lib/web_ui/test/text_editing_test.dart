@@ -404,7 +404,9 @@ void main() {
       expect(document.activeElement, document.body);
 
       editingElement.disable();
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+        skip: browserEngine == BrowserEngine.webkit);
 
     test('Does not dispose and recreate dom elements in persistent mode', () {
       editingElement =
@@ -441,7 +443,9 @@ void main() {
       expect(document.body.contains(editingElement.domElement), isTrue);
       // But the DOM element loses focus.
       expect(document.activeElement, document.body);
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+        skip: browserEngine == BrowserEngine.webkit);
 
     test('Refocuses when setting editing state', () {
       editingElement =
@@ -463,7 +467,9 @@ void main() {
       expect(document.activeElement, testInputElement);
 
       editingElement.disable();
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+        skip: browserEngine == BrowserEngine.webkit);
 
     test('Works in multi-line mode', () {
       final TextAreaElement textarea = TextAreaElement();
@@ -506,7 +512,9 @@ void main() {
       expect(document.body.contains(editingElement.domElement), isTrue);
       // But the textarea loses focus.
       expect(document.activeElement, document.body);
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+        skip: browserEngine == BrowserEngine.webkit);
 
     test('Does not position or size its DOM element', () {
       editingElement.enable(
@@ -525,6 +533,7 @@ void main() {
         expect(editingElement.domElement.style.width, '');
         expect(editingElement.domElement.style.height, '');
       }
+
       checkPlacementIsEmpty();
       editingElement.placeElement();
       checkPlacementIsEmpty();
@@ -689,7 +698,9 @@ void main() {
       );
       // Input element is removed from DOM.
       expect(document.getElementsByTagName('input'), hasLength(0));
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+        skip: browserEngine == BrowserEngine.webkit);
 
     test('setClient, setEditingState, show, setClient', () {
       final MethodCall setClient = MethodCall(
@@ -808,64 +819,67 @@ void main() {
 
       // Confirm that [HybridTextEditing] didn't send any messages.
       expect(spy.messages, isEmpty);
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+        skip: browserEngine == BrowserEngine.webkit);
 
     test(
-      'setClient, show, setEditableSizeAndTransform, setStyle, setEditingState, clearClient',
-      () {
-        final MethodCall setClient = MethodCall(
-            'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
-        sendFrameworkMessage(codec.encodeMethodCall(setClient));
+        'setClient, show, setEditableSizeAndTransform, setStyle, setEditingState, clearClient',
+        () {
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
-        const MethodCall show = MethodCall('TextInput.show');
-        sendFrameworkMessage(codec.encodeMethodCall(show));
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
 
-        final MethodCall setSizeAndTransform =
-            configureSetSizeAndTransformMethodCall(
-                150,
-                50,
-                Matrix4.translationValues(
-                  10.0,
-                  20.0,
-                  30.0,
-                ).storage.toList());
-        sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(
+              150,
+              50,
+              Matrix4.translationValues(
+                10.0,
+                20.0,
+                30.0,
+              ).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
 
-        final MethodCall setStyle =
-            configureSetStyleMethodCall(12, 'sans-serif', 4, 4, 1);
-        sendFrameworkMessage(codec.encodeMethodCall(setStyle));
+      final MethodCall setStyle =
+          configureSetStyleMethodCall(12, 'sans-serif', 4, 4, 1);
+      sendFrameworkMessage(codec.encodeMethodCall(setStyle));
 
-        const MethodCall setEditingState =
-            MethodCall('TextInput.setEditingState', <String, dynamic>{
-          'text': 'abcd',
-          'selectionBase': 2,
-          'selectionExtent': 3,
-        });
-        sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+      const MethodCall setEditingState =
+          MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
-        final HtmlElement domElement = textEditing.editingElement.domElement;
+      final HtmlElement domElement = textEditing.editingElement.domElement;
 
-        checkInputEditingState(domElement, 'abcd', 2, 3);
+      checkInputEditingState(domElement, 'abcd', 2, 3);
 
-        // Check if the position is correct.
-        expect(
-          domElement.getBoundingClientRect(),
-          Rectangle<double>.fromPoints(const Point<double>(10.0, 20.0),
-              const Point<double>(160.0, 70.0)),
-        );
-        expect(
-          domElement.style.transform,
-          'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1)',
-        );
-        expect(
-          textEditing.editingElement.domElement.style.font,
-          '500 12px sans-serif',
-        );
+      // Check if the position is correct.
+      expect(
+        domElement.getBoundingClientRect(),
+        Rectangle<double>.fromPoints(
+            const Point<double>(10.0, 20.0), const Point<double>(160.0, 70.0)),
+      );
+      expect(
+        domElement.style.transform,
+        'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1)',
+      );
+      expect(
+        textEditing.editingElement.domElement.style.font,
+        '500 12px sans-serif',
+      );
 
-        const MethodCall clearClient = MethodCall('TextInput.clearClient');
-        sendFrameworkMessage(codec.encodeMethodCall(clearClient));
-      },
-    );
+      const MethodCall clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+        skip: browserEngine == BrowserEngine.webkit);
 
     test('input font set succesfully with null fontWeightIndex', () {
       final MethodCall setClient = MethodCall(
@@ -907,7 +921,9 @@ void main() {
           textEditing.editingElement.domElement.style.font, '12px sans-serif');
 
       hideKeyboard();
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+        skip: browserEngine == BrowserEngine.webkit);
 
     test(
         'negative base offset and selection extent values in editing state is handled',
@@ -1172,7 +1188,8 @@ void main() {
     EditingState _editingState;
 
     setUp(() {
-      editingElement = GloballyPositionedTextEditingStrategy(HybridTextEditing());
+      editingElement =
+          GloballyPositionedTextEditingStrategy(HybridTextEditing());
       editingElement.enable(
         singlelineConfig,
         onChange: trackEditingState,

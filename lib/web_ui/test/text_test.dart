@@ -40,7 +40,9 @@ void main() async {
             from: paragraph.alphabeticBaseline * baselineRatio),
       );
     }
-  });
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: browserEngine == BrowserEngine.webkit);
 
   test('predictably lays out a multi-line paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
@@ -70,7 +72,9 @@ void main() async {
             from: paragraph.alphabeticBaseline * baselineRatio),
       );
     }
-  });
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: browserEngine == BrowserEngine.webkit);
 
   test('lay out unattached paragraph', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
@@ -378,7 +382,8 @@ void main() async {
     builder.addText('Hello');
 
     final EngineParagraph paragraph = builder.build();
-    expect(paragraph.paragraphElement.style.fontFamily, 'SomeFont, Arial, sans-serif');
+    expect(paragraph.paragraphElement.style.fontFamily,
+        'SomeFont, Arial, sans-serif');
 
     debugEmulateFlutterTesterEnvironment = true;
   }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
@@ -413,7 +418,8 @@ void main() async {
     builder.addText('Hello');
 
     final EngineParagraph paragraph = builder.build();
-    expect(paragraph.paragraphElement.style.fontFamily, '"MyFont 2000", Arial, sans-serif');
+    expect(paragraph.paragraphElement.style.fontFamily,
+        '"MyFont 2000", Arial, sans-serif');
 
     debugEmulateFlutterTesterEnvironment = true;
   });
@@ -453,24 +459,32 @@ void main() async {
     });
     test('textBefore works', () {
       expect(const TextRange(start: 0, end: 0).textBefore('hello'), isEmpty);
-      expect(const TextRange(start: 1, end: 1).textBefore('hello'), equals('h'));
-      expect(const TextRange(start: 1, end: 2).textBefore('hello'), equals('h'));
-      expect(const TextRange(start: 5, end: 5).textBefore('hello'), equals('hello'));
+      expect(
+          const TextRange(start: 1, end: 1).textBefore('hello'), equals('h'));
+      expect(
+          const TextRange(start: 1, end: 2).textBefore('hello'), equals('h'));
+      expect(const TextRange(start: 5, end: 5).textBefore('hello'),
+          equals('hello'));
       expect(const TextRange(start: 0, end: 5).textBefore('hello'), isEmpty);
     });
     test('textAfter works', () {
-      expect(const TextRange(start: 0, end: 0).textAfter('hello'), equals('hello'));
-      expect(const TextRange(start: 1, end: 1).textAfter('hello'), equals('ello'));
-      expect(const TextRange(start: 1, end: 2).textAfter('hello'), equals('llo'));
+      expect(const TextRange(start: 0, end: 0).textAfter('hello'),
+          equals('hello'));
+      expect(
+          const TextRange(start: 1, end: 1).textAfter('hello'), equals('ello'));
+      expect(
+          const TextRange(start: 1, end: 2).textAfter('hello'), equals('llo'));
       expect(const TextRange(start: 5, end: 5).textAfter('hello'), isEmpty);
       expect(const TextRange(start: 0, end: 5).textAfter('hello'), isEmpty);
     });
     test('textInside works', () {
       expect(const TextRange(start: 0, end: 0).textInside('hello'), isEmpty);
       expect(const TextRange(start: 1, end: 1).textInside('hello'), isEmpty);
-      expect(const TextRange(start: 1, end: 2).textInside('hello'), equals('e'));
+      expect(
+          const TextRange(start: 1, end: 2).textInside('hello'), equals('e'));
       expect(const TextRange(start: 5, end: 5).textInside('hello'), isEmpty);
-      expect(const TextRange(start: 0, end: 5).textInside('hello'), equals('hello'));
+      expect(const TextRange(start: 0, end: 5).textInside('hello'),
+          equals('hello'));
     });
   });
 }

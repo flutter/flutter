@@ -56,7 +56,9 @@ void main() async {
         closeTo(paragraph.alphabeticBaseline * kAhemBaselineRatio, 3.0),
       );
     }
-  });
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: browserEngine == BrowserEngine.webkit);
 
   testEachMeasurement('predictably lays out a multi-line paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
@@ -83,7 +85,9 @@ void main() async {
         closeTo(paragraph.alphabeticBaseline * kAhemBaselineRatio, 3.0),
       );
     }
-  });
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: browserEngine == BrowserEngine.webkit);
 
   testEachMeasurement('predictably lays out a single-line rich paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
@@ -105,7 +109,9 @@ void main() async {
       expect(paragraph.maxIntrinsicWidth, fontSize * 10.0);
     }
   }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      skip: (browserEngine == BrowserEngine.firefox));
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: (browserEngine == BrowserEngine.firefox ||
+          browserEngine == BrowserEngine.webkit));
 
   testEachMeasurement('predictably lays out a multi-line rich paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
@@ -128,7 +134,9 @@ void main() async {
       expect(paragraph.maxIntrinsicWidth, fontSize * 16.0);
     }
   }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      skip: (browserEngine == BrowserEngine.firefox));
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: (browserEngine == BrowserEngine.firefox ||
+          browserEngine == BrowserEngine.webkit));
 
   testEachMeasurement('getPositionForOffset single-line', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
@@ -221,7 +229,6 @@ void main() async {
       TextPosition(offset: 2, affinity: TextAffinity.upstream),
     );
 
-
     // Second line: "abcdefg\n"
 
     // At the beginning of the second line.
@@ -244,7 +251,6 @@ void main() async {
       paragraph.getPositionForOffset(Offset(46, 15)),
       TextPosition(offset: 10, affinity: TextAffinity.upstream),
     );
-
 
     // Last (third) line: "ab"
 
@@ -299,7 +305,9 @@ void main() async {
         TextDirection.rtl,
       ),
     );
-  });
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: browserEngine == BrowserEngine.webkit);
 
   testEachMeasurement(
       'getBoxesForRange return empty list for zero-length range', () {
@@ -419,5 +427,7 @@ void main() async {
 
     expect(paragraph.width, 30);
     expect(paragraph.height, 10);
-  });
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: browserEngine == BrowserEngine.webkit);
 }

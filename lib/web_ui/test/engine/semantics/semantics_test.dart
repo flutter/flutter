@@ -502,7 +502,9 @@ void _testVerticalScrolling() {
     expect(scrollable.scrollTop, 10);
 
     semantics().semanticsEnabled = false;
-  });
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: browserEngine == BrowserEngine.webkit);
 }
 
 void _testHorizontalScrolling() {
@@ -623,7 +625,9 @@ void _testHorizontalScrolling() {
     expect(scrollable.scrollLeft, 10);
 
     semantics().semanticsEnabled = false;
-  });
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: browserEngine == BrowserEngine.webkit);
 }
 
 void _testIncrementables() {
@@ -807,7 +811,9 @@ void _testTextField() {
 
     semantics().semanticsEnabled = false;
   }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      skip: (browserEngine == BrowserEngine.firefox));
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
+      skip: (browserEngine == BrowserEngine.firefox ||
+          browserEngine == BrowserEngine.webkit));
 }
 
 void _testCheckables() {
