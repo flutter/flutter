@@ -142,7 +142,7 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--no-use-integer-division');
     }
 
-    // The name of the debug file must contain additonal information about
+    // The name of the debug file must contain additional information about
     // the architecture, since a single build command may produce
     // multiple debug files.
     final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);

@@ -27,6 +27,7 @@ class TestCommand extends FastFlutterCommand {
   TestCommand({
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
+    this.testRunner = const FlutterTestRunner(),
   }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
@@ -110,12 +111,24 @@ class TestCommand extends FastFlutterCommand {
               'test cases (must be a 32bit unsigned integer).\n'
               'If "random", pick a random seed to use.\n'
               'If 0 or not set, do not randomize test case execution order.',
+      )
+      ..addFlag('enable-vmservice',
+        defaultsTo: false,
+        hide: !verboseHelp,
+        help: 'Enables the vmservice without --start-paused. This flag is '
+              'intended for use with tests that will use dart:developer to '
+              'interact with the vmservice at runtime.\n'
+              'This flag is ignored if --start-paused or coverage are requested. '
+              'The vmservice will be enabled no matter what in those cases.'
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
   /// The interface for starting and configuring the tester.
   final TestWrapper testWrapper;
+
+  /// Interface for running the tester process.
+  final FlutterTestRunner testRunner;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
@@ -235,14 +248,14 @@ class TestCommand extends FastFlutterCommand {
     final bool disableServiceAuthCodes =
       boolArg('disable-service-auth-codes');
 
-    final int result = await runTests(
+    final int result = await testRunner.runTests(
       testWrapper,
       files,
       workDir: workDir,
       names: names,
       plainNames: plainNames,
       watcher: watcher,
-      enableObservatory: collector != null || startPaused,
+      enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
       ipv6: boolArg('ipv6'),

@@ -67,6 +67,35 @@ void main() {
     ), Uri.parse('http://localhost:1'));
   });
 
+  testUsingContext('Selects mdns discovery if VM service connecton fails due to Sentinel', () async {
+    when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
+      return VM()..isolates = <IsolateRef>[
+        IsolateRef(),
+      ];
+    });
+    when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
+      return Sentinel();
+    });
+
+    when(mockMDnsObservatoryDiscovery.getObservatoryUri(
+      'hello',
+      null, // Device
+      usesIpv6: false,
+      hostVmservicePort: 1,
+    )).thenAnswer((Invocation invocation) async {
+      return Uri.parse('http://localhost:1234');
+    });
+
+    expect(await fallbackDiscovery.discover(
+      assumedDevicePort: 23,
+      deivce: null,
+      hostVmservicePort: 1,
+      packageId: 'hello',
+      usesIpv6: false,
+       packageName: 'hello',
+    ), Uri.parse('http://localhost:1234'));
+  });
+
   testUsingContext('Selects mdns discovery if VM service connecton fails', () async {
     when(mockVmService.getVM()).thenThrow(Exception());
 

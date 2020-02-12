@@ -570,7 +570,7 @@ void main() {
 }
 
 Widget wrap({ Widget child }) {
-  return FocusTraversalGroup(
+  return DefaultFocusTraversal(
     policy: ReadingOrderTraversalPolicy(),
     child: Directionality(
       textDirection: TextDirection.ltr,
