@@ -1023,18 +1023,6 @@ final Set<Hash256> _grandfatheredBinaries = <Hash256>{
   Hash256(0x4C67221E25626CB2, 0x3F94E1F49D34E4CF, 0x3A9787A514924FC5, 0x9EF1E143E5BC5690),
 
 
-  // HISTORICAL DEVICE LAB IMAGES
-
-  // dev/devicelab/images/agent-statuses.png
-  Hash256(0x0A43016C84095771, 0x1C610E1C01B1C3B2, 0x681DA0B2062C02AA, 0x31CC7FB3FDC298FD),
-
-  // dev/devicelab/images/broken-test.png
-  Hash256(0x319459F42967A888, 0x90B20063544D6707, 0x849E1E3447CC56A5, 0xE226C47DE34F13AD),
-
-  // dev/devicelab/images/legend.png
-  Hash256(0x92A98975AF5F076C, 0xE7BFAB86B0DD7A3D, 0xC45287B706D10456, 0x4E512BA3C41B2749),
-
-
   // MISCELLANEOUS
 
   // dev/bots/serviceaccount.enc
@@ -1060,7 +1048,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> grandfathe
   assert(
     _grandfatheredBinaries
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
-      .reduce((int value, int element) => value ^ element) == 0x17138C817203D1A7 // Please do not modify this line.
+      .reduce((int value, int element) => value ^ element) == 0x606B51C908B40BFA // Please do not modify this line.
   );
   grandfatheredBinaries ??= _grandfatheredBinaries;
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
