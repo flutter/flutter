@@ -28,7 +28,6 @@ void main() {
       stdio: const Stdio(),
       outputPreferences: OutputPreferences.test(wrapText: true),
       timeoutConfiguration: const TimeoutConfiguration(),
-      platform: const LocalPlatform(),
     ));
 
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
