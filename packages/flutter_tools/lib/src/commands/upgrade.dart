@@ -58,11 +58,11 @@ class UpgradeCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() {
     _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot;
     return _commandRunner.runCommand(
-      boolArg('force'),
-      boolArg('continue'),
-      stringArg('working-directory') != null,
-      GitTagVersion.determine(processUtils),
-      stringArg('working-directory') == null
+      force: boolArg('force'),
+      continueFlow: boolArg('continue'),
+      testFlow: stringArg('working-directory') != null,
+      gitTagVersion: GitTagVersion.determine(processUtils),
+      flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
     );
@@ -74,27 +74,32 @@ class UpgradeCommandRunner {
 
   String workingDirectory;
 
-  Future<FlutterCommandResult> runCommand(
-    bool force,
-    bool continueFlow,
-    bool testFlow,
-    GitTagVersion gitTagVersion,
-    FlutterVersion flutterVersion,
-  ) async {
+  Future<FlutterCommandResult> runCommand({
+    @required bool force,
+    @required bool continueFlow,
+    @required bool testFlow,
+    @required GitTagVersion gitTagVersion,
+    @required FlutterVersion flutterVersion,
+  }) async {
     if (!continueFlow) {
-      await runCommandFirstHalf(force, gitTagVersion, flutterVersion, testFlow);
+      await runCommandFirstHalf(
+        force: force,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        testFlow: testFlow,
+      );
     } else {
       await runCommandSecondHalf(flutterVersion);
     }
     return FlutterCommandResult.success();
   }
 
-  Future<void> runCommandFirstHalf(
-    bool force,
-    GitTagVersion gitTagVersion,
-    FlutterVersion flutterVersion,
-    bool testFlow,
-  ) async {
+  Future<void> runCommandFirstHalf({
+    @required bool force,
+    @required GitTagVersion gitTagVersion,
+    @required FlutterVersion flutterVersion,
+    @required bool testFlow,
+  }) async {
     await verifyUpstreamConfigured();
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,

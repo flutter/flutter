@@ -61,9 +61,12 @@ class VersionCommand extends FlutterCommand {
     }
 
     globals.printStatus(
-      'Warning: "flutter version" will leave the SDK in a detached HEAD state. '
-      'If you are using the command to return to a previously installed SDK version '
-      'consider using the "flutter downgrade" command instead.'
+      '╔══════════════════════════════════════════════════════════════════════════════╗\n'
+      '║ Warning: "flutter version" will leave the SDK in a detached HEAD state.      ║\n'
+      '║ If you are using the command to return to a previously installed SDK version ║\n'
+      '║ consider using the "flutter downgrade" command instead.                      ║\n'
+      '╚══════════════════════════════════════════════════════════════════════════════╝\n',
+      emphasis: true,
     );
     if (globals.stdio.stdinHasTerminal) {
       globals.terminal.usesTerminalUi = true;

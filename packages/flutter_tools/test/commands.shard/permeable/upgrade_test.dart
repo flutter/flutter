@@ -57,11 +57,11 @@ void main() {
 
     testUsingContext('throws on unknown tag, official branch,  noforce', () async {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-        false,
-        false,
-        false,
-        const GitTagVersion.unknown(),
-        flutterVersion,
+        force: false,
+        continueFlow: false,
+        testFlow: false,
+        gitTagVersion: const GitTagVersion.unknown(),
+        flutterVersion: flutterVersion,
       );
       expect(result, throwsToolExit());
     }, overrides: <Type, Generator>{
@@ -70,11 +70,11 @@ void main() {
 
     testUsingContext('does not throw on unknown tag, official branch, force', () async {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-        true,
-        false,
-        false,
-        const GitTagVersion.unknown(),
-        flutterVersion,
+        force: true,
+        continueFlow: false,
+        testFlow: false,
+        gitTagVersion: const GitTagVersion.unknown(),
+        flutterVersion: flutterVersion,
       );
       expect(await result, FlutterCommandResult.success());
     }, overrides: <Type, Generator>{
@@ -85,11 +85,11 @@ void main() {
     testUsingContext('throws tool exit with uncommitted changes', () async {
       fakeCommandRunner.willHaveUncomittedChanges = true;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-        false,
-        false,
-        false,
-        gitTagVersion,
-        flutterVersion,
+        force: false,
+        continueFlow: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
       );
       expect(result, throwsToolExit());
     }, overrides: <Type, Generator>{
@@ -100,11 +100,11 @@ void main() {
       fakeCommandRunner.willHaveUncomittedChanges = true;
 
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-        true,
-        false,
-        false,
-        gitTagVersion,
-        flutterVersion,
+        force: true,
+        continueFlow: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
       );
       expect(await result, FlutterCommandResult.success());
     }, overrides: <Type, Generator>{
@@ -114,11 +114,11 @@ void main() {
 
     testUsingContext("Doesn't throw on known tag, dev branch, no force", () async {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-        false,
-        false,
-        false,
-        gitTagVersion,
-        flutterVersion,
+        force: false,
+        continueFlow: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
       );
       expect(await result, FlutterCommandResult.success());
     }, overrides: <Type, Generator>{
@@ -129,11 +129,11 @@ void main() {
     testUsingContext("Doesn't continue on known tag, dev branch, no force, already up-to-date", () async {
       fakeCommandRunner.alreadyUpToDate = true;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-        false,
-        false,
-        false,
-        gitTagVersion,
-        flutterVersion,
+        force: false,
+        continueFlow: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
       );
       expect(await result, FlutterCommandResult.success());
       verifyNever(globals.processManager.start(

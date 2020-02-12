@@ -43,7 +43,11 @@ Channel getChannelForName(String name) {
 
 class FlutterVersion {
   FlutterVersion([this._clock = const SystemClock(), this._workingDirectory]) {
-    _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '), processUtils, _workingDirectory);
+    _frameworkRevision = _runGit(
+      gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
+      processUtils,
+      _workingDirectory,
+    );
     _gitTagVersion = GitTagVersion.determine(processUtils, _workingDirectory);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
@@ -87,11 +91,19 @@ class FlutterVersion {
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel {
     if (_channel == null) {
-      final String channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}', processUtils, _workingDirectory);
+      final String channel = _runGit(
+        'git rev-parse --abbrev-ref --symbolic @{u}',
+        processUtils,
+        _workingDirectory,
+      );
       final int slash = channel.indexOf('/');
       if (slash != -1) {
         final String remote = channel.substring(0, slash);
-        _repositoryUrl = _runGit('git ls-remote --get-url $remote', processUtils, _workingDirectory);
+        _repositoryUrl = _runGit(
+          'git ls-remote --get-url $remote',
+          processUtils,
+          _workingDirectory,
+        );
         _channel = channel.substring(slash + 1);
       } else if (channel.isEmpty) {
         _channel = 'unknown';
@@ -115,7 +127,11 @@ class FlutterVersion {
 
   String _frameworkAge;
   String get frameworkAge {
-    return _frameworkAge ??= _runGit(gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '), processUtils, _workingDirectory);
+    return _frameworkAge ??= _runGit(
+      gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '),
+      processUtils,
+      _workingDirectory,
+    );
   }
 
   String _frameworkVersion;
