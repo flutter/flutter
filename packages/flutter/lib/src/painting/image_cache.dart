@@ -203,17 +203,18 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader(), { ImageErrorListener onError }) {
     assert(key != null);
     assert(loader != null);
-    final Flow flow = Flow.begin();
-    Timeline.startSync(
-      'ImageCache.putIfAbsent', arguments: <String, dynamic>{
-        'key': key,
-      },
-      flow: flow,
-    );
+    // final TimelineTask timelineTask = TimelineTask();
+    // timelineTask.start(
+    //   'ImageCache.putIfAbsent', arguments: <String, dynamic>{
+    //     'key': key.toString(),
+    //   },
+    // );
     ImageStreamCompleter result = _pendingImages[key]?.completer;
     // Nothing needs to be done because the image hasn't loaded yet.
     if (result != null) {
-
+      // timelineTask.finish(arguments: <String, dynamic>{
+      //   'location': 'pending',
+      // });
       return result;
     }
     // Remove the provider from the list so that we can move it to the
@@ -221,11 +222,20 @@ class ImageCache {
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
       _cache[key] = image;
+      // timelineTask.finish(arguments: <String, dynamic>{
+      //   'location': 'completed',
+      //   'sizeInBytes': image.sizeBytes,
+      // });
       return image.completer;
     }
     try {
+      // timelineTask.instant('ImageCache.putIfAbsent.loader');
       result = loader();
     } catch (error, stackTrace) {
+      // timelineTask.finish(arguments: <String, dynamic>{
+      //   'error': error,
+      //   'stackTrace': stackTrace,
+      // });
       if (onError != null) {
         onError(error, stackTrace);
         return null;
@@ -234,6 +244,9 @@ class ImageCache {
       }
     }
     void listener(ImageInfo info, bool syncCall) {
+      // timelineTask.instant('ImageCache.putIfAbsent.listener', arguments: <String, dynamic>{
+      //   'syncCall': syncCall,
+      // });
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
       final _CachedImage image = _CachedImage(result, imageSize);
@@ -249,10 +262,13 @@ class ImageCache {
       }
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
+      // timelineTask.instant('ImageCache.putIfAbsent.streamListener');
       final ImageStreamListener streamListener = ImageStreamListener(listener);
       _pendingImages[key] = _PendingImage(result, streamListener);
       // Listener is removed in [_PendingImage.removeListener].
       result.addListener(streamListener);
+    } else {
+      // timelineTask.finish();
     }
     return result;
   }
