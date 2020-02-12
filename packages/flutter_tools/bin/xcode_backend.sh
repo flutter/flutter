@@ -39,7 +39,7 @@ AssertExists() {
 }
 
 PlistHasField() {
-  if /usr/libexec/PlistBuddy -c "Print :$1" $2 1>/dev/null 2>/dev/null; then
+  if /usr/libexec/PlistBuddy -c "Print :$1" $2 > /dev/null 2>&1; then
     return 0
   else
     return 1
