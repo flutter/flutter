@@ -1319,9 +1319,9 @@ class Scaffold extends StatefulWidget {
   /// This flag is deprecated and fixes and issue with incorrect clipping
   /// and positioning of the [SnackBar] set to [SnackBarBehavior.floating].
   @Deprecated(
-    'Fixes a bug that that fixes clipping and positioning of SnackBar '
-    'as it incorrectly offsets itself assuming a floating action button '
-    'is present when it is not. This parameter will be removed. '
+    'Fixes a bug that incorrectly clips and positions SnackBar. It '
+    'previously incorrectly offsets itself assuming a floating action button '
+    'is present even when it is not. This parameter will be removed. '
     'This feature was deprecated after v1.15.3.'
   )
   static bool shouldSnackBarIgnoreFABRect = false;
