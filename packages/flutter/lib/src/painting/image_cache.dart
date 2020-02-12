@@ -259,7 +259,11 @@ class ImageCache {
       result = loader();
     } catch (error, stackTrace) {
       if (!kReleaseMode) {
-        timelineTask.finish(arguments: <String, dynamic>{'result': 'error', 'error': error, 'stackTrace': stackTrace});
+        timelineTask.finish(arguments: <String, dynamic>{
+          'result': 'error',
+          'error': error.toString(),
+          'stackTrace': stackTrace.toString(),
+        });
       }
       if (onError != null) {
         onError(error, stackTrace);
