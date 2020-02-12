@@ -25,7 +25,7 @@ class AlwaysTrueBotDetector implements BotDetector {
   const AlwaysTrueBotDetector();
 
   @override
-  Future<bool> get isRunningOnBot async => true;
+  bool get isRunningOnBot => true;
 }
 
 
@@ -33,7 +33,7 @@ class AlwaysFalseBotDetector implements BotDetector {
   const AlwaysFalseBotDetector();
 
   @override
-  Future<bool> get isRunningOnBot async => false;
+  bool get isRunningOnBot => false;
 }
 
 
