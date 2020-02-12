@@ -139,7 +139,6 @@ class UpgradeCommandRunner {
   }
 
   void recordState(FlutterVersion flutterVersion) {
-    globals.printStatus('Recording ${flutterVersion.frameworkRevision} for ${flutterVersion.channel}');
     final Channel channel = getChannelForName(flutterVersion.channel);
     if (channel == null) {
       return;
