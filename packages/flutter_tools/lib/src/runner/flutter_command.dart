@@ -175,11 +175,15 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag('web-run-headless',
       defaultsTo: false,
-      help: 'Launches the browser in headless mode.',
+      help: 'Launches the browser in headless mode. Currently only Chrome '
+        'supports this option.',
       hide: true,
     );
     argParser.addOption('web-browser-debug-port',
-      help: 'The debug port the browser should use. If not specified, a random port is selected.',
+      help: 'The debug port the browser should use. If not specified, a '
+        'random port is selected. Currently only Chrome supports this option. '
+        'It serves the Chrome DevTools Protocol '
+        '(https://chromedevtools.github.io/devtools-protocol/).',
       hide: true,
     );
   }
