@@ -49,11 +49,14 @@ void main() {
     final Directory testDirectory = parentDirectory.childDirectory('flutter');
     testDirectory.createSync(recursive: true);
 
+    // Enable longpaths for windows integration test.
+    await processManager.run(<String>[
+      'git', 'config', '--system', 'core.longpaths', 'true',
+    ]);
+
     // Step 1. Clone the dev branch of flutter into the test directory.
     await processUtils.stream(<String>[
       'git',
-      '-c',
-      'core.longPaths=true',
       'clone',
       'https://github.com/flutter/flutter.git',
     ], workingDirectory: parentDirectory.path, trace: true);
@@ -62,8 +65,6 @@ void main() {
     await processUtils.stream(<String>[
       'git',
       'checkout',
-      '-c',
-      'core.longPaths=true',
       '--track',
       '-b',
       _kBranch,
@@ -73,8 +74,6 @@ void main() {
     // Step 3. Revert to a prior version.
     await processUtils.stream(<String>[
       'git',
-      '-c',
-      'core.longPaths=true',
       'reset',
       '--hard',
       _kInitialVersion,
@@ -91,8 +90,6 @@ void main() {
     // Step 5. Verify that the version is different.
     final RunResult versionResult = await processUtils.run(<String>[
       'git',
-      '-c',
-      'core.longPaths=true',
       'describe',
       '--match',
       'v*.*.*',
@@ -113,8 +110,6 @@ void main() {
     // Step 7. Verify downgraded version matches original version.
     final RunResult oldVersionResult = await processUtils.run(<String>[
       'git',
-      '-c',
-      'core.longPaths=true',
       'describe',
       '--match',
       'v*.*.*',
