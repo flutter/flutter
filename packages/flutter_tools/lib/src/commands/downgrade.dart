@@ -46,7 +46,7 @@ class DowngradeCommand extends FlutterCommand {
     argParser.addOption(
       'working-directory',
       hide: true,
-      help: 'Override the downgrade working directoy for integration testing.'
+      help: 'Override the downgrade working directory for integration testing.'
     );
     argParser.addFlag(
       'prompt',
