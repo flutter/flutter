@@ -52,6 +52,8 @@ void main() {
     // Step 1. Clone the dev branch of flutter into the test directory.
     await processUtils.stream(<String>[
       'git',
+      '-c',
+      'core.longPaths=true',
       'clone',
       'https://github.com/flutter/flutter.git',
     ], workingDirectory: parentDirectory.path, trace: true);
@@ -60,6 +62,8 @@ void main() {
     await processUtils.stream(<String>[
       'git',
       'checkout',
+      '-c',
+      'core.longPaths=true',
       '--track',
       '-b',
       _kBranch,
@@ -69,6 +73,8 @@ void main() {
     // Step 3. Revert to a prior version.
     await processUtils.stream(<String>[
       'git',
+      '-c',
+      'core.longPaths=true',
       'reset',
       '--hard',
       _kInitialVersion,
@@ -84,7 +90,15 @@ void main() {
 
     // Step 5. Verify that the version is different.
     final RunResult versionResult = await processUtils.run(<String>[
-      'git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags',
+      'git',
+      '-c',
+      'core.longPaths=true',
+      'describe',
+      '--match',
+      'v*.*.*',
+      '--first-parent',
+      '--long',
+      '--tags',
     ], workingDirectory: testDirectory.path);
     expect(versionResult.stdout, isNot(contains(_kInitialVersion)));
 
@@ -98,7 +112,15 @@ void main() {
 
     // Step 7. Verify downgraded version matches original version.
     final RunResult oldVersionResult = await processUtils.run(<String>[
-      'git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags',
+      'git',
+      '-c',
+      'core.longPaths=true',
+      'describe',
+      '--match',
+      'v*.*.*',
+      '--first-parent',
+      '--long',
+      '--tags',
     ], workingDirectory: testDirectory.path);
     expect(oldVersionResult.stdout, contains(_kInitialVersion));
   });
