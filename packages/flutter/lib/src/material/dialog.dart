@@ -540,6 +540,7 @@ class SimpleDialogOption extends StatelessWidget {
   const SimpleDialogOption({
     Key key,
     this.onPressed,
+    this.padding,
     this.child,
   }) : super(key: key);
 
@@ -556,12 +557,17 @@ class SimpleDialogOption extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
+  /// The amount of space to surround the [child] with.
+  ///
+  /// Defaults to EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0).
+  final EdgeInsets padding;
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
+        padding: padding ?? const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
         child: child,
       ),
     );
