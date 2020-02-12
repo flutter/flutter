@@ -30,8 +30,7 @@
 
 #if defined(OS_ANDROID)
 #include <android/log.h>
-#elif defined(OS_MACOSX)
-#include <os/log.h>
+#elif defined(OS_IOS)
 extern "C" {
 // Cannot import the syslog.h header directly because of macro collision.
 extern void syslog(int, const char*, ...);
@@ -200,29 +199,19 @@ void Logger_PrintString(Dart_NativeArguments args) {
     // Write to the logcat on Android.
     __android_log_print(ANDROID_LOG_INFO, logger_prefix.c_str(), "%.*s",
                         (int)length, chars);
-#elif defined(OS_MACOSX)
+#elif defined(OS_IOS)
+    // Write to syslog on iOS.
+    //
     // TODO(cbracken): replace with dedicated communication channel and bypass
     // iOS logging APIs altogether.
-    //
-    // Unified logging (os_log) became available in iOS 9.0 and syslog stopped
-    // working in iOS 13.0. idevicesyslog made device syslog available on the
-    // connected host, but there is no known API to view device unified logging
-    // on the host. Flutter tool will continue to observe syslog on devices
-    // older than iOS 13.0 since it provides more logging context, particularly
-    // for application crashes.
-    if (__builtin_available(iOS 13.0, macOS 10.11, *)) {
-      os_log_t dart_log = os_log_create("io.flutter", "dart");
-      os_log(dart_log, "%.*s", static_cast<int>(length), chars);
-    } else {
-      syslog(1 /* LOG_ALERT */, "%.*s", static_cast<int>(length), chars);
-    }
+    syslog(1 /* LOG_ALERT */, "%.*s", (int)length, chars);
 #else
     std::cout << log_string << std::endl;
 #endif
   }
 
   if (dart::bin::ShouldCaptureStdout()) {
-    // Report print output on the Stdout stream.
+    // For now we report print output on the Stdout stream.
     uint8_t newline[] = {'\n'};
     Dart_ServiceSendDataEvent("Stdout", "WriteEvent",
                               reinterpret_cast<const uint8_t*>(chars), length);
