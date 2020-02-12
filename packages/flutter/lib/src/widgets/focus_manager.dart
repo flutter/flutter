@@ -230,12 +230,12 @@ class FocusAttachment {
 /// particular direction, is determined by the [FocusTraversalPolicy] in force.
 ///
 /// The ambient policy is determined by looking up the widget hierarchy for a
-/// [FocusTraversalGroup] widget, and obtaining the focus traversal policy
+/// [DefaultFocusTraversal] widget, and obtaining the focus traversal policy
 /// from it. Different focus nodes can inherit difference policies, so part of
 /// the app can go in widget order, and part can go in reading order, depending
 /// upon the use case.
 ///
-/// Predefined policies include [WidgetOrderTraversalPolicy],
+/// Predefined policies include [WidgetOrderFocusTraversalPolicy],
 /// [ReadingOrderTraversalPolicy], and [DirectionalFocusTraversalPolicyMixin],
 /// but custom policies can be built based upon these policies.
 ///
@@ -361,8 +361,8 @@ class FocusAttachment {
 ///    events to focused nodes.
 ///  * [FocusTraversalPolicy], a class used to determine how to move the focus
 ///    to other nodes.
-///  * [FocusTraversalGroup], a widget used to group together and configure the
-///    focus traversal policy for a widget subtree.
+///  * [DefaultFocusTraversal], a widget used to configure the default focus
+///    traversal policy for a widget subtree.
 class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates a focus node.
   ///
@@ -426,8 +426,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// See also:
   ///
-  ///  * [FocusTraversalGroup], a widget used to group together and configure the
-  ///    focus traversal policy for a widget subtree.
+  ///  * [DefaultFocusTraversal], a widget that sets the traversal policy for
+  ///    its descendants.
   ///  * [FocusTraversalPolicy], a class that can be extended to describe a
   ///    traversal policy.
   bool get canRequestFocus {
@@ -518,8 +518,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return _descendants;
   }
 
-  /// Returns all descendants which do not have the [skipTraversal] and do have
-  /// the [canRequestFocus] flag set.
+  /// Returns all descendants which do not have the [skipTraversal] flag set.
   Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
 
   /// An [Iterable] over the ancestors of this node.
@@ -777,7 +776,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       _manager?.primaryFocus?._setAsFocusedChild();
     }
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
-      FocusTraversalGroup.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
+      DefaultFocusTraversal.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
     }
     if (child._requestFocusWhenReparented) {
       child._doRequestFocus();
@@ -916,19 +915,19 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusTraversalPolicy.next] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool nextFocus() => FocusTraversalGroup.of(context).next(this);
+  bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
 
   /// Request to move the focus to the previous focus node, by calling the
   /// [FocusTraversalPolicy.previous] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool previousFocus() => FocusTraversalGroup.of(context).previous(this);
+  bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
 
   /// Request to move the focus to the nearest focus node in the given
   /// direction, by calling the [FocusTraversalPolicy.inDirection] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool focusInDirection(TraversalDirection direction) => FocusTraversalGroup.of(context).inDirection(this, direction);
+  bool focusInDirection(TraversalDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -462,10 +462,8 @@ class _FocusState extends State<Focus> {
     return _FocusMarker(
       node: focusNode,
       child: Semantics(
-        // If these values are false, then just don't set them, so they don't
-        // eclipse values set by children.
-        focusable: _canRequestFocus ? true : null,
-        focused: _hasPrimaryFocus ? true : null,
+        focusable: _canRequestFocus,
+        focused: _hasPrimaryFocus,
         child: widget.child,
       ),
     );
