@@ -79,7 +79,7 @@ void main() {
 
     testUsingOsxContext('majorVersion returns major version', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(ProcessResult(1, 0, 'Xcode 11.4.3\nBuild version 11N111s', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode 10.1\nBuild version 10B61', ''));
       expect(xcodeProjectInterpreter.majorVersion, 11);
     });
 

@@ -68,8 +68,8 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is true when version meets minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
       expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
@@ -125,8 +125,8 @@ void main() {
         .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
 
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
       expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
     }, overrides: <Type, Generator>{
