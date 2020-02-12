@@ -1441,7 +1441,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
         _markedForUnfocus = node;
       }
       _markNeedsUpdate();
-     }
+    }
     assert(_focusDebug('Unfocused node $node:', <String>['primary focus is $_primaryFocus', 'next focus will be $_markedForFocus']));
   }
 
