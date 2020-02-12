@@ -203,6 +203,11 @@ class ImageChunkEvent extends Diagnosticable {
 ///
 /// ImageStream objects are backed by [ImageStreamCompleter] objects.
 ///
+/// The [ImageCache] will consider an image to be live until the listener count
+/// drops to zero after adding at least one listener. The
+/// [addOnLastListenerRemovedCallback] method is used for tracking this
+/// information.
+///
 /// See also:
 ///
 ///  * [ImageProvider], which has an example that includes the use of an
