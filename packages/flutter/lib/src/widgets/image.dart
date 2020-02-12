@@ -117,6 +117,7 @@ Future<void> precacheImage(
       }
       // Give callers until at least the end of the frame to subscribe to the
       // image stream.
+      // See ImageCache._liveImages
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         stream.removeListener(listener);
       });

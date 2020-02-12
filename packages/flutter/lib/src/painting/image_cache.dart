@@ -20,10 +20,21 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// the network if they are referenced in the [putIfAbsent] method), but the raw
 /// bits are kept in memory for as long as the application is using them.
 ///
+/// The cache also holds a list of "live" references. An image is considered
+/// live if its [ImageStreamCompleter]'s listener count has never dropped to
+/// zero after adding at least one listener. The cache uses
+/// [ImageStreamCompleter.addOnLastListenerRemovedCallback] to determine when
+/// this has happened.
+///
 /// The [putIfAbsent] method is the main entry-point to the cache API. It
 /// returns the previously cached [ImageStreamCompleter] for the given key, if
 /// available; if not, it calls the given callback to obtain it first. In either
 /// case, the key is moved to the "most recently used" position.
+///
+/// A caller can determine whether an image is already in the cache by using
+/// [containsKey], which will return true if the image is tracked by the cache
+/// in a pending or compelted state. More fine grained information is available
+/// by using the [locationForKey] method.
 ///
 /// Generally this class is not used directly. The [ImageProvider] class and its
 /// subclasses automatically handle the caching of images.
@@ -261,6 +272,11 @@ class ImageCache {
   int get pendingImageCount => _pendingImages.length;
 
   /// Clears any live references to images in this cache.
+  ///
+  /// An image is considered live if its [ImageStreamCompleter] has never hit
+  /// zero listeners after adding at least one listener. The
+  /// [ImageStreamCompleter.addOnLastListenerRemovedCallback] is used to
+  /// determine when this has happened.
   ///
   /// This is called after a hot reload to evict any stale references to image
   /// data for assets that have changed. Calling this method does not relieve
