@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
+import '../base/time.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
@@ -208,8 +208,8 @@ class UpgradeCommandRunner {
     } catch (e) {
       throwToolExit(
         'Unable to upgrade Flutter: no origin repository configured. '
-        'Run \'git remote add origin '
-        'https://github.com/flutter/flutter\' in $workingDirectory\n$e',
+        "Run 'git remote add origin "
+        "https://github.com/flutter/flutter' in $workingDirectory",
       );
     }
   }

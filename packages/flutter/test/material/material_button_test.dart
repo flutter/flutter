@@ -213,7 +213,7 @@ void main() {
     await gesture2.up();
   });
 
-  testWidgets('MaterialButton\'s disabledColor takes precedence over its default disabled color.', (WidgetTester tester) async {
+  testWidgets("MaterialButton's disabledColor takes precedence over its default disabled color.", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/30012.
 
     final Finder rawButtonMaterial = find.descendant(

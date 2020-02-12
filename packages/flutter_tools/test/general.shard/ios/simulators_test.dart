@@ -245,7 +245,7 @@ void main() {
     });
 
     testUsingContext(
-      'old Xcode doesn\'t support screenshot',
+      "old Xcode doesn't support screenshot",
       () {
         when(mockXcode.majorVersion).thenReturn(7);
         when(mockXcode.minorVersion).thenReturn(1);

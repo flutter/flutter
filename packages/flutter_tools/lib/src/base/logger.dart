@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../base/context.dart';
 import '../globals.dart' as globals;
@@ -179,15 +178,13 @@ class StdoutLogger extends Logger {
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
-    @required Platform platform,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   })
     : _stdio = stdio,
       _terminal = terminal,
       _timeoutConfiguration = timeoutConfiguration,
       _outputPreferences = outputPreferences,
-      _stopwatchFactory = stopwatchFactory,
-      _platform = platform;
+      _stopwatchFactory = stopwatchFactory;
 
   @override
   final AnsiTerminal _terminal;
@@ -197,7 +194,6 @@ class StdoutLogger extends Logger {
   final TimeoutConfiguration _timeoutConfiguration;
   final Stdio _stdio;
   final StopwatchFactory _stopwatchFactory;
-  final Platform _platform;
 
   Status _status;
 
@@ -306,8 +302,8 @@ class StdoutLogger extends Logger {
         onFinish: _clearStatus,
         stdio: _stdio,
         timeoutConfiguration: _timeoutConfiguration,
-        platform: _platform,
         stopwatch: _stopwatchFactory.createStopwatch(),
+        terminal: _terminal,
       )..start();
     } else {
       _status = SummaryStatus(
@@ -352,7 +348,6 @@ class WindowsStdoutLogger extends StdoutLogger {
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
-    @required Platform platform,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : super(
       terminal: terminal,
@@ -360,15 +355,16 @@ class WindowsStdoutLogger extends StdoutLogger {
       outputPreferences: outputPreferences,
       timeoutConfiguration: timeoutConfiguration,
       stopwatchFactory: stopwatchFactory,
-      platform: platform,
     );
 
   @override
   void writeToStdOut(String message) {
     // TODO(jcollins-g): wrong abstraction layer for this, move to [Stdio].
-    final String windowsMessage = message
-      .replaceAll('✗', 'X')
-      .replaceAll('✓', '√');
+    final String windowsMessage = _terminal.supportsEmoji
+      ? message
+      : message.replaceAll('🔥', '')
+               .replaceAll('✗', 'X')
+               .replaceAll('✓', '√');
     _stdio.stdoutWrite(windowsMessage);
   }
 }
@@ -681,19 +677,18 @@ abstract class Status {
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
     @required Stopwatch stopwatch,
-    @required bool supportsColor,
-    @required Platform platform,
+    @required AnsiTerminal terminal,
     VoidCallback onFinish,
     SlowWarningCallback slowWarningCallback,
   }) {
-    if (supportsColor) {
+    if (terminal.supportsColor) {
       return AnsiSpinner(
         timeout: timeout,
         onFinish: onFinish,
         slowWarningCallback: slowWarningCallback,
         timeoutConfiguration: timeoutConfiguration,
         stopwatch: stopwatch,
-        platform: platform,
+        terminal: terminal,
       )..start();
     }
     return SilentStatus(
@@ -862,12 +857,12 @@ class AnsiSpinner extends Status {
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
     @required Stopwatch stopwatch,
-    @required Platform platform,
+    @required AnsiTerminal terminal,
     VoidCallback onFinish,
     this.slowWarningCallback,
     Stdio stdio,
   }) : _stdio = stdio ?? globals.stdio,
-       _isWindows = platform.isWindows,
+       _terminal = terminal,
        super(
          timeout: timeout,
          onFinish: onFinish,
@@ -878,7 +873,7 @@ class AnsiSpinner extends Status {
   final String _backspaceChar = '\b';
   final String _clearChar = ' ';
   final Stdio _stdio;
-  final bool _isWindows;
+  final AnsiTerminal _terminal;
 
   bool timedOut = false;
 
@@ -886,7 +881,7 @@ class AnsiSpinner extends Status {
   Timer timer;
 
   // Windows console font has a limited set of Unicode characters.
-  List<String> get _animation => _isWindows
+  List<String> get _animation => !_terminal.supportsEmoji
       ? const <String>[r'-', r'\', r'|', r'/']
       : const <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
@@ -984,7 +979,7 @@ class AnsiStatus extends AnsiSpinner {
     this.padding = kDefaultStatusPadding,
     @required Duration timeout,
     @required Stopwatch stopwatch,
-    @required Platform platform,
+    @required AnsiTerminal terminal,
     VoidCallback onFinish,
     Stdio stdio,
     TimeoutConfiguration timeoutConfiguration,
@@ -997,7 +992,7 @@ class AnsiStatus extends AnsiSpinner {
          stdio: stdio,
          timeoutConfiguration: timeoutConfiguration,
          stopwatch: stopwatch,
-         platform: platform,
+         terminal: terminal,
         );
 
   final String message;

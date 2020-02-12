@@ -23,7 +23,7 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 }
 
 void main() {
-  testWidgets('Sliver appbars - floating - scroll offset doesn\'t change', (WidgetTester tester) async {
+  testWidgets("Sliver appbars - floating - scroll offset doesn't change", (WidgetTester tester) async {
     const double bigHeight = 1000.0;
     await tester.pumpWidget(
       Directionality(

@@ -112,7 +112,7 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('Doesn\'t throw on known tag, dev branch, no force', () async {
+    testUsingContext("Doesn't throw on known tag, dev branch, no force", () async {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         false,
         false,
@@ -126,7 +126,7 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('Doesn\'t continue on known tag, dev branch, no force, already up-to-date', () async {
+    testUsingContext("Doesn't continue on known tag, dev branch, no force, already up-to-date", () async {
       fakeCommandRunner.alreadyUpToDate = true;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         false,
@@ -290,7 +290,7 @@ void main() {
       expect(_match('Fast-forward'), true);
     });
 
-    test('regex doesn\'t match', () {
+    test("regex doesn't match", () {
       expect(_match('Updating 79cfe1e..5046107'), false);
       expect(_match('229 files changed, 6179 insertions(+), 3065 deletions(-)'), false);
     });

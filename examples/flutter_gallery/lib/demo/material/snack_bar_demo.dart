@@ -50,7 +50,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
                     label: 'ACTION',
                     onPressed: () {
                       Scaffold.of(context).showSnackBar(SnackBar(
-                        content: Text('You pressed snackbar $thisSnackBarIndex\'s action.'),
+                        content: Text("You pressed snackbar $thisSnackBarIndex's action."),
                       ));
                     },
                   ),

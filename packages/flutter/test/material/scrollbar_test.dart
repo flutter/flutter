@@ -36,7 +36,7 @@ Widget _buildBoilerplate({
 }
 
 void main() {
-  testWidgets('Scrollbar doesn\'t show when tapping list', (WidgetTester tester) async {
+  testWidgets("Scrollbar doesn't show when tapping list", (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildBoilerplate(
         child: Center(

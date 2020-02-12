@@ -688,7 +688,7 @@ class Image extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool sample --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material}
   ///
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
@@ -706,7 +706,7 @@ class Image extends StatefulWidget {
   ///       borderRadius: BorderRadius.circular(20),
   ///     ),
   ///     child: Image.network(
-  ///       'https://example.com/image.jpg',
+  ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
   ///       frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
   ///         if (wasSynchronouslyLoaded) {
   ///           return child;
@@ -723,11 +723,6 @@ class Image extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// Run against a real-world image, the previous example renders the following
-  /// image.
-  ///
-  /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/frame_builder_image.mp4}
   final ImageFrameBuilder frameBuilder;
 
   /// A builder that specifies the widget to display to the user while an image
@@ -759,7 +754,7 @@ class Image extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.image.chainedBuildersExample}
   ///
-  /// {@tool sample --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material}
   ///
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.
@@ -791,9 +786,9 @@ class Image extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// Run against a real-world image, the previous example renders the following
-  /// loading progress indicator while the image loads before rendering the
-  /// completed image.
+  /// Run against a real-world image on a slow network, the previous example
+  /// renders the following loading progress indicator while the image loads
+  /// before rendering the completed image.
   ///
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
   final ImageLoadingBuilder loadingBuilder;
