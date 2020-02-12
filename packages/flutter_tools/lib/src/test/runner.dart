@@ -54,7 +54,7 @@ abstract class FlutterTestRunner {
   });
 }
 
-class _FlutterTestRunnerImpl extends FlutterTestRunner {
+class _FlutterTestRunnerImpl implements FlutterTestRunner {
   const _FlutterTestRunnerImpl() : super._();
 
   @override

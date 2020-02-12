@@ -88,7 +88,7 @@ void main() {
     await commandRunner.run(const <String>[
       'test',
       '--no-pub',
-      '--enable-observatory',
+      '--enable-vmservice',
       '--',
       'test/fake_test.dart',
     ]);
@@ -101,7 +101,7 @@ void main() {
       'test',
       '--no-pub',
       '--start-paused',
-      '--no-enable-observatory',
+      '--no-enable-vmservice',
       '--',
       'test/fake_test.dart',
     ]);

@@ -112,14 +112,14 @@ class TestCommand extends FastFlutterCommand {
               'If "random", pick a random seed to use.\n'
               'If 0 or not set, do not randomize test case execution order.',
       )
-      ..addFlag('enable-observatory',
+      ..addFlag('enable-vmservice',
         defaultsTo: false,
         hide: !verboseHelp,
-        help: 'Enables the observatory without --start-paused. This flag is '
+        help: 'Enables the vmservice without --start-paused. This flag is '
               'intended for use with tests that will use dart:developer to '
-              'interact with the observatory at runtime.\n'
+              'interact with the vmservice at runtime.\n'
               'This flag is ignored if --start-paused or coverage are requested. '
-              'The observatory will be enabled no matter what in those cases.'
+              'The vmservice will be enabled no matter what in those cases.'
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
@@ -255,7 +255,7 @@ class TestCommand extends FastFlutterCommand {
       names: names,
       plainNames: plainNames,
       watcher: watcher,
-      enableObservatory: collector != null || startPaused || boolArg('enable-observatory'),
+      enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
       ipv6: boolArg('ipv6'),
