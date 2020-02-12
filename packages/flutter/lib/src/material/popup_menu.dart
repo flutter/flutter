@@ -1045,18 +1045,18 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// See [showButtonMenu] for a way to programmatically open the popup menu
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
-  /// A method to show a popup menu with the buttons supplied to
+  /// A method to show a popup menu with the items supplied to
   /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
   ///
-  /// It is normally called when the user taps the button and [PopupMenuButton.enabled]
-  /// is set to `true`, but you can also open the button manually
-  /// by calling [showButtonMenu].
+  /// By default, it is called when the user taps the button and [PopupMenuButton.enabled]
+  /// is set to `true`.
+  /// Moreover, you can open the button by calling the method manually.
   ///
   /// {@tool sample}
   ///
   /// You would access your [PopupMenuButtonState] using a [GlobalKey].
-  /// Using the following setup, you can show the menu of the button
-  /// using `globalKey.currentState.showButtonMenu`.
+  /// With the following setup, you can show the menu of the button
+  /// via `globalKey.currentState.showButtonMenu`.
   ///
   /// ```dart
   /// class ExampleWidget extends StatelessWidget {
