@@ -647,6 +647,11 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
                 treeShakeIcons treeShakeIconsOptionsValue
+                doLast {
+                    project.exec {
+                        commandLine('chmod',  '-R', 'u+w', assetsDirectory)
+                    }
+                }
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -684,7 +689,6 @@ class FlutterPlugin implements Plugin<Project> {
                     dependsOn packageAssets
                     dependsOn cleanPackageAssets
                     into packageAssets.outputDir
-                    fileMode 0644
                     return
                 }
                 // `variant.mergeAssets` will be removed at the end of 2019.
@@ -694,7 +698,6 @@ class FlutterPlugin implements Plugin<Project> {
                 dependsOn "clean${mergeAssets.name.capitalize()}"
                 mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
                 into mergeAssets.outputDir
-                fileMode 0644
             }
             if (!isUsedAsSubproject) {
                 def variantOutput = variant.outputs.first()
@@ -859,6 +862,10 @@ class FlutterTask extends BaseFlutterTask {
     @OutputDirectory
     File getOutputDirectory() {
         return intermediateDir
+    }
+
+    String getAssetsDirectory() {
+        return "${outputDirectory}/flutter_assets/"
     }
 
     CopySpec getAssets() {
