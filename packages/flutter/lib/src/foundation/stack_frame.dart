@@ -133,16 +133,16 @@ class StackFrame {
     );
   }
 
+  // Non-debug builds do not point to dart code but compiled JavaScript, so
+  // line numbers are meaningless. We only attempt to parse the class and
+  // method name, which is more or less readable in profile builds, and
+  // minified in release builds.
+  static final RegExp _webNonDebugFramePattern = RegExp(r'^\s*at ([^\s]+).*$');
+
   // Parses `line` as a stack frame in profile and release Web builds. If not
   // recognized as a stack frame, returns null.
   static StackFrame _parseWebNonDebugFrame(String line) {
-    // Non-debug builds do not point to dart code but compiled JavaScript, so
-    // line numbers are meaningless. We only attempt to parse the class and
-    // method name, which is more or less readable in profile builds, and
-    // minified in release builds.
-    final RegExp parser = RegExp(r'^\s*at ([^\s]+).*$');
-
-    final Match match = parser.firstMatch(line);
+    final Match match = _webNonDebugFramePattern.firstMatch(line);
     if (match == null) {
       // On the Web in non-debug builds the stack trace includes the exception
       // message that precedes the stack trace itself. Example:

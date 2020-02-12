@@ -97,6 +97,9 @@ class ChromeLauncher {
   /// `headless` defaults to false, and controls whether we open a headless or
   /// a `headfull` browser.
   ///
+  /// `debugPort` is Chrome's debugging protocol port. If null, a random free
+  /// port is picked automatically.
+  ///
   /// `skipCheck` does not attempt to make a devtools connection before returning.
   Future<Chrome> launch(String url, { bool headless = false, int debugPort, bool skipCheck = false, Directory dataDir }) async {
     // This is a JSON file which contains configuration from the
