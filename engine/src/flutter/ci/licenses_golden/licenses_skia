@@ -1,4 +1,4 @@
-Signature: 8052ad3e1b6e3d59f02f29729188de98
+Signature: 235bfc064edd7350fbba067f22d22125
 
 UNUSED LICENSES:
 
@@ -2131,7 +2131,6 @@ FILE: ../../../third_party/skia/samplecode/SampleFatBits.cpp
 FILE: ../../../third_party/skia/samplecode/SampleQuadStroker.cpp
 FILE: ../../../third_party/skia/src/codec/SkColorTable.h
 FILE: ../../../third_party/skia/src/core/SkAnnotation.cpp
-FILE: ../../../third_party/skia/src/core/SkBBoxHierarchy.h
 FILE: ../../../third_party/skia/src/core/SkFontDescriptor.cpp
 FILE: ../../../third_party/skia/src/core/SkFontDescriptor.h
 FILE: ../../../third_party/skia/src/core/SkImagePriv.h
