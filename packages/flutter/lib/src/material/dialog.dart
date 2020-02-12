@@ -540,8 +540,8 @@ class SimpleDialogOption extends StatelessWidget {
   const SimpleDialogOption({
     Key key,
     this.onPressed,
-    this.child,
     this.padding,
+    this.child,
   }) : super(key: key);
 
   /// The callback that is called when this option is selected.
