@@ -14,25 +14,38 @@ import '../src/common.dart';
 
 const String _kInitialVersion = 'v1.9.1+hotfix.6';
 const String _kBranch = 'stable';
+const FileSystem fileSystem = LocalFileSystem();
+const ProcessManager processManager = LocalProcessManager();
+final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(
+  terminal: AnsiTerminal(
+    platform: const LocalPlatform(),
+    stdio: const Stdio(),
+  ),
+  stdio: const Stdio(),
+  outputPreferences: OutputPreferences.test(wrapText: true),
+  timeoutConfiguration: const TimeoutConfiguration(),
+));
+final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
 
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
 void main() {
-  test('Can upgrade and downgrade a Flutter checkout', () async {
-    const FileSystem fileSystem = LocalFileSystem();
-    const ProcessManager processManager = LocalProcessManager();
-    final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(
-      terminal: AnsiTerminal(
-        platform: const LocalPlatform(),
-        stdio: const Stdio(),
-      ),
-      stdio: const Stdio(),
-      outputPreferences: OutputPreferences.test(wrapText: true),
-      timeoutConfiguration: const TimeoutConfiguration(),
-    ));
+  Directory parentDirectory;
 
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final Directory parentDirectory = fileSystem.systemTempDirectory
-      .createTempSync('flutter_tools_upgrade.');
+  setUp(() {
+    parentDirectory = fileSystem.systemTempDirectory
+      .createTempSync('flutter_tools.');
+    parentDirectory.createSync(recursive: true);
+  });
+
+  tearDown(() {
+    try {
+      parentDirectory.deleteSync(recursive: true);
+    } on FileSystemException {
+      print('Failed to delete test directory');
+    }
+  });
+
+  test('Can upgrade and downgrade a Flutter checkout', () async {
     final Directory testDirectory = parentDirectory.childDirectory('flutter');
     testDirectory.createSync(recursive: true);
 
