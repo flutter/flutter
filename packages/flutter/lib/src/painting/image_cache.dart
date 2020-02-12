@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
+
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
@@ -85,6 +87,7 @@ class ImageCache {
     assert(value >= 0);
     if (value == maximumSize)
       return;
+    Timeline.instantSync('ImageCache.maximumSize', arguments: <String, dynamic>{'value': value});
     _maximumSize = value;
     if (maximumSize == 0) {
       clear();
@@ -134,6 +137,14 @@ class ImageCache {
   /// Images which have not finished loading yet will not be removed from the
   /// cache, and when they complete they will be inserted as normal.
   void clear() {
+    Timeline.instantSync(
+      'ImageCache.clear',
+      arguments: <String, dynamic>{
+        'pendingImages': _pendingImages.length,
+        'cachedImages': _cache.length,
+        'currentSizeInBytes': _currentSizeBytes,
+      },
+    );
     _cache.clear();
     _pendingImages.clear();
     _currentSizeBytes = 0;
@@ -158,14 +169,24 @@ class ImageCache {
   bool evict(Object key) {
     final _PendingImage pendingImage = _pendingImages.remove(key);
     if (pendingImage != null) {
+      Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
+        'type': 'pending'
+      });
       pendingImage.removeListener();
       return true;
     }
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
+      Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
+        'type': 'completed',
+        'sizeiInBytes': image.sizeBytes,
+      });
       _currentSizeBytes -= image.sizeBytes;
       return true;
     }
+    Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
+      'type': 'miss',
+    });
     return false;
   }
 
@@ -182,10 +203,19 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader(), { ImageErrorListener onError }) {
     assert(key != null);
     assert(loader != null);
+    final Flow flow = Flow.begin();
+    Timeline.startSync(
+      'ImageCache.putIfAbsent', arguments: <String, dynamic>{
+        'key': key,
+      },
+      flow: flow,
+    );
     ImageStreamCompleter result = _pendingImages[key]?.completer;
     // Nothing needs to be done because the image hasn't loaded yet.
-    if (result != null)
+    if (result != null) {
+
       return result;
+    }
     // Remove the provider from the list so that we can move it to the
     // recently used position below.
     final _CachedImage image = _cache.remove(key);
@@ -235,12 +265,14 @@ class ImageCache {
   // Remove images from the cache until both the length and bytes are below
   // maximum, or the cache is empty.
   void _checkCacheSize() {
+    Timeline.startSync('ImageCache._checkCacheSize');
     while (_currentSizeBytes > _maximumSizeBytes || _cache.length > _maximumSize) {
       final Object key = _cache.keys.first;
       final _CachedImage image = _cache[key];
       _currentSizeBytes -= image.sizeBytes;
       _cache.remove(key);
     }
+    Timeline.finishSync();
     assert(_currentSizeBytes >= 0);
     assert(_cache.length <= maximumSize);
     assert(_currentSizeBytes <= maximumSizeBytes);
