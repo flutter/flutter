@@ -147,7 +147,10 @@ class CrashingFlutterCommand extends FlutterCommand {
 }
 
 class CrashingUsage implements Usage {
-  CrashingUsage() : _impl = Usage(versionOverride: '[user-branch]');
+  CrashingUsage() : _impl = Usage(
+    versionOverride: '[user-branch]',
+    runningOnBot: true,
+  );
 
   final Usage _impl;
 
