@@ -472,19 +472,17 @@ class _FocusState extends State<Focus> {
   @override
   Widget build(BuildContext context) {
     _focusAttachment.reparent();
-    Widget semantics;
+    Widget child = widget.child;
     if (widget.includeSemantics) {
-      semantics = Semantics(
+      child = Semantics(
         focusable: _canRequestFocus,
         focused: _hasPrimaryFocus,
         child: widget.child,
       );
-    } else {
-      semantics = widget.child;
     }
     return _FocusMarker(
       node: focusNode,
-      child: semantics,
+      child: child,
     );
   }
 }
