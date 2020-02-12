@@ -1395,7 +1395,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       debugLabel: '<Default WidgetsApp Shortcuts>',
       child: Actions(
         actions: widget.actions ?? WidgetsApp.defaultActions,
-        child: FocusTraversalGroup(
+        child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
           child: _MediaQueryFromWindow(
             child: Localizations(
