@@ -38,14 +38,6 @@ AssertExists() {
   return 0
 }
 
-PlistHasField() {
-  if /usr/libexec/PlistBuddy -c "Print :$1" $2 > /dev/null 2>&1; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 BuildApp() {
   local project_path="${SOURCE_ROOT}/.."
   if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
@@ -70,8 +62,7 @@ BuildApp() {
   local assets_path="flutter_assets"
   # The value of assets_path can set by add FLTAssetsPath to
   # AppFrameworkInfo.plist.
-  if PlistHasField "FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist"; then
-    FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null)
+  if FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null); then
     if [[ -n "$FLTAssetsPath" ]]; then
       assets_path="${FLTAssetsPath}"
     fi
