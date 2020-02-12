@@ -1222,7 +1222,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
           ErrorSummary('setState() called in constructor: $this'),
           ErrorHint(
             'This happens when you call setState() on a State object for a widget that '
-            'hasn\'t been inserted into the widget tree yet. It is not necessary to call '
+            "hasn't been inserted into the widget tree yet. It is not necessary to call "
             'setState() in the constructor, since the state is already assumed to be dirty '
             'when it is initially created.'
           ),
@@ -3104,7 +3104,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('visitChildElements() called during build.'),
         ErrorDescription(
-          'The BuildContext.visitChildElements() method can\'t be called during '
+          "The BuildContext.visitChildElements() method can't be called during "
           'build because the child list is still being updated at that point, '
           'so the children might not be constructed yet, or might be old children '
           'that are going to be replaced.'
@@ -3368,7 +3368,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       assert(() {
         if (parent == this) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('A GlobalKey was used multiple times inside one widget\'s child list.'),
+            ErrorSummary("A GlobalKey was used multiple times inside one widget's child list."),
             DiagnosticsProperty<GlobalKey>('The offending GlobalKey was', key),
             parent.describeElement('The parent of the widgets with that key was'),
             element.describeElement('The first child to get instantiated with that key became'),
@@ -3763,15 +3763,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(() {
       if (_debugLifecycleState != _ElementLifecycle.active) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Looking up a deactivated widget\'s ancestor is unsafe.'),
+          ErrorSummary("Looking up a deactivated widget's ancestor is unsafe."),
           ErrorDescription(
-            'At this point the state of the widget\'s element tree is no longer '
+            "At this point the state of the widget's element tree is no longer "
             'stable.'
           ),
           ErrorHint(
-            'To safely refer to a widget\'s ancestor in its dispose() method, '
+            "To safely refer to a widget's ancestor in its dispose() method, "
             'save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() '
-            'in the widget\'s didChangeDependencies() method.'
+            "in the widget's didChangeDependencies() method."
           ),
         ]);
       }
@@ -4733,7 +4733,7 @@ class StatefulElement extends ComponentElement {
           ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called before ${_state.runtimeType}.initState() completed.'),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
-            'its dependent widgets are rebuilt. If the dependent widget\'s reference to '
+            "its dependent widgets are rebuilt. If the dependent widget's reference to "
             'the inherited widget is in a constructor or an initState() method, '
             'then the rebuilt dependent widget will not reflect the changes in the '
             'inherited widget.',

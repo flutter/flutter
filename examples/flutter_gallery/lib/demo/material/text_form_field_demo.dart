@@ -108,7 +108,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
       showInSnackBar('Please fix the errors in red before submitting.');
     } else {
       form.save();
-      showInSnackBar('${person.name}\'s phone number is ${person.phoneNumber}');
+      showInSnackBar("${person.name}'s phone number is ${person.phoneNumber}");
     }
   }
 
@@ -136,7 +136,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     if (passwordField.value == null || passwordField.value.isEmpty)
       return 'Please enter a password.';
     if (passwordField.value != value)
-      return 'The passwords don\'t match';
+      return "The passwords don't match";
     return null;
   }
 

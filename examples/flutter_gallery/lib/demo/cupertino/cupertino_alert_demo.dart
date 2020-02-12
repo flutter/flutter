@@ -141,7 +141,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
           'for directions, nearby search results, and estimated travel times.'),
         actions: <Widget>[
           CupertinoDialogAction(
-            child: const Text('Don\'t Allow'),
+            child: const Text("Don't Allow"),
             onPressed: () => Navigator.pop(context, 'Disallow'),
           ),
           CupertinoDialogAction(

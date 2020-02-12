@@ -113,7 +113,7 @@ void main() {
       ProcessManager: () => MockProcessManager(),
     });
 
-    testUsingContext('exit tool if can\'t get the tags', () async {
+    testUsingContext("exit tool if can't get the tags", () async {
       final VersionCommand command = VersionCommand();
       try {
         await command.getTags();

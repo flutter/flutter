@@ -804,7 +804,7 @@ class DropdownButton<T> extends StatefulWidget {
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
               }).length == 1,
-                'There should be exactly one item with [DropdownButton]\'s value: '
+                "There should be exactly one item with [DropdownButton]'s value: "
                 '$value. \n'
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',
@@ -1420,7 +1420,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
               }).length == 1,
-                'There should be exactly one item with [DropdownButton]\'s value: '
+                "There should be exactly one item with [DropdownButton]'s value: "
                 '$value. \n'
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',

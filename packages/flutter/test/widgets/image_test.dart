@@ -64,7 +64,7 @@ void main() {
     expect(renderImage.image, isNull);
   });
 
-  testWidgets('Verify Image doesn\'t reset its RenderImage when changing providers if it has gaplessPlayback set', (WidgetTester tester) async {
+  testWidgets("Verify Image doesn't reset its RenderImage when changing providers if it has gaplessPlayback set", (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestImageProvider imageProvider1 = TestImageProvider();
     await tester.pumpWidget(
@@ -144,7 +144,7 @@ void main() {
     expect(renderImage.image, isNull);
   });
 
-  testWidgets('Verify Image doesn\'t reset its RenderImage when changing providers if it has gaplessPlayback set', (WidgetTester tester) async {
+  testWidgets("Verify Image doesn't reset its RenderImage when changing providers if it has gaplessPlayback set", (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestImageProvider imageProvider1 = TestImageProvider();
     await tester.pumpWidget(
@@ -1199,7 +1199,7 @@ void main() {
     expect(find.byType(RawImage), findsOneWidget);
   }, skip: isBrowser);
 
-  testWidgets('Image doesn\'t rebuild on chunk events if loadingBuilder is null', (WidgetTester tester) async {
+  testWidgets("Image doesn't rebuild on chunk events if loadingBuilder is null", (WidgetTester tester) async {
     final ui.Image image = await tester.runAsync(createTestImage);
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
     final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);

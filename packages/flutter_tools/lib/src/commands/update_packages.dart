@@ -25,7 +25,7 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'dwds': '0.8.5', // Requires updates to web_fs due to breaking changes.
+  'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -361,7 +361,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     await _downloadCoverageData();
 
     final double seconds = timer.elapsedMilliseconds / 1000.0;
-    globals.printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
+    globals.printStatus("\nRan 'pub' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.");
 
     return FlutterCommandResult.success();
   }

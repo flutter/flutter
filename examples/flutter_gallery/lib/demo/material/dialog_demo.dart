@@ -124,7 +124,7 @@ class DialogDemoState extends State<DialogDemo> {
               showDemoDialog<DialogDemoAction>(
                 context: context,
                 child: AlertDialog(
-                  title: const Text('Use Google\'s location service?'),
+                  title: const Text("Use Google's location service?"),
                   content: Text(
                     _alertWithTitleText,
                     style: dialogTextStyle,
