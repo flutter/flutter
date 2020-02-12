@@ -59,6 +59,7 @@ void main() {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         false,
         false,
+        false,
         const GitTagVersion.unknown(),
         flutterVersion,
       );
@@ -70,6 +71,7 @@ void main() {
     testUsingContext('does not throw on unknown tag, official branch, force', () async {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         true,
+        false,
         false,
         const GitTagVersion.unknown(),
         flutterVersion,
@@ -83,6 +85,7 @@ void main() {
     testUsingContext('throws tool exit with uncommitted changes', () async {
       fakeCommandRunner.willHaveUncomittedChanges = true;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        false,
         false,
         false,
         gitTagVersion,
@@ -99,6 +102,7 @@ void main() {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         true,
         false,
+        false,
         gitTagVersion,
         flutterVersion,
       );
@@ -110,6 +114,7 @@ void main() {
 
     testUsingContext('Doesn\'t throw on known tag, dev branch, no force', () async {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        false,
         false,
         false,
         gitTagVersion,
@@ -124,6 +129,7 @@ void main() {
     testUsingContext('Doesn\'t continue on known tag, dev branch, no force, already up-to-date', () async {
       fakeCommandRunner.alreadyUpToDate = true;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        false,
         false,
         false,
         gitTagVersion,

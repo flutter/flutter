@@ -57,8 +57,26 @@ class VersionCommand extends FlutterCommand {
     final List<String> tags = await getTags();
     if (argResults.rest.isEmpty) {
       tags.forEach(globals.printStatus);
-      return const FlutterCommandResult(ExitStatus.success);
+      return FlutterCommandResult.success();
     }
+
+    globals.printStatus(
+      'Warning: "flutter version" will leave the SDK in a detached HEAD state. '
+      'If you are using the command to return to a previously installed SDK version '
+      'consider using the "flutter downgrade" command instead.'
+    );
+    if (globals.stdio.stdinHasTerminal) {
+      globals.terminal.usesTerminalUi = true;
+      final String result = await globals.terminal.promptForCharInput(
+        <String>['y', 'n'],
+        logger: globals.logger,
+        prompt: 'Are you sure you want to proceed?'
+      );
+      if (result == 'n') {
+        return FlutterCommandResult.success();
+      }
+    }
+
     final String version = argResults.rest[0].replaceFirst('v', '');
     if (!tags.contains('v$version')) {
       globals.printError('There is no version: $version');

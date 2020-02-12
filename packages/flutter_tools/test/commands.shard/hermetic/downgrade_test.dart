@@ -65,7 +65,14 @@ void main() {
       .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
-      processManager: processManager,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'git', 'describe', '--exact-match', 'invalid'
+          ],
+          exitCode: 1,
+        )
+      ]),
       terminal: terminal,
       stdio: mockStdio,
       flutterVersion: flutterVersion,
@@ -74,14 +81,14 @@ void main() {
     applyMocksToCommand(command);
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
-      throwsToolExit(message: 'There is no previously recorded version for channel "master."'));
+      throwsToolExit(message: 'Failed to parse version for downgrade'));
   });
 
    testUsingContext('Downgrade prompts for user input when terminal is attached - y', () async {
     when(flutterVersion.channel).thenReturn('master');
     when(mockStdio.hasTerminal).thenReturn(true);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
-      .writeAsStringSync('{"last-active-master-version":"v1.15.2-40-g6b00b5e88"}');
+      .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
@@ -112,7 +119,7 @@ void main() {
     when(flutterVersion.channel).thenReturn('master');
     when(mockStdio.hasTerminal).thenReturn(true);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
-      .writeAsStringSync('{"last-active-master-version":"v1.15.2-40-g6b00b5e88"}');
+      .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
@@ -143,9 +150,12 @@ void main() {
     when(flutterVersion.channel).thenReturn('master');
     when(mockStdio.hasTerminal).thenReturn(false);
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
-      .writeAsStringSync('{"last-active-master-version":"v1.15.2-40-g6b00b5e88"}');
+      .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
-      persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
+      persistentToolState: PersistentToolState.test(
+        directory: fileSystem.currentDirectory,
+        logger: bufferLogger,
+      ),
       processManager: processManager,
       terminal: terminal,
       stdio: mockStdio,
@@ -161,6 +171,46 @@ void main() {
       prompt: anyNamed('prompt'),
       logger: anyNamed('logger'),
     ));
+    expect(bufferLogger.statusText, contains('Success'));
+  });
+
+  testUsingContext('Downgrade performs correct git commands', () async {
+    when(flutterVersion.channel).thenReturn('master');
+    when(mockStdio.hasTerminal).thenReturn(false);
+    fileSystem.currentDirectory.childFile('.flutter_tool_state')
+      .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+    final DowngradeCommand command = DowngradeCommand(
+      persistentToolState: PersistentToolState.test(
+        directory: fileSystem.currentDirectory,
+        logger: bufferLogger,
+      ),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'git', 'describe', '--exact-match', 'g6b00b5e88'
+          ],
+          stdout: 'v1.2.3',
+        ),
+        const FakeCommand(
+          command: <String>[
+            'git', 'reset', '--hard', 'g6b00b5e88'
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'git', 'checkout', 'master', '--'
+          ]
+        ),
+      ]),
+      terminal: terminal,
+      stdio: mockStdio,
+      flutterVersion: flutterVersion,
+      logger: bufferLogger,
+    );
+    applyMocksToCommand(command);
+
+    await createTestCommandRunner(command).run(const <String>['downgrade']);
+
     expect(bufferLogger.statusText, contains('Success'));
   });
 }

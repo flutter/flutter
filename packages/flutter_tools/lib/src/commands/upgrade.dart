@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -34,6 +35,11 @@ class UpgradeCommand extends FlutterCommand {
         help: 'For the second half of the upgrade flow requiring the new '
               'version of Flutter. Should not be invoked manually, but '
               're-entrantly by the standard upgrade command.',
+      )
+      ..addOption(
+        'working-directory',
+        hide: true,
+        help: 'Override the upgrade working directoy for integration testing.'
       );
   }
 
@@ -50,25 +56,33 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() {
+    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot;
     return _commandRunner.runCommand(
       boolArg('force'),
       boolArg('continue'),
+      stringArg('working-directory') != null,
       GitTagVersion.determine(processUtils),
-      globals.flutterVersion,
+      stringArg('working-directory') == null
+        ? globals.flutterVersion
+        : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
     );
   }
 }
 
 @visibleForTesting
 class UpgradeCommandRunner {
+
+  String workingDirectory;
+
   Future<FlutterCommandResult> runCommand(
     bool force,
     bool continueFlow,
+    bool testFlow,
     GitTagVersion gitTagVersion,
     FlutterVersion flutterVersion,
   ) async {
     if (!continueFlow) {
-      await runCommandFirstHalf(force, gitTagVersion, flutterVersion);
+      await runCommandFirstHalf(force, gitTagVersion, flutterVersion, testFlow);
     } else {
       await runCommandSecondHalf(flutterVersion);
     }
@@ -79,6 +93,7 @@ class UpgradeCommandRunner {
     bool force,
     GitTagVersion gitTagVersion,
     FlutterVersion flutterVersion,
+    bool testFlow,
   ) async {
     await verifyUpstreamConfigured();
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
@@ -110,7 +125,7 @@ class UpgradeCommandRunner {
         'command with --force.'
       );
     }
-    recordState(gitTagVersion, flutterVersion.channel);
+    recordState(flutterVersion);
     await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
     final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
@@ -118,17 +133,18 @@ class UpgradeCommandRunner {
       // If the upgrade was a no op, then do not continue with the second half.
       globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
       globals.printStatus('$flutterVersion');
-    } else {
+    } else if (!testFlow) {
       await flutterUpgradeContinue();
     }
   }
 
-  void recordState(GitTagVersion currentVersion, String currentChannel) {
-    final Channel channel = getChannelForName(currentChannel);
+  void recordState(FlutterVersion flutterVersion) {
+    globals.printStatus('Recording ${flutterVersion.frameworkRevision} for ${flutterVersion.channel}');
+    final Channel channel = getChannelForName(flutterVersion.channel);
     if (channel == null) {
       return;
     }
-    globals.persistentToolState.updateLastActiveVersion(currentVersion, channel);
+    globals.persistentToolState.updateLastActiveVersion(flutterVersion.frameworkRevision, channel);
   }
 
   Future<void> flutterUpgradeContinue() async {
@@ -139,7 +155,7 @@ class UpgradeCommandRunner {
         '--continue',
         '--no-version-check',
       ],
-      workingDirectory: Cache.flutterRoot,
+      workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
       environment: Map<String, String>.of(globals.platform.environment),
     );
@@ -165,7 +181,7 @@ class UpgradeCommandRunner {
       final RunResult result = await processUtils.run(
         <String>['git', 'status', '-s'],
         throwOnError: true,
-        workingDirectory: Cache.flutterRoot,
+        workingDirectory: workingDirectory,
       );
       return result.stdout.trim().isNotEmpty;
     } on ProcessException catch (error) {
@@ -188,13 +204,13 @@ class UpgradeCommandRunner {
       await processUtils.run(
         <String>[ 'git', 'rev-parse', '@{u}'],
         throwOnError: true,
-        workingDirectory: Cache.flutterRoot,
+        workingDirectory: workingDirectory,
       );
     } catch (e) {
       throwToolExit(
         'Unable to upgrade Flutter: no origin repository configured. '
         'Run \'git remote add origin '
-        'https://github.com/flutter/flutter\' in ${Cache.flutterRoot}',
+        'https://github.com/flutter/flutter\' in $workingDirectory\n$e',
       );
     }
   }
@@ -215,7 +231,7 @@ class UpgradeCommandRunner {
       await processUtils.run(
         <String>['git', 'reset', '--hard', tag],
         throwOnError: true,
-        workingDirectory: Cache.flutterRoot,
+        workingDirectory: workingDirectory,
       );
     } on ProcessException catch (error) {
       throwToolExit(
@@ -232,7 +248,7 @@ class UpgradeCommandRunner {
   /// If the user is on a deprecated channel, attempts to migrate them off of
   /// it.
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {
-    globals.printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
+    globals.printStatus('Upgrading Flutter from $workingDirectory...');
     await ChannelCommand.upgradeChannel();
   }
 
@@ -246,7 +262,7 @@ class UpgradeCommandRunner {
   Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
     final int code = await processUtils.stream(
       <String>['git', 'pull', '--ff'],
-      workingDirectory: Cache.flutterRoot,
+      workingDirectory: workingDirectory,
       mapFunction: (String line) => matchesGitLine(line) ? null : line,
     );
     if (code != 0) {
@@ -256,7 +272,7 @@ class UpgradeCommandRunner {
     // Check if the upgrade did anything.
     bool alreadyUpToDate = false;
     try {
-      final FlutterVersion newFlutterVersion = FlutterVersion();
+      final FlutterVersion newFlutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
       alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
         newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
     } catch (e) {
@@ -277,7 +293,7 @@ class UpgradeCommandRunner {
       <String>[
         globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
       ],
-      workingDirectory: Cache.flutterRoot,
+      workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
       environment: Map<String, String>.of(globals.platform.environment),
     );
@@ -305,7 +321,7 @@ class UpgradeCommandRunner {
       <String>[
         globals.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
       ],
-      workingDirectory: Cache.flutterRoot,
+      workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
     );
   }

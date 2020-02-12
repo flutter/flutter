@@ -42,10 +42,10 @@ abstract class PersistentToolState {
   /// Returns the last active version for a given [channel].
   ///
   /// If there was no active prior version, returns `null` instead.
-  GitTagVersion lastActiveVersion(Channel channel);
+  String lastActiveVersion(Channel channel);
 
   /// Update the last active version for a given [channel].
-  void updateLastActiveVersion(GitTagVersion version, Channel channel);
+  void updateLastActiveVersion(String fullGitHash, Channel channel);
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -72,12 +72,12 @@ class _DefaultPersistentToolState implements PersistentToolState {
 
   static const String _kFileName = '.flutter_tool_state';
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
-  static const List<String> _lastActiveVersion = <String>[
-    'last-active-master-version',
-    'last-active-dev-version',
-    'last-active-beta-version',
-    'last-active-stable-version'
-  ];
+  static const Map<Channel, String> _lastActiveVersionKeys = <Channel,String>{
+    Channel.master: 'last-active-master-version',
+    Channel.dev: 'last-active-dev-version',
+    Channel.beta: 'last-active-beta-version',
+    Channel.stable: 'last-active-stable-version'
+  };
 
   final Config _config;
 
@@ -87,15 +87,10 @@ class _DefaultPersistentToolState implements PersistentToolState {
   }
 
   @override
-  GitTagVersion lastActiveVersion(Channel channel) {
+  String lastActiveVersion(Channel channel) {
     final String versionKey = _versionKeyFor(channel);
     assert(versionKey != null);
-    final String rawValue = _config.getValue(versionKey) as String;
-    if (rawValue == null) {
-      return null;
-    }
-    // Note: if Version.parse fails it will also return null.
-    return GitTagVersion.parse(rawValue);
+    return _config.getValue(versionKey) as String;
   }
 
   @override
@@ -104,13 +99,13 @@ class _DefaultPersistentToolState implements PersistentToolState {
   }
 
   @override
-  void updateLastActiveVersion(GitTagVersion version, Channel channel) {
+  void updateLastActiveVersion(String fullGitHash, Channel channel) {
     final String versionKey = _versionKeyFor(channel);
     assert(versionKey != null);
-    _config.setValue(versionKey, version.frameworkVersionFor(version.hash));
+    _config.setValue(versionKey, fullGitHash);
   }
 
   String _versionKeyFor(Channel channel) {
-    return _lastActiveVersion[channel.index];
+    return _lastActiveVersionKeys[channel];
   }
 }
