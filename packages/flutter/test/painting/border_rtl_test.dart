@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -502,7 +502,7 @@ void main() {
     );
     expect(
       const BorderDirectional(start: magenta3) + const BorderDirectional(start: yellow2),
-      isNot(isInstanceOf<BorderDirectional>()), // see shape_border_test.dart for better tests of this case
+      isNot(isA<BorderDirectional>()), // see shape_border_test.dart for better tests of this case
     );
     const BorderDirectional b3 = BorderDirectional(top: magenta3);
     const BorderDirectional b6 = BorderDirectional(top: magenta6);

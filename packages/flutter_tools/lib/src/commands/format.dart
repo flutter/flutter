@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,11 +45,6 @@ class FormatCommand extends FlutterCommand {
   final String description = 'Format one or more dart files.';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
-  @override
   String get invocation => '${runner.executableName} $name <one or more paths>';
 
   @override
@@ -68,11 +63,11 @@ class FormatCommand extends FlutterCommand {
     final String dartfmt = sdkBinaryName('dartfmt');
     final List<String> command = <String>[
       dartfmt,
-      if (argResults['dry-run']) '-n',
-      if (argResults['machine']) '-m',
+      if (boolArg('dry-run')) '-n',
+      if (boolArg('machine')) '-m',
       if (argResults['line-length'] != null) '-l ${argResults['line-length']}',
-      if (!argResults['dry-run'] && !argResults['machine']) '-w',
-      if (argResults['set-exit-if-changed']) '--set-exit-if-changed',
+      if (!boolArg('dry-run') && !boolArg('machine')) '-w',
+      if (boolArg('set-exit-if-changed')) '--set-exit-if-changed',
       ...argResults.rest,
     ];
 
@@ -81,6 +76,6 @@ class FormatCommand extends FlutterCommand {
       throwToolExit('Formatting failed: $result', exitCode: result);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

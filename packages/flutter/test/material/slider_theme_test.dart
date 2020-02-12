@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -80,15 +80,15 @@ void main() {
       'disabledThumbColor: Color(0xff000011)',
       'overlayColor: Color(0xff000012)',
       'valueIndicatorColor: Color(0xff000013)',
-      'overlayShape: Instance of \'RoundSliderOverlayShape\'',
-      'tickMarkShape: Instance of \'RoundSliderTickMarkShape\'',
-      'thumbShape: Instance of \'RoundSliderThumbShape\'',
-      'trackShape: Instance of \'RoundedRectSliderTrackShape\'',
-      'valueIndicatorShape: Instance of \'PaddleSliderValueIndicatorShape\'',
-      'rangeTickMarkShape: Instance of \'RoundRangeSliderTickMarkShape\'',
-      'rangeThumbShape: Instance of \'RoundRangeSliderThumbShape\'',
-      'rangeTrackShape: Instance of \'RoundedRectRangeSliderTrackShape\'',
-      'rangeValueIndicatorShape: Instance of \'PaddleRangeSliderValueIndicatorShape\'',
+      "overlayShape: Instance of 'RoundSliderOverlayShape'",
+      "tickMarkShape: Instance of 'RoundSliderTickMarkShape'",
+      "thumbShape: Instance of 'RoundSliderThumbShape'",
+      "trackShape: Instance of 'RoundedRectSliderTrackShape'",
+      "valueIndicatorShape: Instance of 'PaddleSliderValueIndicatorShape'",
+      "rangeTickMarkShape: Instance of 'RoundRangeSliderTickMarkShape'",
+      "rangeThumbShape: Instance of 'RoundRangeSliderThumbShape'",
+      "rangeTrackShape: Instance of 'RoundedRectRangeSliderTrackShape'",
+      "rangeValueIndicatorShape: Instance of 'PaddleRangeSliderValueIndicatorShape'",
       'showValueIndicator: always',
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
     ]);
@@ -144,7 +144,7 @@ void main() {
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
-      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
+      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyText1.copyWith(color: customColor4),
     );
 
     expect(sliderTheme.activeTrackColor, equals(customColor1.withAlpha(0xff)));
@@ -172,7 +172,7 @@ void main() {
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
-      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
+      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyText1.copyWith(color: customColor4),
     );
 
     expect(sliderTheme.overlayShape, const RoundSliderOverlayShape());
@@ -191,13 +191,13 @@ void main() {
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
-      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
+      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyText1.copyWith(color: Colors.black),
     ).copyWith(trackHeight: 2.0);
     final SliderThemeData sliderThemeWhite = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
-      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
+      valueIndicatorTextStyle: ThemeData.fallback().textTheme.bodyText1.copyWith(color: Colors.white),
     ).copyWith(trackHeight: 6.0);
     final SliderThemeData lerp = SliderThemeData.lerp(sliderThemeBlack, sliderThemeWhite, 0.5);
     const Color middleGrey = Color(0xff7f7f7f);
@@ -378,7 +378,7 @@ void main() {
                     data: sliderTheme,
                     child: Slider(
                       value: sliderValue,
-                      label: '$value',
+                      label: value,
                       divisions: 3,
                       onChanged: (double d) { },
                     ),

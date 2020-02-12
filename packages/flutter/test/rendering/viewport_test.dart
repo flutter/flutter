@@ -1,6 +1,11 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// This file is separate from viewport_caching_test.dart because we can't use
+// both testWidgets and rendering_tester in the same file - testWidgets will
+// initialize a binding, which rendering_tester will attempt to re-initialize
+// (or vice versa).
 
 import 'dart:ui';
 
@@ -34,7 +39,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -80,7 +85,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -126,7 +131,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -173,7 +178,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -223,7 +228,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -264,7 +269,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -305,7 +310,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -355,7 +360,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -406,7 +411,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -448,7 +453,7 @@ void main() {
       ),
     );
 
-    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+    final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
@@ -1042,7 +1047,7 @@ void main() {
           'FlutterError\n'
           '   Horizontal viewport was given unbounded width.\n'
           '   Viewports expand in the scrolling direction to fill their\n'
-          '   container.In this case, a horizontal viewport was given an\n'
+          '   container. In this case, a horizontal viewport was given an\n'
           '   unlimited amount of horizontal space in which to expand. This\n'
           '   situation typically happens when a scrollable widget is nested\n'
           '   inside another scrollable widget.\n'
@@ -1139,4 +1144,36 @@ void main() {
       '   its intrinsic dimensions.\n',
     );
   });
+
+  testWidgets('Handles infinite constraints when TargetPlatform is iOS or macOS', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/45866
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            GridView(
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 3,
+                  mainAxisSpacing: 3,
+                  crossAxisSpacing: 3),
+              children: const <Widget>[
+                Text('a'),
+                Text('b'),
+                Text('c'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('b'), findsOneWidget);
+    await tester.drag(find.text('b'), const Offset(0, 200));
+    await tester.pumpAndSettle();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 }

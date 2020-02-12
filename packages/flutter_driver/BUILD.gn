@@ -1,4 +1,4 @@
-# Copyright 2018 The Chromium Authors. All rights reserved.
+# Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -18,13 +18,15 @@ dart_library("flutter_driver") {
     "//third_party/dart-pkg/git/flutter/packages/fuchsia_remote_debug_protocol",
     "//third_party/dart-pkg/pub/file",
     "//third_party/dart-pkg/pub/json_rpc_2",
+    "//third_party/dart-pkg/pub/matcher",
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/path",
-    "//third_party/dart-pkg/pub/web_socket_channel",
     "//third_party/dart-pkg/pub/vm_service_client",
+    "//third_party/dart-pkg/pub/web_socket_channel",
+    "//third_party/dart-pkg/pub/webdriver",
   ]
 
   if (is_fuchsia) {
-    deps += [ "$flutter_root/sky/packages/sky_engine:sky_engine_dart" ]
+    deps += [ "//topaz/runtime/sky_engine:sky_engine_dart" ]
   }
 }

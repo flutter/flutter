@@ -1,32 +1,55 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
+import '../android/gradle_utils.dart';
+import '../base/common.dart';
 import '../base/os.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
-  BuildAarCommand({bool verboseHelp = false}) {
-    addBuildModeFlags(verboseHelp: verboseHelp);
+  BuildAarCommand() {
+    argParser
+      ..addFlag(
+        'debug',
+        defaultsTo: true,
+        help: 'Build a debug version of the current project.',
+      )
+      ..addFlag(
+        'profile',
+        defaultsTo: true,
+        help: 'Build a version of the current project specialized for performance profiling.',
+      )
+      ..addFlag(
+        'release',
+        defaultsTo: true,
+        help: 'Build a release version of the current project.',
+      );
+    addTreeShakeIconsFlag();
     usesFlavorOption();
+    usesBuildNumberOption();
     usesPubOption();
     argParser
-      ..addMultiOption('target-platform',
+      ..addMultiOption(
+        'target-platform',
         splitCommas: true,
         defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the project is compiled.',
       )
-      ..addOption('output-dir',
-        help: 'The absolute path to the directory where the repository is generated.'
-              'By default, this is \'<current-directory>android/build\'. ',
+      ..addOption(
+        'output-dir',
+        help: 'The absolute path to the directory where the repository is generated. '
+              "By default, this is '<current-directory>android/build'. ",
       );
   }
 
@@ -34,46 +57,73 @@ class BuildAarCommand extends BuildSubCommand {
   final String name = 'aar';
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.androidGenSnapshot,
+  };
+
+  @override
   Future<Map<CustomDimensions, String>> get usageValues async {
     final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
-    final FlutterProject futterProject = _getProject();
-    if (futterProject == null) {
+    final FlutterProject flutterProject = _getProject();
+    if (flutterProject == null) {
       return usage;
     }
-    if (futterProject.manifest.isModule) {
+    if (flutterProject.manifest.isModule) {
       usage[CustomDimensions.commandBuildAarProjectType] = 'module';
-    } else if (futterProject.manifest.isPlugin) {
+    } else if (flutterProject.manifest.isPlugin) {
       usage[CustomDimensions.commandBuildAarProjectType] = 'plugin';
     } else {
       usage[CustomDimensions.commandBuildAarProjectType] = 'app';
     }
-    usage[CustomDimensions.commandBuildAarTargetPlatform] =
-        (argResults['target-platform'] as List<String>).join(',');
+    usage[CustomDimensions.commandBuildAarTargetPlatform] = stringsArg('target-platform').join(',');
     return usage;
   }
 
   @override
   final String description = 'Build a repository containing an AAR and a POM file.\n\n'
-      'The POM file is used to include the dependencies that the AAR was compiled against.\n\n'
+      'By default, AARs are built for `release`, `debug` and `profile`.\n'
+      'The POM file is used to include the dependencies that the AAR was compiled against.\n'
       'To learn more about how to use these artifacts, see '
-      'https://docs.gradle.org/current/userguide/repository_types.html#sub:maven_local';
+      'https://flutter.dev/go/build-aar';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildInfo buildInfo = getBuildInfo();
-    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(buildInfo,
-        targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName));
+    if (androidSdk == null) {
+      exitWithNoSdkMessage();
+    }
+    final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
 
+    final Iterable<AndroidArch> targetArchitectures =
+        stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
+
+    final String buildNumber = argParser.options.containsKey('build-number')
+      && stringArg('build-number') != null
+      && stringArg('build-number').isNotEmpty
+      ? stringArg('build-number')
+      : '1.0';
+
+    for (final String buildMode in const <String>['debug', 'profile', 'release']) {
+      if (boolArg(buildMode)) {
+        androidBuildInfo.add(AndroidBuildInfo(
+          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor'), treeShakeIcons: boolArg('tree-shake-icons')),
+          targetArchs: targetArchitectures,
+        ));
+      }
+    }
+    if (androidBuildInfo.isEmpty) {
+      throwToolExit('Please specify a build mode and try again.');
+    }
     await androidBuilder.buildAar(
       project: _getProject(),
       target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,
-      outputDir: argResults['output-dir'],
+      outputDirectoryPath: stringArg('output-dir'),
+      buildNumber: buildNumber,
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 
-  /// Returns the [FlutterProject] which is determinated from the remaining command-line
+  /// Returns the [FlutterProject] which is determined from the remaining command-line
   /// argument if any or the current working directory.
   FlutterProject _getProject() {
     if (argResults.rest.isEmpty) {

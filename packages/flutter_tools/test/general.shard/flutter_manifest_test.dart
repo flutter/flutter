@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 
@@ -360,6 +359,7 @@ flutter:
       expect(flutterManifest.isModule, false);
       expect(flutterManifest.isPlugin, false);
       expect(flutterManifest.androidPackage, null);
+      expect(flutterManifest.usesAndroidX, false);
     });
 
     test('allows a module declaration', () async {
@@ -368,10 +368,12 @@ name: test
 flutter:
   module:
     androidPackage: com.example
+    androidX: true
 ''';
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isModule, true);
       expect(flutterManifest.androidPackage, 'com.example');
+      expect(flutterManifest.usesAndroidX, true);
     });
 
     test('allows a legacy plugin declaration', () async {
@@ -385,7 +387,8 @@ flutter:
       expect(flutterManifest.isPlugin, true);
       expect(flutterManifest.androidPackage, 'com.example');
     });
-    test('allows a multi-plat plugin declaration', () async {
+
+    test('allows a multi-plat plugin declaration with android only', () async {
       const String manifest = '''
 name: test
 flutter:
@@ -400,8 +403,21 @@ flutter:
       expect(flutterManifest.androidPackage, 'com.example');
     });
 
+    test('allows a multi-plat plugin declaration with ios only', () async {
+      const String manifest = '''
+name: test
+flutter:
+    plugin:
+      platforms:
+        ios:
+          pluginClass: HelloPlugin
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isPlugin, true);
+      expect(flutterManifest.androidPackage, isNull);
+    });
+
     testUsingContext('handles an invalid plugin declaration', () async {
-      final BufferLogger bufferLogger = context.get<Logger>();
       const String manifest = '''
 name: test
 flutter:
@@ -409,7 +425,7 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest, null);
-      expect(bufferLogger.errorText, contains('Expected "plugin" to be an object, but got null'));
+      expect(testLogger.errorText, contains('Expected "plugin" to be an object, but got null'));
     });
 
 
@@ -528,7 +544,6 @@ flutter:
 
     // Regression test for https://github.com/flutter/flutter/issues/31764
     testUsingContext('Returns proper error when font detail is malformed', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -543,11 +558,10 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
       expect(flutterManifest, null);
-      expect(logger.errorText, contains('Expected "fonts" to either be null or a list.'));
+      expect(testLogger.errorText, contains('Expected "fonts" to either be null or a list.'));
     });
 
     testUsingContext('Returns proper error when font detail is not a list of maps', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -562,11 +576,10 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
       expect(flutterManifest, null);
-      expect(logger.errorText, contains('Expected "fonts" to be a list of maps.'));
+      expect(testLogger.errorText, contains('Expected "fonts" to be a list of maps.'));
     });
 
     testUsingContext('Returns proper error when font is a map instead of a list', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -581,11 +594,10 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
       expect(flutterManifest, null);
-      expect(logger.errorText, contains('Expected "fonts" to be a list'));
+      expect(testLogger.errorText, contains('Expected "fonts" to be a list'));
     });
 
     testUsingContext('Returns proper error when second font family is invalid', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -601,11 +613,10 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest, null);
-      expect(logger.errorText, contains('Expected a map.'));
+      expect(testLogger.errorText, contains('Expected a map.'));
     });
 
     testUsingContext('Does not crash on empty entry', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -620,8 +631,45 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       final List<Uri> assets = flutterManifest.assets;
 
-      expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
+      expect(testLogger.errorText, contains('Asset manifest contains a null or empty uri.'));
       expect(assets.length, 1);
+    });
+
+    testUsingContext('Special characters in asset URIs', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - lib/gallery/abc#xyz
+    - lib/gallery/abc?xyz
+    - lib/gallery/aaa bbb
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      final List<Uri> assets = flutterManifest.assets;
+
+      expect(assets.length, 3);
+      expect(assets[0].path, 'lib/gallery/abc%23xyz');
+      expect(assets[1].path, 'lib/gallery/abc%3Fxyz');
+      expect(assets[2].path, 'lib/gallery/aaa%20bbb');
+    });
+
+    testUsingContext('Returns proper error when flutter is a list instead of a map', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  - uses-material-design: true
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+
+      expect(flutterManifest, null);
+      expect(testLogger.errorText, contains('Expected "flutter" section to be an object or null, but got [{uses-material-design: true}].'));
     });
   });
 
@@ -678,6 +726,4 @@ flutter:
     );
 
   });
-
 }
-

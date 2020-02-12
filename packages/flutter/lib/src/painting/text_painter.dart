@@ -1,12 +1,11 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, TextHeightBehavior, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
@@ -83,7 +82,7 @@ class PlaceholderDimensions {
 ///
 /// See [Text.textWidthBasis], for example.
 enum TextWidthBasis {
-  /// Multiline text will take up the full width given by the parent. For single
+  /// multiline text will take up the full width given by the parent. For single
   /// line text, only the minimum amount of width needed to contain the text
   /// will be used. A common use case for this is a standard series of
   /// paragraphs.
@@ -143,6 +142,7 @@ class TextPainter {
     Locale locale,
     StrutStyle strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    ui.TextHeightBehavior textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -156,7 +156,8 @@ class TextPainter {
        _ellipsis = ellipsis,
        _locale = locale,
        _strutStyle = strutStyle,
-       _textWidthBasis = textWidthBasis;
+       _textWidthBasis = textWidthBasis,
+       _textHeightBehavior = textHeightBehavior;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -170,6 +171,8 @@ class TextPainter {
   void markNeedsLayout() {
     _paragraph = null;
     _needsLayout = true;
+    _previousCaretPosition = null;
+    _previousCaretPrototype = null;
   }
 
   /// The (potentially styled) text to paint.
@@ -178,7 +181,7 @@ class TextPainter {
   /// This and [textDirection] must be non-null before you call [layout].
   ///
   /// The [InlineSpan] this provides is in the form of a tree that may contain
-  /// multiple instances of [TextSpan]s and [WidgetSpan]s. To obtain a plaintext
+  /// multiple instances of [TextSpan]s and [WidgetSpan]s. To obtain a plain text
   /// representation of the contents of this [TextPainter], use [InlineSpan.toPlainText]
   /// to get the full contents of all nodes in the tree. [TextSpan.text] will
   /// only provide the contents of the first node in the tree.
@@ -339,6 +342,15 @@ class TextPainter {
     markNeedsLayout();
   }
 
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  ui.TextHeightBehavior get textHeightBehavior => _textHeightBehavior;
+  ui.TextHeightBehavior _textHeightBehavior;
+  set textHeightBehavior(ui.TextHeightBehavior value) {
+    if (_textHeightBehavior == value)
+      return;
+    _textHeightBehavior = value;
+    markNeedsLayout();
+  }
 
   ui.Paragraph _layoutTemplate;
 
@@ -398,6 +410,7 @@ class TextPainter {
       textDirection: textDirection ?? defaultTextDirection,
       textScaleFactor: textScaleFactor,
       maxLines: _maxLines,
+      textHeightBehavior: _textHeightBehavior,
       ellipsis: _ellipsis,
       locale: _locale,
       strutStyle: _strutStyle,
@@ -405,6 +418,7 @@ class TextPainter {
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
       maxLines: maxLines,
+      textHeightBehavior: _textHeightBehavior,
       ellipsis: ellipsis,
       locale: locale,
     );
@@ -549,7 +563,7 @@ class TextPainter {
     _lastMaxWidth = maxWidth;
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
-      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth);
+      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
       if (newWidth != width) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
       }
@@ -793,12 +807,28 @@ class TextPainter {
 
   /// Returns a list of rects that bound the given selection.
   ///
+  /// The [boxHeightStyle] and [boxWidthStyle] arguments may be used to select
+  /// the shape of the [TextBox]s. These properties default to
+  /// [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
+  /// must not be null.
+  ///
   /// A given selection might have more than one rect if this text painter
   /// contains bidirectional text because logically contiguous text might not be
   /// visually contiguous.
-  List<TextBox> getBoxesForSelection(TextSelection selection) {
+  List<TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
     assert(!_needsLayout);
-    return _paragraph.getBoxesForRange(selection.start, selection.end);
+    assert(boxHeightStyle != null);
+    assert(boxWidthStyle != null);
+    return _paragraph.getBoxesForRange(
+      selection.start,
+      selection.end,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle
+    );
   }
 
   /// Returns the position within the text for the given pixel offset.
@@ -816,8 +846,15 @@ class TextPainter {
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   TextRange getWordBoundary(TextPosition position) {
     assert(!_needsLayout);
-    final List<int> indices = _paragraph.getWordBoundary(position.offset);
-    return TextRange(start: indices[0], end: indices[1]);
+    return _paragraph.getWordBoundary(position);
+  }
+
+  /// Returns the text range of the line at the given offset.
+  ///
+  /// The newline, if any, is included in the range.
+  TextRange getLineBoundary(TextPosition position) {
+    assert(!_needsLayout);
+    return _paragraph.getLineBoundary(position);
   }
 
   /// Returns the full list of [LineMetrics] that describe in detail the various
@@ -834,7 +871,7 @@ class TextPainter {
   ///
   /// This can potentially return a large amount of data, so it is not recommended
   /// to repeatedly call this. Instead, cache the results. The cached results
-  /// should be invalidated upon the next sucessful [layout].
+  /// should be invalidated upon the next successful [layout].
   List<ui.LineMetrics> computeLineMetrics() {
     assert(!_needsLayout);
     return _paragraph.computeLineMetrics();

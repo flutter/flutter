@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -325,6 +325,12 @@ void main() {
 
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
+
+    await tester.pumpWidget(build(TargetPlatform.macOS));
+    await tester.pumpAndSettle(); // Run theme change animation.
+
+    expect(find.byIcon(Icons.more_vert), findsNothing);
+    expect(find.byIcon(Icons.more_horiz), findsOneWidget);
   });
 
   group('PopupMenuButton with Icon', () {
@@ -345,7 +351,7 @@ void main() {
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
         );
-      }, throwsA(isInstanceOf<AssertionError>()));
+      }, throwsAssertionError);
     });
 
     testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {
@@ -910,7 +916,7 @@ void main() {
             textDirection: textDirection,
             child: PopupMenuTheme(
               data: PopupMenuTheme.of(context).copyWith(
-                textStyle: Theme.of(context).textTheme.subhead.copyWith(fontSize: fontSize),
+                textStyle: Theme.of(context).textTheme.subtitle1.copyWith(fontSize: fontSize),
               ),
               child: child,
             ),
@@ -1231,9 +1237,15 @@ void main() {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({ this.textDirection, this.child });
+  const TestApp({
+    Key key,
+    this.textDirection,
+    this.child,
+  }) : super(key: key);
+
   final TextDirection textDirection;
   final Widget child;
+
   @override
   _TestAppState createState() => _TestAppState();
 }

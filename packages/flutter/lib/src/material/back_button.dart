@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,6 +34,7 @@ class BackButtonIcon extends StatelessWidget {
       case TargetPlatform.fuchsia:
         return Icons.arrow_back;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return Icons.arrow_back_ios;
     }
     assert(false);
@@ -127,13 +128,20 @@ class BackButton extends StatelessWidget {
 ///  * [IconButton], to create other material design icon buttons.
 class CloseButton extends StatelessWidget {
   /// Creates a Material Design close button.
-  const CloseButton({ Key key }) : super(key: key);
+  const CloseButton({ Key key, this.color }) : super(key: key);
+
+  /// The color to use for the icon.
+  ///
+  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
+  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
       icon: const Icon(Icons.close),
+      color: color,
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {
         Navigator.maybePop(context);

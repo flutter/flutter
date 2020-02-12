@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -117,7 +117,7 @@ class CupertinoSlider extends StatefulWidget {
   /// The value passed will be the last [value] that the slider had before the
   /// change began.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// CupertinoSlider(
@@ -149,7 +149,7 @@ class CupertinoSlider extends StatefulWidget {
   /// [onChanged] for that), but rather to know when the user has completed
   /// selecting a new [value] by ending a drag.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// CupertinoSlider(
@@ -426,7 +426,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double _currentDragValue = 0.0;
 
   double get _discretizedCurrentDragValue {
-    double dragValue = _currentDragValue.clamp(0.0, 1.0);
+    double dragValue = _currentDragValue.clamp(0.0, 1.0) as double;
     if (divisions != null)
       dragValue = (dragValue * divisions).round() / divisions;
     return dragValue;
@@ -558,11 +558,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   void _increaseAction() {
     if (isInteractive)
-      onChanged((value + _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged((value + _semanticActionUnit).clamp(0.0, 1.0) as double);
   }
 
   void _decreaseAction() {
     if (isInteractive)
-      onChanged((value - _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged((value - _semanticActionUnit).clamp(0.0, 1.0) as double);
   }
 }

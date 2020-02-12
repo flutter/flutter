@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -61,10 +61,10 @@ Future<void> main() async {
     print('Starting app...');
     runApp(const GalleryApp(testMode: true));
     final _LiveWidgetController controller = _LiveWidgetController(WidgetsBinding.instance);
-    for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
+    for (final GalleryDemoCategory category in kAllGalleryDemoCategories) {
       print('Tapping "${category.name}" section...');
       await controller.tap(find.text(category.name));
-      for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
+      for (final GalleryDemo demo in kGalleryCategoryToDemos[category]) {
         final Finder demoItem = find.text(demo.title);
         print('Scrolling to "${demo.title}"...');
         await controller.scrollIntoView(demoItem, alignment: 0.5);

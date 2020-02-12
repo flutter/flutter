@@ -1,19 +1,19 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:convert';
 
 import 'package:collection/collection.dart' show ListEquality;
-import 'package:flutter_tools/src/base/time.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
-
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -31,7 +31,7 @@ void main() {
     mockCache = MockCache();
   });
 
-  for (String channel in FlutterVersion.officialChannels) {
+  for (final String channel in FlutterVersion.officialChannels) {
     DateTime getChannelUpToDateVersion() {
       return _testClock.ago(FlutterVersion.versionAgeConsideredUpToDate(channel) ~/ 2);
     }
@@ -57,7 +57,7 @@ void main() {
           expectSetStamp: true,
           channel: channel,
         );
-        await FlutterVersion.instance.checkFlutterVersionFreshness();
+        await globals.flutterVersion.checkFlutterVersionFreshness();
         _expectVersionMessage('');
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(_testClock),
@@ -79,7 +79,7 @@ void main() {
           expectServerPing: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
@@ -102,7 +102,7 @@ void main() {
           channel: channel,
         );
 
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
       }, overrides: <Type, Generator>{
@@ -124,7 +124,7 @@ void main() {
           channel: channel,
         );
 
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
         expect((await VersionCheckStamp.load()).lastTimeWarningWasPrinted, _testClock.now());
@@ -147,7 +147,7 @@ void main() {
           expectServerPing: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
@@ -182,7 +182,7 @@ void main() {
           expectServerPing: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.newVersionAvailableMessage());
@@ -202,7 +202,7 @@ void main() {
           expectSetStamp: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage('');
@@ -222,7 +222,7 @@ void main() {
           expectSetStamp: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         await version.checkFlutterVersionFreshness();
         _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())));
@@ -242,7 +242,7 @@ void main() {
           expectSetStamp: true,
           channel: channel,
         );
-        final FlutterVersion version = FlutterVersion.instance;
+        final FlutterVersion version = globals.flutterVersion;
 
         when(mockProcessManager.runSync(
           <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],
@@ -414,9 +414,8 @@ void main() {
 }
 
 void _expectVersionMessage(String message) {
-  final BufferLogger logger = context.get<Logger>();
-  expect(logger.statusText.trim(), message.trim());
-  logger.clear();
+  expect(testLogger.statusText.trim(), message.trim());
+  testLogger.clear();
 }
 
 void fakeData(
@@ -457,7 +456,7 @@ void fakeData(
     expect(invocation.positionalArguments.first, VersionCheckStamp.flutterVersionCheckStampFile);
 
     if (expectSetStamp) {
-      stamp = VersionCheckStamp.fromJson(json.decode(invocation.positionalArguments[1]));
+      stamp = VersionCheckStamp.fromJson(castStringKeyedMap(json.decode(invocation.positionalArguments[1] as String)));
       return null;
     }
 
@@ -467,13 +466,13 @@ void fakeData(
   final Answering<ProcessResult> syncAnswer = (Invocation invocation) {
     bool argsAre(String a1, [ String a2, String a3, String a4, String a5, String a6, String a7, String a8, String a9 ]) {
       const ListEquality<String> equality = ListEquality<String>();
-      final List<String> args = invocation.positionalArguments.single;
+      final List<String> args = invocation.positionalArguments.single as List<String>;
       final List<String> expectedArgs = <String>[a1, a2, a3, a4, a5, a6, a7, a8, a9].where((String arg) => arg != null).toList();
       return equality.equals(args, expectedArgs);
     }
 
     bool listArgsAre(List<String> a) {
-      return Function.apply(argsAre, a);
+      return Function.apply(argsAre, a) as bool;
     }
 
     if (listArgsAre(FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ad', '--date=iso']))) {

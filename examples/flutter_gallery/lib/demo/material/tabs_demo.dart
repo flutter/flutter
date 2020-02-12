@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -113,7 +113,7 @@ class _CardDataItem extends StatelessWidget {
               alignment: page.id == 'H'
                 ? Alignment.centerLeft
                 : Alignment.centerRight,
-              child: CircleAvatar(child: Text('${page.id}')),
+              child: CircleAvatar(child: Text(page.id)),
             ),
             SizedBox(
               width: 144.0,
@@ -127,7 +127,7 @@ class _CardDataItem extends StatelessWidget {
             Center(
               child: Text(
                 data.title,
-                style: Theme.of(context).textTheme.title,
+                style: Theme.of(context).textTheme.headline6,
               ),
             ),
           ],
@@ -150,7 +150,7 @@ class TabsDemo extends StatelessWidget {
             return <Widget>[
               SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                child: SliverAppBar(
+                sliver: SliverAppBar(
                   title: const Text('Tabs and scrolling'),
                   actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
                   pinned: true,

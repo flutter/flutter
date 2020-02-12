@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,7 +24,7 @@ import 'rounded_rectangle_border.dart';
 /// optionally filling it with a color or a gradient, optionally painting an
 /// image into it, and optionally casting a shadow.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw a white rectangle with a 24-pixel multicolor outline, with the text
@@ -122,6 +122,11 @@ class ShapeDecoration extends Decoration {
     );
   }
 
+  @override
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    return shape.getOuterPath(rect, textDirection: textDirection);
+  }
+
   /// The color to fill in the background of the shape.
   ///
   /// The color is under the [image].
@@ -188,9 +193,9 @@ class ShapeDecoration extends Decoration {
     if (a is BoxDecoration) {
       return ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t);
     } else if (a == null || a is ShapeDecoration) {
-      return ShapeDecoration.lerp(a, this, t);
+      return ShapeDecoration.lerp(a as ShapeDecoration, this, t);
     }
-    return super.lerpFrom(a, t);
+    return super.lerpFrom(a, t) as ShapeDecoration;
   }
 
   @override
@@ -198,9 +203,9 @@ class ShapeDecoration extends Decoration {
     if (b is BoxDecoration) {
       return ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t);
     } else if (b == null || b is ShapeDecoration) {
-      return ShapeDecoration.lerp(this, b, t);
+      return ShapeDecoration.lerp(this, b as ShapeDecoration, t);
     }
-    return super.lerpTo(b, t);
+    return super.lerpTo(b, t) as ShapeDecoration;
   }
 
   /// Linearly interpolate between two shapes.
@@ -241,17 +246,17 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final ShapeDecoration typedOther = other;
-    return color == typedOther.color
-        && gradient == typedOther.gradient
-        && image == typedOther.image
-        && shadows == typedOther.shadows
-        && shape == typedOther.shape;
+    return other is ShapeDecoration
+        && other.color == color
+        && other.gradient == gradient
+        && other.image == image
+        && other.shadows == shadows
+        && other.shape == shape;
   }
 
   @override

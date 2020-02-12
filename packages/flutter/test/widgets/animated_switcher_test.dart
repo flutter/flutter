@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -261,8 +261,8 @@ void main() {
     );
 
     expect(find.byType(Column), findsOneWidget);
-    for (Widget child in foundChildren) {
-      expect(child, isInstanceOf<KeyedSubtree>());
+    for (final Widget child in foundChildren) {
+      expect(child, isA<KeyedSubtree>());
     }
 
     await tester.pumpWidget(
@@ -279,8 +279,8 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 50));
 
-    for (Widget child in foundChildren) {
-      expect(child, isInstanceOf<KeyedSubtree>());
+    for (final Widget child in foundChildren) {
+      expect(child, isA<KeyedSubtree>());
       expect(
         find.descendant(of: find.byWidget(child), matching: find.byType(SizeTransition)),
         findsOneWidget,
@@ -429,8 +429,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
 
     expect(foundChildren.length, equals(3));
-    for (Widget child in foundChildren) {
-      expect(child, isInstanceOf<KeyedSubtree>());
+    for (final Widget child in foundChildren) {
+      expect(child, isA<KeyedSubtree>());
       expect(
         find.descendant(of: find.byWidget(child), matching: find.byType(FadeTransition)),
         findsOneWidget,
@@ -459,8 +459,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
 
     expect(foundChildren.length, equals(3));
-    for (Widget child in foundChildren) {
-      expect(child, isInstanceOf<KeyedSubtree>());
+    for (final Widget child in foundChildren) {
+      expect(child, isA<KeyedSubtree>());
       expect(
         find.descendant(of: find.byWidget(child), matching: find.byType(ScaleTransition)),
         findsOneWidget,

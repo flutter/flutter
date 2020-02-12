@@ -1,4 +1,4 @@
-// Copyright (c) 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../framework/adb.dart';
 import '../framework/framework.dart';
-import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createChannelsIntegrationTest() {
@@ -108,8 +107,22 @@ TaskFunction createAndroidSplashScreenKitchenSinkTest() {
   );
 }
 
-class DriverTest {
+/// Executes a driver test that takes a screenshot and compares it against a golden image.
+/// If [useFlutterGold] is true, the golden image is served by Flutter Gold
+/// (https://flutter-gold.skia.org/), otherwise the golden image is read from the disk.
+TaskFunction createFlutterDriverScreenshotTest({
+  bool useFlutterGold = false,
+}) {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/flutter_driver_screenshot_test',
+    'lib/main.dart',
+    extraOptions: useFlutterGold ? const <String>[
+      '--driver', 'test_driver/flutter_gold_main_test.dart'
+    ] : const <String>[]
+  );
+}
 
+class DriverTest {
   DriverTest(
     this.testDirectory,
     this.testTarget, {
@@ -130,8 +143,6 @@ class DriverTest {
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
       final List<String> options = <String>[
         '-v',
         '-t',

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -64,7 +64,7 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 /// class is provided, to check if the new instance contains different
 /// information that affects the semantics tree.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample extends the same code shown for [RadialGradient] to create a
 /// custom painter that paints a sky.
@@ -790,7 +790,7 @@ class RenderCustomPaint extends RenderProxyBox {
     }
 
     assert(() {
-      for (SemanticsNode node in newChildren) {
+      for (final SemanticsNode node in newChildren) {
         assert(node != null);
       }
       return true;

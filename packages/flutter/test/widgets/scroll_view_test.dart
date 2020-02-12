@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -326,22 +326,22 @@ void main() {
 
   testWidgets('Primary ListViews are always scrollable', (WidgetTester tester) async {
     final ListView view = ListView(primary: true);
-    expect(view.physics, isInstanceOf<AlwaysScrollableScrollPhysics>());
+    expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Non-primary ListViews are not always scrollable', (WidgetTester tester) async {
     final ListView view = ListView(primary: false);
-    expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
+    expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
     final ListView view = ListView(scrollDirection: Axis.vertical);
-    expect(view.physics, isInstanceOf<AlwaysScrollableScrollPhysics>());
+    expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Defaulting-to-not-primary ListViews are not always scrollable', (WidgetTester tester) async {
     final ListView view = ListView(scrollDirection: Axis.horizontal);
-    expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
+    expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('primary:true leads to scrolling', (WidgetTester tester) async {
@@ -459,7 +459,7 @@ void main() {
 
     // A separatorBuilder that returns null throws a FlutterError
     await tester.pumpWidget(buildFrame(null));
-    expect(tester.takeException(), isInstanceOf<FlutterError>());
+    expect(tester.takeException(), isFlutterError);
     expect(find.byType(ErrorWidget), findsOneWidget);
   });
 
@@ -520,7 +520,7 @@ void main() {
 
     // When it does throw, one error widget is rendered in the item's place
     await tester.pumpWidget(buildFrame(true));
-    expect(tester.takeException(), isInstanceOf<Exception>());
+    expect(tester.takeException(), isA<Exception>());
     expect(finder, findsOneWidget);
   });
 
@@ -556,7 +556,36 @@ void main() {
 
     // When it does throw, one error widget is rendered in the separator's place
     await tester.pumpWidget(buildFrame(true));
-    expect(tester.takeException(), isInstanceOf<Exception>());
+    expect(tester.takeException(), isA<Exception>());
     expect(finder, findsOneWidget);
+  });
+
+  testWidgets('ListView.builder asserts on negative childCount', (WidgetTester tester) async {
+    expect(() => ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return const SizedBox();
+      },
+      itemCount: -1,
+    ), throwsAssertionError);
+  });
+
+  testWidgets('ListView.builder asserts on negative semanticChildCount', (WidgetTester tester) async {
+    expect(() => ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return const SizedBox();
+      },
+      itemCount: 1,
+      semanticChildCount: -1,
+    ), throwsAssertionError);
+  });
+
+  testWidgets('ListView.builder asserts on nonsensical childCount/semanticChildCount', (WidgetTester tester) async {
+    expect(() => ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return const SizedBox();
+      },
+      itemCount: 1,
+      semanticChildCount: 4,
+    ), throwsAssertionError);
   });
 }

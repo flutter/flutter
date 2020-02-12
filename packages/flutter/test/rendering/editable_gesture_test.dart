@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,7 +37,7 @@ void main() {
       onSelectionChanged: (_, __, ___) { },
     );
     final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () { });
-    final _PointerRouterSpy spy = GestureBinding.instance.pointerRouter;
+    final _PointerRouterSpy spy = GestureBinding.instance.pointerRouter as _PointerRouterSpy;
     editable.attach(owner);
     // This should register pointer into GestureBinding.instance.pointerRouter.
     editable.handleEvent(const PointerDownEvent(), BoxHitTestEntry(editable, const Offset(10,10)));

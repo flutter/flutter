@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,7 +25,7 @@ import 'widgets_localizations.dart';
 ///
 /// {@macro flutter.localizations.cupertino.languages}
 ///
-/// This list is available programatically via [kCupertinoSupportedLanguages].
+/// This list is available programmatically via [kCupertinoSupportedLanguages].
 ///
 /// ## Sample code
 ///
@@ -210,7 +210,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
         assert(
           false,
           'Failed to load DatePickerDateOrder $datePickerDateOrderString for '
-          'locale $_localeName.\nNon conforming string for $_localeName\'s '
+          "locale $_localeName.\nNon conforming string for $_localeName's "
           '.arb file',
         );
         return null;
@@ -244,7 +244,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
         assert(
           false,
           'Failed to load DatePickerDateTimeOrder $datePickerDateTimeOrderString '
-          'for locale $_localeName.\nNon conforming string for $_localeName\'s '
+          "for locale $_localeName.\nNon conforming string for $_localeName's "
           '.arb file',
         );
         return null;

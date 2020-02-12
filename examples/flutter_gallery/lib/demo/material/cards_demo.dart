@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -243,7 +243,7 @@ class SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 12.0),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(title, style: Theme.of(context).textTheme.subhead),
+        child: Text(title, style: Theme.of(context).textTheme.subtitle1),
       ),
     );
   }
@@ -259,8 +259,8 @@ class TravelDestinationContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
-    final TextStyle descriptionStyle = theme.textTheme.subhead;
+    final TextStyle titleStyle = theme.textTheme.headline5.copyWith(color: Colors.white);
+    final TextStyle descriptionStyle = theme.textTheme.subtitle1;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

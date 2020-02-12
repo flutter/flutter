@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -103,7 +103,7 @@ void main() {
     expect(tester.widget<Text>(find.byKey(textKey)).data, 'Atrás');
   });
 
-  testWidgets('Localizations.override widget tracks parent\'s locale', (WidgetTester tester) async {
+  testWidgets("Localizations.override widget tracks parent's locale", (WidgetTester tester) async {
     Widget buildLocaleFrame(Locale locale) {
       return buildFrame(
         locale: locale,

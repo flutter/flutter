@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -192,7 +192,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   @override
   String toString() {
-    return '$runtimeType(keyLabel: $keyLabel, code: $code, '
+    return '${objectRuntimeType(this, 'RawKeyEventDataWeb')}(keyLabel: $keyLabel, code: $code, '
         'metaState: $metaState, modifiers down: $modifiersPressed)';
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -338,7 +338,7 @@ void main() {
     BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
     expect(tabDecoration.color, isSameColorAs(const Color(0xF0F9F9F9))); // Inherited from theme.
 
@@ -364,7 +364,7 @@ void main() {
     tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
     expect(tabDecoration.color, isSameColorAs(const Color(0xF01D1D1D)));
 
@@ -474,6 +474,37 @@ void main() {
     final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
 
     expect(initialPoint, finalPoint);
+  });
+
+  testWidgets(
+    'Opaque tab bar consumes bottom padding while non opaque tab bar does not',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/43581.
+      Future<EdgeInsets> getContentPaddingWithTabBarColor(Color color) async {
+        EdgeInsets contentPadding;
+
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: MediaQuery(
+              data: const MediaQueryData(padding: EdgeInsets.only(bottom: 50)),
+              child: CupertinoTabScaffold(
+                tabBar: CupertinoTabBar(
+                  backgroundColor: color,
+                  items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+                ),
+                tabBuilder: (BuildContext context, int index) {
+                  contentPadding = MediaQuery.of(context).padding;
+                  return const Placeholder();
+                }
+              ),
+            ),
+          ),
+        );
+        return contentPadding;
+      }
+
+      expect(await getContentPaddingWithTabBarColor(const Color(0xAAFFFFFF)), isNot(EdgeInsets.zero));
+      expect(await getContentPaddingWithTabBarColor(const Color(0xFFFFFFFF)), EdgeInsets.zero);
   });
 
   testWidgets('Tab and page scaffolds do not double stack view insets', (WidgetTester tester) async {
@@ -693,7 +724,7 @@ void main() {
       expect(tabsPainted, const <int> [0, 0, 1]);
   });
 
-  testWidgets('Do not call dispose on a controller that we do not own'
+  testWidgets('Do not call dispose on a controller that we do not own '
               'but do remove from its listeners when done listening to it',
     (WidgetTester tester) async {
       final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
@@ -767,7 +798,7 @@ void main() {
     expect(find.text('Tab 3'), findsNothing);
   });
 
-  testWidgets('A controller can control more than one CupertinoTabScaffold,'
+  testWidgets('A controller can control more than one CupertinoTabScaffold, '
     'removal of listeners does not break the controller',
     (WidgetTester tester) async {
       final List<int> tabsPainted0 = <int>[];

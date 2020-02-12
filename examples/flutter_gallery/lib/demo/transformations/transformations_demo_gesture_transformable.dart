@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'transformations_demo_inertial_motion.dart';
@@ -179,7 +183,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   // Get the offset of the current widget from the global screen coordinates.
   // TODO(justinmc): Protect against calling this during first build.
   static Offset getOffset(BuildContext context) {
-    final RenderBox renderObject = context.findRenderObject();
+    final RenderBox renderObject = context.findRenderObject() as RenderBox;
     return renderObject.localToGlobal(Offset.zero);
   }
 
@@ -373,7 +377,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     final double clampedTotalScale = totalScale.clamp(
       widget.minScale,
       widget.maxScale,
-    );
+    ) as double;
     final double clampedScale = clampedTotalScale / currentScale;
     return matrix..scale(clampedScale);
   }

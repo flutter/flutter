@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -47,7 +47,7 @@ Widget boilerplate({ Widget child }) {
 }
 
 Color getBackgroundColor(WidgetTester tester, int childIndex) {
-  return getRenderSegmentedControl(tester).backgroundColors[childIndex];
+  return getRenderSegmentedControl(tester).backgroundColors[childIndex] as Color;
 }
 
 void main() {
@@ -369,7 +369,7 @@ void main() {
               },
               groupValue: sharedValue,
               unselectedColor: CupertinoColors.lightBackgroundGray,
-              selectedColor: CupertinoColors.activeGreen,
+              selectedColor: CupertinoColors.activeGreen.color,
               borderColor: CupertinoColors.black,
               pressedColor: const Color(0x638CFC7B),
             ),
@@ -383,8 +383,8 @@ void main() {
 
     expect(getRenderSegmentedControl(tester).borderColor, CupertinoColors.black);
     expect(textStyle.style.color, CupertinoColors.lightBackgroundGray);
-    expect(iconTheme.data.color, CupertinoColors.activeGreen);
-    expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen);
+    expect(iconTheme.data.color, CupertinoColors.activeGreen.color);
+    expect(getBackgroundColor(tester, 0), CupertinoColors.activeGreen.color);
     expect(getBackgroundColor(tester, 1), CupertinoColors.lightBackgroundGray);
 
     await tester.tap(find.widgetWithIcon(IconTheme, const IconData(1)));
@@ -393,17 +393,17 @@ void main() {
     textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
 
-    expect(textStyle.style.color, CupertinoColors.activeGreen);
+    expect(textStyle.style.color, CupertinoColors.activeGreen.color);
     expect(iconTheme.data.color, CupertinoColors.lightBackgroundGray);
     expect(getBackgroundColor(tester, 0), CupertinoColors.lightBackgroundGray);
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
+    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen.color);
 
     final Offset center = tester.getCenter(find.text('Child 1'));
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     expect(getBackgroundColor(tester, 0), const Color(0x638CFC7B));
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen);
+    expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen.color);
   });
 
   testWidgets('Widgets are centered within segments', (WidgetTester tester) async {
@@ -912,7 +912,7 @@ void main() {
 
     expect(sharedValue, 1);
 
-    final double childWidth = getRenderSegmentedControl(tester).firstChild.size.width;
+    final double childWidth = getRenderSegmentedControl(tester).firstChild.size.width as double;
     final Offset centerOfSegmentedControl = tester.getCenter(find.text('Child 1'));
 
     // Tap just inside segment bounds
@@ -1382,6 +1382,47 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(getBackgroundColor(tester, 0), isSameColorAs(CupertinoColors.white));
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
+  });
+
+  // Regression test: https://github.com/flutter/flutter/issues/43414.
+  testWidgets("Quick double tap doesn't break the internal state", (WidgetTester tester) async {
+    const Map<int, Widget> children = <int, Widget>{
+      0: Text('A'),
+      1: Text('B'),
+      2: Text('C'),
+    };
+    int sharedValue = 0;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              onValueChanged: (int newValue) {
+                setState(() { sharedValue = newValue; });
+              },
+              groupValue: sharedValue,
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('B'));
+    // sharedValue has been updated but widget.groupValue is not.
+    expect(sharedValue, 1);
+
+    // Land the second tap before the widget gets a chance to rebuild.
+    final TestGesture secondTap = await tester.startGesture(tester.getCenter(find.text('B')));
+    await tester.pump();
+
+    await secondTap.up();
+    expect(sharedValue, 1);
+
+    await tester.tap(find.text('C'));
+    expect(sharedValue, 2);
   });
 
   testWidgets('Golden Test Placeholder Widget', (WidgetTester tester) async {

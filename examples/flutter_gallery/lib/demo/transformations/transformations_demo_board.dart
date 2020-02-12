@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:collection' show IterableMixin;
 import 'dart:math';
 import 'dart:ui' show Vertices;
@@ -262,12 +266,13 @@ class BoardPoint {
 
   // Only compares by location.
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final BoardPoint boardPoint = other;
-    return boardPoint.q == q && boardPoint.r == r;
+    return other is BoardPoint
+        && other.q == q
+        && other.r == r;
   }
 
   @override

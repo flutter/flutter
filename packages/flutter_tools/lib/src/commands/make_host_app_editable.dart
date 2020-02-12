@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,12 +13,12 @@ class MakeHostAppEditableCommand extends FlutterCommand {
 
     argParser.addFlag(
       'ios',
-      help: 'Whether to make this project\'s iOS app editable.',
+      help: "Whether to make this project's iOS app editable.",
       negatable: false,
     );
     argParser.addFlag(
       'android',
-      help: 'Whether ot make this project\'s Android app editable.',
+      help: "Whether ot make this project's Android app editable.",
       negatable: false,
     );
   }
@@ -46,8 +46,8 @@ class MakeHostAppEditableCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     await _project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
 
-    final bool isAndroidRequested = argResults['android'];
-    final bool isIOSRequested = argResults['ios'];
+    final bool isAndroidRequested = boolArg('android');
+    final bool isIOSRequested = boolArg('ios');
 
     if (isAndroidRequested == isIOSRequested) {
       // No flags provided, or both flags provided. Make Android and iOS host
@@ -60,6 +60,6 @@ class MakeHostAppEditableCommand extends FlutterCommand {
       await _project.ios.makeHostAppEditable();
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

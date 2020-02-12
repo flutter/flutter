@@ -1,6 +1,7 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:math' show Random;
 
@@ -165,11 +166,11 @@ class _ListItem extends StatelessWidget {
           Container(
             width: 38.0,
             child: called
-                ? const Align(
+                ? Align(
                     alignment: Alignment.topCenter,
                     child: Icon(
                       CupertinoIcons.phone_solid,
-                      color: CupertinoColors.inactiveGray,
+                      color: CupertinoColors.inactiveGray.resolveFrom(context),
                       size: 18.0,
                     ),
                   )
@@ -203,10 +204,10 @@ class _ListItem extends StatelessWidget {
                           place,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15.0,
                             letterSpacing: -0.24,
-                            color: CupertinoColors.inactiveGray,
+                            color: CupertinoColors.inactiveGray.resolveFrom(context),
                           ),
                         ),
                       ],
@@ -214,8 +215,8 @@ class _ListItem extends StatelessWidget {
                   ),
                   Text(
                     date,
-                    style: const TextStyle(
-                      color: CupertinoColors.inactiveGray,
+                    style: TextStyle(
+                      color: CupertinoColors.inactiveGray.resolveFrom(context),
                       fontSize: 15.0,
                       letterSpacing: -0.41,
                     ),

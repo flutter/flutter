@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,7 +27,7 @@ Future<void> _parseExampleCode(AssetBundle bundle) async {
   List<String> codeBlock;
   String codeTag;
 
-  for (String line in lines) {
+  for (final String line in lines) {
     if (codeBlock == null) {
       // Outside a block.
       if (line.startsWith(_kStartTag)) {

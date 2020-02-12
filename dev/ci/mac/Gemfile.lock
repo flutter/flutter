@@ -63,7 +63,7 @@ GEM
     dotenv (2.7.5)
     emoji_regex (1.0.1)
     escape (0.0.4)
-    excon (0.67.0)
+    excon (0.71.0)
     faraday (0.17.0)
       multipart-post (>= 1.2, < 3)
     faraday-cookie_jar (0.0.6)
@@ -205,8 +205,10 @@ GEM
       rouge (~> 2.0.7)
     xcpretty-travis-formatter (1.0.0)
       xcpretty (~> 0.2, >= 0.0.7)
+
 PLATFORMS
   ruby
+
 DEPENDENCIES
   cocoapods
   fastlane (= 2.134.0)

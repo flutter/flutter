@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -129,7 +129,7 @@ void main() {
       when(mockXcode.xcodeSelectPath).thenReturn('/fake/Xcode.app/Contents/Developer');
       when(mockXcode.getSimulatorPath()).thenAnswer((_) => '/fake/simulator.app');
       when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-        final List<String> args = invocation.positionalArguments[0];
+        final List<String> args = invocation.positionalArguments[0] as List<String>;
         if (args.length >= 3 && args[0] == 'open' && args[1] == '-a' && args[2] == '/fake/simulator.app') {
           didAttemptToRunSimulator = true;
         }
@@ -206,9 +206,9 @@ class MockProcessManager extends Mock implements ProcessManager {
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
   }) {
-    final String program = command[0];
-    final List<String> args = command.sublist(1);
-    switch (command[0]) {
+    final String program = command[0] as String;
+    final List<String> args = command.sublist(1) as List<String>;
+    switch (program) {
       case '/usr/bin/xcode-select':
         throw ProcessException(program, args);
         break;

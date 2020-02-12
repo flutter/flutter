@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -90,13 +90,21 @@ void main() {
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target 1'));
             },
-            onLeave: (int data) => leftBehind['Target 1'] = leftBehind['Target 1'] + data,
+            onLeave: (Object data) {
+              if (data is int) {
+                leftBehind['Target 1'] = leftBehind['Target 1'] + data;
+              }
+            },
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target 2'));
             },
-            onLeave: (int data) => leftBehind['Target 2'] = leftBehind['Target 2'] + data,
+            onLeave: (Object data) {
+              if (data is int) {
+                leftBehind['Target 2'] = leftBehind['Target 2'] + data;
+              }
+            },
           ),
         ],
       ),

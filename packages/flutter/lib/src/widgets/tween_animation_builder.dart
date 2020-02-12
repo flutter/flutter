@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,7 +59,7 @@ import 'value_listenable_builder.dart';
 ///
 /// ## Example Code
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example shows an [IconButton] that "zooms" in when the widget first
 /// builds (its size smoothly increases from 0 to 24) and whenever the button
 /// is pressed, it smoothly changes its size to the new target value of either
@@ -215,7 +215,7 @@ class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimat
       // Constructor will never be called because null is never provided as current tween.
       assert(false);
       return null;
-    });
+    }) as Tween<T>;
   }
 
   @override

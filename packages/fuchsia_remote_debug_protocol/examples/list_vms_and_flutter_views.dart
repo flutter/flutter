@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,13 +36,13 @@ Future<void> main(List<String> args) async {
   final FuchsiaRemoteConnection connection =
       await FuchsiaRemoteConnection.connect(address, interface, sshConfigPath);
   print('On $address, the following Dart VM ports are running:');
-  for (int port in await connection.getDeviceServicePorts()) {
+  for (final int port in await connection.getDeviceServicePorts()) {
     print('\t$port');
   }
   print('');
 
   print('The following Flutter views are running:');
-  for (FlutterView view in await connection.getFlutterViews()) {
+  for (final FlutterView view in await connection.getFlutterViews()) {
     print('\t${view.name ?? view.id}');
   }
   await connection.stop();

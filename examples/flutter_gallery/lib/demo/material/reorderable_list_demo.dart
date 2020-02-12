@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -207,7 +207,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           header: _itemType != _ReorderableListType.threeLine
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('Header of the list', style: Theme.of(context).textTheme.headline))
+                  child: Text('Header of the list', style: Theme.of(context).textTheme.headline5))
               : null,
           onReorder: _onReorder,
           reverse: _reverse,

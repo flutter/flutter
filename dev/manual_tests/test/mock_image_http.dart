@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:io';
 
@@ -17,10 +21,10 @@ MockHttpClient createMockImageHttpClient(SecurityContext _) {
   when(response.contentLength).thenReturn(kTransparentImage.length);
   when(response.statusCode).thenReturn(HttpStatus.ok);
   when(response.listen(any)).thenAnswer((Invocation invocation) {
-    final void Function(List<int>) onData = invocation.positionalArguments[0];
-    final void Function() onDone = invocation.namedArguments[#onDone];
-    final void Function(Object, [StackTrace]) onError = invocation.namedArguments[#onError];
-    final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+    final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
+    final void Function() onDone = invocation.namedArguments[#onDone] as void Function();
+    final void Function(Object, [StackTrace]) onError = invocation.namedArguments[#onError] as void Function(Object, [StackTrace]);
+    final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
     return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
   });
   return client;

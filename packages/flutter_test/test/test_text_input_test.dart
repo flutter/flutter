@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,7 +29,7 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.done);
       fail('Expected a PlatformException, but it was not thrown.');
     } catch (e) {
-      expect(e, isInstanceOf<PlatformException>());
+      expect(e, isA<PlatformException>());
     }
   });
 }

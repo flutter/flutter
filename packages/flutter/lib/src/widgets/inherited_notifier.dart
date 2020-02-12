@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ import 'framework.dart';
 /// even if the [notifier] fires multiple times between two frames.
 ///
 /// Typically this class is subclassed with a class that provides an `of` static
-/// method that calls [BuildContext.inheritFromWidgetOfExactType] with that
+/// method that calls [BuildContext.dependOnInheritedWidgetOfExactType] with that
 /// class.
 ///
 /// The [updateShouldNotify] method may also be overridden, to change the logic
@@ -79,7 +79,7 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
   }
 
   @override
-  InheritedNotifier<T> get widget => super.widget;
+  InheritedNotifier<T> get widget => super.widget as InheritedNotifier<T>;
 
   bool _dirty = false;
 

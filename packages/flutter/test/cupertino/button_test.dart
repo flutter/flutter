@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -156,7 +156,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
-  testWidgets('Disabled button doesn\'t animate', (WidgetTester tester) async {
+  testWidgets("Disabled button doesn't animate", (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       child: Text('Tap me'),
       onPressed: null,
@@ -248,7 +248,7 @@ void main() {
 
     BoxDecoration boxDecoration = tester.widget<DecoratedBox>(
         find.widgetWithText(DecoratedBox, 'Skeuomorph me')
-      ).decoration;
+      ).decoration as BoxDecoration;
 
     expect(boxDecoration.color, const Color(0x000000FF));
 
@@ -261,7 +261,7 @@ void main() {
 
     boxDecoration = tester.widget<DecoratedBox>(
         find.widgetWithText(DecoratedBox, 'Skeuomorph me')
-      ).decoration;
+      ).decoration as BoxDecoration;
 
     expect(boxDecoration.color, const Color(0x0000FF00));
   });
@@ -291,7 +291,7 @@ void main() {
 
     BoxDecoration boxDecoration = tester.widget<DecoratedBox>(
       find.widgetWithText(DecoratedBox, 'Skeuomorph me')
-    ).decoration;
+    ).decoration as BoxDecoration;
 
     expect(boxDecoration.color.value, 0xFF654321);
 
@@ -309,7 +309,7 @@ void main() {
 
     boxDecoration = tester.widget<DecoratedBox>(
       find.widgetWithText(DecoratedBox, 'Skeuomorph me')
-    ).decoration;
+    ).decoration as BoxDecoration;
 
     // Disabled color.
     expect(boxDecoration.color.value, 0xFF111111);
@@ -350,7 +350,7 @@ void main() {
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
       ),
-    ).decoration;
+    ).decoration as BoxDecoration;
     expect(decoration.color, CupertinoColors.activeBlue);
 
     await tester.pumpWidget(
@@ -385,7 +385,7 @@ void main() {
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
       ),
-    ).decoration;
+    ).decoration as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
   });
 }

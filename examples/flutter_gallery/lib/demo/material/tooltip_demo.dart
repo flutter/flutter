@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,10 +30,10 @@ class TooltipDemo extends StatelessWidget {
             bottom: false,
             child: ListView(
               children: <Widget>[
-                Text(_introText, style: theme.textTheme.subhead),
+                Text(_introText, style: theme.textTheme.subtitle1),
                 Row(
                   children: <Widget>[
-                    Text('Long press the ', style: theme.textTheme.subhead),
+                    Text('Long press the ', style: theme.textTheme.subtitle1),
                     Tooltip(
                       message: 'call icon',
                       child: Icon(
@@ -42,7 +42,7 @@ class TooltipDemo extends StatelessWidget {
                         color: theme.iconTheme.color,
                       ),
                     ),
-                    Text(' icon.', style: theme.textTheme.subhead),
+                    Text(' icon.', style: theme.textTheme.subtitle1),
                   ],
                 ),
                 Center(

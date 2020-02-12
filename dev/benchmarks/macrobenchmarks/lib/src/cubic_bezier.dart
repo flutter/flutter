@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -146,7 +146,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
     path.moveTo(100.0, 97.0);
 
-    for (Point p in pointList[0]) {
+    for (final Point p in pointList[0]) {
       path.lineTo(p.x, p.y);
     }
 
@@ -167,7 +167,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
     bezier2Path.moveTo(0.0, 70.55);
 
-    for (Point p in pointList[1]) {
+    for (final Point p in pointList[1]) {
       bezier2Path.lineTo(p.x, p.y);
     }
 
@@ -188,7 +188,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
     bezier3Path.moveTo(0.0, 69.48);
 
-    for (Point p in pointList[2]) {
+    for (final Point p in pointList[2]) {
       bezier3Path.lineTo(p.x, p.y);
     }
 
@@ -210,7 +210,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
     bezier4Path.moveTo(0.0, 69.48);
 
-    for (Point p in pointList[3]) {
+    for (final Point p in pointList[3]) {
       bezier4Path.lineTo(p.x, p.y);
     }
 
@@ -221,7 +221,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
   }
 
   List<PathDetail> _playReversed() {
-    for (List<Point> list in pointList) {
+    for (final List<Point> list in pointList) {
       if (list.isNotEmpty) {
         list.removeLast();
       }
@@ -232,7 +232,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
     path.moveTo(100.0, 97.0);
 
-    for (Point point in points) {
+    for (final Point point in points) {
       path.lineTo(point.x, point.y);
     }
 
@@ -240,14 +240,14 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
     bezier2Path.moveTo(0.0, 70.55);
 
-    for (Point p in pointList[1]) {
+    for (final Point p in pointList[1]) {
       bezier2Path.lineTo(p.x, p.y);
     }
 
     final Path bezier3Path = Path();
     bezier3Path.moveTo(0.0, 69.48);
 
-    for (Point p in pointList[2]) {
+    for (final Point p in pointList[2]) {
       bezier3Path.lineTo(p.x, p.y);
     }
 
@@ -255,7 +255,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
     bezier4Path.moveTo(0.0, 69.48);
 
-    for (Point p in pointList[3]) {
+    for (final Point p in pointList[3]) {
       bezier4Path.lineTo(p.x, p.y);
     }
 
@@ -278,7 +278,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
   //From http://wiki.roblox.com/index.php?title=File:Beziereq4.png
   double _getCubicPoint(double t, double p0, double p1, double p2, double p3) {
-    return pow(1 - t, 3) * p0 +
+    return (pow(1 - t, 3) as double) * p0 +
         3 * pow(1 - t, 2) * t * p1 +
         3 * (1 - t) * pow(t, 2) * p2 +
         pow(t, 3) * p3;
@@ -287,7 +287,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
   void playAnimation() {
     isPlaying = true;
     isReversed = false;
-    for (List<Point> list in pointList) {
+    for (final List<Point> list in pointList) {
       list.clear();
     }
     controller.reset();
@@ -297,7 +297,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
   void stopAnimation() {
     isPlaying = false;
     controller.stop();
-    for (List<Point> list in pointList) {
+    for (final List<Point> list in pointList) {
       list.clear();
     }
   }

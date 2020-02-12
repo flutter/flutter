@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,6 +8,8 @@ import 'dart:io';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -48,7 +50,7 @@ void main() {
         File file;
 
         setUp(() {
-          file = fs.file('foo.plist')..createSync();
+          file = globals.fs.file('foo.plist')..createSync();
         });
 
         tearDown(() {

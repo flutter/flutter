@@ -1,6 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
@@ -59,7 +61,7 @@ void main() {
     final Size largeSize = tester.getSize(find.byType(RichText));
     expect(largeSize.width, 105.0);
     expect(largeSize.height, equals(21.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
@@ -87,9 +89,9 @@ void main() {
     final Size largeSize = tester.getSize(find.byType(RichText));
     expect(largeSize.width, anyOf(131.0, 130.0));
     expect(largeSize.height, equals(26.0));
-  }, skip: isBrowser);
+  });
 
-  testWidgets('Text throws a nice error message if there\'s no Directionality', (WidgetTester tester) async {
+  testWidgets("Text throws a nice error message if there's no Directionality", (WidgetTester tester) async {
     await tester.pumpWidget(const Text('Hello'));
     final String message = tester.takeException().toString();
     expect(message, contains('Directionality'));
@@ -157,13 +159,13 @@ void main() {
       ),
     );
     expect(tester.takeException(), null);
-  });
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const Text(
-        '\$\$',
+        r'$$',
         semanticsLabel: 'Double dollars',
         textDirection: TextDirection.ltr,
       )
@@ -189,7 +191,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: Text('\$\$', semanticsLabel: 'Double dollars')),
+        child: Text(r'$$', semanticsLabel: 'Double dollars')),
     );
 
     expect(
@@ -411,7 +413,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
@@ -602,7 +604,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser);
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -682,7 +684,7 @@ void main() {
       ),
     );
     semantics.dispose();
-  }, skip: isBrowser);
+  }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42086
 
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -770,8 +772,7 @@ void main() {
                 // Each word takes up more than a half of a line. Together they
                 // wrap onto two lines, but leave a lot of extra space.
                 child: Text(
-                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywr'
-                    'apwithlotsofextraspace',
+                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
                   textDirection: TextDirection.ltr,
                   textWidthBasis: textWidthBasis,
                 ),
@@ -797,7 +798,15 @@ void main() {
     final Size textSizeLongestLine = tester.getSize(find.byType(Text));
     expect(textSizeLongestLine.width, equals(630.0));
     expect(textSizeLongestLine.height, equals(fontHeight * 2));
-  }, skip: isBrowser);
+  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+
+  testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
+    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+    builder.addText('hello');
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+    expect(paragraph.getBoxesForRange(2, 2), isEmpty);
+  });
 }
 
 Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {

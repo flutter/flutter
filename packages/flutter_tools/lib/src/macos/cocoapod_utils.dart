@@ -1,12 +1,12 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../build_info.dart';
+import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -24,7 +24,7 @@ Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDir
   // If the Xcode project, Podfile, or generated xcconfig have changed since
   // last run, pods should be updated.
   final Fingerprinter fingerprinter = Fingerprinter(
-    fingerprintPath: fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
+    fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
@@ -36,7 +36,6 @@ Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDir
   final bool didPodInstall = await cocoaPods.processPods(
     xcodeProject: xcodeProject,
     engineDir: flutterFrameworkDir(buildMode),
-    isSwift: await xcodeProject.isSwift,
     dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
   );
   if (didPodInstall) {

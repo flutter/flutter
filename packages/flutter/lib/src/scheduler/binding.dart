@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,15 +50,16 @@ typedef TaskCallback<T> = T Function();
 /// whenever the system needs to decide whether a task at a given
 /// priority needs to be run.
 ///
-/// Return true if a task with the given priority should be executed
-/// at this time, false otherwise.
+/// Return true if a task with the given priority should be executed at this
+/// time, false otherwise.
 ///
-/// See also [defaultSchedulingStrategy].
+/// See also:
+///
+///  * [defaultSchedulingStrategy], the default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
 typedef SchedulingStrategy = bool Function({ int priority, SchedulerBinding scheduler });
 
 class _TaskEntry<T> {
   _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {
-    // ignore: prefer_asserts_in_initializer_lists
     assert(() {
       debugStack = StackTrace.current;
       return true;
@@ -133,7 +134,10 @@ class _FrameCallbackEntry {
 /// The values of this enum are ordered in the same order as the phases occur,
 /// so their relative index values can be compared to each other.
 ///
-/// See also the discussion at [WidgetsBinding.drawFrame].
+/// See also:
+///
+///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
+///    to generate a frame.
 enum SchedulerPhase {
   /// No frame is being processed. Tasks (scheduled by
   /// [WidgetsBinding.scheduleTask]), microtasks (scheduled by
@@ -204,7 +208,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (!kReleaseMode) {
       int frameNumber = 0;
       addTimingsCallback((List<FrameTiming> timings) {
-        for (FrameTiming frameTiming in timings) {
+        for (final FrameTiming frameTiming in timings) {
           frameNumber += 1;
           _profileFramePostEvent(frameNumber, frameTiming);
         }
@@ -224,9 +228,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///
   /// If the same callback is added twice, it will be executed twice.
   void addTimingsCallback(TimingsCallback callback) {
-    // TODO(liyuqian): once this is merged, modify the doc of
-    //  [Window.onReportTimings] inside the engine repo to recommend using this
-    // API instead of using [Window.onReportTimings] directly.
     _timingsCallbacks.add(callback);
     if (_timingsCallbacks.length == 1) {
       assert(window.onReportTimings == null);
@@ -247,7 +248,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void _executeTimingsCallbacks(List<FrameTiming> timings) {
     final List<TimingsCallback> clonedCallbacks =
         List<TimingsCallback>.from(_timingsCallbacks);
-    for (TimingsCallback callback in clonedCallbacks) {
+    for (final TimingsCallback callback in clonedCallbacks) {
       try {
         if (_timingsCallbacks.contains(callback)) {
           callback(timings);
@@ -333,7 +334,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         _setFramesEnabledState(true);
         break;
       case AppLifecycleState.paused:
-      case AppLifecycleState.suspending:
+      case AppLifecycleState.detached:
         _setFramesEnabledState(false);
         break;
     }
@@ -352,8 +353,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         return AppLifecycleState.resumed;
       case 'AppLifecycleState.inactive':
         return AppLifecycleState.inactive;
-      case 'AppLifecycleState.suspending':
-        return AppLifecycleState.suspending;
+      case 'AppLifecycleState.detached':
+        return AppLifecycleState.detached;
     }
     return null;
   }
@@ -416,7 +417,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   // Whether this scheduler already requested to be called from the event loop.
   bool _hasRequestedAnEventLoopCallback = false;
 
-  // Ensures that the scheduler services a task scheduled by [scheduleTask].
+  // Ensures that the scheduler services a task scheduled by
+  // [SchedulerBinding.scheduleTask].
   void _ensureEventLoopCallback() {
     assert(!locked);
     assert(_taskQueue.isNotEmpty);
@@ -575,7 +577,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
                 'The stack traces for when they were registered are as follows:'
               );
             }
-            for (int id in callbacks.keys) {
+            for (final int id in callbacks.keys) {
               final _FrameCallbackEntry entry = callbacks[id];
               yield DiagnosticsStackTrace('── callback $id ──', entry.debugStack, showSeparator: false);
             }
@@ -804,6 +806,11 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// Consider using [scheduleWarmUpFrame] instead if the goal is to update the
   /// rendering as soon as possible (e.g. at application startup).
   void scheduleForcedFrame() {
+    // TODO(chunhtai): Removes the if case once the issue is fixed
+    // https://github.com/flutter/flutter/issues/45131
+    if (!_framesEnabled)
+      return;
+
     if (_hasScheduledFrame)
       return;
     assert(() {
@@ -1036,7 +1043,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     try {
       // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
-      for (FrameCallback callback in _persistentCallbacks)
+      for (final FrameCallback callback in _persistentCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
 
       // POST-FRAME CALLBACKS
@@ -1044,7 +1051,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       final List<FrameCallback> localPostFrameCallbacks =
           List<FrameCallback>.from(_postFrameCallbacks);
       _postFrameCallbacks.clear();
-      for (FrameCallback callback in localPostFrameCallbacks)
+      for (final FrameCallback callback in localPostFrameCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
     } finally {
       _schedulerPhase = SchedulerPhase.idle;

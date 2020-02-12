@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,10 +19,10 @@ class RunningProcessInfo {
 
   @override
   bool operator ==(Object other) {
-    return other is RunningProcessInfo &&
-        other.pid == pid &&
-        other.commandLine == commandLine &&
-        other.creationDate == creationDate;
+    return other is RunningProcessInfo
+        && other.pid == pid
+        && other.commandLine == commandLine
+        && other.creationDate == creationDate;
   }
 
   @override
@@ -85,7 +85,7 @@ Stream<RunningProcessInfo> windowsRunningProcesses(String processName) async* {
   // a process.
   // See: https://docs.microsoft.com/en-us/windows/desktop/cimwin32prov/win32-process
   final String script = processName != null
-      ? '"Get-CimInstance Win32_Process -Filter \\\"name=\'$processName\'\\\" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'
+      ? '"Get-CimInstance Win32_Process -Filter \\"name=\'$processName\'\\" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'
       : '"Get-CimInstance Win32_Process | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"';
   // Unfortunately, there doesn't seem to be a good way to get ProcessManager to
   // run this. May be a bug in Dart.
@@ -100,7 +100,7 @@ Stream<RunningProcessInfo> windowsRunningProcesses(String processName) async* {
     print(result.stdout);
     return;
   }
-  for (RunningProcessInfo info in processPowershellOutput(result.stdout)) {
+  for (final RunningProcessInfo info in processPowershellOutput(result.stdout as String)) {
     yield info;
   }
 }
@@ -122,7 +122,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
   int creationDateHeaderEnd;
   int commandLineHeaderStart;
   bool inTableBody = false;
-  for (String line in output.split('\n')) {
+  for (final String line in output.split('\n')) {
     if (line.startsWith('ProcessId')) {
       commandLineHeaderStart = line.indexOf('CommandLine');
       creationDateHeaderEnd = commandLineHeaderStart - 1;
@@ -191,7 +191,7 @@ Stream<RunningProcessInfo> posixRunningProcesses(
     print(result.stdout);
     return;
   }
-  for (RunningProcessInfo info in processPsOutput(result.stdout, processName)) {
+  for (final RunningProcessInfo info in processPsOutput(result.stdout as String, processName)) {
     yield info;
   }
 }

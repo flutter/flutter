@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 # The tests to run on Firebase Test Lab.
 # Currently, the test consists on building an Android App Bundle and ensuring
@@ -18,7 +21,7 @@ tests=(
 devices=(
   # Pixel 3
   "model=blueline,version=28"
-  "model=blueline,version=Q-beta-3"
+  "model=blueline,version=29"
 
   # Moto Z XT1650
   "model=griffin,version=24"

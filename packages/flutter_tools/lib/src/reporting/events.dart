@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -112,7 +112,7 @@ class DoctorResultEvent extends UsageEvent {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
-    final GroupedValidator group = validator;
+    final GroupedValidator group = validator as GroupedValidator;
     for (int i = 0; i < group.subValidators.length; i++) {
       final DoctorValidator v = group.subValidators[i];
       final ValidationResult r = group.subResults[i];
@@ -139,9 +139,9 @@ class BuildEvent extends UsageEvent {
     // category
     'build',
     // parameter
-    FlutterCommand.current == null ?
-      'unspecified' :
-      '${FlutterCommand.current.name}',
+    FlutterCommand.current == null
+      ? 'unspecified'
+      : FlutterCommand.current.name,
     label: label,
   );
 
@@ -171,7 +171,9 @@ class BuildEvent extends UsageEvent {
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
   CommandResultEvent(String commandPath, FlutterCommandResult result)
-      : super(commandPath, result?.toString() ?? 'unspecified');
+      : assert(commandPath != null),
+        assert(result != null),
+        super(commandPath, result.toString());
 
   @override
   void send() {
@@ -195,7 +197,19 @@ class CommandResultEvent extends UsageEvent {
       );
     } catch (error) {
       // If grabbing the maxRss fails for some reason, just don't send an event.
-      printTrace('Querying maxRss failed with error: $error');
+      globals.printTrace('Querying maxRss failed with error: $error');
     }
   }
+}
+
+/// An event that reports on changes in the configuration of analytics.
+class AnalyticsConfigEvent extends UsageEvent {
+  AnalyticsConfigEvent({
+    /// Whether analytics reporting is being enabled (true) or disabled (false).
+    @required bool enabled,
+  }) : super(
+    'analytics',
+    'enabled',
+    label: enabled ? 'true' : 'false',
+  );
 }

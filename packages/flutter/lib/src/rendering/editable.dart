@@ -1,9 +1,9 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox, lerpDouble;
+import 'dart:ui' as ui show TextBox, lerpDouble, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -97,6 +97,47 @@ class TextSelectionPoint {
   }
 }
 
+// Check if the given code unit is a white space or separator
+// character.
+//
+// Includes newline characters from ASCII and separators from the
+// [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
+// TODO(gspencergoog): replace when we expose this ICU information.
+bool _isWhitespace(int codeUnit) {
+  switch (codeUnit) {
+    case 0x9: // horizontal tab
+    case 0xA: // line feed
+    case 0xB: // vertical tab
+    case 0xC: // form feed
+    case 0xD: // carriage return
+    case 0x1C: // file separator
+    case 0x1D: // group separator
+    case 0x1E: // record separator
+    case 0x1F: // unit separator
+    case 0x20: // space
+    case 0xA0: // no-break space
+    case 0x1680: // ogham space mark
+    case 0x2000: // en quad
+    case 0x2001: // em quad
+    case 0x2002: // en space
+    case 0x2003: // em space
+    case 0x2004: // three-per-em space
+    case 0x2005: // four-er-em space
+    case 0x2006: // six-per-em space
+    case 0x2007: // figure space
+    case 0x2008: // punctuation space
+    case 0x2009: // thin space
+    case 0x200A: // hair space
+    case 0x202F: // narrow no-break space
+    case 0x205F: // medium mathematical space
+    case 0x3000: // ideographic space
+      break;
+    default:
+      return false;
+  }
+  return true;
+}
+
 /// Displays some text in a scrollable container with a potentially blinking
 /// cursor and with gesture recognizers.
 ///
@@ -167,6 +208,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     bool paintCursorAboveText = false,
     Offset cursorOffset,
     double devicePixelRatio = 1.0,
+    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
     bool enableInteractiveSelection,
     EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     @required this.textSelectionDelegate,
@@ -178,7 +221,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(endHandleLayerLink != null),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         'minLines can\'t be greater than maxLines',
+         "minLines can't be greater than maxLines",
        ),
        assert(expands != null),
        assert(
@@ -196,6 +239,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(readOnly != null),
        assert(forceLine != null),
        assert(devicePixelRatio != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -221,6 +266,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _floatingCursorAddedMargin = floatingCursorAddedMargin,
        _enableInteractiveSelection = enableInteractiveSelection,
        _devicePixelRatio = devicePixelRatio,
+       _selectionHeightStyle = selectionHeightStyle,
+       _selectionWidthStyle = selectionWidthStyle,
        _startHandleLayerLink = startHandleLayerLink,
        _endHandleLayerLink = endHandleLayerLink,
        _obscureText = obscureText,
@@ -324,7 +371,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final Offset startOffset = _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
-      Rect.zero,
+      _caretPrototype,
     );
     // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
     // Check if the selection is visible with an approximation because a
@@ -340,7 +387,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.end, affinity: _selection.affinity),
-      Rect.zero,
+      _caretPrototype,
     );
     _selectionEndInViewport.value = visibleRegion
       .inflate(visibleRegionSlop)
@@ -351,14 +398,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // to select vertically past the end or beginning of the field. If they do,
   // then we need to keep the old cursor location so that we can go back to it
   // if they change their minds. Only used for moving selection up and down in a
-  // multi-line text field when selecting using the keyboard.
+  // multiline text field when selecting using the keyboard.
   int _cursorResetLocation = -1;
 
   // Whether we should reset the location of the cursor in the case the user
   // tries to select vertically past the end or beginning of the field. If they
   // do, then we need to keep the old cursor location so that we can go back to
   // it if they change their minds. Only used for resetting selection up and
-  // down in a multi-line text field when selecting using the keyboard.
+  // down in a multiline text field when selecting using the keyboard.
   bool _wasSelectingVerticallyWithKeyboard = false;
 
   // Call through to onSelectionChanged.
@@ -368,8 +415,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ) {
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
-    // changed.
-    if (nextSelection == selection && cause != SelectionChangedCause.keyboard) {
+    // changed. Also, focusing an empty field is sent as a selection change even
+    // if the selection offset didn't change.
+    final bool focusingEmpty = nextSelection.baseOffset == 0
+      && nextSelection.extentOffset == 0
+      && !hasFocus;
+    if (nextSelection == selection
+        && cause != SelectionChangedCause.keyboard
+        && !focusingEmpty) {
       return;
     }
     if (onSelectionChanged != null) {
@@ -384,12 +437,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     LogicalKeyboardKey.arrowDown,
   };
 
+  static final Set<LogicalKeyboardKey> _deleteKeys = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.delete,
+    LogicalKeyboardKey.backspace,
+  };
+
   static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.keyA,
     LogicalKeyboardKey.keyC,
     LogicalKeyboardKey.keyV,
     LogicalKeyboardKey.keyX,
-    LogicalKeyboardKey.delete,
+    ..._deleteKeys,
   };
 
   static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
@@ -400,10 +458,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   static final Set<LogicalKeyboardKey> _modifierKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.shift,
     LogicalKeyboardKey.control,
+    LogicalKeyboardKey.alt,
+  };
+
+  static final Set<LogicalKeyboardKey> _macOsModifierKeys = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.shift,
+    LogicalKeyboardKey.meta,
+    LogicalKeyboardKey.alt,
   };
 
   static final Set<LogicalKeyboardKey> _interestingKeys = <LogicalKeyboardKey>{
     ..._modifierKeys,
+    ..._macOsModifierKeys,
     ..._nonModifierKeys,
   };
 
@@ -414,12 +480,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleKeyEvent(RawKeyEvent keyEvent) {
     if (keyEvent is! RawKeyDownEvent || onSelectionChanged == null)
       return;
-
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
     final LogicalKeyboardKey key = keyEvent.logicalKey;
 
+    final bool isMacOS = keyEvent.data is RawKeyEventDataMacOs;
     if (!_nonModifierKeys.contains(key) ||
-        keysPressed.difference(_modifierKeys).length > 1 ||
+        keysPressed.difference(isMacOS ? _macOsModifierKeys : _modifierKeys).length > 1 ||
         keysPressed.difference(_interestingKeys).isNotEmpty) {
       // If the most recently pressed key isn't a non-modifier key, or more than
       // one non-modifier key is down, or keys other than the ones we're interested in
@@ -427,22 +493,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
 
+    final bool isWordModifierPressed = isMacOS ? keyEvent.isAltPressed : keyEvent.isControlPressed;
+    final bool isLineModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isAltPressed;
+    final bool isShortcutModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
     if (_movementKeys.contains(key)) {
-      _handleMovement(key, control: keyEvent.isControlPressed, shift: keyEvent.isShiftPressed);
-    } else if (keyEvent.isControlPressed && _shortcutKeys.contains(key)) {
+        _handleMovement(key, wordModifier: isWordModifierPressed, lineModifier: isLineModifierPressed, shift: keyEvent.isShiftPressed);
+    } else if (isShortcutModifierPressed && _shortcutKeys.contains(key)) {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
-    } else if (key == LogicalKeyboardKey.delete) {
+    } else if (_deleteKeys.contains(key)) {
       _handleDelete();
     }
   }
 
   void _handleMovement(
       LogicalKeyboardKey key, {
-      @required bool control,
+      @required bool wordModifier,
+      @required bool lineModifier,
       @required bool shift,
     }) {
+    if (wordModifier && lineModifier) {
+      // If both modifiers are down, nothing happens on any of the platforms.
+      return;
+    }
+
     TextSelection newSelection = selection;
 
     final bool rightArrow = key == LogicalKeyboardKey.arrowRight;
@@ -450,34 +525,80 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final bool upArrow = key == LogicalKeyboardKey.arrowUp;
     final bool downArrow = key == LogicalKeyboardKey.arrowDown;
 
-    // Because the user can use multiple keys to change how they select, the
-    // new offset variable is threaded through these four functions and
-    // potentially changes after each one.
-    if (control) {
-      // If control is pressed, we will decide which way to look for a word
-      // based on which arrow is pressed.
-      if (leftArrow && newSelection.extentOffset > 2) {
-        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: newSelection.extentOffset - 2));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset + 1);
-      } else if (rightArrow && newSelection.extentOffset < text.toPlainText().length - 2) {
-        final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: newSelection.extentOffset + 1));
-        newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset - 1);
+    // Find the previous non-whitespace character
+    int previousNonWhitespace(int extent) {
+      int result = math.max(extent - 1, 0);
+      while (result > 0 && _isWhitespace(_plainText.codeUnitAt(result))) {
+        result -= 1;
+      }
+      return result;
+    }
+
+    int nextNonWhitespace(int extent) {
+      int result = math.min(extent + 1, _plainText.length);
+      while (result < _plainText.length && _isWhitespace(_plainText.codeUnitAt(result))) {
+        result += 1;
+      }
+      return result;
+    }
+
+    if ((rightArrow || leftArrow) && !(rightArrow && leftArrow)) {
+      // Jump to begin/end of word.
+      if (wordModifier) {
+        // If control/option is pressed, we will decide which way to look for a
+        // word based on which arrow is pressed.
+        if (leftArrow) {
+          // When going left, we want to skip over any whitespace before the word,
+          // so we go back to the first non-whitespace before asking for the word
+          // boundary, since _selectWordAtOffset finds the word boundaries without
+          // including whitespace.
+          final int startPoint = previousNonWhitespace(newSelection.extentOffset);
+          final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
+          newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
+        } else {
+          // When going right, we want to skip over any whitespace after the word,
+          // so we go forward to the first non-whitespace character before asking
+          // for the word bounds, since _selectWordAtOffset finds the word
+          // boundaries without including whitespace.
+          final int startPoint = nextNonWhitespace(newSelection.extentOffset);
+          final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: startPoint));
+          newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
+        }
+      } else if (lineModifier) {
+        // If control/command is pressed, we will decide which way to expand to
+        // the beginning/end of the line based on which arrow is pressed.
+        if (leftArrow) {
+          // When going left, we want to skip over any whitespace before the line,
+          // so we go back to the first non-whitespace before asking for the line
+          // bounds, since _selectLineAtOffset finds the line boundaries without
+          // including whitespace (like the newline).
+          final int startPoint = previousNonWhitespace(newSelection.extentOffset);
+          final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
+          newSelection = newSelection.copyWith(extentOffset: textSelection.baseOffset);
+        } else {
+          // When going right, we want to skip over any whitespace after the line,
+          // so we go forward to the first non-whitespace character before asking
+          // for the line bounds, since _selectLineAtOffset finds the line
+          // boundaries without including whitespace (like the newline).
+          final int startPoint = nextNonWhitespace(newSelection.extentOffset);
+          final TextSelection textSelection = _selectLineAtOffset(TextPosition(offset: startPoint));
+          newSelection = newSelection.copyWith(extentOffset: textSelection.extentOffset);
+        }
+      } else {
+        if (rightArrow && newSelection.extentOffset < _plainText.length) {
+          newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset + 1);
+          if (shift) {
+            _cursorResetLocation += 1;
+          }
+        } else if (leftArrow && newSelection.extentOffset > 0) {
+          newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset - 1);
+          if (shift) {
+            _cursorResetLocation -= 1;
+          }
+        }
       }
     }
-    // Set the new offset to be +/- 1 depending on which arrow is pressed
-    // If shift is down, we also want to update the previous cursor location
-    if (rightArrow && newSelection.extentOffset < text.toPlainText().length) {
-      newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset + 1);
-      if (shift) {
-        _cursorResetLocation += 1;
-      }
-    }
-    if (leftArrow && newSelection.extentOffset > 0) {
-      newSelection = newSelection.copyWith(extentOffset: newSelection.extentOffset - 1);
-      if (shift) {
-        _cursorResetLocation -= 1;
-      }
-    }
+
     // Handles moving the cursor vertically as well as taking care of the
     // case where the user moves the cursor to the end or beginning of the text
     // and then back up or down.
@@ -498,7 +619,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // case that the user wants to unhighlight some text.
       if (position.offset == newSelection.extentOffset) {
         if (downArrow) {
-          newSelection = newSelection.copyWith(extentOffset: text.toPlainText().length);
+          newSelection = newSelection.copyWith(extentOffset: _plainText.length);
         } else if (upArrow) {
           newSelection = newSelection.copyWith(extentOffset: 0);
         }
@@ -512,20 +633,24 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
     }
 
-    // Just place the collapsed selection at the new position if shift isn't down.
+    // Just place the collapsed selection at the end or beginning of the region
+    // if shift isn't down.
     if (!shift) {
       // We want to put the cursor at the correct location depending on which
       // arrow is used while there is a selection.
       int newOffset = newSelection.extentOffset;
       if (!selection.isCollapsed) {
-        if (leftArrow)
+        if (leftArrow) {
           newOffset = newSelection.baseOffset < newSelection.extentOffset ? newSelection.baseOffset : newSelection.extentOffset;
-        else if (rightArrow)
+        } else if (rightArrow) {
           newOffset = newSelection.baseOffset > newSelection.extentOffset ? newSelection.baseOffset : newSelection.extentOffset;
+        }
       }
       newSelection = TextSelection.fromPosition(TextPosition(offset: newOffset));
     }
 
+    // Update the text selection delegate so that the engine knows what we did.
+    textSelectionDelegate.textEditingValue = textSelectionDelegate.textEditingValue.copyWith(selection: newSelection);
     _handleSelectionChange(
       newSelection,
       SelectionChangedCause.keyboard,
@@ -533,22 +658,22 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   // Handles shortcut functionality including cut, copy, paste and select all
-  // using control + (X, C, V, A).
+  // using control/command + (X, C, V, A).
   Future<void> _handleShortcuts(LogicalKeyboardKey key) async {
     assert(_shortcutKeys.contains(key), 'shortcut key $key not recognized.');
     if (key == LogicalKeyboardKey.keyC) {
       if (!selection.isCollapsed) {
         Clipboard.setData(
-            ClipboardData(text: selection.textInside(text.toPlainText())));
+            ClipboardData(text: selection.textInside(_plainText)));
       }
       return;
     }
     if (key == LogicalKeyboardKey.keyX) {
       if (!selection.isCollapsed) {
-        Clipboard.setData(ClipboardData(text: selection.textInside(text.toPlainText())));
+        Clipboard.setData(ClipboardData(text: selection.textInside(_plainText)));
         textSelectionDelegate.textEditingValue = TextEditingValue(
-          text: selection.textBefore(text.toPlainText())
-              + selection.textAfter(text.toPlainText()),
+          text: selection.textBefore(_plainText)
+              + selection.textAfter(_plainText),
           selection: TextSelection.collapsed(offset: selection.start),
         );
       }
@@ -584,15 +709,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _handleDelete() {
-    if (selection.textAfter(text.toPlainText()).isNotEmpty) {
+    if (selection.textAfter(_plainText).isNotEmpty) {
       textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection.textBefore(text.toPlainText())
-          + selection.textAfter(text.toPlainText()).substring(1),
+        text: selection.textBefore(_plainText)
+          + selection.textAfter(_plainText).substring(1),
         selection: TextSelection.collapsed(offset: selection.start),
       );
     } else {
       textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection.textBefore(text.toPlainText()),
+        text: selection.textBefore(_plainText),
         selection: TextSelection.collapsed(offset: selection.start),
       );
     }
@@ -617,13 +742,21 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _textLayoutLastMinWidth = null;
   }
 
+  // Retuns a cached plain text version of the text in the painter.
+  String _cachedPlainText;
+  String get _plainText {
+    _cachedPlainText ??= _textPainter.text.toPlainText();
+    return _cachedPlainText;
+  }
+
   /// The text to display.
-  TextSpan get text => _textPainter.text;
+  TextSpan get text => _textPainter.text as TextSpan;
   final TextPainter _textPainter;
   set text(TextSpan value) {
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
+    _cachedPlainText = null;
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
   }
@@ -637,7 +770,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_textPainter.textAlign == value)
       return;
     _textPainter.textAlign = value;
-    markNeedsPaint();
+    markNeedsTextLayout();
   }
 
   /// The directionality of the text.
@@ -967,6 +1100,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   Offset _floatingCursorOffset;
   TextPosition _floatingCursorTextPosition;
 
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxHeightStyle] for details on available styles.
+  ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
+  ui.BoxHeightStyle _selectionHeightStyle;
+  set selectionHeightStyle(ui.BoxHeightStyle value) {
+    assert(value != null);
+    if (_selectionHeightStyle == value)
+      return;
+    _selectionHeightStyle = value;
+    markNeedsPaint();
+  }
+
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxWidthStyle] for details on available styles.
+  ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
+  ui.BoxWidthStyle _selectionWidthStyle;
+  set selectionWidthStyle(ui.BoxWidthStyle value) {
+    assert(value != null);
+    if (_selectionWidthStyle == value)
+      return;
+    _selectionWidthStyle = value;
+    markNeedsPaint();
+  }
+
   /// If false, [describeSemanticsConfiguration] will not set the
   /// configuration's cursor motion or set selection callbacks.
   ///
@@ -1013,8 +1172,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     config
       ..value = obscureText
-          ? obscuringCharacter * text.toPlainText().length
-          : text.toPlainText()
+          ? obscuringCharacter * _plainText.length
+          : _plainText
       ..isObscured = obscureText
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
@@ -1124,42 +1283,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // Check if the given text range only contains white space or separator
   // characters.
   //
-  // newline characters from ascii and separators from the
+  // Includes newline characters from ASCII and separators from the
   // [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
   // TODO(jonahwilliams): replace when we expose this ICU information.
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int codeUnit = text.codeUnitAt(i);
-      switch (codeUnit) {
-        case 0x9: // horizontal tab
-        case 0xA: // line feed
-        case 0xB: // vertical tab
-        case 0xC: // form feed
-        case 0xD: // carriage return
-        case 0x1C: // file separator
-        case 0x1D: // group separator
-        case 0x1E: // record separator
-        case 0x1F: // unit separator
-        case 0x20: // space
-        case 0xA0: // no-break space
-        case 0x1680: // ogham space mark
-        case 0x2000: // en quad
-        case 0x2001: // em quad
-        case 0x2002: // en space
-        case 0x2003: // em space
-        case 0x2004: // three-per-em space
-        case 0x2005: // four-er-em space
-        case 0x2006: // six-per-em space
-        case 0x2007: // figure space
-        case 0x2008: // punctuation space
-        case 0x2009: // thin space
-        case 0x200A: // hair space
-        case 0x202F: // narrow no-break space
-        case 0x205F: // medium mathematical space
-        case 0x3000: // ideographic space
-          break;
-        default:
-          return false;
+      if (!_isWhitespace(codeUnit)) {
+        return false;
       }
     }
     return true;
@@ -1338,7 +1469,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     // Set the height based on the content.
     if (width == double.infinity) {
-      final String text = _textPainter.text.toPlainText();
+      final String text = _plainText;
       int lines = 1;
       for (int index = 0; index < text.length; index += 1) {
         if (text.codeUnitAt(index) == 0x0A) // count explicit line breaks
@@ -1550,9 +1681,23 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return TextSelection.fromPosition(position);
     // If text is obscured, the entire sentence should be treated as one word.
     if (obscureText) {
-      return TextSelection(baseOffset: 0, extentOffset: text.toPlainText().length);
+      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
     }
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
+  }
+
+  TextSelection _selectLineAtOffset(TextPosition position) {
+    assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
+        _textLayoutLastMinWidth == constraints.minWidth,
+    'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
+    final TextRange line = _textPainter.getLineBoundary(position);
+    if (position.offset >= line.end)
+      return TextSelection.fromPosition(position);
+    // If text is obscured, the entire string should be treated as one line.
+    if (obscureText) {
+      return TextSelection(baseOffset: 0, extentOffset: _plainText.length);
+    }
+    return TextSelection(baseOffset: line.start, extentOffset: line.end);
   }
 
   Rect _caretPrototype;
@@ -1588,6 +1733,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(defaultTargetPlatform != null);
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1646,6 +1792,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (caretHeight != null) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           final double heightDiff = caretHeight - caretRect.height;
           // Center the caret vertically along the text.
           caretRect = Rect.fromLTWH(
@@ -1804,7 +1951,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
     assert(_selectionRects != null);
     final Paint paint = Paint()..color = _selectionColor;
-    for (ui.TextBox box in _selectionRects)
+    for (final ui.TextBox box in _selectionRects)
       canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
 
@@ -1826,7 +1973,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (showSelection) {
-      _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
+      _selectionRects ??= _textPainter.getBoxesForSelection(_selection, boxHeightStyle: _selectionHeightStyle, boxWidthStyle: _selectionWidthStyle);
       _paintSelection(context.canvas, effectiveOffset);
     }
 
@@ -1851,8 +1998,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints) {
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
-      startPoint.dx.clamp(0.0, size.width),
-      startPoint.dy.clamp(0.0, size.height),
+      startPoint.dx.clamp(0.0, size.width) as double,
+      startPoint.dy.clamp(0.0, size.height) as double,
     );
     context.pushLayer(
       LeaderLayer(link: startHandleLayerLink, offset: startPoint),
@@ -1862,8 +2009,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (endpoints.length == 2) {
       Offset endPoint = endpoints[1].point;
       endPoint = Offset(
-        endPoint.dx.clamp(0.0, size.width),
-        endPoint.dy.clamp(0.0, size.height),
+        endPoint.dx.clamp(0.0, size.width) as double,
+        endPoint.dy.clamp(0.0, size.height) as double,
       );
       context.pushLayer(
         LeaderLayer(link: endHandleLayerLink, offset: endPoint),
