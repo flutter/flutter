@@ -404,10 +404,6 @@ class _RenderButtonBarRow extends RenderFlex {
             break;
         }
         currentHeight += child.size.height;
-
-        if (overflowButtonSpacing != null)
-          currentHeight += overflowButtonSpacing;
-
         switch (verticalDirection) {
           case VerticalDirection.down:
             child = childParentData.nextSibling;
@@ -416,6 +412,9 @@ class _RenderButtonBarRow extends RenderFlex {
             child = childParentData.previousSibling;
             break;
         }
+
+        if (overflowButtonSpacing != null && child != null)
+          currentHeight += overflowButtonSpacing;
       }
       size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
     }

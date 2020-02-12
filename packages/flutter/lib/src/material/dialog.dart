@@ -223,7 +223,7 @@ class AlertDialog extends StatelessWidget {
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
     this.actionsOverflowDirection,
-    this.actionsOverflowButtonSpacing,
+    this.actionsOverflowButtonSpacing = 4.0,
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
