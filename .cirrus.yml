@@ -81,7 +81,7 @@ task:
     populate_script:
       - git fetch origin
       - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-      - flutter precache
+      - flutter precache --android --ios --web
       - flutter doctor -v
   setup_script:
     - date
@@ -306,7 +306,7 @@ task:
     populate_script:
       - git fetch origin
       - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-      - flutter precache
+      - flutter precache --android --ios --web
       - flutter doctor -v
   setup_script:
     - git clean -xffd --exclude=bin/cache/
@@ -478,7 +478,7 @@ task:
     populate_script:
       - git fetch origin
       - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
-      - flutter precache
+      - flutter precache --android --ios --web
       - flutter doctor -v
   pub_cache:
     folder: $HOME/.pub-cache
