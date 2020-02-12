@@ -4,6 +4,8 @@
 
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
+
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
@@ -87,12 +89,18 @@ class ImageCache {
     assert(value >= 0);
     if (value == maximumSize)
       return;
-    Timeline.instantSync('ImageCache.maximumSize', arguments: <String, dynamic>{'value': value});
+    TimelineTask timelineTask;
+    if (!kReleaseMode) {
+       timelineTask = TimelineTask()..start('ImageCache.setMaximumSize', arguments: <String, dynamic>{'value': value});
+    }
     _maximumSize = value;
     if (maximumSize == 0) {
       clear();
     } else {
-      _checkCacheSize();
+      _checkCacheSize(timelineTask);
+    }
+    if (!kReleaseMode) {
+      timelineTask.finish();
     }
   }
 
@@ -117,11 +125,18 @@ class ImageCache {
     assert(value >= 0);
     if (value == _maximumSizeBytes)
       return;
+    TimelineTask timelineTask;
+    if (!kReleaseMode) {
+      timelineTask = TimelineTask()..start('ImageCache.setMaximumSizeBytes', arguments: <String, dynamic>{'value': value});
+    }
     _maximumSizeBytes = value;
     if (_maximumSizeBytes == 0) {
       clear();
     } else {
-      _checkCacheSize();
+      _checkCacheSize(timelineTask);
+    }
+    if (!kReleaseMode) {
+      timelineTask.finish();
     }
   }
 
@@ -137,14 +152,16 @@ class ImageCache {
   /// Images which have not finished loading yet will not be removed from the
   /// cache, and when they complete they will be inserted as normal.
   void clear() {
-    Timeline.instantSync(
-      'ImageCache.clear',
-      arguments: <String, dynamic>{
-        'pendingImages': _pendingImages.length,
-        'cachedImages': _cache.length,
-        'currentSizeInBytes': _currentSizeBytes,
-      },
-    );
+    if (!kReleaseMode) {
+      Timeline.instantSync(
+        'ImageCache.clear',
+        arguments: <String, dynamic>{
+          'pendingImages': _pendingImages.length,
+          'cachedImages': _cache.length,
+          'currentSizeInBytes': _currentSizeBytes,
+        },
+      );
+    }
     _cache.clear();
     _pendingImages.clear();
     _currentSizeBytes = 0;
@@ -169,24 +186,30 @@ class ImageCache {
   bool evict(Object key) {
     final _PendingImage pendingImage = _pendingImages.remove(key);
     if (pendingImage != null) {
-      Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
-        'type': 'pending'
-      });
+      if (!kReleaseMode) {
+        Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
+          'type': 'pending'
+        });
+      }
       pendingImage.removeListener();
       return true;
     }
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
-      Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
-        'type': 'completed',
-        'sizeiInBytes': image.sizeBytes,
-      });
+      if (!kReleaseMode) {
+        Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
+          'type': 'completed',
+          'sizeiInBytes': image.sizeBytes,
+        });
+      }
       _currentSizeBytes -= image.sizeBytes;
       return true;
     }
-    Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
-      'type': 'miss',
-    });
+    if (!kReleaseMode) {
+      Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
+        'type': 'miss',
+      });
+    }
     return false;
   }
 
@@ -203,39 +226,41 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader(), { ImageErrorListener onError }) {
     assert(key != null);
     assert(loader != null);
-    // final TimelineTask timelineTask = TimelineTask();
-    // timelineTask.start(
-    //   'ImageCache.putIfAbsent', arguments: <String, dynamic>{
-    //     'key': key.toString(),
-    //   },
-    // );
+    TimelineTask timelineTask;
+    TimelineTask listenerTask;
+    if (!kReleaseMode) {
+      timelineTask = TimelineTask()..start(
+        'ImageCache.putIfAbsent',
+        arguments: <String, dynamic>{
+          'key': key.toString(),
+        },
+      );
+    }
     ImageStreamCompleter result = _pendingImages[key]?.completer;
     // Nothing needs to be done because the image hasn't loaded yet.
     if (result != null) {
-      // timelineTask.finish(arguments: <String, dynamic>{
-      //   'location': 'pending',
-      // });
+      if (!kReleaseMode) {
+        timelineTask.finish(arguments: <String, dynamic>{'result': 'pending'});
+      }
       return result;
     }
     // Remove the provider from the list so that we can move it to the
     // recently used position below.
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
+      if (!kReleaseMode) {
+        timelineTask.finish(arguments: <String, dynamic>{'result': 'completed'});
+      }
       _cache[key] = image;
-      // timelineTask.finish(arguments: <String, dynamic>{
-      //   'location': 'completed',
-      //   'sizeInBytes': image.sizeBytes,
-      // });
       return image.completer;
     }
+
     try {
-      // timelineTask.instant('ImageCache.putIfAbsent.loader');
       result = loader();
     } catch (error, stackTrace) {
-      // timelineTask.finish(arguments: <String, dynamic>{
-      //   'error': error,
-      //   'stackTrace': stackTrace,
-      // });
+      if (!kReleaseMode) {
+        timelineTask.finish(arguments: <String, dynamic>{'result': 'error', 'error': error, 'stackTrace': stackTrace});
+      }
       if (onError != null) {
         onError(error, stackTrace);
         return null;
@@ -243,10 +268,11 @@ class ImageCache {
         rethrow;
       }
     }
+
+    if (!kReleaseMode) {
+      listenerTask = TimelineTask(parent: timelineTask)..start('listener');
+    }
     void listener(ImageInfo info, bool syncCall) {
-      // timelineTask.instant('ImageCache.putIfAbsent.listener', arguments: <String, dynamic>{
-      //   'syncCall': syncCall,
-      // });
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
       final _CachedImage image = _CachedImage(result, imageSize);
@@ -258,17 +284,24 @@ class ImageCache {
       if (imageSize <= maximumSizeBytes) {
         _currentSizeBytes += imageSize;
         _cache[key] = image;
-        _checkCacheSize();
+        _checkCacheSize(listenerTask);
+      }
+      if (!kReleaseMode) {
+        listenerTask.finish(arguments: <String, dynamic>{
+          'syncCall': syncCall,
+          'sizeInBytes': imageSize,
+        });
+        timelineTask.finish(arguments: <String, dynamic>{
+          'currentSizeBytes': currentSizeBytes,
+          'currentSize': currentSize,
+        });
       }
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
-      // timelineTask.instant('ImageCache.putIfAbsent.streamListener');
       final ImageStreamListener streamListener = ImageStreamListener(listener);
       _pendingImages[key] = _PendingImage(result, streamListener);
       // Listener is removed in [_PendingImage.removeListener].
       result.addListener(streamListener);
-    } else {
-      // timelineTask.finish();
     }
     return result;
   }
@@ -280,15 +313,29 @@ class ImageCache {
 
   // Remove images from the cache until both the length and bytes are below
   // maximum, or the cache is empty.
-  void _checkCacheSize() {
-    Timeline.startSync('ImageCache._checkCacheSize');
+  void _checkCacheSize(TimelineTask timelineTask) {
+    final Map<String, dynamic> finishArgs = <String, dynamic>{};
+    TimelineTask checkCacheTask;
+    if (!kReleaseMode) {
+      checkCacheTask = TimelineTask(parent: timelineTask)..start('checkCacheSize');
+      finishArgs['evictedKeys'] = <String>[];
+      finishArgs['currentSize'] = currentSize;
+      finishArgs['currentSizeBytes'] = currentSizeBytes;
+    }
     while (_currentSizeBytes > _maximumSizeBytes || _cache.length > _maximumSize) {
       final Object key = _cache.keys.first;
       final _CachedImage image = _cache[key];
       _currentSizeBytes -= image.sizeBytes;
       _cache.remove(key);
+      if (!kReleaseMode) {
+        finishArgs['evictedKeys'].add(key.toString());
+      }
     }
-    Timeline.finishSync();
+    if (!kReleaseMode) {
+      finishArgs['endSize'] = currentSize;
+      finishArgs['endSizeBytes'] = currentSizeBytes;
+      checkCacheTask.finish(arguments: finishArgs);
+    }
     assert(_currentSizeBytes >= 0);
     assert(_cache.length <= maximumSize);
     assert(_currentSizeBytes <= maximumSizeBytes);
