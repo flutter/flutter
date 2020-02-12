@@ -173,6 +173,15 @@ abstract class FlutterCommand extends Command<void> {
         'when running on remote machines.',
       hide: hide,
     );
+    argParser.addFlag('web-run-headless',
+      defaultsTo: false,
+      help: 'Launches the browser in headless mode.',
+      hide: true,
+    );
+    argParser.addOption('web-browser-debug-port',
+      help: 'The debug port the browser should use. If not specified, a random port is selected.',
+      hide: true,
+    );
   }
 
   void usesTargetOption() {
