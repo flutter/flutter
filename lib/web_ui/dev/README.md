@@ -55,7 +55,14 @@ To run tests on Safari use the following command. It works on MacOS devices and 
 felt test --browser=safari
 ```
 
-To run a single test:
+To run tests on Windows Edge use the following command. It works on Windows devices and it uses the Edge installed on the OS. 
+
+```
+felt_windows.bat test --browser=edge
+```
+
+To run a single test use the following command. Note that it does not work on Windows.
+
 ```
 felt test test/golden_tests/engine/canvas_golden_test.dart
 ```
