@@ -59,6 +59,36 @@ void main() {
       throwsToolExit(message: 'Flutter is not currently on a known channel.'));
   });
 
+  testUsingContext('Downgrade exits on no recorded version', () async {
+    when(flutterVersion.channel).thenReturn('dev');
+    fileSystem.currentDirectory.childFile('.flutter_tool_state')
+      .writeAsStringSync('{"last-active-master-version":"abcd"}');
+    final DowngradeCommand command = DowngradeCommand(
+      persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'git', 'describe', '--tags', 'abcd'
+          ],
+          exitCode: 0,
+          stdout: 'v1.2.3'
+        )
+      ]),
+      terminal: terminal,
+      stdio: mockStdio,
+      flutterVersion: flutterVersion,
+      logger: bufferLogger,
+    );
+    applyMocksToCommand(command);
+
+    expect(createTestCommandRunner(command).run(const <String>['downgrade']),
+      throwsToolExit(message:
+        'There is no previously recorded version for channel "dev".\n'
+        'Channel "master" was previously on: v1.2.3.'
+      ),
+    );
+  });
+
   testUsingContext('Downgrade exits on unknown recorded version', () async {
     when(flutterVersion.channel).thenReturn('master');
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
@@ -68,7 +98,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--exact-match', 'invalid'
+            'git', 'describe', '--tags', 'invalid'
           ],
           exitCode: 1,
         )
@@ -187,7 +217,7 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--exact-match', 'g6b00b5e88'
+            'git', 'describe', '--tags', 'g6b00b5e88'
           ],
           stdout: 'v1.2.3',
         ),

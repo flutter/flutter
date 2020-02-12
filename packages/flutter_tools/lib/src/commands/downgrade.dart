@@ -101,8 +101,10 @@ class DowngradeCommand extends FlutterCommand {
     final String lastFlutterVesion = _persistentToolState.lastActiveVersion(channel);
     final String currentFlutterVersion = _flutterVersion.frameworkRevision;
     if (lastFlutterVesion == null || currentFlutterVersion == lastFlutterVesion) {
+      final String trailing = await _createErrorMessage(workingDirectory, channel);
       throwToolExit(
-        'There is no previously recorded version for channel "$currentChannel."'
+        'There is no previously recorded version for channel "$currentChannel".\n'
+        '$trailing'
       );
     }
 
@@ -164,5 +166,26 @@ class DowngradeCommand extends FlutterCommand {
     await FlutterVersion.resetFlutterVersionFreshnessCheck();
     _logger.printStatus('Success');
     return FlutterCommandResult.success();
+  }
+
+  // Formats an error message that lists the currently stored versions.
+  Future<String> _createErrorMessage(String workingDirectory, Channel currentChannel) async {
+    final StringBuffer buffer = StringBuffer();
+    for (final Channel channel in Channel.values) {
+      if (channel == currentChannel) {
+        continue;
+      }
+      final String sha = _persistentToolState.lastActiveVersion(channel);
+      if (sha == null) {
+        continue;
+      }
+      final RunResult parseResult = await _processUtils.run(<String>[
+        'git', 'describe', '--tags', sha,
+      ], workingDirectory: workingDirectory);
+      if (parseResult.exitCode == 0) {
+        buffer.writeln('Channel "${getNameForChannel(channel)}" was previously on: ${parseResult.stdout}.');
+      }
+    }
+    return buffer.toString();
   }
 }
