@@ -4,9 +4,9 @@
 
 import 'dart:ui' show hashValues;
 
-import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
+import 'constants.dart';
 import 'object.dart';
 
 /// A object representation of a frame from a stack trace.

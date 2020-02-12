@@ -646,7 +646,7 @@ Future<void> _runWebDebugStackTraceTest() async {
       'lib/stack_trace.dart',
     ],
     output: output,
-    outputMode: OutputMode.discard,
+    outputMode: OutputMode.capture,
     outputListener: (String line, Process process) {
       if (line.contains('--- TEST SUCCEEDED ---')) {
         success = true;
