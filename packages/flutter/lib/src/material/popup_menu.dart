@@ -1037,10 +1037,50 @@ class PopupMenuButton<T> extends StatefulWidget {
   final bool captureInheritedThemes;
 
   @override
-  _PopupMenuButtonState<T> createState() => _PopupMenuButtonState<T>();
+  PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
 
-class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
+/// The [State] for a [PopupMenuButton].
+///
+/// See [showButtonMenu] for a way to programmatically open the popup menu
+/// of your button state.
+class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
+  /// A method to show a popup menu with the items supplied to
+  /// [PopupMenuButton.itemBuilder] at the position of your [PopupMenuButton].
+  ///
+  /// By default, it is called when the user taps the button and [PopupMenuButton.enabled]
+  /// is set to `true`. Moreover, you can open the button by calling the method manually.
+  ///
+  /// {@tool sample}
+  ///
+  /// You would access your [PopupMenuButtonState] using a [GlobalKey].
+  /// With the following setup, you can show the menu of the button
+  /// via `globalKey.currentState.showButtonMenu`.
+  ///
+  /// ```dart
+  /// class ExampleWidget extends StatelessWidget {
+  ///   final GlobalKey<PopupMenuButtonState<int>> globalKey = GlobalKey();
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return PopupMenuButton<int>(
+  ///       key: globalKey,
+  ///       itemBuilder: (BuildContext context) {
+  ///         return <PopupMenuEntry<int>>[
+  ///           const PopupMenuItem<int>(
+  ///             value: 1,
+  ///             child: Text('Tap me please!'),
+  ///           ),
+  ///         ];
+  ///       },
+  ///     );
+  ///   }
+  ///
+  ///   void showButtonMenu() => globalKey.currentState.showButtonMenu();
+  /// }
+  /// ```
+  ///
+  /// {@end-tool}
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject() as RenderBox;
