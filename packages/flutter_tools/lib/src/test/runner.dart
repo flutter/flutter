@@ -24,8 +24,6 @@ import 'watcher.dart';
 abstract class FlutterTestRunner {
   const factory FlutterTestRunner() = _FlutterTestRunnerImpl;
 
-  const FlutterTestRunner._();
-
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
     TestWrapper testWrapper,
@@ -55,7 +53,7 @@ abstract class FlutterTestRunner {
 }
 
 class _FlutterTestRunnerImpl implements FlutterTestRunner {
-  const _FlutterTestRunnerImpl() : super._();
+  const _FlutterTestRunnerImpl();
 
   @override
   Future<int> runTests(
