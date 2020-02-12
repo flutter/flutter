@@ -398,15 +398,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.isSnackBarFloating,
     @required this.extendBody,
     @required this.extendBodyBehindAppBar,
-    @required this.shouldSnackBarIgnoreFABRect,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
        assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null),
        assert(extendBody != null),
-       assert(extendBodyBehindAppBar != null),
-       assert(shouldSnackBarIgnoreFABRect != null);
+       assert(extendBodyBehindAppBar != null);
 
   final bool extendBody;
   final bool extendBodyBehindAppBar;
@@ -420,7 +418,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final bool isSnackBarFloating;
-  final bool shouldSnackBarIgnoreFABRect;
 
   @override
   void performLayout(Size size) {
@@ -556,7 +553,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }
 
       double snackBarYOffsetBase;
-      if (shouldSnackBarIgnoreFABRect) {
+      if (Scaffold.shouldSnackBarIgnoreFABRect) {
         if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating)
           snackBarYOffsetBase = floatingActionButtonRect.top;
         else
@@ -1319,9 +1316,10 @@ class Scaffold extends StatefulWidget {
   /// This flag is deprecated and fixes and issue with incorrect clipping
   /// and positioning of the [SnackBar] set to [SnackBarBehavior.floating].
   @Deprecated(
-    'Fixes a bug that incorrectly clips and positions SnackBar. It '
-    'previously incorrectly offsets itself assuming a floating action button '
-    'is present even when it is not. This parameter will be removed. '
+    'This property controls whether to clip and position the snackbar as '
+    'if there is always a floating action button, even if one is not present. '
+    'It exists to provide backwards compatibility to ease migrations, and will '
+    'eventually be removed. '
     'This feature was deprecated after v1.15.3.'
   )
   static bool shouldSnackBarIgnoreFABRect = false;
@@ -2517,7 +2515,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 isSnackBarFloating: isSnackBarFloating,
-                shouldSnackBarIgnoreFABRect: Scaffold.shouldSnackBarIgnoreFABRect,
               ),
             );
           }),
