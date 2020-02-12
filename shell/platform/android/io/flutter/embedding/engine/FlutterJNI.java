@@ -56,13 +56,16 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * <p>To connect part of an Android app to Flutter's C/C++ engine, instantiate a {@code FlutterJNI}
  * and then attach it to the native side:
  *
- * <p>{@code // Instantiate FlutterJNI and attach to the native side. FlutterJNI flutterJNI = new
- * FlutterJNI(); flutterJNI.attachToNative();
+ * <pre>{@code
+ * // Instantiate FlutterJNI and attach to the native side.
+ * FlutterJNI flutterJNI = new FlutterJNI();
+ * flutterJNI.attachToNative();
  *
- * <p>// Use FlutterJNI as desired. flutterJNI.dispatchPointerDataPacket(...);
+ * // Use FlutterJNI as desired. flutterJNI.dispatchPointerDataPacket(...);
  *
- * <p>// Destroy the connection to the native side and cleanup.
- * flutterJNI.detachFromNativeAndReleaseResources(); }
+ * // Destroy the connection to the native side and cleanup.
+ * flutterJNI.detachFromNativeAndReleaseResources();
+ * }</pre>
  *
  * <p>To provide a visual, interactive surface for Flutter rendering and touch events, register a
  * {@link RenderSurface} with {@link #setRenderSurface(RenderSurface)}
