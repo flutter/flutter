@@ -901,8 +901,8 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// If |force| is true, the symlinks will be recreated, otherwise they will
 /// be created only if missing.
 ///
-/// This uses [project.flutterPluginsDependenciesFile], so should only be run
-/// after refreshPluginList has been run since the last plugin change.
+/// This uses [project.flutterPluginsDependenciesFile], so it should only be
+/// run after refreshPluginList has been run since the last plugin change.
 void createPluginSymlinks(FlutterProject project, {bool force = false}) {
   Map<String, dynamic> platformPlugins;
   final String pluginFileContent = _readFileContent(project.flutterPluginsDependenciesFile);
@@ -916,13 +916,15 @@ void createPluginSymlinks(FlutterProject project, {bool force = false}) {
     _createPlatformPluginSymlinks(
       project.windows.pluginSymlinkDirectory,
       platformPlugins[project.windows.pluginConfigKey] as List<dynamic>,
-      force: force);
+      force: force,
+    );
   }
   if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
     _createPlatformPluginSymlinks(
       project.linux.pluginSymlinkDirectory,
       platformPlugins[project.linux.pluginConfigKey] as List<dynamic>,
-      force: force);
+      force: force,
+    );
   }
 }
 
@@ -951,7 +953,7 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> pla
       if (globals.platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
         throwToolExit(
           'Building with plugins requires symlink support. '
-          'Please enable Developer Mode in your system settings.'
+          'Please enable Developer Mode in your system settings.\n\n$e'
         );
       }
       rethrow;
