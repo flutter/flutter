@@ -649,7 +649,11 @@ class FlutterPlugin implements Plugin<Project> {
                 treeShakeIcons treeShakeIconsOptionsValue
                 doLast {
                     project.exec {
-                        commandLine('chmod',  '-R', 'u+w', assetsDirectory)
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                            commandLine('cmd', '/c', 'attrib -r ${assetsDirectory}')
+                        } else {
+                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
+			}
                     }
                 }
             }
