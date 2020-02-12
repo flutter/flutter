@@ -38,7 +38,7 @@ import 'inherited_notifier.dart';
 ///
 /// To collect a sub-tree of nodes into a group, use a [FocusScope].
 ///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to manage focus using the [Focus] and [FocusScope]
 /// widgets. See [FocusNode] for a similar example that doesn't use [Focus] or
 /// [FocusScope].
@@ -462,8 +462,10 @@ class _FocusState extends State<Focus> {
     return _FocusMarker(
       node: focusNode,
       child: Semantics(
-        focusable: _canRequestFocus,
-        focused: _hasPrimaryFocus,
+        // If these values are false, then just don't set them, so they don't
+        // eclipse values set by children.
+        focusable: _canRequestFocus ? true : null,
+        focused: _hasPrimaryFocus ? true : null,
         child: widget.child,
       ),
     );

@@ -337,7 +337,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       globals.printStatus(buildResult.stderr, indent: 4);
     }
     if (buildResult.stdout.isNotEmpty) {
-      globals.printStatus('Xcode\'s output:\n↳');
+      globals.printStatus("Xcode's output:\n↳");
       globals.printStatus(buildResult.stdout, indent: 4);
     }
     return XcodeBuildResult(
@@ -454,7 +454,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
       // May need updating if Xcode changes its outputs.
-      result.stdout?.contains('Xcode couldn\'t find a provisioning profile matching') == true) {
+      result.stdout?.contains("Xcode couldn't find a provisioning profile matching") == true) {
     globals.printError(noProvisioningProfileInstruction, emphasis: true);
     return;
   }

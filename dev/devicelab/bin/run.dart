@@ -157,7 +157,7 @@ final ArgParser _argParser = ArgParser()
   ..addFlag(
     'list',
     abbr: 'l',
-    help: 'Don\'t actually run the tasks, but list out the tasks that would\n'
+    help: "Don't actually run the tasks, but list out the tasks that would\n"
           'have been run, in the order they would have run.',
   )
   ..addOption(

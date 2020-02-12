@@ -1819,7 +1819,7 @@ class StringProperty extends DiagnosticsProperty<String> {
       // Escape linebreaks in multiline strings to avoid confusing output when
       // the parent of this node is trying to display all properties on the same
       // line.
-      text = text.replaceAll('\n', '\\n');
+      text = text.replaceAll('\n', r'\n');
     }
 
     if (quoted && text != null) {

@@ -19,8 +19,8 @@ import '../ios/devices.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
 
-const int kXcodeRequiredVersionMajor = 10;
-const int kXcodeRequiredVersionMinor = 2;
+const int kXcodeRequiredVersionMajor = 11;
+const int kXcodeRequiredVersionMinor = 0;
 
 enum SdkType {
   iPhone,
@@ -229,7 +229,7 @@ class XCDevice {
 
   Future<List<dynamic>> _getAllDevices({bool useCache = false}) async {
     if (!isInstalled) {
-      _logger.printTrace('Xcode not found. Run \'flutter doctor\' for more information.');
+      _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
     }
     if (useCache && _cachedListResults != null) {

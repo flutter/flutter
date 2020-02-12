@@ -41,7 +41,7 @@ class ScreenshotCommand extends FlutterCommand {
       help: 'The type of screenshot to retrieve.',
       allowed: const <String>[_kDeviceType, _kSkiaType, _kRasterizerType],
       allowedHelp: const <String, String>{
-        _kDeviceType: 'Delegate to the device\'s native screenshot capabilities. This '
+        _kDeviceType: "Delegate to the device's native screenshot capabilities. This "
             'screenshots the entire screen currently being displayed (including content '
             'not rendered by Flutter, like the device status bar).',
         _kSkiaType: 'Render the Flutter app as a Skia picture. Requires --$_kObservatoryUri',

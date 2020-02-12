@@ -65,7 +65,7 @@ class PlatformViewsService {
         }
         break;
       default:
-        throw UnimplementedError('${call.method} was invoked but isn\'t implemented by PlatformViewsService');
+        throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
     }
     return null;
   }
