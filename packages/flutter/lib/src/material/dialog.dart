@@ -557,7 +557,7 @@ class SimpleDialogOption extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  /// The amount of space by which to inset the [children].
+  /// The amount of space to surround the [child] with.
   ///
   /// Defaults to EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0).
   final EdgeInsets padding;
