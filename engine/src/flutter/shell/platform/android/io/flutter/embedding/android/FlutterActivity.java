@@ -107,12 +107,14 @@ import java.lang.reflect.Method;
  *
  * <p>The following illustrates how to pre-warm and cache a {@link FlutterEngine}:
  *
- * <p>{@code // Create and pre-warm a FlutterEngine. FlutterEngine flutterEngine = new
- * FlutterEngine(context); flutterEngine .getDartExecutor()
- * .executeDartEntrypoint(DartEntrypoint.createDefault());
+ * <pre>{@code
+ * // Create and pre-warm a FlutterEngine.
+ * FlutterEngine flutterEngine = new FlutterEngine(context);
+ * flutterEngine.getDartExecutor().executeDartEntrypoint(DartEntrypoint.createDefault());
  *
- * <p>// Cache the pre-warmed FlutterEngine in the FlutterEngineCache.
- * FlutterEngineCache.getInstance().put("my_engine", flutterEngine); }
+ * // Cache the pre-warmed FlutterEngine in the FlutterEngineCache.
+ * FlutterEngineCache.getInstance().put("my_engine", flutterEngine);
+ * }</pre>
  *
  * <p><strong>Alternatives to FlutterActivity</strong>
  *
