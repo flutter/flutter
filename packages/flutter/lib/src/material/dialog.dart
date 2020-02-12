@@ -349,8 +349,8 @@ class AlertDialog extends StatelessWidget {
   /// arranged into a column. This parameter provides additional
   /// vertical space in between buttons when it does overflow.
   ///
-  /// If null then no spacing will be added in between buttons
-  /// in an overflow state.
+  /// If null then a default spacing of 4.0 will be added in
+  /// between buttons in an overflow state.
   final double actionsOverflowButtonSpacing;
 
   /// The padding that surrounds each button in [actions].
