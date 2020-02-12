@@ -91,7 +91,7 @@ void main() {
     expect(largeSize.height, equals(26.0));
   });
 
-  testWidgets('Text throws a nice error message if there\'s no Directionality', (WidgetTester tester) async {
+  testWidgets("Text throws a nice error message if there's no Directionality", (WidgetTester tester) async {
     await tester.pumpWidget(const Text('Hello'));
     final String message = tester.takeException().toString();
     expect(message, contains('Directionality'));

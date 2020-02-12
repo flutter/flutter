@@ -745,7 +745,7 @@ class SliverGeometry extends Diagnosticable {
           'The "maxPaintExtent" is less than the "paintExtent".',
           details:
             _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent)
-              ..add(ErrorDescription('By definition, a sliver can\'t paint more than the maximum that it can paint!')),
+              ..add(ErrorDescription("By definition, a sliver can't paint more than the maximum that it can paint!")),
         );
       }
       verify(hitTestExtent != null, 'The "hitTestExtent" is null.');

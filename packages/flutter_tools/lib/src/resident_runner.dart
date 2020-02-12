@@ -52,7 +52,7 @@ class FlutterDevice {
          ),
          buildMode: buildMode,
          trackWidgetCreation: trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots,
+         fileSystemRoots: fileSystemRoots ?? <String>[],
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
          experimentalFlags: experimentalFlags,
@@ -79,14 +79,15 @@ class FlutterDevice {
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
-    if (featureFlags.isWebIncrementalCompilerEnabled &&
-        targetPlatform == TargetPlatform.web_javascript) {
+    if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildMode),
         buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots,
-        fileSystemScheme: fileSystemScheme,
+        fileSystemRoots: fileSystemRoots ?? <String>[],
+        // Override the filesystem scheme so that the frontend_server can find
+        // the generated entrypoint code.
+        fileSystemScheme: 'org-dartlang-app',
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts

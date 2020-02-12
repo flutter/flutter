@@ -2409,7 +2409,7 @@ void main() {
                 ),
                 body: tabTextContent.isNotEmpty
                   ? TabBarView(
-                      children: tabTextContent.map((String textContent) => Tab(text: '$textContent\'s view')).toList()
+                      children: tabTextContent.map((String textContent) => Tab(text: "$textContent's view")).toList()
                     )
                   : const Center(child: Text('No tabs')),
                 bottomNavigationBar: BottomAppBar(
@@ -2452,7 +2452,7 @@ void main() {
     await tester.tap(find.byKey(const Key('Add tab')));
     await tester.pumpAndSettle();
     expect(find.text('Tab 1'), findsOneWidget);
-    expect(find.text('Tab 1\'s view'), findsOneWidget);
+    expect(find.text("Tab 1's view"), findsOneWidget);
 
     // Dynamically updates to zero tabs properly
     await tester.tap(find.byKey(const Key('Delete tab')));

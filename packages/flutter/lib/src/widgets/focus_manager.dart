@@ -230,16 +230,16 @@ class FocusAttachment {
 /// particular direction, is determined by the [FocusTraversalPolicy] in force.
 ///
 /// The ambient policy is determined by looking up the widget hierarchy for a
-/// [DefaultFocusTraversal] widget, and obtaining the focus traversal policy
+/// [FocusTraversalGroup] widget, and obtaining the focus traversal policy
 /// from it. Different focus nodes can inherit difference policies, so part of
 /// the app can go in widget order, and part can go in reading order, depending
 /// upon the use case.
 ///
-/// Predefined policies include [WidgetOrderFocusTraversalPolicy],
+/// Predefined policies include [WidgetOrderTraversalPolicy],
 /// [ReadingOrderTraversalPolicy], and [DirectionalFocusTraversalPolicyMixin],
 /// but custom policies can be built based upon these policies.
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 /// This example shows how a FocusNode should be managed if not using the
 /// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
 /// example using [Focus] and [FocusScope] widgets.
@@ -361,8 +361,8 @@ class FocusAttachment {
 ///    events to focused nodes.
 ///  * [FocusTraversalPolicy], a class used to determine how to move the focus
 ///    to other nodes.
-///  * [DefaultFocusTraversal], a widget used to configure the default focus
-///    traversal policy for a widget subtree.
+///  * [FocusTraversalGroup], a widget used to group together and configure the
+///    focus traversal policy for a widget subtree.
 class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates a focus node.
   ///
@@ -426,8 +426,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// See also:
   ///
-  ///  * [DefaultFocusTraversal], a widget that sets the traversal policy for
-  ///    its descendants.
+  ///  * [FocusTraversalGroup], a widget used to group together and configure the
+  ///    focus traversal policy for a widget subtree.
   ///  * [FocusTraversalPolicy], a class that can be extended to describe a
   ///    traversal policy.
   bool get canRequestFocus {
@@ -518,7 +518,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return _descendants;
   }
 
-  /// Returns all descendants which do not have the [skipTraversal] flag set.
+  /// Returns all descendants which do not have the [skipTraversal] and do have
+  /// the [canRequestFocus] flag set.
   Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
 
   /// An [Iterable] over the ancestors of this node.
@@ -776,7 +777,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       _manager?.primaryFocus?._setAsFocusedChild();
     }
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
-      DefaultFocusTraversal.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
+      FocusTraversalGroup.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
     }
     if (child._requestFocusWhenReparented) {
       child._doRequestFocus();
@@ -915,19 +916,19 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusTraversalPolicy.next] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
+  bool nextFocus() => FocusTraversalGroup.of(context).next(this);
 
   /// Request to move the focus to the previous focus node, by calling the
   /// [FocusTraversalPolicy.previous] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
+  bool previousFocus() => FocusTraversalGroup.of(context).previous(this);
 
   /// Request to move the focus to the nearest focus node in the given
   /// direction, by calling the [FocusTraversalPolicy.inDirection] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  bool focusInDirection(TraversalDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
+  bool focusInDirection(TraversalDirection direction) => FocusTraversalGroup.of(context).inDirection(this, direction);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1166,6 +1167,15 @@ enum FocusHighlightStrategy {
 /// current focus in that [FocusScopeNode] is null, it will stop there, and no
 /// [FocusNode] will have focus.
 ///
+/// If you would like notification whenever the [primaryFocus] changes, register
+/// a listener with [addListener]. When you no longer want to receive events, as
+/// when your object is about to be disposed, you must unregister with
+/// [removeListener] to avoid memory leaks. Removing listeners is typically done
+/// in [State.dispose] on stateful widgets.
+///
+/// The [highlightMode] changes are notified separately via
+/// [addHighlightModeListener] and removed with [removeHighlightModeListener].
+///
 /// See also:
 ///
 ///  * [FocusNode], which is a node in the focus tree that can receive focus.
@@ -1177,7 +1187,7 @@ enum FocusHighlightStrategy {
 ///    a given [BuildContext].
 ///  * The [focusManager] and [primaryFocus] global accessors, for convenient
 ///    access from anywhere to the current focus manager state.
-class FocusManager with DiagnosticableTreeMixin {
+class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagnosticable {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
@@ -1443,6 +1453,9 @@ class FocusManager with DiagnosticableTreeMixin {
       node._notify();
     }
     _dirtyNodes.clear();
+    if (previousFocus != _primaryFocus) {
+      notifyListeners();
+    }
     assert(() {
       if (_kDebugFocus) {
         debugDumpFocusTree();

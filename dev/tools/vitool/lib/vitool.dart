@@ -88,8 +88,8 @@ class PathAnimation {
         if (commandType != currentCommandType)
           throw Exception(
               'Paths must be built from the same commands in all frames '
-              'command $commandIdx at frame 0 was of type \'$commandType\' '
-              'command $commandIdx at frame $i was of type \'$currentCommandType\''
+              "command $commandIdx at frame 0 was of type '$commandType' "
+              "command $commandIdx at frame $i was of type '$currentCommandType'"
           );
         for (int j = 0; j < numPointsInCommand; j += 1)
           points[j].add(frame.paths[pathIdx].commands[commandIdx].points[j]);
@@ -529,7 +529,7 @@ final RegExp _pixelsExp = RegExp(r'^([0-9]+)px$');
 int parsePixels(String pixels) {
   if (!_pixelsExp.hasMatch(pixels))
     throw ArgumentError(
-      'illegal pixels expression: \'$pixels\''
+      "illegal pixels expression: '$pixels'"
       ' (the tool currently only support pixel units).');
   return int.parse(_pixelsExp.firstMatch(pixels).group(1));
 }
@@ -540,7 +540,7 @@ String _extractAttr(XmlElement element, String name) {
         .value;
   } catch (e) {
     throw ArgumentError(
-        'Can\'t find a single \'$name\' attributes in ${element.name}, '
+        "Can't find a single '$name' attributes in ${element.name}, "
         'attributes were: ${element.attributes}'
     );
   }
