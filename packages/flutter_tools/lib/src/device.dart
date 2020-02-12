@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter_tools/src/convert.dart';
 import 'package:meta/meta.dart';
 
 import 'android/android_device_discovery.dart';
@@ -499,14 +498,7 @@ abstract class Device {
     await descriptions(devices).forEach(globals.printStatus);
   }
 
-  static Future<void> printDevicesAsJson(List<Device> devices) async {
-    globals.printStatus(
-      const JsonEncoder.withIndent('  ').convert(
-        await Future.wait(devices.map((Device d) => d.toJson()))
-      )
-    );
-  }
-
+  /// Returns a representation of this Device object as a JSON object
   Future<Map<String, Object>> toJson() async =>
     <String, Object>{
       'name': name,

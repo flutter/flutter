@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/convert.dart';
 import '../base/common.dart';
 import '../base/utils.dart';
 import '../device.dart';
@@ -50,8 +51,8 @@ class DevicesCommand extends FlutterCommand {
           globals.printStatus('• $diagnostic', hangingIndent: 2);
         }
       }
-    } else if(boolArg('machine')) {
-      await Device.printDevicesAsJson(devices);
+    } else if (boolArg('machine')) {
+      await printDevicesAsJson(devices);
     } else {
       globals.printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
       await Device.printDevices(devices);
@@ -59,4 +60,13 @@ class DevicesCommand extends FlutterCommand {
 
     return FlutterCommandResult.success();
   }
+
+  Future<void> printDevicesAsJson(List<Device> devices) async {
+    globals.printStatus(
+      const JsonEncoder.withIndent('  ').convert(
+        await Future.wait(devices.map((Device d) => d.toJson()))
+      )
+    );
+  }
+
 }
