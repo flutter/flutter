@@ -331,6 +331,7 @@ class DataTable extends StatelessWidget {
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
     this.showCheckboxColumn = true,
+    this.borderThickness = 1.0,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
@@ -343,6 +344,7 @@ class DataTable extends StatelessWidget {
        assert(showCheckboxColumn != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
+       assert(borderThickness != null && borderThickness >=0),
        _onlyTextColumn = _initOnlyTextColumn(columns),
        super(key: key);
 
@@ -466,7 +468,11 @@ class DataTable extends StatelessWidget {
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
   static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
   static const Color _grey300Opacity = Color(0x1E000000); // Dark theme variant is just a guess.
-  static const double _defaultBorderThickness = 1.0;
+
+  /// The width of the border between table rows.
+  /// Must not be null or negative. 0 is allowed.
+  /// This value defaults to 1.0.
+  final double borderThickness;
 
   Widget _buildCheckbox({
     Color color,
@@ -614,12 +620,12 @@ class DataTable extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final BoxDecoration _kSelectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width: theme.dividerTheme.thickness ?? _defaultBorderThickness)),
+      border: Border(bottom: Divider.createBorderSide(context, width:  borderThickness)),
       // The backgroundColor has to be transparent so you can see the ink on the material
       color: (Theme.of(context).brightness == Brightness.light) ? _grey100Opacity : _grey300Opacity,
     );
     final BoxDecoration _kUnselectedDecoration = BoxDecoration(
-      border: Border(bottom: Divider.createBorderSide(context, width: theme.dividerTheme.thickness ?? _defaultBorderThickness)),
+      border: Border(bottom: Divider.createBorderSide(context, width: borderThickness)),
     );
 
     final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);
