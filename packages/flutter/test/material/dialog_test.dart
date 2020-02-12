@@ -566,7 +566,7 @@ void main() {
     expect(buttonTwoRect.bottom, lessThanOrEqualTo(buttonOneRect.top));
   });
 
-  testWidgets('Dialogs have a default button spacing of overflowing actions', (WidgetTester tester) async {
+  testWidgets('Dialogs have no spacing by default for overflowing actions', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -596,7 +596,7 @@ void main() {
 
     final Rect buttonOneRect = tester.getRect(find.byKey(key1));
     final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
-    expect(buttonOneRect.bottom, buttonTwoRect.top - 4.0);
+    expect(buttonOneRect.bottom, buttonTwoRect.top);
   });
 
   testWidgets('Dialogs can set the button spacing of overflowing actions', (WidgetTester tester) async {
