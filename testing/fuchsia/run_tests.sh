@@ -68,3 +68,8 @@ done
     -f shell_tests-0.far  \
     -t shell_tests \
     -a "--gtest_filter=-ShellTest.HandlesActualIphoneXsInputEvents:ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.Screenshot:ShellTest.WaitForFirstFrameTimeout"
+
+echo "Dumping system logs..."
+
+./fuchsia_ctl -d $device_name ssh \
+    -c "log_listener --dump_logs yes"
