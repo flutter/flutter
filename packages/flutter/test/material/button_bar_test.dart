@@ -570,60 +570,7 @@ void main() {
         final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
         final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
         // Second [Container] should appear above first container.
-        expect(containerTwoRect.bottom, lessThanOrEqualTo(containerOneRect.top));
-      },
-    );
-
-    testWidgets(
-      'ButtonBar has no spacing by default when overflowing',
-      (WidgetTester tester) async {
-        final Key keyOne = UniqueKey();
-        final Key keyTwo = UniqueKey();
-        await tester.pumpWidget(
-          MaterialApp(
-            home: ButtonBar(
-              alignment: MainAxisAlignment.center,
-              // Set padding to zero to align buttons with edge of button bar.
-              buttonPadding: EdgeInsets.zero,
-              children: <Widget>[
-                Container(key: keyOne, height: 50.0, width: 500.0),
-                Container(key: keyTwo, height: 50.0, width: 500.0),
-              ],
-            ),
-          ),
-        );
-
-        final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
-        final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
-        expect(containerOneRect.bottom, containerTwoRect.top);
-      },
-    );
-
-    testWidgets(
-      "ButtonBar's children respects overflowButtonSpacing when overflowing",
-      (WidgetTester tester) async {
-        final Key keyOne = UniqueKey();
-        final Key keyTwo = UniqueKey();
-        await tester.pumpWidget(
-          MaterialApp(
-            home: ButtonBar(
-              alignment: MainAxisAlignment.center,
-              // Set padding to zero to align buttons with edge of button bar.
-              buttonPadding: EdgeInsets.zero,
-              // Set the overflow button spacing to ensure add some space between
-              // buttons in an overflow case.
-              overflowButtonSpacing: 10.0,
-              children: <Widget>[
-                Container(key: keyOne, height: 50.0, width: 500.0),
-                Container(key: keyTwo, height: 50.0, width: 500.0),
-              ],
-            ),
-          ),
-        );
-
-        final Rect containerOneRect = tester.getRect(find.byKey(keyOne));
-        final Rect containerTwoRect = tester.getRect(find.byKey(keyTwo));
-        expect(containerOneRect.bottom, containerTwoRect.top - 10.0);
+        expect(containerTwoRect.bottom, containerOneRect.top);
       },
     );
   });
