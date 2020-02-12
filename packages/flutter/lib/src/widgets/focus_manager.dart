@@ -654,8 +654,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// This method is safe to call regardless of whether this node has ever
   /// requested focus.
   ///
-  /// Has no effect on nodes that return true from [hasFocus], but false from
-  /// [hasPrimaryFocus].
+  /// For nodes that return true from [hasFocus], but false from
+  /// [hasPrimaryFocus], this will unfocus the descendant node that has the
+  /// primary focus instead ([FocusManager.primaryFocus]).
   ///
   /// If [focusPrevious] is true, then rather than losing all focus, the focus
   /// will be moved to the node that the [enclosingScope] thinks should have it,
