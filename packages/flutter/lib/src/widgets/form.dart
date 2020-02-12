@@ -198,9 +198,6 @@ class FormState extends State<Form> {
   /// returns true if there are no errors.
   ///
   /// The form will rebuild to report the results.
-  ///
-  /// See also:
-  ///   * [isValid], which will only check validity, but not rebuild the UI.
   bool validate() {
     _forceRebuild();
     return _validate();
@@ -211,15 +208,6 @@ class FormState extends State<Form> {
     for (final FormFieldState<dynamic> field in _fields)
       hasError = !field.validate() || hasError;
     return !hasError;
-  }
-
-  /// Check whether all the fields in this form are valid without changing
-  /// the display state.
-  ///
-  /// See also:
-  ///   * [validate], which will validate and show any error on screen.
-  bool isValid() {
-    return !_fields.any((FormFieldState<dynamic> field) => !field.isValid);
   }
 }
 

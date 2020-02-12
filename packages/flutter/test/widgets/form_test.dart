@@ -137,8 +137,9 @@ void main() {
     await checkErrorText('');
   });
 
-  testWidgets('IsValid returns true when all of the fields are valid', (WidgetTester tester) async {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
     const String validString = 'Valid string';
     String validator(String s) => s == validString ? null : 'Error text';
 
@@ -151,15 +152,16 @@ void main() {
             child: Center(
               child: Material(
                 child: Form(
-                  key: formKey,
                   child: ListView(
                     children: <Widget>[
                       TextFormField(
+                        key: fieldKey1,
                         initialValue: validString,
                         validator: validator,
                         autovalidate: true
                       ),
                       TextFormField(
+                        key: fieldKey2,
                         initialValue: validString,
                         validator: validator,
                         autovalidate: true
@@ -176,14 +178,15 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    expect(formKey.currentState.isValid(), isTrue);
+    expect(fieldKey1.currentState.isValid, isTrue);
+    expect(fieldKey2.currentState.isValid, isTrue);
   });
 
   testWidgets(
-    'IsValid returns false when any of the fields are invalid and does not change error display',
+    'isValid returns false when the field is invalid and does not change error display',
     (WidgetTester tester) async {
-      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-      final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
+      final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
+      final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
       const String validString = 'Valid string';
       String validator(String s) => s == validString ? null : 'Error text';
 
@@ -196,16 +199,16 @@ void main() {
               child: Center(
                 child: Material(
                   child: Form(
-                    key: formKey,
                     child: ListView(
                       children: <Widget>[
                         TextFormField(
+                          key: fieldKey1,
                           initialValue: validString,
                           validator: validator,
                           autovalidate: false,
                         ),
                         TextFormField(
-                          key: fieldKey,
+                          key: fieldKey2,
                           initialValue: '',
                           validator: validator,
                           autovalidate: false,
@@ -222,8 +225,9 @@ void main() {
 
       await tester.pumpWidget(builder());
 
-      expect(formKey.currentState.isValid(), isFalse);
-      expect(fieldKey.currentState.hasError, isFalse);
+      expect(fieldKey1.currentState.isValid, isTrue);
+      expect(fieldKey2.currentState.isValid, isFalse);
+      expect(fieldKey2.currentState.hasError, isFalse);
     },
   );
 
