@@ -819,6 +819,11 @@ void main() {
       tree.toString(),
       equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3)'),
     );
+
+    expect(
+      tree.toString(minLevel: DiagnosticLevel.debug),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, DEBUG_ONLY: DEBUG_ONLY)'),
+    );
   });
 
   test('transition test', () {
