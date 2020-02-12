@@ -33,7 +33,7 @@ void main() {
           '   must have unique keys.\n'
           '   Flex(direction: vertical, mainAxisAlignment: start,\n'
           '   crossAxisAlignment: center) has multiple children with key\n'
-          '   [<\'key\'>].\n',
+          "   [<'key'>].\n",
         ),
       );
     }
@@ -56,7 +56,7 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   Duplicate key found: [<\'key\'>].\n'
+          "   Duplicate key found: [<'key'>].\n"
         ),
       );
     }
@@ -206,7 +206,7 @@ void main() {
           '   A build function returned context.widget.\n'
           '   The offending widget is:\n'
           '     Container\n'
-          '   Build functions must never return their BuildContext parameter\'s\n'
+          "   Build functions must never return their BuildContext parameter's\n"
           '   widget or a child that contains "context.widget". Doing so\n'
           '   introduces a loop in the widget tree that can cause the app to\n'
           '   crash.\n'

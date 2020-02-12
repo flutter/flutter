@@ -174,7 +174,7 @@ void main() {
     semantics.dispose();
   });
 
-  group('RawGestureDetector\'s custom semantics delegate', () {
+  group("RawGestureDetector's custom semantics delegate", () {
     testWidgets('should update semantics notations when switching from the default delegate', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final Map<Type, GestureRecognizerFactory> gestures =
@@ -322,7 +322,7 @@ void main() {
     });
   });
 
-  group('RawGestureDetector\'s default semantics delegate', () {
+  group("RawGestureDetector's default semantics delegate", () {
     group('should map onTap to', () {
       testWidgets('null when there is no TapGR', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);

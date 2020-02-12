@@ -238,7 +238,7 @@ Future<void> main() async {
             android:name="flutterProjectType"
             android:value="module" />''')
       ) {
-        return TaskResult.failure('Debug host APK doesn\'t contain metadata: flutterProjectType = module ');
+        return TaskResult.failure("Debug host APK doesn't contain metadata: flutterProjectType = module ");
       }
 
       final String analyticsOutput = analyticsOutputFile.readAsStringSync();
@@ -320,7 +320,7 @@ Future<void> main() async {
             android:name="flutterProjectType"
             android:value="module" />''')
       ) {
-        return TaskResult.failure('Release host APK doesn\'t contain metadata: flutterProjectType = module ');
+        return TaskResult.failure("Release host APK doesn't contain metadata: flutterProjectType = module ");
       }
 
       if (!Platform.isWindows) {

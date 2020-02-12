@@ -127,7 +127,7 @@ Future<void> main() async {
 
           final String sharedLibrary = path.join(androidArmSnapshotPath, 'app.so');
           if (!File(sharedLibrary).existsSync()) {
-            throw TaskResult.failure('Shared library doesn\'t exist');
+            throw TaskResult.failure("Shared library doesn't exist");
           }
         }
       });

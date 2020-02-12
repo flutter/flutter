@@ -218,7 +218,7 @@ Future<void> main() async {
         );
       }
 
-      section("Check all modes' have plugin dylib");
+      section('Check all modes have plugins');
 
       for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         final String pluginFrameworkPath = path.join(
@@ -238,6 +238,17 @@ Future<void> main() async {
           'device_info.framework',
           'device_info',
         ));
+
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'device_info.xcframework',
+          'ios-armv7_arm64',
+          'device_info.framework',
+          'Headers',
+          'DeviceInfoPlugin.h',
+        ));
+
         final String simulatorFrameworkPath = path.join(
           outputPath,
           mode,
@@ -246,10 +257,23 @@ Future<void> main() async {
           'device_info.framework',
           'device_info',
         );
+
+        final String simulatorFrameworkHeaderPath = path.join(
+          outputPath,
+          mode,
+          'device_info.xcframework',
+          'ios-x86_64-simulator',
+          'device_info.framework',
+          'Headers',
+          'DeviceInfoPlugin.h',
+        );
+
         if (mode == 'Debug') {
           checkFileExists(simulatorFrameworkPath);
+          checkFileExists(simulatorFrameworkHeaderPath);
         } else {
           checkFileNotExists(simulatorFrameworkPath);
+          checkFileNotExists(simulatorFrameworkHeaderPath);
         }
       }
 
@@ -296,6 +320,56 @@ Future<void> main() async {
         } else {
           checkFileNotExists(simulatorHeaderPath);
         }
+      }
+
+      // This builds all build modes' frameworks by default
+      section('Build podspec');
+
+      const String cocoapodsOutputDirectoryName = 'flutter-frameworks-cocoapods';
+
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios-framework',
+            '--cocoapods',
+            '--force', // Allow podspec creation on master.
+            '--output=$cocoapodsOutputDirectoryName'
+          ],
+        );
+      });
+
+      final String cocoapodsOutputPath = path.join(projectDir.path, cocoapodsOutputDirectoryName);
+      for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+        checkFileExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'Flutter.podspec',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'App.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'FlutterPluginRegistrant.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'device_info.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'package_info.framework',
+        ));
       }
 
       return TaskResult.success(null);

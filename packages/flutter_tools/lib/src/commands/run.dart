@@ -102,6 +102,13 @@ class RunCommand extends RunCommandBase {
         help: 'Enable tracing of Skia code. This is useful when debugging '
               'the GPU thread. By default, Flutter will not log skia code.',
       )
+      ..addFlag('endless-trace-buffer',
+        negatable: false,
+        help: 'Enable tracing to the endless tracer. This is useful when '
+              'recording huge amounts of traces. If we need to use endless buffer to '
+              'record startup traces, we can combine the ("--trace-startup"). '
+              'For exemple, flutter run --trace-startup --endless-trace-buffer. ',
+      )
       ..addFlag('trace-systrace',
         negatable: false,
         help: 'Enable tracing to the system tracer. This is only useful on '
@@ -113,7 +120,7 @@ class RunCommand extends RunCommandBase {
               'or just dump the trace as soon as the application is running. The first frame '
               'is detected by looking for a Timeline event with the name '
               '"${Tracing.firstUsefulFrameEventName}". '
-              'By default, the widgets library\'s binding takes care of sending this event. ',
+              "By default, the widgets library's binding takes care of sending this event. ",
       )
       ..addFlag('use-test-fonts',
         negatable: true,
@@ -350,6 +357,7 @@ class RunCommand extends RunCommandBase {
         skiaDeterministicRendering: boolArg('skia-deterministic-rendering'),
         traceSkia: boolArg('trace-skia'),
         traceSystrace: boolArg('trace-systrace'),
+        endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
         cacheSkSL: cacheSkSL,
         deviceVmServicePort: deviceVmservicePort,

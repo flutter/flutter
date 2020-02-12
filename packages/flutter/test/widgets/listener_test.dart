@@ -354,7 +354,7 @@ void main() {
     });
   });
 
-  testWidgets('RenderPointerListener\'s debugFillProperties when default', (WidgetTester tester) async {
+  testWidgets("RenderPointerListener's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderPointerListener().debugFillProperties(builder);
 
@@ -372,7 +372,7 @@ void main() {
     ]);
   });
 
-  testWidgets('RenderPointerListener\'s debugFillProperties when full', (WidgetTester tester) async {
+  testWidgets("RenderPointerListener's debugFillProperties when full", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderPointerListener(
       onPointerDown: (PointerDownEvent event) {},

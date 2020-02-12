@@ -60,11 +60,11 @@ class MatchesGoldenFile extends AsyncMatcher {
     _renderElement(binding.window, renderObject);
     final String result = await binding.runAsync<String>(() async {
       if (autoUpdateGoldenFiles) {
-        await webGoldenComparator.update(key, element, size);
+        await webGoldenComparator.update(size.width, size.height, key);
         return null;
       }
       try {
-        final bool success = await webGoldenComparator.compare(element, size, key);
+        final bool success = await webGoldenComparator.compare(size.width, size.height, key);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;
