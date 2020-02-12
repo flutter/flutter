@@ -1051,36 +1051,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   /// By default, it is called when the user taps the button and [PopupMenuButton.enabled]
   /// is set to `true`. Moreover, you can open the button by calling the method manually.
   ///
-  /// {@tool sample}
-  ///
-  /// You would access your [PopupMenuButtonState] using a [GlobalKey].
-  /// With the following setup, you can show the menu of the button
-  /// via `globalKey.currentState.showButtonMenu`.
-  ///
-  /// ```dart
-  /// class ExampleWidget extends StatelessWidget {
-  ///   final GlobalKey<PopupMenuButtonState<int>> globalKey = GlobalKey();
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return PopupMenuButton<int>(
-  ///       key: globalKey,
-  ///       itemBuilder: (BuildContext context) {
-  ///         return <PopupMenuEntry<int>>[
-  ///           const PopupMenuItem<int>(
-  ///             value: 1,
-  ///             child: Text('Tap me please!'),
-  ///           ),
-  ///         ];
-  ///       },
-  ///     );
-  ///   }
-  ///
-  ///   void showButtonMenu() => globalKey.currentState.showButtonMenu();
-  /// }
-  /// ```
-  ///
-  /// {@end-tool}
+  /// You would access your [PopupMenuButtonState] using a [GlobalKey] and
+  /// show the menu of the button with `globalKey.currentState.showButtonMenu`.
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject() as RenderBox;
