@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -16,6 +17,7 @@ import android.arch.lifecycle.Lifecycle;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import io.flutter.embedding.android.FlutterActivityAndFragmentDelegate.Host;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
@@ -58,8 +60,8 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(mockHost.getDartEntrypointFunctionName()).thenReturn("main");
     when(mockHost.getAppBundlePath()).thenReturn("/fake/path");
     when(mockHost.getInitialRoute()).thenReturn("/");
-    when(mockHost.getRenderMode()).thenReturn(FlutterView.RenderMode.surface);
-    when(mockHost.getTransparencyMode()).thenReturn(FlutterView.TransparencyMode.transparent);
+    when(mockHost.getRenderMode()).thenReturn(RenderMode.surface);
+    when(mockHost.getTransparencyMode()).thenReturn(TransparencyMode.transparent);
     when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(mockFlutterEngine);
     when(mockHost.shouldAttachEngineToActivity()).thenReturn(true);
     when(mockHost.shouldDestroyEngineWithHost()).thenReturn(true);
@@ -198,6 +200,38 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Verify that the host was asked to configure our FlutterEngine.
     verify(mockHost, times(1)).configureFlutterEngine(mockFlutterEngine);
+  }
+
+  @Test
+  public void itGivesHostAnOpportunityToConfigureFlutterSurfaceView() {
+    // ---- Test setup ----
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null);
+
+    // Verify that the host was asked to configure a FlutterSurfaceView.
+    verify(mockHost, times(1)).onFlutterSurfaceViewCreated(notNull(FlutterSurfaceView.class));
+  }
+
+  @Test
+  public void itGivesHostAnOpportunityToConfigureFlutterTextureView() {
+    // ---- Test setup ----
+    Host customMockHost = mock(Host.class);
+    when(customMockHost.getRenderMode()).thenReturn(RenderMode.texture);
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate =
+        new FlutterActivityAndFragmentDelegate(customMockHost);
+
+    // --- Execute the behavior under test ---
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null);
+
+    // Verify that the host was asked to configure a FlutterTextureView.
+    verify(customMockHost, times(1)).onFlutterTextureViewCreated(notNull(FlutterTextureView.class));
   }
 
   @Test

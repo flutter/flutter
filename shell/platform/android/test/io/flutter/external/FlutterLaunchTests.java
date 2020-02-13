@@ -8,8 +8,9 @@ import static org.junit.Assert.assertTrue;
 import android.content.Intent;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
-import io.flutter.embedding.android.FlutterView;
+import io.flutter.embedding.android.RenderMode;
 import io.flutter.embedding.android.RobolectricFlutterActivity;
+import io.flutter.embedding.android.TransparencyMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -32,7 +33,7 @@ public class FlutterLaunchTests {
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
     assertEquals(
         BackgroundMode.opaque, RobolectricFlutterActivity.getBackgroundMode(flutterActivity));
-    assertEquals(FlutterView.RenderMode.surface, flutterActivity.getRenderMode());
-    assertEquals(FlutterView.TransparencyMode.opaque, flutterActivity.getTransparencyMode());
+    assertEquals(RenderMode.surface, flutterActivity.getRenderMode());
+    assertEquals(TransparencyMode.opaque, flutterActivity.getTransparencyMode());
   }
 }
