@@ -8,14 +8,21 @@ import 'package:xml/xml.dart' as xml;
 /// with MSBuild/Visual Studio projects.
 class PropertySheet {
   /// Creates a PropertySheet with the given properties.
-  const PropertySheet({this.libraryDependencies, this.environmentVariables});
-
-  /// Libraries to link against.
-  final List<String> libraryDependencies;
+  const PropertySheet({
+    this.environmentVariables,
+    this.includePaths,
+    this.libraryDependencies,
+  });
 
   /// Variables to make available both as build macros and as environment
   /// variables for script steps.
   final Map<String, String> environmentVariables;
+
+  /// Directories to search for headers.
+  final List<String> includePaths;
+
+  /// Libraries to link against.
+  final List<String> libraryDependencies;
 
   @override
   String toString() {
@@ -38,6 +45,7 @@ class PropertySheet {
       });
       builder.element('PropertyGroup');
       builder.element('ItemDefinitionGroup', nest: () {
+        _addIncludePaths(builder);
         _addLibraryDependencies(builder);
       });
       builder.element('ItemGroup', nest: () {
@@ -48,7 +56,21 @@ class PropertySheet {
     return builder.build().toXmlString(pretty: true, indent: '  ');
   }
 
-  /// Writes key/value pairs for any environment variables as user macros.
+  /// Adds directories to the header search path.
+  ///
+  /// Must be called within the context of the ItemDefinitionGroup.
+  void _addIncludePaths(xml.XmlBuilder builder) {
+    if (includePaths == null || includePaths.isEmpty) {
+      return;
+    }
+    builder.element('ClCompile', nest: () {
+      builder.element('AdditionalIncludeDirectories', nest: () {
+        builder.text('${includePaths.join(';')};%(AdditionalIncludeDirectories)');
+      });
+    });
+  }
+
+  /// Adds libraries to the link step.
   ///
   /// Must be called within the context of the ItemDefinitionGroup.
   void _addLibraryDependencies(xml.XmlBuilder builder) {

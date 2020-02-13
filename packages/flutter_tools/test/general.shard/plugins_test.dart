@@ -73,9 +73,10 @@ void main() {
       windowsProject = MockWindowsProject();
       when(flutterProject.windows).thenReturn(windowsProject);
       when(windowsProject.pluginConfigKey).thenReturn('windows');
-      when(windowsProject.pluginSymlinkDirectory).thenReturn(flutterProject.directory.childDirectory('windows').childDirectory('symlinks'));
       final Directory windowsManagedDirectory = flutterProject.directory.childDirectory('windows').childDirectory('flutter');
       when(windowsProject.managedDirectory).thenReturn(windowsManagedDirectory);
+      when(windowsProject.vcprojFile).thenReturn(windowsManagedDirectory.parent.childFile('Runner.vcxproj'));
+      when(windowsProject.pluginSymlinkDirectory).thenReturn(windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks'));
       when(windowsProject.generatedPluginPropertySheetFile).thenReturn(windowsManagedDirectory.childFile('GeneratedPlugins.props'));
       when(windowsProject.existsSync()).thenReturn(false);
       linuxProject = MockLinuxProject();
@@ -860,9 +861,11 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         await injectPlugins(flutterProject, checkProjects: true);
 
         final File properties = windowsProject.generatedPluginPropertySheetFile;
+        final String includePath = fs.path.join('flutter', 'ephemeral', '.plugin_symlinks', 'apackage', 'windows');
 
         expect(properties.existsSync(), isTrue);
         expect(properties.readAsStringSync(), contains('apackage_plugin.lib'));
+        expect(properties.readAsStringSync(), contains('>$includePath;'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

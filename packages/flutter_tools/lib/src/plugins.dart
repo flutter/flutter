@@ -859,7 +859,7 @@ Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugi
     'plugins': windowsPlugins,
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
-  await _writeWindowsPluginProperties(project.windows.generatedPluginPropertySheetFile, windowsPlugins);
+  await _writeWindowsPluginProperties(project.windows, windowsPlugins);
 }
 
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
@@ -876,10 +876,18 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynami
   );
 }
 
-Future<void> _writeWindowsPluginProperties(File propertyFile, List<Map<String, dynamic>> windowsPlugins) async {
+Future<void> _writeWindowsPluginProperties(WindowsProject project, List<Map<String, dynamic>> windowsPlugins) async {
   final List<String> pluginLibraryFilenames = windowsPlugins.map(
     (Map<String, dynamic> plugin) => '${plugin['name']}_plugin.lib').toList();
-  propertyFile.writeAsStringSync(PropertySheet(libraryDependencies: pluginLibraryFilenames).toString());
+  // Use paths relative to the VS project directory.
+  final String projectDir = project.vcprojFile.parent.path;
+  final String symlinkDirPath = project.pluginSymlinkDirectory.path.substring(projectDir.length + 1);
+  final List<String> pluginIncludePaths = windowsPlugins.map((Map<String, dynamic> plugin) =>
+    globals.fs.path.join(symlinkDirPath, plugin['name'] as String, 'windows')).toList();
+  project.generatedPluginPropertySheetFile.writeAsStringSync(PropertySheet(
+    includePaths: pluginIncludePaths,
+    libraryDependencies: pluginLibraryFilenames,
+  ).toString());
 }
 
 Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {

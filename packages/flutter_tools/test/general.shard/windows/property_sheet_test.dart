@@ -34,6 +34,12 @@ void main() {
     </BuildMacro>'''));
     });
 
+    test('Include paths generate the correct elements', () async {
+      const PropertySheet sheet = PropertySheet(includePaths: <String>['foo/bar', 'baz']);
+      final String propsContent = sheet.toString();
+      expect(propsContent, contains('<AdditionalIncludeDirectories>foo/bar;baz;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>'));
+    });
+
     test('Library dependencies generate the correct elements', () async {
       const PropertySheet sheet = PropertySheet(libraryDependencies: <String>['foo.lib', 'bar.lib']);
       final String propsContent = sheet.toString();
