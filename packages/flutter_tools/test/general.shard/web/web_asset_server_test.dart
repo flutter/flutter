@@ -40,7 +40,7 @@ void main() {
   });
 
   test('release asset server serves correct mime type and content length for png', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer();
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
     globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
@@ -54,7 +54,7 @@ void main() {
   }));
 
   test('release asset server serves correct mime type and content length for JavaScript', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer();
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
     globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.js'))
       ..createSync(recursive: true)
       ..writeAsStringSync('function main() {}');
@@ -68,7 +68,7 @@ void main() {
   }));
 
   test('release asset server serves correct mime type and content length for html', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer();
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
     globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.html'))
       ..createSync(recursive: true)
       ..writeAsStringSync('<!doctype html><html></html>');
@@ -82,7 +82,7 @@ void main() {
   }));
 
   test('release asset server serves content from flutter root', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer();
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
     globals.fs.file(globals.fs.path.join('flutter', 'bar.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
@@ -93,8 +93,8 @@ void main() {
   }));
 
   test('release asset server serves content from project directory', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer();
-    globals.fs.file(globals.fs.path.join('lib', 'bar.dart'))
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+    globals.fs.file(globals.fs.path.join('bar.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
     final Response response = await assetServer
