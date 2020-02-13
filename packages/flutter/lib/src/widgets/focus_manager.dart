@@ -81,16 +81,14 @@ class FocusAttachment {
     assert(_node != null);
     assert(_focusDebug('Detaching node:', <String>[_node.toString(), 'With enclosing scope ${_node.enclosingScope}']));
     if (isAttached) {
-      if (_node.hasPrimaryFocus || (_node._manager != null && _node._manager._markedForFocus == _node)) {
+      if (_node.hasPrimaryFocus || (_node._manager != null && _node._manager._nextFocus == _node)) {
         _node.unfocus(focusPrevious: true);
       }
-      // This node is no longer in the tree, so shouldn't send notifications anymore.
-      _node._manager?._markDetached(_node);
+      assert(_node._manager?._nextFocus != _node);
+      assert(!_node.hasPrimaryFocus);
+      _node._manager?._dirtyNodes?.remove(_node);
       _node._parent?._removeChild(_node);
       _node._attachment = null;
-      assert(!_node.hasPrimaryFocus);
-      assert(_node._manager?._markedForFocus != _node);
-      assert(_node._manager?._markedForUnfocus != _node);
     }
     assert(!isAttached);
   }
@@ -400,7 +398,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   set skipTraversal(bool value) {
     if (value != _skipTraversal) {
       _skipTraversal = value;
-      _manager?._markPropertiesChanged(this);
+      _manager?._dirtyNodes?.add(this);
+      _manager?._markNeedsUpdate();
     }
   }
 
@@ -443,7 +442,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         unfocus(focusPrevious: true);
       }
       _canRequestFocus = value;
-      _manager?._markPropertiesChanged(this);
+      _manager?._dirtyNodes?.add(this);
+      _manager?._markNeedsUpdate();
     }
   }
 
@@ -561,7 +561,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///  * [Focus.isAt], which is a static method that will return the focus
   ///    state of the nearest ancestor [Focus] widget's focus node.
   bool get hasFocus {
-    if (_manager?.primaryFocus == null || _manager?._markedForUnfocus == this) {
+    if (_manager?.primaryFocus == null) {
       return false;
     }
     if (hasPrimaryFocus) {
@@ -655,9 +655,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// This method is safe to call regardless of whether this node has ever
   /// requested focus.
   ///
-  /// For nodes that return true from [hasFocus], but false from
-  /// [hasPrimaryFocus], this will unfocus the descendant node that has the
-  /// primary focus instead ([FocusManager.primaryFocus]).
+  /// Has no effect on nodes that return true from [hasFocus], but false from
+  /// [hasPrimaryFocus].
   ///
   /// If [focusPrevious] is true, then rather than losing all focus, the focus
   /// will be moved to the node that the [enclosingScope] thinks should have it,
@@ -665,7 +664,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusScopeNode.setFirstFocus].
   void unfocus({ bool focusPrevious = false }) {
     assert(focusPrevious != null);
-    if (!hasFocus && (_manager == null || _manager._markedForFocus != this)) {
+    if (!hasFocus && (_manager != null && _manager._nextFocus != this)) {
       return;
     }
     if (!hasPrimaryFocus) {
@@ -673,7 +672,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // the primary instead.
       _manager?.primaryFocus?.unfocus(focusPrevious: focusPrevious);
     }
-    _manager?._markUnfocused(this);
+    _manager?._willUnfocusNode(this);
     final FocusScopeNode scope = enclosingScope;
     if (scope != null) {
       scope._focusedChildren.remove(this);
@@ -705,22 +704,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return true;
   }
 
-  // Marks the node as being the next to be focused, meaning that it will become
-  // the primary focus and notify listeners of a focus change the next time
-  // focus is resolved by the manager. If something else calls _markNextFocus
-  // before then, then that node will become the next focus instead of the
-  // previous one.
-  void _markNextFocus(FocusNode newFocus) {
+  // Marks the node as dirty, meaning that it needs to notify listeners of a
+  // focus change the next time focus is resolved by the manager.
+  void _markAsDirty({FocusNode newFocus}) {
     if (_manager != null) {
       // If we have a manager, then let it handle the focus change.
-      _manager._markNextFocus(this);
-      return;
-    }
-    // If we don't have a manager, then change the focus locally.
-    newFocus?._setAsFocusedChildForScope();
-    newFocus?._notify();
-    if (newFocus != this) {
-      _notify();
+      _manager._markNeedsUpdate(newFocus: newFocus);
+      _manager._dirtyNodes?.add(this);
+    } else {
+      // If we don't have a manager, then change the focus locally.
+      newFocus?._setAsFocusedChild();
+      newFocus?._notify();
+      if (newFocus != this) {
+        _notify();
+      }
     }
   }
 
@@ -777,7 +774,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
     if (hadFocus) {
       // Update the focus chain for the current focus without changing it.
-      _manager?.primaryFocus?._setAsFocusedChildForScope();
+      _manager?.primaryFocus?._setAsFocusedChild();
     }
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
       FocusTraversalGroup.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
@@ -820,7 +817,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     if (hasPrimaryFocus) {
-      _setAsFocusedChildForScope();
+      _setAsFocusedChild();
     }
     notifyListeners();
   }
@@ -869,13 +866,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       _requestFocusWhenReparented = true;
       return;
     }
-    _setAsFocusedChildForScope();
-    if (hasPrimaryFocus && (_manager._markedForFocus == null || _manager._markedForFocus == this)) {
+    _setAsFocusedChild();
+    if (hasPrimaryFocus) {
       return;
     }
     _hasKeyboardToken = true;
     assert(_focusDebug('Node requesting focus: $this'));
-    _markNextFocus(this);
+    _markAsDirty(newFocus: this);
   }
 
   // If set to true, the node will request focus on this node the next time
@@ -901,7 +898,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// node would be focused if the enclosing scope receives focus, and keeps
   /// track of previously focused children in that scope, so that if the focused
   /// child in that scope is removed, the previous focus returns.
-  void _setAsFocusedChildForScope() {
+  void _setAsFocusedChild() {
     FocusNode scopeFocus = this;
     for (final FocusScopeNode ancestor in ancestors.whereType<FocusScopeNode>()) {
       assert(scopeFocus != ancestor, 'Somehow made a loop by setting focusedChild to its scope.');
@@ -1047,7 +1044,7 @@ class FocusScopeNode extends FocusNode {
     if (hasFocus) {
       scope._doRequestFocus();
     } else {
-      scope._setAsFocusedChildForScope();
+      scope._setAsFocusedChild();
     }
   }
 
@@ -1088,8 +1085,8 @@ class FocusScopeNode extends FocusNode {
       // We didn't find a FocusNode at the leaf, so we're focusing the scope, if
       // allowed.
       if (primaryFocus.canRequestFocus) {
-        _setAsFocusedChildForScope();
-        _markNextFocus(this);
+        _setAsFocusedChild();
+        _markAsDirty(newFocus: this);
       }
     } else {
       // We found a FocusScope at the leaf, so ask it to focus itself instead of
@@ -1381,70 +1378,29 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   FocusNode get primaryFocus => _primaryFocus;
   FocusNode _primaryFocus;
 
+  // The node that has requested to have the primary focus, but hasn't been
+  // given it yet.
+  FocusNode _nextFocus;
   // The set of nodes that need to notify their listeners of changes at the next
   // update.
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
 
-  // The node that has requested to have the primary focus, but hasn't been
-  // given it yet.
-  FocusNode _markedForFocus;
-
-  // The node that has been marked as needing to be unfocused during the next
-  // focus update.
-  FocusNode _markedForUnfocus;
-
-  void _markDetached(FocusNode node) {
-    // The node has been removed from the tree, so it no longer needs to be
-    // notified of changes.
-    assert(_focusDebug('Node was detached: $node'));
-    if (_markedForUnfocus == node) {
-      _markedForUnfocus = null;
-    }
-    if (_primaryFocus == node) {
-      _primaryFocus = null;
-    }
-    _dirtyNodes?.remove(node);
-  }
-
-  void _markPropertiesChanged(FocusNode node) {
-    _markNeedsUpdate();
-    assert(_focusDebug('Properties changed for node $node.'));
-    _dirtyNodes?.add(node);
-  }
-
-  void _markNextFocus(FocusNode node) {
-    if (_primaryFocus == node) {
-      // The caller asked for the current focus to be the next focus, so just
-      // pretend that didn't happen.
-      _markedForFocus = null;
-      // If this node is going to be the next focus, then it's not going to be
-      // unfocused unless we call _markUnfocused again, so unset _unfocusedNode.
-      if (_markedForUnfocus == node) {
-        _markedForUnfocus = null;
-      }
-    } else {
-      _markedForFocus = node;
-      _markNeedsUpdate();
-    }
-  }
-
-  // Called to indicate that the given node should be marked to be unfocused at
-  // the next focus update, and that any pending request to focus it should be
-  // canceled.
-  void _markUnfocused(FocusNode node) {
+  // Called to indicate that the given node is being unfocused, and that any
+  // pending request to be focused should be canceled.
+  void _willUnfocusNode(FocusNode node) {
     assert(node != null);
     assert(_focusDebug('Unfocusing node $node'));
-    if (_primaryFocus == node || _markedForFocus == node) {
-      if (_markedForFocus == node) {
-        _markedForFocus = null;
-      }
+    if (_primaryFocus == node || _nextFocus == node) {
       if (_primaryFocus == node) {
-        assert(_markedForUnfocus == null);
-        _markedForUnfocus = node;
+        _primaryFocus = null;
       }
+      if (_nextFocus == node) {
+        _nextFocus = null;
+      }
+      _dirtyNodes.add(node);
       _markNeedsUpdate();
     }
-    assert(_focusDebug('Unfocused node $node:', <String>['primary focus is $_primaryFocus', 'next focus will be $_markedForFocus']));
+    assert(_focusDebug('Unfocused node $node:', <String>['primary focus is $_primaryFocus', 'next focus will be $_nextFocus']));
   }
 
   // True indicates that there is an update pending.
@@ -1452,8 +1408,11 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
 
   // Request that an update be scheduled, optionally requesting focus for the
   // given newFocus node.
-  void _markNeedsUpdate() {
-    assert(_focusDebug('Scheduling update, current focus is $_primaryFocus, next focus will be $_markedForFocus'));
+  void _markNeedsUpdate({FocusNode newFocus}) {
+    // If newFocus isn't specified, then don't mess with _nextFocus, just
+    // schedule the update.
+    _nextFocus = newFocus ?? _nextFocus;
+    assert(_focusDebug('Scheduling update, next focus will be $_nextFocus'));
     if (_haveScheduledUpdate) {
       return;
     }
@@ -1463,33 +1422,22 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
 
   void _applyFocusChange() {
     _haveScheduledUpdate = false;
-    if (_markedForUnfocus == _primaryFocus) {
-      _primaryFocus = null;
-    }
+    assert(_focusDebug('Refreshing focus state. Next focus will be $_nextFocus'));
     final FocusNode previousFocus = _primaryFocus;
-    if (_primaryFocus == null && _markedForFocus == null) {
+    if (_primaryFocus == null && _nextFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
       // then revert to the root scope.
-      _markedForFocus = rootScope;
+      _nextFocus = rootScope;
     }
-    assert(_focusDebug('Refreshing focus state. Next focus will be $_markedForFocus'));
-    // A node has requested to be the next focus, and isn't already the primary
-    // focus.
-    if (_markedForFocus != null && _markedForFocus != _primaryFocus) {
+    if (_nextFocus != null && _nextFocus != _primaryFocus) {
+      _primaryFocus = _nextFocus;
       final Set<FocusNode> previousPath = previousFocus?.ancestors?.toSet() ?? <FocusNode>{};
-      final Set<FocusNode> nextPath = _markedForFocus.ancestors.toSet();
-      if (_markedForUnfocus != null) {
-        final Set<FocusNode> unfocusedNodes = <FocusNode>{_markedForUnfocus, ..._markedForUnfocus.ancestors};
-        unfocusedNodes.removeAll(nextPath); // No need to dirty the ancestors that are in the newly focused set.
-        _dirtyNodes.addAll(unfocusedNodes);
-      }
+      final Set<FocusNode> nextPath = _nextFocus.ancestors.toSet();
       // Notify nodes that are newly focused.
       _dirtyNodes.addAll(nextPath.difference(previousPath));
       // Notify nodes that are no longer focused
       _dirtyNodes.addAll(previousPath.difference(nextPath));
-
-      _primaryFocus = _markedForFocus;
-      _markedForFocus = null;
+      _nextFocus = null;
     }
     if (previousFocus != _primaryFocus) {
       assert(_focusDebug('Updating focus from $previousFocus to $_primaryFocus'));
@@ -1505,7 +1453,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
       node._notify();
     }
     _dirtyNodes.clear();
-    _markedForUnfocus = null;
     if (previousFocus != _primaryFocus) {
       notifyListeners();
     }
@@ -1528,7 +1475,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties.add(FlagProperty('haveScheduledUpdate', value: _haveScheduledUpdate, ifTrue: 'UPDATE SCHEDULED'));
     properties.add(DiagnosticsProperty<FocusNode>('primaryFocus', primaryFocus, defaultValue: null));
-    properties.add(DiagnosticsProperty<FocusNode>('nextFocus', _markedForFocus, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('nextFocus', _nextFocus, defaultValue: null));
     final Element element = primaryFocus?.context as Element;
     if (element != null) {
       properties.add(DiagnosticsProperty<String>('primaryFocusCreator', element.debugGetCreatorChain(20)));

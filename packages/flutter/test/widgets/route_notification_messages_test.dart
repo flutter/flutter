@@ -63,7 +63,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routeUpdated',
+          'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': null,
             'routeName': '/',
@@ -78,7 +78,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routeUpdated',
+          'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
             'routeName': '/A',
@@ -93,10 +93,10 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routeUpdated',
+          'routePopped',
           arguments: <String, dynamic>{
-            'previousRouteName': '/A',
-            'routeName': '/',
+            'previousRouteName': '/',
+            'routeName': '/A',
           },
         ));
   });
@@ -130,7 +130,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routeUpdated',
+          'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': null,
             'routeName': '/',
@@ -145,7 +145,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routeUpdated',
+          'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
             'routeName': '/A',
@@ -160,7 +160,7 @@ void main() {
     expect(
         log.last,
         isMethodCall(
-          'routeUpdated',
+          'routeReplaced',
           arguments: <String, dynamic>{
             'previousRouteName': '/A',
             'routeName': '/B',
@@ -195,7 +195,7 @@ void main() {
     expect(log, hasLength(1));
     expect(
       log.last,
-      isMethodCall('routeUpdated', arguments: <String, dynamic>{
+      isMethodCall('routePushed', arguments: <String, dynamic>{
         'previousRouteName': null,
         'routeName': '/home',
       }),
@@ -208,7 +208,7 @@ void main() {
     expect(log, hasLength(2));
     expect(
       log.last,
-      isMethodCall('routeUpdated', arguments: <String, dynamic>{
+      isMethodCall('routePushed', arguments: <String, dynamic>{
         'previousRouteName': '/home',
         'routeName': null,
       }),

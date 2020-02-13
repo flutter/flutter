@@ -46,7 +46,6 @@ void main() {
 
     expect(material.clipBehavior, cardTheme.clipBehavior);
     expect(material.color, cardTheme.color);
-    expect(material.shadowColor, cardTheme.shadowColor);
     expect(material.elevation, cardTheme.elevation);
     expect(container.margin, cardTheme.margin);
     expect(material.shape, cardTheme.shape);
@@ -147,7 +146,6 @@ CardTheme _cardTheme() {
   return const CardTheme(
     clipBehavior: Clip.antiAlias,
     color: Colors.green,
-    shadowColor: Colors.red,
     elevation: 6.0,
     margin: EdgeInsets.all(7.0),
     shape: RoundedRectangleBorder(

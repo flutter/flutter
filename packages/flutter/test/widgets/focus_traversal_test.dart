@@ -11,8 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'semantics_tester.dart';
-
 void main() {
   group(WidgetOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
@@ -1953,14 +1951,6 @@ void main() {
       await tester.idle();
 
       expect(events.length, 2);
-    });
-  });
-  group(FocusTraversalGroup, () {
-    testWidgets("Focus traversal group doesn't introduce a Semantics node", (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      await tester.pumpWidget(FocusTraversalGroup(child: Container()));
-      final TestSemantics expectedSemantics = TestSemantics.root();
-      expect(semantics, hasSemantics(expectedSemantics));
     });
   });
 }

@@ -11,7 +11,7 @@ import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _buildAppWithDialog(Widget dialog, { ThemeData theme }) {
+MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -64,7 +64,7 @@ void main() {
         ),
       ],
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -80,7 +80,7 @@ void main() {
       backgroundColor: customColor,
       actions: <Widget>[ ],
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(brightness: Brightness.dark)));
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: ThemeData(brightness: Brightness.dark)));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -95,7 +95,7 @@ void main() {
       content: Text('Y'),
       actions: <Widget>[ ],
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(brightness: Brightness.dark)));
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: ThemeData(brightness: Brightness.dark)));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -112,7 +112,7 @@ void main() {
       actions: <Widget>[ ],
       elevation: customElevation,
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -129,7 +129,7 @@ void main() {
       titleTextStyle: titleTextStyle,
       actions: <Widget>[ ],
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -146,7 +146,7 @@ void main() {
       contentTextStyle: contentTextStyle,
       actions: <Widget>[ ],
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -162,7 +162,7 @@ void main() {
       actions: <Widget>[ ],
       shape: customBorder,
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -176,7 +176,7 @@ void main() {
       actions: <Widget>[ ],
       shape: null,
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -191,7 +191,7 @@ void main() {
       actions: <Widget>[ ],
       shape: customBorder,
     );
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
+    await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
 
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -241,32 +241,6 @@ void main() {
     await tester.tap(find.text('First option'));
 
     expect(await result, equals(42));
-  });
-
-  testWidgets('Custom padding on SimpleDialogOption', (WidgetTester tester) async {
-    const EdgeInsets customPadding = EdgeInsets.fromLTRB(4, 10, 8, 6);
-    final SimpleDialog dialog = SimpleDialog(
-      title: const Text('Title'),
-      children: <Widget>[
-        SimpleDialogOption(
-          onPressed: () {},
-          child: const Text('First option'),
-          padding: customPadding,
-        ),
-      ],
-    );
-
-    await tester.pumpWidget(_buildAppWithDialog(dialog));
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
-
-    final Rect dialogRect = tester.getRect(find.byType(SimpleDialogOption));
-    final Rect textRect = tester.getRect(find.text('First option'));
-
-    expect(textRect.left, dialogRect.left + customPadding.left);
-    expect(textRect.top, dialogRect.top + customPadding.top);
-    expect(textRect.right, dialogRect.right - customPadding.right);
-    expect(textRect.bottom, dialogRect.bottom - customPadding.bottom);
   });
 
   testWidgets('Barrier dismissible', (WidgetTester tester) async {
@@ -379,7 +353,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _buildAppWithDialog(dialog),
+      _appWithAlertDialog(tester, dialog),
     );
 
     await tester.tap(find.text('X'));
@@ -413,7 +387,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _buildAppWithDialog(dialog),
+      _appWithAlertDialog(tester, dialog),
     );
 
     await tester.tap(find.text('X'));
@@ -455,7 +429,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _buildAppWithDialog(dialog),
+      _appWithAlertDialog(tester, dialog),
     );
 
     await tester.tap(find.text('X'));
@@ -519,7 +493,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _buildAppWithDialog(dialog),
+      _appWithAlertDialog(tester, dialog),
     );
 
     await tester.tap(find.text('X'));
@@ -580,7 +554,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _buildAppWithDialog(dialog),
+      _appWithAlertDialog(tester, dialog),
     );
 
     await tester.tap(find.text('X'));
@@ -980,7 +954,7 @@ void main() {
         ),
         scrollable: true,
       );
-      await tester.pumpWidget(_buildAppWithDialog(dialog));
+      await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle();
 
@@ -1000,7 +974,7 @@ void main() {
         ),
         scrollable: true,
       );
-      await tester.pumpWidget(_buildAppWithDialog(dialog));
+      await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle();
 
@@ -1026,7 +1000,7 @@ void main() {
         ),
         scrollable: true,
       );
-      await tester.pumpWidget(_buildAppWithDialog(dialog));
+      await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle();
 

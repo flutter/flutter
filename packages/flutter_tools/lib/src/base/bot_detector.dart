@@ -59,9 +59,6 @@ class BotDetector {
       // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
       || _platform.environment.containsKey('JENKINS_URL')
 
-      // https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
-      || _platform.environment.containsKey('GITHUB_ACTIONS')
-
       // Properties on Flutter's Chrome Infra bots.
       || _platform.environment['CHROME_HEADLESS'] == '1'
       || _platform.environment.containsKey('BUILDBOT_BUILDERNAME')
@@ -96,16 +93,21 @@ class AzureDetector {
       );
       request.headers.add('Metadata', true);
       await request.close();
-    } on SocketException {
-      // If there is an error on the socket, it probalby means that we are not
-      // running on Azure.
-      return _isRunningOnAzure = false;
+    } on SocketException catch (e) {
+      if (e.toString().contains('HTTP connection timed out')) {
+        // If the connection attempt times out, assume that the service is not
+        // available, and that we are not running on Azure.
+        return _isRunningOnAzure = false;
+      }
+      // If it's some other socket exception, then there is a bug in the
+      // detection code that should go to crash logging.
+      rethrow;
     } on HttpException {
       // If the connection gets set up, but encounters an error condition, it
       // still means we're on Azure.
       return _isRunningOnAzure = true;
     }
-    // We got a response. We're running on Azure.
+    // We got a response, we're running on Azure.
     return _isRunningOnAzure = true;
   }
 }

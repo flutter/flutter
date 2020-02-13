@@ -34,7 +34,6 @@ class CardTheme extends Diagnosticable {
   const CardTheme({
     this.clipBehavior,
     this.color,
-    this.shadowColor,
     this.elevation,
     this.margin,
     this.shape,
@@ -49,11 +48,6 @@ class CardTheme extends Diagnosticable {
   ///
   /// If null, [Card] uses [ThemeData.cardColor].
   final Color color;
-
-  /// Default value for [Card.shadowColor].
-  ///
-  /// If null, [Card] defaults to fully opaque black.
-  final Color shadowColor;
 
   /// Default value for [Card.elevation].
   ///
@@ -77,7 +71,6 @@ class CardTheme extends Diagnosticable {
   CardTheme copyWith({
     Clip clipBehavior,
     Color color,
-    Color shadowColor,
     double elevation,
     EdgeInsetsGeometry margin,
     ShapeBorder shape,
@@ -85,7 +78,6 @@ class CardTheme extends Diagnosticable {
     return CardTheme(
       clipBehavior: clipBehavior ?? this.clipBehavior,
       color: color ?? this.color,
-      shadowColor: shadowColor ?? this.shadowColor,
       elevation: elevation ?? this.elevation,
       margin: margin ?? this.margin,
       shape: shape ?? this.shape,
@@ -107,7 +99,6 @@ class CardTheme extends Diagnosticable {
     return CardTheme(
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       color: Color.lerp(a?.color, b?.color, t),
-      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -119,7 +110,6 @@ class CardTheme extends Diagnosticable {
     return hashValues(
       clipBehavior,
       color,
-      shadowColor,
       elevation,
       margin,
       shape,
@@ -135,7 +125,6 @@ class CardTheme extends Diagnosticable {
     return other is CardTheme
         && other.clipBehavior == clipBehavior
         && other.color == color
-        && other.shadowColor == shadowColor
         && other.elevation == elevation
         && other.margin == margin
         && other.shape == shape;
@@ -146,7 +135,6 @@ class CardTheme extends Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
-    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
