@@ -91,6 +91,14 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       throwToolExit('Cannot execute Flutter tester at $shellPath');
     }
 
+    if(tags != null && tags.isEmpty){
+      throwToolExit('`tags` parameter cannot be empty');
+    }
+
+    if(excludeTags != null && excludeTags.isEmpty){
+      throwToolExit('`exclude-tags` parameter cannot be empty');
+    }
+
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = <String>[
       if (!globals.terminal.supportsColor)

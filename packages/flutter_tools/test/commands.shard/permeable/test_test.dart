@@ -117,6 +117,26 @@ void main() {
     expect(result.exitCode, 0);
   });
 
+  testUsingContext('flutter test should fail a test when tags argument is empty', () async {
+    Cache.flutterRoot = '../..';
+    final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--tags']);
+    if (!(result.stdout as String).contains('-1: `tags` parameter cannot be empty')) {
+      fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    }
+    expect(result.exitCode, 0);
+  });
+
+  testUsingContext('flutter test should fail a test when exclude-tags argument is empty', () async {
+    Cache.flutterRoot = '../..';
+    final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--exclude-tags']);
+    if (!(result.stdout as String).contains('-1: `exclude-tags` parameter cannot be empty')) {
+      fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    }
+    expect(result.exitCode, 0);
+  });
+
   testUsingContext('flutter test should test runs to completion', () async {
     Cache.flutterRoot = '../..';
     final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
