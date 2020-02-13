@@ -185,9 +185,23 @@ for (let moduleName of Object.getOwnPropertyNames(modulePaths)) {
 // Create the main module loaded below.
 define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
-  dart_sdk._isolate_helper.startRootIsolate(() => {}, []);
   dart_sdk._debugger.registerDevtoolsFormatter();
-  let voidToNull = () => (voidToNull = dart_sdk.dart.constFn(dart_sdk.dart.fnType(dart_sdk.core.Null, [dart_sdk.dart.void])))();
+  \$dartLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
+  if (window.\$dartStackTraceUtility && !window.\$dartStackTraceUtility.ready) {
+    window.\$dartStackTraceUtility.ready = true;
+    let dart = dart_sdk.dart;
+    window.\$dartStackTraceUtility.setSourceMapProvider(
+      function(url) {
+        url = url.replace(baseUrl, '/');
+        var module = window.\$dartLoader.urlToModuleId.get(url);
+        if (!module) return null;
+        return dart.getSourceMap(module);
+      });
+  }
+  if (typeof document != 'undefined') {
+    window.postMessage({ type: "DDC_STATE_CHANGE", state: "start" }, "*");
+  }
+  dart_sdk._isolate_helper.startRootIsolate(() => {}, []);
 
   // See the generateMainModule doc comment.
   var child = {};
