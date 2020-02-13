@@ -25,8 +25,8 @@ public class FlutterFragmentTest {
     assertTrue(fragment.shouldAttachEngineToActivity());
     assertNull(fragment.getCachedEngineId());
     assertTrue(fragment.shouldDestroyEngineWithHost());
-    assertEquals(FlutterView.RenderMode.surface, fragment.getRenderMode());
-    assertEquals(FlutterView.TransparencyMode.transparent, fragment.getTransparencyMode());
+    assertEquals(RenderMode.surface, fragment.getRenderMode());
+    assertEquals(TransparencyMode.transparent, fragment.getTransparencyMode());
   }
 
   @Test
@@ -36,8 +36,8 @@ public class FlutterFragmentTest {
             .dartEntrypoint("custom_entrypoint")
             .initialRoute("/custom/route")
             .shouldAttachEngineToActivity(false)
-            .renderMode(FlutterView.RenderMode.texture)
-            .transparencyMode(FlutterView.TransparencyMode.opaque)
+            .renderMode(RenderMode.texture)
+            .transparencyMode(TransparencyMode.opaque)
             .build();
     fragment.setDelegate(new FlutterActivityAndFragmentDelegate(fragment));
 
@@ -47,8 +47,8 @@ public class FlutterFragmentTest {
     assertFalse(fragment.shouldAttachEngineToActivity());
     assertNull(fragment.getCachedEngineId());
     assertTrue(fragment.shouldDestroyEngineWithHost());
-    assertEquals(FlutterView.RenderMode.texture, fragment.getRenderMode());
-    assertEquals(FlutterView.TransparencyMode.opaque, fragment.getTransparencyMode());
+    assertEquals(RenderMode.texture, fragment.getRenderMode());
+    assertEquals(TransparencyMode.opaque, fragment.getTransparencyMode());
   }
 
   @Test

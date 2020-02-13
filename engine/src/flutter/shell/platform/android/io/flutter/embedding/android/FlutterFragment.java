@@ -68,9 +68,11 @@ import io.flutter.view.FlutterMain;
  * <p>The following illustrates how to pre-warm and cache a {@link FlutterEngine}:
  *
  * <pre>{@code
- * // Create and pre-warm a FlutterEngine. FlutterEngine flutterEngine = new
- * FlutterEngine(context);
- * flutterEngine.getDartExecutor().executeDartEntrypoint(DartEntrypoint.createDefault());
+ * // Create and pre-warm a FlutterEngine.
+ * FlutterEngine flutterEngine = new FlutterEngine(context);
+ * flutterEngine
+ *   .getDartExecutor()
+ *   .executeDartEntrypoint(DartEntrypoint.createDefault());
  *
  * // Cache the pre-warmed FlutterEngine in the FlutterEngineCache.
  * FlutterEngineCache.getInstance().put("my_engine", flutterEngine);
@@ -91,14 +93,10 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   protected static final String ARG_APP_BUNDLE_PATH = "app_bundle_path";
   /** Flutter shell arguments. */
   protected static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
-  /**
-   * {@link FlutterView.RenderMode} to be used for the {@link FlutterView} in this {@code
-   * FlutterFragment}
-   */
+  /** {@link RenderMode} to be used for the {@link FlutterView} in this {@code FlutterFragment} */
   protected static final String ARG_FLUTTERVIEW_RENDER_MODE = "flutterview_render_mode";
   /**
-   * {@link FlutterView.TransparencyMode} to be used for the {@link FlutterView} in this {@code
-   * FlutterFragment}
+   * {@link TransparencyMode} to be used for the {@link FlutterView} in this {@code FlutterFragment}
    */
   protected static final String ARG_FLUTTERVIEW_TRANSPARENCY_MODE = "flutterview_transparency_mode";
   /** See {@link #shouldAttachEngineToActivity()}. */
@@ -185,9 +183,8 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     private String initialRoute = "/";
     private String appBundlePath = null;
     private FlutterShellArgs shellArgs = null;
-    private FlutterView.RenderMode renderMode = FlutterView.RenderMode.surface;
-    private FlutterView.TransparencyMode transparencyMode =
-        FlutterView.TransparencyMode.transparent;
+    private RenderMode renderMode = RenderMode.surface;
+    private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
 
     /**
@@ -241,27 +238,25 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     }
 
     /**
-     * Render Flutter either as a {@link FlutterView.RenderMode#surface} or a {@link
-     * FlutterView.RenderMode#texture}. You should use {@code surface} unless you have a specific
-     * reason to use {@code texture}. {@code texture} comes with a significant performance impact,
-     * but {@code texture} can be displayed beneath other Android {@code View}s and animated,
-     * whereas {@code surface} cannot.
+     * Render Flutter either as a {@link RenderMode#surface} or a {@link RenderMode#texture}. You
+     * should use {@code surface} unless you have a specific reason to use {@code texture}. {@code
+     * texture} comes with a significant performance impact, but {@code texture} can be displayed
+     * beneath other Android {@code View}s and animated, whereas {@code surface} cannot.
      */
     @NonNull
-    public NewEngineFragmentBuilder renderMode(@NonNull FlutterView.RenderMode renderMode) {
+    public NewEngineFragmentBuilder renderMode(@NonNull RenderMode renderMode) {
       this.renderMode = renderMode;
       return this;
     }
 
     /**
-     * Support a {@link FlutterView.TransparencyMode#transparent} background within {@link
-     * FlutterView}, or force an {@link FlutterView.TransparencyMode#opaque} background.
+     * Support a {@link TransparencyMode#transparent} background within {@link FlutterView}, or
+     * force an {@link TransparencyMode#opaque} background.
      *
-     * <p>See {@link FlutterView.TransparencyMode} for implications of this selection.
+     * <p>See {@link TransparencyMode} for implications of this selection.
      */
     @NonNull
-    public NewEngineFragmentBuilder transparencyMode(
-        @NonNull FlutterView.TransparencyMode transparencyMode) {
+    public NewEngineFragmentBuilder transparencyMode(@NonNull TransparencyMode transparencyMode) {
       this.transparencyMode = transparencyMode;
       return this;
     }
@@ -326,12 +321,10 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       }
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
-          renderMode != null ? renderMode.name() : FlutterView.RenderMode.surface.name());
+          renderMode != null ? renderMode.name() : RenderMode.surface.name());
       args.putString(
           ARG_FLUTTERVIEW_TRANSPARENCY_MODE,
-          transparencyMode != null
-              ? transparencyMode.name()
-              : FlutterView.TransparencyMode.transparent.name());
+          transparencyMode != null ? transparencyMode.name() : TransparencyMode.transparent.name());
       args.putBoolean(ARG_SHOULD_ATTACH_ENGINE_TO_ACTIVITY, shouldAttachEngineToActivity);
       args.putBoolean(ARG_DESTROY_ENGINE_WITH_FRAGMENT, true);
       return args;
@@ -412,9 +405,8 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     private final Class<? extends FlutterFragment> fragmentClass;
     private final String engineId;
     private boolean destroyEngineWithFragment = false;
-    private FlutterView.RenderMode renderMode = FlutterView.RenderMode.surface;
-    private FlutterView.TransparencyMode transparencyMode =
-        FlutterView.TransparencyMode.transparent;
+    private RenderMode renderMode = RenderMode.surface;
+    private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
 
     private CachedEngineFragmentBuilder(@NonNull String engineId) {
@@ -440,27 +432,26 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     }
 
     /**
-     * Render Flutter either as a {@link FlutterView.RenderMode#surface} or a {@link
-     * FlutterView.RenderMode#texture}. You should use {@code surface} unless you have a specific
-     * reason to use {@code texture}. {@code texture} comes with a significant performance impact,
-     * but {@code texture} can be displayed beneath other Android {@code View}s and animated,
-     * whereas {@code surface} cannot.
+     * Render Flutter either as a {@link RenderMode#surface} or a {@link RenderMode#texture}. You
+     * should use {@code surface} unless you have a specific reason to use {@code texture}. {@code
+     * texture} comes with a significant performance impact, but {@code texture} can be displayed
+     * beneath other Android {@code View}s and animated, whereas {@code surface} cannot.
      */
     @NonNull
-    public CachedEngineFragmentBuilder renderMode(@NonNull FlutterView.RenderMode renderMode) {
+    public CachedEngineFragmentBuilder renderMode(@NonNull RenderMode renderMode) {
       this.renderMode = renderMode;
       return this;
     }
 
     /**
-     * Support a {@link FlutterView.TransparencyMode#transparent} background within {@link
-     * FlutterView}, or force an {@link FlutterView.TransparencyMode#opaque} background.
+     * Support a {@link TransparencyMode#transparent} background within {@link FlutterView}, or
+     * force an {@link TransparencyMode#opaque} background.
      *
-     * <p>See {@link FlutterView.TransparencyMode} for implications of this selection.
+     * <p>See {@link TransparencyMode} for implications of this selection.
      */
     @NonNull
     public CachedEngineFragmentBuilder transparencyMode(
-        @NonNull FlutterView.TransparencyMode transparencyMode) {
+        @NonNull TransparencyMode transparencyMode) {
       this.transparencyMode = transparencyMode;
       return this;
     }
@@ -519,12 +510,10 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       args.putBoolean(ARG_DESTROY_ENGINE_WITH_FRAGMENT, destroyEngineWithFragment);
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
-          renderMode != null ? renderMode.name() : FlutterView.RenderMode.surface.name());
+          renderMode != null ? renderMode.name() : RenderMode.surface.name());
       args.putString(
           ARG_FLUTTERVIEW_TRANSPARENCY_MODE,
-          transparencyMode != null
-              ? transparencyMode.name()
-              : FlutterView.TransparencyMode.transparent.name());
+          transparencyMode != null ? transparencyMode.name() : TransparencyMode.transparent.name());
       args.putBoolean(ARG_SHOULD_ATTACH_ENGINE_TO_ACTIVITY, shouldAttachEngineToActivity);
       return args;
     }
@@ -832,38 +821,36 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   }
 
   /**
-   * Returns the desired {@link FlutterView.RenderMode} for the {@link FlutterView} displayed in
-   * this {@code FlutterFragment}.
+   * Returns the desired {@link RenderMode} for the {@link FlutterView} displayed in this {@code
+   * FlutterFragment}.
    *
-   * <p>Defaults to {@link FlutterView.RenderMode#surface}.
+   * <p>Defaults to {@link RenderMode#surface}.
    *
    * <p>Used by this {@code FlutterFragment}'s {@link FlutterActivityAndFragmentDelegate.Host}
    */
   @Override
   @NonNull
-  public FlutterView.RenderMode getRenderMode() {
+  public RenderMode getRenderMode() {
     String renderModeName =
-        getArguments()
-            .getString(ARG_FLUTTERVIEW_RENDER_MODE, FlutterView.RenderMode.surface.name());
-    return FlutterView.RenderMode.valueOf(renderModeName);
+        getArguments().getString(ARG_FLUTTERVIEW_RENDER_MODE, RenderMode.surface.name());
+    return RenderMode.valueOf(renderModeName);
   }
 
   /**
-   * Returns the desired {@link FlutterView.TransparencyMode} for the {@link FlutterView} displayed
-   * in this {@code FlutterFragment}.
+   * Returns the desired {@link TransparencyMode} for the {@link FlutterView} displayed in this
+   * {@code FlutterFragment}.
    *
-   * <p>Defaults to {@link FlutterView.TransparencyMode#transparent}.
+   * <p>Defaults to {@link TransparencyMode#transparent}.
    *
    * <p>Used by this {@code FlutterFragment}'s {@link FlutterActivityAndFragmentDelegate.Host}
    */
   @Override
   @NonNull
-  public FlutterView.TransparencyMode getTransparencyMode() {
+  public TransparencyMode getTransparencyMode() {
     String transparencyModeName =
         getArguments()
-            .getString(
-                ARG_FLUTTERVIEW_TRANSPARENCY_MODE, FlutterView.TransparencyMode.transparent.name());
-    return FlutterView.TransparencyMode.valueOf(transparencyModeName);
+            .getString(ARG_FLUTTERVIEW_TRANSPARENCY_MODE, TransparencyMode.transparent.name());
+    return TransparencyMode.valueOf(transparencyModeName);
   }
 
   @Override
@@ -981,6 +968,16 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   @Override
   public boolean shouldAttachEngineToActivity() {
     return getArguments().getBoolean(ARG_SHOULD_ATTACH_ENGINE_TO_ACTIVITY);
+  }
+
+  @Override
+  public void onFlutterSurfaceViewCreated(@NonNull FlutterSurfaceView flutterSurfaceView) {
+    // Hook for subclasses.
+  }
+
+  @Override
+  public void onFlutterTextureViewCreated(@NonNull FlutterTextureView flutterTextureView) {
+    // Hook for subclasses.
   }
 
   /**
