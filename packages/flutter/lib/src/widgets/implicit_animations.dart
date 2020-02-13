@@ -1505,8 +1505,9 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAn
 /// without explicit style) over a given duration whenever the given style
 /// changes.
 ///
-/// The [textAlign], [softWrap], [textOverflow], and [maxLines] properties are
-/// not animated and take effect immediately when changed.
+/// The [textAlign], [softWrap], [textOverflow], [maxLines], [textWidthBasis]
+/// and [textHeightBehavior] properties are not animated and take effect
+/// immediately when changed.
 ///
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.elasticInOut].
