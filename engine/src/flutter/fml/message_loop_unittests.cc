@@ -10,7 +10,6 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
@@ -315,33 +314,4 @@ TEST(MessageLoop, CanCreateConcurrentMessageLoop) {
   }
   latch.Wait();
   ASSERT_GE(thread_ids.size(), 1u);
-}
-
-TEST(MessageLoop, TIME_SENSITIVE(WakeUpTimersAreSingletons)) {
-  auto loop_impl = fml::MessageLoopImpl::Create();
-
-  const auto t1 = fml::TimeDelta::FromMilliseconds(10);
-  const auto t2 = fml::TimeDelta::FromMilliseconds(20);
-
-  const auto begin = fml::TimePoint::Now();
-
-  // Register a task scheduled for 10ms in the future. This schedules a
-  // WakeUp call on the MessageLoopImpl with that fml::TimePoint
-  loop_impl->PostTask(
-      [&]() {
-        auto delta = fml::TimePoint::Now() - begin;
-        auto ms = delta.ToMillisecondsF();
-        ASSERT_GE(ms, 10);
-        ASSERT_LE(ms, 25);
-
-        loop_impl->Terminate();
-      },
-      fml::TimePoint::Now() + t1);
-
-  // Call WakeUp manually to change the WakeUp time to the future. If the
-  // timer is correctly set up to be rearmed instead of a new timer scheduled,
-  // the above task will be executed at t2 instead of t1 now.
-  loop_impl->WakeUp(fml::TimePoint::Now() + t2);
-
-  loop_impl->Run();
 }
