@@ -28,6 +28,9 @@ import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.platform.PlatformViewsController;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
@@ -305,9 +308,17 @@ public class TextInputPluginTest {
 
   @Test
   public void inputConnection_finishComposingTextUpdatesIMM() throws JSONException {
+    ShadowBuild.setManufacturer("samsung");
+    InputMethodSubtype inputMethodSubtype =
+        new InputMethodSubtype(0, 0, /*locale=*/ "en", "", "", false, false);
+    Settings.Secure.putString(
+        RuntimeEnvironment.application.getContentResolver(),
+        Settings.Secure.DEFAULT_INPUT_METHOD,
+        "com.sec.android.inputmethod/.SamsungKeypad");
     TestImm testImm =
         Shadow.extract(
             RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
     FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
     View testView = new View(RuntimeEnvironment.application);
     DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
@@ -338,13 +349,59 @@ public class TextInputPluginTest {
     }
   }
 
+  @Test
+  public void inputConnection_samsungFinishComposingTextSetsSelection() throws JSONException {
+    ShadowBuild.setManufacturer("samsung");
+    InputMethodSubtype inputMethodSubtype =
+        new InputMethodSubtype(0, 0, /*locale=*/ "en", "", "", false, false);
+    Settings.Secure.putString(
+        RuntimeEnvironment.application.getContentResolver(),
+        Settings.Secure.DEFAULT_INPUT_METHOD,
+        "com.sec.android.inputmethod/.SamsungKeypad");
+    TestImm testImm =
+        Shadow.extract(
+            RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+    FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+    View testView = new View(RuntimeEnvironment.application);
+    DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(testView, dartExecutor, mock(PlatformViewsController.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
+            null));
+    // There's a pending restart since we initialized the text input client. Flush that now.
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("", 0, 0));
+    InputConnection connection = textInputPlugin.createInputConnection(testView, new EditorInfo());
+
+    testImm.setTrackSelection(true);
+    connection.finishComposingText();
+    testImm.setTrackSelection(false);
+
+    List<Integer> expectedSelectionValues =
+        Arrays.asList(0, 0, -1, -1, -1, -1, -1, -1, 0, 0, -1, -1);
+    assertEquals(testImm.getSelectionUpdateValues(), expectedSelectionValues);
+  }
+
   @Implements(InputMethodManager.class)
   public static class TestImm extends ShadowInputMethodManager {
     private InputMethodSubtype currentInputMethodSubtype;
     private SparseIntArray restartCounter = new SparseIntArray();
     private CursorAnchorInfo cursorAnchorInfo;
+    private ArrayList<Integer> selectionUpdateValues;
+    private boolean trackSelection = false;
 
-    public TestImm() {}
+    public TestImm() {
+      selectionUpdateValues = new ArrayList<Integer>();
+    }
 
     @Implementation
     public InputMethodSubtype getCurrentInputMethodSubtype() {
@@ -368,6 +425,28 @@ public class TextInputPluginTest {
     @Implementation
     public void updateCursorAnchorInfo(View view, CursorAnchorInfo cursorAnchorInfo) {
       this.cursorAnchorInfo = cursorAnchorInfo;
+    }
+
+    // We simply store the values to verify later.
+    @Implementation
+    public void updateSelection(
+        View view, int selStart, int selEnd, int candidatesStart, int candidatesEnd) {
+      if (trackSelection) {
+        this.selectionUpdateValues.add(selStart);
+        this.selectionUpdateValues.add(selEnd);
+        this.selectionUpdateValues.add(candidatesStart);
+        this.selectionUpdateValues.add(candidatesEnd);
+      }
+    }
+
+    // only track values when enabled via this.
+    public void setTrackSelection(boolean val) {
+      trackSelection = val;
+    }
+
+    // Returns true if the last updateSelection call passed the following values.
+    public ArrayList<Integer> getSelectionUpdateValues() {
+      return selectionUpdateValues;
     }
 
     public CursorAnchorInfo getLastCursorAnchorInfo() {

@@ -4,8 +4,10 @@
 
 package io.flutter.plugin.editing;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
+import android.provider.Settings;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.Layout;
@@ -17,6 +19,7 @@ import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 
@@ -29,6 +32,9 @@ class InputConnectionAdaptor extends BaseInputConnection {
   private int mBatchCount;
   private InputMethodManager mImm;
   private final Layout mLayout;
+
+  // Used to determine if Samsung-specific hacks should be applied.
+  private final boolean isSamsung;
 
   @SuppressWarnings("deprecation")
   public InputConnectionAdaptor(
@@ -56,6 +62,8 @@ class InputConnectionAdaptor extends BaseInputConnection {
             0.0f,
             false);
     mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+    isSamsung = isSamsung();
   }
 
   // Send the current state of the editable to Flutter.
@@ -132,17 +140,62 @@ class InputConnectionAdaptor extends BaseInputConnection {
   public boolean finishComposingText() {
     boolean result = super.finishComposingText();
 
-    if (Build.VERSION.SDK_INT >= 21) {
-      // Update the keyboard with a reset/empty composing region. Critical on
-      // Samsung keyboards to prevent punctuation duplication.
-      CursorAnchorInfo.Builder builder = new CursorAnchorInfo.Builder();
-      builder.setComposingText(-1, "");
-      CursorAnchorInfo anchorInfo = builder.build();
-      mImm.updateCursorAnchorInfo(mFlutterView, anchorInfo);
+    // Apply Samsung hacks. Samsung caches composing region data strangely, causing text
+    // duplication.
+    if (isSamsung) {
+      if (Build.VERSION.SDK_INT >= 21) {
+        // Samsung keyboards don't clear the composing region on finishComposingText.
+        // Update the keyboard with a reset/empty composing region. Critical on
+        // Samsung keyboards to prevent punctuation duplication.
+        CursorAnchorInfo.Builder builder = new CursorAnchorInfo.Builder();
+        builder.setComposingText(/*composingTextStart*/ -1, /*composingText*/ "");
+        CursorAnchorInfo anchorInfo = builder.build();
+        mImm.updateCursorAnchorInfo(mFlutterView, anchorInfo);
+      }
+      // TODO(garyq): There is still a duplication case that comes from hiding+showing the keyboard.
+      // The exact behavior to cause it has so far been hard to pinpoint and it happens far more
+      // rarely than the original bug.
+
+      // Temporarily indicate to the IME that the composing region selection should be reset.
+      // The correct selection is then immediately set properly in the updateEditingState() call
+      // in this method. This is a hack to trigger Samsung keyboard's internal cache to clear.
+      // This prevents duplication on keyboard hide+show. See
+      // https://github.com/flutter/flutter/issues/31512
+      //
+      // We only do this if the proper selection will be restored later, eg, when mBatchCount is 0.
+      if (mBatchCount == 0) {
+        mImm.updateSelection(
+            mFlutterView,
+            -1, /*selStart*/
+            -1, /*selEnd*/
+            -1, /*candidatesStart*/
+            -1 /*candidatesEnd*/);
+      }
     }
 
     updateEditingState();
     return result;
+  }
+
+  // Detect if the keyboard is a Samsung keyboard, where we apply Samsung-specific hacks to
+  // fix critical bugs that make the keyboard otherwise unusable. See finishComposingText() for
+  // more details.
+  @SuppressLint("NewApi") // New API guard is inline, the linter can't see it.
+  @SuppressWarnings("deprecation")
+  private boolean isSamsung() {
+    InputMethodSubtype subtype = mImm.getCurrentInputMethodSubtype();
+    // Impacted devices all shipped with Android Lollipop or newer.
+    if (subtype == null
+        || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP
+        || !Build.MANUFACTURER.equals("samsung")) {
+      return false;
+    }
+    String keyboardName =
+        Settings.Secure.getString(
+            mFlutterView.getContext().getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+    // The Samsung keyboard is called "com.sec.android.inputmethod/.SamsungKeypad" but look
+    // for "Samsung" just in case Samsung changes the name of the keyboard.
+    return keyboardName.contains("Samsung");
   }
 
   @Override
