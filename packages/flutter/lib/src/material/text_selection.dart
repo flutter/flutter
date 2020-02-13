@@ -90,7 +90,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
 
   @override
   void initState() {
-    _measureItemsNextFrame();
     super.initState();
   }
 
@@ -101,47 +100,8 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
     // re-measure.
     if (widget.menuWidthChanged(oldWidget)) {
       _menuContentWidth = null;
-      _measureItemsNextFrame();
     }
     super.didUpdateWidget(oldWidget);
-  }
-
-  // Measure the width of the container and how many items fit inside in order
-  // to decide which items to put in the overflow menu.
-  void _measureItemsNextFrame() {
-    // TODO(justinmc): Disabling to avoid key errors.
-    return;
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      // If the menu is empty, no need to measure it.
-      if (_itemKeys.isEmpty) {
-        return;
-      }
-
-      assert(_containerKey.currentContext != null);
-      final RenderBox renderBoxContainer = _containerKey.currentContext.findRenderObject() as RenderBox;
-      double remainingContainerWidth = renderBoxContainer.size.width;
-
-      setState(() {
-        _indexWhereOverflows = _itemKeys.indexWhere((GlobalKey key) {
-          assert(key.currentContext != null);
-          final RenderBox renderBox = key.currentContext.findRenderObject() as RenderBox;
-
-          if (renderBox.size.width > remainingContainerWidth) {
-            return true;
-          }
-
-          remainingContainerWidth -= renderBox.size.width;
-          return false;
-        });
-
-        final RenderBox renderBoxMoreButton = _moreButtonKey.currentContext.findRenderObject() as RenderBox;
-        final double itemsWidth = renderBoxContainer.size.width - remainingContainerWidth;
-
-        _menuContentWidth = _shouldShowMoreButton
-          ? itemsWidth + renderBoxMoreButton.size.width
-          : itemsWidth;
-      });
-    });
   }
 
   @override
@@ -193,8 +153,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       _itemKeys.add(GlobalKey());
       items.add(FlatButton(
         key: _itemKeys[_itemKeys.length - 1],
-        //child: Text(localizations.selectAllButtonLabel),
-        child: Text('Select absolutely everything'),
+        child: Text(localizations.selectAllButtonLabel),
         onPressed: () {
           setState(() {
             _overflowOpen = false;
@@ -209,87 +168,28 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       return Container(width: 0.0, height: 0.0);
     }
 
-    return _TextSelectionToolbarROW(
-      // TODO(justinmc): These children should be all buttons. More button
-      // might need to be a separate parameter?
-      children: items,
-      /*
-      navButton: IconButton(
-        key: _moreButtonKey,
-        icon: Icon(Icons.more_vert),
-        tooltip: 'More',
-        onPressed: () {},//TODO onMorePressed,
-      ),
-      */
-      navButton: Container(
-        width: 40,
-        height: 40,
-        color: Colors.pink,
-      ),
-        /*
-      children: <Widget>[
-        Container(
-          width: 40,
-          height: 40,
-          color: Colors.blue,
-        ),
-        Container(
-          width: 40,
-          height: 40,
-          color: Colors.yellow,
-        ),
-      ],
-      */
-    );
-
-    // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
-    // frame for measurement.
-    if (_menuContentWidth == null) {
-      return Offstage(
-        child: _TextSelectionToolbarContainer(
-          key: _containerKey,
-          child: _TextSelectionToolbarContent(
-            items: items,
-            showMoreButton: true,
-            moreButtonKey: _moreButtonKey,
-          ),
-        ),
-      );
-    }
-
-    assert(_indexWhereOverflows != null);
-    final int itemsInFirstMenu = _indexWhereOverflows == -1
-      ? _itemKeys.length
-      : _indexWhereOverflows;
-
-    if (_overflowOpen) {
-      return _TextSelectionToolbarContainer(
-        key: _containerKey,
-        width: _menuContentWidth,
-        child: _TextSelectionToolbarContentOverflow(
-          isAbove: widget.isAbove,
-          items: items.sublist(itemsInFirstMenu, items.length),
-          onBackPressed: () {
-            setState(() {
-              _overflowOpen = false;
-            });
-          },
-        ),
-      );
-    }
-
     return _TextSelectionToolbarContainer(
       key: _containerKey,
       width: _menuContentWidth,
-      child: _TextSelectionToolbarContent(
-        items: items.sublist(0, itemsInFirstMenu),
-        showMoreButton: itemsInFirstMenu < items.length,
-        moreButtonKey: _moreButtonKey,
-        onMorePressed: () {
-          setState(() {
-            _overflowOpen = true;
-          });
-        },
+      child: _TextSelectionToolbarROW(
+        isAbove: widget.isAbove,
+        overflowOpen: _overflowOpen,
+        children: <Widget>[
+          Material(
+            child: IconButton(
+              key: _moreButtonKey,
+              icon: Icon(Icons.more_vert),
+              onPressed: () {
+                print('justin pressed more.');
+                setState(() {
+                  _overflowOpen = true;
+                });
+              },
+              tooltip: 'More',
+            ),
+          ),
+          ...items,
+        ],
       ),
     );
   }
@@ -407,54 +307,184 @@ class _TextSelectionToolbarContentOverflow extends StatelessWidget {
   }
 }
 
+// TODO(justinmc): Rename.
 class _TextSelectionToolbarROW extends MultiChildRenderObjectWidget {
   _TextSelectionToolbarROW({
     Key key,
     @required this.children,
-    @required this.navButton,
+    @required this.isAbove,
+    @required this.overflowOpen,
   }) : super(key: key, children: children);
 
   final List<Widget> children;
-  final Widget navButton;
+  final bool isAbove;
+  final bool overflowOpen;
 
   @override
   _TextSelectionToolbarRB createRenderObject(BuildContext context) {
-    return _TextSelectionToolbarRB();
+    return _TextSelectionToolbarRB(
+      isAbove: isAbove,
+      overflowOpen: overflowOpen,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _TextSelectionToolbarRB renderObject) {
+    renderObject
+      ..isAbove = isAbove
+      ..overflowOpen = overflowOpen;
   }
 
   @override
   _TextSelectionToolbarElement createElement() => _TextSelectionToolbarElement(this);
 }
 
-class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData> {
+class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>, RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
+  _TextSelectionToolbarRB({
+    @required this.isAbove,
+    @required this.overflowOpen,
+  }) : assert(overflowOpen != null),
+       assert(isAbove != null),
+       super();
+
+  bool isAbove;
+  bool overflowOpen;
+  int _lastIndexThatFits = -1;
+
+  // Lay out all children, regardless of whether or not they will be painted or
+  // placed with an offset. Find which child overflows, if any.
+  void _layoutChildren() {
+    int i = -1;
+    double width = 0.0;
+    visitChildren((RenderObject renderObjectChild) {
+      i++;
+      final RenderBox child = renderObjectChild as RenderBox;
+      child.layout(constraints, parentUsesSize: true);
+      width += child.size.width;
+
+      if (width > constraints.maxWidth && _lastIndexThatFits == -1) {
+        _lastIndexThatFits = i - 1;
+      }
+    });
+
+    // If the last child overflows, but only because of the width of the
+    // overflow button, then just show it and hide the overflow button.
+    final RenderBox navButton = firstChild as RenderBox;
+    if (_lastIndexThatFits != -1 && _lastIndexThatFits == childCount - 2
+      && width - navButton.size.width < constraints.maxWidth) {
+      _lastIndexThatFits = -1;
+    }
+  }
+
+  // Set the offset of all of the children that will be painted.
+  void _placeChildren() {
+    int i = -1;
+    Size nextSize = Size(0.0, 0.0);
+    double fitWidth = 0.0;
+    RenderBox navButton = firstChild as RenderBox;
+    double overflowHeight = overflowOpen && !isAbove ? navButton.size.height : 0.0;
+    visitChildren((RenderObject renderObjectChild) {
+      i++;
+
+      // The navigation button is placed after iterating all children.
+      if (renderObjectChild == firstChild) {
+        return;
+      }
+
+      // If the current child is not displayed, no need to place it.
+      if (_lastIndexThatFits != -1) {
+        if ((!overflowOpen && i > _lastIndexThatFits)
+          || (overflowOpen && i <= _lastIndexThatFits)) {
+          return;
+        }
+      }
+
+      final RenderBox child = renderObjectChild as RenderBox;
+      final FlexParentData childParentData = child.parentData as FlexParentData;
+
+      if (!overflowOpen) {
+        childParentData.offset = Offset(fitWidth, 0.0);
+        fitWidth += child.size.width;
+        nextSize = Size(
+          fitWidth,
+          math.max(child.size.height, nextSize.height),
+        );
+      } else {
+        childParentData.offset = Offset(0.0, overflowHeight);
+        overflowHeight += child.size.height;
+        nextSize = Size(
+          math.max(child.size.width, nextSize.width),
+          overflowHeight,
+        );
+      }
+    });
+
+    // Place the navigation button if there is overflow.
+    if (_lastIndexThatFits >= 0) {
+      // TODO(justinmc): The navButton is just the first child in the array of
+      // children. Should I create a separate slot for it?
+      final FlexParentData navButtonParentData = navButton.parentData as FlexParentData;
+      if (overflowOpen) {
+        navButtonParentData.offset = isAbove
+          ? Offset(0.0, overflowHeight)
+          : Offset.zero;
+        nextSize = Size(
+          nextSize.width,
+          isAbove ? nextSize.height + navButton.size.height : nextSize.height,
+        );
+      } else {
+        navButtonParentData.offset = Offset(fitWidth, 0.0);
+        nextSize = Size(nextSize.width + navButton.size.width, nextSize.height);
+      }
+    }
+
+    size = nextSize;
+  }
 
   @override
   void performLayout() {
+    _lastIndexThatFits = -1;
     if (firstChild == null) {
       performResize();
       return;
     }
 
-    Offset offset = Offset.zero;
-    visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      child.layout(constraints, parentUsesSize: true);
-      final FlexParentData childParentData = child.parentData as FlexParentData;
-      childParentData.offset = offset;
-      size = child.size;
-      offset = Offset(offset.dx + child.size.width, 0.0);
-    });
+    _layoutChildren();
+    _placeChildren();
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     final Rect overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width, 0.0);
 
+    double lastY = 0.0;
+    int i = -1;
+    bool fits = true;
     visitChildren((RenderObject renderObjectChild) {
+      i++;
+
+      // Don't paint the navButton if there is no overflow.
+      if (_lastIndexThatFits == -1 && renderObjectChild == firstChild) {
+        return;
+      }
+
+      // Don't paint children that don't fit when overflow is closed, and don't
+      // paint children that do fit when overflow is open.
+      if (renderObjectChild != firstChild && fits == overflowOpen) {
+        if (fits && i == _lastIndexThatFits) {
+          fits = false;
+        }
+        return;
+      }
+
+      // Otherwise paint the child.
       final RenderBox child = renderObjectChild as RenderBox;
-      // TODO(justinmc): Actually paint the correct children in row/column.
       final FlexParentData childParentData = child.parentData as FlexParentData;
       context.paintChild(child, childParentData.offset + offset);
+      lastY = childParentData.offset.dy + offset.dy;
+      if (fits && i == _lastIndexThatFits) {
+        fits = false;
+      }
     });
   }
 
@@ -464,6 +494,11 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
       child.parentData = FlexParentData();
     }
   }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    return defaultHitTestChildren(result, position: position);
+  }
 }
 
 class _TextSelectionToolbarElement extends MultiChildRenderObjectElement {
@@ -471,17 +506,8 @@ class _TextSelectionToolbarElement extends MultiChildRenderObjectElement {
     : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
       super(widget as MultiChildRenderObjectWidget);
 
-  Element _navButton;
-
   @override
   _TextSelectionToolbarROW get widget => super.widget as _TextSelectionToolbarROW;
-
-  // This is overriden to handle navButton, while super handles children.
-  @override
-  void mount(Element parent, dynamic newSlot) {
-    super.mount(parent, newSlot);
-    _navButton = inflateWidget(widget.navButton, null);
-  }
 }
 
 /// Centers the toolbar around the given anchor, ensuring that it remains on
