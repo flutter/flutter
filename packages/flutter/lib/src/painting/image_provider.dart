@@ -334,7 +334,7 @@ abstract class ImageProvider<T> {
 
   /// Returns the cache location for the key that this [ImageProvider] creates.
   ///
-  /// The location may be [ImageCacheLocation.untracked], indicating that this
+  /// The location may be [ImageCacheStatus.untracked], indicating that this
   /// image provider's key is not available in the [ImageCache].
   ///
   /// The `cache` and `configuration` parameters must not be null. If the
@@ -342,12 +342,12 @@ abstract class ImageProvider<T> {
   /// [FlutterError.onError], and the method will return null.
   ///
   /// A completed return value of null indicates that an error has occurred.
-  Future<ImageCacheLocation> findCacheLocation({
+  Future<ImageCacheStatus> obtainCacheStatus({
     @required ImageConfiguration configuration,
     ImageErrorListener handleError,
   }) {
     assert(configuration != null);
-    final Completer<ImageCacheLocation> completer = Completer<ImageCacheLocation>();
+    final Completer<ImageCacheStatus> completer = Completer<ImageCacheStatus>();
     bool didError = false;
     final ImageErrorListener errorHandler = (dynamic exception, StackTrace stack) {
       if (didError) {
@@ -394,7 +394,7 @@ abstract class ImageProvider<T> {
         return;
       }
       key.then<void>((T key) {
-        completer.complete(PaintingBinding.instance.imageCache.locationForKey(key));
+        completer.complete(PaintingBinding.instance.imageCache.statusForKey(key));
       }).catchError(errorHandler);
     });
 

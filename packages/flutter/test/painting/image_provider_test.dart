@@ -117,7 +117,7 @@ void main() {
       FlutterError.onError = (FlutterErrorDetails details) {
         caughtError.complete(true);
       };
-      await imageProvider.findCacheLocation(configuration: ImageConfiguration.empty);
+      await imageProvider.obtainCacheStatus(configuration: ImageConfiguration.empty);
 
       expect(await caughtError.future, true);
     });

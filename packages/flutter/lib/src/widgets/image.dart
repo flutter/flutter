@@ -78,8 +78,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// will wait until the end of the frame after its future completes before
 /// releasing its own listener. This gives callers a chance to listen to the
 /// stream if necessary. A caller can determine if the image ended up in the
-/// cache by calling [ImageProvider.findCacheLocation]. If it is only held as
-/// [ImageCacheLocation.live], and the caller wishes to keep the resolved
+/// cache by calling [ImageProvider.obtainCacheStatus]. If it is only held as
+/// [ImageCacheStatus.live], and the caller wishes to keep the resolved
 /// image in memory, the caller should immediately call `provider.resolve` and
 /// add a listener to the returned [ImageStream]. The image will remain pinned
 /// in memory at least until the caller removes its listener from the stream,

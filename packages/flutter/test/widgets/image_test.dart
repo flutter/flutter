@@ -1400,12 +1400,12 @@ void main() {
     ));
 
     expect(imageCache.liveImageCount, 2);
-    expect(imageCache.locationForKey(provider1).live, true);
-    expect(imageCache.locationForKey(provider1).pending, false);
-    expect(imageCache.locationForKey(provider1).completed, false);
-    expect(imageCache.locationForKey(provider2).live, true);
-    expect(imageCache.locationForKey(provider2).pending, false);
-    expect(imageCache.locationForKey(provider2).completed, false);
+    expect(imageCache.statusForKey(provider1).live, true);
+    expect(imageCache.statusForKey(provider1).pending, false);
+    expect(imageCache.statusForKey(provider1).keepAlive, false);
+    expect(imageCache.statusForKey(provider2).live, true);
+    expect(imageCache.statusForKey(provider2).pending, false);
+    expect(imageCache.statusForKey(provider2).keepAlive, false);
 
     expect(provider1.loadCallCount, 1);
     expect(provider2.loadCallCount, 1);
@@ -1421,10 +1421,10 @@ void main() {
 
     await tester.pumpWidget(Image(image: provider2));
     await tester.idle();
-    expect(imageCache.locationForKey(provider1).untracked, true);
-    expect(imageCache.locationForKey(provider2).live, true);
-    expect(imageCache.locationForKey(provider2).pending, false);
-    expect(imageCache.locationForKey(provider2).completed, false);
+    expect(imageCache.statusForKey(provider1).untracked, true);
+    expect(imageCache.statusForKey(provider2).live, true);
+    expect(imageCache.statusForKey(provider2).pending, false);
+    expect(imageCache.statusForKey(provider2).keepAlive, false);
     expect(imageCache.liveImageCount, 1);
 
     await tester.pumpWidget(const SizedBox());
@@ -1453,11 +1453,11 @@ void main() {
     expect(imageCache.liveImageCount, 1);
     expect(imageCache.containsKey(provider), false);
 
-    final ImageCacheLocation providerLocation = await provider.findCacheLocation(configuration: ImageConfiguration.empty);
+    final ImageCacheStatus providerLocation = await provider.obtainCacheStatus(configuration: ImageConfiguration.empty);
 
     expect(providerLocation, isNotNull);
     expect(providerLocation.live, true);
-    expect(providerLocation.completed, false);
+    expect(providerLocation.keepAlive, false);
     expect(providerLocation.pending, false);
 
     // Check that a second resolve of the same image is synchronous.

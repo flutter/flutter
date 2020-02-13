@@ -170,14 +170,14 @@ void main() {
         return completer1;
       }) as TestImageStreamCompleter;
 
-      expect(imageCache.locationForKey(testImage).pending, true);
-      expect(imageCache.locationForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).pending, true);
+      expect(imageCache.statusForKey(testImage).live, true);
       imageCache.clear();
-      expect(imageCache.locationForKey(testImage).pending, false);
-      expect(imageCache.locationForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
       imageCache.clearLiveImages();
-      expect(imageCache.locationForKey(testImage).pending, false);
-      expect(imageCache.locationForKey(testImage).live, false);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, false);
 
       final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
         return completer2;
@@ -264,21 +264,21 @@ void main() {
         return completer1;
       }) as TestImageStreamCompleter;
 
-      expect(imageCache.locationForKey(testImage).pending, false);
-      expect(imageCache.locationForKey(testImage).completed, true);
-      expect(imageCache.locationForKey(testImage).live, true);
-      expect(imageCache.locationForKey(testImage2).untracked, true);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage2).untracked, true);
       final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage2, () {
         return completer2;
       }) as TestImageStreamCompleter;
 
 
-      expect(imageCache.locationForKey(testImage).pending, false);
-      expect(imageCache.locationForKey(testImage).completed, false); // evicted
-      expect(imageCache.locationForKey(testImage).live, true);
-      expect(imageCache.locationForKey(testImage2).pending, false);
-      expect(imageCache.locationForKey(testImage2).completed, true); // took the LRU spot.
-      expect(imageCache.locationForKey(testImage2).live, false); // no listeners
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).keepAlive, false); // evicted
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage2).pending, false);
+      expect(imageCache.statusForKey(testImage2).keepAlive, true); // took the LRU spot.
+      expect(imageCache.statusForKey(testImage2).live, false); // no listeners
 
       expect(resultingCompleter1, completer1);
       expect(resultingCompleter2, completer2);

@@ -29,7 +29,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// A caller can determine whether an image is already in the cache by using
 /// [containsKey], which will return true if the image is tracked by the cache
 /// in a pending or compelted state. More fine grained information is available
-/// by using the [locationForKey] method.
+/// by using the [statusForKey] method.
 ///
 /// Generally this class is not used directly. The [ImageProvider] class and its
 /// subclasses automatically handle the caching of images.
@@ -269,11 +269,11 @@ class ImageCache {
     return result;
   }
 
-  /// The [ImageCacheLocation] information for the given `key`.
-  ImageCacheLocation locationForKey(Object key) {
-    return ImageCacheLocation._(
+  /// The [ImageCacheStatus] information for the given `key`.
+  ImageCacheStatus statusForKey(Object key) {
+    return ImageCacheStatus._(
       pending: _pendingImages.containsKey(key),
-      completed: _cache.containsKey(key),
+      keepAlive: _cache.containsKey(key),
       live: _liveImages.containsKey(key),
     );
   }
@@ -339,14 +339,14 @@ class ImageCache {
 ///
 /// An [untracked] image is not being cached.
 ///
-/// To obtain an [ImageCacheLocation], use [ImageCache.locationForKey] or
-/// [ImageProvider.findCacheLocation].
-class ImageCacheLocation {
-  const ImageCacheLocation._({
+/// To obtain an [ImageCacheStatus], use [ImageCache.statusForKey] or
+/// [ImageProvider.obtainCacheStatus].
+class ImageCacheStatus {
+  const ImageCacheStatus._({
     this.pending = false,
-    this.completed = false,
+    this.keepAlive = false,
     this.live = false,
-  }) : assert(!pending || !completed);
+  }) : assert(!pending || !keepAlive);
 
   /// An image that has been submitted to [ImageCache.putIfAbsent], but
   /// not yet completed.
@@ -355,34 +355,40 @@ class ImageCacheLocation {
   /// An image that has been submitted to [ImageCache.putIfAbsent], has
   /// completed, fits based on the sizing rules of the cache, and has not been
   /// evicted.
-  final bool completed;
+  ///
+  /// Such images will be kept alive even if [live] is false, as long
+  /// as they have not been evicted from the cache based on its sizing rules.
+  final bool keepAlive;
 
   /// An image that has been submitted to [ImageCache.putIfAbsent], has
   /// completed, and has at least one listener on its [ImageStreamCompleter].
+  ///
+  /// Such images may also be [keepAlive] if they fit in the cache based on its
+  /// sizing rules. They may also be [pending] if they have not yet resolved.
   final bool live;
 
   /// An image that is tracked in some way by the [ImageCache], whether
-  /// [pending], [completed], or [live].
-  bool get tracked => pending || completed || live;
+  /// [pending], [keepAlive], or [live].
+  bool get tracked => pending || keepAlive || live;
 
   /// An image that either has not been submitted to
   /// [ImageCache.putIfAbsent] or has otherwise been evicted from the
   /// [completed] and [live] caches.
-  bool get untracked => !pending && !completed && !live;
+  bool get untracked => !pending && !keepAlive && !live;
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ImageCacheLocation
+    return other is ImageCacheStatus
         && other.pending == pending
-        && other.completed == completed
+        && other.keepAlive == keepAlive
         && other.live == live;
   }
 
   @override
-  int get hashCode => hashValues(pending, completed, live);
+  int get hashCode => hashValues(pending, keepAlive, live);
 }
 
 class _CachedImage {
