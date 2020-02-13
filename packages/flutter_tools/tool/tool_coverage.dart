@@ -60,6 +60,7 @@ class VMPlatform extends PlatformPlugin {
   );
   final Map<String, Future<void>> _pending = <String, Future<void>>{};
   final String precompiledPath = path.join('.dart_tool', 'build', 'generated', 'flutter_tools');
+  final String outputName = Platform.environment['SUBSHARD'];
 
   @override
   StreamChannel<void> loadChannel(String codePath, SuitePlatform platform) =>
@@ -154,7 +155,7 @@ class VMPlatform extends PlatformPlugin {
     final String result = await coverageCollector.finalizeCoverage(
       formatter: formatter,
     );
-    final String outputLcovPath = path.join('coverage', 'lcov.info');
+    final String outputLcovPath = path.join('coverage', 'lcov.$outputName.info');
     File(outputLcovPath)
       ..createSync(recursive: true)
       ..writeAsStringSync(result);
