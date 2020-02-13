@@ -284,7 +284,15 @@ abstract class IosAssetBundle extends Target {
 
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
-    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      assetDepfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
 
 
     // Copy the plist from either the project or module.
