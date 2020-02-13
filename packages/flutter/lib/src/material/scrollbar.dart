@@ -37,6 +37,7 @@ class Scrollbar extends StatefulWidget {
     Key key,
     @required this.child,
     this.controller,
+    this.displayAlways = false,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -49,6 +50,49 @@ class Scrollbar extends StatefulWidget {
 
   /// {@macro flutter.cupertino.cupertinoScrollbar.controller}
   final ScrollController controller;
+
+  /// The default value of displayAlways is false,
+  /// When displayAlways property is true, the [Scrollbar] will be always shown.
+  /// but to show the [Scrollbar] always, you need to pass the [Scrollable]'s controller. see [ScrollController]
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// final ScrollController _controllerOne = ScrollController();
+  /// final ScrollController _controllerTwo = ScrollController();
+  ///
+  /// build(BuildContext context) {
+  /// return Column(
+  ///   children: <Widget>[
+  ///     Container(
+  ///        height: 200,
+  ///        child: Scrollbar(
+  ///          displayAlways: true,
+  ///          controller: _controllerOne,
+  ///          child: ListView.builder(
+  ///            controller: _controllerOne,
+  ///            itemCount: 120,
+  ///            itemBuilder: (BuildContext context, int index) => Text('item $index'),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///      Container(
+  ///        height: 200,
+  ///        child: Scrollbar(
+  ///          displayAlways: true,
+  ///          controller: _controllerTwo,
+  ///          child: SingleChildScrollView(
+  ///            controller: _controllerTwo,
+  ///            child: SizedBox(height: 2000, width: 500,),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///    ],
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final bool displayAlways;
 
   @override
   _ScrollbarState createState() => _ScrollbarState();
@@ -87,8 +131,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        // On iOS, stop all local animations. CupertinoScrollbar has its own
-        // animations.
+      // On iOS, stop all local animations. CupertinoScrollbar has its own
+      // animations.
         _fadeoutTimer?.cancel();
         _fadeoutTimer = null;
         _fadeoutAnimationController.reset();
@@ -100,9 +144,31 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         _textDirection = Directionality.of(context);
         _materialPainter = _buildMaterialScrollbarPainter();
         _useCupertinoScrollbar = false;
+        WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+          if (widget.displayAlways) {
+            assert(widget.controller != null);
+            // Wait one frame and cause an empty scroll event.  This allows the
+            // thumb to show immediately when displayAlways is true.  A scroll
+            // event is required in order to paint the thumb.
+            widget.controller.position.didUpdateScrollPositionBy(0);
+          }
+        });
         break;
     }
     assert(_useCupertinoScrollbar != null);
+  }
+
+  @override
+  void didUpdateWidget(Scrollbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.displayAlways != oldWidget.displayAlways) {
+      assert(widget.controller != null);
+      if (widget.displayAlways == false) {
+        _fadeoutAnimationController.reverse();
+      } else {
+        _fadeoutAnimationController.animateTo(1.0);
+      }
+    }
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
@@ -124,17 +190,21 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     // iOS sub-delegates to the CupertinoScrollbar instead and doesn't handle
     // scroll notifications here.
     if (!_useCupertinoScrollbar &&
-        (notification is ScrollUpdateNotification || notification is OverscrollNotification)) {
+        (notification is ScrollUpdateNotification ||
+            notification is OverscrollNotification)) {
       if (_fadeoutAnimationController.status != AnimationStatus.forward) {
         _fadeoutAnimationController.forward();
       }
 
-      _materialPainter.update(notification.metrics, notification.metrics.axisDirection);
-      _fadeoutTimer?.cancel();
-      _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
-        _fadeoutAnimationController.reverse();
-        _fadeoutTimer = null;
-      });
+      _materialPainter.update(
+          notification.metrics, notification.metrics.axisDirection);
+      if (!widget.displayAlways) {
+        _fadeoutTimer?.cancel();
+        _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
+          _fadeoutAnimationController.reverse();
+          _fadeoutTimer = null;
+        });
+      }
     }
     return false;
   }
@@ -152,6 +222,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
         child: widget.child,
+        displayAlways: widget.displayAlways,
         controller: widget.controller,
       );
     }
