@@ -187,19 +187,19 @@ class BuildDaemonCreator {
     bool initializePlatform,
     WebTestTargetManifest testTargets,
   }) {
+    // The build script is stored in an auxillary package to reduce
+    // dependencies of the main tool.
     final String flutterToolsPackages = globals.fs.path.join(
       Cache.flutterRoot,
       'packages',
-      'flutter_tools',
+      '_flutter_web_build_script',
       '.packages',
     );
     final String buildScript = globals.fs.path.join(
       Cache.flutterRoot,
       'packages',
-      'flutter_tools',
+      '_flutter_web_build_script',
       'lib',
-      'src',
-      'build_runner',
       'build_script.dart',
     );
     final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);

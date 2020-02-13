@@ -416,3 +416,4 @@ Future<bool> _isAppEntryPoint(AssetId dartId, AssetReader reader) async {
         node.functionExpression.parameters.parameters.length <= 2;
   });
 }
+
