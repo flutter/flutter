@@ -1263,7 +1263,7 @@ class IosUsbArtifacts extends CachedArtifact {
     'openssl',
     'ideviceinstaller',
     'ios-deploy',
-    'libzip',
+    //'libzip',
   ];
 
   // For unknown reasons, users are getting into bad states where libimobiledevice is

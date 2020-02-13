@@ -220,6 +220,8 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> installApp(IOSApp app) async {
+    globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
+    globals.printError('In installApp()');
     final Directory bundle = globals.fs.directory(app.deviceBundlePath);
     if (!bundle.existsSync()) {
       globals.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
@@ -227,6 +229,8 @@ class IOSDevice extends Device {
     }
 
     try {
+      globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
+      globals.printError('About to invoke ideviceinstaller');
       await processUtils.run(
         <String>[_installerPath, '-i', app.deviceBundlePath],
         throwOnError: true,
@@ -359,7 +363,7 @@ class IOSDevice extends Device {
           ipv6: ipv6,
         );
       }
-      final int installationResult = await IOSDeploy.instance.runApp(
+      final int installationResult = await IOSDeploy.instance.runApp( // TODO IOSDeploy!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: launchArguments,
