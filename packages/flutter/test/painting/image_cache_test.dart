@@ -248,7 +248,40 @@ void main() {
 
       expect(resultingCompleter1, completer1);
       expect(imageCache.containsKey(testImage), true);
+    });
 
+    test('putIfAbsent updates LRU properties of a live image', () async {
+      imageCache.maximumSize = 1;
+      const TestImage testImage = TestImage(width: 8, height: 8);
+      const TestImage testImage2 = TestImage(width: 10, height: 10);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()..testSetImage(testImage);
+      final TestImageStreamCompleter completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
+
+      completer1.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      }) as TestImageStreamCompleter;
+
+      expect(imageCache.locationForKey(testImage).pending, false);
+      expect(imageCache.locationForKey(testImage).completed, true);
+      expect(imageCache.locationForKey(testImage).live, true);
+      expect(imageCache.locationForKey(testImage2).untracked, true);
+      final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage2, () {
+        return completer2;
+      }) as TestImageStreamCompleter;
+
+
+      expect(imageCache.locationForKey(testImage).pending, false);
+      expect(imageCache.locationForKey(testImage).completed, false); // evicted
+      expect(imageCache.locationForKey(testImage).live, true);
+      expect(imageCache.locationForKey(testImage2).pending, false);
+      expect(imageCache.locationForKey(testImage2).completed, true); // took the LRU spot.
+      expect(imageCache.locationForKey(testImage2).live, false); // no listeners
+
+      expect(resultingCompleter1, completer1);
+      expect(resultingCompleter2, completer2);
     });
   });
 }

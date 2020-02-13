@@ -332,8 +332,10 @@ abstract class ImageProvider<T> {
     return ImageStream();
   }
 
-  /// Checks if this [ImageProvider] has a matching key in the
-  /// [PaintingBinding.imageCache]
+  /// Returns the cache location for the key that this [ImageProvider] creates.
+  ///
+  /// The location may be [ImageCacheLocation.untracked], indicating that this
+  /// image provider's key is not available in the [ImageCache].
   ///
   /// The `cache` and `configuration` parameters must not be null. If the
   /// `handleError` parameter is null, errors will be reported to
@@ -367,7 +369,6 @@ abstract class ImageProvider<T> {
         completer.complete(null);
       }
     };
-
 
     // If an error is added to a synchronous completer before a listener has been
     // added, it can throw an error both into the zone and up the stack. Thus, it

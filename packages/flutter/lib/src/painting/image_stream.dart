@@ -407,7 +407,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
 
   final List<VoidCallback> _onLastListenerRemovedCallbacks = <VoidCallback>[];
 
-  /// A adds a callback to call when [removeListener] results in an empty
+  /// Adds a callback to call when [removeListener] results in an empty
   /// list of listeners.
   ///
   /// This callback will never fire if [removeListener] is never called.

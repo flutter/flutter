@@ -69,8 +69,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// as long as both images share the same key, and the image is held by the
 /// cache.
 ///
-/// The cache may refuse to hold the image it is disabled, the image is too
-/// too large, or some other criteria implemented by a custom [ImageCache]
+/// The cache may refuse to hold the image if it is disabled, the image is too
+/// large, or some other criteria implemented by a custom [ImageCache]
 /// implementation.
 ///
 /// The [ImageCache] holds a reference to all images passed to [putIfAbsent] as

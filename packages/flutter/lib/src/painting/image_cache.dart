@@ -13,12 +13,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///
 /// Implements a least-recently-used cache of up to 1000 images, and up to 100
 /// MB. The maximum size can be adjusted using [maximumSize] and
-/// [maximumSizeBytes]. Images that are actively in use (i.e. to which the
-/// application is holding references, either via [ImageStream] objects,
-/// [ImageStreamCompleter] objects, [ImageInfo] objects, or raw [dart:ui.Image]
-/// objects) may get evicted from the cache (and thus need to be refetched from
-/// the network if they are referenced in the [putIfAbsent] method), but the raw
-/// bits are kept in memory for as long as the application is using them.
+/// [maximumSizeBytes].
 ///
 /// The cache also holds a list of "live" references. An image is considered
 /// live if its [ImageStreamCompleter]'s listener count has never dropped to
@@ -80,7 +75,11 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
-  final Map<Object, ImageStreamCompleter> _liveImages = <Object, ImageStreamCompleter>{};
+  /// ImageStreamCompleters with at least one listener. These images may or may
+  /// not fit into the _pendingImages or _cache objects.
+  ///
+  /// Unlike _cache, the [_CachedImage] for this may have a null byte size.
+  final Map<Object, _CachedImage> _liveImages = <Object, _CachedImage>{};
 
   /// Maximum number of entries to store in the cache.
   ///
@@ -183,6 +182,19 @@ class ImageCache {
     return false;
   }
 
+  /// Updates the least recently used image cache with this image, if it is
+  /// less than the [maximumSizeBytes] of this cache.
+  ///
+  /// Resizes the cache as appropriate to maintain the constraints of
+  /// [maximumSize] and [maximumSizeBytes].
+  void _touch(Object key, _CachedImage image) {
+    if (image.sizeBytes != null && image.sizeBytes <= maximumSizeBytes) {
+      _currentSizeBytes += image.sizeBytes;
+      _cache[key] = image;
+      _checkCacheSize();
+    }
+  }
+
   /// Returns the previously cached [ImageStream] for the given key, if available;
   /// if not, calls the given callback to obtain it first. In either case, the
   /// key is moved to the "most recently used" position.
@@ -204,18 +216,20 @@ class ImageCache {
     // recently used position below.
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
+      assert(_liveImages.containsKey(key));
       _cache[key] = image;
       return image.completer;
     }
 
-    result = _liveImages[key];
-    if (result != null) {
-      return result;
+    final _CachedImage liveImage = _liveImages[key];
+    if (liveImage != null) {
+      _touch(key, liveImage);
+      return liveImage.completer;
     }
 
     try {
       result = loader();
-      _liveImages[key] = result;
+      _liveImages[key] = _CachedImage(result, null);
       result.addOnLastListenerRemovedCallback(() {
         _liveImages.remove(key);
       });
@@ -230,17 +244,21 @@ class ImageCache {
     void listener(ImageInfo info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
+
       final _CachedImage image = _CachedImage(result, imageSize);
+      if (!_liveImages.containsKey(key)) {
+        assert(syncCall);
+        result.addOnLastListenerRemovedCallback(() {
+          _liveImages.remove(key);
+        });
+      }
+      _liveImages[key] = image;
       final _PendingImage pendingImage = _pendingImages.remove(key);
       if (pendingImage != null) {
         pendingImage.removeListener();
       }
 
-      if (imageSize <= maximumSizeBytes) {
-        _currentSizeBytes += imageSize;
-        _cache[key] = image;
-        _checkCacheSize();
-      }
+      _touch(key, image);
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
       final ImageStreamListener streamListener = ImageStreamListener(listener);
@@ -252,23 +270,27 @@ class ImageCache {
   }
 
   /// The [ImageCacheLocation] information for the given `key`.
-  ImageCacheLocation locationForKey(Object key) => ImageCacheLocation._(
-    pending: _pendingImages.containsKey(key),
-    completed: _cache.containsKey(key),
-    live: _liveImages.containsKey(key),
-  );
+  ImageCacheLocation locationForKey(Object key) {
+    return ImageCacheLocation._(
+      pending: _pendingImages.containsKey(key),
+      completed: _cache.containsKey(key),
+      live: _liveImages.containsKey(key),
+    );
+  }
 
   /// Returns whether this `key` has been previously added by [putIfAbsent].
   bool containsKey(Object key) {
     return _pendingImages[key] != null || _cache[key] != null;
   }
 
-  /// The number of live images being held by the [ImageCache]. Compare with
-  /// [ImageCache.currentSize] for completed held images.
+  /// The number of live images being held by the [ImageCache].
+  ///
+  /// Compare with [ImageCache.currentSize] for completed held images.
   int get liveImageCount => _liveImages.length;
 
-  /// The number of images being tracked as pending in the [ImageCache]. Compare
-  /// with [ImageCache.currentSize] for completedly held images.
+  /// The number of images being tracked as pending in the [ImageCache].
+  ///
+  /// Compare with [ImageCache.currentSize] for completedly held images.
   int get pendingImageCount => _pendingImages.length;
 
   /// Clears any live references to images in this cache.
@@ -301,16 +323,16 @@ class ImageCache {
   }
 }
 
-/// A class that provides information about how the [ImageCache] is
-/// tracking an image.
+/// Information about how the [ImageCache] is tracking an image.
 ///
 /// A [pending] image is one that has not completed yet. It may also be tracked
 /// as [live] because something is listening to it, but it has not yet
 /// [completed].
 ///
-/// A [completed] image is being held in the LRU cache, and is subject to eviction
-/// based on [ImageCache.maximumSizeBytes] and [ImageCache.maximumSize]. It may
-/// [live], but not [pending].
+/// A [completed] image is being held in the cache, which uses Least Recently
+/// Used semantics to determine when to evict an image. These images are subject
+/// to eviction based on [ImageCache.maximumSizeBytes] and
+/// [ImageCache.maximumSize]. It may be [live], but not [pending].
 ///
 /// A [live] image is being held until its [ImageStreamCompleter] has no more
 /// listeners. It may also be [pending] or [completed].
@@ -338,6 +360,10 @@ class ImageCacheLocation {
   /// An image that has been submitted to [ImageCache.putIfAbsent], has
   /// completed, and has at least one listener on its [ImageStreamCompleter].
   final bool live;
+
+  /// An image that is tracked in some way by the [ImageCache], whether
+  /// [pending], [completed], or [live].
+  bool get tracked => pending || completed || live;
 
   /// An image that either has not been submitted to
   /// [ImageCache.putIfAbsent] or has otherwise been evicted from the
