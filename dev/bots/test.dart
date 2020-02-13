@@ -421,7 +421,7 @@ Future<void> _runFrameworkTests() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false, recursive: false)
       .whereType<Directory>()
-      .where((Directory dir) => dir.path.endsWith('widgets') == false)
+      .where((Directory dir) => dir.path.endsWith('widgets') == false && dir.path.endsWith('tracing') == false)
       .map<String>((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
     print('${green}Running packages/flutter tests$reset for: $cyan${tests.join(", ")}$reset');
@@ -460,6 +460,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter', 'tracing'),
       options: <String>['--enable-vmservice'],
+      tests: <String>[ path.join('test', 'tracing') + path.separator ],
       tableData: bigqueryApi?.tabledata,
     );
     await _runFlutterTest(
