@@ -350,6 +350,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   bool get hasError => _errorText != null;
 
   /// True if the current value is valid.
+  ///
   /// This will not set [errorText] or [hasError] and it will not update
   /// error display.
   ///
