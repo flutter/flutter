@@ -51,7 +51,8 @@ class Dialog extends StatelessWidget {
     this.shape,
     this.clipBehavior = Clip.none,
     this.child,
-  }) : super(key: key);
+  }) : assert(clipBehavior != null),
+       super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
