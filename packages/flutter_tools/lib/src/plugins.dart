@@ -19,6 +19,7 @@ import 'globals.dart' as globals;
 import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
+import 'windows/property_sheet.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
@@ -852,12 +853,13 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
-Future<void> _writeWindowsPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(plugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': windowsPlugins,
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
+  await _writeWindowsPluginProperties(project.windows.generatedPluginPropertySheetFile, windowsPlugins);
 }
 
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
@@ -872,6 +874,12 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynami
     templateContext,
     globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
   );
+}
+
+Future<void> _writeWindowsPluginProperties(File propertyFile, List<Map<String, dynamic>> windowsPlugins) async {
+  final List<String> pluginLibraryFilenames = windowsPlugins.map(
+    (Map<String, dynamic> plugin) => '${plugin['name']}_plugin.lib').toList();
+  propertyFile.writeAsStringSync(PropertySheet(libraryDependencies: pluginLibraryFilenames).toString());
 }
 
 Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -1013,7 +1021,7 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
-    await _writeWindowsPluginRegistrant(project, plugins);
+    await _writeWindowsPluginFiles(project, plugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {
