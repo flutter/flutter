@@ -193,7 +193,8 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       _itemKeys.add(GlobalKey());
       items.add(FlatButton(
         key: _itemKeys[_itemKeys.length - 1],
-        child: Text(localizations.selectAllButtonLabel),
+        //child: Text(localizations.selectAllButtonLabel),
+        child: Text('Select absolutely everything'),
         onPressed: () {
           setState(() {
             _overflowOpen = false;
@@ -211,6 +212,21 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
     return _TextSelectionToolbarROW(
       // TODO(justinmc): These children should be all buttons. More button
       // might need to be a separate parameter?
+      children: items,
+      /*
+      navButton: IconButton(
+        key: _moreButtonKey,
+        icon: Icon(Icons.more_vert),
+        tooltip: 'More',
+        onPressed: () {},//TODO onMorePressed,
+      ),
+      */
+      navButton: Container(
+        width: 40,
+        height: 40,
+        color: Colors.pink,
+      ),
+        /*
       children: <Widget>[
         Container(
           width: 40,
@@ -223,6 +239,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
           color: Colors.yellow,
         ),
       ],
+      */
     );
 
     // If _itemsInFirstMenu hasn't been calculated yet, render offstage for one
@@ -394,9 +411,11 @@ class _TextSelectionToolbarROW extends MultiChildRenderObjectWidget {
   _TextSelectionToolbarROW({
     Key key,
     @required this.children,
+    @required this.navButton,
   }) : super(key: key, children: children);
 
   final List<Widget> children;
+  final Widget navButton;
 
   @override
   _TextSelectionToolbarRB createRenderObject(BuildContext context) {
@@ -407,7 +426,7 @@ class _TextSelectionToolbarROW extends MultiChildRenderObjectWidget {
   _TextSelectionToolbarElement createElement() => _TextSelectionToolbarElement(this);
 }
 
-class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData> {
+class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData> {
 
   @override
   void performLayout() {
@@ -416,28 +435,33 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
       return;
     }
 
+    Offset offset = Offset.zero;
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      // TODO(justinmc): New plan: layout all children here and then only paint
-      // the ones that should be visible.
       child.layout(constraints, parentUsesSize: true);
+      final FlexParentData childParentData = child.parentData as FlexParentData;
+      childParentData.offset = offset;
       size = child.size;
+      offset = Offset(offset.dx + child.size.width, 0.0);
     });
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    final Rect overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width, 0.0);
+
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
       // TODO(justinmc): Actually paint the correct children in row/column.
-      context.paintChild(child, offset);
+      final FlexParentData childParentData = child.parentData as FlexParentData;
+      context.paintChild(child, childParentData.offset + offset);
     });
   }
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! MultiChildLayoutParentData) {
-      child.parentData = MultiChildLayoutParentData();
+    if (child.parentData is! FlexParentData) {
+      child.parentData = FlexParentData();
     }
   }
 }
@@ -446,6 +470,18 @@ class _TextSelectionToolbarElement extends MultiChildRenderObjectElement {
   _TextSelectionToolbarElement(_TextSelectionToolbarROW widget)
     : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
       super(widget as MultiChildRenderObjectWidget);
+
+  Element _navButton;
+
+  @override
+  _TextSelectionToolbarROW get widget => super.widget as _TextSelectionToolbarROW;
+
+  // This is overriden to handle navButton, while super handles children.
+  @override
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot);
+    _navButton = inflateWidget(widget.navButton, null);
+  }
 }
 
 /// Centers the toolbar around the given anchor, ensuring that it remains on
