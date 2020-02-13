@@ -94,7 +94,7 @@ void main() {
 
   test('release asset server serves content from project directory', () => testbed.run(() async {
     final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
-    globals.fs.file(globals.fs.path.join('lib', 'bar.dart'))
+    globals.fs.file(globals.fs.path.join('bar.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
     final Response response = await assetServer
