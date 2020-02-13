@@ -650,10 +650,10 @@ class FlutterPlugin implements Plugin<Project> {
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine('cmd', '/c', 'attrib -r ${assetsDirectory}')
+                            commandLine('cmd', '/c', 'attrib -r ${assetsDirectory}/* /s')
                         } else {
                             commandLine('chmod', '-R', 'u+w', assetsDirectory)
-			}
+                        }
                     }
                 }
             }
@@ -869,7 +869,7 @@ class FlutterTask extends BaseFlutterTask {
     }
 
     String getAssetsDirectory() {
-        return "${outputDirectory}/flutter_assets/"
+        return "${outputDirectory}/flutter_assets"
     }
 
     CopySpec getAssets() {
