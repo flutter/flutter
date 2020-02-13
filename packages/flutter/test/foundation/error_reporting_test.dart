@@ -81,6 +81,11 @@ Future<void> main() async {
       r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+      r'\(elided one frame from dart:async\)\n'
+      r'\n'
+      r'line 1 of extra information\n'
+      r'line 2 of extra information\n'
+      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
@@ -148,6 +153,11 @@ Future<void> main() async {
       r'#2      getSampleStack \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'#3      main \([^)]+flutter/test/foundation/error_reporting_test\.dart:[0-9]+:[0-9]+\)\n'
       r'(.+\n)+' // TODO(ianh): when fixing #4021, also filter out frames from the test infrastructure below the first call to our main()
+      r'\(elided one frame from dart:async\)\n'
+      r'\n'
+      r'line 1 of extra information\n'
+      r'line 2 of extra information\n'
+      r'════════════════════════════════════════════════════════════════════════════════════════════════════$',
     ));
     console.clear();
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
