@@ -6,9 +6,7 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
-import '../globals.dart' as globals;
 import 'common.dart' show throwToolExit;
-import 'context.dart';
 
 export 'package:file/file.dart';
 export 'package:file/local.dart';
@@ -22,13 +20,6 @@ class FileNotFoundException implements IOException {
   @override
   String toString() => 'File not found: $path';
 }
-
-final FileSystemUtils _defaultFileSystemUtils = FileSystemUtils(
-  fileSystem: globals.fs,
-  platform: globals.platform,
-);
-
-FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? _defaultFileSystemUtils;
 
 /// Various convenience file system methods.
 class FileSystemUtils {
@@ -123,7 +114,7 @@ class FileSystemUtils {
   ///
   /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
   /// path unchanged.
-  String escapePath(String path) => _platform.isWindows ? path.replaceAll('\\', '\\\\') : path;
+  String escapePath(String path) => _platform.isWindows ? path.replaceAll(r'\', r'\\') : path;
 
   /// Returns true if the file system [entity] has not been modified since the
   /// latest modification to [referenceFile].
@@ -142,11 +133,14 @@ class FileSystemUtils {
         && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
   }
 
-  /// Reads the process environment to find the current user's home directory.
-  ///
-  /// If the searched environment variables are not set, '.' is returned instead.
-  String get userHomePath {
-    final String envKey = _platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-    return _platform.environment[envKey] ?? '.';
+  /// Return the absolute path of the user's home directory
+  String get homeDirPath {
+    String path = _platform.isWindows
+        ? _platform.environment['USERPROFILE']
+        : _platform.environment['HOME'];
+    if (path != null) {
+      path = _fileSystem.path.absolute(path);
+    }
+    return path;
   }
 }

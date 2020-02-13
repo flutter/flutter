@@ -343,7 +343,7 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-      expect(description, equals(<String>['key: [<\'foo\'>]']));
+      expect(description, equals(<String>["key: [<'foo'>]"]));
     });
     testWidgets('CallbackAction debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -360,7 +360,7 @@ void main() {
           .map((DiagnosticsNode node) => node.toString())
           .toList();
 
-      expect(description, equals(<String>['intentKey: [<\'foo\'>]']));
+      expect(description, equals(<String>["intentKey: [<'foo'>]"]));
     });
     testWidgets('default Actions debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -401,7 +401,7 @@ void main() {
           .toList();
 
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
-      expect(description[1], equals('actions: {[<\'bar\'>]: Closure: () => TestAction}'));
+      expect(description[1], equals("actions: {[<'bar'>]: Closure: () => TestAction}"));
     }, skip: isBrowser);
   });
 }

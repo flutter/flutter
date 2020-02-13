@@ -52,7 +52,7 @@ void main(List<String> args) {
     kJustPrint,
     negatable: false,
     help:
-        'Don\'t actually roll the dev channel; '
+        "Don't actually roll the dev channel; "
         'just print the would-be version and quit.',
   );
   argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
@@ -168,7 +168,7 @@ String getFullTag() {
 }
 
 Match parseFullTag(String version) {
-  final RegExp versionPattern = RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
+  final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)$');
   return versionPattern.matchAsPrefix(version);
 }
 

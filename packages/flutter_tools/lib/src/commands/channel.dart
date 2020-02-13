@@ -116,7 +116,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _switchChannel(String branchName) {
+  Future<void> _switchChannel(String branchName) async {
     globals.printStatus("Switching to flutter channel '$branchName'...");
     if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
       final String alternative = FlutterVersion.obsoleteBranches[branchName];
@@ -124,7 +124,9 @@ class ChannelCommand extends FlutterCommand {
     } else if (!FlutterVersion.officialChannels.contains(branchName)) {
       globals.printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
-    return _checkout(branchName);
+    await _checkout(branchName);
+    globals.printStatus("Successfully switched to flutter channel '$branchName'.");
+    globals.printStatus("To ensure that you're on the latest build from this channel, run 'flutter upgrade'");
   }
 
   static Future<void> upgradeChannel() async {

@@ -13,7 +13,6 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
-import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
@@ -144,12 +143,12 @@ class UpgradeCommandRunner {
   // re-entrantly with the `--continue` flag
   Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
     // Make sure the welcome message re-display is delayed until the end.
-    persistentToolState.redisplayWelcomeMessage = false;
+    globals.persistentToolState.redisplayWelcomeMessage = false;
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
-    persistentToolState.redisplayWelcomeMessage = true;
+    globals.persistentToolState.redisplayWelcomeMessage = true;
   }
 
   Future<bool> hasUncomittedChanges() async {
@@ -185,8 +184,8 @@ class UpgradeCommandRunner {
     } catch (e) {
       throwToolExit(
         'Unable to upgrade Flutter: no origin repository configured. '
-        'Run \'git remote add origin '
-        'https://github.com/flutter/flutter\' in ${Cache.flutterRoot}',
+        "Run 'git remote add origin "
+        "https://github.com/flutter/flutter' in ${Cache.flutterRoot}",
       );
     }
   }

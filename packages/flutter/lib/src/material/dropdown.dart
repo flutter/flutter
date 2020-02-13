@@ -707,7 +707,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// This sample shows a `DropdownButton` with a large arrow icon,
 /// purple text style, and bold purple underline, whose value is one of "One",
@@ -804,7 +804,7 @@ class DropdownButton<T> extends StatefulWidget {
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
               }).length == 1,
-                'There should be exactly one item with [DropdownButton]\'s value: '
+                "There should be exactly one item with [DropdownButton]'s value: "
                 '$value. \n'
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',
@@ -865,7 +865,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// from the list corresponds to the [DropdownMenuItem] of the same index
   /// in [items].
   ///
-  /// {@tool sample --template=stateful_widget_scaffold}
+  /// {@tool dartpad --template=stateful_widget_scaffold}
   ///
   /// This sample shows a `DropdownButton` with a button with [Text] that
   /// corresponds to but is unique from [DropdownMenuItem].
@@ -916,7 +916,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// To use a separate text style for selected item when it's displayed within
   /// the dropdown button,, consider using [selectedItemBuilder].
   ///
-  /// {@tool sample --template=stateful_widget_scaffold}
+  /// {@tool dartpad --template=stateful_widget_scaffold}
   ///
   /// This sample shows a `DropdownButton` with a dropdown button text style
   /// that is different than its menu items.
@@ -1143,6 +1143,17 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       menuItems[index] = _MenuItem<T>(
         item: widget.items[index],
         onLayout: (Size size) {
+          // If [_dropdownRoute] is null and onLayout is called, this means
+          // that performLayout was called on a _DropdownRoute that has not
+          // left the widget tree but is already on its way out.
+          //
+          // Since onLayout is used primarily to collect the desired heights
+          // of each menu item before laying them out, not having the _DropdownRoute
+          // collect each item's height to lay out is fine since the route is
+          // already on its way out.
+          if (_dropdownRoute == null)
+            return;
+
           _dropdownRoute.itemHeights[index] = size.height;
         },
       );
@@ -1162,7 +1173,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     );
 
     Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
-      _dropdownRoute = null;
+      _removeDropdownRoute();
       if (!mounted || newValue == null)
         return;
       if (widget.onChanged != null)
@@ -1409,7 +1420,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
               }).length == 1,
-                'There should be exactly one item with [DropdownButton]\'s value: '
+                "There should be exactly one item with [DropdownButton]'s value: "
                 '$value. \n'
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',
@@ -1427,19 +1438,20 @@ class DropdownButtonFormField<T> extends FormField<T> {
          validator: validator,
          autovalidate: autovalidate,
          builder: (FormFieldState<T> field) {
+           final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration effectiveDecoration = decoration.applyDefaults(
              Theme.of(field.context).inputDecorationTheme,
            );
            return InputDecorator(
              decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-             isEmpty: value == null,
+             isEmpty: state.value == null,
              child: DropdownButtonHideUnderline(
                child: DropdownButton<T>(
-                 value: value,
+                 value: state.value,
                  items: items,
                  selectedItemBuilder: selectedItemBuilder,
                  hint: hint,
-                 onChanged: onChanged == null ? null : field.didChange,
+                 onChanged: onChanged == null ? null : state.didChange,
                  disabledHint: disabledHint,
                  elevation: elevation,
                  style: style,

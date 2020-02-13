@@ -75,6 +75,7 @@ class CupertinoApp extends StatefulWidget {
     this.routes = const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
+    this.onGenerateInitialRoutes,
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.builder,
@@ -130,6 +131,9 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateRoute}
   final RouteFactory onGenerateRoute;
+
+  /// {@macro flutter.widgets.widgetsApp.onGenerateInitialRoutes}
+  final InitialRouteListFactory onGenerateInitialRoutes;
 
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
   final RouteFactory onUnknownRoute;
@@ -348,6 +352,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
                 routes: widget.routes,
                 initialRoute: widget.initialRoute,
                 onGenerateRoute: widget.onGenerateRoute,
+                onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
                 onUnknownRoute: widget.onUnknownRoute,
                 builder: widget.builder,
                 title: widget.title,

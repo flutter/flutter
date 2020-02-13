@@ -16,6 +16,7 @@ import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -59,7 +60,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
-              'in the application\'s LICENSE file.',
+              "in the application's LICENSE file.",
         defaultsTo: false);
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
@@ -138,6 +139,7 @@ class BuildBundleCommand extends BuildSubCommand {
       extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       fileSystemScheme: stringArg('filesystem-scheme'),
       fileSystemRoots: stringsArg('filesystem-root'),
+      treeShakeIcons: boolArg('tree-shake-icons'),
     );
     return FlutterCommandResult.success();
   }

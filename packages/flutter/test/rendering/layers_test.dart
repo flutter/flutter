@@ -256,6 +256,21 @@ void main() {
     );
   });
 
+  test('PictureLayer prints picture, engine layer, and raster cache hints in debug info', () {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPaint(Paint());
+    final Picture picture = recorder.endRecording();
+    final PictureLayer layer = PictureLayer(const Rect.fromLTRB(0, 0, 1, 1));
+    layer.picture = picture;
+    layer.isComplexHint = true;
+    layer.willChangeHint = false;
+    final List<String> info = _getDebugInfo(layer);
+    expect(info, contains('picture: ${describeIdentity(picture)}'));
+    expect(info, contains('engine layer: ${describeIdentity(null)}'));
+    expect(info, contains('raster cache hints: isComplex = true, willChange = false'));
+  });
+
   test('mutating PictureLayer fields triggers needsAddToScene', () {
     final PictureLayer pictureLayer = PictureLayer(Rect.zero);
     checkNeedsAddToScene(pictureLayer, () {

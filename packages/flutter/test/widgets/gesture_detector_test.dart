@@ -91,7 +91,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Pan doesn\'t crash', (WidgetTester tester) async {
+  testWidgets("Pan doesn't crash", (WidgetTester tester) async {
     bool didStartPan = false;
     Offset panDelta;
     bool didEndPan = false;
@@ -523,7 +523,7 @@ void main() {
     expect(forcePressStart, 0);
   });
 
-  group('RawGestureDetectorState\'s debugFillProperties', () {
+  group("RawGestureDetectorState's debugFillProperties", () {
     testWidgets('when default', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();

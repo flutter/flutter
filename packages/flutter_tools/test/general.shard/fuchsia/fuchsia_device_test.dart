@@ -345,7 +345,7 @@ void main() {
       ),
     });
 
-    test('takeScreenshot throws if file isn\'t .ppm', () async {
+    test("takeScreenshot throws if file isn't .ppm", () async {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.invalid')),
@@ -435,7 +435,7 @@ void main() {
       ),
     }, testOn: 'posix');
 
-    testUsingContext('takeScreenshot prints error if can\'t delete file from device', () async {
+    testUsingContext("takeScreenshot prints error if can't delete file from device", () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
 
       when(mockProcessManager.run(
@@ -720,7 +720,7 @@ void main() {
         app = BuildableFuchsiaApp(project: FlutterProject.current().fuchsia);
       }
 
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null, treeShakeIcons: false));
       return await device.startApp(
         app,
         prebuiltApplication: prebuilt,
@@ -753,7 +753,7 @@ void main() {
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
       final DebuggingOptions debuggingOptions =
-          DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null));
+          DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true,
           debuggingOptions: debuggingOptions);

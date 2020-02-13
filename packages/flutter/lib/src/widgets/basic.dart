@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Image, ImageFilter;
+import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -144,7 +144,7 @@ class Directionality extends InheritedWidget {
 /// ```dart
 /// Opacity(
 ///   opacity: _visible ? 1.0 : 0.0,
-///   child: const Text('Now you see me, now you don\'t!'),
+///   child: const Text("Now you see me, now you don't!"),
 /// )
 /// ```
 /// {@end-tool}
@@ -479,6 +479,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   }) : assert(size != null),
        assert(isComplex != null),
        assert(willChange != null),
+       assert(painter != null || foregroundPainter != null || (!isComplex && !willChange)),
        super(key: key, child: child);
 
   /// The painter that paints before the children.
@@ -503,10 +504,16 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// frame. If this flag is not set, then the compositor will apply its own
   /// heuristics to decide whether the this layer is complex enough to benefit
   /// from caching.
+  ///
+  /// This flag can't be set to true if both [painter] and [foregroundPainter]
+  /// are null because this flag will be ignored in such case.
   final bool isComplex;
 
   /// Whether the raster cache should be told that this painting is likely
   /// to change in the next frame.
+  ///
+  /// This flag can't be set to true if both [painter] and [foregroundPainter]
+  /// are null because this flag will be ignored in such case.
   final bool willChange;
 
   @override
@@ -2099,9 +2106,9 @@ class SizedBox extends SingleChildRenderObjectWidget {
     } else if (width == 0.0 && height == 0.0) {
       type = '${objectRuntimeType(this, 'SizedBox')}.shrink';
     } else {
-      type = '${objectRuntimeType(this, 'SizedBox')}';
+      type = objectRuntimeType(this, 'SizedBox');
     }
-    return key == null ? '$type' : '$type-$key';
+    return key == null ? type : '$type-$key';
   }
 
   @override
@@ -4022,7 +4029,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// Row(
 ///   children: <Widget>[
 ///     const FlutterLogo(),
-///     const Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///     const Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     const Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
@@ -4050,7 +4057,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   children: <Widget>[
 ///     const FlutterLogo(),
 ///     const Expanded(
-///       child: Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
 ///     const Icon(Icons.sentiment_very_satisfied),
 ///   ],
@@ -4444,7 +4451,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_rnZaagadyo}
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
 /// it's middle child, a [Container] here, expands to fill the space.
 ///
@@ -4483,7 +4490,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Row] with multiple
 /// children expanded, utilizing the [flex] factor to prioritize available space.
 ///
@@ -4826,9 +4833,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///
 ///
-/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
-///
-/// {@tool sample --template=freeform}
+/// {@tool dartpad --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
@@ -5063,6 +5068,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.locale,
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
+    this.textHeightBehavior,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5144,6 +5150,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final ui.TextHeightBehavior textHeightBehavior;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -5156,6 +5165,7 @@ class RichText extends MultiChildRenderObjectWidget {
       maxLines: maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -5173,6 +5183,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..maxLines = maxLines
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
+      ..textHeightBehavior = textHeightBehavior
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 
@@ -5536,7 +5547,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being touched, showing a count of
 /// the number of pointer downs and ups.
 ///
@@ -5789,7 +5800,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being entered by a mouse
 /// pointer, showing a count of the number of entries and exits.
 ///
@@ -5943,7 +5954,7 @@ class MouseRegion extends StatefulWidget {
   ///    override [State.dispose] and call [onExit], or create your own widget
   ///    using [RenderMouseRegion].
   ///
-  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// The following example shows a blue rectangular that turns yellow when
   /// hovered. Since the hover state is completely contained within a widget
   /// that unconditionally creates the `MouseRegion`, you can ignore the
@@ -5971,7 +5982,7 @@ class MouseRegion extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// The following example shows a widget that hides its content one second
   /// after behing hovered, and also exposes the enter and exit callbacks.
   /// Because the widget conditionally creates the `MouseRegion`, and leaks the

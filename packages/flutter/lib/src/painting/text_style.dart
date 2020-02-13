@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 
@@ -50,7 +50,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ```dart
 /// Text(
-///   'Welcome to the present, we\'re running a real nation.',
+///   "Welcome to the present, we're running a real nation.",
 ///   style: TextStyle(fontStyle: FontStyle.italic),
 /// )
 /// ```
@@ -80,15 +80,15 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///     style: DefaultTextStyle.of(context).style,
 ///     children: <TextSpan>[
 ///       TextSpan(
-///         text: 'You don\'t have the votes.\n',
+///         text: "You don't have the votes.\n",
 ///         style: TextStyle(color: Colors.black.withOpacity(0.6)),
 ///       ),
 ///       TextSpan(
-///         text: 'You don\'t have the votes!\n',
+///         text: "You don't have the votes!\n",
 ///         style: TextStyle(color: Colors.black.withOpacity(0.8)),
 ///       ),
 ///       TextSpan(
-///         text: 'You\'re gonna need congressional approval and you don\'t have the votes!\n',
+///         text: "You're gonna need congressional approval and you don't have the votes!\n",
 ///         style: TextStyle(color: Colors.black.withOpacity(1.0)),
 ///       ),
 ///     ],
@@ -106,7 +106,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ```dart
 /// Text(
-///   'These are wise words, enterprising men quote \'em.',
+///   "These are wise words, enterprising men quote 'em.",
 ///   style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
 /// )
 /// ```
@@ -158,7 +158,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```dart
 /// RichText(
 ///   text: TextSpan(
-///     text: 'Don\'t tax the South ',
+///     text: "Don't tax the South ",
 ///     children: <TextSpan>[
 ///       TextSpan(
 ///         text: 'cuz',
@@ -1067,6 +1067,7 @@ class TextStyle extends Diagnosticable {
     double textScaleFactor = 1.0,
     String ellipsis,
     int maxLines,
+    ui.TextHeightBehavior textHeightBehavior,
     Locale locale,
     String fontFamily,
     double fontSize,
@@ -1087,6 +1088,7 @@ class TextStyle extends Diagnosticable {
       fontFamily: fontFamily ?? this.fontFamily,
       fontSize: (fontSize ?? this.fontSize ?? _defaultFontSize) * textScaleFactor,
       height: height ?? this.height,
+      textHeightBehavior: textHeightBehavior,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
@@ -1175,7 +1177,6 @@ class TextStyle extends Diagnosticable {
       color,
       backgroundColor,
       fontFamily,
-      fontFamilyFallback,
       fontSize,
       fontWeight,
       fontStyle,
@@ -1189,13 +1190,14 @@ class TextStyle extends Diagnosticable {
       decoration,
       decorationColor,
       decorationStyle,
-      shadows,
-      fontFeatures,
+      hashList(shadows),
+      hashList(fontFeatures),
+      hashList(fontFamilyFallback),
     );
   }
 
   @override
-  String toStringShort() => '${objectRuntimeType(this, 'TextStyle')}';
+  String toStringShort() => objectRuntimeType(this, 'TextStyle');
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override

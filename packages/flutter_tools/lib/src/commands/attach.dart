@@ -215,7 +215,7 @@ class AttachCommand extends FlutterCommand {
       if (device is FuchsiaDevice) {
         final String module = stringArg('module');
         if (module == null) {
-          throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
+          throwToolExit("'--module' is required for attaching to a Fuchsia device");
         }
         usesIpv6 = device.ipv6;
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;

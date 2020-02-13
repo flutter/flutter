@@ -174,7 +174,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
       throwOnError: true,
     )).stdout.trim();
   } on ProcessException catch (error) {
-    globals.printTrace('Couldn\'t find the certificate: $error.');
+    globals.printTrace("Couldn't find the certificate: $error.");
     return null;
   }
 
