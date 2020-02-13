@@ -221,7 +221,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(endHandleLayerLink != null),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         'minLines can\'t be greater than maxLines',
+         "minLines can't be greater than maxLines",
        ),
        assert(expands != null),
        assert(

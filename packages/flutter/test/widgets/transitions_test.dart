@@ -59,7 +59,7 @@ void main() {
       DecoratedBoxTransition(
         decoration: decorationTween.animate(controller),
         child: const Text(
-          'Doesn\'t matter',
+          "Doesn't matter",
           textDirection: TextDirection.ltr,
         ),
       );
@@ -113,7 +113,7 @@ void main() {
         decoration: curvedDecorationAnimation,
         position: DecorationPosition.foreground,
         child: const Text(
-          'Doesn\'t matter',
+          "Doesn't matter",
           textDirection: TextDirection.ltr,
         ),
       );

@@ -225,7 +225,7 @@ class DataCell {
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to display a [DataTable] with three columns: name, age, and
 /// role. The columns are defined by three [DataColumn] objects. The table

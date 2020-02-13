@@ -132,8 +132,12 @@ class FallbackDiscovery {
         final VmService vmService = await _vmServiceConnectUri(assumedWsUri.toString());
         final VM vm = await vmService.getVM();
         for (final IsolateRef isolateRefs in vm.isolates) {
-          final Isolate isolate = await vmService.getIsolate(isolateRefs.id) as Isolate;
-          final LibraryRef library = isolate.rootLib;
+          final dynamic isolateResponse = await vmService.getIsolate(isolateRefs.id);
+          if (isolateResponse is Sentinel) {
+            // Might have been a Sentinel. Try again later.
+            throw Exception('Expected Isolate but found Sentinel: $isolateResponse');
+          }
+          final LibraryRef library = (isolateResponse as Isolate).rootLib;
           if (library.uri.startsWith('package:$packageName')) {
             UsageEvent(_kEventName, 'success').send();
             return Uri.parse('http://localhost:$hostPort');

@@ -552,7 +552,7 @@ class SkiaGoldClient {
       } on FormatException catch(_) {
         if (rawResponse.contains('stream timeout')) {
           final StringBuffer buf = StringBuffer()
-            ..writeln('Stream timeout on Gold\'s /details api.');
+            ..writeln("Stream timeout on Gold's /details api.");
           throw Exception(buf.toString());
         } else {
           print('Formatting error detected requesting /ignores from Flutter Gold.'

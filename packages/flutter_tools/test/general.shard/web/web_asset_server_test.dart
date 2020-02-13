@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/build_runner/web_fs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/web/devfs_web.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
@@ -23,7 +20,6 @@ const List<int> kTransparentImage = <int>[
 
 void main() {
   Testbed testbed;
-  AssetServer assetServer;
 
   setUp(() {
     testbed = Testbed(
@@ -39,80 +35,12 @@ void main() {
         globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'bar'))
           ..createSync(recursive: true)
           ..writeAsBytesSync(<int>[1, 2, 3]);
-        assetServer = DebugAssetServer(FlutterProject.current(), globals.fs.path.join('main'));
       }
     );
   });
 
-  test('can serve an html file from the web directory', () => testbed.run(() async {
-    final Response response = await assetServer
-      .handle(Request('GET', Uri.parse('http://localhost:8080/index.html')));
-
-    expect(response.headers, <String, String>{
-      'Content-Type': 'text/html',
-      'content-length': '5',
-    });
-    expect(await response.readAsString(), 'hello');
-  }));
-
-  test('can serve a sourcemap from dart:ui', () => testbed.run(() async {
-    final String flutterWebSdkPath = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
-    final File windowSourceFile = globals.fs.file(globals.fs.path.join(flutterWebSdkPath, 'lib', 'ui', 'src', 'ui', 'window.dart'))
-      ..createSync(recursive: true)
-      ..writeAsStringSync('test');
-    final Response response = await assetServer
-      .handle(Request('GET', Uri.parse('http://localhost:8080/packages/build_web_compilers/lib/ui/src/ui/window.dart')));
-
-    expect(response.headers, <String, String>{
-      'content-length': windowSourceFile.lengthSync().toString(),
-    });
-    expect(await response.readAsString(), 'test');
-  }));
-
-  test('can serve a sourcemap from the dart:sdk', () => testbed.run(() async {
-    final String dartSdkPath = globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath);
-    final File listSourceFile = globals.fs.file(globals.fs.path.join(dartSdkPath, 'lib', 'core', 'list.dart'))
-      ..createSync(recursive: true)
-      ..writeAsStringSync('test');
-
-    final Response response = await assetServer
-      .handle(Request('GET', Uri.parse('http://localhost:8080/packages/dart-sdk/lib/core/list.dart')));
-
-    expect(response.headers, <String, String>{
-      'content-length': listSourceFile.lengthSync().toString(),
-    });
-    expect(await response.readAsString(), 'test');
-  }));
-
-  test('can serve an asset with a png content type', () => testbed.run(() async {
-    final Response response = await assetServer
-      .handle(Request('GET', Uri.parse('http://localhost:8080/assets/foo.png')));
-
-    expect(response.headers, <String, String>{
-      'Content-Type': 'image/png',
-      'content-length': '64',
-    });
-  }));
-
-  test('can fallback to application/octet-stream', () => testbed.run(() async {
-    final Response response = await assetServer
-      .handle(Request('GET', Uri.parse('http://localhost:8080/assets/bar')));
-
-    expect(response.headers, <String, String>{
-      'Content-Type': 'application/octet-stream',
-      'content-length': '3',
-    });
-  }));
-
-  test('handles a missing html file from the web directory', () => testbed.run(() async {
-    final Response response = await assetServer
-        .handle(Request('GET', Uri.parse('http://localhost:8080/foobar.html')));
-
-    expect(response.statusCode, 404);
-  }));
-
   test('release asset server serves correct mime type and content length for png', () => testbed.run(() async {
-    assetServer = ReleaseAssetServer();
+    final ReleaseAssetServer assetServer = ReleaseAssetServer();
     globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
@@ -126,7 +54,7 @@ void main() {
   }));
 
   test('release asset server serves correct mime type and content length for JavaScript', () => testbed.run(() async {
-    assetServer = ReleaseAssetServer();
+    final ReleaseAssetServer assetServer = ReleaseAssetServer();
     globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.js'))
       ..createSync(recursive: true)
       ..writeAsStringSync('function main() {}');
@@ -140,7 +68,7 @@ void main() {
   }));
 
   test('release asset server serves correct mime type and content length for html', () => testbed.run(() async {
-    assetServer = ReleaseAssetServer();
+    final ReleaseAssetServer assetServer = ReleaseAssetServer();
     globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.html'))
       ..createSync(recursive: true)
       ..writeAsStringSync('<!doctype html><html></html>');
@@ -154,7 +82,7 @@ void main() {
   }));
 
   test('release asset server serves content from flutter root', () => testbed.run(() async {
-    assetServer = ReleaseAssetServer();
+    final ReleaseAssetServer assetServer = ReleaseAssetServer();
     globals.fs.file(globals.fs.path.join('flutter', 'bar.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
@@ -165,7 +93,7 @@ void main() {
   }));
 
   test('release asset server serves content from project directory', () => testbed.run(() async {
-    assetServer = ReleaseAssetServer();
+    final ReleaseAssetServer assetServer = ReleaseAssetServer();
     globals.fs.file(globals.fs.path.join('lib', 'bar.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');

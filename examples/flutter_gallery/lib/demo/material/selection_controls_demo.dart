@@ -8,7 +8,7 @@ import '../../gallery/demo.dart';
 
 const String _checkboxText =
   'Checkboxes allow the user to select multiple options from a set. '
-  'A normal checkbox\'s value is true or false and a tristate checkbox\'s '
+  "A normal checkbox's value is true or false and a tristate checkbox's "
   'value can also be null.';
 
 const String _checkboxCode = 'selectioncontrols_checkbox';
