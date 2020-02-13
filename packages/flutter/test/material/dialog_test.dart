@@ -104,6 +104,7 @@ void main() {
     expect(materialWidget.color, Colors.grey[800]);
     expect(materialWidget.shape, _defaultDialogShape);
     expect(materialWidget.elevation, 24.0);
+    expect(materialWidget.clipBehavior, Clip.none);
   });
 
   testWidgets('Custom dialog elevation', (WidgetTester tester) async {
@@ -169,6 +170,42 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.shape, customBorder);
+  });
+
+  testWidgets('Custom dialog clip behavior', (WidgetTester tester) async {
+    const Clip clip = Clip.antiAlias;
+    const Dialog dialog = Dialog(
+      clipBehavior: clip,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+              builder: (BuildContext context) {
+                return Center(
+                  child: RaisedButton(
+                    child: const Text('X'),
+                    onPressed: () {
+                      showDialog<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return dialog;
+                        },
+                      );
+                    },
+                  ),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)));
+    expect(materialWidget.clipBehavior, clip);
   });
 
   testWidgets('Null dialog shape', (WidgetTester tester) async {

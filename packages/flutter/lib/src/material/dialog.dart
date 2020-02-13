@@ -49,6 +49,7 @@ class Dialog extends StatelessWidget {
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.child,
   }) : super(key: key);
 
@@ -95,6 +96,11 @@ class Dialog extends StatelessWidget {
   /// {@endtemplate}
   final ShapeBorder shape;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  final Clip clipBehavior;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
@@ -126,6 +132,7 @@ class Dialog extends StatelessWidget {
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
               shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
               type: MaterialType.card,
+              clipBehavior: clipBehavior,
               child: child,
             ),
           ),
