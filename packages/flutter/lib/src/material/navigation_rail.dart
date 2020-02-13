@@ -5,6 +5,623 @@ import 'package:flutter/material.dart';
 
 import '../../scheduler.dart';
 
+/// TODO
+class NavigationRail extends StatefulWidget {
+  /// TODO
+  NavigationRail({
+    this.extended,
+    this.leading,
+    this.trailing,
+    this.destinations,
+    this.currentIndex,
+    this.onDestinationSelected,
+    this.elevation = 0,
+    this.groupAlignment = NavigationRailGroupAlignment.top,
+    this.labelType = NavigationRailLabelType.none,
+    this.unselectedLabelTextStyle,
+    this.selectedLabelTextStyle,
+    this.unselectedIconTheme,
+    this.selectedIconTheme,
+    this.backgroundColor,
+    this.minWidth = _railWidth,
+    this.extendedWidth = _extendedRailWidth,
+  }) : assert(extendedWidth >= _railWidth);
+
+  /// Indicates of the [NavigationRail] should be in the extended state.
+  ///
+  /// The rail will implicitly animate between the extended and normal state.
+  ///
+  /// If the rail is going to be in the extended state, then the [labelType]
+  /// should be set to [NavigationRailLabelType.none].
+  final bool extended;
+
+  /// The leading widget in the rail that is placed above the destinations.
+  ///
+  /// This is commonly a [FloatingActionButton], but may also be a non-button,
+  /// such as a logo.
+  final Widget leading;
+
+  /// The trailing widget in the rail that is placed below the destinations.
+  ///
+  /// This is commonly a list of additional options or destinations that is
+  /// usually only rendered when [extended] is true.
+  final Widget trailing;
+
+  /// Defines the appearance of the button items that are arrayed within the
+  /// navigation rail.
+  final List<NavigationRailDestination> destinations;
+
+  /// The index into [destinations] for the current active
+  /// [NavigationRailDestination].
+  final int currentIndex;
+
+  /// Called when one of the [destinations] is selected.
+  ///
+  /// The stateful widget that creates the navigation rail needs to keep
+  /// track of the index of the selected [NavigationRailDestination] and call
+  /// `setState` to rebuild the navigation rail with the new [currentIndex].
+  final ValueChanged<int> onDestinationSelected;
+
+  /// The elevation for the inner side of the rail.
+  ///
+  /// The shadow only shows on the inner side of the rail.
+  ///
+  /// In LTR configurations, the inner side is the right side, and in RTL
+  /// configurations, it is the left side.
+  final double elevation;
+
+  /// The alignment for the [NavigationRailDestination]s as they are positioned
+  /// within the [NavigationRail].
+  ///
+  /// Navigation rail destinations can be aligned as a group to the [top],
+  /// [bottom], or [center] of a layout.
+  final NavigationRailGroupAlignment groupAlignment;
+
+  /// Defines the layout and behavior of the labels in the [NavigationRail].
+  ///
+  /// See also:
+  ///
+  ///   * [NavigationRailLabelType] for information on the meaning of different
+  ///   types.
+  final NavigationRailLabelType labelType;
+
+  /// The [TextStyle] of the unselected [NavigationRailDestination] labels.
+  ///
+  /// When the [NavigationRailDestination] is selected, the
+  /// [selectedLabelTextStyle] will be used instead.
+  final TextStyle unselectedLabelTextStyle;
+
+  /// The [TextStyle] of the [NavigationRailDestination] labels when they are
+  /// selected.
+  ///
+  /// When the [NavigationRailDestination] is not selected,
+  /// [unselectedLabelTextStyle] will be used.
+  final TextStyle selectedLabelTextStyle;
+
+  /// The default size, opacity, and color of the icon in the
+  /// [NavigationRailDestination].
+  ///
+  /// If this field is not provided, or provided with any null properties, then
+  /// a copy of the [IconThemeData.fallback] with a custom [NavigationRail]
+  /// specific color will be used.
+  final IconThemeData unselectedIconTheme;
+
+  /// The size, opacity, and color of the icon in the selected
+  /// [NavigationRailDestination].
+  ///
+  /// When the [NavigationRailDestination] is not selected,
+  /// [unselectedIconTheme] will be used.
+  final IconThemeData selectedIconTheme;
+
+  /// Sets the color of the Container that holds all of the [NavigationRail]'s
+  /// contents.
+  final Color backgroundColor;
+
+  /// The smallest possible width for the rail regardless of the destination
+  /// content size.
+  ///
+  /// The default is 72.
+  ///
+  /// This value also defines the min width and min height of the destination
+  /// boxes.
+  ///
+  /// To make a compact rail, set this to 56 and use
+  /// [NavigationRailLabelType.none].
+  final double minWidth;
+
+  /// The final width when the animation is complete for setting [extended] to
+  /// true.
+  ///
+  /// The default value is 256.
+  final double extendedWidth;
+
+  /// Returns the animation that controls the [NavigationRail.extended] state.
+  ///
+  /// This can be used to synchronize animations in the [leading] or [trailing]
+  /// widget, such as an animated menu or a [FloatingActionButton] animation.
+  static Animation<double> extendedAnimation(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_ExtendedNavigationRailAnimation>().animation;
+  }
+
+  @override
+  _NavigationRailState createState() => _NavigationRailState();
+}
+
+class _NavigationRailState extends State<NavigationRail> with TickerProviderStateMixin {
+  List<AnimationController> _destinationControllers = <AnimationController>[];
+  List<Animation<double>> _destinationAnimations;
+  AnimationController _extendedController;
+  Animation<double> _extendedAnimation;
+
+  // The following variables are used to measure and store the sizes of the
+  // inner content of each destination so that the rail can adapt to various
+  // icon sizes, font sizes, and textScaleFactors.
+  bool _contentMeasured = false;
+  GlobalKey _offstageLeadingKey;
+  List<GlobalKey> _offstageActiveIconKeys;
+  List<GlobalKey> _offstageIconKeys;
+  List<GlobalKey> _offstageSelectedLabelKeys;
+  List<GlobalKey> _offstageLabelKeys;
+  Size _leadingSize;
+  List<Size> _activeIconSizes = <Size>[];
+  List<Size> _iconSizes = <Size>[];
+  List<Size> _selectedLabelSizes = <Size>[];
+  List<Size> _labelSizes = <Size>[];
+
+  @override
+  void initState() {
+    print('initState()');
+    super.initState();
+    _initControllers();
+    _initKeys();
+    _measureLabelsAndResize(false);
+  }
+
+  @override
+  void dispose() {
+    _disposeControllers();
+    super.dispose();
+  }
+
+//  @override
+//  void didChangeDependencies() {
+//    _measureLabelsAndResize(true);
+//  }
+
+  @override
+  void didUpdateWidget(NavigationRail oldWidget) {
+    print('didUpdateWidget()');
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.extended != oldWidget.extended) {
+      if (widget.extended) {
+        _extendedController.forward();
+      } else {
+        _extendedController.reverse();
+      }
+    }
+
+//    if (widget.destinations != oldWidget.destinations) {
+//      print('destinations not equal');
+//      _measureLabelsAndResize(true);
+//    }
+
+    // No animated segue if the length of the items list changes.
+    if (widget.destinations.length != oldWidget.destinations.length) {
+      _resetState();
+      return;
+    }
+
+    if (widget.currentIndex != oldWidget.currentIndex) {
+      _destinationControllers[oldWidget.currentIndex].reverse();
+      _destinationControllers[widget.currentIndex].forward();
+      return;
+    }
+
+    _measureLabelsAndResize(true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print('build()');
+    final Widget leading = widget.leading;
+    final Widget trailing = widget.trailing;
+    final double maxDestinationContentWidth = <double>[
+      _railWidth,
+      ...<Size>[
+        ..._activeIconSizes,
+        ..._iconSizes,
+        ..._selectedLabelSizes,
+        ..._labelSizes,
+      ].map((Size size) => size.width)].reduce(max);
+    final double maxDestinationWidth = maxDestinationContentWidth + 2 * _horizontalDestinationPadding;
+    final double railWidth = maxDestinationWidth + _extendedAnimation.value * (_extendedRailWidth - _railWidth) * maxDestinationWidth / _minDestinationContentWidth;
+    final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment();
+
+    final Color baseSelectedColor = Theme.of(context).colorScheme.primary;
+    final Color baseColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.64);
+    final IconThemeData unselectedIconTheme = const IconThemeData.fallback().copyWith(color: baseColor).merge(widget.unselectedIconTheme);
+    final IconThemeData selectedIconTheme = const IconThemeData.fallback().copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme);
+    final TextStyle unselectedLabelTextStyle = TextStyle(color: baseColor, fontSize: 14).merge(widget.unselectedLabelTextStyle);
+    final TextStyle selectedLabelTextStyle = TextStyle(color: baseSelectedColor, fontSize: 14).merge(widget.selectedLabelTextStyle);
+
+    return _ExtendedNavigationRailAnimation(
+      animation: _extendedAnimation,
+      child: !_contentMeasured ?
+          SizedBox(
+          width: railWidth,
+          child: Stack(
+            overflow: Overflow.visible,
+            children: <Widget>[
+              for (int i = 0; i < widget.destinations.length; i++)
+                ...<Widget>[
+                  Offstage(
+                    child: KeyedSubtree(
+                      key: _offstageActiveIconKeys[i],
+                      child: IconTheme(
+                        data: selectedIconTheme,
+                        child: widget.destinations[i].activeIcon,
+                      ),
+                    ),
+                  ),
+                  Offstage(
+                    child: KeyedSubtree(
+                      key: _offstageIconKeys[i],
+                      child: IconTheme(
+                        data: unselectedIconTheme,
+                        child: widget.destinations[i].icon,
+                      ),
+                    ),
+                  ),
+                  Offstage(
+                    child: KeyedSubtree(
+                      key: _offstageSelectedLabelKeys[i],
+                      child: DefaultTextStyle(
+                        style: selectedLabelTextStyle,
+                        child: widget.destinations[i].label,
+                      ),
+                    ),
+                  ),
+                  Offstage(
+                    child: KeyedSubtree(
+                      key: _offstageLabelKeys[i],
+                      child: DefaultTextStyle(
+                        style: unselectedLabelTextStyle,
+                        child: widget.destinations[i].label,
+                      ),
+                    ),
+                  ),
+                ],
+                Offstage(
+                  child: KeyedSubtree(
+                    key: _offstageLeadingKey,
+                    child: leading,
+                  ),
+                ),
+          ],
+        ),
+      ) : Material(
+        elevation: widget.elevation,
+        child: Container(
+          width: railWidth,
+          padding: const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+          color: widget.backgroundColor ?? Theme.of(context).colorScheme.surface,
+          child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _verticalSpacing,
+              if (leading != null)
+                ...<Widget>[
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: (maxDestinationContentWidth - _leadingSize.width) / 2),
+                    child: leading,
+                  ),
+                  _verticalSpacing,
+                ],
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: destinationsAlignment,
+                  children: <Widget>[
+                    for (int i = 0; i < widget.destinations.length; i++)
+                      _RailDestinationBox(
+                        width: railWidth,
+                        extendedTransitionAnimation: _extendedAnimation,
+                        selected: widget.currentIndex == i,
+                        icon: widget.currentIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
+                        label: _extendedAnimation.value > 0 ? widget.destinations[i].extendedLabel : widget.destinations[i].label,
+                        destinationAnimation: _destinationAnimations[i],
+                        labelType: widget.labelType,
+                        iconTheme: widget.currentIndex == i ? selectedIconTheme : unselectedIconTheme,
+                        labelTextStyle: widget.currentIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
+                        iconSize: widget.currentIndex == i ? _activeIconSizes[i] : _iconSizes[i],
+                        labelSize: widget.currentIndex == i ? _selectedLabelSizes[i] : _labelSizes[i],
+                        onTap: () {
+                          widget.onDestinationSelected(i);
+                        },
+                      ),
+                  ],
+                ),
+              ),
+              // TODO: measure this and use the measurement for padding
+              if (trailing != null) trailing,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _measureLabelsAndResize(bool shouldSetState) {
+    if (widget.labelType != NavigationRailLabelType.none) {
+      SchedulerBinding.instance.addPostFrameCallback(_resize);
+      if (shouldSetState) {
+        setState(() {
+          _contentMeasured = false;
+        });
+      }
+    }
+  }
+
+  void _resize(Duration duration) {
+    print('_resize()');
+    if (_contentMeasured == false) {
+      setState(() {
+        _contentMeasured = true;
+        _leadingSize = _toRenderBoxSize(_offstageLeadingKey);
+        _activeIconSizes = _toRenderBoxSizes(_offstageActiveIconKeys);
+        _iconSizes = _toRenderBoxSizes(_offstageIconKeys);
+        _selectedLabelSizes = _toRenderBoxSizes(_offstageSelectedLabelKeys);
+        _labelSizes = _toRenderBoxSizes(_offstageLabelKeys);
+      });
+    }
+  }
+
+  void _initKeys() {
+    _offstageLeadingKey = GlobalKey();
+    _offstageActiveIconKeys = _keysFromDestinations();
+    _offstageIconKeys = _keysFromDestinations();
+    _offstageSelectedLabelKeys = _keysFromDestinations();
+    _offstageLabelKeys = _keysFromDestinations();
+  }
+
+  List<Size> _toRenderBoxSizes(List<GlobalKey> keys) => keys.map(_toRenderBoxSize).toList();
+
+  Size _toRenderBoxSize(GlobalKey key) => (key.currentContext.findRenderObject() as RenderBox).size;
+
+  List<GlobalKey> _keysFromDestinations() => widget.destinations.map((NavigationRailDestination destination) => GlobalKey()).toList();
+
+  MainAxisAlignment _resolveGroupAlignment() {
+    switch (widget.groupAlignment) {
+      case NavigationRailGroupAlignment.top:
+        return MainAxisAlignment.start;
+      case NavigationRailGroupAlignment.center:
+        return MainAxisAlignment.center;
+      case NavigationRailGroupAlignment.bottom:
+        return MainAxisAlignment.end;
+    }
+    return MainAxisAlignment.start;
+  }
+
+  void _disposeControllers() {
+    for (final AnimationController controller in _destinationControllers)
+      controller.dispose();
+    _extendedController.dispose();
+  }
+
+  void _initControllers() {
+    _destinationControllers = List<AnimationController>.generate(widget.destinations.length, (int index) {
+      return AnimationController(
+        duration: kThemeAnimationDuration,
+        vsync: this,
+      )..addListener(_rebuild);
+    });
+    _destinationAnimations = _destinationControllers.map((AnimationController controller) => controller.view).toList();
+    _destinationControllers[widget.currentIndex].value = 1.0;
+    _extendedController = AnimationController(
+      duration: kThemeAnimationDuration,
+      vsync: this,
+
+    );
+    _extendedAnimation = CurvedAnimation(
+      parent: _extendedController,
+      curve: Curves.easeInOut,
+    );
+    _extendedController.addListener(() {
+      setState(() {
+        // Rebuild.
+      });
+    });
+  }
+
+  void _resetState() {
+    _disposeControllers();
+    _initControllers();
+  }
+
+  void _rebuild() {
+    setState(() {
+      // Rebuilding when any of the controllers tick, i.e. when the items are
+      // animated.
+    });
+  }
+}
+
+class _RailDestinationBox extends StatelessWidget {
+  _RailDestinationBox({
+    @required this.width,
+    @required this.icon,
+    @required this.label,
+    @required this.destinationAnimation,
+    @required this.extendedTransitionAnimation,
+    @required this.labelType,
+    @required this.selected,
+    @required this.iconTheme,
+    @required this.labelTextStyle,
+    @required this.iconSize,
+    @required this.labelSize,
+    @required this.onTap,
+  }) : assert(width != null),
+       assert(icon != null),
+       assert(label != null),
+       assert(destinationAnimation != null),
+       assert(extendedTransitionAnimation != null),
+       assert(labelType != null),
+       assert(selected != null),
+       assert(iconTheme != null),
+       assert(labelTextStyle != null),
+       assert(iconSize != null),
+       assert(labelSize != null),
+       assert(onTap != null),
+       _positionAnimation = CurvedAnimation(
+          parent: ReverseAnimation(destinationAnimation),
+          curve: Curves.easeInOut,
+          reverseCurve: Curves.easeInOut.flipped,
+       );
+
+  final double width;
+  final Widget icon;
+  final Widget label;
+  final Animation<double> destinationAnimation;
+  final NavigationRailLabelType labelType;
+  final bool selected;
+  final Animation<double> extendedTransitionAnimation;
+  final IconThemeData iconTheme;
+  final TextStyle labelTextStyle;
+  final Size iconSize;
+  final Size labelSize;
+  final VoidCallback onTap;
+
+  final Animation<double> _positionAnimation;
+
+  double _normalLabelFadeInValue() {
+    if (destinationAnimation.value < 0.25) {
+      return 0;
+    } else if (destinationAnimation.value < 0.75) {
+      return (destinationAnimation.value - 0.25) * 2;
+    } else {
+      return 1;
+    }
+  }
+
+  double _normalLabelFadeOutValue() {
+    if (destinationAnimation.value > 0.75) {
+      return (destinationAnimation.value - 0.75) * 4;
+    } else {
+      return 0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget themedIcon = IconTheme(
+      data: iconTheme,
+      child: icon,
+    );
+    final Widget styledLabel = DefaultTextStyle.merge(
+      style: labelTextStyle,
+      child: label,
+    );
+    final double textScaleRatio = labelSize.height < 14 ? 1 : labelSize.height / 14;
+//    final double verticalPaddingNoLabel = _verticalDestinationPaddingNoLabel * textScaleRatio;
+//    final double verticalPaddingWithLabel = _verticalDestinationPaddingWithLabel * textScaleRatio;
+    final double verticalPaddingNoLabel = _verticalDestinationPaddingNoLabel;
+    final double verticalPaddingWithLabel = _verticalDestinationPaddingWithLabel;
+    Widget content;
+    if (extendedTransitionAnimation.value > 0) {
+      content = SizedBox(
+        width: double.infinity,
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              child: SizedBox(
+                width: width,
+                height: width,
+                child: themedIcon,
+              ),
+            ),
+            Positioned(
+              left: width,
+              child: Opacity(
+                opacity: extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4 : 1,
+                child: Container(
+                  alignment: AlignmentDirectional.centerStart,
+                  height: width,
+                  child: styledLabel,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      switch (labelType) {
+        case NavigationRailLabelType.none:
+          content = SizedBox(
+            width: width,
+            height: verticalPaddingNoLabel * 2 + iconSize.height,
+            child: themedIcon,
+          );
+          break;
+        case NavigationRailLabelType.selected:
+          final double animationValue = 1 - _positionAnimation.value;
+          content = SizedBox(
+            width: width,
+            height: iconSize.height + animationValue * labelSize.height + 2 * lerpDouble(verticalPaddingNoLabel, verticalPaddingWithLabel, animationValue),
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                  top: lerpDouble(verticalPaddingNoLabel, verticalPaddingWithLabel, animationValue),
+                  left: (width - iconSize.width) / 2 - _horizontalDestinationPadding,
+                  child: themedIcon,
+                ),
+                Positioned(
+                  top: iconSize.height + lerpDouble(verticalPaddingNoLabel, verticalPaddingWithLabel, animationValue),
+                  left: (width - labelSize.width) / 2 - _horizontalDestinationPadding,
+                  child: Opacity(
+                    alwaysIncludeSemantics: true,
+//                    opacity: (selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue()).clamp(0, 0.9).toDouble() + 0.1,
+                    opacity: (selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue()),
+                    child: styledLabel,
+                  ),
+                ),
+              ],
+            ),
+          );
+          break;
+        case NavigationRailLabelType.all:
+          content = SizedBox(
+            width: width,
+            height: verticalPaddingWithLabel * 2 + labelSize.height + iconSize.height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                themedIcon,
+                styledLabel,
+              ],
+            ),
+          );
+          break;
+      }
+    }
+
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Material(
+      type: MaterialType.transparency,
+      clipBehavior: Clip.none,
+      child: InkResponse(
+        onTap: onTap,
+        onHover: (_) {},
+        highlightShape: BoxShape.rectangle,
+        borderRadius: BorderRadius.all(Radius.circular(width / 2)),
+        containedInkWell: true,
+        splashColor: colors.primary.withOpacity(0.12),
+        hoverColor: colors.primary.withOpacity(0.04),
+        child: content,
+      ),
+    );
+  }
+}
+
 /// Defines the behavior of the labels of a [NavigationRail].
 ///
 /// See also:
@@ -53,7 +670,9 @@ class NavigationRailDestination {
     @required this.icon,
     Widget activeIcon,
     this.label,
+    Widget extendedLabel,
   }) : activeIcon = activeIcon ?? icon,
+        extendedLabel = extendedLabel ?? label,
         assert(icon != null);
   /// The icon of the destination.
   ///
@@ -86,6 +705,14 @@ class NavigationRailDestination {
   /// The label should be provided when used with the [NavigationRail], unless
   /// [NavigationRailLabelType.none] used and the rail will not be extended.
   final Widget label;
+
+  /// The override for the label for the destination in the extended state.
+  ///
+  /// If null, then the [label] is used.
+  ///
+  /// This is useful when the [label] has multi-lined text, but the
+  /// [extendedLabel] should be on one line.
+  final Widget extendedLabel;
 }
 
 class _ExtendedNavigationRailAnimation extends InheritedWidget {
@@ -94,7 +721,7 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
     @required this.animation,
     @required Widget child,
   }) : assert(child != null),
-       super(key: key, child: child);
+        super(key: key, child: child);
 
   final Animation<double> animation;
 
@@ -106,518 +733,10 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
   bool updateShouldNotify(_ExtendedNavigationRailAnimation old) => animation != old.animation;
 }
 
-/// TODO
-class NavigationRail extends StatefulWidget {
-  /// TODO
-  NavigationRail({
-    this.extended,
-    this.leading,
-    this.trailing,
-    this.destinations,
-    this.currentIndex,
-    this.onDestinationSelected,
-    this.groupAlignment = NavigationRailGroupAlignment.top,
-    this.labelType = NavigationRailLabelType.none,
-    this.labelTextStyle,
-    this.selectedLabelTextStyle,
-    this.iconTheme,
-    this.selectedIconTheme,
-    this.backgroundColor,
-    this.extendedWidth = _extendedRailWidth,
-  }) : assert(extendedWidth >= _railWidth);
-
-  /// Indicates of the [NavigationRail] should be in the extended state.
-  ///
-  /// The rail will implicitly animate between the extended and normal state.
-  ///
-  /// If the rail is going to be in the extended state, then the [labelType]
-  /// should be set to [NavigationRailLabelType.none].
-  final bool extended;
-
-  /// The leading widget in the rail that is placed above the destinations.
-  ///
-  /// This is commonly a [FloatingActionButton], but may also be a non-button,
-  /// such as a logo.
-  final Widget leading;
-
-  /// The trailing widget in the rail that is placed below the destinations.
-  ///
-  /// This is commonly a list of additional options or destinations that is
-  /// usually only rendered when [extended] is true.
-  final Widget trailing;
-
-  /// Defines the appearance of the button items that are arrayed within the
-  /// navigation rail.
-  final List<NavigationRailDestination> destinations;
-
-  /// The index into [destinations] for the current active
-  /// [NavigationRailDestination].
-  final int currentIndex;
-
-  /// Called when one of the [destinations] is selected.
-  ///
-  /// The stateful widget that creates the navigation rail needs to keep
-  /// track of the index of the selected [NavigationRailDestination] and call
-  /// `setState` to rebuild the navigation rail with the new [currentIndex].
-  final ValueChanged<int> onDestinationSelected;
-
-  /// The alignment for the [NavigationRailDestination]s as they are positioned
-  /// within the [NavigationRail].
-  ///
-  /// Navigation rail destinations can be aligned as a group to the [top],
-  /// [bottom], or [center] of a layout.
-  final NavigationRailGroupAlignment groupAlignment;
-
-  /// Defines the layout and behavior of the labels in the [NavigationRail].
-  ///
-  /// See also:
-  ///
-  ///   * [NavigationRailLabelType] for information on the meaning of different
-  ///   types.
-  final NavigationRailLabelType labelType;
-
-  /// The [TextStyle] of the [NavigationRailDestination] labels.
-  ///
-  /// This is the default [TextStyle] for all labels. When the
-  /// [NavigationRailDestination] is selected, the [selectedLabelTextStyle] will be
-  /// used instead.
-  final TextStyle labelTextStyle;
-
-  /// The [TextStyle] of the [NavigationRailDestination] labels when they are
-  /// selected.
-  ///
-  /// This field overrides the [labelTextStyle] for selected items.
-  ///
-  /// When the [NavigationRailDestination] is not selected, [labelTextStyle] will be
-  /// used.
-  final TextStyle selectedLabelTextStyle;
-
-  /// The default size, opacity, and color of the icon in the
-  /// [NavigationRailDestination].
-  ///
-  /// If this field is not provided, or provided with any null properties, then
-  ///a copy of the [IconThemeData.fallback] with a custom [NavigationRail]
-  /// specific color will be used.
-  final IconThemeData iconTheme;
-
-  /// The size, opacity, and color of the icon in the selected
-  /// [NavigationRailDestination].
-  ///
-  /// This field overrides the [iconTheme] for selected items.
-  ///
-  /// When the [NavigationRailDestination] is not selected, [iconTheme] will be
-  /// used.
-  final IconThemeData selectedIconTheme;
-
-  /// Sets the color of the Container that holds all of the [NavigationRail]'s
-  /// contents.
-  final Color backgroundColor;
-
-  /// The final width when the animation is complete for setting [extended] to
-  /// true.
-  ///
-  /// The default value is 256.
-  final double extendedWidth;
-
-  /// Returns the animation that controls the [NavigationRail.extended] state.
-  ///
-  /// This can be used to synchronize animations in the [leading] or [trailing]
-  /// widget, such as an animated menu or a [FloatingActionButton] animation.
-  static Animation<double> extendedAnimation(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_ExtendedNavigationRailAnimation>().animation;
-  }
-
-  @override
-  _NavigationRailState createState() => _NavigationRailState();
-}
-
-class _NavigationRailState extends State<NavigationRail> with TickerProviderStateMixin {
-  List<AnimationController> _destinationControllers = <AnimationController>[];
-  List<Animation<double>> _destinationAnimations;
-
-  AnimationController _extendedController;
-  Animation<double> _extendedAnimation;
-
-  List<GlobalKey> _offstageLabelKeys;
-  List<Size> _labelSizes;
-  bool _labelsMeasured = false;
-
-  @override
-  void initState() {
-    print('initState()');
-    super.initState();
-    _initControllers();
-    _offstageLabelKeys = widget.destinations.map((NavigationRailDestination destination) => GlobalKey()).toList();
-    _labelsMeasured = false;
-    _measureLabelsAndResize(false);
-  }
-
-  @override
-  void dispose() {
-    _disposeControllers();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(NavigationRail oldWidget) {
-    print('didUpdateWidget()');
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.destinations != oldWidget.destinations) {
-      _measureLabelsAndResize(true);
-    }
-
-    if (widget.extended != oldWidget.extended) {
-      if (widget.extended) {
-        _extendedController.forward();
-      } else {
-        _extendedController.reverse();
-      }
-    }
-
-    // No animated segue if the length of the items list changes.
-    if (widget.destinations.length != oldWidget.destinations.length) {
-      _resetState();
-      return;
-    }
-
-    if (widget.currentIndex != oldWidget.currentIndex) {
-      _destinationControllers[oldWidget.currentIndex].reverse();
-      _destinationControllers[widget.currentIndex].forward();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print('build()');
-    final Widget leading = widget.leading;
-    final Widget trailing = widget.trailing;
-    final double railWidth = _labelSizes == null ? _railWidth : max(_railWidth, _labelSizes.map((e) => e.width).reduce(max));
-    final double currentWidth = railWidth + _extendedAnimation.value * (_extendedRailWidth - _railWidth) * railWidth / _railWidth;
-    final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment();
-    final IconThemeData selectedIconTheme = widget.selectedIconTheme ?? widget.iconTheme;
-    final TextStyle selectedLabelTextStyle = widget.selectedLabelTextStyle ?? widget.labelTextStyle;
-
-    if (!_labelsMeasured) {
-      return SizedBox(
-        width: railWidth,
-        child: Stack(
-          overflow: Overflow.visible,
-          children: <Widget>[
-            for (int i = 0; i < widget.destinations.length; i++)
-              Offstage(
-                child: KeyedSubtree(
-                  key: _offstageLabelKeys[i],
-                  child: DefaultTextStyle(
-                    style: widget.currentIndex == i ? selectedLabelTextStyle : widget.labelTextStyle,
-                      child: widget.destinations[i].label,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      );
-    } else {
-      return _ExtendedNavigationRailAnimation(
-        animation: _extendedAnimation,
-        child: DefaultTextStyle(
-          style: TextStyle(color: Theme
-              .of(context)
-              .colorScheme
-              .primary),
-          child: Container(
-            width: currentWidth,
-            color: widget.backgroundColor ?? Theme
-                .of(context)
-                .colorScheme
-                .surface,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _verticalSpacing,
-                if (leading != null)
-                  ...<Widget>[
-                    Container(
-                      padding: EdgeInsets.all(_spacing),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                            minWidth: railWidth),
-                        child: leading,
-                      ),
-                    ),
-                    _verticalSpacing,
-                  ],
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: destinationsAlignment,
-                    children: <Widget>[
-                      for (int i = 0; i < widget.destinations.length; i++)
-                        _RailDestinationBox(
-                          destinationAnimation: _destinationAnimations[i],
-                          labelKind: widget.labelType,
-                          selected: widget.currentIndex == i,
-                          icon: IconTheme(
-                            data: IconThemeData(
-                              color: widget.currentIndex == i ? Theme
-                                  .of(context)
-                                  .colorScheme
-                                  .primary : Theme
-                                  .of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withOpacity(0.64),
-                            ).merge(widget.currentIndex == i
-                                ? selectedIconTheme
-                                : widget.iconTheme),
-                            child: widget.currentIndex == i ? widget
-                                .destinations[i].activeIcon : widget
-                                .destinations[i].icon,
-                          ),
-                          label: DefaultTextStyle(
-                            style: TextStyle(
-                              color: widget.currentIndex == i ? Theme
-                                  .of(context)
-                                  .colorScheme
-                                  .primary : Theme
-                                  .of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withOpacity(0.64),
-                            ).merge(widget.currentIndex == i
-                                ? selectedLabelTextStyle
-                                : widget.labelTextStyle),
-                            child: widget.destinations[i].label,
-                          ),
-                          onTap: () {
-                            widget.onDestinationSelected(i);
-                          },
-                          extendedTransitionAnimation: _extendedAnimation,
-                          width: railWidth,
-                          height: railWidth,
-                        ),
-                    ],
-                  ),
-                ),
-                if (trailing != null) trailing,
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-  }
-
-  void _measureLabelsAndResize(bool shouldSetState) {
-    if (widget.labelType != NavigationRailLabelType.none) {
-      SchedulerBinding.instance.addPostFrameCallback(_resize);
-      if (shouldSetState) {
-        setState(() {
-          _labelsMeasured = false;
-        });
-      }
-    }
-  }
-
-  void _resize(Duration duration) {
-    print('_resize()');
-    if (_labelsMeasured == false) {
-      final List<Size> labelSizes = _offstageLabelKeys.map((GlobalKey key) => (key.currentContext.findRenderObject() as RenderBox).size).toList();
-
-      setState(() {
-        _labelsMeasured = true;
-        _labelSizes = labelSizes;
-      });
-    }
-  }
-
-  MainAxisAlignment _resolveGroupAlignment() {
-    switch (widget.groupAlignment) {
-      case NavigationRailGroupAlignment.top:
-        return MainAxisAlignment.start;
-      case NavigationRailGroupAlignment.center:
-        return MainAxisAlignment.center;
-      case NavigationRailGroupAlignment.bottom:
-        return MainAxisAlignment.end;
-    }
-    return MainAxisAlignment.start;
-  }
-
-  void _disposeControllers() {
-    for (final AnimationController controller in _destinationControllers)
-      controller.dispose();
-    _extendedController.dispose();
-  }
-
-  void _initControllers() {
-    _destinationControllers = List<AnimationController>.generate(widget.destinations.length, (int index) {
-      return AnimationController(
-        duration: kThemeAnimationDuration,
-        vsync: this,
-      )..addListener(_rebuild);
-    });
-    _destinationAnimations = _destinationControllers.map((AnimationController controller) => controller.view).toList();
-    _destinationControllers[widget.currentIndex].value = 1.0;
-    _extendedController = AnimationController(
-      duration: kThemeAnimationDuration,
-      vsync: this,
-
-    );
-    _extendedAnimation = CurvedAnimation(
-      parent: _extendedController,
-      curve: Curves.easeInOut,
-    );
-    _extendedController.addListener(() {
-      setState(() {
-        // Rebuild.
-      });
-    });
-  }
-
-  void _resetState() {
-    _disposeControllers();
-    _initControllers();
-//    _offstageLabelKeys = widget.destinations.map((e) => GlobalKey()).toList();
-  }
-
-  void _rebuild() {
-    setState(() {
-      // Rebuilding when any of the controllers tick, i.e. when the items are
-      // animated.
-    });
-  }
-}
-
-class _RailDestinationBox extends StatelessWidget {
-  _RailDestinationBox({
-    this.destinationAnimation,
-    this.labelKind = NavigationRailLabelType.all,
-    this.selected,
-    this.icon,
-    this.label,
-    this.onTap,
-    this.extendedTransitionAnimation,
-    this.width,
-    this.height,
-  }) : assert(labelKind != null),
-       _positionAnimation = CurvedAnimation(
-          parent: ReverseAnimation(destinationAnimation),
-          curve: Curves.easeInOut,
-          reverseCurve: Curves.easeInOut.flipped,
-       );
-
-  final Animation<double> destinationAnimation;
-  final NavigationRailLabelType labelKind;
-  final bool selected;
-  final Widget icon;
-  final Widget label;
-  final VoidCallback onTap;
-  final Animation<double> extendedTransitionAnimation;
-  final double width;
-  final double height;
-
-  final Animation<double> _positionAnimation;
-
-  double _normalLabelFadeInValue() {
-    if (destinationAnimation.value < 0.25) {
-      return 0;
-    } else if (destinationAnimation.value < 0.75) {
-      return (destinationAnimation.value - 0.25) * 2;
-    } else {
-      return 1;
-    }
-  }
-
-  double _normalLabelFadeOutValue() {
-    if (destinationAnimation.value > 0.75) {
-      return (destinationAnimation.value - 0.75) * 4;
-    } else {
-      return 0;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Widget content;
-    if (extendedTransitionAnimation.value > 0) {
-      content = SizedBox(
-        width: double.infinity,
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              child: SizedBox(
-                width: width,
-                height: height,
-                child: icon,
-              ),
-            ),
-            Positioned(
-              left: width,
-              child: Opacity(
-                opacity: extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4 : 1,
-                child: Container(
-                  alignment: AlignmentDirectional.centerStart,
-                  height: height,
-                  child: label,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      switch (labelKind) {
-        case NavigationRailLabelType.none:
-          content = icon;
-          break;
-        case NavigationRailLabelType.selected:
-          content = Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(height: _positionAnimation.value * height / 4),
-              icon,
-              Opacity(
-                alwaysIncludeSemantics: true,
-                opacity: (selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue()).clamp(0, 0.9).toDouble() + 0.1,
-                child: label,
-              ),
-            ],
-          );
-          break;
-        case NavigationRailLabelType.all:
-          content = Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              icon,
-              label,
-            ],
-          );
-          break;
-      }
-      content = SizedBox(
-        width: width,
-        height: height,
-        child: content,
-      );
-    }
-
-    final ColorScheme colors = Theme.of(context).colorScheme;
-    return Material(
-      type: MaterialType.transparency,
-      clipBehavior: Clip.none,
-      child: InkResponse(
-        onTap: onTap,
-        onHover: (_) {},
-        highlightShape: BoxShape.rectangle,
-        borderRadius: BorderRadius.all(Radius.circular(width / 2)),
-        containedInkWell: true,
-        splashColor: colors.primary.withOpacity(0.12),
-        hoverColor: colors.primary.withOpacity(0.04),
-        child: content,
-      ),
-    );
-  }
-}
-
+const double _minDestinationContentWidth = 56;
+const double _horizontalDestinationPadding = 8;
+const double _verticalDestinationPaddingNoLabel = 24;
+const double _verticalDestinationPaddingWithLabel = 16;
 const double _railWidth = 72;
 const double _extendedRailWidth = 256;
 const double _spacing = 8;
