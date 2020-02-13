@@ -614,7 +614,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _appWithAlertDialog(dialog),
+      _buildAppWithDialog(dialog),
     );
 
     await tester.tap(find.text('X'));
@@ -648,7 +648,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      _appWithAlertDialog(dialog),
+      _buildAppWithDialog(dialog),
     );
 
     await tester.tap(find.text('X'));
