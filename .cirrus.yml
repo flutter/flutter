@@ -162,7 +162,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_coverage-linux # linux-only
-      only_if: "$CIRRUS_BRANCH == 'master'"
+      #only_if: "$CIRRUS_BRANCH == 'master'"
       environment:
         # As of February 2020, the tool_coverage-linux shard needed at least 24G of RAM to run without
         # getting OOM-killed, and even 8 CPUs took 25 minutes.
@@ -171,7 +171,7 @@ task:
         CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
       script:
         - dart --enable-asserts ./dev/bots/test.dart
-        - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/coverage/lcov.info -F flutter_tool
+        - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/lcov.info -F flutter_tool
 
     - name: web_tests-0-linux
       << : *WEB_SHARD_TEMPLATE

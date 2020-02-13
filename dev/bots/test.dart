@@ -234,14 +234,43 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
 }
 
 Future<void> _runToolCoverage() async {
-  await runCommand( // Precompile tests to speed up subsequent runs.
+  await runCommand(
     pub,
-    <String>['run', 'build_runner', 'build'],
+    <String>[
+      'run',
+      'test',
+      '-j1',
+      '--coverage=coverage',
+      path.join('test', 'general.shard'),
+    ],
     workingDirectory: toolRoot,
+    environment: <String, String>{
+      'FLUTTER_ROOT': flutterRoot,
+    }
   );
   await runCommand(
-    dart,
-    <String>[path.join('tool', 'tool_coverage.dart')],
+    pub,
+    <String>[
+      'run',
+      'test',
+      '-j1',
+      '--coverage=coverage',
+      path.join('test', 'commands.shard', 'hermetic'),
+    ],
+    workingDirectory: toolRoot,
+    environment: <String, String>{
+      'FLUTTER_ROOT': flutterRoot,
+    }
+  );
+  await runCommand(
+    pub,
+    <String>[
+      'run',
+      'coverage:format_coverage',
+      '--in=coverage',
+      '--out=lcov.info',
+      '--lcov',
+    ],
     workingDirectory: toolRoot,
     environment: <String, String>{
       'FLUTTER_ROOT': flutterRoot,
