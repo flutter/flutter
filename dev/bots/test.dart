@@ -458,6 +458,11 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(
+      path.join(flutterRoot, 'dev', 'tracing_tests'),
+      options: <String>['--enable-vmservice'],
+      tableData: bigqueryApi?.tabledata,
+    );
+    await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'),
       tableData: bigqueryApi?.tabledata,
       environment: <String, String>{
