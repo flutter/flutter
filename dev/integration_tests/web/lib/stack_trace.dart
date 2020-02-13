@@ -27,14 +27,15 @@ final List<StackFrame> expectedProfileStackFrames = callChain.map<StackFrame>((S
   );
 }).toList();
 
+// TODO(yjbanov): fix these stack traces when https://github.com/flutter/flutter/issues/50753 is fixed.
 const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
   StackFrame(
     number: -1,
     packageScheme: 'package',
     package: 'web_integration',
-    packagePath: 'stack_trace.dart',
-    line: 120,
-    column: 3,
+    packagePath: 'stack_trace.dart.lib.js',
+    line: 138,
+    column: 15,
     className: '<unknown>',
     method: 'baz',
     source: '',
@@ -43,9 +44,9 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     number: -1,
     packageScheme: 'package',
     package: 'web_integration',
-    packagePath: 'stack_trace.dart',
-    line: 115,
-    column: 3,
+    packagePath: 'stack_trace.dart.lib.js',
+    line: 135,
+    column: 17,
     className: '<unknown>',
     method: 'bar',
     source: '',
@@ -54,9 +55,9 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     number: -1,
     packageScheme: 'package',
     package: 'web_integration',
-    packagePath: 'stack_trace.dart',
-    line: 110,
-    column: 3,
+    packagePath: 'stack_trace.dart.lib.js',
+    line: 132,
+    column: 17,
     className: '<unknown>',
     method: 'foo',
     source: '',
