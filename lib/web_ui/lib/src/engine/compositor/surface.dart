@@ -47,6 +47,7 @@ class Surface {
   /// The given [size] is in physical pixels.
   SurfaceFrame acquireFrame(ui.Size size) {
     final SkSurface surface = acquireRenderSurface(size);
+    canvasKit.callMethod('setCurrentContext', <int>[surface.context]);
 
     if (surface == null) return null;
 
