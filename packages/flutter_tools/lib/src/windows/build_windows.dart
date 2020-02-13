@@ -9,6 +9,7 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'msbuild_utils.dart';
@@ -39,6 +40,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
   writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
+  createPluginSymlinks(windowsProject.project);
 
   final String vcvarsScript = visualStudio.vcvarsPath;
   if (vcvarsScript == null) {

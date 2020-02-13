@@ -164,10 +164,10 @@ task:
     - name: tool_coverage-linux # linux-only
       only_if: "$CIRRUS_BRANCH == 'master'"
       environment:
-        # As of October 2019, the tool_coverage-linux shard needed at least 12G of RAM to run without
+        # As of February 2020, the tool_coverage-linux shard needed at least 24G of RAM to run without
         # getting OOM-killed, and even 8 CPUs took 25 minutes.
         CPU: 8
-        MEMORY: 12G
+        MEMORY: 24G
         CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
       script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -292,7 +292,7 @@ task:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
-    - git clean -xffd --exclude=bin\cache\
+    - git clean -xffd --exclude=bin/cache/ # git wants forward slash path separators, even on Windows.
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics

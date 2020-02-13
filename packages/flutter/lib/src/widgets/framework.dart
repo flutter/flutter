@@ -2191,6 +2191,8 @@ abstract class BuildContext {
   /// Obtains the element corresponding to the nearest widget of the given type [T],
   /// which must be the type of a concrete [InheritedWidget] subclass.
   ///
+  /// Returns null if no such element is found.
+  ///
   /// Calling this method is O(1) with a small constant factor.
   ///
   /// This method does not establish a relationship with the target in the way

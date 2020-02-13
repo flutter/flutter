@@ -53,6 +53,7 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     BuildMode buildMode,
     bool enableDwds,
+    Uri entrypoint,
   ) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
@@ -63,7 +64,7 @@ class WebAssetServer implements AssetReader {
 
       // In release builds deploy a simpler proxy server.
       if (buildMode != BuildMode.debug) {
-        final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer();
+        final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(entrypoint);
         shelf.serveRequests(httpServer, releaseAssetServer.handle);
         return server;
       }
@@ -318,8 +319,10 @@ class WebDevFS implements DevFS {
     @required this.urlTunneller,
     @required this.buildMode,
     @required this.enableDwds,
+    @required this.entrypoint,
   });
 
+  final Uri entrypoint;
   final String hostname;
   final int port;
   final String packagesFilePath;
@@ -385,6 +388,7 @@ class WebDevFS implements DevFS {
       urlTunneller,
       buildMode,
       enableDwds,
+      entrypoint,
     );
     return Uri.parse('http://$hostname:$port');
   }
@@ -552,24 +556,31 @@ String _filePathToUriFragment(String path) {
 }
 
 class ReleaseAssetServer {
+  ReleaseAssetServer(this.entrypoint);
+
+  final Uri entrypoint;
+
   // Locations where source files, assets, or source maps may be located.
   final List<Uri> _searchPaths = <Uri>[
     globals.fs.directory(getWebBuildDirectory()).uri,
-    globals.fs.directory(Cache.flutterRoot).parent.uri,
-    globals.fs.currentDirectory.childDirectory('lib').uri,
+    globals.fs.directory(Cache.flutterRoot).uri,
+    globals.fs.currentDirectory.uri,
   ];
 
   Future<shelf.Response> handle(shelf.Request request) async {
     Uri fileUri;
-    for (final Uri uri in _searchPaths) {
-      final Uri potential = uri.resolve(request.url.path);
-      if (potential == null || !globals.fs.isFileSync(potential.toFilePath())) {
-        continue;
+    if (request.url.toString() == 'main.dart') {
+      fileUri = entrypoint;
+    } else {
+      for (final Uri uri in _searchPaths) {
+        final Uri potential = uri.resolve(request.url.path);
+        if (potential == null || !globals.fs.isFileSync(potential.toFilePath())) {
+          continue;
+        }
+        fileUri = potential;
+        break;
       }
-      fileUri = potential;
-      break;
     }
-
     if (fileUri != null) {
       final File file = globals.fs.file(fileUri);
       final Uint8List bytes = file.readAsBytesSync();
