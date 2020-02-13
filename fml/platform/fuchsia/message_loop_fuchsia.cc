@@ -5,16 +5,13 @@
 #include "flutter/fml/platform/fuchsia/message_loop_fuchsia.h"
 
 #include <lib/async-loop/default.h>
+#include <lib/async/cpp/task.h>
 #include <lib/zx/time.h>
 
 namespace fml {
 
 MessageLoopFuchsia::MessageLoopFuchsia()
-    : loop_(&kAsyncLoopConfigAttachToCurrentThread) {
-  auto handler = [this](async_dispatcher_t* dispatcher, async::Task* task,
-                        zx_status_t status) { RunExpiredTasksNow(); };
-  task_.set_handler(handler);
-}
+    : loop_(&kAsyncLoopConfigAttachToCurrentThread) {}
 
 MessageLoopFuchsia::~MessageLoopFuchsia() = default;
 
@@ -33,12 +30,8 @@ void MessageLoopFuchsia::WakeUp(fml::TimePoint time_point) {
     due_time = zx::nsec((time_point - now).ToNanoseconds());
   }
 
-  std::scoped_lock lock(task_mutex_);
-
-  auto status = task_.Cancel();
-  FML_DCHECK(status == ZX_OK || status == ZX_ERR_NOT_FOUND);
-
-  status = task_.PostDelayed(loop_.dispatcher(), due_time);
+  auto status = async::PostDelayedTask(
+      loop_.dispatcher(), [this]() { RunExpiredTasksNow(); }, due_time);
   FML_DCHECK(status == ZX_OK);
 }
 
