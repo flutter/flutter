@@ -16,7 +16,6 @@ import '../rendering/rendering_tester.dart';
 
 void main() {
   String isolateId;
-  Uri observatoryUri;
   final TimelineObtainer timelineObtainer = TimelineObtainer();
 
   setUpAll(() async {
@@ -26,8 +25,7 @@ void main() {
     if (info.serverUri == null) {
       fail('This test _must_ be run with --enable-vmservice.');
     }
-    observatoryUri = info.serverUri;
-    await timelineObtainer.connect(observatoryUri);
+    await timelineObtainer.connect(info.serverUri);
     await timelineObtainer.setDartFlags();
 
     // Initialize the image cache.
@@ -109,16 +107,14 @@ bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
 
 // TODO(dnfield): we can drop this in favor of vm_service when https://github.com/dart-lang/webdev/issues/899 is resolved.
 class TimelineObtainer {
-  Uri observatoryUri;
   WebSocket _observatorySocket;
-  int lastCallId = 0;
+  int _lastCallId = 0;
 
   final Map<int, Completer<dynamic>> _completers = <int, Completer<dynamic>>{};
 
 
   Future<void> connect(Uri uri) async {
-    observatoryUri = uri;
-    _observatorySocket = await WebSocket.connect('ws://localhost:${observatoryUri.port}${observatoryUri.path}ws');
+    _observatorySocket = await WebSocket.connect('ws://localhost:${uri.port}${uri.path}ws');
     _observatorySocket.listen((dynamic data) => _processResponse(data as String));
   }
 
@@ -129,11 +125,11 @@ class TimelineObtainer {
   }
 
   Future<bool> setDartFlags() async {
-    lastCallId += 1;
+    _lastCallId += 1;
     final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
-    _completers[lastCallId] = completer;
+    _completers[_lastCallId] = completer;
     _observatorySocket.add(jsonEncode(<String, dynamic>{
-      'id': lastCallId,
+      'id': _lastCallId,
       'method': 'setVMTimelineFlags',
       'params': <String, dynamic>{
         'recordedStreams': <String>['Dart'],
@@ -145,11 +141,11 @@ class TimelineObtainer {
   }
 
   Future<List<Map<String, dynamic>>> getTimelineData() async {
-    lastCallId += 1;
+    _lastCallId += 1;
     final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
-    _completers[lastCallId] = completer;
+    _completers[_lastCallId] = completer;
     _observatorySocket.add(jsonEncode(<String, dynamic>{
-      'id': lastCallId,
+      'id': _lastCallId,
       'method': 'getVMTimeline',
     }));
 
