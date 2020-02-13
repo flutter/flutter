@@ -282,6 +282,7 @@ class ImageCache {
     if (!kReleaseMode) {
       listenerTask = TimelineTask(parent: timelineTask)..start('listener');
     }
+    bool listenedOnce = false;
     void listener(ImageInfo info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
@@ -296,7 +297,7 @@ class ImageCache {
         _cache[key] = image;
         _checkCacheSize(listenerTask);
       }
-      if (!kReleaseMode) {
+      if (!kReleaseMode && !listenedOnce) {
         listenerTask.finish(arguments: <String, dynamic>{
           'syncCall': syncCall,
           'sizeInBytes': imageSize,
@@ -306,6 +307,7 @@ class ImageCache {
           'currentSize': currentSize,
         });
       }
+      listenedOnce = true;
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
       final ImageStreamListener streamListener = ImageStreamListener(listener);
