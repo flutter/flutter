@@ -162,6 +162,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_coverage-linux # linux-only
+      skip: true # https://github.com/flutter/flutter/issues/50755
       only_if: "$CIRRUS_BRANCH == 'master'"
       environment:
         # As of February 2020, the tool_coverage-linux shard needed at least 24G of RAM to run without
