@@ -318,6 +318,12 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
+// Key strings for the .flutter-plugins-dependencies file.
+const String _kFlutterPluginsPluginListKey = 'plugins';
+const String _kFlutterPluginsNameKey = 'name';
+const String _kFlutterPluginsPathKey = 'path';
+const String _kFlutterPluginsDependenciesKey = 'dependencies';
+
   /// Filters [plugins] to those supported by [platformKey].
   List<Map<String, dynamic>> _filterPluginsByPlatform(List<Plugin>plugins, String platformKey) {
     final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
@@ -328,9 +334,9 @@ List<Plugin> findPlugins(FlutterProject project) {
     final List<Map<String, dynamic>> list = <Map<String, dynamic>>[];
     for (final Plugin plugin in platformPlugins) {
       list.add(<String, dynamic>{
-        'name': plugin.name,
-        'path': globals.fsUtils.escapePath(plugin.path),
-        'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
+        _kFlutterPluginsNameKey: plugin.name,
+        _kFlutterPluginsPathKey: globals.fsUtils.escapePath(plugin.path),
+        _kFlutterPluginsDependenciesKey: <String>[...plugin.dependencies.where(pluginNames.contains)],
       });
     }
     return list;
@@ -411,7 +417,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final Map<String, dynamic> result = <String, dynamic> {};
 
   result['info'] =  'This is a generated file; do not edit or check into version control.';
-  result['plugins'] = pluginsMap;
+  result[_kFlutterPluginsPluginListKey] = pluginsMap;
   /// The dependencyGraph object is kept for backwards compatibility, but
   /// should be removed once migration is complete.
   /// https://github.com/flutter/flutter/issues/48918
@@ -889,6 +895,72 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
   }
 }
 
+/// For each platform that uses them, creates symlinks within the platform
+/// directory to each plugin used on that platform.
+///
+/// If |force| is true, the symlinks will be recreated, otherwise they will
+/// be created only if missing.
+///
+/// This uses [project.flutterPluginsDependenciesFile], so it should only be
+/// run after refreshPluginList has been run since the last plugin change.
+void createPluginSymlinks(FlutterProject project, {bool force = false}) {
+  Map<String, dynamic> platformPlugins;
+  final String pluginFileContent = _readFileContent(project.flutterPluginsDependenciesFile);
+  if (pluginFileContent != null) {
+    final Map<String, dynamic> pluginInfo = json.decode(pluginFileContent) as Map<String, dynamic>;
+    platformPlugins = pluginInfo[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
+  }
+  platformPlugins ??= <String, dynamic>{};
+
+  if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
+    _createPlatformPluginSymlinks(
+      project.windows.pluginSymlinkDirectory,
+      platformPlugins[project.windows.pluginConfigKey] as List<dynamic>,
+      force: force,
+    );
+  }
+  if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
+    _createPlatformPluginSymlinks(
+      project.linux.pluginSymlinkDirectory,
+      platformPlugins[project.linux.pluginConfigKey] as List<dynamic>,
+      force: force,
+    );
+  }
+}
+
+/// Creates [symlinkDirectory] containing symlinks to each plugin listed in [platformPlugins].
+///
+/// If [force] is true, the directory will be created only if missing.
+void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> platformPlugins, {bool force = false}) {
+  if (force && symlinkDirectory.existsSync()) {
+    // Start fresh to avoid stale links.
+    symlinkDirectory.deleteSync(recursive: true);
+  }
+  symlinkDirectory.createSync(recursive: true);
+  if (platformPlugins == null) {
+    return;
+  }
+  for (final Map<String, dynamic> pluginInfo in platformPlugins.cast<Map<String, dynamic>>()) {
+    final String name = pluginInfo[_kFlutterPluginsNameKey] as String;
+    final String path = pluginInfo[_kFlutterPluginsPathKey] as String;
+    final Link link = symlinkDirectory.childLink(name);
+    if (link.existsSync()) {
+      continue;
+    }
+    try {
+      link.createSync(path);
+    } on FileSystemException catch (e) {
+      if (globals.platform.isWindows && (e.osError?.errorCode ?? 0) == 1314) {
+        throwToolExit(
+          'Building with plugins requires symlink support. '
+          'Please enable Developer Mode in your system settings.\n\n$e'
+        );
+      }
+      rethrow;
+    }
+  }
+}
+
 /// Rewrites the `.flutter-plugins` file of [project] based on the plugin
 /// dependencies declared in `pubspec.yaml`.
 ///
@@ -905,6 +977,7 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
 
   final bool changed = _writeFlutterPluginsList(project, plugins);
   if (changed || legacyChanged) {
+    createPluginSymlinks(project, force: true);
     if (!checkProjects || project.ios.existsSync()) {
       cocoaPods.invalidatePodInstallOutput(project.ios);
     }
