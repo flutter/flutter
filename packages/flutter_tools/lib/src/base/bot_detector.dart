@@ -66,6 +66,11 @@ class BotDetector {
       || _platform.environment['CHROME_HEADLESS'] == '1'
       || _platform.environment.containsKey('BUILDBOT_BUILDERNAME')
       || _platform.environment.containsKey('SWARMING_TASK_ID')
+
+      // Property when running on borg.
+      || _platform.environment.containsKey('BORG_ALLOC_DIR')
+
+      // Property when running on Azure.
       || await _azureDetector.isRunningOnAzure;
   }
 }

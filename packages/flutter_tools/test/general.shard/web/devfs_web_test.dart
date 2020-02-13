@@ -289,6 +289,7 @@ void main() {
         urlTunneller: null,
         buildMode: BuildMode.debug,
         enableDwds: false,
+        entrypoint: Uri.base,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.dartSdk.createSync(recursive: true);
