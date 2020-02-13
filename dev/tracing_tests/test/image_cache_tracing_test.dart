@@ -10,9 +10,7 @@ import 'dart:isolate' as isolate;
 
 import 'package:flutter/painting.dart';
 
-import '../flutter_test_alternative.dart';
-import '../painting/mocks_for_image_cache.dart';
-import '../rendering/rendering_tester.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   String isolateId;
@@ -23,17 +21,17 @@ void main() {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
     if (info.serverUri == null) {
-      fail('This test _must_ be run with --enable-vmservice.');
+      throw TestFailure('This test _must_ be run with --enable-vmservice.');
     }
     await timelineObtainer.connect(info.serverUri);
     await timelineObtainer.setDartFlags();
 
     // Initialize the image cache.
-    TestRenderingFlutterBinding();
+    TestWidgetsFlutterBinding.ensureInitialized();
   });
 
   tearDownAll(() async {
-    await timelineObtainer.close();
+    await timelineObtainer?.close();
   });
 
   test('Image cache tracing', () async {
@@ -159,3 +157,5 @@ class TimelineObtainer {
     await _observatorySocket.close();
   }
 }
+
+class TestImageStreamCompleter extends ImageStreamCompleter {}
