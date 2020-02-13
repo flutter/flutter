@@ -93,7 +93,7 @@ void main() {
     expect(text2.overflow, TextOverflow.fade);
     expect(text2.maxLines, 3);
     expect(text2.textWidthBasis, TextWidthBasis.longestLine);
-    expect(text2.textHeightBehavior, ui.TextHeightBehavior(applyHeightToFirstAscent: false));
+    expect(text2.textHeightBehavior, const ui.TextHeightBehavior(applyHeightToFirstAscent: false));
 
     await tester.pump(const Duration(milliseconds: 1000));
 
@@ -105,6 +105,6 @@ void main() {
     expect(text3.overflow, TextOverflow.fade);
     expect(text3.maxLines, 3);
     expect(text2.textWidthBasis, TextWidthBasis.longestLine);
-    expect(text2.textHeightBehavior, ui.TextHeightBehavior(applyHeightToFirstAscent: false));
+    expect(text2.textHeightBehavior, const ui.TextHeightBehavior(applyHeightToFirstAscent: false));
   });
 }
