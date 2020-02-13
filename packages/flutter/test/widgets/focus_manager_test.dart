@@ -745,6 +745,136 @@ void main() {
     await tester.pump();
     expect(parent1.focusedChild, equals(child2));
   });
+  testWidgets('Ancestors get notified exactly as often as needed if focused child changes focus.', (WidgetTester tester) async {
+    bool topFocus = false;
+    bool parent1Focus = false;
+    bool parent2Focus = false;
+    bool child1Focus = false;
+    bool child2Focus = false;
+    int topNotify = 0;
+    int parent1Notify = 0;
+    int parent2Notify = 0;
+    int child1Notify = 0;
+    int child2Notify = 0;
+    void clear() {
+      topFocus = false;
+      parent1Focus = false;
+      parent2Focus = false;
+      child1Focus = false;
+      child2Focus = false;
+      topNotify = 0;
+      parent1Notify = 0;
+      parent2Notify = 0;
+      child1Notify = 0;
+      child2Notify = 0;
+    }
+    final BuildContext context = await setupWidget(tester);
+    final FocusScopeNode top = FocusScopeNode(debugLabel: 'top');
+    final FocusAttachment topAttachment = top.attach(context);
+    final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+    final FocusAttachment parent1Attachment = parent1.attach(context);
+    final FocusScopeNode parent2 = FocusScopeNode(debugLabel: 'parent2');
+    final FocusAttachment parent2Attachment = parent2.attach(context);
+    final FocusNode child1 = FocusNode(debugLabel: 'child1');
+    final FocusAttachment child1Attachment = child1.attach(context);
+    final FocusNode child2 = FocusNode(debugLabel: 'child2');
+    final FocusAttachment child2Attachment = child2.attach(context);
+    topAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+    parent1Attachment.reparent(parent: top);
+    parent2Attachment.reparent(parent: top);
+    child1Attachment.reparent(parent: parent1);
+    child2Attachment.reparent(parent: parent2);
+    top.addListener(() {
+      topNotify++;
+      topFocus = top.hasFocus;
+    });
+    parent1.addListener(() {
+      parent1Notify++;
+      parent1Focus = parent1.hasFocus;
+    });
+    parent2.addListener(() {
+      parent2Notify++;
+      parent2Focus = parent2.hasFocus;
+    });
+    child1.addListener(() {
+      child1Notify++;
+      child1Focus = child1.hasFocus;
+    });
+    child2.addListener(() {
+      child2Notify++;
+      child2Focus = child2.hasFocus;
+    });
+    child1.requestFocus();
+    await tester.pump();
+    expect(topFocus, isTrue);
+    expect(parent1Focus, isTrue);
+    expect(child1Focus, isTrue);
+    expect(parent2Focus, isFalse);
+    expect(child2Focus, isFalse);
+    expect(topNotify, equals(1));
+    expect(parent1Notify, equals(1));
+    expect(child1Notify, equals(1));
+    expect(parent2Notify, equals(0));
+    expect(child2Notify, equals(0));
+
+    clear();
+    child1.unfocus();
+    await tester.pump();
+    expect(topFocus, isFalse);
+    expect(parent1Focus, isFalse);
+    expect(child1Focus, isFalse);
+    expect(parent2Focus, isFalse);
+    expect(child2Focus, isFalse);
+    expect(topNotify, equals(1));
+    expect(parent1Notify, equals(1));
+    expect(child1Notify, equals(1));
+    expect(parent2Notify, equals(0));
+    expect(child2Notify, equals(0));
+
+    clear();
+    child1.requestFocus();
+    await tester.pump();
+    expect(topFocus, isTrue);
+    expect(parent1Focus, isTrue);
+    expect(child1Focus, isTrue);
+    expect(parent2Focus, isFalse);
+    expect(child2Focus, isFalse);
+    expect(topNotify, equals(1));
+    expect(parent1Notify, equals(1));
+    expect(child1Notify, equals(1));
+    expect(parent2Notify, equals(0));
+    expect(child2Notify, equals(0));
+
+    clear();
+    child2.requestFocus();
+    await tester.pump();
+    expect(topFocus, isFalse);
+    expect(parent1Focus, isFalse);
+    expect(child1Focus, isFalse);
+    expect(parent2Focus, isTrue);
+    expect(child2Focus, isTrue);
+    expect(topNotify, equals(0));
+    expect(parent1Notify, equals(1));
+    expect(child1Notify, equals(1));
+    expect(parent2Notify, equals(1));
+    expect(child2Notify, equals(1));
+
+    // Changing the focus back before the pump shouldn't cause notifications.
+    clear();
+    child1.requestFocus();
+    child2.requestFocus();
+    await tester.pump();
+    expect(topFocus, isFalse);
+    expect(parent1Focus, isFalse);
+    expect(child1Focus, isFalse);
+    expect(parent2Focus, isFalse);
+    expect(child2Focus, isFalse);
+    expect(topNotify, equals(0));
+    expect(parent1Notify, equals(0));
+    expect(child1Notify, equals(0));
+    expect(parent2Notify, equals(0));
+    expect(child2Notify, equals(0));
+  });
   testWidgets('Focus changes notify listeners.', (WidgetTester tester) async {
     final BuildContext context = await setupWidget(tester);
     final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');

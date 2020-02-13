@@ -187,7 +187,7 @@ class MediaQueryData {
   /// for subsequent descendants in the widget tree by inserting a new
   /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
   ///
-  /// Padding is derived from the values of viewInsets and viewPadding.
+  /// Padding is derived from the values of [viewInsets] and [viewPadding].
   ///
   /// See also:
   ///

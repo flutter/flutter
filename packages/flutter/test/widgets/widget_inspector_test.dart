@@ -117,7 +117,7 @@ class CyclicDiagnostic extends DiagnosticableTree {
   // We have to override toString to avoid the toString call itself triggering a
   // stack overflow.
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
     return toStringShort();
   }
 

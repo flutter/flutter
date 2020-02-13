@@ -73,10 +73,12 @@ void main() {
       windowsProject = MockWindowsProject();
       when(flutterProject.windows).thenReturn(windowsProject);
       when(windowsProject.pluginConfigKey).thenReturn('windows');
+      when(windowsProject.pluginSymlinkDirectory).thenReturn(flutterProject.directory.childDirectory('windows').childDirectory('symlinks'));
       when(windowsProject.existsSync()).thenReturn(false);
       linuxProject = MockLinuxProject();
       when(flutterProject.linux).thenReturn(linuxProject);
       when(linuxProject.pluginConfigKey).thenReturn('linux');
+      when(linuxProject.pluginSymlinkDirectory).thenReturn(flutterProject.directory.childDirectory('linux').childDirectory('symlinks'));
       when(linuxProject.existsSync()).thenReturn(false);
 
       when(mockClock.now()).thenAnswer(
@@ -820,6 +822,138 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+    });
+
+    group('createPluginSymlinks', () {
+      MockFeatureFlags featureFlags;
+
+      setUp(() {
+        featureFlags = MockFeatureFlags();
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+      });
+
+      testUsingContext('Symlinks are created for Linux plugins', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        configureDummyPackageAsPlugin();
+        // refreshPluginsList should call createPluginSymlinks.
+        refreshPluginsList(flutterProject);
+
+        expect(linuxProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Symlinks are created for Windows plugins', () {
+        when(windowsProject.existsSync()).thenReturn(true);
+        configureDummyPackageAsPlugin();
+        // refreshPluginsList should call createPluginSymlinks.
+        refreshPluginsList(flutterProject);
+
+        expect(windowsProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Existing symlinks are removed when no longer in use with force', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(windowsProject.existsSync()).thenReturn(true);
+
+        final List<File> dummyFiles = <File>[
+          flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
+          flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
+        ];
+        for (final File file in dummyFiles) {
+          file.createSync(recursive: true);
+        }
+
+        createPluginSymlinks(flutterProject, force: true);
+
+        for (final File file in dummyFiles) {
+          expect(file.existsSync(), false);
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Existing symlinks are removed automatically on refresh when no longer in use', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(windowsProject.existsSync()).thenReturn(true);
+
+        final List<File> dummyFiles = <File>[
+          flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
+          flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
+        ];
+        for (final File file in dummyFiles) {
+          file.createSync(recursive: true);
+        }
+
+        // refreshPluginsList should remove existing links and recreate on changes.
+        configureDummyPackageAsPlugin();
+        refreshPluginsList(flutterProject);
+
+        for (final File file in dummyFiles) {
+          expect(file.existsSync(), false);
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('createPluginSymlinks is a no-op without force when up to date', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(windowsProject.existsSync()).thenReturn(true);
+
+        final List<File> dummyFiles = <File>[
+          flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
+          flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
+        ];
+        for (final File file in dummyFiles) {
+          file.createSync(recursive: true);
+        }
+
+        // Without force, this should do nothing to existing files.
+        createPluginSymlinks(flutterProject);
+
+        for (final File file in dummyFiles) {
+          expect(file.existsSync(), true);
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('createPluginSymlinks repairs missing links', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(windowsProject.existsSync()).thenReturn(true);
+        configureDummyPackageAsPlugin();
+        refreshPluginsList(flutterProject);
+
+        final List<Link> links = <Link>[
+          linuxProject.pluginSymlinkDirectory.childLink('apackage'),
+          windowsProject.pluginSymlinkDirectory.childLink('apackage'),
+        ];
+        for (final Link link in links) {
+          link.deleteSync();
+        }
+        createPluginSymlinks(flutterProject);
+
+        for (final Link link in links) {
+          expect(link.existsSync(), true);
+        }
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

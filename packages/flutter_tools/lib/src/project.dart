@@ -963,6 +963,9 @@ class WindowsProject extends FlutterProjectPlatform {
   /// Ideally this will be replaced in the future with inspection of the project.
   File get nameFile => ephemeralDirectory.childFile('exe_filename');
 
+  /// The directory to write plugin symlinks.
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
@@ -996,6 +999,9 @@ class LinuxProject extends FlutterProjectPlatform {
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
   File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
+
+  /// The directory to write plugin symlinks.
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }

@@ -163,7 +163,6 @@ void main() {
       '     Localizations\n'
       '     MediaQuery\n'
       '     _MediaQueryFromWindow\n'
-      '     Semantics\n'
       '     _FocusMarker\n'
       '     Focus\n'
       '     _FocusTraversalGroupMarker\n'
