@@ -163,4 +163,207 @@ void main() {
     await tester.pump(_kScrollbarTimeToFade);
     await tester.pump(_kScrollbarFadeDuration);
   });
+
+  testWidgets('On first render with displayAlways: true, the thumb shows',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: controller,
+            child: CupertinoScrollbar(
+              displayAlways: true,
+              controller: controller,
+              child: const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0)),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+  });
+
+  testWidgets('On first render with displayAlways: false, the thumb is hidden',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: PrimaryScrollController(
+            controller: controller,
+            child: CupertinoScrollbar(
+              displayAlways: false,
+              controller: controller,
+              child: const SingleChildScrollView(
+                  child: SizedBox(width: 4000.0, height: 4000.0)),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rect()));
+  });
+
+  testWidgets(
+      'With displayAlways: true, fling a scroll. While it is still scrolling, set displayAlways: false. The thumb should not fade out until the scrolling stops.',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    bool displayAlways = true;
+    Widget viewWithScroll() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Stack(
+                children: <Widget>[
+                  CupertinoScrollbar(
+                    displayAlways: displayAlways,
+                    controller: controller,
+                    child: SingleChildScrollView(
+                        controller: controller,
+                        child: const SizedBox(width: 4000.0, height: 4000.0)),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    child: CupertinoButton(
+                      onPressed: () {
+                        setState(() {
+                          displayAlways = !displayAlways;
+                        });
+                      },
+                      child: const Text('change displayAlways'),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    await tester.fling(
+        find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10);
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
+  });
+
+  testWidgets(
+      'With displayAlways: false, fling a scroll. While it is still scrolling, set displayAlways: true. The thumb should not fade even after the scrolling stops',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    bool displayAlways = false;
+    Widget viewWithScroll() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Stack(
+                children: <Widget>[
+                  CupertinoScrollbar(
+                    displayAlways: displayAlways,
+                    controller: controller,
+                    child: SingleChildScrollView(
+                        controller: controller,
+                        child: const SizedBox(width: 4000.0, height: 4000.0)),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    child: CupertinoButton(
+                      onPressed: () {
+                        setState(() {
+                          displayAlways = !displayAlways;
+                        });
+                      },
+                      child: const Text('change displayAlways'),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    await tester.fling(
+        find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10);
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+  });
+
+  testWidgets(
+      'Toggling displayAlways while not scrolling fades the thumb in/out. This works even when you have never scrolled at all yet',
+      (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    bool displayAlways = true;
+    Widget viewWithScroll() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Stack(
+                children: <Widget>[
+                  CupertinoScrollbar(
+                    displayAlways: displayAlways,
+                    controller: controller,
+                    child: SingleChildScrollView(
+                        controller: controller,
+                        child: const SizedBox(width: 4000.0, height: 4000.0)),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    child: CupertinoButton(
+                      onPressed: () {
+                        setState(() {
+                          displayAlways = !displayAlways;
+                        });
+                      },
+                      child: const Text('change displayAlways'),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll());
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
+  });
 }
