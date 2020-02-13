@@ -149,8 +149,10 @@ class Focus extends StatefulWidget {
     this.debugLabel,
     this.canRequestFocus,
     this.skipTraversal,
+    this.includeSemantics = true,
   })  : assert(child != null),
         assert(autofocus != null),
+        assert(includeSemantics != null),
         super(key: key);
 
   /// A debug label for this widget.
@@ -230,6 +232,17 @@ class Focus extends StatefulWidget {
   /// widget can't be reached via traversal, not that it can't be focused. It may
   /// still be focused explicitly.
   final bool skipTraversal;
+
+  /// Include semantics information in this [Focus] widget.
+  ///
+  /// If true, this [Focus] widget will include a [Semantics] node that
+  /// indicates the [Semantics.focusable] and [Semantics.focused] properties.
+  ///
+  /// Is is not typical to set this to false, as that can affect the semantics
+  /// information available to accessibility systems.
+  ///
+  /// Must not be null, defaults to true.
+  final bool includeSemantics;
 
   /// {@template flutter.widgets.Focus.canRequestFocus}
   /// If true, this widget may request the primary focus.
@@ -459,13 +472,17 @@ class _FocusState extends State<Focus> {
   @override
   Widget build(BuildContext context) {
     _focusAttachment.reparent();
-    return _FocusMarker(
-      node: focusNode,
-      child: Semantics(
+    Widget child = widget.child;
+    if (widget.includeSemantics) {
+      child = Semantics(
         focusable: _canRequestFocus,
         focused: _hasPrimaryFocus,
         child: widget.child,
-      ),
+      );
+    }
+    return _FocusMarker(
+      node: focusNode,
+      child: child,
     );
   }
 }
