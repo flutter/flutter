@@ -292,7 +292,7 @@ task:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
-    - git clean -xffd --exclude=bin\cache\
+    - git clean -xffd --exclude=bin/cache/ # git wants forward slash path separators, even on Windows.
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
