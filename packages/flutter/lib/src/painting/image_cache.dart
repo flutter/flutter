@@ -91,7 +91,10 @@ class ImageCache {
       return;
     TimelineTask timelineTask;
     if (!kReleaseMode) {
-       timelineTask = TimelineTask()..start('ImageCache.setMaximumSize', arguments: <String, dynamic>{'value': value});
+       timelineTask = TimelineTask()..start(
+        'ImageCache.setMaximumSize',
+        arguments: <String, dynamic>{'value': value},
+      );
     }
     _maximumSize = value;
     if (maximumSize == 0) {
@@ -127,7 +130,10 @@ class ImageCache {
       return;
     TimelineTask timelineTask;
     if (!kReleaseMode) {
-      timelineTask = TimelineTask()..start('ImageCache.setMaximumSizeBytes', arguments: <String, dynamic>{'value': value});
+      timelineTask = TimelineTask()..start(
+        'ImageCache.setMaximumSizeBytes',
+        arguments: <String, dynamic>{'value': value},
+      );
     }
     _maximumSizeBytes = value;
     if (_maximumSizeBytes == 0) {

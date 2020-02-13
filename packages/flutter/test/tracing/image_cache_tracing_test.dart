@@ -2,29 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:io';
 import 'dart:isolate' as isolate;
 
 import 'package:flutter/painting.dart';
-import 'package:vm_service/vm_service.dart';
-import 'package:vm_service/vm_service_io.dart';
 
 import '../flutter_test_alternative.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
-  VmService vmService;
   String isolateId;
+  Uri observatoryUri;
+  final TimelineObtainer timelineObtainer = TimelineObtainer();
+
   setUpAll(() async {
-    final developer.ServiceProtocolInfo info =
-        await developer.Service.getInfo();
-    vmService = await vmServiceConnectUri(
-        'ws://localhost:${info.serverUri.port}${info.serverUri.path}ws');
-    await vmService.setVMTimelineFlags(<String>['Dart']);
     isolateId = developer.Service.getIsolateID(isolate.Isolate.current);
+    final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+
+    if (info.serverUri == null) {
+      fail('This test _must_ be run with --enable-vmservice.');
+    }
+    observatoryUri = info.serverUri;
+    await timelineObtainer.connect(observatoryUri);
+    await timelineObtainer.setDartFlags();
+
+    // Initialize the image cache.
     TestRenderingFlutterBinding();
+  });
+
+  tearDownAll(() async {
+    await timelineObtainer.close();
   });
 
   test('Image cache tracing', () async {
@@ -34,9 +45,11 @@ void main() {
       () => completer1,
     );
     PaintingBinding.instance.imageCache.clear();
-    final Timeline timeline = await vmService.getVMTimeline();
+
+    final List<Map<String, dynamic>> timelineEvents = await timelineObtainer.getTimelineData();
+
     _expectTimelineEvents(
-      timeline.traceEvents,
+      timelineEvents,
       <Map<String, dynamic>>[
         <String, dynamic>{
           'name': 'ImageCache.putIfAbsent',
@@ -61,14 +74,15 @@ void main() {
 }
 
 void _expectTimelineEvents(
-    List<TimelineEvent> events, List<Map<String, dynamic>> expected) {
-  for (final TimelineEvent event in events) {
+  List<Map<String, dynamic>> events,
+  List<Map<String, dynamic>> expected,
+) {
+  for (final Map<String, dynamic> event in events) {
+
     for (int index = 0; index < expected.length; index += 1) {
-      if (expected[index]['name'] == event.json['name']) {
-        final Map<String, dynamic> expectedArgs =
-            expected[index]['args'] as Map<String, dynamic>;
-        final Map<String, dynamic> args =
-            event.json['args'] as Map<String, dynamic>;
+      if (expected[index]['name'] == event['name']) {
+        final Map<String, dynamic> expectedArgs = expected[index]['args'] as Map<String, dynamic>;
+        final Map<String, dynamic> args = event['args'] as Map<String, dynamic>;
         if (_mapsEqual(expectedArgs, args)) {
           expected.removeAt(index);
         }
@@ -77,8 +91,7 @@ void _expectTimelineEvents(
   }
   if (expected.isNotEmpty) {
     final String encodedEvents = jsonEncode(events);
-    fail(
-        'Timeline did not contain expected events: $expected\nactual: $encodedEvents');
+    fail('Timeline did not contain expected events: $expected\nactual: $encodedEvents');
   }
 }
 
@@ -92,4 +105,61 @@ bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
     }
   }
   return true;
+}
+
+// TODO(dnfield): we can drop this in favor of vm_service when https://github.com/dart-lang/webdev/issues/899 is resolved.
+class TimelineObtainer {
+  Uri observatoryUri;
+  WebSocket _observatorySocket;
+  int lastCallId = 0;
+
+  final Map<int, Completer<dynamic>> _completers = <int, Completer<dynamic>>{};
+
+
+  Future<void> connect(Uri uri) async {
+    observatoryUri = uri;
+    _observatorySocket = await WebSocket.connect('ws://localhost:${observatoryUri.port}${observatoryUri.path}ws');
+    _observatorySocket.listen((dynamic data) => _processResponse(data as String));
+  }
+
+  void _processResponse(String data) {
+    final Map<String, dynamic> json = jsonDecode(data) as Map<String, dynamic>;
+    final int id = json['id'] as int;
+    _completers.remove(id).complete(json['result']);
+  }
+
+  Future<bool> setDartFlags() async {
+    lastCallId += 1;
+    final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
+    _completers[lastCallId] = completer;
+    _observatorySocket.add(jsonEncode(<String, dynamic>{
+      'id': lastCallId,
+      'method': 'setVMTimelineFlags',
+      'params': <String, dynamic>{
+        'recordedStreams': <String>['Dart'],
+      },
+    }));
+
+    final Map<String, dynamic> result = await completer.future;
+    return result['type'] == 'Success';
+  }
+
+  Future<List<Map<String, dynamic>>> getTimelineData() async {
+    lastCallId += 1;
+    final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
+    _completers[lastCallId] = completer;
+    _observatorySocket.add(jsonEncode(<String, dynamic>{
+      'id': lastCallId,
+      'method': 'getVMTimeline',
+    }));
+
+    final Map<String, dynamic> result = await completer.future;
+    final List<dynamic> list = result['traceEvents'] as List<dynamic>;
+    return list.cast<Map<String, dynamic>>();
+  }
+
+  Future<void> close() async {
+    expect(_completers, isEmpty);
+    await _observatorySocket.close();
+  }
 }
