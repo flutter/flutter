@@ -3,15 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-
-import 'environment.dart';
-
-import 'package:path/path.dart' as path;
-import 'package:pedantic/pedantic.dart';
-
-import 'package:test_core/src/util/io.dart'; // ignore: implementation_imports
 
 import 'browser.dart';
 import 'safari_installation.dart';
@@ -43,21 +35,22 @@ class Safari extends Browser {
         infoLog: DevNull(),
       );
 
-      // Safari will only open files (not general URLs) via the command-line
-      // API, so we create a dummy file to redirect it to the page we actually
-      // want it to load.
-      final Directory redirectDir = Directory(
-        path.join(environment.webUiDartToolDir.path),
-      );
-      final redirect = path.join(redirectDir.path, 'redirect.html');
-      File(redirect).writeAsStringSync(
-          '<script>location = ' + jsonEncode(url.toString()) + '</script>');
-
-      var process =
-          await Process.start(installation.executable, [redirect] /* args */);
-
-      unawaited(process.exitCode
-          .then((_) => File(redirect).deleteSync(recursive: true)));
+      // In the latest versions of MacOs opening Safari browser with a file brings
+      // a popup which halts the test.
+      // The following list of arguments needs to be provided to the `open` command
+      // to open Safari for a given URL. In summary they provide a new instance
+      // to open, that instance to wait for opening the url until Safari launches,
+      // provide Safari bundles identifier.
+      // The details copied from `man open` on MacOS.
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50809
+      var process = await Process.start(installation.executable, [
+        '-F', // Open a fresh application with no persistant state.
+        '-W', // Open to wait until the applications it opens.
+        '-n', // Open a new instance of the application.
+        '-b', // Specifies the bundle identifier for the application to use.
+        'com.apple.Safari', // Bundle identifier for Safari.
+        '${url.toString()}'
+      ]);
 
       return process;
     });
