@@ -74,7 +74,7 @@ task:
       only_if: "changesInclude('.cirrus.yml', 'bin/internal/engine.version')"
       script:
         - flutter precache --fuchsia --no-android --no-ios
-        - flutter precache --flutter_runner --no-andorid --no-ios
+        - flutter precache --flutter_runner --no-android --no-ios
 
     - name: framework_tests-widgets-linux
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
