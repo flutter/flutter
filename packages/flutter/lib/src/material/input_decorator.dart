@@ -2767,19 +2767,47 @@ class InputDecoration {
   /// setting the constraints' minimum height and width to a value lower than
   /// 48px.
   ///
-  /// ```dart
-  /// InputDecoration(
-  ///   prefixIcon: Icon(Icons.search, size: 26),
-  ///   prefixIconConstraints: BoxConstraints(
-  ///     minHeight: 32,
-  ///     minWidth: 32,
-  ///   ),
-  ///   isDense: true,
-  /// )
-  /// ```
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// This example shows the differences between two `TextField` widgets when
+  /// [prefixIconConstraints] is set to the default value and when one is not.
+  ///
+  /// Note that [isDense] must be set to true to be able to
+  /// set the constraints smaller than 48px.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Padding(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
+  ///     child: Column(
+  ///       mainAxisAlignment: MainAxisAlignment.center,
+  ///       children: <Widget>[
+  ///         TextField(
+  ///           decoration: InputDecoration(
+  ///             hintText: 'Normal Icon Constraints',
+  ///             prefixIcon: Icon(Icons.search),
+  ///           ),
+  ///         ),
+  ///         SizedBox(height: 10),
+  ///         TextField(
+  ///           decoration: InputDecoration(
+  ///             isDense: true,
+  ///             hintText:'Smaller Icon Constraints',
+  ///             prefixIcon: Icon(Icons.search),
+  ///             prefixIconConstraints: BoxConstraints(
+  ///               minHeight: 32,
+  ///               minWidth: 32,
+  ///             ),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   final BoxConstraints prefixIconConstraints;
 
   /// Optional widget to place on the line before the input.
@@ -2904,19 +2932,50 @@ class InputDecoration {
   /// setting the constraints' minimum height and width to a value lower than
   /// 48px.
   ///
-  /// ```dart
-  /// InputDecoration(
-  ///   suffixIcon: Icon(Icons.search, size: 26),
-  ///   suffixIconConstraints: BoxConstraints(
-  ///     minHeight: 32,
-  ///     minWidth: 32,
-  ///   ),
-  ///   isDense: true,
-  /// )
-  /// ```
-  ///
   /// If null, a [BoxConstraints] with a minimum width and height of 48px is
   /// used.
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// This example shows the differences between two `TextField` widgets when
+  /// [sufficIconConstraints] is set to the default value and when one is not.
+  ///
+  /// Note that [isDense] must be set to true to be able to
+  /// set the constraints smaller than 48px.
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Padding(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
+  ///     child: Column(
+  ///       mainAxisAlignment: MainAxisAlignment.center,
+  ///       children: <Widget>[
+  ///         TextField(
+  ///           decoration: InputDecoration(
+  ///             hintText: 'Normal Icon Constraints',
+  ///             suffixIcon: Icon(Icons.search),
+  ///           ),
+  ///         ),
+  ///         SizedBox(height: 10),
+  ///         TextField(
+  ///           decoration: InputDecoration(
+  ///             isDense: true,
+  ///             hintText:'Smaller Icon Constraints',
+  ///             suffixIcon: Icon(Icons.search),
+  ///             sufficIconConstraints: BoxConstraints(
+  ///               minHeight: 32,
+  ///               minWidth: 32,
+  ///             ),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   final BoxConstraints suffixIconConstraints;
 
   /// Optional text to place below the line as a character count.
