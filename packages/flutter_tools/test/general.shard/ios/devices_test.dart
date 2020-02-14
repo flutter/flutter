@@ -384,7 +384,12 @@ void main() {
             debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)),
             platformArgs: <String, dynamic>{},
         );
-        verify(mockUsage.sendEvent('ios-handshake', 'failure')).called(1);
+        verify(mockUsage.sendEvent(
+          'ios-handshake',
+          'failure',
+          label: anyNamed('label'),
+          value: anyNamed('value'),
+        )).called(1);
         verify(mockUsage.sendEvent('ios-handshake', 'mdns-failure')).called(1);
         verify(mockUsage.sendEvent('ios-handshake', 'fallback-failure')).called(1);
         expect(launchResult.started, isFalse);
