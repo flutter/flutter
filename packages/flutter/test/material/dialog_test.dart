@@ -155,6 +155,20 @@ void main() {
     expect(content.text.style, contentTextStyle);
   });
 
+  testWidgets('Custom clipBehavior', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[],
+      clipBehavior: Clip.antiAlias,
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
       RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
@@ -748,6 +762,47 @@ void main() {
       tester.getRect(find.byType(Placeholder)),
       const Rect.fromLTRB(40.0, 24.0, 800.0 - 40.0, 600.0 - 24.0),
     );
+  });
+
+  testWidgets('Dialog insetPadding added to outside of dialog', (WidgetTester tester) async {
+    // The default testing screen (800, 600)
+    const Rect screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
+
+    // Test with no padding
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.all(0.0),
+        ),
+        child: Dialog(
+          child: Placeholder(),
+          insetPadding: null,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byType(Placeholder)), screenRect);
+
+    // Test with an insetPadding
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.all(0.0),
+        ),
+        child: Dialog(
+          insetPadding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
+          child: Placeholder(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byType(Placeholder)),
+        Rect.fromLTRB(
+          screenRect.left + 10.0,
+          screenRect.top + 20.0,
+          screenRect.right - 30.0,
+          screenRect.bottom - 40.0,
+        ));
   });
 
   testWidgets('Dialog widget contains route semantics from title', (WidgetTester tester) async {

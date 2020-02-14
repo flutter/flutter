@@ -49,9 +49,12 @@ class Dialog extends StatelessWidget {
     this.elevation,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
+    this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+    this.clipBehavior = Clip.none,
     this.shape,
     this.child,
-  }) : super(key: key);
+  }) : assert(clipBehavior != null)
+     , super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -87,6 +90,24 @@ class Dialog extends StatelessWidget {
   /// {@endtemplate}
   final Curve insetAnimationCurve;
 
+  /// {@template flutter.material.dialog.insetPadding}
+  /// The amount of padding added to the outside of the dialog.
+  ///
+  /// Defaults to `const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0)`.
+  /// {@endtemplate}
+  final EdgeInsets insetPadding;
+
+  /// {@template flutter.material.dialog.clipBehavior}
+  /// Controls how the contents of the Dialog are clipped (or not) to the given
+  /// [shape].
+  ///
+  /// See the enum [Clip] for details of all possible options and their common
+  /// use cases.
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  /// {@endtemplate}
+  final Clip clipBehavior;
+
   /// {@template flutter.material.dialog.shape}
   /// The shape of this dialog's border.
   ///
@@ -109,8 +130,9 @@ class Dialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DialogTheme dialogTheme = DialogTheme.of(context);
+    final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? const EdgeInsets.all(0.0));
     return AnimatedPadding(
-      padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+      padding: effectivePadding,
       duration: insetAnimationDuration,
       curve: insetAnimationCurve,
       child: MediaQuery.removeViewInsets(
@@ -127,6 +149,7 @@ class Dialog extends StatelessWidget {
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
               shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
               type: MaterialType.card,
+              clipBehavior: clipBehavior,
               child: child,
             ),
           ),
@@ -229,10 +252,13 @@ class AlertDialog extends StatelessWidget {
     this.backgroundColor,
     this.elevation,
     this.semanticLabel,
+    this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+    this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
-  }) : assert(contentPadding != null),
-       super(key: key);
+  }) : assert(contentPadding != null)
+     , assert(clipBehavior != null)
+     , super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -394,6 +420,12 @@ class AlertDialog extends StatelessWidget {
   ///    value is used.
   final String semanticLabel;
 
+  /// {@macro flutter.material.dialog.insetPadding}
+  final EdgeInsets insetPadding;
+
+  /// {@macro flutter.material.dialog.clipBehavior}
+  final Clip clipBehavior;
+
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder shape;
 
@@ -518,6 +550,8 @@ class AlertDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,
+      insetPadding: insetPadding,
+      clipBehavior: clipBehavior,
       shape: shape,
       child: dialogChild,
     );
