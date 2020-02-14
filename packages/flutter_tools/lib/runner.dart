@@ -9,7 +9,6 @@ import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:meta/meta.dart';
 
-import 'src/base/bot_detector.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
@@ -35,8 +34,8 @@ Future<int> run(
   bool reportCrashes,
   String flutterVersion,
   Map<Type, Generator> overrides,
-}) {
-  reportCrashes ??= !isRunningOnBot(globals.platform);
+}) async {
+  reportCrashes ??= !await globals.isRunningOnBot;
 
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
@@ -189,7 +188,11 @@ FileSystem crashFileSystem = const LocalFileSystem();
 
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace, String doctorText) async {
-  File crashFile = fsUtils.getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
+  File crashFile = globals.fsUtils.getUniqueFile(
+    crashFileSystem.currentDirectory,
+    'flutter',
+    'log',
+  );
 
   final StringBuffer buffer = StringBuffer();
 
@@ -209,7 +212,11 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
     crashFile.writeAsStringSync(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
-    crashFile = fsUtils.getUniqueFile(crashFileSystem.systemTempDirectory, 'flutter', 'log');
+    crashFile = globals.fsUtils.getUniqueFile(
+      crashFileSystem.systemTempDirectory,
+      'flutter',
+      'log',
+    );
     try {
       crashFile.writeAsStringSync(buffer.toString());
     } on FileSystemException catch (e) {

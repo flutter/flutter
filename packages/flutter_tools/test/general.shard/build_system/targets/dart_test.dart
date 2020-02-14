@@ -63,22 +63,10 @@ void main() {
       } else {
         assert(false);
       }
-      final String skyEngineLine = globals.platform.isWindows
-        ? r'sky_engine:file:///C:/bin/cache/pkg/sky_engine/lib/'
-        : 'sky_engine:file:///bin/cache/pkg/sky_engine/lib/';
-      globals.fs.file('.packages')
-        ..createSync()
-        ..writeAsStringSync('''
-# Generated
-$skyEngineLine
-flutter_tools:lib/''');
+
       final String engineArtifacts = globals.fs.path.join('bin', 'cache',
           'artifacts', 'engine');
       final List<String> paths = <String>[
-        globals.fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui',
-          'ui.dart'),
-        globals.fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'sdk_ext',
-            'vmservice_io.dart'),
         globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
         globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart.exe'),
         globals.fs.path.join(engineArtifacts, getNameForHostPlatform(hostPlatform),
@@ -315,7 +303,7 @@ flutter_tools:lib/''');
   }));
 
   test('aot_assembly_profile will lipo binaries together when multiple archs are requested', () => testbed.run(() async {
-    iosEnvironment.defines[kIosArchs] ='armv7,arm64';
+    iosEnvironment.defines[kIosArchs] ='armv7 arm64';
     when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
       globals.fs.file(globals.fs.path.join(iosEnvironment.buildDir.path, 'App.framework', 'App'))
           .createSync(recursive: true);
@@ -360,7 +348,7 @@ flutter_tools:lib/''');
   }));
 
   test('aot_assembly_profile with bitcode sends correct argument to snapshotter (mutli arch)', () => testbed.run(() async {
-    iosEnvironment.defines[kIosArchs] = 'armv7,arm64';
+    iosEnvironment.defines[kIosArchs] = 'armv7 arm64';
     iosEnvironment.defines[kBitcodeFlag] = 'true';
 
     final FakeProcessResult fakeProcessResult = FakeProcessResult(
@@ -377,9 +365,8 @@ flutter_tools:lib/''');
     when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
     when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
 
-    final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
+    await const AotAssemblyProfile().build(iosEnvironment);
 
-    expect(result.success, true);
     verify(mockXcode.cc(argThat(contains('-fembed-bitcode')))).called(2);
     verify(mockXcode.clang(argThat(contains('-fembed-bitcode')))).called(2);
   }, overrides: <Type, Generator>{
@@ -388,7 +375,7 @@ flutter_tools:lib/''');
   }));
 
   test('aot_assembly_profile will lipo binaries together when multiple archs are requested', () => testbed.run(() async {
-    iosEnvironment.defines[kIosArchs] = 'armv7,arm64';
+    iosEnvironment.defines[kIosArchs] = 'armv7 arm64';
     when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
       globals.fs.file(globals.fs.path.join(iosEnvironment.buildDir.path, 'App.framework', 'App'))
           .createSync(recursive: true);

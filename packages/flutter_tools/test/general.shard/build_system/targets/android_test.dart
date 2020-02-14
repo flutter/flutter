@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -10,15 +9,17 @@ import 'package:flutter_tools/src/build_system/targets/android.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/cache.dart';
-
-import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../../../src/common.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/testbed.dart';
 
 void main() {
+  FakeProcessManager fakeProcessManager;
   final Testbed testbed = Testbed(overrides: <Type, Generator>{
     Cache: () => FakeCache(),
+    Platform: () => FakePlatform(operatingSystem: 'linux', environment: const <String, String>{}),
   });
 
   testbed.test('debug bundle contains expected resources', () async {
@@ -94,31 +95,27 @@ void main() {
         kBuildMode: 'release',
       }
     );
-    when(genSnapshot.run(
-      snapshotType: anyNamed('snapshotType'),
-      darwinArch: anyNamed('darwinArch'),
-      additionalArgs: anyNamed('additionalArgs'),
-    )).thenAnswer((Invocation invocation) async {
-      return 0;
-    });
+    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: <String>[
+        globals.fs.path.absolute(globals.fs.path.join('android-arm64-release', 'linux-x64', 'gen_snapshot')),
+        '--deterministic',
+        '--snapshot_kind=app-aot-elf',
+        '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
+        '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        environment.buildDir.childFile('app.dill').path,
+        ],
+      )
+    ]);
     environment.buildDir.createSync(recursive: true);
     environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages')
-      .writeAsStringSync('sky_engine:file:///\n');
+    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
 
     await androidAot.build(environment);
-
-    final SnapshotType snapshotType = verify(genSnapshot.run(
-      snapshotType: captureAnyNamed('snapshotType'),
-      darwinArch: anyNamed('darwinArch'),
-      additionalArgs: anyNamed('additionalArgs')
-    )).captured.single as SnapshotType;
-
-    expect(snapshotType.platform, TargetPlatform.android_arm64);
-    expect(snapshotType.mode, BuildMode.release);
   }, overrides: <Type, Generator>{
-    GenSnapshot: () => MockGenSnapshot(),
+    ProcessManager: () => fakeProcessManager,
   });
 
   testbed.test('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
@@ -131,28 +128,29 @@ void main() {
         kTargetPlatform: 'android-arm',
       }
     );
-    environment.buildDir.createSync(recursive: true);
-    environment.buildDir.childFile('app.dill').createSync();
-    environment.projectDir.childFile('.packages')
-      .writeAsStringSync('sky_engine:file:///\n');
-
-    when(genSnapshot.run(
-      snapshotType: anyNamed('snapshotType'),
-      darwinArch: anyNamed('darwinArch'),
-      additionalArgs: captureAnyNamed('additionalArgs'),
-    )).thenAnswer((Invocation invocation) async {
-      expect(invocation.namedArguments[#additionalArgs], containsAll(<String>[
+    fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: <String>[
+         globals.fs.path.absolute(globals.fs.path.join('android-arm64-release', 'linux-x64', 'gen_snapshot')),
+        '--deterministic',
         'foo',
         'bar',
         'baz=2',
-      ]));
-      return 0;
-    });
+        '--snapshot_kind=app-aot-elf',
+        '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
+        '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        environment.buildDir.childFile('app.dill').path
+      ])
+    ]);
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.projectDir.childFile('.packages').writeAsStringSync('\n');
 
     await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release)
       .build(environment);
   }, overrides: <Type, Generator>{
-    GenSnapshot: () => MockGenSnapshot(),
+    ProcessManager: () => fakeProcessManager,
   });
 
   testbed.test('android aot bundle copies so from abi directory', () async {
@@ -179,5 +177,3 @@ void main() {
       .childFile('app.so').existsSync(), true);
   });
 }
-
-class MockGenSnapshot extends Mock implements GenSnapshot {}

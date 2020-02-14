@@ -69,6 +69,21 @@ void main() {
     verify(mockBuildStep.writeAsString(any,
         argThat(isNot(contains('registerPlugins(webPluginRegistry)'))))).called(1);
   });
+
+  test('FlutterWebShellBuilder correctly imports registrant', () async {
+    final AssetId nestedEntrypoint = AssetId('hello_world', 'lib/src/nested_main.dart');
+    when(mockBuildStep.inputId).thenReturn(nestedEntrypoint);
+
+    const FlutterWebShellBuilder builder = FlutterWebShellBuilder(
+      hasPlugins: true,
+      initializePlatform: true,
+    );
+
+    await builder.build(mockBuildStep);
+
+    verify(mockBuildStep.writeAsString(any,
+        argThat(contains("import '../generated_plugin_registrant.dart';")))).called(1);
+  });
 }
 
 class MockBuildStep extends Mock implements BuildStep {}

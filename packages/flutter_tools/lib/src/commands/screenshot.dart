@@ -41,7 +41,7 @@ class ScreenshotCommand extends FlutterCommand {
       help: 'The type of screenshot to retrieve.',
       allowed: const <String>[_kDeviceType, _kSkiaType, _kRasterizerType],
       allowedHelp: const <String, String>{
-        _kDeviceType: 'Delegate to the device\'s native screenshot capabilities. This '
+        _kDeviceType: "Delegate to the device's native screenshot capabilities. This "
             'screenshots the entire screen currently being displayed (including content '
             'not rendered by Flutter, like the device status bar).',
         _kSkiaType: 'Render the Flutter app as a Skia picture. Requires --$_kObservatoryUri',
@@ -109,7 +109,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<void> runScreenshot(File outputFile) async {
-    outputFile ??= fsUtils.getUniqueFile(
+    outputFile ??= globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
       'png',
@@ -124,7 +124,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<void> runSkia(File outputFile) async {
     final Map<String, dynamic> skp = await _invokeVmServiceRpc('_flutter.screenshotSkp');
-    outputFile ??= fsUtils.getUniqueFile(
+    outputFile ??= globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
       'skp',
@@ -138,7 +138,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<void> runRasterizer(File outputFile) async {
     final Map<String, dynamic> response = await _invokeVmServiceRpc('_flutter.screenshot');
-    outputFile ??= fsUtils.getUniqueFile(
+    outputFile ??= globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
       'png',

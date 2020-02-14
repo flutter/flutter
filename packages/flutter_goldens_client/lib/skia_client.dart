@@ -106,7 +106,7 @@ class SkiaGoldClient {
   /// with a service account for Cirrus testing, or through the context provided
   /// by a luci environment.
   Future<void> auth() async {
-    if (_clientIsAuthorized())
+    if (await clientIsAuthorized())
       return;
 
     List<String> authArguments;
@@ -590,7 +590,7 @@ class SkiaGoldClient {
       } on FormatException catch(_) {
         if (rawResponse.contains('stream timeout')) {
           final StringBuffer buf = StringBuffer()
-            ..writeln('Stream timeout on Gold\'s /details api.');
+            ..writeln("Stream timeout on Gold's /details api.");
           throw Exception(buf.toString());
         } else {
           print('Formatting error detected requesting /ignores from Flutter Gold.'
@@ -643,12 +643,18 @@ class SkiaGoldClient {
 
   /// Returns a boolean value to prevent the client from re-authorizing itself
   /// for multiple tests.
-  bool _clientIsAuthorized() {
+  Future<bool> clientIsAuthorized() async {
     final File authFile = workDirectory?.childFile(fs.path.join(
       'temp',
       'auth_opt.json',
     ));
-    return authFile.existsSync();
+
+    if(await authFile.exists()) {
+      final String contents = await authFile.readAsString();
+      final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
+      return !(decoded['GSUtil'] as bool);
+    }
+    return false;
   }
 }
 

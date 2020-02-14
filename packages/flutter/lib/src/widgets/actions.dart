@@ -329,7 +329,7 @@ class Actions extends InheritedWidget {
       }
       if (action == null) {
         throw FlutterError('Unable to find an action for an intent in the $Actions widget in the context.\n'
-            '$Actions.invoke() was called on an $Actions widget that doesn\'t '
+            "$Actions.invoke() was called on an $Actions widget that doesn't "
             'contain a mapping for the given intent.\n'
             'The context used was:\n'
             '  $context\n'
@@ -371,7 +371,7 @@ class Actions extends InheritedWidget {
 /// widget, and the new control should be enabled for keyboard traversal and
 /// activation.
 ///
-/// {@tool sample --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows how keyboard interaction can be added to a custom control
 /// that changes color when hovered and focused, and can toggle a light when
 /// activated, either by touch or by hitting the `X` key on the keyboard.

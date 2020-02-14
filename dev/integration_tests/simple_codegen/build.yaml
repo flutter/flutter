@@ -6,3 +6,4 @@ builders:
       - simpleBuilder
     build_extensions: {'.spec':['.dart']}
     auto_apply: all_packages
+    build_to: source

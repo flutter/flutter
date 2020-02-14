@@ -13,9 +13,11 @@ import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'binding.dart';
+import 'disposable_build_context.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'scroll_aware_image_provider.dart';
 import 'ticker_provider.dart';
 
 export 'package:flutter/painting.dart' show
@@ -86,11 +88,15 @@ Future<void> precacheImage(
   ImageStreamListener listener;
   listener = ImageStreamListener(
     (ImageInfo image, bool sync) {
-      completer.complete();
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
       stream.removeListener(listener);
     },
     onError: (dynamic exception, StackTrace stackTrace) {
-      completer.complete();
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
       stream.removeListener(listener);
       if (onError != null) {
         onError(exception, stackTrace);
@@ -682,7 +688,7 @@ class Image extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool sample --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material}
   ///
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
@@ -700,7 +706,7 @@ class Image extends StatefulWidget {
   ///       borderRadius: BorderRadius.circular(20),
   ///     ),
   ///     child: Image.network(
-  ///       'https://example.com/image.jpg',
+  ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
   ///       frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
   ///         if (wasSynchronouslyLoaded) {
   ///           return child;
@@ -717,11 +723,6 @@ class Image extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// Run against a real-world image, the previous example renders the following
-  /// image.
-  ///
-  /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/frame_builder_image.mp4}
   final ImageFrameBuilder frameBuilder;
 
   /// A builder that specifies the widget to display to the user while an image
@@ -753,7 +754,7 @@ class Image extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.image.chainedBuildersExample}
   ///
-  /// {@tool sample --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material}
   ///
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.
@@ -785,9 +786,9 @@ class Image extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// Run against a real-world image, the previous example renders the following
-  /// loading progress indicator while the image loads before rendering the
-  /// completed image.
+  /// Run against a real-world image on a slow network, the previous example
+  /// renders the following loading progress indicator while the image loads
+  /// before rendering the completed image.
   ///
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
   final ImageLoadingBuilder loadingBuilder;
@@ -946,11 +947,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   bool _invertColors;
   int _frameNumber;
   bool _wasSynchronouslyLoaded;
+  DisposableBuildContext<State<Image>> _scrollAwareContext;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scrollAwareContext = DisposableBuildContext<State<Image>>(this);
   }
 
   @override
@@ -958,6 +961,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     assert(_imageStream != null);
     WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
+    _scrollAwareContext.dispose();
     super.dispose();
   }
 
@@ -1006,8 +1010,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _resolveImage() {
+    final ScrollAwareImageProvider provider = ScrollAwareImageProvider<dynamic>(
+      context: _scrollAwareContext,
+      imageProvider: widget.image,
+    );
     final ImageStream newStream =
-      widget.image.resolve(createLocalImageConfiguration(
+      provider.resolve(createLocalImageConfiguration(
         context,
         size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
       ));

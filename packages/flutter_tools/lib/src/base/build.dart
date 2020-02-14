@@ -10,7 +10,6 @@ import '../artifacts.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -65,7 +64,7 @@ class GenSnapshot {
       // Filter out gen_snapshot's warning message about stripping debug symbols
       // from ELF library snapshots.
       const String kStripWarning = 'Warning: Generating ELF library without DWARF debugging information.';
-      const String kAssemblyStripWarning = 'Warning: Generating assembly code without DWARF debugging information';
+      const String kAssemblyStripWarning = 'Warning: Generating assembly code without DWARF debugging information.';
       outputFilter = (String line) => line != kStripWarning && line != kAssemblyStripWarning ? line : null;
     }
 
@@ -94,6 +93,7 @@ class AOTSnapshotter {
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
+    @required String splitDebugInfo,
     bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
@@ -108,22 +108,9 @@ class AOTSnapshotter {
     // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
     assert(platform != TargetPlatform.ios || darwinArch != null);
 
-    final PackageMap packageMap = PackageMap(packagesPath);
-    final String packageMapError = packageMap.checkValid();
-    if (packageMapError != null) {
-      globals.printError(packageMapError);
-      return 1;
-    }
-
     final Directory outputDir = globals.fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final String skyEnginePkg = _getPackagePath(packageMap, 'sky_engine');
-    final String uiPath = globals.fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
-    final String vmServicePath = globals.fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
-
-    final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
-    final Set<String> outputPaths = <String>{};
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
     ];
@@ -135,13 +122,11 @@ class AOTSnapshotter {
     final String assembly = globals.fs.path.join(outputDir.path, 'snapshot_assembly.S');
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       // Assembly AOT snapshot.
-      outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
       genSnapshotArgs.add('--assembly=$assembly');
       genSnapshotArgs.add('--strip');
     } else {
       final String aotSharedLibrary = globals.fs.path.join(outputDir.path, 'app.so');
-      outputPaths.add(aotSharedLibrary);
       genSnapshotArgs.add('--snapshot_kind=app-aot-elf');
       genSnapshotArgs.add('--elf=$aotSharedLibrary');
       genSnapshotArgs.add('--strip');
@@ -157,21 +142,28 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--no-use-integer-division');
     }
 
+    // The name of the debug file must contain additional information about
+    // the architecture, since a single build command may produce
+    // multiple debug files.
+    final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
+    final String debugFilename = 'app.$archName.symbols';
+    if (splitDebugInfo?.isNotEmpty ?? false) {
+      globals.fs.directory(splitDebugInfo)
+        .createSync(recursive: true);
+    }
+
     // Optimization arguments.
     genSnapshotArgs.addAll(<String>[
       // Faster async/await
       '--no-causal-async-stacks',
       '--lazy-async-stacks',
+      if (splitDebugInfo?.isNotEmpty ?? false) ...<String>[
+        '--dwarf-stack-traces',
+        '--save-debugging-info=${globals.fs.path.join(splitDebugInfo, debugFilename)}'
+      ]
     ]);
 
     genSnapshotArgs.add(mainPath);
-
-    // TODO(jonahwilliams): fully remove input checks once all callers are
-    // using assemble.
-    final Iterable<String> missingInputs = inputPaths.where((String p) => !globals.fs.isFileSync(p));
-    if (missingInputs.isNotEmpty) {
-      globals.printTrace('Missing input files: $missingInputs from $inputPaths');
-    }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode =
@@ -185,12 +177,6 @@ class AOTSnapshotter {
       globals.printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
       return genSnapshotExitCode;
     }
-
-    // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
-    // the Dart SDK.
-    // TODO(jonahwilliams): remove when all callers are using assemble.
-    final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
-    outputDir.childFile('gen_snapshot.d').writeAsStringSync('gen_snapshot.d: $genSnapshotPath\n');
 
     // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
@@ -337,10 +323,6 @@ class AOTSnapshotter {
       TargetPlatform.ios,
       TargetPlatform.darwin_x64,
     ].contains(platform);
-  }
-
-  String _getPackagePath(PackageMap packageMap, String package) {
-    return globals.fs.path.dirname(globals.fs.path.fromUri(packageMap.map[package]));
   }
 
   /// This method is used to measure duration of an action and emit it into

@@ -112,6 +112,13 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   final int length;             // The number of fields. Ranges from 1-3.
   final String originalString;  // Original un-parsed locale string.
 
+  String camelCase() {
+    return originalString
+      .split('_')
+      .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
+      .join('');
+  }
+
   @override
   bool operator ==(Object other) {
     return other is LocaleInfo
@@ -218,13 +225,6 @@ void checkCwdIsRepoRoot(String commandName) {
       'current working directory is: ${Directory.current.path}'
     );
   }
-}
-
-String camelCase(LocaleInfo locale) {
-  return locale.originalString
-    .split('_')
-    .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
-    .join('');
 }
 
 GeneratorOptions parseArgs(List<String> rawArgs) {
@@ -339,7 +339,7 @@ String describeLocale(String tag) {
   assert(subtags.isNotEmpty);
   assert(_languages.containsKey(subtags[0]));
   final String language = _languages[subtags[0]];
-  String output = '$language';
+  String output = language;
   String region;
   String script;
   if (subtags.length == 2) {
@@ -364,53 +364,53 @@ String generateClassDeclaration(
   String classNamePrefix,
   String superClass,
 ) {
-  final String camelCaseName = camelCase(locale);
+  final String camelCaseName = locale.camelCase();
   return '''
 
 /// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).
 class $classNamePrefix$camelCaseName extends $superClass {''';
 }
 
-/// Return `s` as a Dart-parseable raw string in single or double quotes.
+/// Return `s` as a Dart-parseable string.
 ///
-/// Double quotes are expanded:
+/// The result tries to avoid character escaping:
 ///
 /// ```
-/// foo => r'foo'
-/// foo "bar" => r'foo "bar"'
-/// foo 'bar' => r'foo ' "'" r'bar' "'"
+/// foo => 'foo'
+/// foo "bar" => 'foo "bar"'
+/// foo 'bar' => "foo 'bar'"
+/// foo 'bar' "baz" => '''foo 'bar' "baz"'''
+/// foo\bar => r'foo\bar'
 /// ```
-String generateString(String s) {
-  if (!s.contains("'"))
-    return "r'$s'";
+///
+/// Strings with newlines are not supported.
+String generateString(String value) {
+  assert(!value.contains('\n'));
+  final String rawPrefix = value.contains(r'$') || value.contains(r'\') ? 'r' : '';
+  if (!value.contains("'"))
+    return "$rawPrefix'$value'";
+  if (!value.contains('"'))
+    return '$rawPrefix"$value"';
+  if (!value.contains("'''"))
+    return "$rawPrefix'''$value'''";
+  if (!value.contains('"""'))
+    return '$rawPrefix"""$value"""';
 
-  final StringBuffer output = StringBuffer();
-  bool started = false; // Have we started writing a raw string.
-  for (int i = 0; i < s.length; i++) {
-    if (s[i] == "'") {
-      if (started)
-        output.write("'");
-      output.write(' "\'" ');
-      started = false;
-    } else if (!started) {
-      output.write("r'${s[i]}");
-      started = true;
-    } else {
-      output.write(s[i]);
-    }
-  }
-  if (started)
-    output.write("'");
-  return output.toString();
+  return value.split("'''")
+    .map(generateString)
+    // If value contains more than 6 consecutive single quotes some empty strings may be generated.
+    // The following map removes them.
+    .map((String part) => part == "''" ? '' : part)
+    .join(" \"'''\" ");
 }
 
 /// Only used to generate localization strings for the Kannada locale ('kn') because
 /// some of the localized strings contain characters that can crash Emacs on Linux.
 /// See packages/flutter_localizations/lib/src/l10n/README for more information.
-String generateEncodedString(String s) {
-  if (s.runes.every((int code) => code <= 0xFF))
-    return generateString(s);
+String generateEncodedString(String locale, String value) {
+  if (locale != 'kn' || value.runes.every((int code) => code <= 0xFF))
+    return generateString(value);
 
-  final String unicodeEscapes = s.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
+  final String unicodeEscapes = value.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
   return "'$unicodeEscapes'";
 }

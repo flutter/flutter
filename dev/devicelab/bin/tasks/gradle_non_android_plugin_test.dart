@@ -37,7 +37,7 @@ Future<void> main() async {
         );
       });
 
-      section('Delete plugin\'s Android folder');
+      section("Delete plugin's Android folder");
 
       final File androidFolder = File(path.join(
         projectDir.path,

@@ -47,6 +47,7 @@ import 'dart:io' as io
 import 'package:meta/meta.dart';
 
 import '../globals.dart' as globals;
+import 'async_guard.dart';
 import 'context.dart';
 import 'process.dart';
 
@@ -271,15 +272,15 @@ class Stdio {
   void _stdioWrite(io.IOSink sink, String message, {
     void Function(String, dynamic, StackTrace) fallback,
   }) {
-    try {
+    asyncGuard<void>(() async {
       sink.write(message);
-    } catch (err, stack) {
+    }, onError: (Object error, StackTrace stackTrace) {
       if (fallback == null) {
         print(message);
       } else {
-        fallback(message, err, stack);
+        fallback(message, error, stackTrace);
       }
-    }
+    });
   }
 
   /// Adds [stream] to [stdout].

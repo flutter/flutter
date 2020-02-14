@@ -470,6 +470,7 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
     } else if (_actionsElement == child) {
       _actionsElement = null;
     }
+    super.forgetChild(child);
   }
 
   @override
