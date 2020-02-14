@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
@@ -40,19 +42,23 @@ class MockIOSApp extends Mock implements IOSApp {}
 class MockApplicationPackage extends Mock implements ApplicationPackage {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
+class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockDirectory extends Mock implements Directory {}
+class MockFile extends Mock implements File {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockForwardedPort extends Mock implements ForwardedPort {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
-class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
+class MockLogger extends Mock implements Logger {}
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
-class MockXcode extends Mock implements Xcode {}
-class MockFile extends Mock implements File {}
+class MockPlatform extends Mock implements Platform {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
+// src/mocks.dart imports `MockProcessManager` which implements some methods, this is a full mock
+class FullMockProcessManager extends Mock implements ProcessManager {}
 class MockUsage extends Mock implements Usage {}
 class MockXcdevice extends Mock implements XCDevice {}
+class MockXcode extends Mock implements Xcode {}
 
 void main() {
   final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
@@ -658,12 +664,18 @@ void main() {
     });
 
     group('Process calls', () {
+      const String bundlePath = '/path/to/bundle';
+      FileSystem fs;
+      MockDirectory directory;
       MockIOSApp mockApp;
       MockArtifacts mockArtifacts;
       MockCache mockCache;
       MockFileSystem mockFileSystem;
-      MockProcessManager mockProcessManager;
-      const String installerPath = '/path/to/ideviceinstaller';
+      MockLogger mockLogger;
+      MockPlatform mockPlatform;
+      FullMockProcessManager mockProcessManager;
+      const String installerPath = '/path/to/ideviceinstaller'; //TODO
+      const String iosDeployPath = '/path/to/ios-deploy';
       const String appId = '789';
       const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
         'DYLD_LIBRARY_PATH',
@@ -672,79 +684,111 @@ void main() {
       final Map<String, String> env = Map<String, String>.fromEntries(
           <MapEntry<String, String>>[libraryEntry]
       );
+      IOSDeploy iosDeploy;
 
       setUp(() {
+        mockFileSystem = MockFileSystem();
+        directory = MockDirectory();
+        when(mockFileSystem.directory(bundlePath)).thenReturn(directory);
+
         mockApp = MockIOSApp();
+        when(mockApp.id).thenReturn(appId);
+        when(mockApp.deviceBundlePath).thenReturn(bundlePath);
+        when(directory.existsSync()).thenReturn(true);
+        when(directory.path).thenReturn(bundlePath);
+
         mockArtifacts = MockArtifacts();
         mockCache = MockCache();
+        mockLogger = MockLogger();
+        mockPlatform = MockPlatform();
+        when(mockPlatform.environment).thenReturn(<String, String>{});
+        when(mockPlatform.isMacOS).thenReturn(true);
+        mockProcessManager = FullMockProcessManager();
+        when(
+            mockArtifacts.getArtifactPath(
+                Artifact.iosDeploy,
+                platform: anyNamed('platform'),
+            ),
+        ).thenReturn(iosDeployPath);
+        iosDeploy = IOSDeploy(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          logger: mockLogger,
+          platform: mockPlatform,
+          processManager: mockProcessManager,
+        );
         when(mockCache.dyLdLibEntry).thenReturn(libraryEntry);
         mockFileSystem = MockFileSystem();
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         when(mockFileSystem.currentDirectory)
           .thenReturn(memoryFileSystem.currentDirectory);
-        mockProcessManager = MockProcessManager();
-        when(
-            mockArtifacts.getArtifactPath(
-                Artifact.ideviceinstaller,
-                platform: anyNamed('platform'),
-            ),
-        ).thenReturn(installerPath);
       });
 
-      testUsingContext('installApp() invokes process with correct environment', () async {
-        final IOSDevice device = IOSDevice('123', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64);
-        const String bundlePath = '/path/to/bundle';
-        final List<String> args = <String>[installerPath, '-i', bundlePath];
-        when(mockApp.deviceBundlePath).thenReturn(bundlePath);
-        final MockDirectory directory = MockDirectory();
+      testWithoutContext('installApp() calls ios-deploy', () async {
         when(mockFileSystem.directory(bundlePath)).thenReturn(directory);
-        when(directory.existsSync()).thenReturn(true);
-        when(mockProcessManager.run(args, environment: env))
-            .thenAnswer(
-                (_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', ''))
-            );
+        final IOSDevice device = IOSDevice(
+          '123',
+          name: 'iPhone 1',
+          fileSystem: mockFileSystem,
+          sdkVersion: '13.3',
+          cpuArchitecture: DarwinArch.arm64,
+          platform: mockPlatform,
+          artifacts: mockArtifacts,
+          iosDeploy: iosDeploy,
+        );
+        final List<String> args = <String>[
+          iosDeployPath,
+          '--id',
+          device.id,
+          '--bundle',
+          bundlePath,
+          '--no-wifi',
+        ];
+        when(mockProcessManager.start(any, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment'))).
+            thenAnswer((Invocation invocation) {
+              return Future<Process>.value(createMockProcess());
+            });
+
         await device.installApp(mockApp);
-        verify(mockProcessManager.run(args, environment: env));
-      }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
-        Cache: () => mockCache,
-        FileSystem: () => mockFileSystem,
-        Platform: () => macPlatform,
-        ProcessManager: () => mockProcessManager,
+
+        final List<String> invocationArguments = verify(mockProcessManager.start(
+          captureAny,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        )).captured.first as List<String>;
+        expect(invocationArguments, args);
       });
 
-      testUsingContext('isAppInstalled() invokes process with correct environment', () async {
-        final IOSDevice device = IOSDevice('123', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64);
-        final List<String> args = <String>[installerPath, '--list-apps'];
-        when(mockProcessManager.run(args, environment: env))
-            .thenAnswer(
-                (_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', ''))
-            );
-        when(mockApp.id).thenReturn(appId);
-        await device.isAppInstalled(mockApp);
-        verify(mockProcessManager.run(args, environment: env));
-      }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
-        Cache: () => mockCache,
-        Platform: () => macPlatform,
-        ProcessManager: () => mockProcessManager,
-      });
-
-      testUsingContext('uninstallApp() invokes process with correct environment', () async {
-        final IOSDevice device = IOSDevice('123', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64);
-        final List<String> args = <String>[installerPath, '-U', appId];
-        when(mockApp.id).thenReturn(appId);
-        when(mockProcessManager.run(args, environment: env))
-            .thenAnswer(
-                (_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', ''))
-            );
+      testWithoutContext('uninstallApp() calls ios-deploy', () async {
+        final IOSDevice device = IOSDevice(
+          '123',
+          name: 'iPhone 1',
+          fileSystem: fs,
+          sdkVersion: '13.3',
+          cpuArchitecture: DarwinArch.arm64,
+          platform: mockPlatform,
+          artifacts: mockArtifacts,
+          iosDeploy: iosDeploy,
+        );
+        final List<String> args = <String>[
+          iosDeployPath,
+          '--id',
+          device.id,
+          '--uninstall_only',
+          '--bundle_id',
+          appId,
+        ];
+        when(mockProcessManager.start(args, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment'))).
+            thenAnswer((Invocation invocation) {
+              return Future<Process>.value(createMockProcess());
+            });
         await device.uninstallApp(mockApp);
-        verify(mockProcessManager.run(args, environment: env));
-      }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
-        Cache: () => mockCache,
-        Platform: () => macPlatform,
-        ProcessManager: () => mockProcessManager,
+        final List<String> invocationArguments = verify(mockProcessManager.start(
+          captureAny,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        )).captured.first as List<String>;
+        expect(invocationArguments, args);
       });
     });
   });
