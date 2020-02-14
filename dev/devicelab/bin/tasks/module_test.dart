@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
 
 final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
 
@@ -271,7 +272,7 @@ Future<void> main() async {
 
       String modes = readonlyDebugAssetFile.statSync().modeString();
       print('\nread-only.txt file access modes = $modes');
-      if (modes != null && modes.compareTo('rw-r--r--') != 0) {
+      if (modes != null && modes.compareTo(fileReadWriteMode) != 0) {
         return TaskResult.failure('Failed to make assets user-readable and writable');
       }
 
@@ -341,7 +342,7 @@ Future<void> main() async {
 
       modes = readonlyReleaseAssetFile.statSync().modeString();
       print('\nread-only.txt file access modes = $modes');
-      if (modes != null && modes.compareTo('rw-r--r--') != 0) {
+      if (modes != null && modes.compareTo(fileReadWriteMode) != 0) {
         return TaskResult.failure('Failed to make assets user-readable and writable');
       }
 
