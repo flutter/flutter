@@ -29,8 +29,8 @@ import '../compile.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
-import 'bootstrap.dart';
-import 'chrome.dart';
+import '../web/bootstrap.dart';
+import '../web/chrome.dart';
 
 /// A web server which handles serving JavaScript and assets.
 ///
