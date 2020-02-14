@@ -17,6 +17,12 @@ import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
+/// Signature for the callback taken by [_createErrorHandlerAndKey].
+typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
+
+/// Signature used for error handling by [_createErrorHandlerAndKey].
+typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, dynamic exception, StackTrace stack);
+
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
 ///
@@ -318,7 +324,28 @@ abstract class ImageProvider<T> {
     final ImageStream stream = createStream(configuration);
     // Load the key (potentially asynchronously), set up an error handling zone,
     // and call resolveStreamForKey.
-    _createErrorHandlerAndKey(configuration, stream);
+    _createErrorHandlerAndKey(
+      configuration,
+      (T key, ImageErrorListener errorHandler) {
+        resolveStreamForKey(configuration, stream, key, errorHandler);
+      },
+      (T key, dynamic exception, StackTrace stack) async {
+        await null; // wait an event turn in case a listener has been added to the image stream.
+        final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
+        stream.setCompleter(imageCompleter);
+        imageCompleter.setError(
+          exception: exception,
+          stack: stack,
+          context: ErrorDescription('while resolving an image'),
+          silent: true, // could be a network error or whatnot
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+            yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
+            yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
+            },
+          );
+        },
+      );
     return stream;
   }
 
@@ -348,83 +375,50 @@ abstract class ImageProvider<T> {
   }) {
     assert(configuration != null);
     final Completer<ImageCacheStatus> completer = Completer<ImageCacheStatus>();
-    bool didError = false;
-    final ImageErrorListener errorHandler = (dynamic exception, StackTrace stack) {
-      if (didError) {
-        return;
-      }
-      didError = true;
-      if (handleError != null) {
-        handleError(exception, stack);
-      } else {
-        FlutterError.onError(FlutterErrorDetails(
-          context: ErrorDescription('while checking the cache location of an image'),
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-            yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
-          },
-          exception: exception,
-          stack: stack,
-        ));
-        completer.complete(null);
-      }
-    };
-
-    // If an error is added to a synchronous completer before a listener has been
-    // added, it can throw an error both into the zone and up the stack. Thus, it
-    // looks like the error has been caught, but it is in fact also bubbling to the
-    // zone. Since we cannot prevent all usage of Completer.sync here, or rather
-    // that changing them would be too breaking, we instead hook into the same
-    // zone mechanism to intercept the uncaught error and deliver it to the
-    // supplied error handler. Note that these errors may be duplicated,
-    // hence the need for the `didError` flag.
-    final Zone dangerZone = Zone.current.fork(
-      specification: ZoneSpecification(
-        handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
-          errorHandler(error, stackTrace);
-        }
-      )
-    );
-    dangerZone.runGuarded(() {
-      Future<T> key;
-      try {
-        key = obtainKey(configuration);
-      } catch (error, stackTrace) {
-        errorHandler(error, stackTrace);
-        return;
-      }
-      key.then<void>((T key) {
+    _createErrorHandlerAndKey(
+      configuration,
+      (T key, ImageErrorListener innerHandleError) {
         completer.complete(PaintingBinding.instance.imageCache.statusForKey(key));
-      }).catchError(errorHandler);
-    });
-
+      },
+      (T key, dynamic exception, StackTrace stack) async {
+        if (handleError != null) {
+          handleError(exception, stack);
+        } else {
+          FlutterError.onError(FlutterErrorDetails(
+            context: ErrorDescription('while checking the cache location of an image'),
+            informationCollector: () sync* {
+              yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+              yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
+              yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
+            },
+            exception: exception,
+            stack: stack,
+          ));
+          completer.complete(null);
+        }
+      },
+    );
     return completer.future;
   }
 
-  void _createErrorHandlerAndKey(ImageConfiguration configuration, ImageStream stream) {
-    assert(configuration != null);
-    assert(stream != null);
+  /// This method is used by both [resolve] and [obtainCacheStatus] to ensure
+  /// that errors thrown during key creation are handled whether synchronous or
+  /// asynchronous.
+  void _createErrorHandlerAndKey(
+    ImageConfiguration configuration,
+    _KeyAndErrorHandlerCallback<T> successCallback,
+    _AsyncKeyErrorHandler<T> errorCallback,
+  ) {
     T obtainedKey;
     bool didError = false;
     Future<void> handleError(dynamic exception, StackTrace stack) async {
       if (didError) {
         return;
       }
+      if (!didError) {
+        errorCallback(obtainedKey, exception, stack);
+      }
       didError = true;
-      await null; // wait an event turn in case a listener has been added to the image stream.
-      final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
-      stream.setCompleter(imageCompleter);
-      imageCompleter.setError(
-        exception: exception,
-        stack: stack,
-        context: ErrorDescription('while resolving an image'),
-        silent: true, // could be a network error or whatnot
-        informationCollector: () sync* {
-          yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-          yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
-          yield DiagnosticsProperty<T>('Image key', obtainedKey, defaultValue: null);
-        },
-      );
     }
 
     // If an error is added to a synchronous completer before a listener has been
@@ -453,7 +447,7 @@ abstract class ImageProvider<T> {
       key.then<void>((T key) {
         obtainedKey = key;
         try {
-          resolveStreamForKey(configuration, stream, key, handleError);
+          successCallback(key, handleError);
         } catch (error, stackTrace) {
           handleError(error, stackTrace);
         }

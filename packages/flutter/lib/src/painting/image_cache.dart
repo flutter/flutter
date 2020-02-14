@@ -393,12 +393,12 @@ class ImageCache {
 
   /// The number of live images being held by the [ImageCache].
   ///
-  /// Compare with [ImageCache.currentSize] for completed held images.
+  /// Compare with [ImageCache.currentSize] for keepAlive images.
   int get liveImageCount => _liveImages.length;
 
   /// The number of images being tracked as pending in the [ImageCache].
   ///
-  /// Compare with [ImageCache.currentSize] for keepAlive held images.
+  /// Compare with [ImageCache.currentSize] for keepAlive images.
   int get pendingImageCount => _pendingImages.length;
 
   /// Clears any live references to images in this cache.
@@ -451,7 +451,6 @@ class ImageCache {
 ///
 /// A [pending] image is one that has not completed yet. It may also be tracked
 /// as [live] because something is listening to it.
-///
 ///
 /// A [keepAlive] image is being held in the cache, which uses Least Recently
 /// Used semantics to determine when to evict an image. These images are subject
