@@ -518,7 +518,7 @@ void main() {
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('am')), false);
     });
 
-    test('throws when arb file\'s locale could not be determined', () {
+    test("throws when arb file's locale could not be determined", () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true)
         ..childFile('app.arb')

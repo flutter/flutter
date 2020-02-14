@@ -34,6 +34,8 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/multi_server_socket",
     "//third_party/dart-pkg/pub/multicast_dns",
     "//third_party/dart-pkg/pub/mustache",
+    "//third_party/dart-pkg/pub/native_stack_traces",
+    "//third_party/dart-pkg/pub/node_preamble",
     "//third_party/dart-pkg/pub/package_config",
     "//third_party/dart-pkg/pub/path",
     "//third_party/dart-pkg/pub/platform",
@@ -51,7 +53,6 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/webkit_inspection_protocol",
     "//third_party/dart-pkg/pub/xml",
     "//third_party/dart-pkg/pub/yaml",
-    "//third_party/dart-pkg/pub/node_preamble",
   ]
 }
 

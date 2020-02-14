@@ -53,6 +53,15 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
   print('$clock ELAPSED TIME: ${prettyPrintDuration(time.elapsed)} for $green$commandDescription$reset in $cyan$relativeWorkingDir$reset');
 }
 
+/// Runs the `executable` and waits until the process exits.
+///
+/// If the process exits with a non-zero exit code, exits this process with
+/// exit code 1, unless `expectNonZeroExit` is set to true.
+///
+/// `outputListener` is called for every line of standard output from the
+/// process, and is given the [Process] object. This can be used to interrupt
+/// an indefinitely running process, for example, by waiting until the process
+/// emits certain output.
 Future<void> runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
@@ -63,6 +72,7 @@ Future<void> runCommand(String executable, List<String> arguments, {
   CapturedOutput output,
   bool skip = false,
   bool Function(String) removeLine,
+  void Function(String, Process) outputListener,
 }) async {
   assert(
     (outputMode == OutputMode.capture) == (output != null),
@@ -88,7 +98,13 @@ Future<void> runCommand(String executable, List<String> arguments, {
     .transform<String>(const Utf8Decoder())
     .transform(const LineSplitter())
     .where((String line) => removeLine == null || !removeLine(line))
-    .map((String line) => '$line\n')
+    .map((String line) {
+      final String formattedLine = '$line\n';
+      if (outputListener != null) {
+        outputListener(formattedLine, process);
+      }
+      return formattedLine;
+    })
     .transform(const Utf8Encoder());
   switch (outputMode) {
     case OutputMode.print:

@@ -31,7 +31,7 @@ bool debugCheckHasMaterial(BuildContext context) {
           '${context.widget.runtimeType} widgets require a Material '
           'widget ancestor.\n'
           'In material design, most widgets are conceptually "printed" on '
-          'a sheet of material. In Flutter\'s material library, that '
+          "a sheet of material. In Flutter's material library, that "
           'material is represented by the Material widget. It is the '
           'Material widget that renders ink splashes, for instance. '
           'Because of this, many material library widgets require that '
