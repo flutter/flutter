@@ -21,7 +21,7 @@ void main(List<String> args) {
 
   // Since I didn't want to add the XML package as a dependency just for this,
   // I just used a regular expression to make this simple change.
-  final RegExp findRe = RegExp(r'''(\s*<key>DocSetPlatformFamily</key>\s*<string>)[^<]+(</string>)''', multiLine: true);
+  final RegExp findRe = RegExp(r'(\s*<key>DocSetPlatformFamily</key>\s*<string>)[^<]+(</string>)', multiLine: true);
   contents = contents.replaceAllMapped(findRe, (Match match) {
     return '${match.group(1)}dartlang${match.group(2)}';
   });

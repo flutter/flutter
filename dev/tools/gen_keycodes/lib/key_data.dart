@@ -146,7 +146,7 @@ class KeyData {
   /// Also, note that some keys (notably MEDIA_EJECT) can be mapped to more than
   /// one scan code, so the mapping can't just be 1:1, it has to be 1:many.
   Map<String, List<int>> _readAndroidScanCodes(String keyboardLayout) {
-    final RegExp keyEntry = RegExp(r'''#?\s*key\s+([0-9]+)\s*"?(?:KEY_)?([0-9A-Z_]+|\(undefined\))"?\s*(FUNCTION)?''');
+    final RegExp keyEntry = RegExp(r'#?\s*key\s+([0-9]+)\s*"?(?:KEY_)?([0-9A-Z_]+|\(undefined\))"?\s*(FUNCTION)?');
     final Map<String, List<int>> result = <String, List<int>>{};
     keyboardLayout.replaceAllMapped(keyEntry, (Match match) {
       if (match.group(3) == 'FUNCTION') {
@@ -176,7 +176,7 @@ class KeyData {
     final RegExp enumBlock = RegExp(r'enum\s*\{(.*)\};', multiLine: true);
     // Eliminate everything outside of the enum block.
     headerFile = headerFile.replaceAllMapped(enumBlock, (Match match) => match.group(1));
-    final RegExp enumEntry = RegExp(r'''AKEYCODE_([A-Z0-9_]+)\s*=\s*([0-9]+),?''');
+    final RegExp enumEntry = RegExp(r'AKEYCODE_([A-Z0-9_]+)\s*=\s*([0-9]+),?');
     final Map<String, int> result = <String, int>{};
     for (final Match match in enumEntry.allMatches(headerFile)) {
       result[match.group(1)] = int.parse(match.group(2));
@@ -191,7 +191,7 @@ class KeyData {
   ///  #define GLFW_KEY_SPACE              32,
   Map<String, int> _readGlfwKeyCodes(String headerFile) {
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
-    final RegExp enumEntry = RegExp(r'''define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?''');
+    final RegExp enumEntry = RegExp(r'define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?');
     final Map<String, dynamic> replaced = <String, dynamic>{};
     for (final Match match in enumEntry.allMatches(headerFile)) {
       replaced[match.group(1)] = int.tryParse(match.group(2)) ?? match.group(2).replaceAll('GLFW_KEY_', '');
@@ -216,8 +216,8 @@ class KeyData {
   List<Key> _readHidEntries(String input) {
     final List<Key> entries = <Key>[];
     final RegExp usbMapRegExp = RegExp(
-        r'''USB_KEYMAP\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'''
-        r'''\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*"?([^\s]+?)"?,\s*([^\s]+?)\s*\)''',
+        r'USB_KEYMAP\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'
+        r'\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*"?([^\s]+?)"?,\s*([^\s]+?)\s*\)',
         multiLine: true);
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
@@ -418,9 +418,9 @@ class Key {
   @override
   String toString() {
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """
-        '''linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '''
-        '''windowsKeyCode: ${toHex(windowsScanCode)}, macOsScanCode: ${toHex(macOsScanCode)}, '''
-        '''chromiumSymbolName: $chromiumName''';
+        'linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
+        'windowsKeyCode: ${toHex(windowsScanCode)}, macOsScanCode: ${toHex(macOsScanCode)}, '
+        'chromiumSymbolName: $chromiumName';
   }
 
   /// Returns the static map of printable representations.
