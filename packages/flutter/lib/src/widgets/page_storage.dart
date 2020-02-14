@@ -133,17 +133,24 @@ class PageStorageBucket {
 ///
 /// {@tool snippet}
 ///
-/// This sample creates a page storage for MyHomePage
+/// This sample uses page storage to implement to counter.
 ///
 /// ```dart
+/// void main() => runApp(MyApp());
+/// 
 /// class MyApp extends StatelessWidget {
 ///   final PageStorageBucket _bucket = PageStorageBucket();
-///   final PageStorageKey mykey = PageStorageKey('testkey');
+///   final PageStorageKey mykey = PageStorageKey('counter');
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
+///       title: 'Flutter Demo',
+///       theme: ThemeData(
+///         primarySwatch: Colors.blue,
+///       ),
 ///       home: PageStorage(
-///         child: MyHomePage(),
+///         child: MyHomePage(title: 'Flutter Demo Home Page'),
 ///         bucket: _bucket,
 ///         key: mykey,
 ///       ),
@@ -151,25 +158,59 @@ class PageStorageBucket {
 ///   }
 /// }
 ///
-/// class MyHomePage extends StatelessWidget {
-/// @override
-/// Widget build(BuildContext context) {
-///   return Text('PageStorage is awesome');
+/// class MyHomePage extends StatefulWidget {
+///   MyHomePage({Key key, this.title}) : super(key: key);
+///   final String title;
+///
+///   @override
+///   _MyHomePageState createState() => _MyHomePageState();
+/// }
+///
+/// class _MyHomePageState extends State<MyHomePage> {
+///   @override
+///   void initState() {
+///     PageStorage.of(context)
+///         .writeState(context, 0, identifier: ValueKey('counter'));
+///     super.initState();
 ///   }
-/// }
-/// ```
 ///
-/// ```dart write data to [PageStorage]
-/// void writeData(context,mykey){
-///   // mykey is the [PageStorageKey] defined before.
-///   PageStorage.of(context).writeState(context, 'Data saved', identifier: ValueKey(mykey));
-/// }
-/// ```
+///   void _incrementCounter() {
+///     var counterNumber = PageStorage.of(context)
+///             .readState(context, identifier: ValueKey('counter')) +
+///         1;
+///     PageStorage.of(context)
+///         .writeState(context, counterNumber, identifier: ValueKey('counter'));
+///     setState(() {});
+///   }
 ///
-/// ``` dart read data from [PageStorage]
-/// void readData(context,mykey){
-///   // mykey is the [PageStorageKey] defined before.
-///   PageStorage.of(context).readState(context, identifier: ValueKey(mykey));
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text(widget.title),
+///       ),
+///       body: Center(
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           children: <Widget>[
+///             Text(
+///               'You have pushed the button this many times:',
+///             ),
+///             Text(
+///                 PageStorage.of(context)
+///                     .readState(context, identifier: ValueKey('counter'))
+///                     .toString(),
+///                 style: Theme.of(context).textTheme.headline5),
+///           ],
+///         ),
+///       ),
+///       floatingActionButton: FloatingActionButton(
+///         onPressed: _incrementCounter,
+///         tooltip: 'Increment',
+///         child: Icon(Icons.add),
+///       ),
+///     );
+///   }
 /// }
 /// ```
 /// {@end-tool}
