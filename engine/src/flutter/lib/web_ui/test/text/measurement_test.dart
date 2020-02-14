@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('chrome || firefox')
-
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/src/engine.dart';
 
@@ -31,14 +29,19 @@ typedef MeasurementTestBody = void Function(TextMeasurementService instance);
 
 /// Runs the same test twice - once with dom measurement and once with canvas
 /// measurement.
-void testMeasurements(String description, MeasurementTestBody body) {
+void testMeasurements(String description, MeasurementTestBody body, {
+  bool skipDom,
+  bool skipCanvas,
+}) {
   test(
     '$description (dom)',
     () => body(TextMeasurementService.domInstance),
+    skip: skipDom,
   );
   test(
     '$description (canvas)',
     () => body(TextMeasurementService.canvasInstance),
+    skip: skipCanvas,
   );
 }
 
@@ -383,6 +386,7 @@ void main() async {
           expect(result.lines, isNull);
         }
       },
+      skipDom: browserEngine == BrowserEngine.webkit,
     );
 
     testMeasurements(
@@ -797,6 +801,7 @@ void main() async {
           expect(result.lines, isNull);
         }
       },
+      skipDom: browserEngine == BrowserEngine.webkit,
     );
 
     testMeasurements('respects max lines', (TextMeasurementService instance) {
