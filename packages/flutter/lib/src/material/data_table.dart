@@ -470,6 +470,7 @@ class DataTable extends StatelessWidget {
   static const Color _grey300Opacity = Color(0x1E000000); // Dark theme variant is just a guess.
 
   /// The width of the divider that appears between [TableRow]s.
+  /// 
   /// Must be non-null and greater than or equal to zero.
   /// This value defaults to 1.0.
   final double dividerThickness;
