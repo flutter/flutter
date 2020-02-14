@@ -20,7 +20,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 const int benchmarkServerPort = 9999;
 
 Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
-  final String macrobenchmarksDirectory = path.join('${flutterDirectory.path}', 'dev', 'benchmarks', 'macrobenchmarks');
+  final String macrobenchmarksDirectory = path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks');
   return await inDirectory(macrobenchmarksDirectory, () async {
     await evalFlutter('build', options: <String>[
       'web',
@@ -71,7 +71,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
             'This request is not handled by the profile-data handler.');
       }
     }).add(createStaticHandler(
-      path.join('$macrobenchmarksDirectory', 'build', 'web'),
+      path.join(macrobenchmarksDirectory, 'build', 'web'),
     ));
 
     server = await io.HttpServer.bind('localhost', benchmarkServerPort);
