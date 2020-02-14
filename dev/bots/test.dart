@@ -595,7 +595,7 @@ Future<void> _runWebIntegrationTests() async {
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
-  final String appBuildDirectory = path.join('$testAppDirectory', 'build', 'web');
+  final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
 
   // Build the app.
   await runCommand(
