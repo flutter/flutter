@@ -7,6 +7,7 @@ web_shard_template: &WEB_SHARD_TEMPLATE
     # As of October 2019, the Web shards needed more than 6G of RAM.
     CPU: 2
     MEMORY: 8G
+    CHROME_NO_SANDBOX: true
     GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
   script:
     - dart --enable-asserts ./dev/bots/test.dart
@@ -172,6 +173,9 @@ task:
       script:
         - dart --enable-asserts ./dev/bots/test.dart
         - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/coverage/lcov.info -F flutter_tool
+
+    - name: web_integration_tests
+      << : *WEB_SHARD_TEMPLATE
 
     - name: web_tests-0-linux
       << : *WEB_SHARD_TEMPLATE

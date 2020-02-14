@@ -108,7 +108,15 @@ class CopyAssets extends Target {
       .childDirectory('flutter_assets');
     output.createSync(recursive: true);
     final Depfile depfile = await copyAssets(environment, output);
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
   }
 }
 

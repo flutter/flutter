@@ -25,6 +25,7 @@ import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
+import 'src/commands/downgrade.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
@@ -76,6 +77,7 @@ Future<void> main(List<String> args) async {
     DaemonCommand(hidden: !verboseHelp),
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
+    DowngradeCommand(),
     DriveCommand(),
     EmulatorsCommand(),
     FormatCommand(),
