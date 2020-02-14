@@ -914,6 +914,7 @@ void main() {
 
     tester.testTextInput.log.clear();
     tester.testTextInput.closeConnection();
+    await tester.pump();
 
     // Widget does not have focus anymore.
     expect(state.wantKeepAlive, false);
