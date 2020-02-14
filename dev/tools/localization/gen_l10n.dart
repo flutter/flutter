@@ -27,7 +27,7 @@ String generateDateFormattingLogic(Message message) {
     return '@(none)';
 
   final Iterable<String> formatStatements = message.placeholders
-    .where ((Placeholder placeholder) => placeholder.isDate)
+    .where((Placeholder placeholder) => placeholder.isDate)
     .map((Placeholder placeholder) {
       if (placeholder.format == null) {
         throw L10nException(
@@ -61,7 +61,7 @@ String generateNumberFormattingLogic(Message message) {
   }
 
   final Iterable<String> formatStatements = message.placeholders
-    .where ((Placeholder placeholder) => placeholder.isNumber)
+    .where((Placeholder placeholder) => placeholder.isNumber)
     .map((Placeholder placeholder) {
       if (!placeholder.hasValidNumberFormat) {
         throw L10nException(
@@ -192,7 +192,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateClass(String className,  AppResourceBundle bundle, Iterable<Message> messages) {
+String generateClass(String className, AppResourceBundle bundle, Iterable<Message> messages) {
   final LocaleInfo locale = bundle.locale;
 
   String baseClassName = className;
@@ -289,9 +289,8 @@ class LocalizationsGenerator {
   LocalizationsGenerator(this._fs);
 
   final file.FileSystem _fs;
-  // TBD: private data
-  Iterable<Message> allMessages;
-  AppResourceBundleCollection allBundles;
+  Iterable<Message> _allMessages;
+  AppResourceBundleCollection _allBundles;
 
 
   /// The reference to the project's l10n directory.
@@ -342,7 +341,7 @@ class LocalizationsGenerator {
 
   /// The list of all arb path strings in [l10nDirectory].
   List<String> get arbPathStrings {
-    return allBundles.bundles.map((AppResourceBundle bundle) => bundle.file.path).toList();
+    return _allBundles.bundles.map((AppResourceBundle bundle) => bundle.file.path).toList();
   }
 
   /// The supported language codes as found in the arb files located in
@@ -495,12 +494,12 @@ class LocalizationsGenerator {
     return true;
   }
 
-  // Load allMessages from templateArbFile and allBundles from all of the ARB
+  // Load _allMessages from templateArbFile and _allBundles from all of the ARB
   // files in l10nDirectory. Also initialized: supportedLocales.
   void loadResources() {
     final AppResourceBundle templateBundle = AppResourceBundle(templateArbFile);
-    allMessages = templateBundle.resourceIds.map((String id) => Message(templateBundle.resources, id));
-    for(final String resourceId in templateBundle.resourceIds)
+    _allMessages = templateBundle.resourceIds.map((String id) => Message(templateBundle.resources, id));
+    for (final String resourceId in templateBundle.resourceIds)
       if (!_isValidGetterAndMethodName(resourceId)) {
         throw L10nException(
           'Invalid ARB resource name "$resourceId" in $templateArbFile.\n'
@@ -510,9 +509,9 @@ class LocalizationsGenerator {
         );
       }
 
-    allBundles = AppResourceBundleCollection(l10nDirectory);
+    _allBundles = AppResourceBundleCollection(l10nDirectory);
 
-    final List<LocaleInfo> allLocales = List<LocaleInfo>.from(allBundles.locales);
+    final List<LocaleInfo> allLocales = List<LocaleInfo>.from(_allBundles.locales);
     for (final LocaleInfo preferredLocale in preferredSupportedLocales) {
       final int index = allLocales.indexOf(preferredLocale);
       if (index == -1) {
@@ -541,23 +540,23 @@ class LocalizationsGenerator {
     });
 
     final Set<String> supportedLanguageCodes = Set<String>.from(
-      allBundles.locales.map<String>((LocaleInfo locale) => '\'${locale.languageCode}\'')
+      _allBundles.locales.map<String>((LocaleInfo locale) => '\'${locale.languageCode}\'')
     );
 
     final StringBuffer allMessagesClasses = StringBuffer();
-    final List<LocaleInfo> allLocales = allBundles.locales.toList()..sort();
+    final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
     for (final LocaleInfo locale in allLocales) {
       allMessagesClasses.writeln();
       allMessagesClasses.writeln(
-        generateClass(className, allBundles.bundleFor(locale), allMessages)
+        generateClass(className, _allBundles.bundleFor(locale), _allMessages)
       );
     }
 
-    final String lookupBody = generateLookupBody(allBundles.locales, className);
+    final String lookupBody = generateLookupBody(_allBundles.locales, className);
 
     return fileTemplate
       .replaceAll('@(class)', className)
-      .replaceAll('@(methods)', allMessages.map(generateBaseClassMethod).join('\n'))
+      .replaceAll('@(methods)', _allMessages.map(generateBaseClassMethod).join('\n'))
       .replaceAll('@(importFile)', '$directory/$outputFileName')
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))

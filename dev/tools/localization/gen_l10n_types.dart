@@ -126,6 +126,25 @@ class L10nException implements Exception {
 }
 
 // One optional named parameter to be used by a NumberFormat.
+//
+// Some of the NumberFormat factory constructors have optional named parameters.
+// For example NumberFormat.compactCurrency has a decimalDigits parameter that
+// specifies the number of decimal places to use when formatting.
+//
+// Optional parameters for NumberFormat placeholders are specified as a
+// JSON map value for optionalParameters in a resource's "@" ARB file entry:
+//
+// "@myResourceId": {
+//   "placeholders": {
+//     "myNumberPlaceholder": {
+//       "type": "double",
+//       "format": "compactCurrency",
+//       "optionalParameters": {
+//         "decimalDigits": 2
+//       }
+//     }
+//   }
+// }
 class OptionalParameter {
   const OptionalParameter(this.name, this.value) : assert(name != null), assert(value != null);
 
@@ -134,6 +153,38 @@ class OptionalParameter {
 }
 
 // One message parameter: one placeholder from an @foo entry in the template ARB file.
+//
+// Placeholders are specified as a JSON map with one entry for each placeholder.
+// One placeholder must be specified for each message "{parameter}".
+// Each placeholder entry is also a JSON map. If the map is empty, the placeholder
+// is assumed to be an Object value whose toString() value will be displayed.
+// For example:
+//
+// "greeting": "{hello} {world}",
+// "@greeting": {
+//   "description": "A message with a two parameters",
+//   "placeholders": {
+//     "hello": {},
+//     "world": {}
+//   }
+// }
+//
+// Each placeholder can optionally specify a valid Dart type. If the type
+// is NumberFormat or DateFormat then a format which matches one of the
+// type's factory constructors can also be specified. In this example the
+// date placeholder is to be formated with DateFormat.yMMMMd:
+//
+// "helloWorldOn": "Hello World on {date}",
+// "@helloWorldOn": {
+//   "description": "A message with a date parameter",
+//   "placeholders": {
+//     "date": {
+//       "type": "DateTime",
+//       "format": "yMMMMd"
+//     }
+//   }
+// }
+//
 class Placeholder {
   Placeholder(this.resourceId, this.name, Map<String, dynamic> attributes)
     : assert(resourceId != null),
@@ -198,6 +249,20 @@ class Placeholder {
 }
 
 // One translation: one pair of foo,@foo entries from the template ARB file.
+//
+// The template ARB file must contain an entry called @myResourceId for each
+// message named myResourceId. The @ entry describes message parameters
+// called "placeholders" and can include an optional description.
+// Here's a simple example message with no parameters:
+//
+// "helloWorld": "Hello World",
+// "@helloWorld": {
+//   "description": "The conventional newborn programmer greeting"
+// }
+//
+// The value of this Message is "Hello World". The Message's value is the
+// localized string to be shown for the template ARB file's locale.
+// The docs for the Placeholder explain how placeholder entries are defined.
 class Message {
   Message(Map<String, dynamic> bundle, this.resourceId)
     : assert(bundle != null),
