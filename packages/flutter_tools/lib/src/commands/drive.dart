@@ -198,7 +198,7 @@ class DriveCommand extends RunCommandBase {
         throwToolExit(
             'Unable to start WebDriver Session for Flutter for Web testing. \n'
             'Make sure you have the correct WebDriver Server running at $driverPort. \n'
-            'Make sure the WebDriver Server matches option 'browser-name'. '
+            'Make sure the WebDriver Server matches option browser-name. '
             '$ex'
         );
       }
