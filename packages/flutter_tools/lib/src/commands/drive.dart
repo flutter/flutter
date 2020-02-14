@@ -506,6 +506,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
       break;
     case Browser.firefox:
       return <String, dynamic>{
+        'acceptInsecureCerts': true,
         'browserName': 'firefox',
         'moz:firefoxOptions' : <String, dynamic>{
           'args': <String>[
