@@ -284,6 +284,115 @@ void main() async {
     TextMeasurementService.enableExperimentalCanvasImplementation = false;
   });
 
+  test('getPositionForOffset multi-line centered', () {
+    TextMeasurementService.enableExperimentalCanvasImplementation = true;
+    TextMeasurementService.initialize(rulerCacheCapacity: 2);
+
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    ));
+    builder.addText('abcd\n');
+    builder.addText('abcdefg\n');
+    builder.addText('ab');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 100));
+
+    // First line: "abcd\n"
+
+    // At the beginning of the first line.
+    expect(
+      paragraph.getPositionForOffset(Offset(0, 5)),
+      TextPosition(offset: 0, affinity: TextAffinity.downstream),
+    );
+    // Above the first line.
+    expect(
+      paragraph.getPositionForOffset(Offset(0, -15)),
+      TextPosition(offset: 0, affinity: TextAffinity.downstream),
+    );
+    // At the end of the first line.
+    expect(
+      paragraph.getPositionForOffset(Offset(100, 5)),
+      TextPosition(offset: 4, affinity: TextAffinity.upstream),
+    );
+    // On the left side of "b" in the first line.
+    expect(
+      // The line is centered so it's shifted to the right by "30.0px".
+      paragraph.getPositionForOffset(Offset(30.0 + 14, 5)),
+      TextPosition(offset: 1, affinity: TextAffinity.downstream),
+    );
+    // On the right side of "b" in the first line.
+    expect(
+      // The line is centered so it's shifted to the right by "30.0px".
+      paragraph.getPositionForOffset(Offset(30.0 + 16, 5)),
+      TextPosition(offset: 2, affinity: TextAffinity.upstream),
+    );
+
+
+    // Second line: "abcdefg\n"
+
+    // At the beginning of the second line.
+    expect(
+      paragraph.getPositionForOffset(Offset(0, 15)),
+      TextPosition(offset: 5, affinity: TextAffinity.downstream),
+    );
+    // At the end of the second line.
+    expect(
+      paragraph.getPositionForOffset(Offset(100, 15)),
+      TextPosition(offset: 12, affinity: TextAffinity.upstream),
+    );
+    // On the left side of "e" in the second line.
+    expect(
+      // The line is centered so it's shifted to the right by "15.0px".
+      paragraph.getPositionForOffset(Offset(15.0 + 44, 15)),
+      TextPosition(offset: 9, affinity: TextAffinity.downstream),
+    );
+    // On the right side of "e" in the second line.
+    expect(
+      // The line is centered so it's shifted to the right by "15.0px".
+      paragraph.getPositionForOffset(Offset(15.0 + 46, 15)),
+      TextPosition(offset: 10, affinity: TextAffinity.upstream),
+    );
+
+
+    // Last (third) line: "ab"
+
+    // At the beginning of the last line.
+    expect(
+      paragraph.getPositionForOffset(Offset(0, 25)),
+      TextPosition(offset: 13, affinity: TextAffinity.downstream),
+    );
+    // At the end of the last line.
+    expect(
+      paragraph.getPositionForOffset(Offset(100, 25)),
+      TextPosition(offset: 15, affinity: TextAffinity.upstream),
+    );
+    // Below the last line.
+    expect(
+      paragraph.getPositionForOffset(Offset(0, 32)),
+      TextPosition(offset: 15, affinity: TextAffinity.upstream),
+    );
+    // On the left side of "b" in the last line.
+    expect(
+      // The line is centered so it's shifted to the right by "40.0px".
+      paragraph.getPositionForOffset(Offset(40.0 + 12, 25)),
+      TextPosition(offset: 14, affinity: TextAffinity.downstream),
+    );
+    // On the right side of "a" in the last line.
+    expect(
+      // The line is centered so it's shifted to the right by "40.0px".
+      paragraph.getPositionForOffset(Offset(40.0 + 9, 25)),
+      TextPosition(offset: 14, affinity: TextAffinity.upstream),
+    );
+
+    TextMeasurementService.clearCache();
+    TextMeasurementService.enableExperimentalCanvasImplementation = false;
+  });
+
   testEachMeasurement('getBoxesForRange returns a box', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
       fontFamily: 'Ahem',
