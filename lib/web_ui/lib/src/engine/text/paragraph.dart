@@ -434,7 +434,7 @@ class EngineParagraph implements ui.Paragraph {
     // code below will do a binary search to find where exactly the [offset]
     // falls within the line.
 
-    final double dx = offset.dx - _alignOffset;
+    final double dx = offset.dx - lineMetrics.left;
     final TextMeasurementService instance = _measurementService;
 
     int low = lineMetrics.startIndex;
