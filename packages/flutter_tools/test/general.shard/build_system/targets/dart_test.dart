@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -28,6 +29,7 @@ void main() {
   FakeProcessManager processManager;
   Environment androidEnvironment;
   Environment iosEnvironment;
+  Artifacts artifacts;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -51,6 +53,11 @@ void main() {
         },
       );
       iosEnvironment.buildDir.createSync(recursive: true);
+      artifacts = CachedArtifacts(
+        cache: globals.cache,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+      );
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(operatingSystem: 'macos', environment: <String, String>{}),
       FileSystem: () => MemoryFileSystem.test(style: FileSystemStyle.posix),
@@ -69,10 +76,10 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/dart',
-        'bin/cache/artifacts/engine/darwin-x64/frontend_server.dart.snapshot',
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        'bin/cache/artifacts/engine/common/flutter_patched_sdk/',
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
         '--target=flutter',
         '-Ddart.developer.causal_async_stacks=false',
         ...buildModeOptions(BuildMode.profile),
@@ -96,10 +103,10 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/dart',
-        'bin/cache/artifacts/engine/darwin-x64/frontend_server.dart.snapshot',
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        'bin/cache/artifacts/engine/common/flutter_patched_sdk/',
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
         '--target=flutter',
         '-Ddart.developer.causal_async_stacks=false',
         ...buildModeOptions(BuildMode.profile),
@@ -123,10 +130,10 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/dart',
-        'bin/cache/artifacts/engine/darwin-x64/frontend_server.dart.snapshot',
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        'bin/cache/artifacts/engine/common/flutter_patched_sdk/',
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
         '--target=flutter',
         '-Ddart.developer.causal_async_stacks=true',
         ...buildModeOptions(BuildMode.debug),
@@ -151,10 +158,10 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/dart',
-        'bin/cache/artifacts/engine/darwin-x64/frontend_server.dart.snapshot',
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        'bin/cache/artifacts/engine/common/flutter_patched_sdk/',
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
         '--target=flutter',
         '-Ddart.developer.causal_async_stacks=true',
         ...buildModeOptions(BuildMode.debug),
@@ -187,10 +194,10 @@ void main() {
     final String build = testEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
-        'bin/cache/dart-sdk/bin/dart',
-        'bin/cache/artifacts/engine/darwin-x64/frontend_server.dart.snapshot',
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
-        'bin/cache/artifacts/engine/common/flutter_patched_sdk/',
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
         '--target=flutter',
         '-Ddart.developer.causal_async_stacks=true',
         ...buildModeOptions(BuildMode.debug),
@@ -213,7 +220,7 @@ void main() {
     final String build = androidEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
-        'bin/cache/artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
+        artifacts.getArtifactPath(Artifact.genSnapshot, mode: BuildMode.profile),
         '--deterministic',
         kElfAot,
         '--elf=$build/app.so',
@@ -267,6 +274,7 @@ void main() {
     final String build = iosEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
+        // This path is not known by the cache due to the iOS gen_snapshot split.
         'bin/cache/artifacts/engine/ios-profile/gen_snapshot_armv7',
         '--deterministic',
         kAssemblyAot,
@@ -279,6 +287,7 @@ void main() {
         '$build/app.dill',
       ]),
       FakeCommand(command: <String>[
+        // This path is not known by the cache due to the iOS gen_snapshot split.
         'bin/cache/artifacts/engine/ios-profile/gen_snapshot_arm64',
         '--deterministic',
         kAssemblyAot,
@@ -390,6 +399,7 @@ void main() {
     final String build = iosEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
+        // This path is not known by the cache due to the iOS gen_snapshot split.
         'bin/cache/artifacts/engine/ios-profile/gen_snapshot_arm64',
         '--deterministic',
         kAssemblyAot,
@@ -463,7 +473,7 @@ void main() {
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
-        'bin/cache/artifacts/engine/android-arm-profile/darwin-x64/gen_snapshot',
+        artifacts.getArtifactPath(Artifact.genSnapshot, mode: BuildMode.profile),
         '--deterministic',
         'foo',
         'bar',
