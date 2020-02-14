@@ -177,13 +177,17 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  Widget selectableTextBuilder({String text = '', int maxLines = 1, int minLines}) {
+  Widget selectableTextBuilder({
+    String text = '',
+    int maxLines = 1,
+    int minLines,
+  }) {
     return boilerplate(
       child: SelectableText(
         text,
         style: const TextStyle(color: Colors.black, fontSize: 34.0),
         maxLines: maxLines,
-        minLines: minLines
+        minLines: minLines,
       ),
     );
   }
@@ -1172,7 +1176,9 @@ void main() {
       );
     } on AssertionError catch (e) {
       expect(e.toString(), contains("minLines can't be greater than maxLines"));
+      return;
     }
+    fail('An assert should be triggered when minLines is greater than maxLines');
   });
 
   testWidgets('Selectable height with minLine', (WidgetTester tester) async {
