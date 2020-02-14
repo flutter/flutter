@@ -2937,7 +2937,7 @@ class InputDecoration {
   ///
   /// {@tool dartpad --template=stateless_widget_scaffold}
   /// This example shows the differences between two `TextField` widgets when
-  /// [sufficIconConstraints] is set to the default value and when one is not.
+  /// [suffixIconConstraints] is set to the default value and when one is not.
   ///
   /// Note that [isDense] must be set to true to be able to
   /// set the constraints smaller than 48px.
@@ -2964,7 +2964,7 @@ class InputDecoration {
   ///             isDense: true,
   ///             hintText:'Smaller Icon Constraints',
   ///             suffixIcon: Icon(Icons.search),
-  ///             sufficIconConstraints: BoxConstraints(
+  ///             suffixIconConstraints: BoxConstraints(
   ///               minHeight: 32,
   ///               minWidth: 32,
   ///             ),
