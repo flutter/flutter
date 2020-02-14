@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:webdriver/async_io.dart' as async_io;
 import 'package:meta/meta.dart';
+import 'package:webdriver/async_io.dart' as async_io;
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -148,8 +148,8 @@ class DriveCommand extends RunCommandBase {
 
       if (isWebPlatform) {
         throwToolExit(
-            'Flutter Driver (web) does not support running without use-existing-app.\n'
-            'Please launch your application beforehand and connects via use-existing-app.'
+          'Flutter Driver (web) does not support running without use-existing-app.\n'
+          'Please launch your application beforehand and connects via use-existing-app.'
         );
       }
 
@@ -196,10 +196,10 @@ class DriveCommand extends RunCommandBase {
         );
       } catch (ex) {
         throwToolExit(
-            'Unable to start WebDriver Session for Flutter for Web testing. \n'
-            'Make sure you have the correct WebDriver Server running at $driverPort. \n'
-            'Make sure the WebDriver Server matches option browser-name. '
-            '$ex'
+          'Unable to start WebDriver Session for Flutter for Web testing. \n'
+          'Make sure you have the correct WebDriver Server running at $driverPort. \n'
+          'Make sure the WebDriver Server matches option browser-name. \n'
+          '$ex'
         );
       }
 
@@ -242,7 +242,7 @@ class DriveCommand extends RunCommandBase {
       if (error is ToolExit) {
         rethrow;
       }
-      throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
+      throw 'Unable to run test: $error\n$stackTrace';
     } finally {
       await driver?.quit();
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
