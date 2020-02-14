@@ -76,6 +76,7 @@ class IOSDeploy {
 
     return await processUtils.stream(
       launchCommand,
+      mapFunction: _monitorFailure,
       trace: true,
       environment: iosDeployEnv,
     );
@@ -104,7 +105,7 @@ class IOSDeploy {
 
     return await processUtils.stream(
       launchCommand,
-      mapFunction: _monitorInstallationFailure,
+      mapFunction: _monitorFailure,
       trace: true,
       environment: iosDeployEnv,
     );
@@ -134,7 +135,7 @@ class IOSDeploy {
 
     return await processUtils.stream(
       launchCommand,
-      mapFunction: _monitorInstallationFailure,
+      mapFunction: _monitorFailure,
       trace: true,
       environment: iosDeployEnv,
     );
@@ -148,9 +149,14 @@ class IOSDeploy {
       _binaryPath,
       '--id',
       deviceId,
-      '--list_bundle_id',
+      '--exists',
+      '--bundle_id',
+      bundleId,
     ];
-    final RunResult result = await processUtils.run(launchCommand);
+    final RunResult result = await processUtils.run(
+      launchCommand,
+      environment: iosDeployEnv,
+    );
     if (result.exitCode != 0) {
       return false;
     }
@@ -158,7 +164,7 @@ class IOSDeploy {
   }
 
   // Maps stdout line stream. Must return original line.
-  String _monitorInstallationFailure(String stdout) {
+  String _monitorFailure(String stdout) {
     // Installation issues.
     if (stdout.contains('Error 0xe8008015') || stdout.contains('Error 0xe8000067')) {
       _logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -280,19 +286,6 @@ class IOSDevice extends Device {
       bundleId: app.id,
       deviceId: id,
     );
-    //RunResult apps;
-    //try {
-    //  apps = await processUtils.run(
-    //    <String>[_installerPath, '--list-apps'],
-    //    throwOnError: true,
-    //    environment: Map<String, String>.fromEntries(
-    //      <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
-    //    ),
-    //  );
-    //} on ProcessException {
-    //  return false;
-    //}
-    //return RegExp(app.id, multiLine: true).hasMatch(apps.stdout);
   }
 
   @override
@@ -300,15 +293,11 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> installApp(IOSApp app) async {
-    globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
-    globals.printError('In installApp()');
     final Directory bundle = globals.fs.directory(app.deviceBundlePath);
     if (!bundle.existsSync()) {
       globals.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
     }
-    globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
-    globals.printError('About to invoke ios-deploy');
     final int installationResult = await IOSDeploy.instance.installApp(
       deviceId: id,
       bundlePath: bundle.path,
@@ -322,21 +311,6 @@ class IOSDevice extends Device {
       return false;
     }
     return true;
-    //try {
-    //  globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
-    //  globals.printError('About to invoke ideviceinstaller');
-    //  await processUtils.run(
-    //    <String>[_installerPath, '-i', app.deviceBundlePath],
-    //    throwOnError: true,
-    //    environment: Map<String, String>.fromEntries(
-    //      <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
-    //    ),
-    //  );
-    //  return true;
-    //} on ProcessException catch (error) {
-    //  globals.printError(error.message);
-    //  return false;
-    //}
   }
 
   @override
@@ -351,19 +325,6 @@ class IOSDevice extends Device {
       return false;
     }
     return true;
-    //try {
-    //  await processUtils.run(
-    //    <String>[_installerPath, '-U', app.id],
-    //    throwOnError: true,
-    //    environment: Map<String, String>.fromEntries(
-    //      <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
-    //    ),
-    //  );
-    //  return true;
-    //} on ProcessException catch (error) {
-    //  globals.printError(error.message);
-    //  return false;
-    //}
   }
 
   @override
