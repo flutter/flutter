@@ -119,6 +119,62 @@ import 'inherited_notifier.dart';
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=stateless_widget_material}
+/// This example shows how to wrap another widget in a [Focus] widget to make it
+/// focusable. It wraps a [Container], and changes the container's color when it
+/// has the [primaryFocus].
+///
+/// If you also want to handle mouse hover and/or keyboard actions on a widget,
+/// consider using a [FocusableActionDetector], which combines several different
+/// widgets to provide those services.
+///
+/// ```dart preamble
+/// class FocusableText extends StatelessWidget {
+///   const FocusableText(this.data, {Key key, this.autofocus}) : super(key: key);
+///
+///   /// The string to display as the text for this widget.
+///   final String data;
+///
+///   /// Whether or not to focus this widget initially if nothing else is focused.
+///   final bool autofocus;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Focus(
+///       autofocus: autofocus,
+///       child: Builder(builder: (BuildContext context) {
+///         // The contents of this Builder are being made focusable. It is inside
+///         // of a Builder because the building provides the correct context
+///         // variable for Focus.of() to be able to find the Focus widget that is
+///         // the Builder's parent. Without the builder, the context variable used
+///         // would be the one given the FocusableText build function, and that
+///         // would start looking for a Focus widget ancestor of the FocusableText
+///         // instead of finding the one inside of its build function.
+///         return Container(
+///           padding: EdgeInsets.all(8.0),
+///           // Change the color based on whether or not this Container has focus.
+///           color: Focus.of(context).hasPrimaryFocus ? Colors.black12 : null,
+///           child: Text(data),
+///         );
+///       }),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ListView.builder(
+///     itemBuilder: (context, index) => FocusableText(
+///       'Item $index',
+///       autofocus: index == 0,
+///     ),
+///     itemCount: 50,
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [FocusNode], which represents a node in the focus hierarchy and
@@ -132,8 +188,8 @@ import 'inherited_notifier.dart';
 ///    distributes key events to focused nodes.
 ///  * [FocusTraversalPolicy], an object used to determine how to move the focus
 ///    to other nodes.
-///  * [DefaultFocusTraversal], a widget used to configure the default focus
-///    traversal policy for a widget subtree.
+///  * [FocusTraversalGroup], a widget that groups together and imposes a
+///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 class Focus extends StatefulWidget {
   /// Creates a widget that manages a [FocusNode].
   ///

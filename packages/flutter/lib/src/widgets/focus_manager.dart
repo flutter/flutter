@@ -18,7 +18,7 @@ import 'framework.dart';
 
 // Used for debugging focus code. Set to true to see highly verbose debug output
 // when focus changes occur.
-const bool _kDebugFocus = false;
+const bool _kDebugFocus = true;
 
 bool _focusDebug(String message, [Iterable<String> details]) {
   if (_kDebugFocus) {
