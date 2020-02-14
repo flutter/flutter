@@ -228,7 +228,7 @@ class RecordingCanvas {
   }
 
   void drawRRect(ui.RRect rrect, SurfacePaint paint) {
-    if (!rrect.webOnlyUniformRadii) {
+    if (paint.shader != null || !rrect.webOnlyUniformRadii) {
       _hasArbitraryPaint = true;
     }
     _didDraw = true;
