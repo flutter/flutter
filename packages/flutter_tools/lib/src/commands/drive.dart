@@ -127,7 +127,6 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    globals.printError('!!!!!!!!!!!In DriveCommand.runCommand()');
     final String testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
@@ -316,20 +315,17 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     return null;
   }
 
-  globals.printError('Stopping previously running application, if any.'); // TODO
+  globals.printTrace('Stopping previously running application, if any.');
   await appStopper(command);
 
   final ApplicationPackage package = await command.applicationPackages
       .getPackageForPlatform(await command.device.targetPlatform);
 
   if (command.shouldBuild) {
-    globals.printError('Yes, we shouldBuild'); // TODO
-    globals.printError('Installing application package.'); // TODO
+    globals.printTrace('Installing application package.');
     if (await command.device.isAppInstalled(package)) {
-      globals.printError('Uninstalling old application package.'); // TODO
       await command.device.uninstallApp(package);
     }
-    globals.printError('Installing new application package.'); // TODO
     await command.device.installApp(package);
   }
 
@@ -338,7 +334,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     platformArgs['trace-startup'] = command.traceStartup;
   }
 
-  globals.printError('Starting application.'); // TODO
+  globals.printTrace('Starting application.');
 
   // Forward device log messages to the terminal window running the "drive" command.
   command._deviceLogSubscription = command
@@ -347,7 +343,6 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       .logLines
       .listen(globals.printStatus);
 
-  globals.printError('About to device.startApp()'); // TODO
   final LaunchResult result = await command.device.startApp(
     package,
     mainPath: mainPath,
