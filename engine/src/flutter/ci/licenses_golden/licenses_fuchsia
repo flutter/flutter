@@ -1,4 +1,4 @@
-Signature: 09932dd69984436b27d6bb1c9f8af60b
+Signature: 62f3625f7edfaf1eb7cdd4c562ac3ea5
 
 UNUSED LICENSES:
 
@@ -449,6 +449,7 @@ FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
@@ -487,6 +488,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
@@ -520,7 +522,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
@@ -915,6 +916,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/wordexp.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/exception.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/clock.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/definitions.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/Scrt1.o
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libdl.so
@@ -1170,6 +1172,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/wordexp.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/exception.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/clock.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/definitions.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/scheduler.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/Scrt1.o
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libdl.so
@@ -1324,6 +1327,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/semantics_
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/credentials_producer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/pairing_options.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/constants.fidl
@@ -1413,6 +1417,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/usage_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/range.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/migration.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/meta.json
@@ -1492,7 +1497,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/pointer_capture.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/types.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/focuser.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view.fidl
@@ -2146,6 +2150,7 @@ FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.control/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
@@ -2184,6 +2189,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
@@ -2217,7 +2223,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.lifecycle/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
@@ -2488,13 +2493,7 @@ LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/null.h
 TYPE: LicenseType.mit
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/multiboot.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/scheduler.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/time.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/null.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/multiboot.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/scheduler.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/time.h
 ----------------------------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -2517,6 +2516,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/hw/usb/dfu.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/limits.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/smc.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/threads.h
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/time.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/driver-config.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/image.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/sysconfig.h
@@ -2527,6 +2527,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/hw/usb/dfu.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/limits.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/smc.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/threads.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/time.h
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/codec.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/enum.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/error.dart
@@ -2660,8 +2661,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/scenic.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/session.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/snapshot.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/commands.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/wlan_common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/wlan_stats.fidl
@@ -3011,17 +3010,56 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
+ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/multiboot.h + ../../../fuchsia/sdk/linux/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/multiboot.h
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/multiboot.h
+----------------------------------------------------------------------------------------------------
+Copyright 2016 The Fuchsia Authors. All rights reserved.
+Copyright (c) 2009 Corey Tabaka
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/arch/arm64/vdso/stream.fidl + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/stream.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/vdso/stream.fidl
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/update.dart
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/audio_mode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/connection_options.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device_watcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/stream.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/server.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/memorypressure.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/url.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/stream.h
@@ -3386,4 +3424,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
-Total license count: 13
+Total license count: 14
