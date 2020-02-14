@@ -149,7 +149,12 @@ Future<void> buildWithAssemble({
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
-    depfile.writeToFile(outputDepfile);
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(depfile, outputDepfile);
   }
 }
 

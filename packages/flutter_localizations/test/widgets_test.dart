@@ -558,7 +558,7 @@ void main() {
     expect(find.text('zh_CN'), findsOneWidget);
   });
 
-  testWidgets('Localizations.override widget tracks parent\'s locale and delegates', (WidgetTester tester) async {
+  testWidgets("Localizations.override widget tracks parent's locale and delegates", (WidgetTester tester) async {
     await tester.pumpWidget(
       buildFrame(
         // Accept whatever locale we're given
@@ -598,7 +598,7 @@ void main() {
     expect(find.text('da_DA TextDirection.ltr'), findsOneWidget);
   });
 
-  testWidgets('Localizations.override widget overrides parent\'s DefaultWidgetLocalizations', (WidgetTester tester) async {
+  testWidgets("Localizations.override widget overrides parent's DefaultWidgetLocalizations", (WidgetTester tester) async {
     await tester.pumpWidget(
       buildFrame(
         // Accept whatever locale we're given

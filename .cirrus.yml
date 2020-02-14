@@ -7,6 +7,7 @@ web_shard_template: &WEB_SHARD_TEMPLATE
     # As of October 2019, the Web shards needed more than 6G of RAM.
     CPU: 2
     MEMORY: 8G
+    CHROME_NO_SANDBOX: true
     GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
   script:
     - dart --enable-asserts ./dev/bots/test.dart
@@ -164,14 +165,17 @@ task:
     - name: tool_coverage-linux # linux-only
       only_if: "$CIRRUS_BRANCH == 'master'"
       environment:
-        # As of October 2019, the tool_coverage-linux shard needed at least 12G of RAM to run without
+        # As of February 2020, the tool_coverage-linux shard needed at least 24G of RAM to run without
         # getting OOM-killed, and even 8 CPUs took 25 minutes.
         CPU: 8
-        MEMORY: 12G
+        MEMORY: 24G
         CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
       script:
         - dart --enable-asserts ./dev/bots/test.dart
         - bash <(curl -s https://codecov.io/bash) -c -f packages/flutter_tools/coverage/lcov.info -F flutter_tool
+
+    - name: web_integration_tests
+      << : *WEB_SHARD_TEMPLATE
 
     - name: web_tests-0-linux
       << : *WEB_SHARD_TEMPLATE
@@ -292,7 +296,7 @@ task:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
-    - git clean -xffd --exclude=bin\cache\
+    - git clean -xffd --exclude=bin/cache/ # git wants forward slash path separators, even on Windows.
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
     - flutter config --no-analytics
@@ -456,7 +460,8 @@ task:
     - date
     - which flutter
     - bundle --version
-    - sudo bundle install --system --gemfile=dev/ci/mac/Gemfile
+    - bundle config set system 'true'
+    - sudo bundle install --gemfile=dev/ci/mac/Gemfile
     - git clean -xffd --exclude=bin/cache/
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.

@@ -120,7 +120,7 @@ class RunCommand extends RunCommandBase {
               'or just dump the trace as soon as the application is running. The first frame '
               'is detected by looking for a Timeline event with the name '
               '"${Tracing.firstUsefulFrameEventName}". '
-              'By default, the widgets library\'s binding takes care of sending this event. ',
+              "By default, the widgets library's binding takes care of sending this event. ",
       )
       ..addFlag('use-test-fonts',
         negatable: true,
@@ -338,6 +338,9 @@ class RunCommand extends RunCommandBase {
 
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
+    final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
+      ? int.parse(stringArg('web-browser-debug-port'))
+      : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -345,6 +348,8 @@ class RunCommand extends RunCommandBase {
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
+        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
+        webBrowserDebugPort: browserDebugPort,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -367,6 +372,8 @@ class RunCommand extends RunCommandBase {
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
+        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
+        webBrowserDebugPort: browserDebugPort,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         // Allow forcing fast-start to off to prevent doing more work on devices that
         // don't support it.

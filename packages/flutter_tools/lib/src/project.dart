@@ -952,6 +952,9 @@ class WindowsProject extends FlutterProjectPlatform {
   /// the build.
   File get generatedPropertySheetFile => ephemeralDirectory.childFile('Generated.props');
 
+  /// Contains configuration to add plugins to the build.
+  File get generatedPluginPropertySheetFile => managedDirectory.childFile('GeneratedPlugins.props');
+
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
 
@@ -962,6 +965,9 @@ class WindowsProject extends FlutterProjectPlatform {
   ///
   /// Ideally this will be replaced in the future with inspection of the project.
   File get nameFile => ephemeralDirectory.childFile('exe_filename');
+
+  /// The directory to write plugin symlinks.
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
@@ -996,6 +1002,9 @@ class LinuxProject extends FlutterProjectPlatform {
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
   File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
+
+  /// The directory to write plugin symlinks.
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }

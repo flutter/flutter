@@ -142,7 +142,8 @@ Future<void> run(List<String> args) async {
       tests[source] = dill;
     }
 
-    exitCode = await runTests(
+    // TODO(dnfield): This should be injected.
+    exitCode = await const FlutterTestRunner().runTests(
       const TestWrapper(),
       tests.keys.toList(),
       workDir: testDirectory,

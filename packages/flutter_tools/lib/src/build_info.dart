@@ -390,6 +390,7 @@ DarwinArch getIOSArchForName(String arch) {
     case 'armv7':
       return DarwinArch.armv7;
     case 'arm64':
+    case 'arm64e': // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
       return DarwinArch.arm64;
     case 'x86_64':
       return DarwinArch.x86_64;

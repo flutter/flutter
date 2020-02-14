@@ -120,20 +120,30 @@ class FallbackDiscovery {
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
       _logger.printTrace('Failed to connect directly, falling back to mDNS');
-      UsageEvent(_kEventName, 'failure').send();
+      UsageEvent(
+        _kEventName,
+        'failure',
+        label: err.toString(),
+        value: hostPort,
+      ).send();
       return null;
     }
 
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
     const int kDelaySeconds = 2;
+    Object firstException;
     while (attempts < 5) {
       try {
         final VmService vmService = await _vmServiceConnectUri(assumedWsUri.toString());
         final VM vm = await vmService.getVM();
         for (final IsolateRef isolateRefs in vm.isolates) {
-          final Isolate isolate = await vmService.getIsolate(isolateRefs.id) as Isolate;
-          final LibraryRef library = isolate.rootLib;
+          final dynamic isolateResponse = await vmService.getIsolate(isolateRefs.id);
+          if (isolateResponse is Sentinel) {
+            // Might have been a Sentinel. Try again later.
+            throw Exception('Expected Isolate but found Sentinel: $isolateResponse');
+          }
+          final LibraryRef library = (isolateResponse as Isolate).rootLib;
           if (library.uri.startsWith('package:$packageName')) {
             UsageEvent(_kEventName, 'success').send();
             return Uri.parse('http://localhost:$hostPort');
@@ -141,6 +151,7 @@ class FallbackDiscovery {
         }
       } on Exception catch (err) {
         // No action, we might have failed to connect.
+        firstException ??= err;
         _logger.printTrace(err.toString());
       }
 
@@ -152,7 +163,12 @@ class FallbackDiscovery {
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
-    UsageEvent(_kEventName, 'failure').send();
+    UsageEvent(
+      _kEventName,
+      'failure',
+      label: firstException?.toString() ?? 'Connection attempts exhausted',
+      value: hostPort,
+    ).send();
     return null;
   }
 }

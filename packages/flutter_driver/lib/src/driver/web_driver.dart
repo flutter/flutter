@@ -68,10 +68,10 @@ class WebFlutterDriver extends FlutterDriver {
     Map<String, dynamic> response;
     final Map<String, String> serialized = command.serialize();
     try {
-      final dynamic data = await _connection.sendCommand('window.\$flutterDriver(\'${jsonEncode(serialized)}\')', command.timeout);
+      final dynamic data = await _connection.sendCommand("window.\$flutterDriver('${jsonEncode(serialized)}')", command.timeout);
       response = data != null ? json.decode(data as String) as Map<String, dynamic> : <String, dynamic>{};
     } catch (error, stackTrace) {
-      throw DriverError('Failed to respond to $command due to remote error\n : \$flutterDriver(\'${jsonEncode(serialized)}\')',
+      throw DriverError("Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
           error,
           stackTrace
       );
