@@ -186,25 +186,36 @@ class DriveCommand extends RunCommandBase {
     if (isWebPlatform) {
       final Browser browser = _browserNameToEnum(
           argResults['browser-name'].toString());
+      final String driverPort = argResults['driver-port'].toString();
       // start WebDriver
       try {
         driver = await _createDriver(
-          argResults['driver-port'].toString(),
+          driverPort,
           browser,
           argResults['headless'].toString() == 'true',
         );
-      } catch (_) {
+      } catch (ex) {
         throwToolExit(
-            'Unable to start WebDriver browser. \n'
-            'Flutter Driver Web test requires WebDriver binary.\n'
+            'Unable to start WebDriver Session. \n'
+            'Make sure you have the correct WebDriver Server running at $driverPort. \n'
+            '$ex'
         );
       }
 
       // set window size
       final List<String> dimensions = argResults['browser-dimension'].split(',') as List<String>;
       assert(dimensions.length == 2);
-      final int x = int.parse(dimensions[0]);
-      final int y = int.parse(dimensions[1]);
+      int x, y;
+      try {
+        x = int.parse(dimensions[0]);
+        y = int.parse(dimensions[1]);
+      } on FormatException catch (ex) {
+        throw FormatException('''
+        Dimension provided is invalid.
+        Please fix 'browser-dimension' on your input.
+        $ex
+        ''');
+      }
       final async_io.Window window = await driver.window;
       try {
         await window.setLocation(const math.Point<int>(0, 0));
@@ -404,7 +415,6 @@ Future<void> _runTests(List<String> testArgs, Map<String, String> environment) a
     ],
     environment: environment,
   );
-  print('done ${DateTime.now()}');
   if (result != 0) {
     throwToolExit('Driver tests failed: $result', exitCode: result);
   }
@@ -455,9 +465,9 @@ Browser _browserNameToEnum(String browserName){
 
 Future<async_io.WebDriver> _createDriver(String driverPort, Browser browser, bool headless) async {
   return async_io.createDriver(
-      uri: Uri.parse('http://localhost:$driverPort/wd/hub/'),
+      uri: Uri.parse('http://localhost:$driverPort/'),
       desired: getDesiredCapabilities(browser, headless),
-      spec: browser != Browser.iosSafari ? async_io.WebDriverSpec.JsonWire : async_io.WebDriverSpec.W3c
+      spec: async_io.WebDriverSpec.Auto
   );
 }
 
@@ -495,7 +505,6 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
       break;
     case Browser.firefox:
       return <String, dynamic>{
-        'acceptInsecureCerts': true,
         'browserName': 'firefox',
         'moz:firefoxOptions' : <String, dynamic>{
           'args': <String>[
@@ -524,10 +533,6 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
     case Browser.safari:
       return <String, dynamic>{
         'browserName': 'safari',
-        'safari.options': <String, dynamic>{
-          'skipExtensionInstallation': true,
-          'cleanSession': true
-        }
       };
       break;
     case Browser.iosSafari:
