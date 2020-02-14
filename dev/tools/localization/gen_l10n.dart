@@ -257,7 +257,7 @@ String genSimpleMethod(Message message) {
 
   return getterMethodTemplate
     .replaceAll('@(methodName)', message.resourceId)
-    .replaceAll('@(message)', '${genSimpleMethodMessage()}')
+    .replaceAll('@(message)', genSimpleMethodMessage())
     .replaceAll('@(intlMethodArgs)', generateIntlMethodArgs(message).join(',\n      '));
 }
 
