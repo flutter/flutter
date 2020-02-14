@@ -963,11 +963,20 @@ flutter:
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
+    final FileSystem fs = MemoryFileSystem();
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
-    expect(IOSDevice('test', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64).isSupportedForProject(flutterProject), false);
+    final IOSDevice device = IOSDevice(
+      'test',
+      fileSystem: fs,
+      platform: macPlatform,
+      name: 'iPhone 1',
+      sdkVersion: '13.3',
+      cpuArchitecture: DarwinArch.arm64,
+    );
+    expect(device.isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),
