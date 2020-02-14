@@ -11,6 +11,7 @@ import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
+import 'browser.dart';
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
 import 'utils.dart';
@@ -116,7 +117,8 @@ Future<void> main(List<String> args) async {
       'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
       'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
-      'web_tests': _runWebTests,
+      'web_tests': _runWebUnitTests,
+      'web_integration_tests': _runWebIntegrationTests,
     });
   } on ExitException catch (error) {
     error.apply();
@@ -522,7 +524,7 @@ Future<void> _runFrameworkCoverage() async {
   }
 }
 
-Future<void> _runWebTests() async {
+Future<void> _runWebUnitTests() async {
   final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
 
   final Directory flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
@@ -583,6 +585,94 @@ Future<void> _runWebTests() async {
   };
 
   await selectSubshard(subshards);
+}
+
+Future<void> _runWebIntegrationTests() async {
+  await _runWebStackTraceTest('profile');
+  await _runWebStackTraceTest('release');
+  await _runWebDebugStackTraceTest();
+}
+
+Future<void> _runWebStackTraceTest(String buildMode) async {
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
+  final String appBuildDirectory = path.join('$testAppDirectory', 'build', 'web');
+
+  // Build the app.
+  await runCommand(
+    flutter,
+    <String>[ 'clean' ],
+    workingDirectory: testAppDirectory,
+  );
+  await runCommand(
+    flutter,
+    <String>[
+      'build',
+      'web',
+      '--$buildMode',
+      '-t',
+      'lib/stack_trace.dart',
+    ],
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
+
+  // Run the app.
+  final String result = await evalTestAppInChrome(
+    appUrl: 'http://localhost:8080/index.html',
+    appDirectory: appBuildDirectory,
+  );
+
+  if (result.contains('--- TEST SUCCEEDED ---')) {
+    print('${green}Web stack trace integration test passed.$reset');
+  } else {
+    print(result);
+    print('${red}Web stack trace integration test failed.$reset');
+    exit(1);
+  }
+}
+
+/// Debug mode is special because `flutter build web` doesn't build in debug mode.
+///
+/// Instead, we use `flutter run --debug` and sniff out the standard output.
+Future<void> _runWebDebugStackTraceTest() async {
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
+  final CapturedOutput output = CapturedOutput();
+  bool success = false;
+  await runCommand(
+    flutter,
+    <String>[
+      'run',
+      '--debug',
+      '-d',
+      'chrome',
+      '--web-run-headless',
+      'lib/stack_trace.dart',
+    ],
+    output: output,
+    outputMode: OutputMode.capture,
+    outputListener: (String line, Process process) {
+      if (line.contains('--- TEST SUCCEEDED ---')) {
+        success = true;
+      }
+      if (success || line.contains('--- TEST FAILED ---')) {
+        process.stdin.add('q'.codeUnits);
+      }
+    },
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
+
+  if (success) {
+    print('${green}Web stack trace integration test passed.$reset');
+  } else {
+    print(output.stdout);
+    print('${red}Web stack trace integration test failed.$reset');
+    exit(1);
+  }
 }
 
 Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) async {
