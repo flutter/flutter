@@ -22,12 +22,16 @@ Dart_Handle DartWrappable::CreateDartWrapper(DartState* dart_state) {
   Dart_PersistentHandle type = dart_state->class_library().GetClass(info);
   TONIC_DCHECK(!LogIfError(type));
 
-  intptr_t native_fields[kNumberOfNativeFields];
-  native_fields[kPeerIndex] = reinterpret_cast<intptr_t>(this);
-  native_fields[kWrapperInfoIndex] = reinterpret_cast<intptr_t>(&info);
-  Dart_Handle wrapper =
-      Dart_AllocateWithNativeFields(type, kNumberOfNativeFields, native_fields);
+  Dart_Handle private_constructor_name = Dart_NewStringFromCString("_");
+  Dart_Handle wrapper = Dart_New(type, private_constructor_name, 0, nullptr);
   TONIC_DCHECK(!LogIfError(wrapper));
+
+  Dart_Handle res = Dart_SetNativeInstanceField(
+      wrapper, kPeerIndex, reinterpret_cast<intptr_t>(this));
+  TONIC_DCHECK(!LogIfError(res));
+  res = Dart_SetNativeInstanceField(wrapper, kWrapperInfoIndex,
+                                    reinterpret_cast<intptr_t>(&info));
+  TONIC_DCHECK(!LogIfError(res));
 
   this->RetainDartWrappableReference();  // Balanced in FinalizeDartWrapper.
   dart_wrapper_ = Dart_NewWeakPersistentHandle(

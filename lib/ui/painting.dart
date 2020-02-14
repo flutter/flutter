@@ -1890,6 +1890,12 @@ class Path extends NativeFieldWrapperClass2 {
   /// Create a new empty [Path] object.
   @pragma('vm:entry-point')
   Path() { _constructor(); }
+
+  // Workaround for tonic, which expects classes with native fields to have a
+  // private constructor.
+  @pragma('vm:entry-point')
+  Path._() { _constructor(); }
+
   void _constructor() native 'Path_constructor';
 
   /// Creates a copy of another [Path].
