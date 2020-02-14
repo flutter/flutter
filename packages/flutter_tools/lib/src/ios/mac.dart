@@ -83,6 +83,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   DarwinArch activeArch,
   bool codesign = true,
 }) async {
+  globals.printError('In buildXcodeProject'); // TODO
   if (!upgradePbxProjWithFlutterAssets(app.project)) {
     return XcodeBuildResult(success: false);
   }

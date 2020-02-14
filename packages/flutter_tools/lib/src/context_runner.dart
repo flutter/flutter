@@ -116,7 +116,11 @@ Future<T> runInContext<T>(
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => IMobileDevice(),
-      IOSDeploy: () => const IOSDeploy(),
+      IOSDeploy: () => IOSDeploy(
+        artifacts: globals.artifacts,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),

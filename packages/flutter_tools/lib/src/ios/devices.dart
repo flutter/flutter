@@ -31,20 +31,96 @@ import 'ios_workflow.dart';
 import 'mac.dart';
 
 class IOSDeploy {
-  const IOSDeploy();
+  IOSDeploy({
+    @required Artifacts artifacts,
+    @required Logger logger,
+    @required Platform platform,
+  }) : _platform = platform,
+       _logger = logger,
+       _binaryPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+
+  final String _binaryPath;
+  final Logger _logger;
+  final Platform _platform;
 
   static IOSDeploy get instance => context.get<IOSDeploy>();
 
-  /// Installs and runs the specified app bundle using ios-deploy, then returns
-  /// the exit code.
+  Map<String, String> get iosDeployEnv {
+    // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
+    //
+    // ios-deploy transitively depends on LLDB.framework, which invokes a
+    // Python script that uses package 'six'. LLDB.framework relies on the
+    // python at the front of the path, which may not include package 'six'.
+    // Ensure that we pick up the system install of python, which does include
+    // it.
+    final Map<String, String> environment = Map<String, String>.from(_platform.environment);
+    environment['PATH'] = '/usr/bin:${environment['PATH']}';
+    environment.addEntries(<MapEntry<String, String>>[globals.cache.dyLdLibEntry]);
+    return environment;
+  }
+
+  /// Uninstalls the specified app bundle.
+  ///
+  /// Uses ios-deploy and returns the exit code.
+  Future<int> uninstallApp({
+    @required String deviceId,
+    @required String bundleId,
+  }) async {
+    final List<String> launchCommand = <String>[
+      _binaryPath,
+      '--id',
+      deviceId,
+      '--uninstall_only',
+      '--bundle_id',
+      bundleId,
+    ];
+
+    return await processUtils.stream(
+      launchCommand,
+      trace: true,
+      environment: iosDeployEnv,
+    );
+  }
+
+  /// Installs the specified app bundle.
+  ///
+  /// Uses ios-deploy and returns the exit code.
+  Future<int> installApp({
+    @required String deviceId,
+    @required String bundlePath,
+    @required List<String>launchArguments,
+  }) async {
+    final List<String> launchCommand = <String>[
+      _binaryPath,
+      '--id',
+      deviceId,
+      '--bundle',
+      bundlePath,
+      '--no-wifi',
+      if (launchArguments.isNotEmpty) ...<String>[
+        '--args',
+        launchArguments.join(' '),
+      ],
+    ];
+
+    return await processUtils.stream(
+      launchCommand,
+      mapFunction: _monitorInstallationFailure,
+      trace: true,
+      environment: iosDeployEnv,
+    );
+  }
+
+  /// Installs and then runs the specified app bundle.
+  ///
+  /// Uses ios-deploy and returns the exit code.
   Future<int> runApp({
     @required String deviceId,
     @required String bundlePath,
     @required List<String> launchArguments,
   }) async {
-    final String iosDeployPath = globals.artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
     final List<String> launchCommand = <String>[
-      iosDeployPath,
+      _binaryPath,
       '--id',
       deviceId,
       '--bundle',
@@ -57,17 +133,6 @@ class IOSDeploy {
       ],
     ];
 
-    // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
-    //
-    // ios-deploy transitively depends on LLDB.framework, which invokes a
-    // Python script that uses package 'six'. LLDB.framework relies on the
-    // python at the front of the path, which may not include package 'six'.
-    // Ensure that we pick up the system install of python, which does include
-    // it.
-    final Map<String, String> iosDeployEnv = Map<String, String>.from(globals.platform.environment);
-    iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
-    iosDeployEnv.addEntries(<MapEntry<String, String>>[globals.cache.dyLdLibEntry]);
-
     return await processUtils.stream(
       launchCommand,
       mapFunction: _monitorInstallationFailure,
@@ -76,21 +141,38 @@ class IOSDeploy {
     );
   }
 
+  Future<bool> isAppInstalled({
+    @required String bundleId,
+    @required String deviceId,
+  }) async {
+    final List<String> launchCommand = <String>[
+      _binaryPath,
+      '--id',
+      deviceId,
+      '--list_bundle_id',
+    ];
+    final RunResult result = await processUtils.run(launchCommand);
+    if (result.exitCode != 0) {
+      return false;
+    }
+    return result.stdout.contains(bundleId);
+  }
+
   // Maps stdout line stream. Must return original line.
   String _monitorInstallationFailure(String stdout) {
     // Installation issues.
     if (stdout.contains('Error 0xe8008015') || stdout.contains('Error 0xe8000067')) {
-      globals.printError(noProvisioningProfileInstruction, emphasis: true);
+      _logger.printError(noProvisioningProfileInstruction, emphasis: true);
 
     // Launch issues.
     } else if (stdout.contains('e80000e2')) {
-      globals.printError('''
+      _logger.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Your device is locked. Unlock your device first before running.
 ═══════════════════════════════════════════════════════════════════════════════════''',
       emphasis: true);
     } else if (stdout.contains('Error 0xe8000022')) {
-      globals.printError('''
+      _logger.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Error launching app. Try launching from within Xcode via:
     open ios/Runner.xcworkspace
@@ -137,17 +219,12 @@ class IOSDevice extends Device {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
       return;
     }
-    _installerPath = globals.artifacts.getArtifactPath(
-      Artifact.ideviceinstaller,
-      platform: TargetPlatform.ios,
-    );
     _iproxyPath = globals.artifacts.getArtifactPath(
       Artifact.iproxy,
       platform: TargetPlatform.ios,
     );
   }
 
-  String _installerPath;
   String _iproxyPath;
 
   final String _sdkVersion;
@@ -200,19 +277,23 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(IOSApp app) async {
-    RunResult apps;
-    try {
-      apps = await processUtils.run(
-        <String>[_installerPath, '--list-apps'],
-        throwOnError: true,
-        environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
-        ),
-      );
-    } on ProcessException {
-      return false;
-    }
-    return RegExp(app.id, multiLine: true).hasMatch(apps.stdout);
+    return IOSDeploy.instance.isAppInstalled(
+      bundleId: app.id,
+      deviceId: id,
+    );
+    //RunResult apps;
+    //try {
+    //  apps = await processUtils.run(
+    //    <String>[_installerPath, '--list-apps'],
+    //    throwOnError: true,
+    //    environment: Map<String, String>.fromEntries(
+    //      <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
+    //    ),
+    //  );
+    //} on ProcessException {
+    //  return false;
+    //}
+    //return RegExp(app.id, multiLine: true).hasMatch(apps.stdout);
   }
 
   @override
@@ -227,39 +308,63 @@ class IOSDevice extends Device {
       globals.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
     }
-
-    try {
-      globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
-      globals.printError('About to invoke ideviceinstaller');
-      await processUtils.run(
-        <String>[_installerPath, '-i', app.deviceBundlePath],
-        throwOnError: true,
-        environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
-        ),
-      );
-      return true;
-    } on ProcessException catch (error) {
-      globals.printError(error.message);
+    globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
+    globals.printError('About to invoke ios-deploy');
+    final int installationResult = await IOSDeploy.instance.installApp(
+      deviceId: id,
+      bundlePath: bundle.path,
+      launchArguments: <String>[],
+    );
+    if (installationResult != 0) {
+      globals.printError('Could not install ${bundle.path} on $id.');
+      globals.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
+      globals.printError('  open ios/Runner.xcworkspace');
+      globals.printError('');
       return false;
     }
+    return true;
+    //try {
+    //  globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
+    //  globals.printError('About to invoke ideviceinstaller');
+    //  await processUtils.run(
+    //    <String>[_installerPath, '-i', app.deviceBundlePath],
+    //    throwOnError: true,
+    //    environment: Map<String, String>.fromEntries(
+    //      <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
+    //    ),
+    //  );
+    //  return true;
+    //} on ProcessException catch (error) {
+    //  globals.printError(error.message);
+    //  return false;
+    //}
   }
 
   @override
   Future<bool> uninstallApp(IOSApp app) async {
-    try {
-      await processUtils.run(
-        <String>[_installerPath, '-U', app.id],
-        throwOnError: true,
-        environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
-        ),
-      );
-      return true;
-    } on ProcessException catch (error) {
-      globals.printError(error.message);
+    globals.printError('About to invoke ios-deploy to uninstall');
+    final int uninstallationResult = await IOSDeploy.instance.uninstallApp(
+      deviceId: id,
+      bundleId: app.id,
+    );
+    if (uninstallationResult != 0) {
+      globals.printError('Could not uninstall ${app.id} on $id.');
       return false;
     }
+    return true;
+    //try {
+    //  await processUtils.run(
+    //    <String>[_installerPath, '-U', app.id],
+    //    throwOnError: true,
+    //    environment: Map<String, String>.fromEntries(
+    //      <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
+    //    ),
+    //  );
+    //  return true;
+    //} on ProcessException catch (error) {
+    //  globals.printError(error.message);
+    //  return false;
+    //}
   }
 
   @override
@@ -297,9 +402,9 @@ class IOSDevice extends Device {
       }
       packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
     } else {
-      if (!await installApp(package)) {
+      if (!await installApp(package)) { globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!install failed!');
         return LaunchResult.failed();
-      }
+      } globals.printError('!!!!!!!!!!!!!!!!!install succeeded?!');
     }
 
     packageId ??= package.id;

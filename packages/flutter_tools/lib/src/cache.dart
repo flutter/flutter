@@ -1261,7 +1261,7 @@ class IosUsbArtifacts extends CachedArtifact {
     'usbmuxd',
     'libplist',
     'openssl',
-    'ideviceinstaller',
+    //'ideviceinstaller',
     'ios-deploy',
     //'libzip',
   ];
