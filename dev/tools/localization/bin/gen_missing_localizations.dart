@@ -75,7 +75,7 @@ bool isPluralVariation(String key, Map<String, dynamic> bundle) {
 
 void updateMissingResources(String localizationPath, String groupPrefix) {
   final Directory localizationDir = Directory(localizationPath);
-  final RegExp filenamePattern = RegExp('${groupPrefix}_(\\w+)\.arb');
+  final RegExp filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
 
   final Set<String> requiredKeys = resourceKeys(loadBundle(File(path.join(localizationPath, '${groupPrefix}_en.arb'))));
 

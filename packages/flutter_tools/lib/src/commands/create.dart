@@ -15,7 +15,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
-import '../base/os.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -660,14 +659,14 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   int _injectGradleWrapper(FlutterProject project) {
     int filesCreated = 0;
-    fsUtils.copyDirectorySync(
+    globals.fsUtils.copyDirectorySync(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
       onFileCopied: (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
         if (modes != null && modes.contains('x')) {
-          os.makeExecutable(destinationFile);
+          globals.os.makeExecutable(destinationFile);
         }
       },
     );

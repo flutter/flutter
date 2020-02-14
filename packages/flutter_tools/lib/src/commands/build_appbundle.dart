@@ -16,6 +16,7 @@ import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
   BuildAppBundleCommand({bool verboseHelp = false}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags();
     usesFlavorOption();
@@ -45,8 +46,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   final String description =
       'Build an Android App Bundle file from your app.\n\n'
-      'This command can build debug and release versions of an app bundle for your application. \'debug\' builds support '
-      'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are '
+      "This command can build debug and release versions of an app bundle for your application. 'debug' builds support "
+      "debugging and a quick development cycle. 'release' builds don't support debugging and are "
       'suitable for deploying to app stores. \n app bundle improves your app size';
 
   @override

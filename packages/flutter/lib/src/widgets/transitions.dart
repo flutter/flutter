@@ -194,7 +194,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
 /// The following code implements the [SlideTransition] as seen in the video
 /// above:
 ///
@@ -583,7 +583,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 
 /// Animates the opacity of a sliver widget.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] that uses a
 /// [SliverFadeTransition] to fade the list in and out.
 ///

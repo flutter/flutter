@@ -616,7 +616,7 @@ void main() {
     expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
   });
 
-  testWidgets('Outline button doesn\'t crash if disabled during a gesture', (WidgetTester tester) async {
+  testWidgets("Outline button doesn't crash if disabled during a gesture", (WidgetTester tester) async {
     Widget buildFrame(VoidCallback onPressed) {
       return Directionality(
         textDirection: TextDirection.ltr,

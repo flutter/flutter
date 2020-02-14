@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
 import 'focus_manager.dart';
+import 'inherited_model.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
@@ -131,7 +132,20 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
 
   static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
   static final Set<Element> _debugIllFatedElements = HashSet<Element>();
-  static final Map<GlobalKey, Element> _debugReservations = <GlobalKey, Element>{};
+  // This map keeps track which child reserve the global key with the parent.
+  // Parent, child -> global key.
+  // This provides us a way to remove old reservation while parent rebuilds the
+  // child in the same slot.
+  static final Map<Element, Map<Element, GlobalKey>> _debugReservations = <Element, Map<Element, GlobalKey>>{};
+
+  static void _debugRemoveReservationFor(Element parent, Element child) {
+    assert(() {
+      assert(parent != null);
+      assert(child != null);
+      _debugReservations[parent]?.remove(child);
+      return true;
+    }());
+  }
 
   void _register(Element element) {
     assert(() {
@@ -159,46 +173,83 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       _registry.remove(this);
   }
 
-  void _debugReserveFor(Element parent) {
+  void _debugReserveFor(Element parent, Element child) {
     assert(() {
       assert(parent != null);
-      if (_debugReservations.containsKey(this) && _debugReservations[this] != parent) {
-        // Reserving a new parent while the old parent is not attached is ok.
-        // This can happen when a renderObject detaches and re-attaches to rendering
-        // tree multiple times.
-        if (_debugReservations[this].renderObject?.attached == false) {
-          _debugReservations[this] = parent;
-          return true;
-        }
-        // It's possible for an element to get built multiple times in one
-        // frame, in which case it'll reserve the same child's key multiple
-        // times. We catch multiple children of one widget having the same key
-        // by verifying that an element never steals elements from itself, so we
-        // don't care to verify that here as well.
-        final String older = _debugReservations[this].toString();
-        final String newer = parent.toString();
-        if (older != newer) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Multiple widgets used the same GlobalKey.'),
-            ErrorDescription(
-              'The key $this was used by multiple widgets. The parents of those widgets were:\n'
-              '- $older\n'
-              '- $newer\n'
-              'A GlobalKey can only be specified on one widget at a time in the widget tree.'
-            ),
-          ]);
-        }
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Multiple widgets used the same GlobalKey.'),
-          ErrorDescription(
-            'The key $this was used by multiple widgets. The parents of those widgets were '
-            'different widgets that both had the following description:\n'
-            '  $parent\n'
-            'A GlobalKey can only be specified on one widget at a time in the widget tree.'
-          ),
-        ]);
-      }
-      _debugReservations[this] = parent;
+      assert(child != null);
+      _debugReservations[parent] ??= <Element, GlobalKey>{};
+      _debugReservations[parent][child] = this;
+      return true;
+    }());
+  }
+
+  static void _debugVerifyGlobalKeyReservation() {
+    assert(() {
+      final Map<GlobalKey, Element> keyToParent = <GlobalKey, Element>{};
+      _debugReservations.forEach((Element parent, Map<Element, GlobalKey> chidToKey) {
+        // We ignore parent that are detached.
+        if (parent.renderObject?.attached == false)
+          return;
+        chidToKey.forEach((Element child, GlobalKey key) {
+          // If parent = null, the node is deactivated by its parent and is
+          // not re-attached to other part of the tree. We should ignore this
+          // node.
+          if (child._parent == null)
+            return;
+          // It is possible the same key registers to the same parent twice
+          // with different children. That is illegal, but it is not in the
+          // scope of this check. Such error will be detected in
+          // _debugVerifyIllFatedPopulation or
+          // _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.
+          if (keyToParent.containsKey(key) && keyToParent[key] != parent) {
+            // We have duplication reservations for the same global key.
+            final Element older = keyToParent[key];
+            final Element newer = parent;
+            FlutterError error;
+            if (older.toString() != newer.toString()) {
+              error = FlutterError.fromParts(<DiagnosticsNode>[
+                ErrorSummary('Multiple widgets used the same GlobalKey.'),
+                ErrorDescription(
+                  'The key $key was used by multiple widgets. The parents of those widgets were:\n'
+                    '- ${older.toString()}\n'
+                    '- ${newer.toString()}\n'
+                    'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+                ),
+              ]);
+            } else {
+              error = FlutterError.fromParts(<DiagnosticsNode>[
+                ErrorSummary('Multiple widgets used the same GlobalKey.'),
+                ErrorDescription(
+                  'The key $key was used by multiple widgets. The parents of those widgets were '
+                    'different widgets that both had the following description:\n'
+                    '  ${parent.toString()}\n'
+                    'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+                ),
+              ]);
+            }
+            // Fix the tree by removing the duplicated child from one of its
+            // parents to resolve the duplicated key issue. This allows us to
+            // tear down the tree during testing without producing additional
+            // misleading exceptions.
+            if (child._parent != older) {
+              older.visitChildren((Element currentChild) {
+                if (currentChild == child)
+                  older.forgetChild(child);
+              });
+            }
+            if (child._parent != newer) {
+              newer.visitChildren((Element currentChild) {
+                if (currentChild == child)
+                  newer.forgetChild(child);
+              });
+            }
+            throw error;
+          } else {
+            keyToParent[key] = parent;
+          }
+        });
+      });
+      _debugReservations.clear();
       return true;
     }());
   }
@@ -214,13 +265,13 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
           final GlobalKey key = element.widget.key as GlobalKey;
           assert(_registry.containsKey(key));
           duplicates ??= <GlobalKey, Set<Element>>{};
-          final Set<Element> elements = duplicates.putIfAbsent(key, () => HashSet<Element>());
+          // Uses ordered set to produce consistent error message.
+          final Set<Element> elements = duplicates.putIfAbsent(key, () => LinkedHashSet<Element>());
           elements.add(element);
           elements.add(_registry[key]);
         }
       }
       _debugIllFatedElements.clear();
-      _debugReservations.clear();
       if (duplicates != null) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[];
         information.add(ErrorSummary('Multiple widgets used the same GlobalKey.'));
@@ -474,6 +525,16 @@ abstract class Widget extends DiagnosticableTree {
     return oldWidget.runtimeType == newWidget.runtimeType
         && oldWidget.key == newWidget.key;
   }
+
+  // Return a numeric encoding of the specific `Widget` concrete subtype.
+  // This is used in `Element.updateChild` to determine if a hot reload modified the
+  // superclass of a mounted element's configuration. The encoding of each `Widget`
+  // must match the corresponding `Element` encoding in `Element._debugConcreteSubtype`.
+  static int _debugConcreteSubtype(Widget widget) {
+    return widget is StatefulWidget ? 1 :
+           widget is StatelessWidget ? 2 :
+           0;
+    }
 }
 
 /// A widget that does not require mutable state.
@@ -1161,7 +1222,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
           ErrorSummary('setState() called in constructor: $this'),
           ErrorHint(
             'This happens when you call setState() on a State object for a widget that '
-            'hasn\'t been inserted into the widget tree yet. It is not necessary to call '
+            "hasn't been inserted into the widget tree yet. It is not necessary to call "
             'setState() in the constructor, since the state is already assumed to be dirty '
             'when it is initially created.'
           ),
@@ -1713,9 +1774,14 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   LeafRenderObjectElement createElement() => LeafRenderObjectElement(this);
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have a single child slot. (This superclass only provides the storage
 /// for that child, it doesn't actually provide the updating logic.)
+///
+/// Typically, the render object assigned to this widget will make use of
+/// [RenderObjectWithChildMixin] to implement a single-child model. The mixin
+/// exposes a [RenderObjectWithChildMixin.child] property that allows
+/// retrieving the render object belonging to the [child] widget.
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1730,10 +1796,20 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   SingleChildRenderObjectElement createElement() => SingleChildRenderObjectElement(this);
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have a single list of children. (This superclass only provides the
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
+///
+/// This will return a [RenderObject] mixing in [ContainerRenderObjectMixin],
+/// which provides the necessary functionality to visit the children of the
+/// container render object (the render object belonging to the [children] widgets).
+/// Typically, this is a [RenderBox] with [RenderBoxContainerDefaultsMixin].
+///
+/// See also:
+///
+///  * [Stack], which uses [MultiChildRenderObjectWidget].
+///  * [RenderStack], for an example implementation of the associated render object.
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   ///
@@ -2114,6 +2190,8 @@ abstract class BuildContext {
 
   /// Obtains the element corresponding to the nearest widget of the given type [T],
   /// which must be the type of a concrete [InheritedWidget] subclass.
+  ///
+  /// Returns null if no such element is found.
   ///
   /// Calling this method is O(1) with a small constant factor.
   ///
@@ -2621,6 +2699,7 @@ class BuildOwner {
       });
       assert(() {
         try {
+          GlobalKey._debugVerifyGlobalKeyReservation();
           GlobalKey._debugVerifyIllFatedPopulation();
           if (_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans != null &&
               _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.isNotEmpty) {
@@ -2839,6 +2918,16 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return 0;
   }
 
+  // Return a numeric encoding of the specific `Element` concrete subtype.
+  // This is used in `Element.updateChild` to determine if a hot reload modified the
+  // superclass of a mounted element's configuration. The encoding of each `Element`
+  // must match the corresponding `Widget` encoding in `Widget._debugConcreteSubtype`.
+  static int _debugConcreteSubtype(Element element) {
+    return element is StatefulElement ? 1 :
+           element is StatelessElement ? 2 :
+           0;
+  }
+
   /// The configuration for this element.
   @override
   Widget get widget => _widget;
@@ -3015,7 +3104,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('visitChildElements() called during build.'),
         ErrorDescription(
-          'The BuildContext.visitChildElements() method can\'t be called during '
+          "The BuildContext.visitChildElements() method can't be called during "
           'build because the child list is still being updated at that point, '
           'so the children might not be constructed yet, or might be old children '
           'that are going to be replaced.'
@@ -3057,25 +3146,40 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// |  **child != null**  |  Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
   @protected
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
-    assert(() {
-      final Key key = newWidget?.key;
-      if (key is GlobalKey) {
-        key._debugReserveFor(this);
-      }
-      return true;
-    }());
     if (newWidget == null) {
       if (child != null)
         deactivateChild(child);
       return null;
     }
+    Element newChild;
     if (child != null) {
-      if (child.widget == newWidget) {
+      bool hasSameSuperclass = true;
+      // When the type of a widget is changed between Stateful and Stateless via
+      // hot reload, the element tree will end up in a partially invalid state.
+      // That is, if the widget was a StatefulWidget and is now a StatelessWidget,
+      // then the element tree currently contains a StatefulElement that is incorrectly
+      // referencing a StatelessWidget (and likewise with StatelessElement).
+      //
+      // To avoid crashing due to type errors, we need to gently guide the invalid
+      // element out of the tree. To do so, we ensure that the `hasSameSuperclass` condition
+      // returns false which prevents us from trying to update the existing element
+      // incorrectly.
+      //
+      // For the case where the widget becomes Stateful, we also need to avoid
+      // accessing `StatelessElement.widget` as the cast on the getter will
+      // cause a type error to be thrown. Here we avoid that by short-circuiting
+      // the `Widget.canUpdate` check once `hasSameSuperclass` is false.
+      assert(() {
+        final int oldElementClass = Element._debugConcreteSubtype(child);
+        final int newWidgetClass = Widget._debugConcreteSubtype(newWidget);
+        hasSameSuperclass = oldElementClass == newWidgetClass;
+        return true;
+      }());
+      if (hasSameSuperclass && child.widget == newWidget) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
-        return child;
-      }
-      if (Widget.canUpdate(child.widget, newWidget)) {
+        newChild = child;
+      } else if (hasSameSuperclass && Widget.canUpdate(child.widget, newWidget)) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
         child.update(newWidget);
@@ -3084,12 +3188,27 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           child.owner._debugElementWasRebuilt(child);
           return true;
         }());
-        return child;
+        newChild = child;
+      } else {
+        deactivateChild(child);
+        assert(child._parent == null);
+        newChild = inflateWidget(newWidget, newSlot);
       }
-      deactivateChild(child);
-      assert(child._parent == null);
+    } else {
+      newChild = inflateWidget(newWidget, newSlot);
     }
-    return inflateWidget(newWidget, newSlot);
+
+    assert(() {
+      if (child != null)
+        _debugRemoveGlobalKeyReservation(child);
+      final Key key = newWidget?.key;
+      if (key is GlobalKey) {
+        key._debugReserveFor(this, newChild);
+      }
+      return true;
+    }());
+
+    return newChild;
   }
 
   /// Add this element to the tree in the given slot of the given parent.
@@ -3127,6 +3246,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }());
   }
 
+  void _debugRemoveGlobalKeyReservation(Element child) {
+    GlobalKey._debugRemoveReservationFor(this, child);
+  }
   /// Change the widget used to configure this element.
   ///
   /// The framework calls this function when the parent wishes to use a
@@ -3145,6 +3267,16 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         && depth != null
         && _active
         && Widget.canUpdate(widget, newWidget));
+    // This Element was told to update and we can now release all the global key
+    // reservations of forgotten children. We cannot do this earlier because the
+    // forgotten children still represent global key duplications if the element
+    // never updates (the forgotten children are not removed from the tree
+    // until the call to update happens)
+    assert(() {
+      _debugForgottenChildrenWithGlobalKey.forEach(_debugRemoveGlobalKeyReservation);
+      _debugForgottenChildrenWithGlobalKey.clear();
+      return true;
+    }());
     _widget = newWidget;
   }
 
@@ -3236,7 +3368,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       assert(() {
         if (parent == this) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('A GlobalKey was used multiple times inside one widget\'s child list.'),
+            ErrorSummary("A GlobalKey was used multiple times inside one widget's child list."),
             DiagnosticsProperty<GlobalKey>('The offending GlobalKey was', key),
             parent.describeElement('The parent of the widgets with that key was'),
             element.describeElement('The first child to get instantiated with that key became'),
@@ -3341,6 +3473,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }());
   }
 
+  // The children that have been forgotten by forgetChild. This will be used in
+  // [update] to remove the global key reservations of forgotten children.
+  final Set<Element> _debugForgottenChildrenWithGlobalKey = HashSet<Element>();
+
   /// Remove the given child from the element's child list, in preparation for
   /// the child being reused elsewhere in the element tree.
   ///
@@ -3349,12 +3485,23 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// The element will still have a valid parent when this is called. After this
   /// is called, [deactivateChild] is called to sever the link to this object.
+  ///
+  /// The [update] is responsible for updating or creating the new child that
+  /// will replace this [child].
   @protected
+  @mustCallSuper
   void forgetChild(Element child) {
-    // TODO(chunhtai): Creates empty body for subclass to call super. This will
-    // enable us to fix internal tests pro-actively for upcoming breaking
-    // change.
-    // https://github.com/flutter/flutter/issues/43780.
+    // This method is called on the old parent when the given child (with a
+    // global key) is given a new parent. We cannot remove the global key
+    // reservation directly in this method because the forgotten child is not
+    // removed from the tree until this Element is updated in [update]. If
+    // [update] is never called, the forgotten child still represents a global
+    // key duplication that we need to catch.
+    assert(() {
+      if (child.widget.key is GlobalKey)
+        _debugForgottenChildrenWithGlobalKey.add(child);
+      return true;
+    }());
   }
 
   void _activateWithParent(Element parent, dynamic newSlot) {
@@ -3425,7 +3572,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   void deactivate() {
     assert(_debugLifecycleState == _ElementLifecycle.active);
-    assert(widget != null);
+    assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(depth != null);
     assert(_active);
     if (_dependencies != null && _dependencies.isNotEmpty) {
@@ -3468,10 +3615,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   void unmount() {
     assert(_debugLifecycleState == _ElementLifecycle.inactive);
-    assert(widget != null);
+    assert(_widget != null); // Use the private property to avoid a CastError during hot reload.
     assert(depth != null);
     assert(!_active);
-    final Key key = widget.key;
+    // Use the private property to avoid a CastError during hot reload.
+    final Key key = _widget.key;
     if (key is GlobalKey) {
       key._unregister(this);
     }
@@ -3615,15 +3763,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(() {
       if (_debugLifecycleState != _ElementLifecycle.active) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Looking up a deactivated widget\'s ancestor is unsafe.'),
+          ErrorSummary("Looking up a deactivated widget's ancestor is unsafe."),
           ErrorDescription(
-            'At this point the state of the widget\'s element tree is no longer '
+            "At this point the state of the widget's element tree is no longer "
             'stable.'
           ),
           ErrorHint(
-            'To safely refer to a widget\'s ancestor in its dispose() method, '
+            "To safely refer to a widget's ancestor in its dispose() method, "
             'save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() '
-            'in the widget\'s didChangeDependencies() method.'
+            "in the widget's didChangeDependencies() method."
           ),
         ]);
       }
@@ -4383,6 +4531,7 @@ abstract class ComponentElement extends Element {
   void forgetChild(Element child) {
     assert(child == _child);
     _child = null;
+    super.forgetChild(child);
   }
 }
 
@@ -4438,7 +4587,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  Widget build() => state.build(this);
+  Widget build() => _state.build(this);
 
   /// The [State] instance associated with this location in the tree.
   ///
@@ -4486,6 +4635,15 @@ class StatefulElement extends ComponentElement {
       return true;
     }());
     super._firstBuild();
+  }
+
+  @override
+  void performRebuild() {
+    if (_didChangeDependencies) {
+      _state.didChangeDependencies();
+      _didChangeDependencies = false;
+    }
+    super.performRebuild();
   }
 
   @override
@@ -4575,7 +4733,7 @@ class StatefulElement extends ComponentElement {
           ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called before ${_state.runtimeType}.initState() completed.'),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
-            'its dependent widgets are rebuilt. If the dependent widget\'s reference to '
+            "its dependent widgets are rebuilt. If the dependent widget's reference to "
             'the inherited widget is in a constructor or an initState() method, '
             'then the rebuilt dependent widget will not reflect the changes in the '
             'inherited widget.',
@@ -4618,10 +4776,21 @@ class StatefulElement extends ComponentElement {
     return super.dependOnInheritedElement(ancestor as InheritedElement, aspect: aspect);
   }
 
+  /// This controls whether we should call [State.didChangeDependencies] from
+  /// the start of [build], to avoid calls when the [State] will not get built.
+  /// This can happen when the widget has dropped out of the tree, but depends
+  /// on an [InheritedWidget] that is still in the tree.
+  ///
+  /// It is set initially to false, since [_firstBuild] makes the initial call
+  /// on the [state]. When it is true, [build] will call
+  /// `state.didChangeDependencies` and then sets it to false. Subsequent calls
+  /// to [didChangeDependencies] set it to true.
+  bool _didChangeDependencies = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _state.didChangeDependencies();
+    _didChangeDependencies = true;
   }
 
   @override
@@ -5519,6 +5688,7 @@ class LeafRenderObjectElement extends RenderObjectElement {
   @override
   void forgetChild(Element child) {
     assert(false);
+    super.forgetChild(child);
   }
 
   @override
@@ -5568,6 +5738,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   void forgetChild(Element child) {
     assert(child == _child);
     _child = null;
+    super.forgetChild(child);
   }
 
   @override
@@ -5674,6 +5845,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     assert(_children.contains(child));
     assert(!_forgottenChildren.contains(child));
     _forgottenChildren.add(child);
+    super.forgetChild(child);
   }
 
   @override

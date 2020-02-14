@@ -124,12 +124,19 @@ class SnippetGenerator {
     description = description.trim().isNotEmpty
         ? '<div class="snippet-description">{@end-inject-html}$description{@inject-html}</div>'
         : '';
+
+    // DartPad only supports stable or master as valid channels. Use master
+    // if not on stable so that local runs will work (although they will
+    // still take their sample code from the master docs server).
+    final String channel = metadata['channel'] == 'stable' ? 'stable' : 'master';
+
     final Map<String, String> substitutions = <String, String>{
       'description': description,
       'code': htmlEscape.convert(result.join('\n')),
       'language': language ?? 'dart',
       'serial': '',
       'id': metadata['id'] as String,
+      'channel': channel,
       'element': metadata['element'] as String ?? '',
       'app': '',
     };
@@ -226,8 +233,7 @@ class SnippetGenerator {
     assert(template != null || type != SnippetType.sample);
     assert(metadata != null && metadata['id'] != null);
     assert(input != null);
-    assert(!showDartPad || type == SnippetType.sample,
-        'Only application snippets work with dartpad.');
+    assert(!showDartPad || type == SnippetType.sample, 'Only application samples work with dartpad.');
     final List<_ComponentTuple> snippetData = parseInput(_loadFileAsUtf8(input));
     switch (type) {
       case SnippetType.sample:
@@ -264,9 +270,7 @@ class SnippetGenerator {
           (_ComponentTuple data) => data.name == 'description',
           orElse: () => null,
         );
-        metadata ??= <String, Object>{};
         metadata.addAll(<String, Object>{
-          'id': metadata['id'],
           'file': path.basename(outputFile.path),
           'description': description?.mergedContent,
         });
