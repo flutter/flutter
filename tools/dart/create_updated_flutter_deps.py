@@ -111,9 +111,11 @@ def Main(argv):
                 updated_value = dart_v.replace(new_vars["dart_git"], "Var('dart_git') + '/")
                 updated_value = updated_value.replace(old_vars["chromium_git"], "Var('chromium_git') + '")
 
-                plain_v = dart_v[dart_v.rfind('/')+1:dart_v.rfind('@')]
-                if plain_v.rfind('.git') != -1:
-                  plain_v = plain_v[:plain_v.rfind('.git')]
+                plain_v = dart_k[dart_k.rfind('/') + 1:]
+                # This dependency has to be special-cased here because the
+                # repository name is not the same as the directory name.
+                if plain_v == "quiver":
+                  plain_v = "quiver-dart"
                 if ('dart_' + plain_v + '_tag' in updated_vars):
                   updated_value = updated_value[:updated_value.rfind('@')] + "' + '@' + Var('dart_" + plain_v + "_tag')"
                 elif ('dart_' + plain_v + '_rev' in updated_vars):
