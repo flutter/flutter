@@ -202,7 +202,7 @@ class CocoaPods {
         '$noCocoaPodsConsequence\n'
         'To initialize CocoaPods, run:\n'
         '  pod setup\n'
-        'once to finalize CocoaPods\' installation.',
+        "once to finalize CocoaPods' installation.",
         emphasis: true,
       );
       return false;
@@ -315,7 +315,7 @@ class CocoaPods {
     if (globals.logger.isVerbose || result.exitCode != 0) {
       final String stdout = result.stdout as String;
       if (stdout.isNotEmpty) {
-        globals.printStatus('CocoaPods\' output:\n↳');
+        globals.printStatus("CocoaPods' output:\n↳");
         globals.printStatus(stdout, indent: 4);
       }
       final String stderr = result.stderr as String;

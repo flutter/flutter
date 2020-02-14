@@ -76,10 +76,12 @@ abstract class Usage {
     String versionOverride,
     String configDirOverride,
     String logFile,
+    @required bool runningOnBot,
   }) => _DefaultUsage(settingsName: settingsName,
                       versionOverride: versionOverride,
                       configDirOverride: configDirOverride,
-                      logFile: logFile);
+                      logFile: logFile,
+                      runningOnBot: runningOnBot);
 
   /// Returns [Usage] active in the current app context.
   static Usage get instance => context.get<Usage>();
@@ -161,6 +163,7 @@ class _DefaultUsage implements Usage {
     String versionOverride,
     String configDirOverride,
     String logFile,
+    @required bool runningOnBot,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
@@ -176,7 +179,7 @@ class _DefaultUsage implements Usage {
         // Many CI systems don't do a full git checkout.
         version.endsWith('/unknown') ||
         // Ignore bots.
-        isRunningOnBot(globals.platform) ||
+        runningOnBot ||
         // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
         suppressEnvFlag
       )) {
@@ -376,10 +379,10 @@ class _DefaultUsage implements Usage {
         // Display the welcome message if we are not on master, and if the
         // persistent tool state instructs that we should.
         (!globals.flutterVersion.isMaster &&
-        (persistentToolState.redisplayWelcomeMessage ?? true))) {
+        (globals.persistentToolState.redisplayWelcomeMessage ?? true))) {
       _printWelcome();
       _printedWelcome = true;
-      persistentToolState.redisplayWelcomeMessage = false;
+      globals.persistentToolState.redisplayWelcomeMessage = false;
     }
   }
 }

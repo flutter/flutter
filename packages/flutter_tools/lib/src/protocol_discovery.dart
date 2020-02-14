@@ -94,7 +94,7 @@ class ProtocolDiscovery {
   }
 
   Match _getPatternMatch(String line) {
-    final RegExp r = RegExp('${RegExp.escape(serviceName)} listening on ((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)');
+    final RegExp r = RegExp(RegExp.escape(serviceName) + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
     return r.firstMatch(line);
   }
 

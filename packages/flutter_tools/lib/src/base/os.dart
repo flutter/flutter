@@ -251,21 +251,48 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   String get name {
-    if (_name == null) {
-      if (_platform.isMacOS) {
-        final List<RunResult> results = <RunResult>[
-          _processUtils.runSync(<String>['sw_vers', '-productName']),
-          _processUtils.runSync(<String>['sw_vers', '-productVersion']),
-          _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
-        ];
-        if (results.every((RunResult result) => result.exitCode == 0)) {
-          _name = '${results[0].stdout.trim()} ${results[1].stdout
-              .trim()} ${results[2].stdout.trim()}';
-        }
-      }
-      _name ??= super.name;
+    if (_name != null) {
+      return _name;
     }
-    return _name;
+    if (_platform.isMacOS) {
+      return _name = _macName;
+    } else if (_platform.isLinux) {
+      return _name = _linuxName;
+    }
+    return _name = super.name;
+  }
+
+  String get _macName {
+    final List<RunResult> results = <RunResult>[
+      _processUtils.runSync(<String>['sw_vers', '-productName']),
+      _processUtils.runSync(<String>['sw_vers', '-productVersion']),
+      _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+    ];
+    if (results.every((RunResult result) => result.exitCode == 0)) {
+      return '${results[0].stdout.trim()} '
+             '${results[1].stdout.trim()} '
+             '${results[2].stdout.trim()}';
+    }
+    return super.name;
+  }
+
+  String get _linuxName {
+    final String fullVersion = _platform.operatingSystemVersion;
+    // This is formatted as 'Linux version build'. The 'build' part can be
+    // somewhat long and is not very informative, so omit it.
+    final List<String> versionParts = fullVersion.split(' ');
+    if (versionParts.length < 2) {
+      // The version string didn't have the expected format. Just return the
+      // full string.
+      return fullVersion;
+    }
+    final String system = versionParts[0];
+    final String version = versionParts[1];
+    if (system != 'Linux') {
+      // If the system name isn't 'Linux', then just return the full string.
+      return fullVersion;
+    }
+    return '$system $version';
   }
 
   @override

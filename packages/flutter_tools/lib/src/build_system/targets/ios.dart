@@ -17,6 +17,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -38,6 +39,7 @@ abstract class AotAssemblyBase extends Target {
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
       ?.split(' ')
       ?.map(getIOSArchForName)
@@ -60,6 +62,7 @@ abstract class AotAssemblyBase extends Target {
         darwinArch: iosArch,
         bitcode: bitcode,
         quiet: true,
+        splitDebugInfo: splitDebugInfo,
       ));
     }
     final List<int> results = await Future.wait(pending);
@@ -159,10 +162,14 @@ class DebugUniveralFramework extends Target {
   String get name => 'debug_universal_framework';
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
 
   @override
-  List<Source> get inputs => const <Source>[];
+  List<Source> get inputs => const <Source>[
+     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[
@@ -172,12 +179,19 @@ class DebugUniveralFramework extends Target {
   @override
   Future<void> build(Environment environment) async {
     // Generate a trivial App.framework.
+    final Set<DarwinArch> iosArchs = environment.defines[kIosArchs]
+      ?.split(' ')
+      ?.map(getIOSArchForName)
+      ?.toSet()
+      ?? <DarwinArch>{DarwinArch.arm64};
     final File iphoneFile = environment.buildDir.childFile('iphone_framework');
     final File simulatorFile = environment.buildDir.childFile('simulator_framework');
     final File lipoOutputFile = environment.buildDir.childFile('App');
     final RunResult iphoneResult = await createStubAppFramework(
       iphoneFile,
       SdkType.iPhone,
+      // Only include 32bit if it is contained in the active architectures.
+      include32Bit: iosArchs.contains(DarwinArch.armv7)
     );
     final RunResult simulatorResult = await createStubAppFramework(
       simulatorFile,
@@ -224,6 +238,7 @@ abstract class IosAssetBundle extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
@@ -269,7 +284,15 @@ abstract class IosAssetBundle extends Target {
 
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
-    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      assetDepfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
 
 
     // Copy the plist from either the project or module.
@@ -348,7 +371,7 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
+Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool include32Bit = true }) async {
   try {
     outputFile.createSync(recursive: true);
   } catch (e) {
@@ -365,8 +388,8 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
     List<String> archFlags;
     if (sdk == SdkType.iPhone) {
       archFlags = <String>[
-        '-arch',
-        getNameForDarwinArch(DarwinArch.armv7),
+        if (include32Bit)
+          ...<String>['-arch', getNameForDarwinArch(DarwinArch.armv7)],
         '-arch',
         getNameForDarwinArch(DarwinArch.arm64),
       ];

@@ -63,7 +63,7 @@ void main() {
     expect(good, isTrue);
   });
 
-  testWidgets('Directionality can\'t be null', (WidgetTester tester) async {
+  testWidgets("Directionality can't be null", (WidgetTester tester) async {
     expect(() {
       Directionality(textDirection: nonconst(null), child: const Placeholder());
     }, throwsAssertionError);
