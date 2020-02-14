@@ -864,6 +864,7 @@ void main() {
       expect(decoded, r'I \M-b\M^O syslog!');
     });
   });
+
   group('logging', () {
     MockIMobileDevice mockIMobileDevice;
     MockIosProject mockIosProject;
@@ -931,56 +932,88 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       Platform: () => macPlatform,
     });
   });
-  testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
-    globals.fs.file('pubspec.yaml')
-      ..createSync()
-      ..writeAsStringSync(r'''
-name: example
 
-flutter:
-  module: {}
-''');
-    globals.fs.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+  group('isSupportedForProject', () {
+    Artifacts mockArtifacts;
+    MockCache mockCache;
+    MockLogger mockLogger;
+    IOSDeploy iosDeploy;
 
-    expect(IOSDevice('test', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64).isSupportedForProject(flutterProject), true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macPlatform,
-  });
-  testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
-    globals.fs.directory('ios').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+    setUp(() {
+      mockArtifacts = MockArtifacts();
+      mockCache = MockCache();
+      iosDeploy = IOSDeploy(
+        artifacts: mockArtifacts,
+        cache: mockCache,
+        logger: mockLogger,
+        platform: macPlatform,
+        processManager: FakeProcessManager.any(),
+      );
+    });
 
-    expect(IOSDevice('test', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64).isSupportedForProject(flutterProject), true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macPlatform,
-  });
+    testUsingContext('is true on module project', () async {
+      globals.fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+  name: example
 
-  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
-    final FileSystem fs = MemoryFileSystem();
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProject.current();
+  flutter:
+    module: {}
+  ''');
+      globals.fs.file('.packages').createSync();
+      final FlutterProject flutterProject = FlutterProject.current();
 
-    final IOSDevice device = IOSDevice(
-      'test',
-      fileSystem: fs,
-      platform: macPlatform,
-      name: 'iPhone 1',
-      sdkVersion: '13.3',
-      cpuArchitecture: DarwinArch.arm64,
-    );
-    expect(device.isSupportedForProject(flutterProject), false);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
-    Platform: () => macPlatform,
+      final IOSDevice device = IOSDevice('test', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64);
+      expect(device.isSupportedForProject(flutterProject), true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => macPlatform,
+    });
+
+    testUsingContext('is true with editable host app', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
+      globals.fs.directory('ios').createSync();
+      final FlutterProject flutterProject = FlutterProject.current();
+      final IOSDevice device = IOSDevice(
+        'test',
+        artifacts: mockArtifacts,
+        fileSystem: globals.fs,
+        iosDeploy: iosDeploy,
+        platform: globals.platform,
+        name: 'iPhone 1',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+      );
+      expect(device.isSupportedForProject(flutterProject), true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => macPlatform,
+    });
+
+    testUsingContext('is false with no host app and no module', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
+      final FlutterProject flutterProject = FlutterProject.current();
+
+      final IOSDevice device = IOSDevice(
+        'test',
+        artifacts: mockArtifacts,
+        fileSystem: globals.fs,
+        iosDeploy: iosDeploy,
+        platform: globals.platform,
+        name: 'iPhone 1',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+      );
+      expect(device.isSupportedForProject(flutterProject), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => macPlatform,
+    });
   });
 }
 
