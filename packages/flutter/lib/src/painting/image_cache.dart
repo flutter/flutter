@@ -253,6 +253,10 @@ class ImageCache {
       return;
     }
     _liveImages[key] = image;
+    // Even if no callers to ImageProvider.resolve have listened to the stream,
+    // the cache is listening to the stream and will remove itself once the
+    // image completes to move it from pending to keepAlive.
+    // Even if the cache size is 0, we still add this listener.
     image.completer.addOnLastListenerRemovedCallback(() {
       _liveImages.remove(key);
     });
@@ -338,6 +342,12 @@ class ImageCache {
     // the trace entry multiple times if we get re-entrant calls from a multi-
     // frame provider here.
     bool listenedOnce = false;
+
+    // We shouldn't use the _pendingImages map if the cache is disabled, but we
+    // will have to listen to the image at least once so we don't leak it in
+    // the live image tracking.
+    // If the cache is disabled, this variable will be set.
+    _PendingImage untrackedPendingImage;
     void listener(ImageInfo info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
@@ -350,12 +360,15 @@ class ImageCache {
         });
       }
       _liveImages[key] = image;
-      final _PendingImage pendingImage = _pendingImages.remove(key);
+      final _PendingImage pendingImage = untrackedPendingImage ?? _pendingImages.remove(key);
       if (pendingImage != null) {
         pendingImage.removeListener();
       }
+      // Only touch if the cache was enabled when resolve was initially called.
+      if (untrackedPendingImage == null) {
+        _touch(key, image, listenerTask);
+      }
 
-      _touch(key, image, listenerTask);
       if (!kReleaseMode && !listenedOnce) {
         listenerTask.finish(arguments: <String, dynamic>{
           'syncCall': syncCall,
@@ -368,12 +381,16 @@ class ImageCache {
       }
       listenedOnce = true;
     }
+
+    final ImageStreamListener streamListener = ImageStreamListener(listener);
     if (maximumSize > 0 && maximumSizeBytes > 0) {
-      final ImageStreamListener streamListener = ImageStreamListener(listener);
       _pendingImages[key] = _PendingImage(result, streamListener);
-      // Listener is removed in [_PendingImage.removeListener].
-      result.addListener(streamListener);
+    } else {
+      untrackedPendingImage = _PendingImage(result, streamListener);
     }
+    // Listener is removed in [_PendingImage.removeListener].
+    result.addListener(streamListener);
+
     return result;
   }
 

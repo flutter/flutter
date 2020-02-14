@@ -9,7 +9,7 @@ import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-  group(ImageCache, () {
+  group('ImageCache', () {
     setUpAll(() {
       TestRenderingFlutterBinding(); // initializes the imageCache
     });
@@ -282,6 +282,40 @@ void main() {
 
       expect(resultingCompleter1, completer1);
       expect(resultingCompleter2, completer2);
+    });
+
+    test('Live image cache avoids leaks of unlistened streams', () async {
+      imageCache.maximumSize = 3;
+
+      const TestImageProvider(1, 1)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(2, 2)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(3, 3)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(4, 4)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(5, 5)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(6, 6)..resolve(ImageConfiguration.empty);
+
+      // wait an event loop to let image resolution process.
+      await null;
+
+      expect(imageCache.currentSize, 3);
+      expect(imageCache.liveImageCount, 0);
+    });
+
+    test('Disabled image cache does not leak live images', () async {
+      imageCache.maximumSize = 0;
+
+      const TestImageProvider(1, 1)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(2, 2)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(3, 3)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(4, 4)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(5, 5)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(6, 6)..resolve(ImageConfiguration.empty);
+
+      // wait an event loop to let image resolution process.
+      await null;
+
+      expect(imageCache.currentSize, 0);
+      expect(imageCache.liveImageCount, 0);
     });
   });
 }
