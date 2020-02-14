@@ -402,9 +402,9 @@ class IOSDevice extends Device {
       }
       packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
     } else {
-      if (!await installApp(package)) { globals.printError('!!!!!!!!!!!!!!!!!!!!!!!!!!!!install failed!');
+      if (!await installApp(package)) {
         return LaunchResult.failed();
-      } globals.printError('!!!!!!!!!!!!!!!!!install succeeded?!');
+      }
     }
 
     packageId ??= package.id;
