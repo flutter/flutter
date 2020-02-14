@@ -246,6 +246,18 @@ class ImageCache {
     }
   }
 
+  void _trackLiveImage(Object key, _CachedImage image) {
+    // Avoid adding unnecessary callbacks to the completer.
+    if (_liveImages.containsKey(key)) {
+      assert(identical(_liveImages[key].completer, image.completer));
+      return;
+    }
+    _liveImages[key] = image;
+    image.completer.addOnLastListenerRemovedCallback(() {
+      _liveImages.remove(key);
+    });
+  }
+
   /// Returns the previously cached [ImageStream] for the given key, if available;
   /// if not, calls the given callback to obtain it first. In either case, the
   /// key is moved to the "most recently used" position.
@@ -281,10 +293,12 @@ class ImageCache {
     // recently used position below.
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
-      assert(_liveImages.containsKey(key));
       if (!kReleaseMode) {
         timelineTask.finish(arguments: <String, dynamic>{'result': 'keepAlive'});
       }
+      // The image might have been keptAlive but had no listeners. We should
+      // track it as live again until it has no listeners again.
+      _trackLiveImage(key, image);
       _cache[key] = image;
       return image.completer;
     }
@@ -300,10 +314,7 @@ class ImageCache {
 
     try {
       result = loader();
-      _liveImages[key] = _CachedImage(result, null);
-      result.addOnLastListenerRemovedCallback(() {
-        _liveImages.remove(key);
-      });
+      _trackLiveImage(key, _CachedImage(result, null));
     } catch (error, stackTrace) {
       if (!kReleaseMode) {
         timelineTask.finish(arguments: <String, dynamic>{
@@ -323,6 +334,9 @@ class ImageCache {
     if (!kReleaseMode) {
       listenerTask = TimelineTask(parent: timelineTask)..start('listener');
     }
+    // If we're doing tracing, we need to make sure that we don't try to finish
+    // the trace entry multiple times if we get re-entrant calls from a multi-
+    // frame provider here.
     bool listenedOnce = false;
     void listener(ImageInfo info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
@@ -342,11 +356,6 @@ class ImageCache {
       }
 
       _touch(key, image, listenerTask);
-      if (imageSize <= maximumSizeBytes) {
-        _currentSizeBytes += imageSize;
-        _cache[key] = image;
-        _checkCacheSize(listenerTask);
-      }
       if (!kReleaseMode && !listenedOnce) {
         listenerTask.finish(arguments: <String, dynamic>{
           'syncCall': syncCall,
