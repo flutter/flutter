@@ -15,6 +15,22 @@ void main() {
       SurfaceSceneBuilder.debugForgetFrameScene();
     });
 
+    test('debugAssertSurfaceState produces a human-readable message', () {
+      final SceneBuilder builder = SceneBuilder();
+      final PersistedOpacity opacityLayer = builder.pushOpacity(100);
+      try {
+        debugAssertSurfaceState(opacityLayer, PersistedSurfaceState.active, PersistedSurfaceState.pendingRetention);
+        fail('Expected $PersistedSurfaceException');
+      } on PersistedSurfaceException catch (exception) {
+        expect(
+          '$exception',
+          'PersistedOpacity: is in an unexpected state.\n'
+          'Expected one of: PersistedSurfaceState.active, PersistedSurfaceState.pendingRetention\n'
+          'But was: PersistedSurfaceState.created',
+        );
+      }
+    });
+
     test('is created', () {
       final SceneBuilder builder = SceneBuilder();
       final PersistedOpacity opacityLayer = builder.pushOpacity(100);
