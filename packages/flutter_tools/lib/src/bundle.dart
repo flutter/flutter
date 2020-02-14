@@ -15,19 +15,21 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/dart.dart';
+import 'build_system/targets/icon_tree_shaker.dart';
+import 'cache.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'project.dart';
 
-String get defaultMainPath => fs.path.join('lib', 'main.dart');
+String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
-String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
 String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
   return getKernelPathForTransformerOptions(
-    fs.path.join(getBuildDirectory(), 'app.dill'),
+    globals.fs.path.join(getBuildDirectory(), 'app.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
@@ -67,11 +69,12 @@ class BundleBuilder {
     List<String> extraGenSnapshotOptions = const <String>[],
     List<String> fileSystemRoots,
     String fileSystemScheme,
+    @required bool treeShakeIcons,
   }) async {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
+    packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
     final FlutterProject flutterProject = FlutterProject.current();
     await buildWithAssemble(
       buildMode: buildMode ?? BuildMode.debug,
@@ -82,10 +85,11 @@ class BundleBuilder {
       depfilePath: depfilePath,
       precompiled: precompiledSnapshot,
       trackWidgetCreation: trackWidgetCreation,
+      treeShakeIcons: treeShakeIcons,
     );
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
-      final File outputDill = fs.directory(assetDirPath).childFile('kernel_blob.bin');
+      final File outputDill = globals.fs.directory(assetDirPath).childFile('kernel_blob.bin');
       if (outputDill.existsSync()) {
         outputDill.copySync(applicationKernelFilePath);
       }
@@ -106,18 +110,22 @@ Future<void> buildWithAssemble({
   @required String depfilePath,
   @required bool precompiled,
   bool trackWidgetCreation,
+  @required bool treeShakeIcons,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
   buildMode = precompiled ? buildMode : BuildMode.debug;
   final Environment environment = Environment(
     projectDir: flutterProject.directory,
-    outputDir: fs.directory(outputDir),
+    outputDir: globals.fs.directory(outputDir),
     buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
+    cacheDir: globals.cache.getRoot(),
+    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     defines: <String, String>{
       kTargetFile: mainPath,
       kBuildMode: getNameForBuildMode(buildMode),
       kTargetPlatform: getNameForTargetPlatform(targetPlatform),
       kTrackWidgetCreation: trackWidgetCreation?.toString(),
+      kIconTreeShakerFlag: treeShakeIcons ? 'true' : null,
     },
   );
   final Target target = buildMode == BuildMode.debug
@@ -126,8 +134,8 @@ Future<void> buildWithAssemble({
   final BuildResult result = await buildSystem.build(target, environment);
 
   if (!result.success) {
-    for (ExceptionMeasurement measurement in result.exceptions.values) {
-        printError('Target ${measurement.target} failed: ${measurement.exception}',
+    for (final ExceptionMeasurement measurement in result.exceptions.values) {
+        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: measurement.fatal
             ? measurement.stackTrace
             : null,
@@ -137,11 +145,16 @@ Future<void> buildWithAssemble({
   }
   if (depfilePath != null) {
     final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-    final File outputDepfile = fs.file(depfilePath);
+    final File outputDepfile = globals.fs.file(depfilePath);
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
-    depfile.writeToFile(outputDepfile);
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(depfile, outputDepfile);
   }
 }
 
@@ -153,7 +166,7 @@ Future<AssetBundle> buildAssets({
   bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
+  packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -176,7 +189,7 @@ Future<void> writeBundle(
   Map<String, DevFSContent> assetEntries,
   { Logger loggerOverride }
 ) async {
-  loggerOverride ??= logger;
+  loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
     try {
       bundleDir.deleteSync(recursive: true);
@@ -195,7 +208,12 @@ Future<void> writeBundle(
     assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = fs.file(bundleDir.uri.resolve(entry.key));
+        // This will result in strange looking files, for example files with `/`
+        // on Windows or files that end up getting URI encoded such as `#.ext`
+        // to `%23.ext`.  However, we have to keep it this way since the
+        // platform channels in the framework will URI encode these values,
+        // and the native APIs will look for files this way.
+        final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
         file.parent.createSync(recursive: true);
         await file.writeAsBytes(await entry.value.contentsAsBytes());
       } finally {

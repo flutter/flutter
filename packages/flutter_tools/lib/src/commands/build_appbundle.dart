@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
+import '../android/gradle_utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../project.dart';
@@ -14,6 +16,7 @@ import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
   BuildAppBundleCommand({bool verboseHelp = false}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags();
     usesFlavorOption();
@@ -43,8 +46,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   final String description =
       'Build an Android App Bundle file from your app.\n\n'
-      'This command can build debug and release versions of an app bundle for your application. \'debug\' builds support '
-      'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are '
+      "This command can build debug and release versions of an app bundle for your application. 'debug' builds support "
+      "debugging and a quick development cycle. 'release' builds don't support debugging and are "
       'suitable for deploying to app stores. \n app bundle improves your app size';
 
   @override
@@ -69,6 +72,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (androidSdk == null) {
+      exitWithNoSdkMessage();
+    }
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
       shrink: boolArg('shrink'),
@@ -78,6 +84,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

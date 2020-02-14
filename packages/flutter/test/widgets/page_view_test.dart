@@ -83,7 +83,6 @@ void main() {
 
   testWidgets('PageView does not squish when overscrolled', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(platform: TargetPlatform.iOS),
       home: PageView(
         children: List<Widget>.generate(10, (int i) {
           return Container(
@@ -113,7 +112,7 @@ void main() {
 
     expect(leftOf(0), lessThan(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('PageController control test', (WidgetTester tester) async {
     final PageController controller = PageController(initialPage: 4);
@@ -663,7 +662,7 @@ void main() {
       await tester.pumpWidget(build());
 
       // The first 3 items should be visible and tappable.
-      for (int index in visiblePages) {
+      for (final int index in visiblePages) {
         expect(find.text(index.toString()), findsOneWidget);
         // The center of page 2's x-coordinate is 800, so we have to manually
         // offset it a bit to make sure the tap lands within the screen.
@@ -676,11 +675,53 @@ void main() {
       await tester.pump();
       // The last 3 items should be visible and tappable.
       visiblePages = const <int> [17, 18, 19];
-      for (int index in visiblePages) {
+      for (final int index in visiblePages) {
         expect(find.text('$index'), findsOneWidget);
         await tester.tap(find.text('$index'));
         expect(tappedIndex, index);
       }
+  });
+
+  testWidgets('the current item remains centered on constraint change', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/50505.
+    final PageController controller = PageController(
+      initialPage: kStates.length - 1,
+      viewportFraction: 0.5,
+    );
+
+    Widget build(Size size) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: PageView(
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
+              controller: controller,
+              onPageChanged: (int page) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Verifies that the last item is centered on screen.
+    void verifyCentered() {
+      expect(
+        tester.getCenter(find.text(kStates.last)),
+        offsetMoreOrLessEquals(const Offset(400, 300)),
+      );
+    }
+
+    await tester.pumpWidget(build(const Size(300, 300)));
+    await tester.pumpAndSettle();
+
+    verifyCentered();
+
+    await tester.pumpWidget(build(const Size(200, 300)));
+    await tester.pumpAndSettle();
+
+    verifyCentered();
   });
 
   testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {

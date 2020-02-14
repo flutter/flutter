@@ -26,7 +26,7 @@ abstract class Decoration extends Diagnosticable {
   const Decoration();
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => objectRuntimeType(this, 'Decoration');
 
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
@@ -165,6 +165,9 @@ abstract class Decoration extends Diagnosticable {
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
   BoxPainter createBoxPainter([ VoidCallback onChanged ]);
+
+  /// Returns a closed [Path] that describes the outer edge of this decoration.
+  Path getClipPath(Rect rect, TextDirection textDirection) => null;
 }
 
 /// A stateful class that can paint a particular [Decoration].

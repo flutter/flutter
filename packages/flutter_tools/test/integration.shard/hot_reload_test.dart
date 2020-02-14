@@ -48,6 +48,23 @@ void main() {
     }
   });
 
+  test('reloadMethod triggers hot reload behavior', () async {
+    await _flutter.run();
+    _project.uncommentHotReloadPrint();
+    final StringBuffer stdout = StringBuffer();
+    final StreamSubscription<String> subscription = _flutter.stdout.listen(stdout.writeln);
+    try {
+      final String libraryId = _project.buildBreakpointUri.toString();
+      await _flutter.reloadMethod(libraryId: libraryId, classId: 'MyApp');
+      // reloadMethod does not wait for the next frame, to allow scheduling a new
+      // update while the previous update was pending.
+      await Future<void>.delayed(const Duration(seconds: 1));
+      expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
+    } finally {
+      await subscription.cancel();
+    }
+  });
+
   test('hot restart works without error', () async {
     await _flutter.run();
     await _flutter.hotRestart();
@@ -107,7 +124,7 @@ void main() {
     await subscription.cancel();
   });
 
-  test('hot reload doesn\'t reassemble if paused', () async {
+  test("hot reload doesn't reassemble if paused", () async {
     await _flutter.run(withDebugger: true);
     final Completer<void> sawTick2 = Completer<void>();
     final Completer<void> sawTick3 = Completer<void>();

@@ -4,10 +4,11 @@
 
 import 'dart:async';
 
+import '../aot.dart';
+import '../bundle.dart';
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
 import '../commands/build_windows.dart';
-
 import '../runner/flutter_command.dart';
 import 'build_aar.dart';
 import 'build_aot.dart';
@@ -26,7 +27,10 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAotCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildIOSCommand());
-    addSubcommand(BuildIOSFrameworkCommand());
+    addSubcommand(BuildIOSFrameworkCommand(
+      aotBuilder: AotBuilder(),
+      bundleBuilder: BundleBuilder(),
+    ));
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildWebCommand());
     addSubcommand(BuildMacosCommand());

@@ -147,8 +147,8 @@ class JSONMethodCodec implements MethodCodec {
         && decoded[0] is String
         && (decoded[1] == null || decoded[1] is String))
       throw PlatformException(
-        code: decoded[0],
-        message: decoded[1],
+        code: decoded[0] as String,
+        message: decoded[1] as String,
         details: decoded[2],
       );
     throw FormatException('Invalid envelope: $decoded');
@@ -356,7 +356,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       }
     } else if (value is String) {
       buffer.putUint8(_valueString);
-      final List<int> bytes = utf8.encoder.convert(value);
+      final Uint8List bytes = utf8.encoder.convert(value);
       writeSize(buffer, bytes.length);
       buffer.putUint8List(bytes);
     } else if (value is Uint8List) {
@@ -566,7 +566,7 @@ class StandardMethodCodec implements MethodCodec {
     final dynamic errorMessage = messageCodec.readValue(buffer);
     final dynamic errorDetails = messageCodec.readValue(buffer);
     if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
-      throw PlatformException(code: errorCode, message: errorMessage, details: errorDetails);
+      throw PlatformException(code: errorCode, message: errorMessage as String, details: errorDetails);
     else
       throw const FormatException('Invalid envelope');
   }

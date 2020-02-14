@@ -19,12 +19,31 @@ Future<void> main() async {
     );
     await inDirectory(platformViewDirectory, () async {
       await flutter('pub', options: <String>['get']);
+      // Pre-cache the iOS artifacts; this may be the first test run on this machine.
+      await flutter(
+        'precache',
+        options: <String>[
+          '--no-android',
+          '--no-fuchsia',
+          '--no-linux',
+          '--no-macos',
+          '--no-web',
+          '--no-windows',
+        ],
+      );
     });
+
     final Directory iosDirectory = dir(
       '$platformViewDirectoryPath/ios',
     );
     await inDirectory(iosDirectory, () async {
-      await exec('pod', <String>['install']);
+      await exec(
+        'pod',
+        <String>['install'],
+        environment: <String, String>{
+          'LANG': 'en_US.UTF-8',
+        },
+      );
     });
 
     final TaskFunction taskFunction = createPlatformViewStartupTest();

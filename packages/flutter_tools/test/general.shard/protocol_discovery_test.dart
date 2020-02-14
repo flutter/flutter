@@ -381,4 +381,7 @@ class MockPortForwarder extends DevicePortForwarder {
   Future<void> unforward(ForwardedPort forwardedPort) {
     throw 'not implemented';
   }
+
+  @override
+  Future<void> dispose() async {}
 }

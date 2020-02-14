@@ -47,8 +47,8 @@ Future<void> _waitForSplashToDisappear(FlutterDriver driver) async {
   while (waitingForSplashToDisappear) {
     final String response = await driver.requestData('splash_test_log',);
 
-    final Map<String, dynamic> splashTestLog = jsonDecode(response);
-    final List<dynamic> events = splashTestLog['events'];
+    final Map<String, dynamic> splashTestLog = jsonDecode(response) as Map<String, dynamic>;
+    final List<dynamic> events = splashTestLog['events'] as List<dynamic>;
     if (events.length == 3) {
       expect(
           events[0],

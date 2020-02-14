@@ -20,7 +20,7 @@ Future<void> main() async {
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
   final Stopwatch watch = Stopwatch();
   int iterations = 0;

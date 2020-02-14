@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
+
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
@@ -28,6 +32,42 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///
 /// A shared instance of this cache is retained by [PaintingBinding] and can be
 /// obtained via the [imageCache] top-level property in the [painting] library.
+///
+/// {@tool snippet}
+///
+/// This sample shows how to supply your own caching logic and replace the
+/// global [imageCache] variable.
+///
+/// ```dart
+/// /// This is the custom implementation of [ImageCache] where we can override
+/// /// the logic.
+/// class MyImageCache extends ImageCache {
+///   @override
+///   void clear() {
+///     print("Clearing cache!");
+///     super.clear();
+///   }
+/// }
+///
+/// class MyWidgetsBinding extends WidgetsFlutterBinding {
+///   @override
+///   ImageCache createImageCache() => MyImageCache();
+/// }
+///
+/// void main() {
+///   // The constructor sets global variables.
+///   MyWidgetsBinding();
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Container();
+///   }
+/// }
+/// ```
+/// {@end-tool}
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
@@ -49,11 +89,21 @@ class ImageCache {
     assert(value >= 0);
     if (value == maximumSize)
       return;
+    TimelineTask timelineTask;
+    if (!kReleaseMode) {
+       timelineTask = TimelineTask()..start(
+        'ImageCache.setMaximumSize',
+        arguments: <String, dynamic>{'value': value},
+      );
+    }
     _maximumSize = value;
     if (maximumSize == 0) {
       clear();
     } else {
-      _checkCacheSize();
+      _checkCacheSize(timelineTask);
+    }
+    if (!kReleaseMode) {
+      timelineTask.finish();
     }
   }
 
@@ -78,11 +128,21 @@ class ImageCache {
     assert(value >= 0);
     if (value == _maximumSizeBytes)
       return;
+    TimelineTask timelineTask;
+    if (!kReleaseMode) {
+      timelineTask = TimelineTask()..start(
+        'ImageCache.setMaximumSizeBytes',
+        arguments: <String, dynamic>{'value': value},
+      );
+    }
     _maximumSizeBytes = value;
     if (_maximumSizeBytes == 0) {
       clear();
     } else {
-      _checkCacheSize();
+      _checkCacheSize(timelineTask);
+    }
+    if (!kReleaseMode) {
+      timelineTask.finish();
     }
   }
 
@@ -98,18 +158,29 @@ class ImageCache {
   /// Images which have not finished loading yet will not be removed from the
   /// cache, and when they complete they will be inserted as normal.
   void clear() {
+    if (!kReleaseMode) {
+      Timeline.instantSync(
+        'ImageCache.clear',
+        arguments: <String, dynamic>{
+          'pendingImages': _pendingImages.length,
+          'cachedImages': _cache.length,
+          'currentSizeInBytes': _currentSizeBytes,
+        },
+      );
+    }
     _cache.clear();
     _pendingImages.clear();
     _currentSizeBytes = 0;
   }
 
   /// Evicts a single entry from the cache, returning true if successful.
-  /// Pending images waiting for completion are removed as well, returning true if successful.
+  /// Pending images waiting for completion are removed as well, returning true
+  /// if successful.
   ///
-  /// When a pending image is removed the listener on it is removed as well to prevent
-  /// it from adding itself to the cache if it eventually completes.
+  /// When a pending image is removed the listener on it is removed as well to
+  /// prevent it from adding itself to the cache if it eventually completes.
   ///
-  /// The [key] must be equal to an object used to cache an image in
+  /// The `key` must be equal to an object used to cache an image in
   /// [ImageCache.putIfAbsent].
   ///
   /// If the key is not immediately available, as is common, consider using
@@ -121,13 +192,29 @@ class ImageCache {
   bool evict(Object key) {
     final _PendingImage pendingImage = _pendingImages.remove(key);
     if (pendingImage != null) {
+      if (!kReleaseMode) {
+        Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
+          'type': 'pending'
+        });
+      }
       pendingImage.removeListener();
       return true;
     }
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
+      if (!kReleaseMode) {
+        Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
+          'type': 'completed',
+          'sizeiInBytes': image.sizeBytes,
+        });
+      }
       _currentSizeBytes -= image.sizeBytes;
       return true;
+    }
+    if (!kReleaseMode) {
+      Timeline.instantSync('ImageCache.evict', arguments: <String, dynamic>{
+        'type': 'miss',
+      });
     }
     return false;
   }
@@ -145,20 +232,45 @@ class ImageCache {
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader(), { ImageErrorListener onError }) {
     assert(key != null);
     assert(loader != null);
+    TimelineTask timelineTask;
+    TimelineTask listenerTask;
+    if (!kReleaseMode) {
+      timelineTask = TimelineTask()..start(
+        'ImageCache.putIfAbsent',
+        arguments: <String, dynamic>{
+          'key': key.toString(),
+        },
+      );
+    }
     ImageStreamCompleter result = _pendingImages[key]?.completer;
     // Nothing needs to be done because the image hasn't loaded yet.
-    if (result != null)
+    if (result != null) {
+      if (!kReleaseMode) {
+        timelineTask.finish(arguments: <String, dynamic>{'result': 'pending'});
+      }
       return result;
+    }
     // Remove the provider from the list so that we can move it to the
     // recently used position below.
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
+      if (!kReleaseMode) {
+        timelineTask.finish(arguments: <String, dynamic>{'result': 'completed'});
+      }
       _cache[key] = image;
       return image.completer;
     }
+
     try {
       result = loader();
     } catch (error, stackTrace) {
+      if (!kReleaseMode) {
+        timelineTask.finish(arguments: <String, dynamic>{
+          'result': 'error',
+          'error': error.toString(),
+          'stackTrace': stackTrace.toString(),
+        });
+      }
       if (onError != null) {
         onError(error, stackTrace);
         return null;
@@ -166,24 +278,36 @@ class ImageCache {
         rethrow;
       }
     }
+
+    if (!kReleaseMode) {
+      listenerTask = TimelineTask(parent: timelineTask)..start('listener');
+    }
+    bool listenedOnce = false;
     void listener(ImageInfo info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
       final _CachedImage image = _CachedImage(result, imageSize);
-      // If the image is bigger than the maximum cache size, and the cache size
-      // is not zero, then increase the cache size to the size of the image plus
-      // some change.
-      if (maximumSizeBytes > 0 && imageSize > maximumSizeBytes) {
-        _maximumSizeBytes = imageSize + 1000;
-      }
-      _currentSizeBytes += imageSize;
       final _PendingImage pendingImage = _pendingImages.remove(key);
       if (pendingImage != null) {
         pendingImage.removeListener();
       }
 
-      _cache[key] = image;
-      _checkCacheSize();
+      if (imageSize <= maximumSizeBytes) {
+        _currentSizeBytes += imageSize;
+        _cache[key] = image;
+        _checkCacheSize(listenerTask);
+      }
+      if (!kReleaseMode && !listenedOnce) {
+        listenerTask.finish(arguments: <String, dynamic>{
+          'syncCall': syncCall,
+          'sizeInBytes': imageSize,
+        });
+        timelineTask.finish(arguments: <String, dynamic>{
+          'currentSizeBytes': currentSizeBytes,
+          'currentSize': currentSize,
+        });
+      }
+      listenedOnce = true;
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
       final ImageStreamListener streamListener = ImageStreamListener(listener);
@@ -194,14 +318,35 @@ class ImageCache {
     return result;
   }
 
+  /// Returns whether this `key` has been previously added by [putIfAbsent].
+  bool containsKey(Object key) {
+    return _pendingImages[key] != null || _cache[key] != null;
+  }
+
   // Remove images from the cache until both the length and bytes are below
   // maximum, or the cache is empty.
-  void _checkCacheSize() {
+  void _checkCacheSize(TimelineTask timelineTask) {
+    final Map<String, dynamic> finishArgs = <String, dynamic>{};
+    TimelineTask checkCacheTask;
+    if (!kReleaseMode) {
+      checkCacheTask = TimelineTask(parent: timelineTask)..start('checkCacheSize');
+      finishArgs['evictedKeys'] = <String>[];
+      finishArgs['currentSize'] = currentSize;
+      finishArgs['currentSizeBytes'] = currentSizeBytes;
+    }
     while (_currentSizeBytes > _maximumSizeBytes || _cache.length > _maximumSize) {
       final Object key = _cache.keys.first;
       final _CachedImage image = _cache[key];
       _currentSizeBytes -= image.sizeBytes;
       _cache.remove(key);
+      if (!kReleaseMode) {
+        finishArgs['evictedKeys'].add(key.toString());
+      }
+    }
+    if (!kReleaseMode) {
+      finishArgs['endSize'] = currentSize;
+      finishArgs['endSizeBytes'] = currentSizeBytes;
+      checkCacheTask.finish(arguments: finishArgs);
     }
     assert(_currentSizeBytes >= 0);
     assert(_cache.length <= maximumSize);

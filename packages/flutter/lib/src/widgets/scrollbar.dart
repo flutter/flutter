@@ -240,7 +240,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // isn't less than the absolute minimum size.
     // _totalContentExtent >= viewportDimension, so (_totalContentExtent - _mainAxisPadding) > 0
     final double fractionVisible = ((_lastMetrics.extentInside - _mainAxisPadding) / (_totalContentExtent - _mainAxisPadding))
-      .clamp(0.0, 1.0);
+      .clamp(0.0, 1.0) as double;
 
     final double thumbExtent = math.max(
       math.min(_trackExtent, minOverscrollLength),
@@ -267,7 +267,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     // The `thumbExtent` should be no greater than `trackSize`, otherwise
     // the scrollbar may scroll towards the wrong direction.
-    return thumbExtent.clamp(newMinLength, _trackExtent);
+    return thumbExtent.clamp(newMinLength, _trackExtent) as double;
   }
 
   @override
@@ -311,7 +311,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
 
     final double fractionPast = (scrollableExtent > 0)
-      ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
+      ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0) as double
       : 0;
 
     return (_isReversed ? 1 - fractionPast : fractionPast) * (_trackExtent - thumbExtent);

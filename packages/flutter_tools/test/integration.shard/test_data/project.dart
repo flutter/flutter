@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../test_utils.dart';
 
@@ -19,9 +20,9 @@ abstract class Project {
 
   Future<void> setUpIn(Directory dir) async {
     this.dir = dir;
-    writeFile(fs.path.join(dir.path, 'pubspec.yaml'), pubspec);
+    writeFile(globals.fs.path.join(dir.path, 'pubspec.yaml'), pubspec);
     if (main != null) {
-      writeFile(fs.path.join(dir.path, 'lib', 'main.dart'), main);
+      writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), main);
     }
     await getPackages(dir.path);
   }

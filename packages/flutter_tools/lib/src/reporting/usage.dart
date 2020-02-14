@@ -76,10 +76,12 @@ abstract class Usage {
     String versionOverride,
     String configDirOverride,
     String logFile,
+    @required bool runningOnBot,
   }) => _DefaultUsage(settingsName: settingsName,
                       versionOverride: versionOverride,
                       configDirOverride: configDirOverride,
-                      logFile: logFile);
+                      logFile: logFile,
+                      runningOnBot: runningOnBot);
 
   /// Returns [Usage] active in the current app context.
   static Usage get instance => context.get<Usage>();
@@ -161,11 +163,12 @@ class _DefaultUsage implements Usage {
     String versionOverride,
     String configDirOverride,
     String logFile,
+    @required bool runningOnBot,
   }) {
-    final FlutterVersion flutterVersion = FlutterVersion.instance;
+    final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
-    final String logFilePath = logFile ?? platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
+    final bool suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+    final String logFilePath = logFile ?? globals.platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
     final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
     if (// To support testing, only allow other signals to supress analytics
@@ -176,7 +179,7 @@ class _DefaultUsage implements Usage {
         // Many CI systems don't do a full git checkout.
         version.endsWith('/unknown') ||
         // Ignore bots.
-        isRunningOnBot ||
+        runningOnBot ||
         // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
         suppressEnvFlag
       )) {
@@ -194,30 +197,38 @@ class _DefaultUsage implements Usage {
             settingsName,
             version,
             documentDirectory:
-                configDirOverride != null ? fs.directory(configDirOverride) : null,
+                configDirOverride != null ? globals.fs.directory(configDirOverride) : null,
           );
     }
     assert(_analytics != null);
 
     // Report a more detailed OS version string than package:usage does by default.
-    _analytics.setSessionValue(cdKey(CustomDimensions.sessionHostOsDetails), os.name);
+    _analytics.setSessionValue(
+      cdKey(CustomDimensions.sessionHostOsDetails),
+      globals.os.name,
+    );
     // Send the branch name as the "channel".
-    _analytics.setSessionValue(cdKey(CustomDimensions.sessionChannelName),
-                               flutterVersion.getBranchName(redactUnknownBranches: true));
+    _analytics.setSessionValue(
+      cdKey(CustomDimensions.sessionChannelName),
+      flutterVersion.getBranchName(redactUnknownBranches: true),
+    );
     // For each flutter experimental feature, record a session value in a comma
     // separated list.
     final String enabledFeatures = allFeatures
-        .where((Feature feature) {
-          return feature.configSetting != null &&
-                 Config.instance.getValue(feature.configSetting) == true;
-        })
-        .map((Feature feature) => feature.configSetting)
-        .join(',');
-    _analytics.setSessionValue(cdKey(CustomDimensions.enabledFlutterFeatures), enabledFeatures);
+      .where((Feature feature) {
+        return feature.configSetting != null &&
+               globals.config.getValue(feature.configSetting) == true;
+      })
+      .map((Feature feature) => feature.configSetting)
+      .join(',');
+    _analytics.setSessionValue(
+      cdKey(CustomDimensions.enabledFlutterFeatures),
+      enabledFeatures,
+    );
 
     // Record the host as the application installer ID - the context that flutter_tools is running in.
-    if (platform.environment.containsKey('FLUTTER_HOST')) {
-      _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
+    if (globals.platform.environment.containsKey('FLUTTER_HOST')) {
+      _analytics.setSessionValue('aiid', globals.platform.environment['FLUTTER_HOST']);
     }
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
   }
@@ -326,8 +337,8 @@ class _DefaultUsage implements Usage {
   }
 
   void _printWelcome() {
-    printStatus('');
-    printStatus('''
+    globals.printStatus('');
+    globals.printStatus('''
   ╔════════════════════════════════════════════════════════════════════════════╗
   ║                 Welcome to Flutter! - https://flutter.dev                  ║
   ║                                                                            ║
@@ -349,10 +360,10 @@ class _DefaultUsage implements Usage {
   ║ crash reports to Google.                                                   ║
   ║                                                                            ║
   ║ Read about data we send with crash reports:                                ║
-  ║ https://github.com/flutter/flutter/wiki/Flutter-CLI-crash-reporting        ║
+  ║ https://flutter.dev/docs/reference/crash-reporting                         ║
   ║                                                                            ║
   ║ See Google's privacy policy:                                               ║
-  ║ https://www.google.com/intl/en/policies/privacy/                           ║
+  ║ https://policies.google.com/privacy                                        ║
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
   }
@@ -367,11 +378,11 @@ class _DefaultUsage implements Usage {
         isFirstRun ||
         // Display the welcome message if we are not on master, and if the
         // persistent tool state instructs that we should.
-        (!FlutterVersion.instance.isMaster &&
-        (persistentToolState.redisplayWelcomeMessage ?? true))) {
+        (!globals.flutterVersion.isMaster &&
+        (globals.persistentToolState.redisplayWelcomeMessage ?? true))) {
       _printWelcome();
       _printedWelcome = true;
-      persistentToolState.redisplayWelcomeMessage = false;
+      globals.persistentToolState.redisplayWelcomeMessage = false;
     }
   }
 }
@@ -381,7 +392,7 @@ class _DefaultUsage implements Usage {
 // xcode_backend.sh etc manipulates them.
 class LogToFileAnalytics extends AnalyticsMock {
   LogToFileAnalytics(String logFilePath) :
-    logFile = fs.file(logFilePath)..createSync(recursive: true),
+    logFile = globals.fs.file(logFilePath)..createSync(recursive: true),
     super(true);
 
   final File logFile;

@@ -232,7 +232,7 @@ class PaintColorMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final Paint actualPaint = item;
+    final Paint actualPaint = item as Paint;
     return actualPaint.color == Color(expectedColor);
   }
 }

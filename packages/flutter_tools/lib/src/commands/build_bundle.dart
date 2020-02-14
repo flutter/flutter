@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
@@ -16,6 +16,7 @@ import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -59,7 +60,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
-              'in the application\'s LICENSE file.',
+              "in the application's LICENSE file.",
         defaultsTo: false);
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
@@ -82,7 +83,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
-    final String projectDir = fs.file(targetFile).parent.parent.path;
+    final String projectDir = globals.fs.file(targetFile).parent.parent.path;
     final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
     if (futterProject == null) {
       return const <CustomDimensions, String>{};
@@ -138,7 +139,8 @@ class BuildBundleCommand extends BuildSubCommand {
       extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       fileSystemScheme: stringArg('filesystem-scheme'),
       fileSystemRoots: stringsArg('filesystem-root'),
+      treeShakeIcons: boolArg('tree-shake-icons'),
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

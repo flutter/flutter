@@ -31,10 +31,10 @@ class ComponentDemoTabData {
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ComponentDemoTabData typedOther = other;
-    return typedOther.tabName == tabName
-        && typedOther.description == description
-        && typedOther.documentationUrl == documentationUrl;
+    return other is ComponentDemoTabData
+        && other.tabName == tabName
+        && other.description == description
+        && other.documentationUrl == documentationUrl;
   }
 
   @override
@@ -77,7 +77,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            title: const Text('Couldn\'t display URL:'),
+            title: const Text("Couldn't display URL:"),
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -133,7 +133,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(demo.description,
-                      style: Theme.of(context).textTheme.subhead,
+                      style: Theme.of(context).textTheme.subtitle1,
                     ),
                   ),
                   Expanded(child: demo.demoWidget),

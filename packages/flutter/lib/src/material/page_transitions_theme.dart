@@ -311,7 +311,7 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation.
 ///
-/// Apps can configure the map of builders for [ThemeData.platformTheme]
+/// Apps can configure the map of builders for [ThemeData.pageTransitionsTheme]
 /// to customize the default [MaterialPageRoute] page transition animation
 /// for different platforms.
 ///
@@ -529,15 +529,15 @@ class PageTransitionsTheme extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final PageTransitionsTheme typedOther = other;
-    if (identical(builders, other.builders))
+    if (other is PageTransitionsTheme && identical(builders, other.builders))
       return true;
-    return listEquals<PageTransitionsBuilder>(_all(builders), _all(typedOther.builders));
+    return other is PageTransitionsTheme
+        && listEquals<PageTransitionsBuilder>(_all(other.builders), _all(builders));
   }
 
   @override

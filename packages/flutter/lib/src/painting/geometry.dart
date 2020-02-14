@@ -66,7 +66,7 @@ Offset positionDependentBox({
   if (size.width - margin * 2.0 < childSize.width) {
     x = (size.width - childSize.width) / 2.0;
   } else {
-    final double normalizedTargetX = target.dx.clamp(margin, size.width - margin);
+    final double normalizedTargetX = target.dx.clamp(margin, size.width - margin) as double;
     final double edge = margin + childSize.width / 2.0;
     if (normalizedTargetX < edge) {
       x = margin;

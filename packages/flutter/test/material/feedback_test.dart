@@ -28,7 +28,7 @@ void main () {
     setUp(() {
       semanticEvents = <Map<String, Object>>[];
       SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
-        final Map<dynamic, dynamic> typedMessage = message;
+        final Map<dynamic, dynamic> typedMessage = message as Map<dynamic, dynamic>;
         semanticEvents.add(typedMessage.cast<String, Object>());
       });
     });
@@ -201,11 +201,11 @@ void main () {
 }
 
 class TestWidget extends StatelessWidget {
-
   const TestWidget({
+    Key key,
     this.tapHandler = nullHandler,
     this.longPressHandler = nullHandler,
-  });
+  }) : super(key: key);
 
   final HandlerCreator tapHandler;
   final HandlerCreator longPressHandler;

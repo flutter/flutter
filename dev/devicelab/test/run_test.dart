@@ -19,7 +19,7 @@ void main() {
       final ProcessResult scriptProcess = processManager.runSync(<String>[
         dart,
         'bin/run.dart',
-        for (String testName in testNames) ...<String>['-t', testName],
+        for (final String testName in testNames) ...<String>['-t', testName],
       ]);
       return scriptProcess;
     }

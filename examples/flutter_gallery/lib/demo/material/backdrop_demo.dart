@@ -185,7 +185,7 @@ class BackdropPanel extends StatelessWidget {
               padding: const EdgeInsetsDirectional.only(start: 16.0),
               alignment: AlignmentDirectional.centerStart,
               child: DefaultTextStyle(
-                style: theme.textTheme.subhead,
+                style: theme.textTheme.subtitle1,
                 child: Tooltip(
                   message: 'Tap to dismiss',
                   child: title,
@@ -205,14 +205,14 @@ class BackdropPanel extends StatelessWidget {
 class BackdropTitle extends AnimatedWidget {
   const BackdropTitle({
     Key key,
-    Listenable listenable,
+    Animation<double> listenable,
   }) : super(key: key, listenable: listenable);
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = listenable;
+    final Animation<double> animation = listenable as Animation<double>;
     return DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.title,
+      style: Theme.of(context).primaryTextTheme.headline6,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
       child: Stack(
@@ -283,7 +283,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   }
 
   double get _backdropHeight {
-    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject();
+    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
@@ -359,8 +359,8 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
         children: <Widget>[
           ListTileTheme(
             iconColor: theme.primaryIconTheme.color,
-            textColor: theme.primaryTextTheme.title.color.withOpacity(0.6),
-            selectedColor: theme.primaryTextTheme.title.color,
+            textColor: theme.primaryTextTheme.headline6.color.withOpacity(0.6),
+            selectedColor: theme.primaryTextTheme.headline6.color,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(

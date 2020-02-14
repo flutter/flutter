@@ -4,8 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show EngineLayer, Image, ImageFilter, PathMetric,
-                            Picture, PictureRecorder, Scene, SceneBuilder;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -31,13 +30,13 @@ class AnnotationEntry<T> {
   /// The annotation object that is found.
   final T annotation;
 
-  /// The target location described by the local coordinate space of the layer
-  /// that contains the annotation.
+  /// The target location described by the local coordinate space of the
+  /// annotation object.
   final Offset localPosition;
 
   @override
   String toString() {
-    return '$runtimeType(annotation: $annotation, localPostion: $localPosition)';
+    return '${objectRuntimeType(this, 'AnnotationEntry')}(annotation: $annotation, localPostion: $localPosition)';
   }
 }
 
@@ -71,7 +70,7 @@ class AnnotationResult<T> {
   ///
   /// It is similar to [entries] but does not contain other information.
   Iterable<T> get annotations sync* {
-    for (AnnotationEntry<T> entry in _entries)
+    for (final AnnotationEntry<T> entry in _entries)
       yield entry.annotation;
   }
 }
@@ -103,7 +102,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Only subclasses of [ContainerLayer] can have children in the layer tree.
   /// All other layer classes are used for leaves in the layer tree.
   @override
-  ContainerLayer get parent => super.parent;
+  ContainerLayer get parent => super.parent as ContainerLayer;
 
   // Whether this layer has any changes since its last call to [addToScene].
   //
@@ -135,7 +134,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(
       !alwaysNeedsAddToScene,
       '$runtimeType with alwaysNeedsAddToScene set called markNeedsAddToScene.\n'
-      'The layer\'s alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.',
+      "The layer's alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.",
     );
 
     // Already marked. Short-circuit.
@@ -461,6 +460,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
     properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer)));
   }
 }
 
@@ -536,6 +536,11 @@ class PictureLayer extends Layer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
+    properties.add(DiagnosticsProperty<String>('picture', describeIdentity(_picture)));
+    properties.add(DiagnosticsProperty<String>(
+      'raster cache hints',
+      'isComplex = $isComplexHint, willChange = $willChangeHint'),
+    );
   }
 
   @override
@@ -625,6 +630,7 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     @required this.rect,
     @required this.viewId,
+    this.hoverAnnotation,
   }) : assert(rect != null),
        assert(viewId != null);
 
@@ -635,6 +641,25 @@ class PlatformViewLayer extends Layer {
   ///
   /// A UIView with this identifier must have been created by [PlatformViewsServices.initUiKitView].
   final int viewId;
+
+  /// [MouseTrackerAnnotation] that handles mouse events for this layer.
+  ///
+  /// If [hoverAnnotation] is non-null, [PlatformViewLayer] will annotate the
+  /// region of this platform view such that annotation callbacks will receive
+  /// mouse events, including mouse enter, exit, and hover, but not including
+  /// mouse down, move, and up. The layer will be treated as opaque during an
+  /// annotation search, which will prevent layers behind it from receiving
+  /// these events.
+  ///
+  /// By default, [hoverAnnotation] is null, and [PlatformViewLayer] will not
+  /// receive mouse events, and will therefore appear translucent during the
+  /// annotation search.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseRegion], which explains more about the mouse events and opacity
+  ///    during annotation search.
+  final MouseTrackerAnnotation hoverAnnotation;
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
@@ -650,6 +675,18 @@ class PlatformViewLayer extends Layer {
   @override
   @protected
   bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (hoverAnnotation == null || !rect.contains(localPosition)) {
+      return false;
+    }
+    if (S == MouseTrackerAnnotation) {
+      final Object untypedValue = hoverAnnotation;
+      final S typedValue = untypedValue as S;
+      result.add(AnnotationEntry<S>(
+        annotation: typedValue,
+        localPosition: localPosition,
+      ));
+      return true;
+    }
     return false;
   }
 }
@@ -773,7 +810,7 @@ class ContainerLayer extends Layer {
       // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
       // or continuing to render stale outlines.
       if (temporaryLayers != null) {
-        for (PictureLayer temporaryLayer in temporaryLayers) {
+        for (final PictureLayer temporaryLayer in temporaryLayers) {
           temporaryLayer.remove();
         }
       }
@@ -1158,7 +1195,11 @@ class OffsetLayer extends ContainerLayer {
     // retained rendering, we don't want to push the offset down to each leaf
     // node. Otherwise, changing an offset layer on the very high level could
     // cascade the change to too many leaves.
-    engineLayer = builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy, oldLayer: _engineLayer);
+    engineLayer = builder.pushOffset(
+      layerOffset.dx + offset.dx,
+      layerOffset.dy + offset.dy,
+      oldLayer: _engineLayer as ui.OffsetEngineLayer,
+    );
     addChildrenToScene(builder);
     builder.pop();
   }
@@ -1281,7 +1322,11 @@ class ClipRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Rect shiftedClipRect = layerOffset == Offset.zero ? clipRect : clipRect.shift(layerOffset);
-      engineLayer = builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+      engineLayer = builder.pushClipRect(
+        shiftedClipRect,
+        clipBehavior: clipBehavior,
+        oldLayer: _engineLayer as ui.ClipRectEngineLayer,
+      );
     } else {
       engineLayer = null;
     }
@@ -1362,7 +1407,11 @@ class ClipRRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final RRect shiftedClipRRect = layerOffset == Offset.zero ? clipRRect : clipRRect.shift(layerOffset);
-      engineLayer = builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+      engineLayer = builder.pushClipRRect(
+        shiftedClipRRect,
+        clipBehavior: clipBehavior,
+        oldLayer: _engineLayer as ui.ClipRRectEngineLayer,
+      );
     } else {
       engineLayer = null;
     }
@@ -1443,7 +1492,11 @@ class ClipPathLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Path shiftedPath = layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset);
-      engineLayer = builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+      engineLayer = builder.pushClipPath(
+        shiftedPath,
+        clipBehavior: clipBehavior,
+        oldLayer: _engineLayer as ui.ClipPathEngineLayer,
+      );
     } else {
       engineLayer = null;
     }
@@ -1486,7 +1539,10 @@ class ColorFilterLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(colorFilter != null);
-    engineLayer = builder.pushColorFilter(colorFilter, oldLayer: _engineLayer);
+    engineLayer = builder.pushColorFilter(
+      colorFilter,
+      oldLayer: _engineLayer as ui.ColorFilterEngineLayer,
+    );
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
@@ -1495,6 +1551,48 @@ class ColorFilterLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ColorFilter>('colorFilter', colorFilter));
+  }
+}
+
+/// A composite layer that applies an [ImageFilter] to its children.
+class ImageFilterLayer extends ContainerLayer {
+  /// Creates a layer that applies an [ImageFilter] to its children.
+  ///
+  /// The [imageFilter] property must be non-null before the compositing phase
+  /// of the pipeline.
+  ImageFilterLayer({
+    ui.ImageFilter imageFilter,
+  }) : _imageFilter = imageFilter;
+
+  /// The image filter to apply to children.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ui.ImageFilter get imageFilter => _imageFilter;
+  ui.ImageFilter _imageFilter;
+  set imageFilter(ui.ImageFilter value) {
+    assert(value != null);
+    if (value != _imageFilter) {
+      _imageFilter = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(imageFilter != null);
+    engineLayer = builder.pushImageFilter(
+      imageFilter,
+      oldLayer: _engineLayer as ui.ImageFilterEngineLayer,
+    );
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('imageFilter', imageFilter));
   }
 }
 
@@ -1546,7 +1644,10 @@ class TransformLayer extends OffsetLayer {
       _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
         ..multiply(_lastEffectiveTransform);
     }
-    engineLayer = builder.pushTransform(_lastEffectiveTransform.storage, oldLayer: _engineLayer);
+    engineLayer = builder.pushTransform(
+      _lastEffectiveTransform.storage,
+      oldLayer: _engineLayer as ui.TransformEngineLayer,
+    );
     addChildrenToScene(builder);
     builder.pop();
   }
@@ -1560,9 +1661,8 @@ class TransformLayer extends OffsetLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
-    final Vector4 result = _invertedTransform.transform(vector);
-    return Offset(result[0], result[1]);
+
+    return MatrixUtils.transformPoint(_invertedTransform, localPosition);
   }
 
   @override
@@ -1656,7 +1756,11 @@ class OpacityLayer extends ContainerLayer {
     }());
 
     if (enabled)
-      engineLayer = builder.pushOpacity(alpha, offset: offset + layerOffset, oldLayer: _engineLayer);
+      engineLayer = builder.pushOpacity(
+        alpha,
+        offset: offset + layerOffset,
+        oldLayer: _engineLayer as ui.OpacityEngineLayer,
+      );
     else
       engineLayer = null;
     addChildrenToScene(builder);
@@ -1748,7 +1852,12 @@ class ShaderMaskLayer extends ContainerLayer {
     assert(blendMode != null);
     assert(layerOffset != null);
     final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
-    engineLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode, oldLayer: _engineLayer);
+    engineLayer = builder.pushShaderMask(
+      shader,
+      shiftedMaskRect,
+      blendMode,
+      oldLayer: _engineLayer as ui.ShaderMaskEngineLayer,
+    );
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
@@ -1786,7 +1895,10 @@ class BackdropFilterLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(filter != null);
-    engineLayer = builder.pushBackdropFilter(filter, oldLayer: _engineLayer);
+    engineLayer = builder.pushBackdropFilter(
+      filter,
+      oldLayer: _engineLayer as ui.BackdropFilterEngineLayer,
+    );
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
@@ -1923,7 +2035,7 @@ class PhysicalModelLayer extends ContainerLayer {
         color: color,
         shadowColor: shadowColor,
         clipBehavior: clipBehavior,
-        oldLayer: _engineLayer,
+        oldLayer: _engineLayer as ui.PhysicalShapeEngineLayer,
       );
     } else {
       engineLayer = null;
@@ -2036,7 +2148,10 @@ class LeaderLayer extends ContainerLayer {
     assert(offset != null);
     _lastOffset = offset + layerOffset;
     if (_lastOffset != Offset.zero)
-      engineLayer = builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage, oldLayer: _engineLayer);
+      engineLayer = builder.pushTransform(
+        Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage,
+        oldLayer: _engineLayer as ui.TransformEngineLayer,
+      );
     addChildrenToScene(builder);
     if (_lastOffset != Offset.zero)
       builder.pop();
@@ -2278,14 +2393,20 @@ class FollowerLayer extends ContainerLayer {
     }
     _establishTransform();
     if (_lastTransform != null) {
-      engineLayer = builder.pushTransform(_lastTransform.storage, oldLayer: _engineLayer);
+      engineLayer = builder.pushTransform(
+        _lastTransform.storage,
+        oldLayer: _engineLayer as ui.TransformEngineLayer,
+      );
       addChildrenToScene(builder);
       builder.pop();
       _lastOffset = unlinkedOffset + layerOffset;
     } else {
       _lastOffset = null;
       final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset.dx, unlinkedOffset.dy, .0);
-      engineLayer = builder.pushTransform(matrix.storage, oldLayer: _engineLayer);
+      engineLayer = builder.pushTransform(
+        matrix.storage,
+        oldLayer: _engineLayer as ui.TransformEngineLayer,
+      );
       addChildrenToScene(builder);
       builder.pop();
     }
@@ -2349,16 +2470,15 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// met.
   final T value;
 
-  /// The size of an optional clipping rectangle, used to control whether a
-  /// position is contained by the annotation.
+  /// The size of the annotated object.
   ///
-  /// If [size] is provided, then the annotation is only added if the target
+  /// If [size] is provided, then the annotation is found only if the target
   /// position is contained by the rectangle formed by [size] and [offset].
   /// Otherwise no such restriction is applied, and clipping can only be done by
   /// the ancestor layers.
   final Size size;
 
-  /// The offset of the optional clipping rectangle that is indicated by [size].
+  /// The position of the annotated object.
   ///
   /// The [offset] defaults to [Offset.zero] if not provided, and is ignored if
   /// [size] is not set.
@@ -2425,10 +2545,10 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     if (T == S) {
       isAbsorbed = isAbsorbed || opaque;
       final Object untypedValue = value;
-      final S typedValue = untypedValue;
+      final S typedValue = untypedValue as S;
       result.add(AnnotationEntry<S>(
         annotation: typedValue,
-        localPosition: localPosition,
+        localPosition: localPosition - offset,
       ));
     }
     return isAbsorbed;

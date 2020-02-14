@@ -19,7 +19,7 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 }
 
 class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index);
+  const Alive(this.alive, this.index, { Key key }) : super(key: key);
   final bool alive;
   final int index;
 
@@ -27,7 +27,7 @@ class Alive extends StatefulWidget {
   AliveState createState() => AliveState();
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) => '$index $alive';
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) => '$index $alive';
 }
 
 class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {

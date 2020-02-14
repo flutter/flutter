@@ -79,7 +79,7 @@ class _InheritedNotifierElement<T extends Listenable> extends InheritedElement {
   }
 
   @override
-  InheritedNotifier<T> get widget => super.widget;
+  InheritedNotifier<T> get widget => super.widget as InheritedNotifier<T>;
 
   bool _dirty = false;
 

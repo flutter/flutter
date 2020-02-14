@@ -56,11 +56,11 @@ Future<void> generateDocs(String url, String docName, String checkFile) async {
   print('Extracting $docName to ${output.path}');
   output.createSync(recursive: true);
 
-  for (ArchiveFile af in archive) {
+  for (final ArchiveFile af in archive) {
     if (!af.name.endsWith('/')) {
       final File file = File('${output.path}/${af.name}');
       file.createSync(recursive: true);
-      file.writeAsBytesSync(af.content);
+      file.writeAsBytesSync(af.content as List<int>);
     }
   }
 

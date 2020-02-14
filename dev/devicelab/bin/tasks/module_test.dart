@@ -212,7 +212,7 @@ Future<void> main() async {
             android:name="flutterProjectType"
             android:value="module" />''')
       ) {
-        return TaskResult.failure('Debug host APK doesn\'t contain metadata: flutterProjectType = module ');
+        return TaskResult.failure("Debug host APK doesn't contain metadata: flutterProjectType = module ");
       }
 
       final String analyticsOutput = analyticsOutputFile.readAsStringSync();
@@ -220,7 +220,7 @@ Future<void> main() async {
           || !analyticsOutput.contains('cd25: true')
           || !analyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
-          'Building outer app produced the following analytics: "$analyticsOutput"'
+          'Building outer app produced the following analytics: "$analyticsOutput" '
           'but not the expected strings: "cd24: android", "cd25: true" and '
           '"viewName: assemble"'
         );
@@ -270,7 +270,7 @@ Future<void> main() async {
             android:name="flutterProjectType"
             android:value="module" />''')
       ) {
-        return TaskResult.failure('Release host APK doesn\'t contain metadata: flutterProjectType = module ');
+        return TaskResult.failure("Release host APK doesn't contain metadata: flutterProjectType = module ");
       }
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {

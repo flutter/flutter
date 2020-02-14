@@ -40,7 +40,7 @@ class Utf8Decoder extends cnv.Utf8Decoder {
     if (reportErrors && result.contains('\u{FFFD}')) {
       throwToolExit(
         'Bad UTF-8 encoding found while decoding string: $result. '
-        'The Flutter team would greatly appreciate if you could file a bug or leave a'
+        'The Flutter team would greatly appreciate if you could file a bug or leave a '
         'comment on the issue https://github.com/flutter/flutter/issues/15646.\n'
         'The source bytes were:\n$codeUnits\n\n');
     }

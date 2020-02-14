@@ -16,8 +16,8 @@ void main() {
         find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement)
       );
       expect(element, isNotNull);
-      expect(element.renderObject is RenderDecoratedBox, isTrue);
-      final RenderDecoratedBox renderObject = element.renderObject;
+      expect(element.renderObject, isA<RenderDecoratedBox>());
+      final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(expectedDecoration));
     }
 
@@ -55,12 +55,12 @@ void main() {
     checkTree(kBoxDecorationB);
   });
 
-  testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) async {
+  testWidgets("Don't rebuild subwidgets", (WidgetTester tester) async {
     await tester.pumpWidget(
-      FlipWidget(
-        key: const Key('rebuild test'),
+      const FlipWidget(
+        key: Key('rebuild test'),
         left: TestBuildCounter(),
-        right: const DecoratedBox(decoration: kBoxDecorationB),
+        right: DecoratedBox(decoration: kBoxDecorationB),
       ),
     );
 

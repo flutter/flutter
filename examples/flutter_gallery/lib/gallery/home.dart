@@ -83,7 +83,7 @@ class _CategoryItem extends StatelessWidget {
               child: Text(
                 category.name,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.subhead.copyWith(
+                style: theme.textTheme.subtitle1.copyWith(
                   fontFamily: 'GoogleSans',
                   color: isDark ? Colors.white : _kFlutterBlue,
                 ),
@@ -134,7 +134,7 @@ class _CategoriesPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: List<Widget>.generate(rowCount, (int rowIndex) {
                   final int columnCountForRow = rowIndex == rowCount - 1
-                    ? categories.length - columnCount * math.max(0, rowCount - 1)
+                    ? categories.length - columnCount * math.max<int>(0, rowCount - 1)
                     : columnCount;
 
                   return Row(
@@ -212,14 +212,14 @@ class _DemoItem extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     demo.title,
-                    style: theme.textTheme.subhead.copyWith(
+                    style: theme.textTheme.subtitle1.copyWith(
                       color: isDark ? Colors.white : const Color(0xFF202124),
                     ),
                   ),
                   if (demo.subtitle != null)
                     Text(
                       demo.subtitle,
-                      style: theme.textTheme.body1.copyWith(
+                      style: theme.textTheme.bodyText2.copyWith(
                         color: isDark ? Colors.white : const Color(0xFF60646B)
                       ),
                     ),

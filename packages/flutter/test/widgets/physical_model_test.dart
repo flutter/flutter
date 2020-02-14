@@ -71,10 +71,10 @@ void main() {
     );
     await tester.pump();
 
-    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderPhysicalModel);
+    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
     expect(renderPhysicalModel.needsCompositing, true);
 
-    final PhysicalModelLayer physicalModelLayer = tester.layers.firstWhere((Layer layer) => layer is PhysicalModelLayer);
+    final PhysicalModelLayer physicalModelLayer = tester.layers.whereType<PhysicalModelLayer>().first;
     expect(physicalModelLayer.shadowColor, Colors.red);
     expect(physicalModelLayer.color, Colors.grey);
     expect(physicalModelLayer.elevation, 1.0);
@@ -105,7 +105,7 @@ void main() {
     );
 
     final dynamic exception = tester.takeException();
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(
@@ -129,7 +129,7 @@ void main() {
       }
       debugDisableShadows = false;
       int count = 0;
-      final Function oldOnError = FlutterError.onError;
+      final void Function(FlutterErrorDetails) oldOnError = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
         count++;
       };

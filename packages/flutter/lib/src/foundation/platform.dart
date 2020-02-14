@@ -13,7 +13,7 @@ import '_platform_io.dart'
 /// platform for styling purposes, rather than using [defaultTargetPlatform].
 /// Widgets and render objects at lower layers that try to emulate the
 /// underlying platform can depend on [defaultTargetPlatform] directly. The
-/// [dart.io.Platform] object should only be used directly when it's critical to
+/// [dart:io.Platform] object should only be used directly when it's critical to
 /// actually know the current platform, without any overrides possible (for
 /// example, when a system API is about to be called).
 ///

@@ -129,19 +129,38 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   Uri getTestUri(Uri key, int version) => key;
 
   /// Calculate the appropriate basedir for the current test context.
+  ///
+  /// The optional [suffix] argument is used by the
+  /// [FlutterSkiaGoldFileComparator] and the [FlutterPreSubmitFileComparator].
+  /// These [FlutterGoldenFileComparators] randomize their base directories to
+  /// maintain thread safety while using the `goldctl` tool.
   @protected
   @visibleForTesting
-  static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform, {String suffix = ''}) {
+  static Directory getBaseDirectory(
+    LocalFileComparator defaultComparator,
+    Platform platform, {
+    String suffix = '',
+    bool local = false,
+  }) {
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
-    final Directory comparisonRoot = flutterRoot.childDirectory(
-      fs.path.join(
-        'bin',
-        'cache',
-        'pkg',
-        'skia_goldens$suffix',
-      )
-    );
+    Directory comparisonRoot;
+
+    if (!local) {
+      comparisonRoot = fs.systemTempDirectory.childDirectory(
+        'skia_goldens$suffix'
+      );
+    } else {
+      comparisonRoot = flutterRoot.childDirectory(
+        fs.path.join(
+          'bin',
+          'cache',
+          'pkg',
+          'skia_goldens',
+        )
+      );
+    }
+
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
     final String testDirectoryRelativePath = fs.path.relative(
       testDirectory.path,
@@ -217,10 +236,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
       platform,
       suffix: '${math.Random().nextInt(10000)}',
     );
-
-    if(!baseDirectory.existsSync()) {
-      baseDirectory.createSync(recursive: true);
-    }
+    baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.auth();
@@ -293,53 +309,51 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final Platform platform, {
     SkiaGoldClient goldens,
     LocalFileComparator defaultComparator,
+    final Directory testBasedir,
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
+    final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
+      suffix: '${math.Random().nextInt(10000)}',
     );
 
-    if(!baseDirectory.existsSync()) {
+    if (!baseDirectory.existsSync())
       baseDirectory.createSync(recursive: true);
-    }
 
     goldens ??= SkiaGoldClient(baseDirectory);
-    await goldens.getExpectations();
 
-    return FlutterPreSubmitFileComparator(baseDirectory.uri, goldens);
+    final bool hasWritePermission = !platform.environment['GOLD_SERVICE_ACCOUNT'].startsWith('ENCRYPTED');
+    if (hasWritePermission) {
+      await goldens.auth();
+      await goldens.tryjobInit();
+      return _AuthorizedFlutterPreSubmitComparator(
+        baseDirectory.uri,
+        goldens,
+        platform: platform,
+      );
+    }
+
+    goldens.emptyAuth();
+    return _UnauthorizedFlutterPreSubmitComparator(
+      baseDirectory.uri,
+      goldens,
+      platform: platform,
+    );
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    golden = _addPrefix(golden);
-    final String testName = skiaClient.cleanTestName(golden.path);
-    final List<String> testExpectations = skiaClient.expectations[testName];
-
-    if (testExpectations == null) {
-      // There is no baseline for this test
-      return true;
-    }
-
-    ComparisonResult result;
-    for (String expectation in testExpectations) {
-      final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
-
-      result = GoldenFileComparator.compareLists(
-        imageBytes,
-        goldenBytes,
-      );
-
-      if (result.passed) {
-        return true;
-      }
-    }
-
-    return skiaClient.testIsIgnoredForPullRequest(
-      platform.environment['CIRRUS_PR'] ?? '',
-      golden.path,
+    assert(
+      false,
+      'The FlutterPreSubmitFileComparator has been used to execute a golden '
+      'file test; this should never happen. Presubmit golden file testing '
+      'should be executed by either the _AuthorizedFlutterPreSubmitComparator '
+      'or the _UnauthorizedFlutterPreSubmitComparator based on contributor '
+      'permissions.'
     );
+    return false;
   }
 
   /// Decides based on the current environment whether goldens tests should be
@@ -349,6 +363,78 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     return platform.environment.containsKey('CIRRUS_CI')
       && cirrusPR.isNotEmpty
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
+  }
+}
+
+class _AuthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileComparator {
+  _AuthorizedFlutterPreSubmitComparator(
+    final Uri basedir,
+    final SkiaGoldClient skiaClient, {
+    final FileSystem fs = const LocalFileSystem(),
+    final Platform platform = const LocalPlatform(),
+  }) : super(
+    basedir,
+    skiaClient,
+    fs: fs,
+    platform: platform,
+  );
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    golden = _addPrefix(golden);
+    await update(golden, imageBytes);
+    final File goldenFile = getGoldenFile(golden);
+
+    return skiaClient.tryjobAdd(golden.path, goldenFile);
+  }
+}
+
+class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileComparator {
+  _UnauthorizedFlutterPreSubmitComparator(
+    final Uri basedir,
+    final SkiaGoldClient skiaClient, {
+    final FileSystem fs = const LocalFileSystem(),
+    final Platform platform = const LocalPlatform(),
+  }) : super(
+    basedir,
+    skiaClient,
+    fs: fs,
+    platform: platform,
+  );
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    golden = _addPrefix(golden);
+    await update(golden, imageBytes);
+    final File goldenFile = getGoldenFile(golden);
+
+    // Check for match to existing baseline.
+    if (await skiaClient.imgtestCheck(golden.path, goldenFile))
+      return true;
+
+    // We do not have a matching image, so we need to check a few things
+    // manually. We wait until this point to do this work so request traffic
+    // low.
+    skiaClient.getExpectations();
+    final String testName = skiaClient.cleanTestName(golden.path);
+    final List<String> testExpectations = skiaClient.expectations[testName];
+    if (testExpectations == null) {
+      // This is a new test.
+      print('No expectations provided by Skia Gold for test: $golden. '
+        'This may be a new test. If this is an unexpected result, check '
+        'https://flutter-gold.skia.org.\n'
+      );
+      return true;
+    }
+
+    // Contributors without the proper permissions to execute a tryjob can make
+    // a golden file change through Gold's ignore feature instead.
+    final bool ignoreResult = await skiaClient.testIsIgnoredForPullRequest(
+      platform.environment['CIRRUS_PR'] ?? '',
+      golden.path,
+    );
+    // If true, this is an intended change.
+    return ignoreResult;
   }
 }
 
@@ -478,6 +564,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
+      local: true,
     );
 
     if(!baseDirectory.existsSync()) {
@@ -492,7 +579,15 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       return FlutterSkippingGoldenFileComparator(
         baseDirectory.uri,
         goldens,
-        'No network connection available for contacting Gold.',
+        'OSError occurred, could not reach Gold. '
+          'Switching to FlutterSkippingGoldenFileComparator.',
+      );
+    } on io.SocketException catch (_) {
+      return FlutterSkippingGoldenFileComparator(
+        baseDirectory.uri,
+        goldens,
+        'SocketException occurred, could not reach Gold. '
+          'Switching to FlutterSkippingGoldenFileComparator.',
       );
     }
 
@@ -517,7 +612,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
     ComparisonResult result;
     final Map<String, ComparisonResult> failureDiffs = <String, ComparisonResult>{};
-    for (String expectation in testExpectations) {
+    for (final String expectation in testExpectations) {
       final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
 
       result = GoldenFileComparator.compareLists(
@@ -531,7 +626,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       failureDiffs[expectation] = result;
     }
 
-    for (MapEntry<String, ComparisonResult> entry in failureDiffs.entries) {
+    for (final MapEntry<String, ComparisonResult> entry in failureDiffs.entries) {
       if (await skiaClient.isValidDigestForExpectation(entry.key, golden.path))
         generateFailureOutput(entry.value, golden, basedir, key: entry.key);
     }

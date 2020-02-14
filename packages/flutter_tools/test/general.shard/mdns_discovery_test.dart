@@ -4,16 +4,32 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:mockito/mockito.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('mDNS Discovery', () {
     final int year3000 = DateTime(3000).millisecondsSinceEpoch;
+
+    setUp(() {
+      setNetworkInterfaceLister(
+        ({
+          bool includeLoopback,
+          bool includeLinkLocal,
+          InternetAddressType type,
+        }) async => <NetworkInterface>[],
+      );
+    });
+
+    tearDown(() {
+      resetNetworkInterfaceLister();
+    });
 
     MDnsClient getMockClient(
       List<PtrResourceRecord> ptrRecords,
@@ -46,6 +62,18 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query())?.port;
       expect(port, isNull);
+    });
+
+    testUsingContext('Prints helpful message when there is no ipv4 link local address.', () async {
+      final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+
+      final Uri uri = await portDiscovery.getObservatoryUri(
+        '',
+        MockIOSDevice(),
+      );
+      expect(uri, isNull);
+      expect(testLogger.errorText, contains('Personal Hotspot'));
     });
 
     testUsingContext('One port available, no appId', () async {
