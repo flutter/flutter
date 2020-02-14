@@ -51,8 +51,7 @@ class IOSDeploy {
     // ios-deploy transitively depends on LLDB.framework, which invokes a
     // Python script that uses package 'six'. LLDB.framework relies on the
     // python at the front of the path, which may not include package 'six'.
-    // Ensure that we pick up the system install of python, which does include
-    // it.
+    // Ensure that we pick up the system install of python, which includes it.
     final Map<String, String> environment = Map<String, String>.from(_platform.environment);
     environment['PATH'] = '/usr/bin:${environment['PATH']}';
     environment.addEntries(<MapEntry<String, String>>[globals.cache.dyLdLibEntry]);
