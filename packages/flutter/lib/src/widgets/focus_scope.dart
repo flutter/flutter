@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -122,11 +121,11 @@ import 'inherited_notifier.dart';
 /// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to wrap another widget in a [Focus] widget to make it
 /// focusable. It wraps a [Container], and changes the container's color when it
-/// has the [primaryFocus].
+/// is set as the [FocusManager.primaryFocus].
 ///
 /// If you also want to handle mouse hover and/or keyboard actions on a widget,
 /// consider using a [FocusableActionDetector], which combines several different
-/// widgets to provide those services.
+/// widgets to provide those capabilities.
 ///
 /// ```dart preamble
 /// class FocusableText extends StatelessWidget {
@@ -170,6 +169,75 @@ import 'inherited_notifier.dart';
 ///       autofocus: index == 0,
 ///     ),
 ///     itemCount: 50,
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example shows how to focus a newly-created widget immediately after it
+/// is created.
+///
+/// The focus node will not actually be given the focus until after the frame in
+/// which it has requested focus is drawn, so it is OK to call
+/// [FocusNode.requestFocus] on a node which is not yet in the focus tree.
+///
+/// ```dart
+/// int focusedChild = 0;
+/// List<Widget> children = <Widget>[];
+/// List<FocusNode> childFocusNodes = <FocusNode>[];
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   // Add the first child.
+///   _addChild();
+/// }
+///
+/// @override
+/// void dispose() {
+///   super.dispose();
+///   childFocusNodes.forEach((FocusNode node) => node.dispose());
+/// }
+///
+/// void _addChild() {
+///   // Calling requestFocus here creates a deferred request for focus, since the
+///   // requestFocus will not actually happen until after this frame is done
+///   // building, so the focus will take effect on the next frame when the new
+///   // child has been added.
+///   childFocusNodes
+///       .add(FocusNode(debugLabel: 'Child ${children.length}')..requestFocus());
+///
+///   children.add(Padding(
+///     padding: const EdgeInsets.all(2.0),
+///     child: ActionChip(
+///       focusNode: childFocusNodes.last,
+///       label: Text('CHILD ${children.length}'),
+///       onPressed: () {},
+///     ),
+///   ));
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text(widget.title),
+///     ),
+///     body: Center(
+///       child: Wrap(
+///         children: children,
+///       ),
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () {
+///         setState(() {
+///           focusedChild = children.length;
+///           _addChild();
+///         });
+///       },
+///       child: Icon(Icons.add),
+///     ),
 ///   );
 /// }
 /// ```
