@@ -1669,8 +1669,8 @@ plugin1=${plugin1.path}
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
         ..createSync(recursive: true)
-        ..writeAsStringSync(
-'''<?xml version="1.0" encoding="UTF-8"?>
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
 <project>
   <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
   <dependencies>
@@ -1761,8 +1761,8 @@ plugin1=${plugin1.path}
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
         ..createSync(recursive: true)
-        ..writeAsStringSync(
-'''<?xml version="1.0" encoding="UTF-8"?>
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
 <project>
   <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
   <dependencies>

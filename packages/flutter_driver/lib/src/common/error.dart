@@ -23,11 +23,12 @@ class DriverError extends Error {
   String toString() {
     if (originalError == null)
       return 'DriverError: $message\n';
-    return '''DriverError: $message
+    return '''
+DriverError: $message
 Original error: $originalError
 Original stack trace:
 $originalStackTrace
-    ''';
+''';
   }
 }
 

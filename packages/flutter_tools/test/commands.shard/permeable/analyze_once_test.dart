@@ -41,7 +41,8 @@ void main() {
       } else {
         flutterRootUri.write(canonicalizedFlutterRootPath);
       }
-      final String dotPackagesSrc = '''# Generated
+      final String dotPackagesSrc = '''
+# Generated
 flutter:$flutterRootUri/packages/flutter/lib/
 sky_engine:$flutterRootUri/bin/cache/pkg/sky_engine/lib/
 flutter_project:lib/
@@ -357,7 +358,8 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ''';
 
-const String pubspecYamlSrc = r'''name: flutter_project
+const String pubspecYamlSrc = r'''
+name: flutter_project
 environment:
   sdk: ">=2.1.0 <3.0.0"
 

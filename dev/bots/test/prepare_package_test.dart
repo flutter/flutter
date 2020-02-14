@@ -250,7 +250,8 @@ void main() {
         final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
-        final String releasesJson = '''{
+        final String releasesJson = '''
+{
   "base_url": "https://storage.googleapis.com/flutter_infra/releases",
   "current_release": {
     "beta": "3ea4d06340a97a1e9d7cae97567c64e0569dcaa2",

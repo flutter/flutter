@@ -250,8 +250,8 @@ void main() {
       // in Flutter web 0.0 sometimes just appears as 0. or 0
       expect(
         error.toStringDeep(),
-        matches(RegExp(
-        r'''FlutterError
+        matches(RegExp(r'''
+FlutterError
    ClampingScrollPhysics\.applyBoundaryConditions\(\) was called
    redundantly\.
    The proposed new position\, 500(\.\d*)?, is exactly equal to the current
