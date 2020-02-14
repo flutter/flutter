@@ -9,7 +9,12 @@
     ],
     "services": [
       "fuchsia.accessibility.semantics.SemanticsManager",
-      "fuchsia.process.Launcher"
+      "fuchsia.process.Launcher",
+      "fuchsia.deprecatedtimezone.Timezone",
+      "fuchsia.netstack.Netstack",
+      "fuchsia.vulkan.loader.Loader",
+      "fuchsia.logger.LogSink",
+      "fuchsia.tracing.provider.Registry"
     ]
   }
 }
