@@ -188,7 +188,7 @@ void main() {
       verifyNever(artifact1.update());
       verify(artifact2.update());
     });
-    testUsingContext('getter dyLdLibEntry concatenates the output of each artifact\'s dyLdLibEntry getter', () async {
+    testUsingContext("getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter", () async {
       final IosUsbArtifacts artifact1 = MockIosUsbArtifacts();
       final IosUsbArtifacts artifact2 = MockIosUsbArtifacts();
       final IosUsbArtifacts artifact3 = MockIosUsbArtifacts();
@@ -420,14 +420,14 @@ void main() {
       final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('libimobiledevice', mockCache);
       when(mockCache.getArtifactDirectory(any)).thenReturn(globals.fs.currentDirectory);
       iosUsbArtifacts.location.createSync();
-      final File ideviceIdFile = iosUsbArtifacts.location.childFile('idevice_id')
+      final File ideviceScreenshotFile = iosUsbArtifacts.location.childFile('idevicescreenshot')
         ..createSync();
-      iosUsbArtifacts.location.childFile('ideviceinfo')
+      iosUsbArtifacts.location.childFile('idevicesyslog')
         ..createSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(), true);
 
-      ideviceIdFile.deleteSync();
+      ideviceScreenshotFile.deleteSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{

@@ -351,13 +351,14 @@ class FlutterWebShellBuilder implements Builder {
       return;
     }
     final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
+    final String pluginRegistrantPath = _getPluginRegistrantPath(dartEntrypointId.path);
     if (hasPlugins) {
       await buildStep.writeAsString(outputId, '''
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import 'generated_plugin_registrant.dart';
+import '$pluginRegistrantPath';
 import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
 
 Future<void> main() async {
@@ -382,6 +383,13 @@ Future<void> main() async {
 }
 ''');
     }
+  }
+
+  /// Gets the relative path to the generated plugin registrant from the app
+  /// app entrypoint.
+  String _getPluginRegistrantPath(String entrypoint) {
+    return path.url.relative('lib/generated_plugin_registrant.dart',
+        from: path.url.dirname(entrypoint));
   }
 
   @override

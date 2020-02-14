@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -1650,6 +1651,81 @@ void main() {
     expect(find.text('Route: root'), findsOneWidget);
     expect(find.text('Route: 4', skipOffstage: false), findsNothing);
   });
+
+  testWidgets('Wrapping TickerMode can turn off ticking in routes', (WidgetTester tester) async {
+    int tickCount = 0;
+    Widget widgetUnderTest({bool enabled}) {
+      return TickerMode(
+        enabled: enabled,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            initialRoute: 'root',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return _TickingWidget(
+                    onTick: () {
+                      tickCount++;
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(widgetUnderTest(enabled: false));
+    expect(tickCount, 0);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tickCount, 0);
+
+    await tester.pumpWidget(widgetUnderTest(enabled: true));
+    expect(tickCount, 0);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tickCount, 4);
+  });
+}
+
+class _TickingWidget extends StatefulWidget {
+  const _TickingWidget({this.onTick});
+
+  final VoidCallback onTick;
+
+  @override
+  State<_TickingWidget> createState() => _TickingWidgetState();
+}
+
+class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProviderStateMixin {
+  Ticker _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = createTicker((Duration _) {
+      widget.onTick();
+    })..start();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
 }
 
 class NoAnimationPageRoute extends PageRouteBuilder<void> {

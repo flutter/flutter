@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
 import 'dart:async';
-import 'dart:io' as io; // ignore: dart_io_import
 
-import 'package:build/build.dart';
 import 'package:build_daemon/client.dart';
+import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
-import 'package:build_runner_core/build_runner_core.dart' as core;
-import 'package:glob/glob.dart';
-import 'package:path/path.dart' as path;
+import 'package:build_daemon/data/build_target.dart';
+import 'package:build_daemon/data/server_log.dart';
+import 'package:path/path.dart' as path; // ignore: package_path_import
 
+import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../convert.dart';
+import '../cache.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../web/compile.dart';
-import 'web_fs.dart';
 
 /// A build_runner specific implementation of the [WebCompilationProxy].
 class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
@@ -42,8 +41,8 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       .createSync();
     final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
     final bool hasWebPlugins = findPlugins(flutterProject)
-        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-    final BuildDaemonClient client = await buildDaemonCreator.startBuildDaemon(
+      .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+    final BuildDaemonClient client = await const BuildDaemonCreator().startBuildDaemon(
       projectDirectory.path,
       release: mode == BuildMode.release,
       profile: mode == BuildMode.profile,
@@ -63,6 +62,9 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     await for (final BuildResults results in client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
         return result.target == 'web';
+      }, orElse: () {
+        // Assume build failed if we lack any results.
+        return DefaultBuildResult((DefaultBuildResultBuilder b) => b.status == BuildStatus.failed);
       });
       if (result.status == BuildStatus.failed) {
         success = false;
@@ -72,119 +74,188 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         break;
       }
     }
-    if (success && testOutputDir != null) {
-      final Directory rootDirectory = projectDirectory
-        .childDirectory('.dart_tool')
-        .childDirectory('build')
-        .childDirectory('flutter_web');
+    if (!success || testOutputDir == null) {
+      return success;
+    }
+    final Directory rootDirectory = projectDirectory
+      .childDirectory('.dart_tool')
+      .childDirectory('build')
+      .childDirectory('flutter_web');
 
-      final Iterable<Directory> childDirectories = rootDirectory
-        .listSync()
-        .whereType<Directory>();
-      for (final Directory childDirectory in childDirectories) {
-        final String path = globals.fs.path.join(
-          testOutputDir,
-          'packages',
-          globals.fs.path.basename(childDirectory.path),
-        );
-        globals.fsUtils.copyDirectorySync(
-          childDirectory.childDirectory('lib'),
-          globals.fs.directory(path),
-        );
-      }
-      final Directory outputDirectory = rootDirectory
-        .childDirectory(projectName)
-        .childDirectory('test');
+    final Iterable<Directory> childDirectories = rootDirectory
+      .listSync()
+      .whereType<Directory>();
+    for (final Directory childDirectory in childDirectories) {
+      final String path = globals.fs.path.join(
+        testOutputDir,
+        'packages',
+        globals.fs.path.basename(childDirectory.path),
+      );
       globals.fsUtils.copyDirectorySync(
-        outputDirectory,
-        globals.fs.directory(globals.fs.path.join(testOutputDir)),
+        childDirectory.childDirectory('lib'),
+        globals.fs.directory(path),
       );
     }
+    final Directory outputDirectory = rootDirectory
+      .childDirectory(projectName)
+      .childDirectory('test');
+    globals.fsUtils.copyDirectorySync(
+      outputDirectory,
+      globals.fs.directory(globals.fs.path.join(testOutputDir)),
+    );
     return success;
   }
 }
 
-/// Handles mapping a single root file scheme to a multi-root scheme.
-///
-/// This allows one build_runner build to read the output from a previous
-/// isolated build.
-class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
-  MultirootFileBasedAssetReader(
-    core.PackageGraph packageGraph,
-    this.generatedDirectory,
-  ) : super(packageGraph);
+class WebTestTargetManifest {
+  WebTestTargetManifest(this.buildFilters);
 
-  final Directory generatedDirectory;
+  WebTestTargetManifest.all() : buildFilters = null;
 
-  @override
-  Future<bool> canRead(AssetId id) {
-    if (packageGraph[id.package] == packageGraph.root && _missingSource(id)) {
-      return _generatedFile(id).exists();
+  final List<String> buildFilters;
+
+  bool get hasBuildFilters => buildFilters != null && buildFilters.isNotEmpty;
+}
+
+/// A testable interface for starting a build daemon.
+class BuildDaemonCreator {
+  const BuildDaemonCreator();
+
+  // TODO(jonahwilliams): find a way to get build checks working for flutter for web.
+  static const String _ignoredLine1 = 'Warning: Interpreting this as package URI';
+  static const String _ignoredLine2 = 'build_script.dart was not found in the asset graph, incremental builds will not work';
+  static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
+
+  /// Start a build daemon and register the web targets.
+  ///
+  /// [initializePlatform] controls whether we should invoke [webOnlyInitializePlatform].
+  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {
+    bool release = false,
+    bool profile = false,
+    bool hasPlugins = false,
+    bool initializePlatform = true,
+    WebTestTargetManifest testTargets,
+  }) async {
+    try {
+      final BuildDaemonClient client = await _connectClient(
+        workingDirectory,
+        release: release,
+        profile: profile,
+        hasPlugins: hasPlugins,
+        initializePlatform: initializePlatform,
+        testTargets: testTargets,
+      );
+      _registerBuildTargets(client, testTargets);
+      return client;
+    } on OptionsSkew {
+      throwToolExit(
+        'Incompatible options with current running build daemon.\n\n'
+        'Please stop other flutter_tool instances running in this directory '
+        'before starting a new instance with these options.'
+      );
     }
-    return super.canRead(id);
+    return null;
   }
 
-  @override
-  Future<List<int>> readAsBytes(AssetId id) {
-    if (packageGraph[id.package] == packageGraph.root && _missingSource(id)) {
-      return _generatedFile(id).readAsBytes();
-    }
-    return super.readAsBytes(id);
-  }
-
-  @override
-  Future<String> readAsString(AssetId id, {Encoding encoding}) {
-    if (packageGraph[id.package] == packageGraph.root && _missingSource(id)) {
-      return _generatedFile(id).readAsString();
-    }
-    return super.readAsString(id, encoding: encoding);
-  }
-
-  @override
-  Stream<AssetId> findAssets(Glob glob, {String package}) async* {
-    if (package == null || packageGraph.root.name == package) {
-      final String generatedRoot = globals.fs.path.join(generatedDirectory.path, packageGraph.root.name);
-      await for (final io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
-        if (entity is io.File && _isNotHidden(entity) && !globals.fs.path.isWithin(generatedRoot, entity.path)) {
-          yield _fileToAssetId(entity, packageGraph.root);
+  void _registerBuildTargets(
+    BuildDaemonClient client,
+    WebTestTargetManifest testTargets,
+  ) {
+    final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
+      ..output = ''
+      ..useSymlinks = true
+      ..hoist = false);
+    client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
+      ..target = 'web'
+      ..outputLocation = outputLocation?.toBuilder()));
+    if (testTargets != null) {
+      client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) {
+        b.target = 'test';
+        b.outputLocation = outputLocation?.toBuilder();
+        if (testTargets.hasBuildFilters) {
+          b.buildFilters.addAll(testTargets.buildFilters);
         }
-      }
-      if (!globals.fs.isDirectorySync(generatedRoot)) {
-        return;
-      }
-      await for (final io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
-        if (entity is io.File && _isNotHidden(entity)) {
-          yield _fileToAssetId(entity, packageGraph.root, globals.fs.path.relative(generatedRoot), true);
-        }
-      }
-      return;
+      }));
     }
-    yield* super.findAssets(glob, package: package);
   }
 
-  bool _isNotHidden(io.FileSystemEntity entity) {
-    return !path.basename(entity.path).startsWith('._');
-  }
-
-  bool _missingSource(AssetId id) {
-    return !globals.fs.file(path.joinAll(<String>[packageGraph.root.path, ...id.pathSegments])).existsSync();
-  }
-
-  File _generatedFile(AssetId id) {
-    return globals.fs.file(
-      path.joinAll(<String>[generatedDirectory.path, packageGraph.root.name, ...id.pathSegments])
+  Future<BuildDaemonClient> _connectClient(
+    String workingDirectory, {
+    bool release,
+    bool profile,
+    bool hasPlugins,
+    bool initializePlatform,
+    WebTestTargetManifest testTargets,
+  }) {
+    final String flutterToolsPackages = globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      '.packages',
     );
-  }
+    final String buildScript = globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      'lib',
+      'src',
+      'build_runner',
+      'build_script.dart',
+    );
+    final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
 
-  /// Creates an [AssetId] for [file], which is a part of [packageNode].
-  AssetId _fileToAssetId(io.File file, core.PackageNode packageNode, [String root, bool generated = false]) {
-    final String filePath = path.normalize(file.absolute.path);
-    String relativePath;
-    if (generated) {
-      relativePath = filePath.substring(root.length + 2);
-    } else {
-      relativePath = path.relative(filePath, from: packageNode.path);
-    }
-    return AssetId(packageNode.name, relativePath);
+    // On Windows we need to call the snapshot directly otherwise
+    // the process will start in a disjoint cmd without access to
+    // STDIO.
+    final List<String> args = <String>[
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--packages=$flutterToolsPackages',
+      buildScript,
+      'daemon',
+      '--skip-build-script-check',
+      '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:entrypoint=release=$release',
+      '--define', 'flutter_tools:entrypoint=profile=$profile',
+      '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
+      '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform',
+      // The following will cause build runner to only build tests that were requested.
+      if (testTargets != null && testTargets.hasBuildFilters)
+        for (final String buildFilter in testTargets.buildFilters)
+          '--build-filter=$buildFilter',
+    ];
+
+    return BuildDaemonClient.connect(
+      workingDirectory,
+      args,
+      logHandler: (ServerLog serverLog) {
+        switch (serverLog.level) {
+          case Level.SEVERE:
+          case Level.SHOUT:
+            // Ignore certain non-actionable messages on startup.
+            if (serverLog.message.contains(_ignoredLine1) ||
+                serverLog.message.contains(_ignoredLine2) ||
+                serverLog.message.contains(_ignoredLine3)) {
+              return;
+            }
+            globals.printError(serverLog.message);
+            if (serverLog.error != null) {
+              globals.printError(serverLog.error);
+            }
+            if (serverLog.stackTrace != null) {
+              globals.printTrace(serverLog.stackTrace);
+            }
+            break;
+          default:
+            if (serverLog.message.contains('Skipping compiling')) {
+              globals.printError(serverLog.message);
+            } else {
+              globals.printTrace(serverLog.message);
+            }
+        }
+      },
+      buildMode: daemon.BuildMode.Manual,
+    );
   }
 }

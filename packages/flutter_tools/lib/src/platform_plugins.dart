@@ -113,8 +113,8 @@ class AndroidPlugin extends PluginPlatform {
     if (!mainClassFound) {
       assert(mainClassCandidates.length <= 2);
       throwToolExit(
-        'The plugin `$name` doesn\'t have a main class defined in ${mainClassCandidates.join(' or ')}. '
-        'This is likely to due to an incorrect `androidPackage: $package` or `mainClass` entry in the plugin\'s pubspec.yaml.\n'
+        "The plugin `$name` doesn't have a main class defined in ${mainClassCandidates.join(' or ')}. "
+        "This is likely to due to an incorrect `androidPackage: $package` or `mainClass` entry in the plugin's pubspec.yaml.\n"
         'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
         'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile. '
       );
@@ -125,7 +125,7 @@ class AndroidPlugin extends PluginPlatform {
       mainClassContent = mainPluginClass.readAsStringSync();
     } on FileSystemException {
       throwToolExit(
-        'Couldn\'t read file ${mainPluginClass.path} even though it exists. '
+        "Couldn't read file ${mainPluginClass.path} even though it exists. "
         'Please verify that this file has read permission and try again.'
       );
     }

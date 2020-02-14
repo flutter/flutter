@@ -4,14 +4,16 @@
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'msbuild_utils.dart';
+import 'property_sheet.dart';
 import 'visual_studio.dart';
 
 /// Builds the Windows project using msbuild.
@@ -23,22 +25,9 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
       'to learn about adding Windows support to a project.');
   }
 
-  final Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': Cache.flutterRoot,
-    'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
-    'PROJECT_DIR': windowsProject.project.directory.path,
-    'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
-  };
-  if (target != null) {
-    environment['FLUTTER_TARGET'] = target;
-  }
-  if (globals.artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
-    final String engineOutPath = localEngineArtifacts.engineOutPath;
-    environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
-    environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
-  }
-  writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
+  // Ensure that necessary emphemeral files are generated and up to date.
+  _writeGeneratedFlutterProperties(windowsProject, buildInfo, target);
+  createPluginSymlinks(windowsProject.project);
 
   final String vcvarsScript = visualStudio.vcvarsPath;
   if (vcvarsScript == null) {
@@ -88,4 +77,27 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`.');
   }
   flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
+}
+
+/// Writes the generatedPropertySheetFile with the configuration for the given build.
+void _writeGeneratedFlutterProperties(WindowsProject windowsProject, BuildInfo buildInfo, String target) {
+  final Map<String, String> environment = <String, String>{
+    'FLUTTER_ROOT': Cache.flutterRoot,
+    'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
+    'PROJECT_DIR': windowsProject.project.directory.path,
+    'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
+  };
+  if (target != null) {
+    environment['FLUTTER_TARGET'] = target;
+  }
+  if (globals.artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
+    environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
+  }
+
+  final File propsFile = windowsProject.generatedPropertySheetFile;
+  propsFile.createSync(recursive: true);
+  propsFile.writeAsStringSync(PropertySheet(environmentVariables: environment).toString());
 }

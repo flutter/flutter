@@ -3,6 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Exit on error
+set -e
+
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
     echo "♦ $*"
@@ -57,10 +60,12 @@ BuildApp() {
 
   # Default value of assets_path is flutter_assets
   local assets_path="flutter_assets"
-  # The value of assets_path can set by add FLTAssetsPath to AppFrameworkInfo.plist
-  FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null)
-  if [[ -n "$FLTAssetsPath" ]]; then
-    assets_path="${FLTAssetsPath}"
+  # The value of assets_path can set by add FLTAssetsPath to
+  # AppFrameworkInfo.plist.
+  if FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null); then
+    if [[ -n "$FLTAssetsPath" ]]; then
+      assets_path="${FLTAssetsPath}"
+    fi
   fi
 
   # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
@@ -171,7 +176,8 @@ BuildApp() {
     -dTargetFile="${target_path}"                                         \
     -dBuildMode=${build_mode}                                             \
     -dIosArchs="${ARCHS}"                                                 \
-    -dFontSubset="${icon_tree_shaker_flag}"                               \
+    -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                \
+    -dTreeShakeIcons="${icon_tree_shaker_flag}"                           \
     -dTrackWidgetCreation="${track_widget_creation_flag}"                 \
     -dEnableBitcode="${bitcode_flag}"                                     \
     "${build_mode}_ios_bundle_flutter_assets"
@@ -218,8 +224,7 @@ LipoExecutable() {
         exit 1
       fi
     else
-      lipo -output "${output}" -extract "${arch}" "${executable}"
-      if [[ $? == 0 ]]; then
+      if lipo -output "${output}" -extract "${arch}" "${executable}"; then
         all_executables+=("${output}")
       else
         echo "Failed to extract ${arch} for ${executable}. Running lipo -info:"
@@ -299,9 +304,6 @@ EmbedFlutterFrameworks() {
 }
 
 # Main entry point.
-
-# TODO(cbracken): improve error handling, then enable set -e
-
 if [[ $# == 0 ]]; then
   # Backwards-compatibility: if no args are provided, build.
   BuildApp
