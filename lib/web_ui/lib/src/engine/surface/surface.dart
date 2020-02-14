@@ -77,7 +77,7 @@ void commitScene(PersistedScene scene) {
   if (_retainedSurfaces.isNotEmpty) {
     for (int i = 0; i < _retainedSurfaces.length; i++) {
       final PersistedSurface retainedSurface = _retainedSurfaces[i];
-      assert(retainedSurface.isPendingRetention);
+      assert(debugAssertSurfaceState(retainedSurface, PersistedSurfaceState.pendingRetention));
       retainedSurface.state = PersistedSurfaceState.active;
     }
     _retainedSurfaces = <PersistedSurface>[];
@@ -483,6 +483,39 @@ enum PersistedSurfaceState {
   released,
 }
 
+class PersistedSurfaceException implements Exception {
+  PersistedSurfaceException(this.surface, this.message);
+
+  final PersistedSurface surface;
+  final String message;
+
+  @override
+  String toString() {
+    if (assertionsEnabled) {
+      return '${surface.runtimeType}: $message';
+    }
+    return super.toString();
+  }
+}
+
+/// Verifies that the [surface] is in one of the valid states.
+///
+/// This function should be used inside an assertion expression.
+bool debugAssertSurfaceState(PersistedSurface surface, PersistedSurfaceState state1, [PersistedSurfaceState state2, PersistedSurfaceState state3]) {
+  final List<PersistedSurfaceState> validStates = [ state1, state2, state3 ];
+
+  if (validStates.contains(surface.state)) {
+    return true;
+  }
+
+  throw PersistedSurfaceException(
+    surface,
+    'is in an unexpected state.\n'
+    'Expected one of: ${validStates.whereType<PersistedSurfaceState>().join(', ')}\n'
+    'But was: ${surface.state}',
+  );
+}
+
 /// A node in the tree built by [SceneBuilder] that contains information used to
 /// compute the fewest amount of mutations necessary to update the browser DOM.
 abstract class PersistedSurface implements ui.EngineLayer {
@@ -537,7 +570,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// reused before the request to retain it came in. In this case, the surface
   /// is [revive]d and rebuilt from scratch.
   void tryRetain() {
-    assert(isActive || isReleased);
+    assert(debugAssertSurfaceState(this, PersistedSurfaceState.active, PersistedSurfaceState.released));
     // Request that the layer is retained, but only if it's still active. It
     // could have been released.
     if (isActive) {
@@ -559,7 +592,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   @visibleForTesting
   @protected
   void revive() {
-    assert(isReleased);
+    assert(debugAssertSurfaceState(this, PersistedSurfaceState.released));
     state = PersistedSurfaceState.created;
   }
 
@@ -636,7 +669,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
       }
     }
     assert(rootElement == null);
-    assert(isCreated);
+    assert(debugAssertSurfaceState(this, PersistedSurfaceState.created));
     rootElement = createElement();
     applyWebkitClipFix(rootElement);
     if (_debugExplainSurfaceStats) {
@@ -656,7 +689,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   @mustCallSuper
   void adoptElements(covariant PersistedSurface oldSurface) {
     assert(oldSurface.rootElement != null);
-    assert(oldSurface.isActive || oldSurface.isPendingUpdate);
+    assert(debugAssertSurfaceState(oldSurface, PersistedSurfaceState.active, PersistedSurfaceState.pendingUpdate));
     assert(() {
       if (oldSurface.isPendingUpdate) {
         final PersistedContainerSurface self = this;
@@ -684,7 +717,8 @@ abstract class PersistedSurface implements ui.EngineLayer {
   void update(covariant PersistedSurface oldSurface) {
     assert(oldSurface != null);
     assert(!identical(oldSurface, this));
-    assert(isCreated && (oldSurface.isPendingUpdate || oldSurface.isActive));
+    assert(debugAssertSurfaceState(this, PersistedSurfaceState.created));
+    assert(debugAssertSurfaceState(oldSurface, PersistedSurfaceState.active, PersistedSurfaceState.pendingUpdate));
 
     adoptElements(oldSurface);
 
@@ -729,7 +763,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   @protected
   @mustCallSuper
   void discard() {
-    assert(isActive);
+    assert(debugAssertSurfaceState(this, PersistedSurfaceState.active));
     assert(rootElement != null);
     // TODO(yjbanov): it may be wasteful to recursively disassemble the DOM tree
     //                node by node. It should be sufficient to detach the root
@@ -919,8 +953,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
 
   /// Adds a child to this container.
   void appendChild(PersistedSurface child) {
-    assert(child.isCreated || child.isPendingRetention || child.isPendingUpdate,
-        'Child is in incorrect state ${child.state}');
+    assert(debugAssertSurfaceState(child, PersistedSurfaceState.created, PersistedSurfaceState.pendingRetention, PersistedSurfaceState.pendingUpdate));
     _children.add(child);
     child.parent = this;
   }
@@ -957,10 +990,10 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       } else if (child is PersistedContainerSurface && child.oldLayer != null) {
         final PersistedSurface oldLayer = child.oldLayer;
         assert(oldLayer.rootElement != null);
-        assert(oldLayer.isPendingUpdate);
+        assert(debugAssertSurfaceState(oldLayer, PersistedSurfaceState.pendingUpdate));
         child.update(child.oldLayer);
       } else {
-        assert(child.isCreated);
+        assert(debugAssertSurfaceState(child, PersistedSurfaceState.created));
         assert(child.rootElement == null);
         child.build();
       }
@@ -984,10 +1017,10 @@ abstract class PersistedContainerSurface extends PersistedSurface {
 
   @override
   void update(PersistedContainerSurface oldSurface) {
-    assert(oldSurface.isActive || oldSurface.isPendingUpdate);
+    assert(debugAssertSurfaceState(oldSurface, PersistedSurfaceState.active, PersistedSurfaceState.pendingUpdate));
     assert(runtimeType == oldSurface.runtimeType);
     super.update(oldSurface);
-    assert(oldSurface.isReleased);
+    assert(debugAssertSurfaceState(oldSurface, PersistedSurfaceState.released));
 
     if (oldSurface._children.isEmpty) {
       _updateZeroToMany(oldSurface);
@@ -1019,8 +1052,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       }
       for (int i = 0; i < _children.length; i++) {
         final PersistedSurface newChild = _children[i];
-        assert(newChild.isActive || newChild.isPendingRetention,
-            'New child is in incorrect state ${newChild.state}');
+        assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.active, PersistedSurfaceState.pendingRetention));
         assert(newChild.rootElement != null);
         assert(newChild.rootElement.parent == childContainer);
       }
@@ -1043,17 +1075,17 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       final PersistedSurface newChild = _children[i];
       if (newChild.isPendingRetention) {
         newChild.retain();
-        assert(newChild.isPendingRetention);
+        assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.pendingRetention));
       } else if (newChild is PersistedContainerSurface &&
           newChild.oldLayer != null) {
         final PersistedContainerSurface oldLayer = newChild.oldLayer;
-        assert(oldLayer.isPendingUpdate);
+        assert(debugAssertSurfaceState(oldLayer, PersistedSurfaceState.pendingUpdate));
         newChild.update(oldLayer);
-        assert(oldLayer.isReleased);
-        assert(newChild.isActive);
+        assert(debugAssertSurfaceState(oldLayer, PersistedSurfaceState.released));
+        assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.active));
       } else {
         newChild.build();
-        assert(newChild.isActive);
+        assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.active));
       }
       assert(newChild.rootElement != null);
       containerElement.append(newChild.rootElement);
@@ -1093,14 +1125,14 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       newChild.retain();
 
       _discardActiveChildren(oldSurface);
-      assert(newChild.isPendingRetention);
+      assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.pendingRetention));
       return;
     }
 
     // Updated child is moved to the correct location in the tree; all others
     // are released.
     if (newChild is PersistedContainerSurface && newChild.oldLayer != null) {
-      assert(newChild.oldLayer.isPendingUpdate);
+      assert(debugAssertSurfaceState(newChild.oldLayer, PersistedSurfaceState.pendingUpdate));
       assert(newChild.rootElement == null);
       assert(newChild.oldLayer.rootElement != null);
 
@@ -1113,12 +1145,12 @@ abstract class PersistedContainerSurface extends PersistedSurface {
 
       newChild.update(oldLayer);
       _discardActiveChildren(oldSurface);
-      assert(oldLayer.isReleased);
-      assert(newChild.isActive);
+      assert(debugAssertSurfaceState(oldLayer, PersistedSurfaceState.released));
+      assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.active));
       return;
     }
 
-    assert(newChild.isCreated);
+    assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.created));
 
     PersistedSurface bestMatch;
     double bestScore = 2.0;
@@ -1135,7 +1167,7 @@ abstract class PersistedContainerSurface extends PersistedSurface {
     }
 
     if (bestMatch != null) {
-      assert(bestMatch.isActive);
+      assert(debugAssertSurfaceState(bestMatch, PersistedSurfaceState.active));
       newChild.update(bestMatch);
 
       // Move the HTML node if necessary.
@@ -1143,11 +1175,11 @@ abstract class PersistedContainerSurface extends PersistedSurface {
         childContainer.append(newChild.rootElement);
       }
 
-      assert(bestMatch.isReleased);
+      assert(debugAssertSurfaceState(bestMatch, PersistedSurfaceState.released));
     } else {
       newChild.build();
       childContainer.append(newChild.rootElement);
-      assert(newChild.isActive);
+      assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.active));
     }
 
     // Child nodes that were not used this frame that are still active and not
@@ -1202,29 +1234,29 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       final PersistedSurface newChild = _children[bottomInNew];
       if (newChild.isPendingRetention) {
         newChild.retain();
-        assert(newChild.isPendingRetention);
+        assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.pendingRetention));
       } else if (newChild is PersistedContainerSurface &&
           newChild.oldLayer != null) {
         final PersistedContainerSurface oldLayer = newChild.oldLayer;
-        assert(oldLayer.isPendingUpdate);
+        assert(debugAssertSurfaceState(oldLayer, PersistedSurfaceState.pendingUpdate));
         newChild.update(oldLayer);
-        assert(oldLayer.isReleased);
-        assert(newChild.isActive);
+        assert(debugAssertSurfaceState(oldLayer, PersistedSurfaceState.released));
+        assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.active));
       } else {
         final PersistedSurface matchedOldChild = matches[newChild];
         if (matchedOldChild != null) {
-          assert(matchedOldChild.isActive);
+          assert(debugAssertSurfaceState(matchedOldChild, PersistedSurfaceState.active));
           newChild.update(matchedOldChild);
-          assert(matchedOldChild.isReleased);
-          assert(newChild.isActive);
+          assert(debugAssertSurfaceState(matchedOldChild, PersistedSurfaceState.released));
+          assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.active));
         } else {
           newChild.build();
-          assert(newChild.isActive);
+          assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.active));
         }
       }
       insertDomNodeIfMoved(newChild);
       assert(newChild.rootElement != null);
-      assert(newChild.isActive || newChild.isPendingRetention);
+      assert(debugAssertSurfaceState(newChild, PersistedSurfaceState.active, PersistedSurfaceState.pendingRetention));
       nextSibling = newChild;
     }
 
