@@ -12,6 +12,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 
+import 'package:flutter_devicelab/framework/browser.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
@@ -74,30 +75,12 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
     ));
 
     server = await io.HttpServer.bind('localhost', benchmarkServerPort);
-    io.Process chromeProcess;
+    Chrome chrome;
     try {
       shelf_io.serveRequests(server, cascade.handler);
 
-      final bool isChromeNoSandbox =
-          io.Platform.environment['CHROME_NO_SANDBOX'] == 'true';
-
       final String dartToolDirectory = path.join('$macrobenchmarksDirectory/.dart_tool');
       final String userDataDir = io.Directory(dartToolDirectory).createTempSync('chrome_user_data_').path;
-      final List<String> args = <String>[
-        '--user-data-dir=$userDataDir',
-        'http://localhost:$benchmarkServerPort/index.html',
-        if (isChromeNoSandbox)
-          '--no-sandbox',
-        '--window-size=1024,1024',
-        '--disable-extensions',
-        '--disable-popup-blocking',
-        // Indicates that the browser is in "browse without sign-in" (Guest session) mode.
-        '--bwsi',
-        '--no-first-run',
-        '--no-default-browser-check',
-        '--disable-default-apps',
-        '--disable-translate',
-      ];
 
       // TODO(yjbanov): temporarily disables headful Chrome until we get
       //                devicelab hardware that is able to run it. Our current
@@ -106,38 +89,33 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       final bool isUncalibratedSmokeTest = io.Platform.environment['CALIBRATED'] != 'true';
       // final bool isUncalibratedSmokeTest =
       //     io.Platform.environment['UNCALIBRATED_SMOKE_TEST'] == 'true';
-      if (isUncalibratedSmokeTest) {
-        print('Running in headless mode because running on uncalibrated hardware.');
-        args.add('--headless');
+      final ChromeOptions options = ChromeOptions(
+        url: 'http://localhost:$benchmarkServerPort/index.html',
+        userDataDirectory: userDataDir,
+        windowHeight: 1024,
+        windowWidth: 1024,
+        headless: isUncalibratedSmokeTest,
         // When running in headless mode Chrome exits immediately unless
         // a debug port is specified.
-        args.add('--remote-debugging-port=${benchmarkServerPort + 1}');
-      }
+        debugPort: isUncalibratedSmokeTest ? benchmarkServerPort + 1 : null,
+      );
 
-      chromeProcess = await startProcess(
-        _findSystemChromeExecutable(),
-        args,
+      print('Launching Chrome.');
+      chrome = await Chrome.launch(
+        options,
+        onError: (String error) {
+          profileData.completeError(Exception(error));
+        },
         workingDirectory: cwd,
       );
 
-      bool receivedProfileData = false;
-      chromeProcess.exitCode.then((int exitCode) {
-        if (!receivedProfileData) {
-          profileData.completeError(Exception(
-            'Chrome process existed prematurely with exit code $exitCode',
-          ));
-        }
-      });
-      forwardStandardStreams(chromeProcess);
-
       print('Waiting for the benchmark to report benchmark profile.');
-
       final String backend = useCanvasKit ? 'canvaskit' : 'html';
       final Map<String, dynamic> taskResult = <String, dynamic>{};
       final List<String> benchmarkScoreKeys = <String>[];
       final List<Map<String, dynamic>> profiles = await profileData.future;
+
       print('Received profile data');
-      receivedProfileData = true;
       for (final Map<String, dynamic> profile in profiles) {
         final String benchmarkName = profile['name'] as String;
         final String benchmarkScoreKey = '$benchmarkName.$backend.averageDrawFrameDuration';
@@ -148,32 +126,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
     } finally {
       server.close();
-      chromeProcess?.kill();
+      chrome.stop();
     }
   });
-}
-
-String _findSystemChromeExecutable() {
-  // On some environments, such as the Dart HHH tester, Chrome resides in a
-  // non-standard location and is provided via the following environment
-  // variable.
-  final String envExecutable = io.Platform.environment['CHROME_EXECUTABLE'];
-  if (envExecutable != null) {
-    return envExecutable;
-  }
-
-  if (io.Platform.isLinux) {
-    final io.ProcessResult which =
-        io.Process.runSync('which', <String>['google-chrome']);
-
-    if (which.exitCode != 0) {
-      throw Exception('Failed to locate system Chrome installation.');
-    }
-
-    return (which.stdout as String).trim();
-  } else if (io.Platform.isMacOS) {
-    return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-  } else {
-    throw Exception('Web benchmarks cannot run on ${io.Platform.operatingSystem} yet.');
-  }
 }

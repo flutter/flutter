@@ -536,6 +536,8 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.webEnableExposeUrl,
+    this.webRunHeadless = false,
+    this.webBrowserDebugPort,
     this.vmserviceOutFile,
     this.fastStart = false,
    }) : debuggingEnabled = true;
@@ -545,6 +547,8 @@ class DebuggingOptions {
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
+      this.webRunHeadless = false,
+      this.webBrowserDebugPort,
       this.cacheSkSL = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
@@ -585,6 +589,17 @@ class DebuggingOptions {
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;
+
+  /// Whether to run the browser in headless mode.
+  ///
+  /// Some CI environments do not provide a display and fail to launch the
+  /// browser with full graphics stack. Some browsers provide a special
+  /// "headless" mode that runs the browser with no graphics.
+  final bool webRunHeadless;
+
+  /// The port the browser should use for its debugging protocol.
+  final int webBrowserDebugPort;
+
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
   final bool fastStart;
