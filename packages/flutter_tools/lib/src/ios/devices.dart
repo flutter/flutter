@@ -467,7 +467,7 @@ class IOSDevice extends Device {
           ipv6: ipv6,
         );
       }
-      final int installationResult = await IOSDeploy.instance.runApp( // TODO IOSDeploy!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      final int installationResult = await IOSDeploy.instance.runApp(
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: launchArguments,
