@@ -12,6 +12,7 @@ import 'framework.dart';
 import 'image.dart';
 import 'implicit_animations.dart';
 import 'transitions.dart';
+import 'value_listenable_builder.dart';
 
 // Examples can assume:
 // Uint8List bytes;
@@ -422,6 +423,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
   Tween<double> _placeholderOpacity;
   Animation<double> _targetOpacityAnimation;
   Animation<double> _placeholderOpacityAnimation;
+  final ValueNotifier<AnimationStatus> _placeholderAnimationStatus = ValueNotifier<AnimationStatus>(null);
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
@@ -437,8 +439,15 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
     ) as Tween<double>;
   }
 
+  void _placeholderListener(AnimationStatus status) {
+    _placeholderAnimationStatus.value = status;
+  }
+
   @override
   void didUpdateTweens() {
+    if (_placeholderOpacityAnimation != null) {
+      _placeholderOpacityAnimation.removeStatusListener(_placeholderListener);
+    }
     _placeholderOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: _placeholderOpacity.chain(CurveTween(curve: widget.fadeOutCurve)),
@@ -448,7 +457,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
         tween: ConstantTween<double>(0),
         weight: widget.fadeInDuration.inMilliseconds.toDouble(),
       ),
-    ]));
+    ]))..addStatusListener(_placeholderListener);
     _targetOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: ConstantTween<double>(0),
@@ -483,10 +492,19 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
           opacity: _targetOpacityAnimation,
           child: widget.target,
         ),
-        FadeTransition(
-          opacity: _placeholderOpacityAnimation,
-          child: widget.placeholder,
-        ),
+        ValueListenableBuilder<AnimationStatus>(
+          valueListenable: _placeholderAnimationStatus,
+          builder: (BuildContext context, AnimationStatus value, Widget child) {
+            if (value != AnimationStatus.completed) {
+              return child;
+            }
+            return const SizedBox.expand();
+          },
+          child: FadeTransition(
+            opacity: _placeholderOpacityAnimation,
+            child: widget.placeholder,
+          ),
+        )
       ],
     );
   }
