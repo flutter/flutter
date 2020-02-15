@@ -1,4 +1,4 @@
-Signature: a1b8d2505b2fcfbb8446f754b2783378
+Signature: f482f0bdb7bbb5567971522f98d5167c
 
 UNUSED LICENSES:
 
@@ -5810,6 +5810,8 @@ FILE: ../../../third_party/skia/src/core/SkRect.cpp
 FILE: ../../../third_party/skia/src/core/SkRegion.cpp
 FILE: ../../../third_party/skia/src/core/SkRegionPriv.h
 FILE: ../../../third_party/skia/src/core/SkRegion_path.cpp
+FILE: ../../../third_party/skia/src/core/SkScalerCache.cpp
+FILE: ../../../third_party/skia/src/core/SkScalerCache.h
 FILE: ../../../third_party/skia/src/core/SkScalerContext.cpp
 FILE: ../../../third_party/skia/src/core/SkScalerContext.h
 FILE: ../../../third_party/skia/src/core/SkScan.cpp
@@ -5820,8 +5822,6 @@ FILE: ../../../third_party/skia/src/core/SkScan_Path.cpp
 FILE: ../../../third_party/skia/src/core/SkSpriteBlitter.h
 FILE: ../../../third_party/skia/src/core/SkSpriteBlitter_ARGB32.cpp
 FILE: ../../../third_party/skia/src/core/SkStream.cpp
-FILE: ../../../third_party/skia/src/core/SkStrike.cpp
-FILE: ../../../third_party/skia/src/core/SkStrike.h
 FILE: ../../../third_party/skia/src/core/SkString.cpp
 FILE: ../../../third_party/skia/src/core/SkStroke.h
 FILE: ../../../third_party/skia/src/core/SkStrokerPriv.cpp
