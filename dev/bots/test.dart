@@ -242,20 +242,7 @@ Future<void> _runToolCoverage() async {
       '-j1',
       '--coverage=coverage',
       path.join('test', 'general.shard'),
-    ],
-    workingDirectory: toolRoot,
-    environment: <String, String>{
-      'FLUTTER_ROOT': flutterRoot,
-    }
-  );
-  await runCommand(
-    pub,
-    <String>[
-      'run',
-      'test',
-      '-j1',
-      '--coverage=coverage',
-      path.join('test', 'commands.shard', 'hermetic'),
+       path.join('test', 'commands.shard', 'hermetic'),
     ],
     workingDirectory: toolRoot,
     environment: <String, String>{
