@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/web/devfs_web.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/discovery.dart';
 import 'package:package_config/packages.dart';
@@ -289,6 +289,7 @@ void main() {
         urlTunneller: null,
         buildMode: BuildMode.debug,
         enableDwds: false,
+        entrypoint: Uri.base,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.dartSdk.createSync(recursive: true);

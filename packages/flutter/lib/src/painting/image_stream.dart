@@ -203,6 +203,11 @@ class ImageChunkEvent extends Diagnosticable {
 ///
 /// ImageStream objects are backed by [ImageStreamCompleter] objects.
 ///
+/// The [ImageCache] will consider an image to be live until the listener count
+/// drops to zero after adding at least one listener. The
+/// [addOnLastListenerRemovedCallback] method is used for tracking this
+/// information.
+///
 /// See also:
 ///
 ///  * [ImageProvider], which has an example that includes the use of an
@@ -392,6 +397,23 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         break;
       }
     }
+    if (_listeners.isEmpty) {
+      for (final VoidCallback callback in _onLastListenerRemovedCallbacks) {
+        callback();
+      }
+      _onLastListenerRemovedCallbacks.clear();
+    }
+  }
+
+  final List<VoidCallback> _onLastListenerRemovedCallbacks = <VoidCallback>[];
+
+  /// Adds a callback to call when [removeListener] results in an empty
+  /// list of listeners.
+  ///
+  /// This callback will never fire if [removeListener] is never called.
+  void addOnLastListenerRemovedCallback(VoidCallback callback) {
+    assert(callback != null);
+    _onLastListenerRemovedCallbacks.add(callback);
   }
 
   /// Calls all the registered listeners to notify them of a new image.

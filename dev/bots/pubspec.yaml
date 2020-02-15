@@ -8,6 +8,8 @@ environment:
 dependencies:
   args: 1.5.2
   crypto: 2.1.3
+  flutter_devicelab:
+    path: ../devicelab
   googleapis: 0.54.0
   googleapis_auth: 0.2.11+1
   http: 0.12.0+4

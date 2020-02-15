@@ -31,9 +31,9 @@ import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
-import '../web/devfs_web.dart';
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
+import 'devfs_web.dart';
 
 /// Injectable factory to create a [ResidentWebRunner].
 class DwdsWebRunnerFactory extends WebRunnerFactory {
@@ -400,6 +400,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       urlTunneller: urlTunneller,
       buildMode: debuggingOptions.buildInfo.mode,
       enableDwds: _enableDwds,
+      entrypoint: globals.fs.file(target).uri,
     );
     final Uri url = await device.devFS.create();
     if (debuggingOptions.buildInfo.isDebug) {
