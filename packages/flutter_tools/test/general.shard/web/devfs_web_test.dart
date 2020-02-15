@@ -151,11 +151,11 @@ void main() {
   }));
 
    test('serves asset files from in filesystem with url-encoded paths', () => testbed.run(() async {
-    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', Uri.encodeFull('abcd象形字.md')))
+    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', Uri.encodeFull('abcd象形字.png')))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer
-      .handleRequest(Request('GET', Uri.parse('http://foobar/assets/abcd%25E8%25B1%25A1%25E5%25BD%25A2%25E5%25AD%2597.md')));
+      .handleRequest(Request('GET', Uri.parse('http://foobar/assets/abcd%25E8%25B1%25A1%25E5%25BD%25A2%25E5%25AD%2597.png')));
 
     expect(response.headers, allOf(<Matcher>[
       containsPair('content-length', source.lengthSync().toString()),
