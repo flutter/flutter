@@ -58,7 +58,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
     packagePath: 'stack_trace.dart.lib.js',
     line: 132,
     column: 17,
-    className: '<unknown>',
+    className: '<foo>',
     method: 'foo',
     source: '',
   ),
