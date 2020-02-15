@@ -33,10 +33,20 @@ import 'inherited_notifier.dart';
 ///
 /// Managing a [FocusNode] means managing its lifecycle, listening for changes
 /// in focus, and re-parenting it when needed to keep the focus hierarchy in
-/// sync with the widget hierarchy. See [FocusNode] for more information about
-/// the details of what node management entails if not using a [Focus] widget.
+/// sync with the widget hierarchy. This widget does all of those things for
+/// you. See [FocusNode] for more information about the details of what node
+/// management entails if you are not using a [Focus] widget and you need to do
+/// it yourself.
 ///
-/// To collect a sub-tree of nodes into a group, use a [FocusScope].
+/// To collect a sub-tree of nodes into an exclusive group that restricts focus
+/// traversal to the group, use a [FocusScope]. To collect a sub-tree of nodes
+/// into a group that has a specific order to its traversal but allows the
+/// traversal to escape the group, use a [FocusTraversalGroup].
+///
+/// To move the focus, use methods on [FocusNode] by getting the [FocusNode]
+/// through the [of] method. For instance, to move the focus to the next node in
+/// the focus traversal order, call `Focus.of(context).nextFocus()`. To unfocus
+/// a widget, call `Focus.of(context).unfocus()`.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to manage focus using the [Focus] and [FocusScope]
@@ -163,12 +173,14 @@ import 'inherited_notifier.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return ListView.builder(
-///     itemBuilder: (context, index) => FocusableText(
-///       'Item $index',
-///       autofocus: index == 0,
+///   return Scaffold(
+///     body: ListView.builder(
+///       itemBuilder: (context, index) => FocusableText(
+///         'Item $index',
+///         autofocus: index == 0,
+///       ),
+///       itemCount: 50,
 ///     ),
-///     itemCount: 50,
 ///   );
 /// }
 /// ```
@@ -202,9 +214,7 @@ import 'inherited_notifier.dart';
 ///
 /// void _addChild() {
 ///   // Calling requestFocus here creates a deferred request for focus, since the
-///   // requestFocus will not actually happen until after this frame is done
-///   // building, so the focus will take effect on the next frame when the new
-///   // child has been added.
+///   // node is not yet part of the focus tree.
 ///   childFocusNodes
 ///       .add(FocusNode(debugLabel: 'Child ${children.length}')..requestFocus());
 ///
@@ -221,9 +231,6 @@ import 'inherited_notifier.dart';
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     appBar: AppBar(
-///       title: Text(widget.title),
-///     ),
 ///     body: Center(
 ///       child: Wrap(
 ///         children: children,
@@ -350,7 +357,7 @@ class Focus extends StatefulWidget {
   /// Sets the [FocusNode.skipTraversal] flag on the focus node so that it won't
   /// be visited by the [FocusTraversalPolicy].
   ///
-  /// This is sometimes useful if a Focus widget should receive key events as
+  /// This is sometimes useful if a [Focus] widget should receive key events as
   /// part of the focus chain, but shouldn't be accessible via focus traversal.
   ///
   /// This is different from [canRequestFocus] because it only implies that the
@@ -401,6 +408,9 @@ class Focus extends StatefulWidget {
   /// [nullOk].
   ///
   /// The [context] and [nullOk] arguments must not be null.
+  ///
+  /// Calling this function creates a dependency that will rebuild the given
+  /// context when the focus changes.
   static FocusNode of(BuildContext context, { bool nullOk = false, bool scopeOk = false }) {
     assert(context != null);
     assert(nullOk != null);
@@ -447,6 +457,9 @@ class Focus extends StatefulWidget {
   /// Returns false if no [Focus] widget is found before reaching the nearest
   /// [FocusScope], or if the root of the focus tree is reached without finding
   /// a [Focus] widget.
+  ///
+  /// Calling this function creates a dependency that will rebuild the given
+  /// context when the focus changes.
   static bool isAt(BuildContext context) => Focus.of(context, nullOk: true)?.hasFocus ?? false;
 
   @override
@@ -612,9 +625,16 @@ class _FocusState extends State<Focus> {
   }
 }
 
-/// A [FocusScope] is similar to a [Focus], but also serves as a scope for other
-/// [Focus]s and [FocusScope]s, grouping them together, and restricting focus
-/// traversal to the scoped controls.
+/// A [FocusScope] is similar to a [Focus], but also serves as a scope for its
+/// descendants, restricting focus traversal to the scoped controls.
+///
+/// For example a new [FocusScope] is created automatically when a route is
+/// pushed, keeping the focus traversal from moving to a control in a previous
+/// route.
+///
+/// If you just want to group widgets together in a group so that they are
+/// traversed in a particular order, but the focus can still leave the group,
+/// use a [FocusTraversalGroup].
 ///
 /// Like [Focus], [FocusScope] provides an [onFocusChange] as a way to be
 /// notified when the focus is given to or removed from this widget.
@@ -625,16 +645,12 @@ class _FocusState extends State<Focus> {
 /// ancestors of that node, stopping if one of them returns true from [onKey],
 /// indicating that it has handled the event.
 ///
-/// A [FocusScope] manages a [FocusScopeNode]. Managing a [FocusScopeNode] means
-/// managing its lifecycle, listening for changes in focus, and re-parenting it
-/// when the widget hierarchy changes. See [FocusNode] and [FocusScopeNode] for
-/// more information about the details of what node management entails if not
-/// using a [FocusScope] widget.
-///
-/// A [FocusTraversalGroup] widget provides the [FocusTraversalPolicy] for
-/// the [FocusScopeNode]s owned by its descendant widgets. Each [FocusScopeNode]
-/// has [FocusNode] descendants. The traversal policy defines what "previous
-/// focus", "next focus", and "move focus in this direction" means for them.
+/// Managing a [FocusScopeNode] means managing its lifecycle, listening for
+/// changes in focus, and re-parenting it when needed to keep the focus
+/// hierarchy in sync with the widget hierarchy. This widget does all of those
+/// things for you. See [FocusScopeNode] for more information about the details
+/// of what node management entails if you are not using a [FocusScope] widget
+/// and you need to do it yourself.
 ///
 /// [FocusScopeNode]s remember the last [FocusNode] that was focused within
 /// their descendants, and can move that focus to the next/previous node, or a
@@ -642,8 +658,10 @@ class _FocusState extends State<Focus> {
 /// [FocusNode.previousFocus], or [FocusNode.focusInDirection] are called on a
 /// [FocusNode] or [FocusScopeNode].
 ///
-/// To move the focus, use methods on [FocusScopeNode]. For instance, to move
-/// the focus to the next node, call `Focus.of(context).nextFocus()`.
+/// To move the focus, use methods on [FocusNode] by getting the [FocusNode]
+/// through the [of] method. For instance, to move the focus to the next node in
+/// the focus traversal order, call `Focus.of(context).nextFocus()`. To unfocus
+/// a widget, call `Focus.of(context).unfocus()`.
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 /// This example demonstrates using a [FocusScope] to restrict focus to a particular

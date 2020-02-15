@@ -40,6 +40,9 @@ typedef FocusOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
 
 /// An attachment point for a [FocusNode].
 ///
+/// Using a [FocusAttachment] is rarely needed, unless you are building
+/// something akin to the [Focus] or [FocusScope] widgets.
+///
 /// Once created, a [FocusNode] must be attached to the widget tree by its
 /// _host_ [StatefulWidget] via a [FocusAttachment] object. [FocusAttachment]s
 /// are owned by the [StatefulWidget] that hosts a [FocusNode] or
@@ -232,14 +235,16 @@ class FocusAttachment {
 /// particular direction, is determined by the [FocusTraversalPolicy] in force.
 ///
 /// The ambient policy is determined by looking up the widget hierarchy for a
-/// [FocusTraversalGroup] widget, and obtaining the focus traversal policy
-/// from it. Different focus nodes can inherit difference policies, so part of
-/// the app can go in widget order, and part can go in reading order, depending
+/// [FocusTraversalGroup] widget, and obtaining the focus traversal policy from
+/// it. Different focus nodes can inherit difference policies, so part of the
+/// app can go in a predefined order (using [OrderedTraversalPolicy]), and part
+/// can go in reading order (using [ReadingOrderTraversalPolicy]), depending
 /// upon the use case.
 ///
 /// Predefined policies include [WidgetOrderTraversalPolicy],
-/// [ReadingOrderTraversalPolicy], and [DirectionalFocusTraversalPolicyMixin],
-/// but custom policies can be built based upon these policies.
+/// [ReadingOrderTraversalPolicy], [OrderedTraversalPolicy], and
+/// [DirectionalFocusTraversalPolicyMixin], but custom policies can be built
+/// based upon these policies. See [FocusTraversalPolicy] for more information.
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 /// This example shows how a FocusNode should be managed if not using the
@@ -1148,39 +1153,37 @@ enum FocusHighlightStrategy {
 
 /// Manages the focus tree.
 ///
-/// The focus tree keeps track of which [FocusNode] is the user's current
-/// keyboard focus. The widget that owns the [FocusNode] often listens for
-/// keyboard events.
-///
-/// The focus manager is responsible for holding the [FocusScopeNode] that is
-/// the root of the focus tree and tracking which [FocusNode] has the overall
-/// focus.
+/// The focus manager is responsible for tracking which [FocusNode] has the
+/// primary input focus (the [primaryFocus]), holding the [FocusScopeNode] that
+/// is the root of the focus tree (the [rootScope]), and what the current
+/// [highlightMode] is.
 ///
 /// The [FocusManager] is held by the [WidgetsBinding] as
 /// [WidgetsBinding.focusManager], and can be conveniently accessed using the
-/// [focusManager] global accessor.
+/// [FocusManager.instance] static accessor.
 ///
 /// To find the [FocusScopeNode] for a given [BuildContext], use
 /// [FocusScope.of].
 ///
 /// The [FocusManager] knows nothing about [FocusNode]s other than the one that
-/// is currently focused (accessible via the [primaryFocus] global accessor). If
-/// a [FocusScopeNode] is removed, then the [FocusManager] will attempt to focus
-/// the next [FocusScopeNode] in the focus tree that it maintains, but if the
-/// current focus in that [FocusScopeNode] is null, it will stop there, and no
-/// [FocusNode] will have focus.
+/// is currently focused (accessible via the [primaryFocus] global accessor).
 ///
 /// If you would like notification whenever the [primaryFocus] changes, register
-/// a listener with [addListener]. When you no longer want to receive events, as
-/// when your object is about to be disposed, you must unregister with
-/// [removeListener] to avoid memory leaks. Removing listeners is typically done
-/// in [State.dispose] on stateful widgets.
+/// a listener with [addListener]. When you no longer want to receive these
+/// events, as when your object is about to be disposed, you must unregister
+/// with [removeListener] to avoid memory leaks. Removing listeners is typically
+/// done in [State.dispose] on stateful widgets.
 ///
 /// The [highlightMode] changes are notified separately via
 /// [addHighlightModeListener] and removed with [removeHighlightModeListener].
 ///
 /// See also:
 ///
+///  * [Focus], a widget that manages a [FocusNode] in the focus tree.
+///  * [FocusScope], a widget that manages a [FocusScopeNode] in the focus tree,
+///    creating a new scope for focus.
+///  * [FocusTraversalGroup], a widget that groups together nodes that should be
+///    traversed using an order described by a given [FocusTraversalPolicy].
 ///  * [FocusNode], which is a node in the focus tree that can receive focus.
 ///  * [FocusScopeNode], which is a node in the focus tree used to collect
 ///    subtrees into groups.
@@ -1188,14 +1191,14 @@ enum FocusHighlightStrategy {
 ///    [BuildContext].
 ///  * [FocusScope.of], which provides the nearest ancestor [FocusScopeNode] for
 ///    a given [BuildContext].
-///  * The [focusManager] and [primaryFocus] global accessors, for convenient
-///    access from anywhere to the current focus manager state.
+///  * The [primaryFocus] global accessor, for convenient access from anywhere
+///    to the current focus manager state.
 class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagnosticable {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
-  /// consider using the [focusManager] accessor instead (which gets it from the
-  /// [WidgetsBinding] singleton).
+  /// consider using the [FocusManager.instance] accessor instead (which gets it
+  /// from the [WidgetsBinding] singleton).
   FocusManager() {
     rootScope._manager = this;
     RawKeyboard.instance.addListener(_handleRawKeyEvent);
