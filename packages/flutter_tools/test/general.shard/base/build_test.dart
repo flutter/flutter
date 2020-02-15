@@ -121,7 +121,6 @@ void main() {
       verify(mockProcessManager.start(
         <String>[
           'gen_snapshot',
-          '--causal_async_stacks',
           '--additional_arg',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -146,7 +145,6 @@ void main() {
       verify(mockProcessManager.start(
         <String>[
           'gen_snapshot_armv7',
-          '--causal_async_stacks',
           '--additional_arg',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -171,7 +169,6 @@ void main() {
       verify(mockProcessManager.start(
         <String>[
           'gen_snapshot_arm64',
-          '--causal_async_stacks',
           '--additional_arg',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -184,7 +181,7 @@ void main() {
               platform: TargetPlatform.android_x64, mode: BuildMode.release))
           .thenReturn('gen_snapshot');
       when(mockProcessManager.start(
-              <String>['gen_snapshot', '--causal_async_stacks', '--strip'],
+              <String>['gen_snapshot', '--strip'],
               workingDirectory: anyNamed('workingDirectory'),
               environment: anyNamed('environment')))
           .thenAnswer((_) => Future<Process>.value(mockProc));
@@ -202,7 +199,7 @@ void main() {
           darwinArch: null,
           additionalArgs: <String>['--strip']);
       verify(mockProcessManager.start(
-              <String>['gen_snapshot', '--causal_async_stacks', '--strip'],
+              <String>['gen_snapshot', '--strip'],
               workingDirectory: anyNamed('workingDirectory'),
               environment: anyNamed('environment')))
           .called(1);
@@ -269,6 +266,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -281,6 +279,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -293,6 +292,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -308,8 +308,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -319,6 +319,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: true,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -329,19 +330,22 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
 
-      final VerificationResult toVerifyCC = verify(xcode.cc(captureAny));
+      final VerificationResult toVerifyCC = verify(mockXcode.cc(captureAny));
       expect(toVerifyCC.callCount, 1);
       final dynamic ccArgs = toVerifyCC.captured.first;
       expect(ccArgs, contains('-fembed-bitcode'));
       expect(ccArgs, contains('-isysroot'));
       expect(ccArgs, contains(kSDKPath));
 
-      final VerificationResult toVerifyClang = verify(xcode.clang(captureAny));
+      final VerificationResult toVerifyClang = verify(mockXcode.clang(captureAny));
       expect(toVerifyClang.callCount, 1);
       final dynamic clangArgs = toVerifyClang.captured.first;
       expect(clangArgs, contains('-fembed-bitcode'));
@@ -361,12 +365,12 @@ void main() {
 
       final String assembly = globals.fs.path.join(outputPath, 'snapshot_assembly.S');
       genSnapshot.outputs = <String, String>{
-        assembly: 'blah blah\n.section __DWARF\nblah blah\n',
+        assembly: 'blah blah\n',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -376,6 +380,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: true,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -386,19 +391,22 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
 
-      final VerificationResult toVerifyCC = verify(xcode.cc(captureAny));
+      final VerificationResult toVerifyCC = verify(mockXcode.cc(captureAny));
       expect(toVerifyCC.callCount, 1);
       final dynamic ccArgs = toVerifyCC.captured.first;
       expect(ccArgs, contains('-fembed-bitcode'));
       expect(ccArgs, contains('-isysroot'));
       expect(ccArgs, contains(kSDKPath));
 
-      final VerificationResult toVerifyClang = verify(xcode.clang(captureAny));
+      final VerificationResult toVerifyClang = verify(mockXcode.clang(captureAny));
       expect(toVerifyClang.callCount, 1);
       final dynamic clangArgs = toVerifyClang.captured.first;
       expect(clangArgs, contains('-fembed-bitcode'));
@@ -406,11 +414,7 @@ void main() {
       expect(clangArgs, contains(kSDKPath));
 
       final File assemblyFile = globals.fs.file(assembly);
-      final File assemblyBitcodeFile = globals.fs.file('$assembly.stripped.S');
       expect(assemblyFile.existsSync(), true);
-      expect(assemblyBitcodeFile.existsSync(), true);
-      expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
-      expect(assemblyBitcodeFile.readAsStringSync().contains('.section __DWARF'), false);
     }, overrides: contextOverrides);
 
     testUsingContext('builds iOS armv7 profile AOT snapshot', () async {
@@ -425,8 +429,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -436,6 +440,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -446,15 +451,73 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
-      verifyNever(xcode.cc(argThat(contains('-fembed-bitcode'))));
-      verifyNever(xcode.clang(argThat(contains('-fembed-bitcode'))));
+      verifyNever(mockXcode.cc(argThat(contains('-fembed-bitcode'))));
+      verifyNever(mockXcode.clang(argThat(contains('-fembed-bitcode'))));
 
-      verify(xcode.cc(argThat(contains('-isysroot')))).called(1);
-      verify(xcode.clang(argThat(contains('-isysroot')))).called(1);
+      verify(mockXcode.cc(argThat(contains('-isysroot')))).called(1);
+      verify(mockXcode.clang(argThat(contains('-isysroot')))).called(1);
+
+      final File assemblyFile = globals.fs.file(assembly);
+      expect(assemblyFile.existsSync(), true);
+      expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds iOS armv7 profile AOT snapshot with dwarf stack traces', () async {
+      globals.fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = globals.fs.path.join('build', 'foo');
+      globals.fs.directory(outputPath).createSync(recursive: true);
+
+      final String assembly = globals.fs.path.join(outputPath, 'snapshot_assembly.S');
+      genSnapshot.outputs = <String, String>{
+        assembly: 'blah blah\n.section __DWARF\nblah blah\n',
+      };
+      final String debugPath = globals.fs.path.join('foo', 'app.ios-armv7.symbols');
+
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.ios,
+        buildMode: BuildMode.profile,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+        darwinArch: DarwinArch.armv7,
+        bitcode: false,
+        splitDebugInfo: 'foo',
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
+      expect(genSnapshot.snapshotType.mode, BuildMode.profile);
+      expect(genSnapshot.additionalArgs, <String>[
+        '--deterministic',
+        '--snapshot_kind=app-aot-assembly',
+        '--assembly=$assembly',
+        '--strip',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        '--dwarf-stack-traces',
+        '--save-debugging-info=$debugPath',
+        'main.dill',
+      ]);
+      verifyNever(mockXcode.cc(argThat(contains('-fembed-bitcode'))));
+      verifyNever(mockXcode.clang(argThat(contains('-fembed-bitcode'))));
+
+      verify(mockXcode.cc(argThat(contains('-isysroot')))).called(1);
+      verify(mockXcode.clang(argThat(contains('-isysroot')))).called(1);
 
       final File assemblyFile = globals.fs.file(assembly);
       expect(assemblyFile.existsSync(), true);
@@ -472,8 +535,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -483,6 +546,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -493,6 +557,9 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -508,8 +575,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -519,6 +586,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -529,8 +597,11 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -546,8 +617,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -557,6 +628,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -567,6 +639,9 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -584,6 +659,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -597,6 +673,77 @@ void main() {
         '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds shared library for android-arm with dwarf stack traces', () async {
+      globals.fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = globals.fs.path.join('build', 'foo');
+      final String debugPath = globals.fs.path.join('foo', 'app.android-arm.symbols');
+      globals.fs.directory(outputPath).createSync(recursive: true);
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+        bitcode: false,
+        splitDebugInfo: 'foo',
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
+      expect(genSnapshot.snapshotType.mode, BuildMode.release);
+      expect(genSnapshot.additionalArgs, <String>[
+        '--deterministic',
+        '--snapshot_kind=app-aot-elf',
+        '--elf=build/foo/app.so',
+        '--strip',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        '--dwarf-stack-traces',
+        '--save-debugging-info=$debugPath',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds shared library for android-arm without dwarf stack traces due to empty string', () async {
+      globals.fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = globals.fs.path.join('build', 'foo');
+      globals.fs.directory(outputPath).createSync(recursive: true);
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+        bitcode: false,
+        splitDebugInfo: '',
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
+      expect(genSnapshot.snapshotType.mode, BuildMode.release);
+      expect(genSnapshot.additionalArgs, <String>[
+        '--deterministic',
+        '--snapshot_kind=app-aot-elf',
+        '--elf=build/foo/app.so',
+        '--strip',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -614,6 +761,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -625,6 +773,8 @@ void main() {
         '--snapshot_kind=app-aot-elf',
         '--elf=build/foo/app.so',
         '--strip',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
@@ -640,8 +790,8 @@ void main() {
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotterWithTimings.build(
         platform: TargetPlatform.android_arm,
@@ -650,6 +800,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);

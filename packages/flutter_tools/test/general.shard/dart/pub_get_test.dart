@@ -328,7 +328,7 @@ void main() {
         await pub.get(context: PubContext.flutterTests, checkLastModified: true);
         expect(true, isFalse, reason: 'pub.get did not throw');
       } catch (error) {
-        expect(error, isInstanceOf<Exception>());
+        expect(error, isA<Exception>());
         expect(error.message, '/: unexpected concurrent modification of pubspec.yaml while running pub.');
       }
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
@@ -365,7 +365,7 @@ void main() {
 class BotDetectorAlwaysNo implements BotDetector {
   const BotDetectorAlwaysNo();
   @override
-  bool get isRunningOnBot => false;
+  Future<bool> get isRunningOnBot async => false;
 }
 
 typedef StartCallback = void Function(List<dynamic> command);

@@ -8,11 +8,9 @@ import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
 import 'base/async_guard.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/os.dart';
 import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
@@ -260,8 +258,7 @@ class Doctor {
         slowWarningCallback: () => validator.slowWarning,
         timeoutConfiguration: timeoutConfiguration,
         stopwatch: Stopwatch(),
-        supportsColor: globals.terminal.supportsColor,
-        platform: globals.platform,
+        terminal: globals.terminal,
       );
       ValidationResult result;
       try {
@@ -603,7 +600,7 @@ class FlutterValidator extends DoctorValidator {
     String frameworkVersion;
 
     try {
-      final FlutterVersion version = FlutterVersion.instance;
+      final FlutterVersion version = globals.flutterVersion;
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
       messages.add(ValidationMessage(userMessages.flutterVersion(
@@ -636,9 +633,15 @@ class FlutterValidator extends DoctorValidator {
       valid = ValidationType.partial;
     }
 
-    return ValidationResult(valid, messages,
+    return ValidationResult(
+      valid,
+      messages,
       statusInfo: userMessages.flutterStatusInfo(
-        versionChannel, frameworkVersion, os.name, globals.platform.localeName),
+        versionChannel,
+        frameworkVersion,
+        globals.os.name,
+        globals.platform.localeName,
+      ),
     );
   }
 }
@@ -743,7 +746,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 
   static Iterable<DoctorValidator> get installed {
     final List<DoctorValidator> validators = <DoctorValidator>[];
-    if (homeDirPath == null) {
+    if (globals.fsUtils.homeDirPath == null) {
       return validators;
     }
 
@@ -762,25 +765,24 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
       validators.add(validator);
     }
 
-    for (final FileSystemEntity dir in globals.fs.directory(homeDirPath).listSync()) {
-      if (dir is Directory) {
-        final String name = globals.fs.path.basename(dir.path);
-        IntelliJValidator._idToTitle.forEach((String id, String title) {
-          if (name.startsWith('.$id')) {
-            final String version = name.substring(id.length + 1);
-            String installPath;
-            try {
-              installPath = globals.fs.file(globals.fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
-            } catch (e) {
-              // ignored
-            }
-            if (installPath != null && globals.fs.isDirectorySync(installPath)) {
-              final String pluginsPath = globals.fs.path.join(dir.path, 'config', 'plugins');
-              addValidator(title, version, installPath, pluginsPath);
-            }
+    final Directory homeDir = globals.fs.directory(globals.fsUtils.homeDirPath);
+    for (final Directory dir in homeDir.listSync().whereType<Directory>()) {
+      final String name = globals.fs.path.basename(dir.path);
+      IntelliJValidator._idToTitle.forEach((String id, String title) {
+        if (name.startsWith('.$id')) {
+          final String version = name.substring(id.length + 1);
+          String installPath;
+          try {
+            installPath = globals.fs.file(globals.fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
+          } catch (e) {
+            // ignored
           }
-        });
-      }
+          if (installPath != null && globals.fs.isDirectorySync(installPath)) {
+            final String pluginsPath = globals.fs.path.join(dir.path, 'config', 'plugins');
+            addValidator(title, version, installPath, pluginsPath);
+          }
+        }
+      });
     }
     return validators;
   }
@@ -799,7 +801,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   static Iterable<DoctorValidator> get installed {
     final List<DoctorValidator> validators = <DoctorValidator>[];
-    final List<String> installPaths = <String>['/Applications', globals.fs.path.join(homeDirPath, 'Applications')];
+    final List<String> installPaths = <String>[
+      '/Applications',
+      globals.fs.path.join(globals.fsUtils.homeDirPath, 'Applications'),
+    ];
 
     void checkForIntelliJ(Directory dir) {
       final String name = globals.fs.path.basename(dir.path);
@@ -856,7 +861,12 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     final List<String> split = version.split('.');
     final String major = split[0];
     final String minor = split[1];
-    return globals.fs.path.join(homeDirPath, 'Library', 'Application Support', '$id$major.$minor');
+    return globals.fs.path.join(
+      globals.fsUtils.homeDirPath,
+      'Library',
+      'Application Support',
+      '$id$major.$minor',
+    );
   }
 }
 

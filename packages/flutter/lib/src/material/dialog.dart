@@ -20,6 +20,7 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
@@ -223,6 +224,7 @@ class AlertDialog extends StatelessWidget {
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
     this.actionsOverflowDirection,
+    this.actionsOverflowButtonSpacing,
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
@@ -253,7 +255,7 @@ class AlertDialog extends StatelessWidget {
   /// Style for the text in the [title] of this [AlertDialog].
   ///
   /// If null, [DialogTheme.titleTextStyle] is used, if that's null, defaults to
-  /// [ThemeData.textTheme.title].
+  /// [ThemeData.textTheme.headline6].
   final TextStyle titleTextStyle;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -276,7 +278,7 @@ class AlertDialog extends StatelessWidget {
   /// Style for the text in the [content] of this [AlertDialog].
   ///
   /// If null, [DialogTheme.contentTextStyle] is used, if that's null, defaults
-  /// to [ThemeData.textTheme.subhead].
+  /// to [ThemeData.textTheme.subtitle1].
   final TextStyle contentTextStyle;
 
   /// The (optional) set of actions that are displayed at the bottom of the
@@ -292,7 +294,7 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
-  /// Padding around the the set of [actions] at the bottom of the dialog.
+  /// Padding around the set of [actions] at the bottom of the dialog.
   ///
   /// Typically used to provide padding to the button bar between the button bar
   /// and the edges of the dialog.
@@ -341,6 +343,22 @@ class AlertDialog extends StatelessWidget {
   ///
   /// * [ButtonBar], which [actions] configures to lay itself out.
   final VerticalDirection actionsOverflowDirection;
+
+  /// The spacing between [actions] when the button bar overflows.
+  ///
+  /// If the widgets in [actions] do not fit into a single row, they are
+  /// arranged into a column. This parameter provides additional
+  /// vertical space in between buttons when it does overflow.
+  ///
+  /// Note that the button spacing may appear to be more than
+  /// the value provided. This is because most buttons adhere to the
+  /// [MaterialTapTargetSize] of 48px. So, even though a button
+  /// might visually be 36px in height, it might still take up to
+  /// 48px vertically.
+  ///
+  /// If null then no spacing will be added in between buttons in
+  /// an overflow state.
+  final double actionsOverflowButtonSpacing;
 
   /// The padding that surrounds each button in [actions].
   ///
@@ -421,7 +439,7 @@ class AlertDialog extends StatelessWidget {
      titleWidget = Padding(
         padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: DefaultTextStyle(
-          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
+          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
             child: title,
             namesRoute: true,
@@ -434,7 +452,7 @@ class AlertDialog extends StatelessWidget {
       contentWidget = Padding(
         padding: contentPadding,
         child: DefaultTextStyle(
-          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
           child: content,
         ),
       );
@@ -445,6 +463,7 @@ class AlertDialog extends StatelessWidget {
         child: ButtonBar(
           buttonPadding: buttonPadding,
           overflowDirection: actionsOverflowDirection,
+          overflowButtonSpacing: actionsOverflowButtonSpacing,
           children: actions,
         ),
       );
@@ -540,6 +559,7 @@ class SimpleDialogOption extends StatelessWidget {
   const SimpleDialogOption({
     Key key,
     this.onPressed,
+    this.padding,
     this.child,
   }) : super(key: key);
 
@@ -556,12 +576,17 @@ class SimpleDialogOption extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
+  /// The amount of space to surround the [child] with.
+  ///
+  /// Defaults to EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0).
+  final EdgeInsets padding;
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
+        padding: padding ?? const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
         child: child,
       ),
     );
@@ -747,7 +772,7 @@ class SimpleDialog extends StatelessWidget {
               Padding(
                 padding: titlePadding,
                 child: DefaultTextStyle(
-                  style: theme.textTheme.title,
+                  style: theme.textTheme.headline6,
                   child: Semantics(namesRoute: true, child: title),
                 ),
               ),

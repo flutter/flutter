@@ -45,7 +45,7 @@ abstract class KeyboardKey extends Diagnosticable {
 /// look at the physical key to make sure that regardless of the character the
 /// key produces, you got the key that is in that location on the keyboard.
 ///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the logical "Q"
 /// key.
 ///
@@ -91,7 +91,7 @@ abstract class KeyboardKey extends Diagnosticable {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
@@ -1960,7 +1960,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// looking for "the key next next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the physical key
 /// to the right of the CAPS LOCK key.
 ///
@@ -2000,7 +2000,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,

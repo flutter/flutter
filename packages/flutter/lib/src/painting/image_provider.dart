@@ -17,6 +17,12 @@ import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
+/// Signature for the callback taken by [_createErrorHandlerAndKey].
+typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
+
+/// Signature used for error handling by [_createErrorHandlerAndKey].
+typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, dynamic exception, StackTrace stack);
+
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
 ///
@@ -182,6 +188,43 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheW
 ///
 /// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
+/// ## Lifecycle of resolving an image
+///
+/// The [ImageProvider] goes through the following lifecycle to resolve an
+/// image, once the [resolve] method is called:
+///
+///   1. Create an [ImageStream] using [createStream] to return to the caller.
+///      This stream will be used to communicate back to the caller when the
+///      image is decoded and ready to display, or when an error occurs.
+///   2. Obtain the key for the image using [obtainKey].
+///      Calling this method can throw exceptions into the zone asynchronously
+///      or into the callstack synchronously. To handle that, an error handler
+///      is created that catches both synchronous and asynchronous errors, to
+///      make sure errors can be routed to the correct consumers.
+///      The error handler is passed on to [resolveStreamForKey] and the
+///      [ImageCache].
+///   3. If the key is successfully obtained, schedule resolution of the image
+///      using that key. This is handled by [resolveStreamForKey]. That method
+///      may fizzle if it determines the image is no longer necessary, use the
+///      provided [ImageErrorListener] to report an error, set the completer
+///      from the cache if possible, or call [load] to fetch the encoded image
+///      bytes and schedule decoding.
+///   4. The [load] method is responsible for both fetching the encoded bytes
+///      and decoding them using the provided [DecoderCallback]. It is called
+///      in a context that uses the [ImageErrorListener] to report errors back.
+///
+/// Subclasses normally only have to implement the [load] and [obtainKey]
+/// methods. A subclass that needs finer grained control over the [ImageStream]
+/// type must override [createStream]. A subclass that needs finer grained
+/// control over the resolution, such as delaying calling [load], must override
+/// [resolveStreamForKey].
+///
+/// The [resolve] method is marked as [nonVirtual] so that [ImageProvider]s can
+/// be properly composed, and so that the base class can properly set up error
+/// handling for subsequent methods.
+///
+/// ## Using an [ImageProvider]
+///
 /// {@tool snippet}
 ///
 /// The following shows the code required to write a widget that fully conforms
@@ -270,31 +313,112 @@ abstract class ImageProvider<T> {
   /// This is the public entry-point of the [ImageProvider] class hierarchy.
   ///
   /// Subclasses should implement [obtainKey] and [load], which are used by this
-  /// method.
+  /// method. If they need to change the implementation of [ImageStream] used,
+  /// they should override [createStream]. If they need to manage the actual
+  /// resolution of the image, they should override [resolveStreamForKey].
+  ///
+  /// See the Lifecycle documentation on [ImageProvider] for more information.
+  @nonVirtual
   ImageStream resolve(ImageConfiguration configuration) {
     assert(configuration != null);
-    final ImageStream stream = ImageStream();
+    final ImageStream stream = createStream(configuration);
+    // Load the key (potentially asynchronously), set up an error handling zone,
+    // and call resolveStreamForKey.
+    _createErrorHandlerAndKey(
+      configuration,
+      (T key, ImageErrorListener errorHandler) {
+        resolveStreamForKey(configuration, stream, key, errorHandler);
+      },
+      (T key, dynamic exception, StackTrace stack) async {
+        await null; // wait an event turn in case a listener has been added to the image stream.
+        final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
+        stream.setCompleter(imageCompleter);
+        imageCompleter.setError(
+          exception: exception,
+          stack: stack,
+          context: ErrorDescription('while resolving an image'),
+          silent: true, // could be a network error or whatnot
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+            yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
+            yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
+            },
+          );
+        },
+      );
+    return stream;
+  }
+
+  /// Called by [resolve] to create the [ImageStream] it returns.
+  ///
+  /// Subclasses should override this instead of [resolve] if they need to
+  /// return some subclass of [ImageStream]. The stream created here will be
+  /// passed to [resolveStreamForKey].
+  @protected
+  ImageStream createStream(ImageConfiguration configuration) {
+    return ImageStream();
+  }
+
+  /// Returns the cache location for the key that this [ImageProvider] creates.
+  ///
+  /// The location may be [ImageCacheStatus.untracked], indicating that this
+  /// image provider's key is not available in the [ImageCache].
+  ///
+  /// The `cache` and `configuration` parameters must not be null. If the
+  /// `handleError` parameter is null, errors will be reported to
+  /// [FlutterError.onError], and the method will return null.
+  ///
+  /// A completed return value of null indicates that an error has occurred.
+  Future<ImageCacheStatus> obtainCacheStatus({
+    @required ImageConfiguration configuration,
+    ImageErrorListener handleError,
+  }) {
+    assert(configuration != null);
+    final Completer<ImageCacheStatus> completer = Completer<ImageCacheStatus>();
+    _createErrorHandlerAndKey(
+      configuration,
+      (T key, ImageErrorListener innerHandleError) {
+        completer.complete(PaintingBinding.instance.imageCache.statusForKey(key));
+      },
+      (T key, dynamic exception, StackTrace stack) async {
+        if (handleError != null) {
+          handleError(exception, stack);
+        } else {
+          FlutterError.onError(FlutterErrorDetails(
+            context: ErrorDescription('while checking the cache location of an image'),
+            informationCollector: () sync* {
+              yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+              yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
+              yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
+            },
+            exception: exception,
+            stack: stack,
+          ));
+          completer.complete(null);
+        }
+      },
+    );
+    return completer.future;
+  }
+
+  /// This method is used by both [resolve] and [obtainCacheStatus] to ensure
+  /// that errors thrown during key creation are handled whether synchronous or
+  /// asynchronous.
+  void _createErrorHandlerAndKey(
+    ImageConfiguration configuration,
+    _KeyAndErrorHandlerCallback<T> successCallback,
+    _AsyncKeyErrorHandler<T> errorCallback,
+  ) {
     T obtainedKey;
     bool didError = false;
     Future<void> handleError(dynamic exception, StackTrace stack) async {
       if (didError) {
         return;
       }
+      if (!didError) {
+        errorCallback(obtainedKey, exception, stack);
+      }
       didError = true;
-      await null; // wait an event turn in case a listener has been added to the image stream.
-      final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
-      stream.setCompleter(imageCompleter);
-      imageCompleter.setError(
-        exception: exception,
-        stack: stack,
-        context: ErrorDescription('while resolving an image'),
-        silent: true, // could be a network error or whatnot
-        informationCollector: () sync* {
-          yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-          yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
-          yield DiagnosticsProperty<T>('Image key', obtainedKey, defaultValue: null);
-        },
-      );
     }
 
     // If an error is added to a synchronous completer before a listener has been
@@ -322,17 +446,54 @@ abstract class ImageProvider<T> {
       }
       key.then<void>((T key) {
         obtainedKey = key;
-        final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
-          key,
-          () => load(key, PaintingBinding.instance.instantiateImageCodec),
-          onError: handleError,
-        );
-        if (completer != null) {
-          stream.setCompleter(completer);
+        try {
+          successCallback(key, handleError);
+        } catch (error, stackTrace) {
+          handleError(error, stackTrace);
         }
       }).catchError(handleError);
     });
-    return stream;
+  }
+
+  /// Called by [resolve] with the key returned by [obtainKey].
+  ///
+  /// Subclasses should override this method rather than calling [obtainKey] if
+  /// they need to use a key directly. The [resolve] method installs appropriate
+  /// error handling guards so that errors will bubble up to the right places in
+  /// the framework, and passes those guards along to this method via the
+  /// [handleError] parameter.
+  ///
+  /// It is safe for the implementation of this method to call [handleError]
+  /// multiple times if multiple errors occur, or if an error is thrown both
+  /// synchronously into the current part of the stack and thrown into the
+  /// enclosing [Zone].
+  ///
+  /// The default implementation uses the key to interact with the [ImageCache],
+  /// calling [ImageCache.putIfAbsent] and notifying listeners of the [stream].
+  /// Implementers that do not call super are expected to correctly use the
+  /// [ImageCache].
+  @protected
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, T key, ImageErrorListener handleError) {
+    // This is an unusual edge case where someone has told us that they found
+    // the image we want before getting to this method. We should avoid calling
+    // load again, but still update the image cache with LRU information.
+    if (stream.completer != null) {
+      final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
+        key,
+        () => stream.completer,
+        onError: handleError,
+      );
+      assert(identical(completer, stream.completer));
+      return;
+    }
+    final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
+      key,
+      () => load(key, PaintingBinding.instance.instantiateImageCodec),
+      onError: handleError,
+    );
+    if (completer != null) {
+      stream.setCompleter(completer);
+    }
   }
 
   /// Evicts an entry from the image cache.
@@ -648,7 +809,7 @@ class FileImage extends ImageProvider<FileImage> {
 
     final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
-      return null;
+      throw StateError('$file is empty and cannot be loaded as an image.');
 
     return await decode(bytes);
   }

@@ -93,20 +93,7 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler> createCompiler() async {
-    if (flutterProject.hasBuilders) {
-      return CodeGeneratingResidentCompiler.create(
-        flutterProject: flutterProject,
-        buildMode: buildMode,
-        trackWidgetCreation: trackWidgetCreation,
-        compilerMessageConsumer: _reportCompilerMessage,
-        initializeFromDill: testFilePath,
-        // We already ran codegen once at the start, we only need to
-        // configure builders.
-        runCold: true,
-        dartDefines: const <String>[],
-      );
-    }
-    return ResidentCompiler(
+    final ResidentCompiler residentCompiler = ResidentCompiler(
       globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       packagesPath: PackageMap.globalPackagesPath,
       buildMode: buildMode,
@@ -116,6 +103,13 @@ class TestCompiler {
       unsafePackageSerialization: false,
       dartDefines: const <String>[],
     );
+    if (flutterProject.hasBuilders) {
+      return CodeGeneratingResidentCompiler.create(
+        residentCompiler: residentCompiler,
+        flutterProject: flutterProject,
+      );
+    }
+    return residentCompiler;
   }
 
   // Handle a compilation request.
@@ -160,7 +154,7 @@ class TestCompiler {
           // The idea is to keep the cache file up-to-date and include as
           // much as possible in an effort to re-use as many packages as
           // possible.
-          fsUtils.ensureDirectoryExists(testFilePath);
+          globals.fsUtils.ensureDirectoryExists(testFilePath);
           await outputFile.copy(testFilePath);
         }
         request.result.complete(kernelReadyToRun.path);
@@ -177,7 +171,7 @@ class TestCompiler {
     if (_suppressOutput) {
       return;
     }
-    if (message.startsWith('Error: Could not resolve the package \'flutter_test\'')) {
+    if (message.startsWith("Error: Could not resolve the package 'flutter_test'")) {
       globals.printTrace(message);
       globals.printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
         emphasis: emphasis,
@@ -186,6 +180,6 @@ class TestCompiler {
       _suppressOutput = true;
       return;
     }
-    globals.printError('$message');
+    globals.printError(message);
   }
 }

@@ -37,7 +37,7 @@ void main() {
       if (globals.platform.isWindows) {
         flutterRootUri
             ..write('/')
-            ..write(canonicalizedFlutterRootPath.replaceAll('\\', '/'));
+            ..write(canonicalizedFlutterRootPath.replaceAll(r'\', '/'));
       } else {
         flutterRootUri.write(canonicalizedFlutterRootPath);
       }
@@ -124,7 +124,7 @@ flutter_project:lib/
             'Analyzing',
             'info $analyzerSeparator Avoid empty else statements',
             'info $analyzerSeparator Avoid empty statements',
-            'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
+            "info $analyzerSeparator The declaration '_incrementCounter' isn't",
           ],
           exitMessageContains: '3 issues found.',
           toolExit: true,
@@ -160,7 +160,7 @@ flutter_project:lib/
             arguments: <String>['analyze', '--no-pub'],
             statusTextContains: <String>[
               'Analyzing',
-              'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
+              "info $analyzerSeparator The declaration '_incrementCounter' isn't",
               'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
             ],
             exitMessageContains: '2 issues found.',
@@ -342,7 +342,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.display1,
+              style: Theme.of(context).textTheme.headline4,
             ),
           ],
         ),

@@ -70,7 +70,11 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
 /// Enables Flutter Driver VM service extension.
 ///
 /// This extension is required for tests that use `package:flutter_driver` to
-/// drive applications from a separate process.
+/// drive applications from a separate process. In order to allow the driver
+/// to interact with the application, this method changes the behavior of the
+/// framework in several ways - including keyboard interaction and text
+/// editing. Applications intended for release should never include this
+/// method.
 ///
 /// Call this function prior to running your application, e.g. before you call
 /// `runApp`.

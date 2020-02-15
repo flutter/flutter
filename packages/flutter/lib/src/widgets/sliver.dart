@@ -1160,6 +1160,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(child.slot != null);
     assert(_childElements.containsKey(child.slot));
     _childElements.remove(child.slot);
+    super.forgetChild(child);
   }
 
   @override
@@ -1334,7 +1335,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 /// bool _visible = true;
 /// List<Widget> listItems = <Widget>[
 ///   Text('Now you see me,'),
-///   Text('Now you don\'t!'),
+///   Text("Now you don't!"),
 /// ];
 ///
 /// SliverOpacity(

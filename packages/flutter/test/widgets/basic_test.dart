@@ -152,38 +152,38 @@ void main() {
       Offset offset = const Offset(0.4, 0.4);
 
       await tester.pumpWidget(
-        StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Directionality(
-              textDirection: TextDirection.ltr,
-              child: Center(
-                child: Semantics(
-                  explicitChildNodes: true,
-                  child: FractionalTranslation(
-                    key: fractionalTranslationKey,
-                    translation: offset,
-                    transformHitTests: true,
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          offset = const Offset(0.8, 0.8);
-                        });
-                      },
-                      child: SizedBox(
-                        width: 100.0,
-                        height: 100.0,
-                        child: Text(
-                          'foo',
-                          key: textKey,
+          StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Semantics(
+                    explicitChildNodes: true,
+                    child: FractionalTranslation(
+                      key: fractionalTranslationKey,
+                      translation: offset,
+                      transformHitTests: true,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            offset = const Offset(0.8, 0.8);
+                          });
+                        },
+                        child: SizedBox(
+                          width: 100.0,
+                          height: 100.0,
+                          child: Text(
+                            'foo',
+                            key: textKey,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
-        )
+              );
+            },
+          )
       );
 
       expect(
@@ -309,7 +309,7 @@ class DoesNotHitRenderBox extends Matcher {
 
   @override
   Description describe(Description description) =>
-    description.add('hit test result doesn\'t contain ').addDescriptionOf(renderBox);
+    description.add("hit test result doesn't contain ").addDescriptionOf(renderBox);
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {

@@ -17,8 +17,8 @@ import 'theme.dart';
 
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
-/// List tiles that appear in a [Drawer] use the theme's [TextTheme.body2]
-/// text style, which is a little smaller than the theme's [TextTheme.subhead]
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyText1]
+/// text style, which is a little smaller than the theme's [TextTheme.subtitle1]
 /// text style, which is used by default.
 enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
@@ -265,7 +265,7 @@ enum ListTileControlAffinity {
 /// // ...
 /// ListTile(
 ///   leading: const Icon(Icons.flight_land),
-///   title: const Text('Trix\'s airplane'),
+///   title: const Text("Trix's airplane"),
 ///   subtitle: _act != 2 ? const Text('The airplane is only in Act II.') : null,
 ///   enabled: _act == 2,
 ///   onTap: () { /* react to the tile being tapped */ }
@@ -317,7 +317,7 @@ enum ListTileControlAffinity {
 /// you're looking for, it's easy to create custom list items with a
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// Here is an example of a custom list item that resembles a Youtube related
 /// video list item created with [Expanded] and [Container] widgets.
@@ -438,7 +438,7 @@ enum ListTileControlAffinity {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
@@ -469,7 +469,7 @@ enum ListTileControlAffinity {
 ///       crossAxisAlignment: CrossAxisAlignment.start,
 ///       children: <Widget>[
 ///         Expanded(
-///           flex: 2,
+///           flex: 1,
 ///           child: Column(
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             children: <Widget>[
@@ -508,7 +508,7 @@ enum ListTileControlAffinity {
 ///                 ),
 ///               ),
 ///               Text(
-///                 '$publishDate · $readDuration ★',
+///                 '$publishDate - $readDuration',
 ///                 style: const TextStyle(
 ///                   fontSize: 12.0,
 ///                   color: Colors.black54,
@@ -806,14 +806,14 @@ class ListTile extends StatelessWidget {
     if (tileTheme != null) {
       switch (tileTheme.style) {
         case ListTileStyle.drawer:
-          style = theme.textTheme.body2;
+          style = theme.textTheme.bodyText1;
           break;
         case ListTileStyle.list:
-          style = theme.textTheme.subhead;
+          style = theme.textTheme.subtitle1;
           break;
       }
     } else {
-      style = theme.textTheme.subhead;
+      style = theme.textTheme.subtitle1;
     }
     final Color color = _textColor(theme, tileTheme, style.color);
     return _isDenseLayout(tileTheme)
@@ -822,7 +822,7 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _subtitleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
-    final TextStyle style = theme.textTheme.body1;
+    final TextStyle style = theme.textTheme.bodyText2;
     final Color color = _textColor(theme, tileTheme, theme.textTheme.caption.color);
     return _isDenseLayout(tileTheme)
       ? style.copyWith(color: color, fontSize: 12.0)
@@ -992,6 +992,7 @@ class _ListTileElement extends RenderObjectElement {
     final _ListTileSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
+    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _ListTileSlot slot) {

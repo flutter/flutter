@@ -5,11 +5,10 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 
 import '../base/context.dart';
 import '../globals.dart' as globals;
-import 'io.dart' hide stderr, stdin, stdout;
+import 'io.dart';
 import 'terminal.dart' show AnsiTerminal, TerminalColor, OutputPreferences;
 import 'utils.dart';
 
@@ -168,6 +167,9 @@ abstract class Logger {
   /// Only surfaces a value in machine modes, Loggers may ignore this message in
   /// non-machine modes.
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+
+  /// Clears all output.
+  void clear();
 }
 
 class StdoutLogger extends Logger {
@@ -176,15 +178,13 @@ class StdoutLogger extends Logger {
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
-    @required Platform platform,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   })
     : _stdio = stdio,
       _terminal = terminal,
       _timeoutConfiguration = timeoutConfiguration,
       _outputPreferences = outputPreferences,
-      _stopwatchFactory = stopwatchFactory,
-      _platform = platform;
+      _stopwatchFactory = stopwatchFactory;
 
   @override
   final AnsiTerminal _terminal;
@@ -194,7 +194,6 @@ class StdoutLogger extends Logger {
   final TimeoutConfiguration _timeoutConfiguration;
   final Stdio _stdio;
   final StopwatchFactory _stopwatchFactory;
-  final Platform _platform;
 
   Status _status;
 
@@ -229,9 +228,9 @@ class StdoutLogger extends Logger {
       message = _terminal.bolden(message);
     }
     message = _terminal.color(message, color ?? TerminalColor.red);
-    _stdio.stderr.writeln(message);
+    writeToStdErr('$message\n');
     if (stackTrace != null) {
-      _stdio.stderr.writeln(stackTrace.toString());
+      writeToStdErr('$stackTrace\n');
     }
     _status?.resume();
   }
@@ -268,9 +267,10 @@ class StdoutLogger extends Logger {
   }
 
   @protected
-  void writeToStdOut(String message) {
-    _stdio.stdout.write(message);
-  }
+  void writeToStdOut(String message) => _stdio.stdoutWrite(message);
+
+  @protected
+  void writeToStdErr(String message) => _stdio.stderrWrite(message);
 
   @override
   void printTrace(String message) { }
@@ -302,8 +302,8 @@ class StdoutLogger extends Logger {
         onFinish: _clearStatus,
         stdio: _stdio,
         timeoutConfiguration: _timeoutConfiguration,
-        platform: _platform,
         stopwatch: _stopwatchFactory.createStopwatch(),
+        terminal: _terminal,
       )..start();
     } else {
       _status = SummaryStatus(
@@ -325,6 +325,13 @@ class StdoutLogger extends Logger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+
+  @override
+  void clear() {
+    _status?.pause();
+    writeToStdOut(_terminal.clearScreen() + '\n');
+    _status?.resume();
+  }
 }
 
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
@@ -341,7 +348,6 @@ class WindowsStdoutLogger extends StdoutLogger {
     @required Stdio stdio,
     @required OutputPreferences outputPreferences,
     @required TimeoutConfiguration timeoutConfiguration,
-    @required Platform platform,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : super(
       terminal: terminal,
@@ -349,16 +355,17 @@ class WindowsStdoutLogger extends StdoutLogger {
       outputPreferences: outputPreferences,
       timeoutConfiguration: timeoutConfiguration,
       stopwatchFactory: stopwatchFactory,
-      platform: platform,
     );
 
   @override
   void writeToStdOut(String message) {
     // TODO(jcollins-g): wrong abstraction layer for this, move to [Stdio].
-    _stdio.stdout.write(message
-        .replaceAll('✗', 'X')
-        .replaceAll('✓', '√')
-    );
+    final String windowsMessage = _terminal.supportsEmoji
+      ? message
+      : message.replaceAll('🔥', '')
+               .replaceAll('✗', 'X')
+               .replaceAll('✓', '√');
+    _stdio.stdoutWrite(windowsMessage);
   }
 }
 
@@ -469,7 +476,7 @@ class BufferLogger extends Logger {
     )..start();
   }
 
-  /// Clears all buffers.
+  @override
   void clear() {
     _error.clear();
     _status.clear();
@@ -626,6 +633,9 @@ class VerboseLogger extends Logger {
 
   @override
   bool get hasTerminal => parent.hasTerminal;
+
+  @override
+  void clear() => parent.clear();
 }
 
 enum _LogType { error, status, trace }
@@ -667,19 +677,18 @@ abstract class Status {
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
     @required Stopwatch stopwatch,
-    @required bool supportsColor,
-    @required Platform platform,
+    @required AnsiTerminal terminal,
     VoidCallback onFinish,
     SlowWarningCallback slowWarningCallback,
   }) {
-    if (supportsColor) {
+    if (terminal.supportsColor) {
       return AnsiSpinner(
         timeout: timeout,
         onFinish: onFinish,
         slowWarningCallback: slowWarningCallback,
         timeoutConfiguration: timeoutConfiguration,
         stopwatch: stopwatch,
-        platform: platform,
+        terminal: terminal,
       )..start();
     }
     return SilentStatus(
@@ -789,9 +798,11 @@ class SummaryStatus extends Status {
     super.start();
   }
 
+  void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
+
   void _printMessage() {
     assert(!_messageShowingOnCurrentLine);
-    _stdio.stdout.write('${message.padRight(padding)}     ');
+    _writeToStdOut('${message.padRight(padding)}     ');
     _messageShowingOnCurrentLine = true;
   }
 
@@ -802,14 +813,14 @@ class SummaryStatus extends Status {
     }
     super.stop();
     writeSummaryInformation();
-    _stdio.stdout.write('\n');
+    _writeToStdOut('\n');
   }
 
   @override
   void cancel() {
     super.cancel();
     if (_messageShowingOnCurrentLine) {
-      _stdio.stdout.write('\n');
+      _writeToStdOut('\n');
     }
   }
 
@@ -822,16 +833,16 @@ class SummaryStatus extends Status {
   /// Examples: `    0.5s`, `   150ms`, ` 1,600ms`, `    3.1s (!)`
   void writeSummaryInformation() {
     assert(_messageShowingOnCurrentLine);
-    _stdio.stdout.write(elapsedTime.padLeft(_kTimePadding));
+    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
     if (seemsSlow) {
-      _stdio.stdout.write(' (!)');
+      _writeToStdOut(' (!)');
     }
   }
 
   @override
   void pause() {
     super.pause();
-    _stdio.stdout.write('\n');
+    _writeToStdOut('\n');
     _messageShowingOnCurrentLine = false;
   }
 }
@@ -846,12 +857,12 @@ class AnsiSpinner extends Status {
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
     @required Stopwatch stopwatch,
-    @required Platform platform,
+    @required AnsiTerminal terminal,
     VoidCallback onFinish,
     this.slowWarningCallback,
     Stdio stdio,
   }) : _stdio = stdio ?? globals.stdio,
-       _isWindows = platform.isWindows,
+       _terminal = terminal,
        super(
          timeout: timeout,
          onFinish: onFinish,
@@ -862,7 +873,7 @@ class AnsiSpinner extends Status {
   final String _backspaceChar = '\b';
   final String _clearChar = ' ';
   final Stdio _stdio;
-  final bool _isWindows;
+  final AnsiTerminal _terminal;
 
   bool timedOut = false;
 
@@ -870,7 +881,7 @@ class AnsiSpinner extends Status {
   Timer timer;
 
   // Windows console font has a limited set of Unicode characters.
-  List<String> get _animation => _isWindows
+  List<String> get _animation => !_terminal.supportsEmoji
       ? const <String>[r'-', r'\', r'|', r'/']
       : const <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
@@ -894,8 +905,10 @@ class AnsiSpinner extends Status {
     _startSpinner();
   }
 
+  void _writeToStdOut(String message) => _stdio.stdoutWrite(message);
+
   void _startSpinner() {
-    _stdio.stdout.write(_clear); // for _callback to backspace over
+    _writeToStdOut(_clear); // for _callback to backspace over
     timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
     _callback(timer);
   }
@@ -904,21 +917,21 @@ class AnsiSpinner extends Status {
     assert(this.timer == timer);
     assert(timer != null);
     assert(timer.isActive);
-    _stdio.stdout.write(_backspace);
+    _writeToStdOut(_backspace);
     ticks += 1;
     if (seemsSlow) {
       if (!timedOut) {
         timedOut = true;
-        _stdio.stdout.write('$_clear\n');
+        _writeToStdOut('$_clear\n');
       }
       if (slowWarningCallback != null) {
         _slowWarning = slowWarningCallback();
       } else {
         _slowWarning = _defaultSlowWarning;
       }
-      _stdio.stdout.write(_slowWarning);
+      _writeToStdOut(_slowWarning);
     }
-    _stdio.stdout.write('${_clearChar * spinnerIndent}$_currentAnimationFrame');
+    _writeToStdOut('${_clearChar * spinnerIndent}$_currentAnimationFrame');
   }
 
   @override
@@ -932,7 +945,7 @@ class AnsiSpinner extends Status {
   }
 
   void _clearSpinner() {
-    _stdio.stdout.write('$_backspace$_clear$_backspace');
+    _writeToStdOut('$_backspace$_clear$_backspace');
   }
 
   @override
@@ -966,7 +979,7 @@ class AnsiStatus extends AnsiSpinner {
     this.padding = kDefaultStatusPadding,
     @required Duration timeout,
     @required Stopwatch stopwatch,
-    @required Platform platform,
+    @required AnsiTerminal terminal,
     VoidCallback onFinish,
     Stdio stdio,
     TimeoutConfiguration timeoutConfiguration,
@@ -979,7 +992,7 @@ class AnsiStatus extends AnsiSpinner {
          stdio: stdio,
          timeoutConfiguration: timeoutConfiguration,
          stopwatch: stopwatch,
-         platform: platform,
+         terminal: terminal,
         );
 
   final String message;
@@ -1002,20 +1015,20 @@ class AnsiStatus extends AnsiSpinner {
   void _startStatus() {
     final String line = '${message.padRight(padding)}$_margin';
     _totalMessageLength = line.length;
-    _stdio.stdout.write(line);
+    _writeToStdOut(line);
   }
 
   @override
   void stop() {
     super.stop();
     writeSummaryInformation();
-    _stdio.stdout.write('\n');
+    _writeToStdOut('\n');
   }
 
   @override
   void cancel() {
     super.cancel();
-    _stdio.stdout.write('\n');
+    _writeToStdOut('\n');
   }
 
   /// Print summary information when a task is done.
@@ -1026,16 +1039,20 @@ class AnsiStatus extends AnsiSpinner {
   /// line before writing the elapsed time.
   void writeSummaryInformation() {
     if (multilineOutput) {
-      _stdio.stdout.write('\n${'$message Done'.padRight(padding)}$_margin');
+      _writeToStdOut('\n${'$message Done'.padRight(padding)}$_margin');
     }
-    _stdio.stdout.write(elapsedTime.padLeft(_kTimePadding));
+    _writeToStdOut(elapsedTime.padLeft(_kTimePadding));
     if (seemsSlow) {
-      _stdio.stdout.write(' (!)');
+      _writeToStdOut(' (!)');
     }
   }
 
   void _clearStatus() {
-    _stdio.stdout.write('${_backspaceChar * _totalMessageLength}${_clearChar * _totalMessageLength}${_backspaceChar * _totalMessageLength}');
+    _writeToStdOut(
+      '${_backspaceChar * _totalMessageLength}'
+      '${_clearChar * _totalMessageLength}'
+      '${_backspaceChar * _totalMessageLength}',
+    );
   }
 
   @override

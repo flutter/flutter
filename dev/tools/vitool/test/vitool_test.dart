@@ -17,7 +17,7 @@ void main() {
   test('parsePixels', () {
     expect(parsePixels('23px'), 23);
     expect(parsePixels('9px'), 9);
-    expect(() { parsePixels('9pt'); }, throwsA(isInstanceOf<ArgumentError>()));
+    expect(() { parsePixels('9pt'); }, throwsArgumentError);
   });
 
   test('parsePoints', () {
@@ -559,7 +559,7 @@ void main() {
             ),
           ]);
 
-      expect(animation.toDart('_AnimatedIconData', '_\$data1'),
+      expect(animation.toDart('_AnimatedIconData', r'_$data1'),
           'const _AnimatedIconData _\$data1 = const _AnimatedIconData(\n'
           '  const Size(48.0, 48.0),\n'
           '  const <_PathFrames>[\n'

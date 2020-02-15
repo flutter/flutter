@@ -409,6 +409,8 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -422,6 +424,8 @@ class CompileTest {
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -719,6 +723,7 @@ class ReportedDurationTest {
       print('launching $project$test on device...');
       await flutter('run', options: <String>[
         '--verbose',
+        '--no-fast-start',
         '--${_reportedDurationTestToString(flavor)}',
         '--no-resident',
         '-d', device.deviceId,
@@ -772,7 +777,7 @@ class ListStatistics {
 
 class _UnzipListEntry {
   factory _UnzipListEntry.fromLine(String line) {
-    final List<String> data = line.trim().split(RegExp('\\s+'));
+    final List<String> data = line.trim().split(RegExp(r'\s+'));
     assert(data.length == 8);
     return _UnzipListEntry._(
       uncompressedSize:  int.parse(data[0]),

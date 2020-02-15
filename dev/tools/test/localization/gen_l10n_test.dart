@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
 import '../../localization/gen_l10n.dart';
+import '../../localization/gen_l10n_types.dart';
 import '../../localization/localizations_utils.dart';
 
 import '../common.dart';
@@ -51,19 +52,6 @@ void main() {
   });
 
   group('Setters', () {
-    test('happy path', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      expect(() {
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-        );
-      }, returnsNormally);
-    });
-
     test('setL10nDirectory fails if the directory does not exist', () {
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
@@ -192,7 +180,7 @@ void main() {
         try {
           generator.className = 'String with spaces';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
@@ -205,12 +193,12 @@ void main() {
         try {
           generator.className = 'TestClass@123';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
 
@@ -218,12 +206,12 @@ void main() {
         try {
           generator.className = 'camelCaseClassName';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
 
@@ -231,12 +219,12 @@ void main() {
         try {
           generator.className = '123ClassName';
         } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid Dart class name'));
+          expect(e.message, contains('is not a valid public Dart class name'));
           return;
         }
         fail(
           'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
+          'the input string is not a valid public Dart class name.'
         );
       });
     });
@@ -432,9 +420,9 @@ void main() {
       }
 
       if (Platform.isWindows) {
-        expect(generator.arbPathStrings.first, 'lib\\l10n\\app_en_US.arb');
-        expect(generator.arbPathStrings.elementAt(1), 'lib\\l10n\\app_es.arb');
-        expect(generator.arbPathStrings.elementAt(2), 'lib\\l10n\\app_zh.arb');
+        expect(generator.arbPathStrings.first, r'lib\l10n\app_en_US.arb');
+        expect(generator.arbPathStrings.elementAt(1), r'lib\l10n\app_es.arb');
+        expect(generator.arbPathStrings.elementAt(2), r'lib\l10n\app_zh.arb');
       } else {
         expect(generator.arbPathStrings.first, 'lib/l10n/app_en_US.arb');
         expect(generator.arbPathStrings.elementAt(1), 'lib/l10n/app_es.arb');
@@ -530,7 +518,7 @@ void main() {
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('am')), false);
     });
 
-    test('throws when arb file\'s locale could not be determined', () {
+    test("throws when arb file's locale could not be determined", () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true)
         ..childFile('app.arb')
@@ -590,133 +578,7 @@ void main() {
   });
 
   group('generateClassMethods', () {
-    test('correctly generates a simple message with getter', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-        );
-        generator.parseArbFiles();
-        generator.generateClassMethods();
-      } on Exception catch (e) {
-        fail('Parsing template arb file should succeed: \n$e');
-      }
-
-      expect(generator.classMethods, isNotEmpty);
-      expect(
-        generator.classMethods.first,
-        '''  String get title {
-    return Intl.message(
-      'Title',
-      locale: _localeName,
-      name: 'title',
-      desc: r'Title for the application'
-    );
-  }
-''');
-    });
-
-    test('correctly generates simple message method with parameters', () {
-      const String singleSimpleMessageWithPlaceholderArbFileString = '''{
-  "itemNumber": "Item {value}",
-  "@itemNumber": {
-    "description": "Item placement in list.",
-    "placeholders": {
-      "value": {
-        "example": "1"
-      }
-    }
-  }
-}''';
-      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
-      l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(singleSimpleMessageWithPlaceholderArbFileString);
-
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-        );
-        generator.parseArbFiles();
-        generator.generateClassMethods();
-      } on Exception catch (e) {
-        fail('Parsing template arb file should succeed: \n$e');
-      }
-
-      expect(generator.classMethods, isNotEmpty);
-      expect(
-        generator.classMethods.first,
-        '''  String itemNumber(Object value) {
-    return Intl.message(
-      \'Item \$value\',
-      locale: _localeName,
-      name: 'itemNumber',
-      desc: r\'Item placement in list.\',
-      args: <Object>[value]
-    );
-  }
-''');
-    });
-
     group('DateTime tests', () {
-      test('correctly generates simple message with dates', () {
-        const String singleDateMessageArbFileString = '''{
-  "springBegins": "Spring begins on {springStartDate}",
-  "@springBegins": {
-      "description": "The first day of spring",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "yMMMMEEEEd"
-          }
-      }
-  }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(singleDateMessageArbFileString);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          '''  String springBegins(Object springStartDate) {
-    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
-    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
-
-    return Intl.message(
-      'Spring begins on \$springStartDateString',
-      locale: _localeName,
-      name: 'springBegins',
-      desc: r'The first day of spring',
-      args: <Object>[springStartDateString]
-    );
-  }
-''');
-      });
-
       test('throws an exception when improperly formatted date is passed in', () {
         const String singleDateMessageArbFileString = '''{
   "springBegins": "Spring begins on {springStartDate}",
@@ -826,186 +688,27 @@ void main() {
         expect(generator.classMethods, isNotEmpty);
         expect(
           generator.classMethods.first,
-          '''  String springGreetings(Object springStartDate, Object helloWorld) {
+          r'''
+  String springGreetings(DateTime springStartDate, Object helloWorld) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
-    return Intl.message(
-      \'Since it\' "\'" r\'s \$springStartDateString, it\' "\'" r\'s finally spring! \$helloWorld!\',
-      locale: _localeName,
-      name: 'springGreetings',
-      desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
-      args: <Object>[springStartDateString, helloWorld]
-    );
-  }
-''');
-      });
-
-      test('correctly generates simple message with multiple dates', () {
-        const String singleDateMessageArbFileString = '''{
-  "springRange": "Spring begins on {springStartDate} and ends on {springEndDate}",
-  "@springRange": {
-      "description": "The range of dates for spring in the year",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "yMMMMEEEEd"
-          },
-          "springEndDate": {
-              "type": "DateTime",
-              "format": "yMMMMEEEEd"
-          }
-      }
-  }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(singleDateMessageArbFileString);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          '''  String springRange(Object springStartDate, Object springEndDate) {
-    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
-    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
-
-    final DateFormat springEndDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
-    final String springEndDateString = springEndDateDateFormat.format(springEndDate);
-
-    return Intl.message(
-      \'Spring begins on \$springStartDateString and ends on \$springEndDateString\',
-      locale: _localeName,
-      name: 'springRange',
-      desc: r\'The range of dates for spring in the year\',
-      args: <Object>[springStartDateString, springEndDateString]
-    );
-  }
-''');
-      });
-
-      test('correctly generates a plural message with DateTime placeholders', () {
-        const String pluralMessageWithDateTimePlaceholder = '''{
-    "helloWorlds": "{count,plural, =1{Hello World, today is {currentDate}}=2{Hello two worlds, today is {currentDate}}many{Hello all {count} worlds, today is {currentDate}}other{Hello other {count} worlds, today is {currentDate}}}",
-  "@helloWorlds": {
-    "placeholders": {
-      "count": {},
-      "currentDate": {
-        "type": "DateTime",
-        "format": "yMMMMEEEEd"
-      }
+    String springGreetings(Object springStartDate, Object helloWorld) {
+      return Intl.message(
+        "Since it's ${springStartDate}, it's finally spring! ${helloWorld}!",
+        locale: _localeName,
+        name: 'springGreetings',
+        desc: "A realization that it's finally the spring season, followed by a greeting.",
+        args: <Object>[springStartDate, helloWorld]
+      );
     }
+    return springGreetings(springStartDateString, helloWorld);
   }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(pluralMessageWithDateTimePlaceholder);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          '''  String helloWorlds(int count, Object currentDate) {
-    final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
-    final String currentDateString = currentDateDateFormat.format(currentDate);
-
-    return Intl.plural(
-      count,
-      locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, currentDateString],
-      one: 'Hello World, today is \$currentDateString',
-      two: 'Hello two worlds, today is \$currentDateString',
-      many: 'Hello all \$count worlds, today is \$currentDateString',
-      other: 'Hello other \$count worlds, today is \$currentDateString'
-    );
-  }
-'''
-        );
+''');
       });
     });
 
     group('Number tests', () {
-      test('correctly generates simple message with numbers', () {
-        const String singleNumberMessage = '''{
-  "courseCompletion": "You have completed {progress} of the course.",
-  "@courseCompletion": {
-    "description": "The amount of progress the student has made in their class.",
-    "placeholders": {
-      "progress": {
-        "type": "Number",
-        "format": "compact"
-      }
-    }
-  }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(singleNumberMessage);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          '''  String courseCompletion(Object progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.compact(
-      locale: _localeName,
-    );
-    final String progressString = progressNumberFormat.format(progress);
-
-    return Intl.message(
-      'You have completed \$progressString of the course.',
-      locale: _localeName,
-      name: 'courseCompletion',
-      desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progressString]
-    );
-  }
-''');
-      });
-
       test('correctly adds optional named parameters to numbers', () {
         const Set<String> numberFormatsWithNamedParameters = <String>{
           'compact',
@@ -1024,7 +727,7 @@ void main() {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
+        "type": "double",
         "format": "$numberFormat",
         "optionalParameters": {
           "decimalDigits": 2
@@ -1055,23 +758,26 @@ void main() {
           expect(generator.classMethods, isNotEmpty);
           expect(
             generator.classMethods.first,
-            '''  String courseCompletion(Object progress) {
+            '''
+  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(
       locale: _localeName,
       decimalDigits: 2,
     );
     final String progressString = progressNumberFormat.format(progress);
 
-    return Intl.message(
-      'You have completed \$progressString of the course.',
-      locale: _localeName,
-      name: 'courseCompletion',
-      desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progressString]
-    );
+    String courseCompletion(Object progress) {
+      return Intl.message(
+        'You have completed \${progress} of the course.',
+        locale: _localeName,
+        name: 'courseCompletion',
+        desc: 'The amount of progress the student has made in their class.',
+        args: <Object>[progress]
+      );
+    }
+    return courseCompletion(progressString);
   }
-''');
-        }
+''');}
       });
 
       test('correctly adds optional positional parameters to numbers', () {
@@ -1088,7 +794,7 @@ void main() {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
+        "type": "double",
         "format": "$numberFormat"
       }
     }
@@ -1116,17 +822,21 @@ void main() {
           expect(generator.classMethods, isNotEmpty);
           expect(
             generator.classMethods.first,
-            '''  String courseCompletion(Object progress) {
+            '''
+  String courseCompletion(double progress) {
     final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(_localeName);
     final String progressString = progressNumberFormat.format(progress);
 
-    return Intl.message(
-      'You have completed \$progressString of the course.',
-      locale: _localeName,
-      name: 'courseCompletion',
-      desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progressString]
-    );
+    String courseCompletion(Object progress) {
+      return Intl.message(
+        'You have completed \${progress} of the course.',
+        locale: _localeName,
+        name: 'courseCompletion',
+        desc: 'The amount of progress the student has made in their class.',
+        args: <Object>[progress]
+      );
+    }
+    return courseCompletion(progressString);
   }
 ''');
         }
@@ -1139,7 +849,7 @@ void main() {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
-        "type": "Number",
+        "type": "double",
         "format": "asdf"
       }
     }
@@ -1172,217 +882,8 @@ void main() {
     });
 
     group('plural messages', () {
-      test('correctly generates a plural message', () {
-        const String singlePluralMessageArbFileString = '''{
-  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
-  "@helloWorlds": {
-    "placeholders": {
-      "count": {}
-    }
-  }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(singlePluralMessageArbFileString);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          '''  String helloWorlds(int count) {
-    return Intl.plural(
-      count,
-      locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count],
-      zero: 'Hello',
-      one: 'Hello World',
-      two: 'Hello two worlds',
-      few: 'Hello \$count worlds',
-      many: 'Hello all \$count worlds',
-      other: 'Hello other \$count worlds'
-    );
-  }
-'''
-        );
-      });
-
-      test('correctly generates a plural message with placeholders', () {
-        const String pluralMessageWithMultiplePlaceholders = '''{
-  "helloWorlds": "{count,plural, =0{Hello}=1{Hello {adjective} World}=2{Hello two {adjective} worlds}few{Hello {count} {adjective} worlds}many{Hello all {count} {adjective} worlds}other{Hello other {count} {adjective} worlds}}",
-  "@helloWorlds": {
-    "placeholders": {
-      "count": {},
-      "adjective": {}
-    }
-  }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(pluralMessageWithMultiplePlaceholders);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-        '''  String helloWorlds(int count, Object adjective) {
-    return Intl.plural(
-      count,
-      locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, adjective],
-      zero: 'Hello',
-      one: 'Hello \$adjective World',
-      two: 'Hello two \$adjective worlds',
-      few: 'Hello \$count \$adjective worlds',
-      many: 'Hello all \$count \$adjective worlds',
-      other: 'Hello other \$count \$adjective worlds'
-    );
-  }
-'''
-        );
-      });
-
-      test('correctly generates a plural message with DateTime placeholders', () {
-        const String pluralMessageWithDateTimePlaceholder = '''{
-  "helloWorlds": "{count,plural, =1{Hello World, today is {currentDate}}=2{Hello two worlds, today is {currentDate}}many{Hello all {count} worlds, today is {currentDate}}other{Hello other {count} worlds, today is {currentDate}}}",
-  "@helloWorlds": {
-    "placeholders": {
-      "count": {},
-      "currentDate": {
-        "type": "DateTime",
-        "format": "yMMMMEEEEd"
-      }
-    }
-  }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(pluralMessageWithDateTimePlaceholder);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          '''  String helloWorlds(int count, Object currentDate) {
-    final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
-    final String currentDateString = currentDateDateFormat.format(currentDate);
-
-    return Intl.plural(
-      count,
-      locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, currentDateString],
-      one: 'Hello World, today is \$currentDateString',
-      two: 'Hello two worlds, today is \$currentDateString',
-      many: 'Hello all \$count worlds, today is \$currentDateString',
-      other: 'Hello other \$count worlds, today is \$currentDateString'
-    );
-  }
-'''
-        );
-      });
-
-      test('correctly generates a plural message with number placeholders', () {
-        const String pluralMessageWithDateTimePlaceholder = '''{
-  "helloWorlds": "{count,plural, =1{Hello World of {population} citizens}=2{Hello two worlds with {population} total citizens}many{Hello all {count} worlds, with a total of {population} citizens}other{Hello other {count} worlds, with a total of {population} citizens}}",
-  "@helloWorlds": {
-    "placeholders": {
-      "count": {},
-      "population": {
-        "type": "Number",
-        "format": "compactLong"
-      }
-    }
-  }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(pluralMessageWithDateTimePlaceholder);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          '''  String helloWorlds(int count, Object population) {
-    final NumberFormat populationNumberFormat = NumberFormat.compactLong(
-      locale: _localeName,
-    );
-    final String populationString = populationNumberFormat.format(population);
-
-    return Intl.plural(
-      count,
-      locale: _localeName,
-      name: 'helloWorlds',
-      args: <Object>[count, populationString],
-      one: 'Hello World of \$populationString citizens',
-      two: 'Hello two worlds with \$populationString total citizens',
-      many: 'Hello all \$count worlds, with a total of \$populationString citizens',
-      other: 'Hello other \$count worlds, with a total of \$populationString citizens'
-    );
-  }
-'''
-        );
-      });
-
-    test('should throw attempting to generate a plural message without placeholders', () {
-      const String pluralMessageWithoutPlaceholdersAttribute = '''{
+      test('should throw attempting to generate a plural message without placeholders', () {
+        const String pluralMessageWithoutPlaceholdersAttribute = '''{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
   "@helloWorlds": {
     "description": "Improperly formatted since it has no placeholder attribute."
@@ -1463,8 +964,7 @@ void main() {
           generator.parseArbFiles();
           generator.generateClassMethods();
         } on L10nException catch (e) {
-          expect(e.message, contains('Resource attribute'));
-          expect(e.message, contains('does not exist'));
+          expect(e.message, contains('Resource attribute "@helloWorlds" was not found'));
           return;
         }
         fail('Generating plural class method without resource attributes should not succeed');
@@ -1495,7 +995,7 @@ void main() {
           generator.generateClassMethods();
         } on L10nException catch (e) {
           expect(e.message, contains('is not properly formatted'));
-          expect(e.message, contains('Ensure that it is a map with keys that are strings'));
+          expect(e.message, contains('Ensure that it is a map with string valued keys'));
           return;
         }
         fail('Generating class methods with incorrect placeholder format should not succeed');
@@ -1658,27 +1158,36 @@ void main() {
     });
   });
 
-  group('generateOutputFile', () {
-    test('correctly generates the localizations classes', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-        );
-        generator.parseArbFiles();
-        generator.generateClassMethods();
-        generator.generateOutputFile();
-      } on Exception catch (e) {
-        fail('Generating output localization file should succeed: \n$e');
-      }
-
-      final String outputFileString = generator.outputFile.readAsStringSync();
-      expect(outputFileString, contains('class AppLocalizations'));
-      expect(outputFileString, contains('class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations>'));
+  group('generateString', () {
+    test('handles simple string', () {
+      expect(generateString('abc'), "'abc'");
+    });
+    test('handles string with quote', () {
+      expect(generateString("ab'c"), '''"ab'c"''');
+    });
+    test('handles string with double quote', () {
+      expect(generateString('ab"c'), """'ab"c'""");
+    });
+    test('handles string with both single and double quote', () {
+      expect(generateString('''a'b"c'''), """'''a'b"c'''""");
+    });
+    test('handles string with a triple single quote and a double quote', () {
+      expect(generateString("""a"b'''c"""), '''"""a"b\'''c"""''');
+    });
+    test('handles string with a triple double quote and a single quote', () {
+      expect(generateString('''a'b"""c'''), """'''a'b\"""c'''""");
+    });
+    test('handles string with both triple single and triple double quote', () {
+      expect(generateString('''a\'''\'''\''b"""c'''), """'a' "'''"  "'''" '''''b\"""c'''""");
+    });
+    test('handles dollar', () {
+      expect(generateString(r'ab$c'), r"r'ab$c'");
+    });
+    test('handles back slash', () {
+      expect(generateString(r'ab\c'), r"r'ab\c'");
+    });
+    test("doesn't support multiline strings", () {
+      expect(() => generateString('ab\nc'), throwsA(isA<AssertionError>()));
     });
   });
 }

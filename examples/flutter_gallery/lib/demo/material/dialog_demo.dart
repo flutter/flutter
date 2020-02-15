@@ -83,7 +83,7 @@ class DialogDemoState extends State<DialogDemo> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
+    final TextStyle dialogTextStyle = theme.textTheme.subtitle1.copyWith(color: theme.textTheme.caption.color);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -124,7 +124,7 @@ class DialogDemoState extends State<DialogDemo> {
               showDemoDialog<DialogDemoAction>(
                 context: context,
                 child: AlertDialog(
-                  title: const Text('Use Google\'s location service?'),
+                  title: const Text("Use Google's location service?"),
                   content: Text(
                     _alertWithTitleText,
                     style: dialogTextStyle,

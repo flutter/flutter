@@ -1511,6 +1511,7 @@ class _RenderDecorationElement extends RenderObjectElement {
     final _DecorationSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
+    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _DecorationSlot slot) {
@@ -1763,7 +1764,7 @@ class InputDecorator extends StatefulWidget {
   /// The style on which to base the label, hint, counter, and error styles
   /// if the [decoration] does not provide explicit styles.
   ///
-  /// If null, `baseStyle` defaults to the `subhead` style from the
+  /// If null, `baseStyle` defaults to the `subtitle1` style from the
   /// current [Theme], see [ThemeData.textTheme].
   ///
   /// The [TextStyle.textBaseline] of the [baseStyle] is used to determine
@@ -2049,7 +2050,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineStyle(ThemeData themeData) {
-    return themeData.textTheme.subhead.merge(widget.baseStyle)
+    return themeData.textTheme.subtitle1.merge(widget.baseStyle)
       .copyWith(color: decoration.enabled ? themeData.hintColor : themeData.disabledColor);
   }
 
@@ -2057,7 +2058,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Color color = decoration.errorText != null
       ? decoration.errorStyle?.color ?? themeData.errorColor
       : _getActiveColor(themeData);
-    final TextStyle style = themeData.textTheme.subhead.merge(widget.baseStyle);
+    final TextStyle style = themeData.textTheme.subtitle1.merge(widget.baseStyle);
     return style
       .copyWith(color: decoration.enabled ? color : themeData.disabledColor)
       .merge(decoration.labelStyle);
@@ -2328,7 +2329,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// to describe their decoration. (In fact, this class is merely the
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to style a `TextField` using an `InputDecorator`. The
 /// TextField displays a "send message" icon to the left of the input area,
@@ -2353,7 +2354,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to style a "collapsed" `TextField` using an
 /// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
@@ -2373,7 +2374,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to create a `TextField` with hint text, a red border
 /// on all sides, and an error message. To display a red border and error
@@ -2394,7 +2395,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to style a `TextField` with a round border and
 /// additional text before and after the input area. It displays "Prefix" before

@@ -22,7 +22,7 @@ Directory createResolvedTempDirectorySync(String prefix) {
 void writeFile(String path, String content) {
   globals.fs.file(path)
     ..createSync(recursive: true)
-    ..writeAsStringSync(content, flush: true)
+    ..writeAsStringSync(content)
     ..setLastModifiedSync(DateTime.now().add(const Duration(seconds: 10)));
 }
 

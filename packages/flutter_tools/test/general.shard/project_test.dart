@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -29,7 +28,7 @@ void main() {
       testInMemory('fails on null directory', () async {
         expect(
           () => FlutterProject.fromDirectory(null),
-          throwsA(isInstanceOf<AssertionError>()),
+          throwsAssertionError,
         );
       });
 
@@ -41,7 +40,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsToolExit(),
         );
       });
 
@@ -53,7 +52,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsToolExit(),
         );
       });
 
@@ -65,7 +64,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsToolExit(),
         );
       });
 
@@ -110,7 +109,7 @@ void main() {
         final FlutterProject project = await someProject();
         await expectLater(
           project.android.makeHostAppEditable(),
-          throwsA(isInstanceOf<AssertionError>()),
+          throwsAssertionError,
         );
       });
       testInMemory('exits on already editable module', () async {
@@ -139,7 +138,7 @@ void main() {
         expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
         expect(
           project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
-          contains('new File(settingsDir.parentFile, \'.android/include_flutter.groovy\')'),
+          contains("new File(settingsDir.parentFile, '.android/include_flutter.groovy')"),
         );
       });
       testInMemory('can be redone after deletion', () async {
@@ -389,7 +388,7 @@ apply plugin: 'kotlin-android'
               });
             }
         );
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
 
@@ -404,7 +403,7 @@ apply plugin: 'kotlin-android'
             });
           }
         );
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
       });
       testWithMocks('empty surrounded by quotes', () async {
@@ -424,7 +423,7 @@ apply plugin: 'kotlin-android'
       testWithMocks('surrounded by single quotes', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
@@ -443,7 +442,7 @@ apply plugin: 'kotlin-android'
       testInMemory('is populated from iOS bundle identifier', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
         expect(await project.organizationNames, <String>['io.flutter']);
       });
@@ -458,7 +457,7 @@ apply plugin: 'kotlin-android'
       testInMemory('is populated from iOS bundle identifier in plugin example', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.example.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
         expect(await project.organizationNames, <String>['io.flutter']);
       });

@@ -23,12 +23,13 @@ void main() {
 
   setUp(() {
     final MockPlatform platform = MockPlatform();
+    final MockOperatingSystemUtils os = MockOperatingSystemUtils();
     exitCompleter = Completer<int>.sync();
     when(platform.isWindows).thenReturn(false);
     testbed = Testbed(overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Platform: () => platform,
-      OperatingSystemUtils: () => MockOperatingSystemUtils(),
+      OperatingSystemUtils: () => os,
     }, setup: () {
       when(os.findFreePort()).thenAnswer((Invocation invocation) async {
         return 1234;
@@ -53,10 +54,10 @@ void main() {
     resetChromeForTesting();
   });
 
-  test('can launch chrome and connect to the devtools', () => testbed.run(() async {
-    const List<String> expected = <String>[
+  List<String> expectChromeArgs({int debugPort = 1234}) {
+    return <String>[
       'example_chrome',
-      '--remote-debugging-port=1234',
+      '--remote-debugging-port=$debugPort',
       '--disable-background-timer-throttling',
       '--disable-extensions',
       '--disable-popup-blocking',
@@ -67,11 +68,18 @@ void main() {
       '--disable-translate',
       'example_url',
     ];
+  }
 
+  test('can launch chrome and connect to the devtools', () => testbed.run(() async {
     await chromeLauncher.launch('example_url', skipCheck: true);
     final VerificationResult result = verify(globals.processManager.start(captureAny));
+    expect(result.captured.single, containsAll(expectChromeArgs()));
+  }));
 
-    expect(result.captured.single, containsAll(expected));
+  test('can launch chrome with a custom debug port', () => testbed.run(() async {
+    await chromeLauncher.launch('example_url', skipCheck: true, debugPort: 10000);
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
+    expect(result.captured.single, containsAll(expectChromeArgs(debugPort: 10000)));
   }));
 
   test('can seed chrome temp directory with existing preferences', () => testbed.run(() async {

@@ -67,7 +67,8 @@ void main() {
     final Container container = _getContainerFromBanner(tester);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(container.decoration, const BoxDecoration(color: Color(0xffffffff)));
-    expect(content.text.style, Typography().englishLike.body1.merge(Typography().black.body1));
+    // Default value for ThemeData.typography is Typography.material2014()
+    expect(content.text.style, Typography.material2014().englishLike.bodyText2.merge(Typography.material2014().black.bodyText2));
   });
 
   testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {

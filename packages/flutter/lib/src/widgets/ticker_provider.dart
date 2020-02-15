@@ -15,25 +15,34 @@ export 'package:flutter/scheduler.dart' show TickerProvider;
 /// This only works if [AnimationController] objects are created using
 /// widget-aware ticker providers. For example, using a
 /// [TickerProviderStateMixin] or a [SingleTickerProviderStateMixin].
-class TickerMode extends InheritedWidget {
+class TickerMode extends StatelessWidget {
   /// Creates a widget that enables or disables tickers.
   ///
   /// The [enabled] argument must not be null.
   const TickerMode({
     Key key,
     @required this.enabled,
-    Widget child,
+    this.child,
   }) : assert(enabled != null),
-       super(key: key, child: child);
+       super(key: key);
 
-  /// The current ticker mode of this subtree.
+  /// The requested ticker mode for this subtree.
   ///
-  /// If true, then tickers in this subtree will tick.
+  /// The effective ticker mode of this subtree may differ from this value
+  /// if there is an ancestor [TickerMode] with this field set to false.
   ///
-  /// If false, then tickers in this subtree will not tick. Animations driven by
-  /// such tickers are not paused, they just don't call their callbacks. Time
-  /// still elapses.
+  /// If true and all ancestor [TickerMode]s are also enabled, then tickers in
+  /// this subtree will tick.
+  ///
+  /// If false, then tickers in this subtree will not tick regardless of any
+  /// ancestor [TickerMode]s. Animations driven by such tickers are not paused,
+  /// they just don't call their callbacks. Time still elapses.
   final bool enabled;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@template flutter.widgets.child}
+  final Widget child;
 
   /// Whether tickers in the given subtree should be enabled or disabled.
   ///
@@ -49,17 +58,42 @@ class TickerMode extends InheritedWidget {
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
   static bool of(BuildContext context) {
-    final TickerMode widget = context.dependOnInheritedWidgetOfExactType<TickerMode>();
+    final _EffectiveTickerMode widget = context.dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.enabled ?? true;
   }
 
   @override
-  bool updateShouldNotify(TickerMode oldWidget) => enabled != oldWidget.enabled;
+  Widget build(BuildContext context) {
+    return _EffectiveTickerMode(
+      enabled: enabled && TickerMode.of(context),
+      child: child,
+    );
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
+    properties.add(FlagProperty('requested mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
+  }
+}
+
+class _EffectiveTickerMode extends InheritedWidget {
+  const _EffectiveTickerMode({
+    Key key,
+    @required this.enabled,
+    Widget child,
+  }) : assert(enabled != null),
+        super(key: key, child: child);
+
+  final bool enabled;
+
+  @override
+  bool updateShouldNotify(_EffectiveTickerMode oldWidget) => enabled != oldWidget.enabled;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagProperty('effective mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
   }
 }
 
