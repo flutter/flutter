@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
@@ -848,6 +850,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     return validators;
   }
 
+  @visibleForTesting
   String get plistFile {
     _plistFile ??= globals.fs.path.join(installPath, 'Contents', 'Info.plist');
     return _plistFile;
@@ -866,10 +869,15 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   @override
   String get pluginsPath {
+    if (_pluginsPath != null) {
+      return _pluginsPath;
+    }
+
     final String altLocation = PlistParser.instance.getValueFromFile(plistFile, 'JetBrainsToolboxApp');
 
     if (altLocation != null) {
-      return altLocation + '.plugins';
+      _pluginsPath = altLocation + '.plugins';
+      return _pluginsPath;
     }
 
     final List<String> split = version.split('.');
@@ -880,13 +888,15 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
     final String major = split[0];
     final String minor = split[1];
-    return globals.fs.path.join(
+    _pluginsPath = globals.fs.path.join(
       globals.fsUtils.homeDirPath,
       'Library',
       'Application Support',
       '$id$major.$minor',
     );
+    return _pluginsPath;
   }
+  String _pluginsPath;
 }
 
 class DeviceValidator extends DoctorValidator {

@@ -74,16 +74,9 @@ void main() {
 
       final IntelliJValidatorOnMac validatorViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathViaToolbox);
       expect(validatorViaToolbox.plistFile, 'test/data/intellij/mac_via_toolbox/Contents/Info.plist');
-      expect(validatorViaToolbox.pluginsPath, '/Users/lynn/Library/Application Support/JetBrains/Toolbox/apps/IDEA-U/ch-0/193.6494.35/IntelliJ IDEA.app.plugins');
 
       final IntelliJValidatorOnMac validatorNotViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathNotViaToolbox);
       expect(validatorNotViaToolbox.plistFile, 'test/data/intellij/mac_not_via_toolbox/Contents/Info.plist');
-      expect(validatorNotViaToolbox.pluginsPath, globals.fs.path.join(
-        globals.fsUtils.homeDirPath,
-        'Library',
-        'Application Support',
-        'Test2019.3',
-      ));
     }, overrides: <Type, Generator>{
       PlistParser: () => const PlistParser(),
     });
