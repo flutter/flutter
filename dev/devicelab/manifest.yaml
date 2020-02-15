@@ -700,6 +700,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  animated_placeholder_perf:
+    description: >
+      Measures CPU usage of a grid of images that use a FadeInImage with an
+      animated image as the placeholder.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   analyzer_benchmark:
     description: >
       Measures the speed of Dart analyzer.
