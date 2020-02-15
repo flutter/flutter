@@ -128,4 +128,7 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
+dependency_overrides:
+  sync_http: 0.2.0
+
 # PUBSPEC CHECKSUM: a075
