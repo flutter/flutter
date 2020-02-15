@@ -160,7 +160,6 @@ class WebAssetServer implements AssetReader {
       final Uri potential = globals.fs.directory(getAssetBuildDirectory())
         .uri.resolve( requestPath.replaceFirst('/assets/', ''));
       file = globals.fs.file(potential);
-      print('LOOKING AT $potential, ${file.path}: ${file.existsSync()}');
     }
 
     if (!file.existsSync()) {
