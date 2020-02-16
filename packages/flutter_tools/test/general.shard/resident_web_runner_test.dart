@@ -317,7 +317,7 @@ void main() {
 
     final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-    expect(testLogger.statusText, contains('Reloaded application in'));
+    expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.

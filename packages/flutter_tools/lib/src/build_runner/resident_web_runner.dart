@@ -512,12 +512,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
         });
       } else {
         transferMarker = timer.elapsed;
-        await _wipConnection?.debugger
-            ?.sendCommand('Runtime.evaluate', params: <String, Object>{
-          'expression': 'window.\$hotReloadHook([$reloadModules])',
-          'awaitPromise': true,
-          'returnByValue': true,
-        });
+        await _wipConnection?.debugger?.sendCommand(
+          'Runtime.evaluate', params: <String, Object>{
+            'expression': 'window.\$hotReloadHook([$reloadModules])',
+            'awaitPromise': true,
+            'returnByValue': true,
+          },
+        );
       }
     } on WipError catch (err) {
       globals.printError(err.toString());
@@ -526,8 +527,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
       status.stop();
     }
 
-    final String verb = fullRestart ? 'Restarted' : 'Reloaded';
-    globals.printStatus('$verb application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+    final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
+    globals.printStatus('Restarted application in $elapsed.');
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
