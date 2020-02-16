@@ -702,8 +702,9 @@ tasks:
 
   animated_placeholder_perf:
     description: >
-      Measures CPU usage of a grid of images that use a FadeInImage with an
-      animated image as the placeholder.
+      Measures frame build and rasterizer times, as well as frame build counts
+      for a grid of images that uses FadeInImage with an animated gif as the
+      placeholder.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
