@@ -173,8 +173,8 @@ List<String> _xcodeBuildSettingsLines({
   }
 
   // This is an optional path to obfuscate and output a mapping.
-  if (buildInfo.dartObfuscation != null) {
-    xcodeBuildSettings.add('DART_OBFUSCATION=${buildInfo.dartObfuscation}');
+  if (buildInfo.dartObfuscation) {
+    xcodeBuildSettings.add('DART_OBFUSCATION=true');
   }
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.

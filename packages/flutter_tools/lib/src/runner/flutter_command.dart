@@ -395,13 +395,13 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addDartObfuscationOption() {
-  argParser.addOption(FlutterOptions.kDartObfuscationOption,
+    argParser.addFlag(FlutterOptions.kDartObfuscationOption,
       help: 'In a release build, this flag removes identifiers and replaces them '
         'with randomized values for the purposes of source code obfuscation. The '
-        'mapping between the values and the original identifiers is stored in a '
-        'separate file. The value of this flag should be a directory where the '
-        'obfuscation map can be stored for later use.',
-      valueHelp: '/project-name/v1.2.3/',
+        'mapping between the values and the original identifiers is stored the '
+        'symbol map created with the "--split-debug-info" option. For an app built '
+        "with this flag, the 'flutter symbolize' command with the right program "
+        'symbol file is required to obtain a human readable stack trace.',
     );
   }
 
@@ -545,8 +545,7 @@ abstract class FlutterCommand extends Command<void> {
           ? boolArg('tree-shake-icons')
           : kIconTreeShakerEnabledDefault,
       dartObfuscation: argParser.options.containsKey(FlutterOptions.kDartObfuscationOption)
-          ? stringArg(FlutterOptions.kDartObfuscationOption)
-          : null,
+          && boolArg(FlutterOptions.kDartObfuscationOption)
     );
   }
 

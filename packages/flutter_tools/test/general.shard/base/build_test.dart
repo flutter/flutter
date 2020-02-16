@@ -267,7 +267,7 @@ void main() {
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+        dartObfuscation: false,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -281,7 +281,7 @@ void main() {
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+        dartObfuscation: false,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -295,7 +295,7 @@ void main() {
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -323,7 +323,7 @@ void main() {
         darwinArch: DarwinArch.armv7,
         bitcode: true,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -385,7 +385,7 @@ void main() {
         darwinArch: DarwinArch.armv7,
         bitcode: true,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -446,7 +446,7 @@ void main() {
         darwinArch: DarwinArch.armv7,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -500,7 +500,7 @@ void main() {
         darwinArch: DarwinArch.armv7,
         bitcode: false,
         splitDebugInfo: 'foo',
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -554,7 +554,7 @@ void main() {
         darwinArch: DarwinArch.arm64,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -595,7 +595,7 @@ void main() {
         darwinArch: DarwinArch.armv7,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -638,7 +638,7 @@ void main() {
         darwinArch: DarwinArch.arm64,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -670,7 +670,7 @@ void main() {
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -705,7 +705,7 @@ void main() {
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: 'foo',
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -741,7 +741,7 @@ void main() {
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: '',
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -775,7 +775,7 @@ void main() {
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -815,7 +815,7 @@ void main() {
         outputPath: outputPath,
         bitcode: false,
         splitDebugInfo: null,
-        dartObfuscationInfo: null,
+       dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
