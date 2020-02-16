@@ -31,9 +31,9 @@ import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
-import '../web/devfs_web.dart';
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
+import 'devfs_web.dart';
 
 /// Injectable factory to create a [ResidentWebRunner].
 class DwdsWebRunnerFactory extends WebRunnerFactory {

@@ -29,8 +29,8 @@ import '../compile.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
-import 'bootstrap.dart';
-import 'chrome.dart';
+import '../web/bootstrap.dart';
+import '../web/chrome.dart';
 
 /// A web server which handles serving JavaScript and assets.
 ///
@@ -157,11 +157,9 @@ class WebAssetServer implements AssetReader {
     // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
-      final String assetPath = requestPath.replaceFirst('/assets/', '');
-      file = globals.fs.file(
-        globals.fs.path.join(getAssetBuildDirectory(),
-        globals.fs.path.relative(assetPath)),
-      );
+      final Uri potential = globals.fs.directory(getAssetBuildDirectory())
+        .uri.resolve( requestPath.replaceFirst('/assets/', ''));
+      file = globals.fs.file(potential);
     }
 
     if (!file.existsSync()) {
