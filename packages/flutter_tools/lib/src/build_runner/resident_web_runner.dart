@@ -5,17 +5,17 @@
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/base/async_guard.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     hide StackTrace;
 
 import '../application_package.dart';
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/io.dart';
 import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
