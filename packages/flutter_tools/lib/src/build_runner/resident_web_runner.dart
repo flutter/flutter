@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/base/async_guard.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -60,6 +63,10 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     );
   }
 }
+
+const String kExitMessage =  'Failed to establish connection with the application '
+  'instance in Chrome.\nThis can happen if the websocket connection used by the '
+  'web tooling is unable to correctly establish a connection, for example due to a firewall.';
 
 /// A hot-runner which handles browser specific delegation.
 abstract class ResidentWebRunner extends ResidentRunner {
@@ -393,45 +400,59 @@ class _ResidentWebRunner extends ResidentWebRunner {
     final int hostPort = debuggingOptions.port == null
         ? await globals.os.findFreePort()
         : int.tryParse(debuggingOptions.port);
-    device.devFS = WebDevFS(
-      hostname: effectiveHostname,
-      port: hostPort,
-      packagesFilePath: packagesFilePath,
-      urlTunneller: urlTunneller,
-      buildMode: debuggingOptions.buildInfo.mode,
-      enableDwds: _enableDwds,
-      entrypoint: globals.fs.file(target).uri,
-    );
-    final Uri url = await device.devFS.create();
-    if (debuggingOptions.buildInfo.isDebug) {
-      final UpdateFSReport report = await _updateDevFS(fullRestart: true);
-      if (!report.success) {
-        globals.printError('Failed to compile application.');
-        return 1;
-      }
-      device.generator.accept();
-    } else {
-       await buildWeb(
-        flutterProject,
-        target,
-        debuggingOptions.buildInfo,
-        debuggingOptions.initializePlatform,
-        dartDefines,
-        false,
-      );
+
+    try {
+      return await asyncGuard(() async {
+        device.devFS = WebDevFS(
+          hostname: effectiveHostname,
+          port: hostPort,
+          packagesFilePath: packagesFilePath,
+          urlTunneller: urlTunneller,
+          buildMode: debuggingOptions.buildInfo.mode,
+          enableDwds: _enableDwds,
+          entrypoint: globals.fs.file(target).uri,
+        );
+        final Uri url = await device.devFS.create();
+        if (debuggingOptions.buildInfo.isDebug) {
+          final UpdateFSReport report = await _updateDevFS(fullRestart: true);
+          if (!report.success) {
+            globals.printError('Failed to compile application.');
+            return 1;
+          }
+          device.generator.accept();
+        } else {
+          await buildWeb(
+            flutterProject,
+            target,
+            debuggingOptions.buildInfo,
+            debuggingOptions.initializePlatform,
+            dartDefines,
+            false,
+          );
+        }
+        await device.device.startApp(
+          package,
+          mainPath: target,
+          debuggingOptions: debuggingOptions,
+          platformArgs: <String, Object>{
+            'uri': url.toString(),
+          },
+        );
+        return attach(
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+        );
+      });
+    } on WebSocketException {
+      throwToolExit(kExitMessage);
+    } on ChromeDebugException {
+      throwToolExit(kExitMessage);
+    } on AppConnectionException {
+      throwToolExit(kExitMessage);
+    } on SocketException {
+      throwToolExit(kExitMessage);
     }
-    await device.device.startApp(
-      package,
-      mainPath: target,
-      debuggingOptions: debuggingOptions,
-      platformArgs: <String, Object>{
-        'uri': url.toString(),
-      },
-    );
-    return attach(
-      connectionInfoCompleter: connectionInfoCompleter,
-      appStartedCompleter: appStartedCompleter,
-    );
+    return 0;
   }
 
   @override
@@ -479,16 +500,18 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
     }
 
+    Duration transferMarker;
     try {
       if (!deviceIsDebuggable) {
         globals.printStatus('Recompile complete. Page requires refresh.');
-      } else if (fullRestart || !debuggingOptions.buildInfo.isDebug) {
+      } else if (!debuggingOptions.buildInfo.isDebug) {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.
         await _wipConnection?.sendCommand('Page.reload', <String, Object>{
           'ignoreCache': !debuggingOptions.buildInfo.isDebug,
         });
       } else {
+        transferMarker = timer.elapsed;
         await _wipConnection?.debugger
             ?.sendCommand('Runtime.evaluate', params: <String, Object>{
           'expression': 'window.\$hotReloadHook([$reloadModules])',
@@ -517,6 +540,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
+        transferTimeInMs: timer.elapsed.inMilliseconds - transferMarker.inMilliseconds
       ).send();
     }
     return OperationResult.ok;
