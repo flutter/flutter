@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/build_info.dart';
@@ -15,18 +17,22 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  Testbed testbed;
-  MockPlatform mockPlatform;
+  FileSystem fileSystem;
+  final Platform fakePlatform = FakePlatform(
+    operatingSystem: 'linux',
+    environment: <String, String>{
+      'FLUTTER_ROOT': '/'
+    }
+  );
 
   setUpAll(() {
     Cache.flutterRoot = '';
@@ -34,36 +40,36 @@ void main() {
   });
 
   setUp(() {
-    testbed = Testbed(setup: () {
-      globals.fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('name: foo\n');
-      globals.fs.file('.packages').createSync();
-      globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    }, overrides: <Type, Generator>{
-      Platform: () => mockPlatform,
-      FlutterVersion: () => MockFlutterVersion(),
-      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-      Pub: () => MockPub(),
-    });
+    fileSystem = MemoryFileSystem.test();
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('name: foo\n');
+    fileSystem.file('.packages').createSync();
+    fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   });
 
-  test('Refuses to build for web when missing index.html', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('web', 'index.html')).deleteSync();
+  testUsingContext('Refuses to build for web when missing index.html', () async {
+    fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
 
     expect(buildWeb(
       FlutterProject.current(),
-      globals.fs.path.join('lib', 'main.dart'),
+      fileSystem.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
       const <String>[],
       false,
     ), throwsToolExit());
-  }));
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    Pub: () => MockPub(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Refuses to build using runner when missing index.html', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('web', 'index.html')).deleteSync();
+  testUsingContext('Refuses to build using runner when missing index.html', () async {
+    fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
 
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       null,
@@ -75,48 +81,64 @@ void main() {
       urlTunneller: null,
     ) as ResidentWebRunner;
     expect(await runner.run(), 1);
-  }));
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    Pub: () => MockPub(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Refuses to build a debug build for web', () => testbed.run(() async {
+  testUsingContext('Refuses to build a debug build for web', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'web', '--debug']),
-        throwsA(isA<UsageException>()));
+      throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-  }));
+    Pub: () => MockPub(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Refuses to build for web when feature is disabled', () => testbed.run(() async {
+  testUsingContext('Refuses to build for web when feature is disabled', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
-    expect(() => runner.run(<String>['build', 'web']),
-        throwsToolExit());
+    expect(
+      () => runner.run(<String>['build', 'web']),
+      throwsToolExit(),
+    );
   }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
-  }));
+    Pub: () => MockPub(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('Builds a web bundle - end to end', () => testbed.run(() async {
+  testUsingContext('Builds a web bundle - end to end', () async {
     final BuildCommand buildCommand = BuildCommand();
     applyMocksToCommand(buildCommand);
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     final List<String> dependencies = <String>[
-      globals.fs.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
-      globals.fs.path.join('bin', 'cache', 'flutter_web_sdk'),
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      globals.fs.path.join('bin', 'cache', 'dart-sdk '),
+      fileSystem.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
+      fileSystem.path.join('bin', 'cache', 'flutter_web_sdk'),
+      fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
+      fileSystem.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      fileSystem.path.join('bin', 'cache', 'dart-sdk '),
     ];
     for (final String dependency in dependencies) {
-      globals.fs.file(dependency).createSync(recursive: true);
+      fileSystem.file(dependency).createSync(recursive: true);
     }
 
     // Project files.
-    globals.fs.file('.packages')
+    fileSystem.file('.packages')
       ..writeAsStringSync('''
 foo:lib/
 fizz:bar/lib/
 ''');
-    globals.fs.file('pubspec.yaml')
+    fileSystem.file('pubspec.yaml')
       ..writeAsStringSync('''
 name: foo
 
@@ -127,7 +149,7 @@ dependencies:
     path:
       bar/
 ''');
-    globals.fs.file(globals.fs.path.join('bar', 'pubspec.yaml'))
+    fileSystem.file(fileSystem.path.join('bar', 'pubspec.yaml'))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: bar
@@ -139,12 +161,12 @@ flutter:
         pluginClass: UrlLauncherPlugin
         fileName: url_launcher_web.dart
 ''');
-    globals.fs.file(globals.fs.path.join('bar', 'lib', 'url_launcher_web.dart'))
+    fileSystem.file(fileSystem.path.join('bar', 'lib', 'url_launcher_web.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 class UrlLauncherPlugin {}
 ''');
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       ..writeAsStringSync('void main() { }');
 
     // Process calls. We're not testing that these invocations are correct because
@@ -154,35 +176,36 @@ class UrlLauncherPlugin {}
     });
     await runner.run(<String>['build', 'web']);
 
-    expect(globals.fs.file(globals.fs.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
+    expect(fileSystem.file(fileSystem.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
   }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    Pub: () => MockPub(),
+    ProcessManager: () => FakeProcessManager.any(),
     BuildSystem: () => MockBuildSystem(),
-  }));
+  });
 
-  test('hidden if feature flag is not enabled', () => testbed.run(() async {
+  testUsingContext('hidden if feature flag is not enabled', () async {
     expect(BuildWebCommand().hidden, true);
   }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
-  }));
+    Pub: () => MockPub(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-  test('not hidden if feature flag is enabled', () => testbed.run(() async {
+  testUsingContext('not hidden if feature flag is enabled', () async {
     expect(BuildWebCommand().hidden, false);
   }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-  }));
+    Pub: () => MockPub(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
-class MockWebCompilationProxy extends Mock implements WebCompilationProxy {}
-class MockPlatform extends Mock implements Platform {
-  @override
-  Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': '/',
-  };
-}
-class MockFlutterVersion extends Mock implements FlutterVersion {
-  @override
-  bool get isMaster => true;
-}
 class MockPub extends Mock implements Pub {}
