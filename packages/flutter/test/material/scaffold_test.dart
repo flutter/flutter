@@ -1596,29 +1596,7 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
-  testWidgets('Drawer does not open with gesture drag when it is disabled', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          drawer: const Drawer(
-            child: Text('Drawer'),
-          ),
-          drawerEnableDragGesture: false,
-          body: const Text('Scaffold body'),
-          appBar: AppBar(
-            centerTitle: true,
-            title: const Text('Title'),
-          ),
-        ),
-      ),
-    );
-    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-    expect(scaffoldState.isDrawerOpen, false);
-
-    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
-    await tester.pumpAndSettle();
-    expect(scaffoldState.isDrawerOpen, false);
-
+  testWidgets('Drawer does not open or close with gesture drag when it is disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1634,15 +1612,56 @@ void main() {
         ),
       ),
     );
+    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
+
+    // Test that we can open and close drawer with drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is true.
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
+
+    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          drawerEnableDragGesture: false,
+          body: const Text('Scaffold body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
+          ),
+        ),
+      ),
+    );
     scaffoldState = tester.state(find.byType(Scaffold));
     expect(scaffoldState.isDrawerOpen, false);
 
+    // Test that we cannot open drawer with drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is false.
     await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+
+    // Test that we cannot close drawer with drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is false.
+    final Finder drawerOpenButton = find.byType(IconButton).first;
+    await tester.tap(drawerOpenButton);
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
+
+    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
     await tester.pumpAndSettle();
     expect(scaffoldState.isDrawerOpen, true);
   });
 
-  testWidgets('End drawer does not open with gesture drag when it is disabled', (WidgetTester tester) async {
+  testWidgets('End drawer does not open or close with gesture drag when it is disabled', (WidgetTester tester) async {
     double screenWidth;
     await tester.pumpWidget(
       MaterialApp(
@@ -1653,8 +1672,8 @@ void main() {
               endDrawer: const Drawer(
                 child: Text('Drawer'),
               ),
-              endDrawerEnableDragGesture: false,
-              body: const Text('Scaffold body'),
+              endDrawerEnableDragGesture: true,
+              body: const Text('Scaffold Body'),
               appBar: AppBar(
                 centerTitle: true,
                 title: const Text('Title'),
@@ -1667,8 +1686,13 @@ void main() {
     ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
     expect(scaffoldState.isEndDrawerOpen, false);
 
-
+    // Test that we can open and close end drawer with drag gesture when
+    // `Scaffold.endDrawerEnableDragGesture` is true.
     await tester.dragFrom(Offset(screenWidth - 1, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, true);
+
+    await tester.dragFrom(Offset(screenWidth - 300, 100), const Offset(300, 0));
     await tester.pumpAndSettle();
     expect(scaffoldState.isEndDrawerOpen, false);
 
@@ -1678,8 +1702,8 @@ void main() {
           endDrawer: const Drawer(
             child: Text('Drawer'),
           ),
-          endDrawerEnableDragGesture: true,
-          body: const Text('Scaffold Body'),
+          endDrawerEnableDragGesture: false,
+          body: const Text('Scaffold body'),
           appBar: AppBar(
             centerTitle: true,
             title: const Text('Title'),
@@ -1690,7 +1714,20 @@ void main() {
     scaffoldState = tester.state(find.byType(Scaffold));
     expect(scaffoldState.isEndDrawerOpen, false);
 
+    // Test that we cannot open end drawer with drag gesture when
+    // `Scaffold.endDrawerEnableDragGesture` is false.
     await tester.dragFrom(Offset(screenWidth - 1, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, false);
+
+    // Test that we cannot close end drawer with drag gesture when
+    // `Scaffold.endDrawerEnableDragGesture` is false.
+    final Finder endDrawerOpenButton = find.byType(IconButton).first;
+    await tester.tap(endDrawerOpenButton);
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, true);
+
+    await tester.dragFrom(Offset(screenWidth - 300, 100), const Offset(300, 0));
     await tester.pumpAndSettle();
     expect(scaffoldState.isEndDrawerOpen, true);
   });
