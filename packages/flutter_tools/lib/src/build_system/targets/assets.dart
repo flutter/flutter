@@ -72,7 +72,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
         resource.release();
       }
   }));
-  return Depfile(inputs, outputs);
+  return Depfile(inputs + assetBundle.additionalDependencies, outputs);
 }
 
 /// Copy the assets defined in the flutter manifest into a build directory.

@@ -17,6 +17,11 @@ Map<String, Uri> _parse(String packagesPath) {
 class PackageMap {
   PackageMap(this.packagesPath);
 
+  /// Create a [PackageMap] for testing.
+  PackageMap.test(Map<String, Uri> input)
+    : packagesPath = '.packages',
+      _map = input;
+
   static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
 
   static set globalPackagesPath(String value) {
