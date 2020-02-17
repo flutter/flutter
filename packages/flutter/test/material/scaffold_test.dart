@@ -1596,7 +1596,7 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
-  testWidgets('Drawer does not open or close with gesture drag when it is disabled', (WidgetTester tester) async {
+  testWidgets('Drawer does not open or close with drag gesture when it is disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1661,7 +1661,7 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
-  testWidgets('End drawer does not open or close with gesture drag when it is disabled', (WidgetTester tester) async {
+  testWidgets('End drawer does not open or close with drag gesture when it is disabled', (WidgetTester tester) async {
     double screenWidth;
     await tester.pumpWidget(
       MaterialApp(
