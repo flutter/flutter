@@ -232,6 +232,7 @@ class DrawerController extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
     this.edgeDragWidth,
+    this.enableDragGesture = true,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -277,6 +278,11 @@ class DrawerController extends StatefulWidget {
   ///
   /// By default, the color used is [Colors.black54]
   final Color scrimColor;
+
+  /// Determines if the [Drawer] can be opened and closed with a drag gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool enableDragGesture;
 
   /// The width of the area within which a horizontal swipe will open the
   /// drawer.
@@ -505,18 +511,22 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
 
     if (_controller.status == AnimationStatus.dismissed) {
-      return Align(
-        alignment: _drawerOuterAlignment,
-        child: GestureDetector(
-          key: _gestureDetectorKey,
-          onHorizontalDragUpdate: _move,
-          onHorizontalDragEnd: _settle,
-          behavior: HitTestBehavior.translucent,
-          excludeFromSemantics: true,
-          dragStartBehavior: widget.dragStartBehavior,
-          child: Container(width: dragAreaWidth),
-        ),
-      );
+      if (widget.enableDragGesture) {
+        return Align(
+          alignment: _drawerOuterAlignment,
+          child: GestureDetector(
+            key: _gestureDetectorKey,
+            onHorizontalDragUpdate: _move,
+            onHorizontalDragEnd: _settle,
+            behavior: HitTestBehavior.translucent,
+            excludeFromSemantics: true,
+            dragStartBehavior: widget.dragStartBehavior,
+            child: Container(width: dragAreaWidth),
+          ),
+        );
+      } else {
+        return const SizedBox.shrink();
+      }
     } else {
       bool platformHasBackButton;
       switch (Theme.of(context).platform) {
@@ -530,53 +540,58 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           break;
       }
       assert(platformHasBackButton != null);
-      return GestureDetector(
-        key: _gestureDetectorKey,
-        onHorizontalDragDown: _handleDragDown,
-        onHorizontalDragUpdate: _move,
-        onHorizontalDragEnd: _settle,
-        onHorizontalDragCancel: _handleDragCancel,
-        excludeFromSemantics: true,
-        dragStartBehavior: widget.dragStartBehavior,
-        child: RepaintBoundary(
-          child: Stack(
-            children: <Widget>[
-              BlockSemantics(
-                child: ExcludeSemantics(
-                  // On Android, the back button is used to dismiss a modal.
-                  excluding: platformHasBackButton,
-                  child: GestureDetector(
-                    onTap: close,
-                    child: Semantics(
-                      label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
-                      child: MouseRegion(
-                        opaque: true,
-                        child: Container( // The drawer's "scrim"
-                          color: _scrimColorTween.evaluate(_controller),
-                        ),
+      final Widget drawer = RepaintBoundary(
+        child: Stack(
+          children: <Widget>[
+            BlockSemantics(
+              child: ExcludeSemantics(
+                // On Android, the back button is used to dismiss a modal.
+                excluding: platformHasBackButton,
+                child: GestureDetector(
+                  onTap: close,
+                  child: Semantics(
+                    label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
+                    child: MouseRegion(
+                      opaque: true,
+                      child: Container( // The drawer's "scrim"
+                        color: _scrimColorTween.evaluate(_controller),
                       ),
                     ),
                   ),
                 ),
               ),
-              Align(
-                alignment: _drawerOuterAlignment,
-                child: Align(
-                  alignment: _drawerInnerAlignment,
-                  widthFactor: _controller.value,
-                  child: RepaintBoundary(
-                    child: FocusScope(
-                      key: _drawerKey,
-                      node: _focusScopeNode,
-                      child: widget.child,
-                    ),
+            ),
+            Align(
+              alignment: _drawerOuterAlignment,
+              child: Align(
+                alignment: _drawerInnerAlignment,
+                widthFactor: _controller.value,
+                child: RepaintBoundary(
+                  child: FocusScope(
+                    key: _drawerKey,
+                    node: _focusScopeNode,
+                    child: widget.child,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
+      if (widget.enableDragGesture) {
+        return GestureDetector(
+          key: _gestureDetectorKey,
+          onHorizontalDragDown: _handleDragDown,
+          onHorizontalDragUpdate: _move,
+          onHorizontalDragEnd: _settle,
+          onHorizontalDragCancel: _handleDragCancel,
+          excludeFromSemantics: true,
+          dragStartBehavior: widget.dragStartBehavior,
+          child: drawer,
+        );
+      } else {
+        return drawer;
+      }
     }
   }
   @override

@@ -1011,6 +1011,8 @@ class Scaffold extends StatefulWidget {
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
+    this.drawerEnableDragGesture = true,
+    this.endDrawerEnableDragGesture = true,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1312,6 +1314,18 @@ class Scaffold extends StatefulWidget {
   /// example, if `TextDirection.of(context)` is set to [TextDirection.ltr],
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double drawerEdgeDragWidth;
+
+  /// Determines if the [Scaffold.drawer] can be opened and closed with a drag
+  /// gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool drawerEnableDragGesture;
+
+  /// Determines if the [Scaffold.endDrawer] can be opened and closed with a
+  /// drag gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool endDrawerEnableDragGesture;
 
   /// This flag is deprecated and fixes and issue with incorrect clipping
   /// and positioning of the [SnackBar] set to [SnackBarBehavior.floating].
@@ -2230,6 +2244,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
+          enableDragGesture: widget.endDrawerEnableDragGesture,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2254,6 +2269,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
+          enableDragGesture: widget.drawerEnableDragGesture,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
