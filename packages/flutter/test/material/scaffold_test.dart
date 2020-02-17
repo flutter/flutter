@@ -1596,6 +1596,105 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
+  testWidgets('Drawer does not open with gesture drag when it is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          drawerEnableDragGesture: false,
+          body: const Text('Scaffold body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
+          ),
+        ),
+      ),
+    );
+    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
+
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          drawerEnableDragGesture: true,
+          body: const Text('Scaffold Body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
+          ),
+        ),
+      ),
+    );
+    scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
+
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
+  });
+
+  testWidgets('End drawer does not open with gesture drag when it is disabled', (WidgetTester tester) async {
+    double screenWidth;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            screenWidth = MediaQuery.of(context).size.width;
+            return Scaffold(
+              endDrawer: const Drawer(
+                child: Text('Drawer'),
+              ),
+              endDrawerEnableDragGesture: false,
+              body: const Text('Scaffold body'),
+              appBar: AppBar(
+                centerTitle: true,
+                title: const Text('Title'),
+              ),
+            );
+          }
+        ),
+      ),
+    );
+    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isEndDrawerOpen, false);
+
+
+    await tester.dragFrom(Offset(screenWidth - 1, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, false);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          endDrawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          endDrawerEnableDragGesture: true,
+          body: const Text('Scaffold Body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
+          ),
+        ),
+      ),
+    );
+    scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isEndDrawerOpen, false);
+
+    await tester.dragFrom(Offset(screenWidth - 1, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isEndDrawerOpen, true);
+  });
+
   testWidgets('Nested scaffold body insets', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20295
     final Key bodyKey = UniqueKey();
