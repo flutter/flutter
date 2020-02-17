@@ -213,6 +213,15 @@ void main() {
       WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
 
+    testUsingContext('closing VMService closes peer', () {
+      FakeAsync().run((FakeAsync time) async {
+        final MockPeer mockPeer = MockPeer();
+        final VMService vmService = VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
+        await vmService.close();
+        expect(mockPeer.registeredMethods, contains('close'));
+      });
+    });
+
     testUsingContext('refreshViews', () {
       FakeAsync().run((FakeAsync time) {
         bool done = false;
