@@ -700,6 +700,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  animated_placeholder_perf:
+    description: >
+      Measures frame build and rasterizer times, as well as frame build counts
+      for a grid of images that uses FadeInImage with an animated gif as the
+      placeholder.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   analyzer_benchmark:
     description: >
       Measures the speed of Dart analyzer.

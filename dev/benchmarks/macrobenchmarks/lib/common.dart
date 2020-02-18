@@ -10,3 +10,4 @@ const String kSimpleAnimationRouteName = '/simple_animation';
 const String kPictureCacheRouteName = '/picture_cache';
 const String kLargeImagesRouteName = '/large_images';
 const String kTextRouteName = '/text';
+const String kAnimatedPlaceholderRouteName = '/animated_placeholder';
