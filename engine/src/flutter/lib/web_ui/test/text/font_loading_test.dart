@@ -23,7 +23,9 @@ Future<void> main() async {
       await expectLater(
           ui.loadFontFromList(Uint8List(0), fontFamily: 'test-font'),
           throwsA(TypeMatcher<Exception>()));
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
+        skip: browserEngine == BrowserEngine.edge);
 
     test('loads Blehm font from buffer', () async {
       expect(_containsFontFamily('Blehm'), false);
@@ -35,12 +37,15 @@ Future<void> main() async {
           fontFamily: 'Blehm');
 
       expect(_containsFontFamily('Blehm'), true);
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
+        skip: browserEngine == BrowserEngine.edge);
 
     test('loading font should clear measurement caches', () async {
       final ui.ParagraphStyle style = ui.ParagraphStyle();
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(style);
-      final ui.ParagraphConstraints constraints = ui.ParagraphConstraints(width: 30.0);
+      final ui.ParagraphConstraints constraints =
+          ui.ParagraphConstraints(width: 30.0);
       builder.addText('test');
       final ui.Paragraph paragraph = builder.build();
       // Triggers the measuring and verifies the result has been cached.
@@ -50,35 +55,41 @@ Future<void> main() async {
       // Now, loads a new font using loadFontFromList. This should clear the
       // cache
       final html.HttpRequest response = await html.HttpRequest.request(
-        _testFontUrl,
-        responseType: 'arraybuffer');
+          _testFontUrl,
+          responseType: 'arraybuffer');
       await ui.loadFontFromList(Uint8List.view(response.response),
-        fontFamily: 'Blehm');
+          fontFamily: 'Blehm');
 
       // Verifies the font is loaded, and the cache is cleaned.
       expect(_containsFontFamily('Blehm'), true);
       expect(TextMeasurementService.rulerManager.rulers.length, 0);
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
+        skip: browserEngine == BrowserEngine.edge);
 
     test('loading font should send font change message', () async {
       final ui.PlatformMessageCallback oldHandler = ui.window.onPlatformMessage;
       String actualName;
       String message;
-      window.onPlatformMessage = (String name, ByteData data, ui.PlatformMessageResponseCallback callback) {
+      window.onPlatformMessage = (String name, ByteData data,
+          ui.PlatformMessageResponseCallback callback) {
         actualName = name;
         final buffer = data.buffer;
-        final Uint8List list = buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        final Uint8List list =
+            buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         message = utf8.decode(list);
       };
       final html.HttpRequest response = await html.HttpRequest.request(
-        _testFontUrl,
-        responseType: 'arraybuffer');
+          _testFontUrl,
+          responseType: 'arraybuffer');
       await ui.loadFontFromList(Uint8List.view(response.response),
-        fontFamily: 'Blehm');
+          fontFamily: 'Blehm');
       window.onPlatformMessage = oldHandler;
       expect(actualName, 'flutter/system');
       expect(message, '{"type":"fontsChange"}');
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/50770
+        skip: browserEngine == BrowserEngine.edge);
   });
 }
 

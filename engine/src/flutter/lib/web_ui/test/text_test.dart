@@ -363,8 +363,11 @@ void main() async {
     expect(spans[0].style.fontFamily, 'Ahem, Arial, sans-serif');
     // The nested span here should not set it's family to default sans-serif.
     expect(spans[1].style.fontFamily, 'Ahem, Arial, sans-serif');
-  }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      skip: (browserEngine == BrowserEngine.firefox));
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50771
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+      skip: (browserEngine == BrowserEngine.firefox ||
+          browserEngine == BrowserEngine.edge));
 
   test('adds Arial and sans-serif as fallback fonts', () {
     // Set this to false so it doesn't default to 'Ahem' font.
@@ -382,8 +385,11 @@ void main() async {
         'SomeFont, Arial, sans-serif');
 
     debugEmulateFlutterTesterEnvironment = true;
-  }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      skip: (browserEngine == BrowserEngine.firefox));
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50771
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+      skip: (browserEngine == BrowserEngine.firefox ||
+          browserEngine == BrowserEngine.edge));
 
   test('does not add fallback fonts to generic families', () {
     // Set this to false so it doesn't default to 'Ahem' font.
@@ -418,7 +424,9 @@ void main() async {
         '"MyFont 2000", Arial, sans-serif');
 
     debugEmulateFlutterTesterEnvironment = true;
-  });
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50771
+      skip: browserEngine == BrowserEngine.edge);
 
   group('TextRange', () {
     test('empty ranges are correct', () {
