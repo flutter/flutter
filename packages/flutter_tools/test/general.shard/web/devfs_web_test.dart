@@ -319,6 +319,7 @@ void main() {
         invalidatedFiles: <Uri>[],
       );
 
+      expect(webDevFS.webAssetServer.getFile('/main.dart'), isNotNull);
       expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
       expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);
 

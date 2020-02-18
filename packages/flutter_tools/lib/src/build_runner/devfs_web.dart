@@ -431,6 +431,7 @@ class WebDevFS implements DevFS {
     if (bundleFirstUpload) {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainPath);
+      webAssetServer.writeFile('/$entrypoint', globals.fs.file(mainPath).readAsStringSync());
       webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
