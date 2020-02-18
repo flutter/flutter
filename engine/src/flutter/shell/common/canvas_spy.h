@@ -26,8 +26,8 @@ class CanvasSpy {
  public:
   CanvasSpy(SkCanvas* target_canvas);
 
-  //------------------------------------------------------------------------------
-  /// @brief      Returns true if any non trasnparent content has been drawn
+  //----------------------------------------------------------------------------
+  /// @brief      Returns true if any non transparent content has been drawn
   /// into
   ///             the spying canvas. Note that this class does tries to detect
   ///             empty canvases but in some cases may return true even for
@@ -35,7 +35,7 @@ class CanvasSpy {
   ///             canvas).
   bool DidDrawIntoCanvas();
 
-  //------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
   /// @brief      The returned canvas delegate all operations to the target
   /// canvas
   ///             while spying on them.
