@@ -191,6 +191,29 @@
       "windows": null
     }
   },
+  "privacyScreenToggle": {
+    "names": {
+      "domkey": "PrivacyScreenToggle",
+      "android": null,
+      "english": "Privacy Screen Toggle",
+      "chromium": "privacyScreenToggle",
+      "glfw": null,
+      "windows": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 23,
+      "linux": 633,
+      "xkb": 641,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null,
+      "glfw": null,
+      "windows": null
+    }
+  },
   "sleep": {
     "names": {
       "domkey": "Sleep",

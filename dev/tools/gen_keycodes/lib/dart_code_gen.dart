@@ -10,8 +10,8 @@ import 'package:gen_keycodes/utils.dart';
 
 /// Generates the keyboard_keys.dart and keyboard_maps.dart files, based on the
 /// information in the key data structure given to it.
-class CodeGenerator {
-  CodeGenerator(this.keyData);
+class DartCodeGenerator {
+  DartCodeGenerator(this.keyData);
 
   /// Given an [input] string, wraps the text at 80 characters and prepends each
   /// line with the [prefix] string. Use for generated comments.
@@ -130,7 +130,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return scanCodeMap.toString().trimRight();
   }
 
-  /// THis generates the map of Flutter key codes to logical keys.
+  /// This generates the map of Flutter key codes to logical keys.
   String get predefinedKeyCodeMap {
     final StringBuffer keyCodeMap = StringBuffer();
     for (final Key entry in keyData.data) {
@@ -312,6 +312,39 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return result.toString().trimRight();
   }
 
+  /// This generates the map of Web KeyboardEvent codes to logical key ids.
+  String get webLogicalKeyCodeMap {
+    final StringBuffer result = StringBuffer();
+    for (final Key entry in keyData.data) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': ${toHex(entry.flutterId, digits: 10)},");
+      }
+    }
+    return result.toString().trimRight();
+  }
+
+  /// This generates the map of Web KeyboardEvent codes to physical key USB HID codes.
+  String get webPhysicalKeyCodeMap {
+    final StringBuffer result = StringBuffer();
+    for (final Key entry in keyData.data) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': ${toHex(entry.usbHidCode)},");
+      }
+    }
+    return result.toString().trimRight();
+  }
+
+  /// This generates the map of Web number pad codes to logical key ids.
+  String get webNumpadCodeMap {
+    final StringBuffer result = StringBuffer();
+    for (final Key entry in numpadKeyData) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': ${toHex(entry.flutterId, digits: 10)},");
+      }
+    }
+    return result.toString().trimRight();
+  }
+
   /// Substitutes the various maps and definitions into the template file for
   /// keyboard_key.dart.
   String generateKeyboardKeys() {
@@ -351,6 +384,19 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     };
 
     final String template = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_maps.tmpl')).readAsStringSync();
+    return _injectDictionary(template, mappings);
+  }
+
+  /// Substitutes the web specific maps into the template file for
+  /// keyboard_map_web.dart in the engine.
+  String generateWebKeyboardMap() {
+    final Map<String, String> mappings = <String, String>{
+      'WEB_LOGICAL_KEY_CODE_MAP': webLogicalKeyCodeMap,
+      'WEB_PHYSICAL_KEY_CODE_MAP': webPhysicalKeyCodeMap,
+      'WEB_NUMPAD_CODE_MAP': webNumpadCodeMap,
+    };
+
+    final String template = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_map_web.tmpl')).readAsStringSync();
     return _injectDictionary(template, mappings);
   }
 
