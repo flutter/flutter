@@ -332,10 +332,10 @@ class HotRunner extends ResidentRunner {
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
     for (final FlutterDevice device in flutterDevices) {
-      // Here we initialize the frontend_server conccurently with the gradle
-      // build, reducing initialization time. This is safe because the first
-      // invocation of the frontend server produces a full dill file that
-      // the subsequent invocation in devfs will not overwrite.
+      // Here we initialize the frontend_server concurrently with the platform
+      // build, reducing overall initialization time. This is safe because the first
+      // invocation of the frontend server produces a full dill file that the
+      // subsequent invocation in devfs will not overwrite.
       if (device.generator != null) {
         startupTasks.add(
           device.generator.recompile(
