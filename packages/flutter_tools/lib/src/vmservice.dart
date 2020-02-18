@@ -452,6 +452,8 @@ class VMService {
   Future<void> getVM() async => await vm.reload();
 
   Future<void> refreshViews({ bool waitForViews = false }) => vm.refreshViews(waitForViews: waitForViews);
+
+  Future<void> close() async => await _peer.close();
 }
 
 /// An error that is thrown when constructing/updating a service object.

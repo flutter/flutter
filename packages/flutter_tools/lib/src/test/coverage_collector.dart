@@ -181,7 +181,10 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
 }) async {
   final VMService vmService = await connector(serviceUri);
   await vmService.getVM();
-  return _getAllCoverage(vmService, libraryPredicate);
+  final Map<String, dynamic> result = await _getAllCoverage(
+      vmService, libraryPredicate);
+  await vmService.close();
+  return result;
 }
 
 Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
