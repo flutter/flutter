@@ -707,6 +707,7 @@ tasks:
       placeholder.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   analyzer_benchmark:
     description: >
