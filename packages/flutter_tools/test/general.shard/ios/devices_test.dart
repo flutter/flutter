@@ -683,7 +683,16 @@ void main() {
       });
 
       testUsingContext('succeeds with --device-vmservice-port', () async {
-        final IOSDevice device = IOSDevice('123', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64);
+        final IOSDevice device = IOSDevice(
+          '123',
+          name: 'iPhone 1',
+          sdkVersion: '13.3',
+          artifacts: mockArtifacts,
+          fileSystem: mockFileSystem,
+          platform: macPlatform,
+          iosDeploy: mockIosDeploy,
+          cpuArchitecture: DarwinArch.arm64,
+        );
         device.setLogReader(mockApp, mockLogReader);
         final Uri uri = Uri(
           scheme: 'http',
@@ -704,6 +713,11 @@ void main() {
           return Future<int>.value(0);
         });
 
+        when(mockIosDeploy.installApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation invocation) => Future<int>.value(0));
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(
