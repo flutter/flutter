@@ -7086,15 +7086,18 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   final Color color;
 
   @override
-  RenderColoredBox createRenderObject(BuildContext context) {
-    return RenderColoredBox(color: color);
+  _RenderColoredBox createRenderObject(BuildContext context) {
+    return _RenderColoredBox(color: color);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
+    renderObject.color = color;
   }
 }
 
-/// A render object that paints its area with the specified [Color].
-class RenderColoredBox extends RenderProxyBox {
-  /// Creates a render object that paints its area with the specified [Color].
-  RenderColoredBox({@required Color color}) : _color = color;
+class _RenderColoredBox extends RenderProxyBox {
+  _RenderColoredBox({@required Color color}) : _color = color;
 
   /// The fill color for this render object.
   ///
@@ -7112,7 +7115,7 @@ class RenderColoredBox extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (size != Size.zero) {
+    if (size > Size.zero) {
       context.canvas.drawRect(offset & size, Paint()..color = color);
     }
     if (child != null) {

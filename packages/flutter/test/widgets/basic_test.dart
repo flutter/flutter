@@ -302,7 +302,7 @@ void main() {
         ],
       ));
       expect(find.byType(ColoredBox), findsOneWidget);
-      final RenderColoredBox renderColoredBox = tester.renderObject(find.byType(ColoredBox)) as RenderColoredBox;
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
@@ -323,7 +323,7 @@ void main() {
         ],
       ));
       expect(find.byType(ColoredBox), findsOneWidget);
-      final RenderColoredBox renderColoredBox = tester.renderObject(find.byType(ColoredBox)) as RenderColoredBox;
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
       final RenderObject renderSizedBox = tester.renderObject(find.byKey(key));
 
       renderColoredBox.paint(mockContext, Offset.zero);
@@ -335,7 +335,7 @@ void main() {
     testWidgets('ColoredBox - size, no child', (WidgetTester tester) async {
       await tester.pumpWidget(const ColoredBox(color: colorToPaint));
       expect(find.byType(ColoredBox), findsOneWidget);
-      final RenderColoredBox renderColoredBox = tester.renderObject(find.byType(ColoredBox)) as RenderColoredBox;
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
 
       renderColoredBox.paint(mockContext, Offset.zero);
 
@@ -351,7 +351,7 @@ void main() {
       const Widget child = SizedBox.expand(key: key);
       await tester.pumpWidget(const ColoredBox(color: colorToPaint, child: child));
       expect(find.byType(ColoredBox), findsOneWidget);
-      final RenderColoredBox renderColoredBox = tester.renderObject(find.byType(ColoredBox)) as RenderColoredBox;
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
       final RenderObject renderSizedBox = tester.renderObject(find.byKey(key));
 
       renderColoredBox.paint(mockContext, Offset.zero);
