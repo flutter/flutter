@@ -1,4 +1,4 @@
-Signature: dbb33a8ed5838bc9e2509c1affd13a57
+Signature: 4e30f9dd5d3cd888c5d1dd0f38841296
 
 UNUSED LICENSES:
 
@@ -5726,7 +5726,6 @@ FILE: ../../../third_party/skia/include/core/SkCanvas.h
 FILE: ../../../third_party/skia/include/core/SkColor.h
 FILE: ../../../third_party/skia/include/core/SkColorFilter.h
 FILE: ../../../third_party/skia/include/core/SkColorPriv.h
-FILE: ../../../third_party/skia/include/core/SkDeque.h
 FILE: ../../../third_party/skia/include/core/SkFlattenable.h
 FILE: ../../../third_party/skia/include/core/SkGraphics.h
 FILE: ../../../third_party/skia/include/core/SkMaskFilter.h
@@ -5755,6 +5754,7 @@ FILE: ../../../third_party/skia/include/effects/SkDiscretePathEffect.h
 FILE: ../../../third_party/skia/include/effects/SkGradientShader.h
 FILE: ../../../third_party/skia/include/effects/SkTableMaskFilter.h
 FILE: ../../../third_party/skia/include/private/SkColorData.h
+FILE: ../../../third_party/skia/include/private/SkDeque.h
 FILE: ../../../third_party/skia/include/private/SkFixed.h
 FILE: ../../../third_party/skia/include/private/SkFloatingPoint.h
 FILE: ../../../third_party/skia/include/private/SkNoncopyable.h
