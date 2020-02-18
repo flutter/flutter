@@ -47,8 +47,6 @@ When the exception was thrown, this was the stack:
 #[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]binding.dart:[0-9]+:[0-9]+\)
 #[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]binding.dart:[0-9]+:[0-9]+\)
 #[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]binding.dart:[0-9]+:[0-9]+\)
-#[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]binding.dart:[0-9]+:[0-9]+\)
-#[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]binding.dart:[0-9]+:[0-9]+\)
 #[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
 <<skip until matching line>>
 ^\(elided [0-9]+ .+$
