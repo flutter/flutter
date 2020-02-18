@@ -7073,11 +7073,11 @@ class _StatefulBuilderState extends State<StatefulBuilder> {
 }
 
 /// A widget that paints its area with a specified [Color] and then draws its
-/// child.
+/// child on top of that color.
 class ColoredBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints its area with the specified [Color].
   ///
-  /// The `color` parameter must not be null.
+  /// The [color] parameter must not be null.
   const ColoredBox({@required this.color, Widget child, Key key})
       : assert(color != null),
         super(key: key, child: child);
@@ -7099,7 +7099,7 @@ class ColoredBox extends SingleChildRenderObjectWidget {
 class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
   _RenderColoredBox({@required Color color})
     : _color = color,
-      super(behavior: color.alpha == 0 ? HitTestBehavior.deferToChild : HitTestBehavior.opaque);
+      super(behavior: HitTestBehavior.opaque);
 
   /// The fill color for this render object.
   ///
@@ -7112,11 +7112,6 @@ class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
       return;
     }
     _color = value;
-    if (color.alpha == 0) {
-      behavior = HitTestBehavior.deferToChild;
-    } else {
-      behavior = HitTestBehavior.opaque;
-    }
     markNeedsPaint();
   }
 

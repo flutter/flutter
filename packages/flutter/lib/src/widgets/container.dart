@@ -296,7 +296,7 @@ class Container extends StatelessWidget {
   ///
   /// The `color` and `decoration` arguments cannot both be supplied, since
   /// it would potentially result in the decoration drawing over the background
-  /// color. To supply a decoration with a color, use `decoration: new
+  /// color. To supply a decoration with a color, use `decoration:
   /// BoxDecoration(color: color)`.
   Container({
     Key key,
