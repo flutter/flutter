@@ -72,6 +72,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => platform,
   });
 
   testUsingContext('Copies files to correct asset directory', () async {
@@ -87,6 +88,7 @@ flutter:
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => platform,
   });
 
   testUsingContext('FlutterPlugins updates required files as needed', () async {
