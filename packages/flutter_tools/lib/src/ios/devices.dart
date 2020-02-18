@@ -128,10 +128,17 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(IOSApp app) async {
-    return _iosDeploy.isAppInstalled(
-      bundleId: app.id,
-      deviceId: id,
-    );
+    bool result;
+    try {
+      result = await _iosDeploy.isAppInstalled(
+        bundleId: app.id,
+        deviceId: id,
+      );
+    } on ProcessException catch (e) {
+      globals.printError(e.message);
+      return false;
+    }
+    return result;
   }
 
   @override
@@ -144,11 +151,18 @@ class IOSDevice extends Device {
       globals.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
     }
-    final int installationResult = await _iosDeploy.installApp(
-      deviceId: id,
-      bundlePath: bundle.path,
-      launchArguments: <String>[],
-    );
+
+    int installationResult;
+    try {
+      installationResult = await _iosDeploy.installApp(
+        deviceId: id,
+        bundlePath: bundle.path,
+        launchArguments: <String>[],
+      );
+    } on ProcessException catch (e) {
+      globals.printError(e.message);
+      return false;
+    }
     if (installationResult != 0) {
       globals.printError('Could not install ${bundle.path} on $id.');
       globals.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
@@ -161,10 +175,16 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> uninstallApp(IOSApp app) async {
-    final int uninstallationResult = await _iosDeploy.uninstallApp(
-      deviceId: id,
-      bundleId: app.id,
-    );
+    int uninstallationResult;
+    try {
+      uninstallationResult = await _iosDeploy.uninstallApp(
+        deviceId: id,
+        bundleId: app.id,
+      );
+    } on ProcessException catch (e) {
+      globals.printError(e.message);
+      return false;
+    }
     if (uninstallationResult != 0) {
       globals.printError('Could not uninstall ${app.id} on $id.');
       return false;
@@ -309,6 +329,9 @@ class IOSDevice extends Device {
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(observatoryUri: localUri);
+    } on ProcessException catch (e) {
+      globals.printError(e.message);
+      return LaunchResult.failed();
     } finally {
       installStatus.stop();
     }
