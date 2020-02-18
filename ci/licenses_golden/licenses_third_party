@@ -1,4 +1,4 @@
-Signature: ebfb795de41787f5b9dd9d56bf985e90
+Signature: 680cd54a0de0613230d8f642b614162f
 
 UNUSED LICENSES:
 
@@ -7751,6 +7751,7 @@ FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/cquery_dri
 FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/xref_extractor.dart
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_base.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/call.cc
@@ -7771,12 +7772,16 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/recognized_method.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/write_barrier_elimination.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/write_barrier_elimination.h
+FILE: ../../../third_party/dart/runtime/vm/constants_base.h
 FILE: ../../../third_party/dart/runtime/vm/dispatch_table.cc
 FILE: ../../../third_party/dart/runtime/vm/dispatch_table.h
 FILE: ../../../third_party/dart/runtime/vm/field_table.cc
 FILE: ../../../third_party/dart/runtime/vm/field_table.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
 FILE: ../../../third_party/dart/runtime/vm/visitor.cc
+FILE: ../../../third_party/dart/samples/ffi/async/async_test.dart
+FILE: ../../../third_party/dart/samples/ffi/async/sample_async_callback.dart
+FILE: ../../../third_party/dart/samples/ffi/async/sample_native_port_call.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/js_patch.dart
@@ -7979,8 +7984,8 @@ FILE: ../../../third_party/dart/runtime/vm/code_patcher.h
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/aot_call_specializer.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_base.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_ia32_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_x64_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_x86.cc
