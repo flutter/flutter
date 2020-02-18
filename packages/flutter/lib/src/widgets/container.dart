@@ -303,8 +303,8 @@ class Container extends StatelessWidget {
     Key key,
     this.alignment,
     this.padding,
-    Color color,
-    Decoration decoration,
+    this.color,
+    this.decoration,
     this.foregroundDecoration,
     double width,
     double height,
@@ -318,11 +318,6 @@ class Container extends StatelessWidget {
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(constraints == null || constraints.debugAssertIsValid()),
        assert(clipBehavior != null),
-       assert(color == null || decoration == null,
-         'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
-       ),
-       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
@@ -363,11 +358,14 @@ class Container extends StatelessWidget {
   /// see [Decoration.padding].
   final EdgeInsetsGeometry padding;
 
+  /// The color to paint behind the [child].
+  ///
+  /// This will paint behind the [decoration], if any.
+  final Color color;
+
   /// The decoration to paint behind the [child].
   ///
-  /// A shorthand for specifying just a solid color is available in the
-  /// constructor: set the `color` argument instead of the `decoration`
-  /// argument.
+  /// Use the [color] property to specify a simple solid color.
   ///
   /// The [child] is not clipped to the decoration. To clip a child to the shape
   /// of a particular [ShapeDecoration], consider using a [ClipPath] widget.
@@ -422,6 +420,9 @@ class Container extends StatelessWidget {
     final EdgeInsetsGeometry effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
       current = Padding(padding: effectivePadding, child: current);
+
+    if (color != null)
+      current = ColoredBox(color: color, child: current);
 
     if (decoration != null)
       current = DecoratedBox(decoration: decoration, child: current);
