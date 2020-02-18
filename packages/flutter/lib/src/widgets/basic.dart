@@ -7096,8 +7096,10 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderColoredBox extends RenderProxyBox {
-  _RenderColoredBox({@required Color color}) : _color = color;
+class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
+  _RenderColoredBox({@required Color color})
+    : _color = color,
+      super(behavior: color.alpha == 0 ? HitTestBehavior.deferToChild : HitTestBehavior.opaque);
 
   /// The fill color for this render object.
   ///
@@ -7110,11 +7112,13 @@ class _RenderColoredBox extends RenderProxyBox {
       return;
     }
     _color = value;
+    if (color.alpha == 0) {
+      behavior = HitTestBehavior.deferToChild;
+    } else {
+      behavior = HitTestBehavior.opaque;
+    }
     markNeedsPaint();
   }
-
-  @override
-  bool hitTestSelf(Offset position) => true;
 
   @override
   void paint(PaintingContext context, Offset offset) {
