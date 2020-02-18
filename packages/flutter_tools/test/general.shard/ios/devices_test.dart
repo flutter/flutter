@@ -811,7 +811,16 @@ void main() {
 
           final IOSApp app = await AbsoluteBuildableIOSApp.fromProject(
             FlutterProject.fromDirectory(projectDir).ios);
-          final IOSDevice device = IOSDevice('123', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64);
+          final IOSDevice device = IOSDevice(
+            '123',
+            name: 'iPhone 1',
+            sdkVersion: '13.3',
+            artifacts: mockArtifacts,
+            fileSystem: globals.fs,
+            platform: macPlatform,
+            iosDeploy: mockIosDeploy,
+            cpuArchitecture: DarwinArch.arm64,
+          );
 
           // Pre-create the expected build products.
           targetBuildDir.createSync(recursive: true);
@@ -841,8 +850,6 @@ void main() {
         }, overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeIosDoctorProvider(),
           IMobileDevice: () => mockIMobileDevice,
-          IOSDeploy: () => mockIosDeploy,
-          Platform: () => macPlatform,
           ProcessManager: () => mockProcessManager,
         });
       }
