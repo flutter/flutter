@@ -37,11 +37,35 @@ import '../web/chrome.dart';
 /// This is only used in development mode.
 class WebAssetServer implements AssetReader {
   @visibleForTesting
-  WebAssetServer(this._httpServer, this._packages, this.internetAddress);
+  WebAssetServer(
+    this._httpServer,
+    this._packages,
+    this.internetAddress,
+    this._controller,
+    this._digests,
+    this._modules,
+  );
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
   static const String _kDefaultMimeType = 'application/octet-stream';
+
+  final StreamController<BuildResult> _controller;
+  final Map<String, String> _digests;
+  final Map<String, String> _modules;
+
+  void performRestart() {
+    for (final String key in _files.keys) {
+      // We skip computing the digest by using the hashCode of the underlying buffer.
+      // Whenever a file is updated, the corresponding Uint8List.view it corresponds
+      // to will change.
+      _digests[key] = _files[key].hashCode.toString();
+      _modules[key] = key.endsWith('.lib.js')
+        ? key.split('.lib.js')[0]
+        : key;
+    }
+    _controller.add(BuildResult((BuildResultBuilder b) => b.status = BuildStatus.succeeded));
+  }
 
   /// Start the web asset server on a [hostname] and [port].
   ///
@@ -60,7 +84,17 @@ class WebAssetServer implements AssetReader {
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final Packages packages = await loadPackagesFile(
         Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
-      final WebAssetServer server = WebAssetServer(httpServer, packages, address);
+      final StreamController<BuildResult> controller = StreamController<BuildResult>();
+      final Map<String, String> digests = <String, String>{};
+      final Map<String, String> modules = <String, String>{};
+      final WebAssetServer server = WebAssetServer(
+        httpServer,
+        packages,
+        address,
+        controller,
+        digests,
+        modules,
+      );
 
       // In release builds deploy a simpler proxy server.
       if (buildMode != BuildMode.debug) {
@@ -71,14 +105,20 @@ class WebAssetServer implements AssetReader {
       // In debug builds, spin up DWDS and the full asset server.
       final Dwds dwds = await Dwds.start(
         assetReader: server,
-        buildResults: const Stream<BuildResult>.empty(),
+        buildResults: controller.stream,
         chromeConnection: () async {
           final Chrome chrome = await ChromeLauncher.connectedInstance;
           return chrome.chromeConnection;
         },
         urlEncoder: urlTunneller,
         enableDebugging: true,
-        logWriter: (Level logLevel, String message) => globals.printTrace(message)
+        logWriter: (Level logLevel, String message) => globals.printTrace(message),
+        loadStrategy: RequireStrategy(
+          ReloadConfiguration.none,
+          '.lib.js',
+          (String path) async => modules,
+          (String path) async => digests,
+        ),
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
       if (enableDwds) {
@@ -288,7 +328,10 @@ class WebAssetServer implements AssetReader {
   }
 
   @override
-  Future<String> dartSourceContents(String serverPath) {
+  Future<String> dartSourceContents(String serverPath) async {
+    if (serverPath == null || serverPath.trim().isEmpty) {
+      return null;
+    }
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();
@@ -448,8 +491,6 @@ class WebDevFS implements DevFS {
           entrypoint: '/$entrypoint.lib.js',
         ),
       );
-      // TODO(jonahwilliams): switch to DWDS provided APIs when they are ready.
-      webAssetServer.writeFile('/basic.digests', '{}');
       webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
       webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
@@ -498,6 +539,7 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
+    webAssetServer.performRestart();
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),

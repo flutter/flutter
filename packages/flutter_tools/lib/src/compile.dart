@@ -659,6 +659,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
       '--incremental',
       '--target=$targetModel',
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
+      '-Ddart.library.io=false',
+      '-Ddart.library.isolate=false',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       if (outputPath != null) ...<String>[

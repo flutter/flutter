@@ -471,7 +471,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       progressId: 'hot.restart',
     );
 
-    String reloadModules;
+    // String reloadModules;
     if (debuggingOptions.buildInfo.isDebug) {
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS(fullRestart: false);
@@ -482,9 +482,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         await device.generator.reject();
         return OperationResult(1, 'Failed to recompile application.');
       }
-      reloadModules = report.invalidatedModules
-        .map((String module) => '"$module"')
-        .join(',');
+      await _vmService.callMethod('hotRestart');
     } else {
       try {
         await buildWeb(
@@ -500,33 +498,26 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
     }
 
-    Duration transferMarker;
-    try {
-      if (!deviceIsDebuggable) {
-        globals.printStatus('Recompile complete. Page requires refresh.');
-      } else if (!debuggingOptions.buildInfo.isDebug) {
-        // On non-debug builds, a hard refresh is required to ensure the
-        // up to date sources are loaded.
-        await _wipConnection?.sendCommand('Page.reload', <String, Object>{
-          'ignoreCache': !debuggingOptions.buildInfo.isDebug,
-        });
-      } else {
-        transferMarker = timer.elapsed;
-        await _wipConnection?.debugger?.sendCommand(
-          'Runtime.evaluate', params: <String, Object>{
-            'expression': 'window.\$hotReloadHook([$reloadModules])',
-            'awaitPromise': true,
-            'returnByValue': true,
-          },
-        );
-      }
-    } on WipError catch (err) {
-      globals.printError(err.toString());
-      return OperationResult(1, err.toString());
-    } finally {
-      status.stop();
-    }
-
+    // Duration transferMarker;
+    // try {
+    //   if (!deviceIsDebuggable) {
+    //     globals.printStatus('Recompile complete. Page requires refresh.');
+    //   } else if (deviceIsDebuggable && !debuggingOptions.buildInfo.isDebug) {
+    //     // On non-debug builds, a hard refresh is required to ensure the
+    //     // up to date sources are loaded.
+    //     await _wipConnection?.sendCommand('Page.reload', <String, Object>{
+    //       'ignoreCache': !debuggingOptions.buildInfo.isDebug,
+    //     });
+    //   } else {
+    //     transferMarker = timer.elapsed;
+    //   }
+    // } on WipError catch (err) {
+    //   globals.printError(err.toString());
+    //   return OperationResult(1, err.toString());
+    // } finally {
+    //   status.stop();
+    // }
+    status.stop();
     final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
     globals.printStatus('Restarted application in $elapsed.');
 
@@ -541,7 +532,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
-        transferTimeInMs: timer.elapsed.inMilliseconds - transferMarker.inMilliseconds
+        // transferTimeInMs: timer.elapsed.inMilliseconds - transferMarker.inMilliseconds
       ).send();
     }
     return OperationResult.ok;
