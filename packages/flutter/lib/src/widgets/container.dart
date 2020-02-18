@@ -293,6 +293,11 @@ class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///
   /// The `height` and `width` values include the padding.
+  ///
+  /// The `color` and `decoration` arguments cannot both be supplied, since
+  /// it would potentially result in the decoration drawing over the background
+  /// color. To supply a decoration with a color, use `decoration: new
+  /// BoxDecoration(color: color)`.
   Container({
     Key key,
     this.alignment,
@@ -312,6 +317,10 @@ class Container extends StatelessWidget {
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(constraints == null || constraints.debugAssertIsValid()),
        assert(clipBehavior != null),
+       assert(color == null || decoration == null,
+         'Cannot provide both a color and a decoration\n'
+         'To provide both, use "decoration: new BoxDecoration(color: color)".'
+       ),
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
