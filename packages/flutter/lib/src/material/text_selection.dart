@@ -62,58 +62,16 @@ class _TextSelectionToolbar extends StatefulWidget {
 }
 
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
-  final GlobalKey _containerKey = GlobalKey();
-  final GlobalKey _moreButtonKey = GlobalKey();
-
-  // The width of all of the items that are being rendered in the closed
-  // toolbar, including the more button if visible.
-  double _menuContentWidth;
-
-  // Keys for all items in the menu.
-  final List<GlobalKey> _itemKeys = <GlobalKey>[];
-
-  // The index of the item that overflows the selection menu, or -1 if
-  // everything fits.
-  int _indexWhereOverflows;
-
   // Whether or not the overflow menu is open.
   bool _overflowOpen = false;
-
-  // Whether the overflow menu exists.
-  bool get _shouldShowMoreButton {
-    final int itemsInFirstMenu = _indexWhereOverflows == -1 ? _itemKeys.length : _indexWhereOverflows;
-    if (_itemKeys.isEmpty || itemsInFirstMenu == null) {
-      return false;
-    }
-    return itemsInFirstMenu < _itemKeys.length;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(_TextSelectionToolbar oldWidget) {
-    // If the widget has been updated, then the content in the menu could have
-    // changed, so it will be necessary to render another frame offscreen and
-    // re-measure.
-    if (widget.menuWidthChanged(oldWidget)) {
-      _menuContentWidth = null;
-    }
-    super.didUpdateWidget(oldWidget);
-  }
 
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     final List<Widget> items = <Widget>[];
-    _itemKeys.removeRange(0, _itemKeys.length);
     if (widget.handleCut != null) {
-      _itemKeys.add(GlobalKey());
       items.add(FlatButton(
-        key: _itemKeys[_itemKeys.length - 1],
         child: Text(localizations.cutButtonLabel),
         onPressed: () {
           setState(() {
@@ -124,9 +82,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       ));
     }
     if (widget.handleCopy != null) {
-      _itemKeys.add(GlobalKey());
       items.add(FlatButton(
-        key: _itemKeys[_itemKeys.length - 1],
         child: Text(localizations.copyButtonLabel),
         onPressed: () {
           setState(() {
@@ -137,9 +93,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       ));
     }
     if (widget.handlePaste != null) {
-      _itemKeys.add(GlobalKey());
       items.add(FlatButton(
-        key: _itemKeys[_itemKeys.length - 1],
         child: Text(localizations.pasteButtonLabel),
         onPressed: () {
           setState(() {
@@ -150,10 +104,9 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       ));
     }
     if (widget.handleSelectAll != null) {
-      _itemKeys.add(GlobalKey());
       items.add(FlatButton(
-        key: _itemKeys[_itemKeys.length - 1],
         child: Text(localizations.selectAllButtonLabel),
+        //child: Text('Select absolutely everything'),
         onPressed: () {
           setState(() {
             _overflowOpen = false;
@@ -169,20 +122,17 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
     }
 
     return _TextSelectionToolbarContainer(
-      key: _containerKey,
-      width: _menuContentWidth,
       child: _TextSelectionToolbarROW(
         isAbove: widget.isAbove,
         overflowOpen: _overflowOpen,
         children: <Widget>[
           Material(
             child: IconButton(
-              key: _moreButtonKey,
               icon: Icon(Icons.more_vert),
               onPressed: () {
                 print('justin pressed more.');
                 setState(() {
-                  _overflowOpen = true;
+                  _overflowOpen = !_overflowOpen;
                 });
               },
               tooltip: 'More',
@@ -210,24 +160,37 @@ class _TextSelectionToolbarContainer extends StatefulWidget {
 }
 
 class _TextSelectionToolbarContainerState extends State<_TextSelectionToolbarContainer> with TickerProviderStateMixin {
+  final GlobalKey _childKey = GlobalKey();
+  double _maxChildWidth;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: widget.width,
+    // Keep track of the largest child width.
+    if (_childKey.currentContext != null) {
+      final RenderBox renderBoxChild = _childKey.currentContext.findRenderObject() as RenderBox;
+      if (_maxChildWidth == null || renderBoxChild.size.width > _maxChildWidth) {
+        _maxChildWidth = renderBoxChild.size.width;
+      }
+    }
+
+    final Material child = Material(
+      elevation: 1.0,
+      child: AnimatedSize(
+        key: _childKey,
+        vsync: this,
+        // This duration was eyeballed on a Pixel 2 emulator running Android
+        // API 28.
+        duration: const Duration(milliseconds: 140),
+        child: widget.child,
+      ),
+    );
+    return _maxChildWidth == null ? child : SizedBox(
+      width: _maxChildWidth,
       child: Align(
-        alignment: Alignment.bottomRight,
+        alignment: Alignment.topRight,
         heightFactor: 1.0,
         widthFactor: 1.0,
-        child: Material(
-          elevation: 1.0,
-          child: AnimatedSize(
-            vsync: this,
-            // This duration was eyeballed on a Pixel 2 emulator running Android
-            // API 28.
-            duration: const Duration(milliseconds: 140),
-            child: widget.child,
-          ),
-        ),
+        child: child,
       ),
     );
   }
@@ -241,14 +204,12 @@ class _TextSelectionToolbarContent extends StatelessWidget {
     @required this.items,
     this.onMorePressed,
     this.showMoreButton = false,
-    this.moreButtonKey,
   }) : assert(items != null),
        super(key: key);
 
   final List<Widget> items;
   final VoidCallback onMorePressed;
   final bool showMoreButton;
-  final GlobalKey moreButtonKey;
 
   @override
   Widget build(BuildContext context) {
@@ -259,7 +220,6 @@ class _TextSelectionToolbarContent extends StatelessWidget {
         children: <Widget>[
           ...items,
           if (showMoreButton) IconButton(
-            key: moreButtonKey,
             icon: Icon(Icons.more_vert),
             tooltip: 'More',
             onPressed: onMorePressed,
@@ -359,7 +319,7 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
     visitChildren((RenderObject renderObjectChild) {
       i++;
       final RenderBox child = renderObjectChild as RenderBox;
-      child.layout(constraints, parentUsesSize: true);
+      child.layout(constraints.loosen(), parentUsesSize: true);
       width += child.size.width;
 
       if (width > constraints.maxWidth && _lastIndexThatFits == -1) {
@@ -371,7 +331,7 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
     // overflow button, then just show it and hide the overflow button.
     final RenderBox navButton = firstChild as RenderBox;
     if (_lastIndexThatFits != -1 && _lastIndexThatFits == childCount - 2
-      && width - navButton.size.width < constraints.maxWidth) {
+      && width - navButton.size.width <= constraints.maxWidth) {
       _lastIndexThatFits = -1;
     }
   }
