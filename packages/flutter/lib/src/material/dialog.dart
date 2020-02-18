@@ -53,8 +53,8 @@ class Dialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.child,
-  }) : assert(clipBehavior != null)
-     , super(key: key);
+  }) : assert(clipBehavior != null),
+       super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -91,9 +91,11 @@ class Dialog extends StatelessWidget {
   final Curve insetAnimationCurve;
 
   /// {@template flutter.material.dialog.insetPadding}
-  /// The amount of padding added to the outside of the dialog.
+  /// The amount of padding added to [MediaQueryData.viewInsets] on the outside
+  /// of the dialog. This defines the minimum space between the screen's edges
+  /// and the dialog.
   ///
-  /// Defaults to `const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0)`.
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0)`.
   /// {@endtemplate}
   final EdgeInsets insetPadding;
 
@@ -256,9 +258,9 @@ class AlertDialog extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
-  }) : assert(contentPadding != null)
-     , assert(clipBehavior != null)
-     , super(key: key);
+  }) : assert(contentPadding != null),
+       assert(clipBehavior != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
