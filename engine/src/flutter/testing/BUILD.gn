@@ -27,6 +27,8 @@ source_set("testing") {
   testonly = true
 
   sources = [
+    "debugger_detection.cc",
+    "debugger_detection.h",
     "run_all_unittests.cc",
     "test_timeout_listener.cc",
     "test_timeout_listener.h",
