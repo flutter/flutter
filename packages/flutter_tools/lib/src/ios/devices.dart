@@ -277,13 +277,13 @@ class IOSDevice extends Device {
           ipv6: ipv6,
         );
       }
-      final int installationResult = await IOSDeploy.instance.runApp(
+      final int installationResult = await _iosDeploy.runApp(
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: launchArguments,
       );
       if (installationResult != 0) {
-        globals.printError('Could not install ${bundle.path} on $id.');
+        globals.printError('Could not run ${bundle.path} on $id.');
         globals.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
         globals.printError('  open ios/Runner.xcworkspace');
         globals.printError('');

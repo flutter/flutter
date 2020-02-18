@@ -261,6 +261,7 @@ void main() {
       MockArtifacts mockArtifacts;
       MockCache mockCache;
       MockFileSystem mockFileSystem;
+      MockPlatform mockPlatform;
       MockProcessManager mockProcessManager;
       MockDeviceLogReader mockLogReader;
       MockMDnsObservatoryDiscovery mockMDnsObservatoryDiscovery;
@@ -293,6 +294,8 @@ void main() {
         mockCache = MockCache();
         when(mockCache.dyLdLibEntry).thenReturn(libraryEntry);
         mockFileSystem = MockFileSystem();
+        mockPlatform = MockPlatform();
+        when(mockPlatform.isMacOS).thenReturn(true);
         mockMDnsObservatoryDiscovery = MockMDnsObservatoryDiscovery();
         mockProcessManager = MockProcessManager();
         mockLogReader = MockDeviceLogReader();
@@ -373,26 +376,29 @@ void main() {
         device.setLogReader(mockApp, mockLogReader);
         await device.dispose();
         verify(mockPortForwarder.dispose()).called(1);
-      }, overrides: <Type, Generator>{
-        //Platform: () => macPlatform,
       });
 
-      testUsingContext(' succeeds in debug mode via mDNS', () async {
+      testUsingContext('succeeds in debug mode via mDNS', () async {
         final IOSDevice device = IOSDevice(
           '123',
+          name: 'iPhone 1',
+          sdkVersion: '13.3',
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
           platform: macPlatform,
           iosDeploy: mockIosDeploy,
-          name: 'iPhone 1',
-          sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
         );
         when(mockIosDeploy.installApp(
           deviceId: device.id,
           bundlePath: anyNamed('bundlePath'),
-          launchArguments: <String>[])
-        ).thenAnswer((Invocation invocation) => Future<int>.value(0));
+          launchArguments: <String>[],
+        )).thenAnswer((Invocation invocation) => Future<int>.value(0));
+        when(mockIosDeploy.runApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation invocation) => Future<int>.value(0));
         device.portForwarder = mockPortForwarder;
         device.setLogReader(mockApp, mockLogReader);
         final Uri uri = Uri(
@@ -485,6 +491,11 @@ void main() {
         when(
           mockIosDeploy.installApp(deviceId: device.id, bundlePath: anyNamed('bundlePath'), launchArguments: <String>[])
         ).thenAnswer((Invocation invocation) => Future<int>.value(0));
+        when(mockIosDeploy.runApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation invocation) => Future<int>.value(0));
         device.portForwarder = mockPortForwarder;
         device.setLogReader(mockApp, mockLogReader);
         // Now that the reader is used, start writing messages to it.
@@ -531,6 +542,11 @@ void main() {
           bundlePath: anyNamed('bundlePath'),
           launchArguments: <String>[],
         )).thenAnswer((Invocation invocation) => Future<int>.value(0));
+        when(mockIosDeploy.runApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation invocation) => Future<int>.value(0));
         device.portForwarder = mockPortForwarder;
         device.setLogReader(mockApp, mockLogReader);
 
@@ -568,21 +584,44 @@ void main() {
       });
 
       testUsingContext('succeeds in release mode', () async {
-        final IOSDevice device = IOSDevice('123', name: 'iPhone 1', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64);
+        final IOSDevice device = IOSDevice(
+          '123',
+          name: 'iPhone 1',
+          fileSystem: mockFileSystem,
+          sdkVersion: '13.3',
+          cpuArchitecture: DarwinArch.arm64,
+          platform: mockPlatform,
+          artifacts: mockArtifacts,
+          iosDeploy: mockIosDeploy,
+        );
+        when(mockIosDeploy.installApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: <String>[],
+        )).thenAnswer((Invocation invocation) => Future<int>.value(0));
+        when(mockIosDeploy.runApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation invocation) => Future<int>.value(0));
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
           platformArgs: <String, dynamic>{},
         );
+        verify(mockIosDeploy.installApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: <String>[],
+        ));
+        verify(mockIosDeploy.runApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        ));
         expect(launchResult.started, isTrue);
         expect(launchResult.hasObservatory, isFalse);
         expect(await device.stopApp(mockApp), isFalse);
-      }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
-        Cache: () => mockCache,
-        FileSystem: () => mockFileSystem,
-        Platform: () => macPlatform,
-        ProcessManager: () => mockProcessManager,
       });
 
       testUsingContext('succeeds with --cache-sksl', () async {
@@ -831,15 +870,11 @@ void main() {
       MockLogger mockLogger;
       MockPlatform mockPlatform;
       FullMockProcessManager mockProcessManager;
-      const String installerPath = '/path/to/ideviceinstaller'; //TODO
       const String iosDeployPath = '/path/to/ios-deploy';
       const String appId = '789';
       const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
         'DYLD_LIBRARY_PATH',
         '/path/to/libraries',
-      );
-      final Map<String, String> env = Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[libraryEntry]
       );
       IOSDeploy iosDeploy;
 
@@ -952,9 +987,27 @@ void main() {
 
   group('getAttachedDevices', () {
     MockXcdevice mockXcdevice;
+    MockArtifacts mockArtifacts;
+    MockCache mockCache;
+    MockFileSystem mockFileSystem;
+    MockLogger mockLogger;
+    FullMockProcessManager mockProcessManager;
+    IOSDeploy iosDeploy;
 
     setUp(() {
       mockXcdevice = MockXcdevice();
+      mockArtifacts = MockArtifacts();
+      mockCache = MockCache();
+      mockLogger = MockLogger();
+      mockFileSystem = MockFileSystem();
+      mockProcessManager = FullMockProcessManager();
+      iosDeploy = IOSDeploy(
+        artifacts: mockArtifacts,
+        cache: mockCache,
+        logger: mockLogger,
+        platform: macPlatform,
+        processManager: mockProcessManager,
+      );
     });
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
@@ -968,17 +1021,25 @@ void main() {
       });
     }
 
-    testUsingContext('returns attached devices', () async {
+    testWithoutContext('returns attached devices', () async {
       when(mockXcdevice.isInstalled).thenReturn(true);
-      final IOSDevice device = IOSDevice('d83d5bc53967baa0ee18626ba87b6254b2ab5418', name: 'Paired iPhone', sdkVersion: '13.3', cpuArchitecture: DarwinArch.arm64);
+
+      final IOSDevice device = IOSDevice(
+        'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
+        name: 'Paired iPhone',
+        sdkVersion: '13.3',
+        cpuArchitecture: DarwinArch.arm64,
+        artifacts: mockArtifacts,
+        iosDeploy: iosDeploy,
+        platform: macPlatform,
+        fileSystem: mockFileSystem,
+      );
       when(mockXcdevice.getAvailableTetheredIOSDevices())
           .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[device]));
 
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices(macPlatform, mockXcdevice);
       expect(devices, hasLength(1));
       expect(identical(devices.first, device), isTrue);
-    }, overrides: <Type, Generator>{
-      Platform: () => macPlatform,
     });
   });
 
@@ -1025,10 +1086,28 @@ void main() {
   group('logging', () {
     MockIMobileDevice mockIMobileDevice;
     MockIosProject mockIosProject;
+    MockArtifacts mockArtifacts;
+    MockCache mockCache;
+    MockFileSystem mockFileSystem;
+    MockLogger mockLogger;
+    FullMockProcessManager mockProcessManager;
+    IOSDeploy iosDeploy;
 
     setUp(() {
       mockIMobileDevice = MockIMobileDevice();
       mockIosProject = MockIosProject();
+      mockArtifacts = MockArtifacts();
+      mockCache = MockCache();
+      mockLogger = MockLogger();
+      mockFileSystem = MockFileSystem();
+      mockProcessManager = FullMockProcessManager();
+      iosDeploy = IOSDeploy(
+        artifacts: mockArtifacts,
+        cache: mockCache,
+        logger: mockLogger,
+        platform: macPlatform,
+        processManager: mockProcessManager,
+      );
     });
 
     testUsingContext('suppresses non-Flutter lines from output', () async {
@@ -1045,7 +1124,16 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
         return Future<Process>.value(mockProcess);
       });
 
-      final IOSDevice device = IOSDevice('123456', name: 'iPhone 1', sdkVersion: '10.3', cpuArchitecture: DarwinArch.arm64);
+      final IOSDevice device = IOSDevice(
+        '123456',
+        name: 'iPhone 1',
+        sdkVersion: '10.3',
+        cpuArchitecture: DarwinArch.arm64,
+        artifacts: mockArtifacts,
+        iosDeploy: iosDeploy,
+        platform: macPlatform,
+        fileSystem: mockFileSystem,
+      );
       final DeviceLogReader logReader = device.getLogReader(
         app: await BuildableIOSApp.fromProject(mockIosProject),
       );
@@ -1071,7 +1159,16 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         return Future<Process>.value(mockProcess);
       });
 
-      final IOSDevice device = IOSDevice('123456', name: 'iPhone 1', sdkVersion: '10.3', cpuArchitecture: DarwinArch.arm64);
+      final IOSDevice device = IOSDevice(
+        '123456',
+        name: 'iPhone 1',
+        sdkVersion: '10.3',
+        cpuArchitecture: DarwinArch.arm64,
+        artifacts: mockArtifacts,
+        iosDeploy: iosDeploy,
+        platform: macPlatform,
+        fileSystem: mockFileSystem,
+      );
       final DeviceLogReader logReader = device.getLogReader(
         app: await BuildableIOSApp.fromProject(mockIosProject),
       );
