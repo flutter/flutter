@@ -7114,6 +7114,9 @@ class _RenderColoredBox extends RenderProxyBox {
   }
 
   @override
+  bool hitTestSelf(Offset position) => true;
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (size > Size.zero) {
       context.canvas.drawRect(offset & size, Paint()..color = color);
