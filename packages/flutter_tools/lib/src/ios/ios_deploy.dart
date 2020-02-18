@@ -9,7 +9,6 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
-import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -34,9 +33,6 @@ class IOSDeploy {
   final Logger _logger;
   final Platform _platform;
   final ProcessUtils _processUtils;
-
-  // TODO(fujino): refactor all uses of this to directly inject IOSDeploy
-  static IOSDeploy get instance => context.get<IOSDeploy>();
 
   Map<String, String> get iosDeployEnv {
     // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
