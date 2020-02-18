@@ -99,7 +99,8 @@ void main() {
     expect(parent.innerHtml, '<a></a><b></b><c></c><d></d>');
   });
 
-  test('inneheight/innerWidth are equal to visualViewport height and width', () {
+  test('innerHeight/innerWidth are equal to visualViewport height and width',
+      () {
     if (html.window.visualViewport != null) {
       expect(html.window.visualViewport.width, html.window.innerWidth);
       expect(html.window.visualViewport.height, html.window.innerHeight);
@@ -115,13 +116,16 @@ void main() {
 
     final DomRenderer renderer = DomRenderer();
     renderer.reset();
-  }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-      skip: (browserEngine == BrowserEngine.firefox));
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50828
+      skip: (browserEngine == BrowserEngine.firefox ||
+          browserEngine == BrowserEngine.edge));
 
   test('accesibility placeholder is attached after creation', () {
     DomRenderer();
 
     expect(html.document.getElementsByTagName('flt-semantics-placeholder'),
-          isNotEmpty);
+        isNotEmpty);
   });
 }

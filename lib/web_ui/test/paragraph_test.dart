@@ -104,10 +104,11 @@ void main() async {
       expect(paragraph.minIntrinsicWidth, fontSize * 10.0);
       expect(paragraph.maxIntrinsicWidth, fontSize * 10.0);
     }
-  }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50771
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
-      skip: (browserEngine == BrowserEngine.firefox ||
-          browserEngine == BrowserEngine.webkit));
+      skip: (browserEngine != BrowserEngine.blink));
 
   testEachMeasurement('predictably lays out a multi-line rich paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
@@ -129,10 +130,11 @@ void main() async {
       expect(paragraph.minIntrinsicWidth, fontSize * 5.0);
       expect(paragraph.maxIntrinsicWidth, fontSize * 16.0);
     }
-  }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+  },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
-      skip: (browserEngine == BrowserEngine.firefox ||
-          browserEngine == BrowserEngine.webkit));
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50771
+      skip: (browserEngine != BrowserEngine.blink));
 
   testEachMeasurement('getPositionForOffset single-line', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
@@ -328,7 +330,6 @@ void main() async {
       TextPosition(offset: 2, affinity: TextAffinity.upstream),
     );
 
-
     // Second line: "abcdefg\n"
 
     // At the beginning of the second line.
@@ -353,7 +354,6 @@ void main() async {
       paragraph.getPositionForOffset(Offset(15.0 + 46, 15)),
       TextPosition(offset: 10, affinity: TextAffinity.upstream),
     );
-
 
     // Last (third) line: "ab"
 
