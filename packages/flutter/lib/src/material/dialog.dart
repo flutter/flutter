@@ -98,7 +98,7 @@ class Dialog extends StatelessWidget {
   final EdgeInsets insetPadding;
 
   /// {@template flutter.material.dialog.clipBehavior}
-  /// Controls how the contents of the Dialog are clipped (or not) to the given
+  /// Controls how the contents of the dialog are clipped (or not) to the given
   /// [shape].
   ///
   /// See the enum [Clip] for details of all possible options and their common
