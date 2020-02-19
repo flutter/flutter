@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show ProcessException;
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -54,11 +55,15 @@ Future<bool> installApp(Device device, ApplicationPackage package, { bool uninst
     return false;
   }
 
-  if (uninstall && await device.isAppInstalled(package)) {
-    globals.printStatus('Uninstalling old version...');
-    if (!await device.uninstallApp(package)) {
-      globals.printError('Warning: uninstalling old version failed');
+  try {
+    if (uninstall && await device.isAppInstalled(package)) {
+      globals.printStatus('Uninstalling old version...');
+      if (!await device.uninstallApp(package)) {
+        globals.printError('Warning: uninstalling old version failed');
+      }
     }
+  } on ProcessException catch (e) {
+    globals.printError('Error accessing device ${device.id}:\n${e.message}');
   }
 
   return device.installApp(package);
