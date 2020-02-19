@@ -302,7 +302,6 @@ void main() {
       buildMode: BuildMode.debug,
       enableDwds: false,
       entrypoint: Uri.base,
-      testMode: true,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.dartSdk
