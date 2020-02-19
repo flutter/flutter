@@ -79,7 +79,10 @@ void main() {
     setUp(() {
       mockArtifacts = MockArtifacts();
       mockCache = MockCache();
+      const MapEntry<String, String> dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path/to/libs');
+      when(mockCache.dyLdLibEntry).thenReturn(dyLdLibEntry);
       mockFileSystem = MockFileSystem();
+      mockLogger = MockLogger();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
         cache: mockCache,
@@ -174,6 +177,79 @@ void main() {
         );
       });
     }
+
+    group('ios-deploy wrappers', () {
+      const String appId = '789';
+      IOSDevice device;
+      IOSDeploy iosDeploy;
+      FullMockProcessManager mockProcessManager;
+
+      setUp(() {
+        mockProcessManager = FullMockProcessManager();
+        iosDeploy = IOSDeploy(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          logger: mockLogger,
+          platform: macPlatform,
+          processManager: mockProcessManager,
+        );
+
+        device = IOSDevice(
+          'device-123',
+          artifacts: mockArtifacts,
+          fileSystem: mockFileSystem,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          name: 'iPhone 1',
+          sdkVersion: '13.3',
+          cpuArchitecture: DarwinArch.arm64,
+        );
+      });
+
+      testUsingContext('isAppInstalled() catches ProcessException from ios-deploy', () async {
+        final MockIOSApp mockApp = MockIOSApp();
+        when(mockApp.id).thenReturn(appId);
+        when(mockProcessManager.run(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        )).thenThrow(const ProcessException('ios-deploy', <String>[]));
+
+        final bool result = await device.isAppInstalled(mockApp);
+        expect(result, false);
+      });
+
+      testUsingContext('installApp() catches ProcessException from ios-deploy', () async {
+        const String bundlePath = '/path/to/bundle';
+        final MockIOSApp mockApp = MockIOSApp();
+        when(mockApp.id).thenReturn(appId);
+        when(mockApp.deviceBundlePath).thenReturn(bundlePath);
+        final MockDirectory mockDirectory = MockDirectory();
+        when(mockFileSystem.directory(bundlePath)).thenReturn(mockDirectory);
+        when(mockDirectory.existsSync()).thenReturn(true);
+        when(mockProcessManager.start(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        )).thenThrow(const ProcessException('ios-deploy', <String>[]));
+
+        final bool result = await device.installApp(mockApp);
+        expect(result, false);
+      });
+
+      testUsingContext('uninstallApp() catches ProcessException from ios-deploy', () async {
+        final MockIOSApp mockApp = MockIOSApp();
+        when(mockApp.id).thenReturn(appId);
+        when(mockProcessManager.start(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        )).thenThrow(const ProcessException('ios-deploy', <String>[]));
+
+        final bool result = await device.uninstallApp(mockApp);
+        expect(result, false);
+      });
+    });
 
     group('.dispose()', () {
       IOSDevice device;
