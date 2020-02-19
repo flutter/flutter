@@ -26,6 +26,8 @@ import 'theme_data.dart';
 // enum Department { treasury, state }
 // BuildContext context;
 
+const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
+
 /// A material design dialog.
 ///
 /// This dialog widget does not have any opinion about the contents of the
@@ -49,7 +51,7 @@ class Dialog extends StatelessWidget {
     this.elevation,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
-    this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+    this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
     this.child,
@@ -254,7 +256,7 @@ class AlertDialog extends StatelessWidget {
     this.backgroundColor,
     this.elevation,
     this.semanticLabel,
-    this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+    this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
