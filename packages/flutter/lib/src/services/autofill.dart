@@ -44,11 +44,3 @@ class AutofillConfiguration {
     };
   }
 }
-
-class TaggedTextInput {
- 
-}
-
-abstract class TaggedTextInputClient {
-  const TaggedTextInputClient();
-}

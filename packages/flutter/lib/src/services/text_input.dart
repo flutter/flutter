@@ -14,6 +14,7 @@ import 'dart:ui' show
   hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
@@ -765,10 +766,12 @@ abstract class TextInputClient {
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue get currentTextEditingValue;
 
+  StrictFormState get currentScope;
   /// Platform notified framework of closed connection.
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
+
 }
 
 /// An interface for interacting with a text input control.
@@ -1067,6 +1070,17 @@ class TextInput {
     }
 
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
+
+    if (method == 'TextInputClient.updateEditingStateWithTag') {
+      final Map<String, Map<String, dynamic>> editingValue = args[1] as Map<String, Map<String, dynamic>>;
+      assert(_currentConnection._client != null);
+      final StrictFormState form = _currentConnection._client.currentScope;
+      for (final String tag in editingValue.keys) {
+        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(editingValue[tag]);
+        form.controller(tag).updateEditingValue(textEditingValue);
+      }
+    }
+
     final int client = args[0] as int;
     // The incoming message was for a different client.
     if (client != _currentConnection._id)
