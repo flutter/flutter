@@ -395,6 +395,44 @@ void main() {
     resizeImage.load(await resizeImage.obtainKey(ImageConfiguration.empty), decode);
   });
 
+  test('ResizeImage handles sync obtainKey', () async {
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage memoryImage = MemoryImage(bytes);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
+
+    final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+      expect(cacheWidth, 123);
+      expect(cacheHeight, 321);
+      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+    };
+
+    bool isAsync = false;
+    resizeImage.obtainKey(ImageConfiguration.empty).then((Object key) {
+      expect(isAsync, false);
+    });
+    isAsync = true;
+    expect(isAsync, true);
+  });
+
+  test('ResizeImage handles async obtainKey', () async {
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MockMemoryImage memoryImage = MockMemoryImage(bytes);
+    final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
+
+    final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+      expect(cacheWidth, 123);
+      expect(cacheHeight, 321);
+      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
+    };
+
+    bool isAsync = false;
+    resizeImage.obtainKey(ImageConfiguration.empty).then((Object key) {
+      expect(isAsync, true);
+    });
+    isAsync = true;
+    expect(isAsync, true);
+  });
+
   test('File image with empty file throws expected error (load)', () async {
     final Completer<StateError> error = Completer<StateError>();
     FlutterError.onError = (FlutterErrorDetails details) {
@@ -423,6 +461,15 @@ Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
   );
   stream.addListener(listener);
   return await completer.future;
+}
+
+class MockMemoryImage extends MemoryImage {
+  MockMemoryImage(Uint8List bytes) : super(bytes) {}
+
+  @override
+  Future<MemoryImage> obtainKey(ImageConfiguration configuration) {
+    return Future<MemoryImage>(() => this);
+  }
 }
 
 class MockHttpClient extends Mock implements HttpClient {}
