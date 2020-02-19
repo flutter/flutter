@@ -66,7 +66,9 @@ class WebAssetServer implements AssetReader {
       // In release builds deploy a simpler proxy server.
       if (buildMode != BuildMode.debug) {
         final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(entrypoint);
-        shelf.serveRequests(httpServer, releaseAssetServer.handle);
+        if (!testMode) {
+          shelf.serveRequests(httpServer, releaseAssetServer.handle);
+        }
         return server;
       }
       // In debug builds, spin up DWDS and the full asset server.
