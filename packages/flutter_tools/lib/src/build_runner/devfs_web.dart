@@ -90,12 +90,12 @@ class WebAssetServer implements AssetReader {
       if (enableDwds) {
         pipeline = pipeline.addMiddleware(dwds.middleware);
       }
-      final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
-      final shelf.Cascade cascade = shelf.Cascade()
-        .add(dwds.handler)
-        .add(dwdsHandler);
       if (!testMode) {
-        shelf.serveRequests(httpServer, cascade.handler);
+        final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
+        final shelf.Cascade cascade = shelf.Cascade()
+          .add(dwds.handler)
+          .add(dwdsHandler);
+          shelf.serveRequests(httpServer, cascade.handler);
       }
       server.dwds = dwds;
       return server;
