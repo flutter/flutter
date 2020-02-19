@@ -483,47 +483,7 @@ void main() {
       expect(scope1.focusedChild, equals(child1));
       expect(scope2.focusedChild, equals(child4));
     });
-    testWidgets('Unfocus with disposition root works properly', (WidgetTester tester) async {
-      final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
-      final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
-      final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'child1');
-      final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'child2');
-      final FocusAttachment child2Attachment = child2.attach(context);
-      scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
-      parent1Attachment.reparent(parent: scope1);
-      child1Attachment.reparent(parent: parent1);
-      child2Attachment.reparent(parent: parent1);
-
-      child1.requestFocus();
-      await tester.pump();
-      expect(scope1.focusedChild, equals(child1));
-
-      // Default is UnfocusDisposition.root.
-      child1.unfocus();
-      await tester.pump();
-      expect(scope1.focusedChild, isNull);
-      expect(child1.hasPrimaryFocus, isFalse);
-      expect(scope1.hasFocus, isFalse);
-      expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
-
-      // Can re-focus child.
-      child1.requestFocus();
-      await tester.pump();
-      expect(scope1.focusedChild, equals(child1));
-      expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
-
-      // When the scope is unfocused, the child gets unfocused.
-      scope1.unfocus(disposition: UnfocusDisposition.root);
-      await tester.pump();
-      expect(scope1.focusedChild, equals(child1));
-      expect(child1.hasPrimaryFocus, isFalse);
-      expect(scope1.hasFocus, isFalse);
-    });
-    testWidgets('Unfocus with disposition pop works properly', (WidgetTester tester) async {
+    testWidgets('Unfocus with disposition previouslyFocusedChild works properly', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       final FocusAttachment scope1Attachment = scope1.attach(context);
@@ -562,7 +522,7 @@ void main() {
       expect(scope1.focusedChild, equals(child1));
       expect(scope2.focusedChild, equals(child3));
 
-      child1.unfocus(disposition: UnfocusDisposition.pop);
+      child1.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       await tester.pump();
       expect(scope1.focusedChild, equals(child2));
       expect(scope2.focusedChild, equals(child3));
@@ -582,7 +542,7 @@ void main() {
       expect(child3.hasPrimaryFocus, isFalse);
 
       // The same thing happens when unfocusing a second time.
-      child1.unfocus(disposition: UnfocusDisposition.pop);
+      child1.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       await tester.pump();
       expect(scope1.focusedChild, equals(child2));
       expect(scope2.focusedChild, equals(child3));
@@ -594,7 +554,7 @@ void main() {
       // When the scope gets unfocused, then the sibling scope gets focus.
       child1.requestFocus();
       await tester.pump();
-      scope1.unfocus(disposition: UnfocusDisposition.pop);
+      scope1.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       await tester.pump();
       expect(scope1.focusedChild, equals(child1));
       expect(scope2.focusedChild, equals(child3));
@@ -645,7 +605,7 @@ void main() {
       child1.unfocus(disposition: UnfocusDisposition.scope);
       await tester.pump();
       // Focused child doesn't change.
-      expect(scope1.focusedChild, equals(child1));
+      expect(scope1.focusedChild, equals(child2));
       expect(scope2.focusedChild, equals(child3));
       // Focus does change.
       expect(scope1.hasPrimaryFocus, isTrue);
@@ -666,7 +626,7 @@ void main() {
       // The same thing happens when unfocusing a second time.
       child1.unfocus(disposition: UnfocusDisposition.scope);
       await tester.pump();
-      expect(scope1.focusedChild, equals(child1));
+      expect(scope1.focusedChild, equals(child2));
       expect(scope2.focusedChild, equals(child3));
       expect(scope1.hasPrimaryFocus, isTrue);
       expect(scope2.hasFocus, isFalse);
@@ -1031,11 +991,11 @@ void main() {
     child1.unfocus();
     await tester.pump();
     expect(topFocus, isFalse);
-    expect(parent1Focus, isFalse);
+    expect(parent1Focus, isTrue);
     expect(child1Focus, isFalse);
     expect(parent2Focus, isFalse);
     expect(child2Focus, isFalse);
-    expect(topNotify, equals(1));
+    expect(topNotify, equals(0));
     expect(parent1Notify, equals(1));
     expect(child1Notify, equals(1));
     expect(parent2Notify, equals(0));
@@ -1044,12 +1004,12 @@ void main() {
     clear();
     child1.requestFocus();
     await tester.pump();
-    expect(topFocus, isTrue);
+    expect(topFocus, isFalse);
     expect(parent1Focus, isTrue);
     expect(child1Focus, isTrue);
     expect(parent2Focus, isFalse);
     expect(child2Focus, isFalse);
-    expect(topNotify, equals(1));
+    expect(topNotify, equals(0));
     expect(parent1Notify, equals(1));
     expect(child1Notify, equals(1));
     expect(parent2Notify, equals(0));
