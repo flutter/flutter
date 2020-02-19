@@ -7,10 +7,12 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -42,6 +44,8 @@ void main() {
       environment = Environment.test(globals.fs.currentDirectory, defines: <String, String>{
         kTargetPlatform: 'ios',
       });
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(operatingSystem: 'macos', environment: const <String, String>{}),
     });
   });
 
@@ -159,6 +163,76 @@ void main() {
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
     expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
+  }));
+
+  test('UnpackIOSEngine throws without build mode', () => testbed.run(() async {
+    expect(const UnpackIOSEngine().build(environment),
+      throwsA(isA<MissingDefineException>()));
+  }));
+
+  test('UnpackIOSEngine for regular project', () => testbed.run(() async {
+    environment.defines[kBuildMode] = getNameForBuildMode(BuildMode.profile);
+    environment.outputDir.createSync();
+    environment.buildDir.createSync(recursive: true);
+    globals.fs.directory('bin/cache/artifacts/engine/ios-profile/Flutter.framework')
+      ..createSync(recursive: true);
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'cp',
+        '-r',
+        '--',
+        'bin/cache/artifacts/engine/ios-profile/Flutter.framework',
+        '/',
+      ]),
+      const FakeCommand(command: <String>[
+        'cp',
+        '-r',
+        '--',
+        'bin/cache/artifacts/engine/ios-profile/Flutter.podspec',
+        '/',
+      ]),
+    ]);
+
+    await const UnpackIOSEngine().build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+    Platform: () => FakePlatform(operatingSystem: 'macos'),
+  }));
+
+  test('UnpackIOSEngine for module', () => testbed.run(() async {
+    environment.defines[kBuildMode] = getNameForBuildMode(BuildMode.profile);
+    environment.outputDir.createSync();
+    environment.buildDir.createSync(recursive: true);
+    globals.fs.file('bin/cache/artifacts/engine/ios-profile/Flutter.framework/a')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('A');
+    globals.fs.file('pubspec.yaml')
+      ..writeAsStringSync('''
+flutter:
+  module:
+    androidPackage: com.example.iosadd2appflutter
+    iosBundleIdentifier: com.example.iosAdd2appFlutter
+''');
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'cp',
+        '-r',
+        '--',
+        'bin/cache/artifacts/engine/ios-profile/Flutter.framework',
+        '/engine',
+      ]),
+      const FakeCommand(command: <String>[
+        'cp',
+        '-r',
+        '--',
+        'bin/cache/artifacts/engine/ios-profile/Flutter.podspec',
+        '/engine',
+      ]),
+    ]);
+
+    await const UnpackIOSEngine().build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
   }));
 }
 
