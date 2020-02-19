@@ -41,6 +41,9 @@ const String kExtraFrontEndOptions = 'ExtraFrontEndOptions';
 /// This is expected to be a comma separated list of strings.
 const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
+/// Whether to strip source code information out of release builds and where to save it.
+const String kSplitDebugInfo = 'SplitDebugInfo';
+
 /// Alternative scheme for file URIs.
 ///
 /// May be used along with [kFileSystemRoots] to support a multi-root
@@ -111,7 +114,15 @@ class CopyFlutterBundle extends Target {
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
     final Depfile assetDepfile = await copyAssets(environment, environment.outputDir);
-    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      assetDepfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
   }
 
   @override
@@ -259,6 +270,7 @@ abstract class AotElfBase extends Target {
       ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+    final String saveDebuggingInformation = environment.defines[kSplitDebugInfo];
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
@@ -267,6 +279,7 @@ abstract class AotElfBase extends Target {
       outputPath: outputPath,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
+      splitDebugInfo: saveDebuggingInformation
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

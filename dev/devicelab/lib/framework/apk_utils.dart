@@ -193,7 +193,7 @@ Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
   final ApkExtractor extractor = ApkExtractor(apk);
   for (final String className in classes) {
     if (!(await extractor.containsClass(className))) {
-      throw Exception('APK doesn\'t contain class `$className`.');
+      throw Exception("APK doesn't contain class `$className`.");
     }
   }
   extractor.dispose();

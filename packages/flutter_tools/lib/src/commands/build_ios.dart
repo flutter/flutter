@@ -19,6 +19,7 @@ import 'build.dart';
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
     addTreeShakeIconsFlag();
+    addSplitDebugInfoOption();
     addBuildModeFlags(defaultToRelease: false);
     usesTargetOption();
     usesFlavorOption();

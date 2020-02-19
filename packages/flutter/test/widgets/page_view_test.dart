@@ -682,6 +682,48 @@ void main() {
       }
   });
 
+  testWidgets('the current item remains centered on constraint change', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/50505.
+    final PageController controller = PageController(
+      initialPage: kStates.length - 1,
+      viewportFraction: 0.5,
+    );
+
+    Widget build(Size size) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: PageView(
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
+              controller: controller,
+              onPageChanged: (int page) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Verifies that the last item is centered on screen.
+    void verifyCentered() {
+      expect(
+        tester.getCenter(find.text(kStates.last)),
+        offsetMoreOrLessEquals(const Offset(400, 300)),
+      );
+    }
+
+    await tester.pumpWidget(build(const Size(300, 300)));
+    await tester.pumpAndSettle();
+
+    verifyCentered();
+
+    await tester.pumpWidget(build(const Size(200, 300)));
+    await tester.pumpAndSettle();
+
+    verifyCentered();
+  });
+
   testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {
     final PageController controller = PageController(
       initialPage: kStates.length - 1,

@@ -18,6 +18,7 @@ import 'build.dart';
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand() {
     addTreeShakeIconsFlag();
+    addSplitDebugInfoOption();
     usesTargetOption();
     addBuildModeFlags();
   }

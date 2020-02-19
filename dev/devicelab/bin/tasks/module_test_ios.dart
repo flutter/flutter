@@ -270,10 +270,10 @@ Future<void> main() async {
       final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
       if (!objectiveCAnalyticsOutput.contains('cd24: ios')
           || !objectiveCAnalyticsOutput.contains('cd25: true')
-          || !objectiveCAnalyticsOutput.contains('viewName: build/bundle')) {
+          || !objectiveCAnalyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
           'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput" '
-          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
         );
       }
 
@@ -359,10 +359,10 @@ Future<void> main() async {
       final String swiftAnalyticsOutput = swiftAnalyticsOutputFile.readAsStringSync();
       if (!swiftAnalyticsOutput.contains('cd24: ios')
           || !swiftAnalyticsOutput.contains('cd25: true')
-          || !swiftAnalyticsOutput.contains('viewName: build/bundle')) {
+          || !swiftAnalyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
           'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput" '
-          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
         );
       }
 

@@ -78,4 +78,19 @@ void main() {
       expect(() => BuildMode.fromName('foo'), throwsArgumentError);
     });
   });
+
+  test('getNameForTargetPlatform on Darwin arches', () {
+    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.arm64), 'ios-arm64');
+    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.armv7), 'ios-armv7');
+    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.x86_64), 'ios-x86_64');
+    expect(getNameForTargetPlatform(TargetPlatform.android), isNot(contains('ios')));
+  });
+
+  test('getIOSArchForName on Darwin arches', () {
+    expect(getIOSArchForName('armv7'), DarwinArch.armv7);
+    expect(getIOSArchForName('arm64'), DarwinArch.arm64);
+    expect(getIOSArchForName('arm64e'), DarwinArch.arm64);
+    expect(getIOSArchForName('x86_64'), DarwinArch.x86_64);
+    expect(() => getIOSArchForName('bogus'), throwsAssertionError);
+  });
 }

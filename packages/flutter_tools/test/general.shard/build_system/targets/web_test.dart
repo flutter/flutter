@@ -24,6 +24,7 @@ void main() {
   Environment environment;
   MockPlatform mockPlatform;
   MockPlatform  mockWindowsPlatform;
+  DepfileService depfileService;
 
   setUp(() {
     mockPlatform = MockPlatform();
@@ -53,6 +54,11 @@ void main() {
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
         }
       );
+      depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
       environment.buildDir.createSync(recursive: true);
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatform,
@@ -315,7 +321,7 @@ void main() {
     await const Dart2JSTarget().build(environment);
 
     expect(environment.buildDir.childFile('dart2js.d').existsSync(), true);
-    final Depfile depfile = Depfile.parse(environment.buildDir.childFile('dart2js.d'));
+    final Depfile depfile = depfileService.parse(environment.buildDir.childFile('dart2js.d'));
 
     expect(depfile.inputs.single.path, globals.fs.path.absolute('a.dart'));
     expect(depfile.outputs.single.path,

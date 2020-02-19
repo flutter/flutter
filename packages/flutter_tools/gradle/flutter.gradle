@@ -603,6 +603,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
+        String splitDebugInfoValue = null
+        if (project.hasProperty('split-debug-info')) {
+            splitDebugInfoValue = project.property('split-debug-info')
+        }
         Boolean treeShakeIconsOptionsValue = false
         if (project.hasProperty('tree-shake-icons')) {
             treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
@@ -641,7 +645,17 @@ class FlutterPlugin implements Plugin<Project> {
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
+                splitDebugInfo splitDebugInfoValue
                 treeShakeIcons treeShakeIconsOptionsValue
+                doLast {
+                    project.exec {
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                            commandLine('cmd', '/c', 'attrib -r ${assetsDirectory}/* /s')
+                        } else {
+                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
+                        }
+                    }
+                }
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -775,6 +789,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     String extraGenSnapshotOptions
     @Optional @Input
+    String splitDebugInfo
+    @Optional @Input
     Boolean treeShakeIcons
 
     @OutputFiles
@@ -832,6 +848,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
+            if (splitDebugInfo != null) {
+                args "-dSplitDebugInfo=${splitDebugInfo}"
+            }
             if (treeShakeIcons == true) {
                 args "-dTreeShakeIcons=true"
             }
@@ -847,6 +866,10 @@ class FlutterTask extends BaseFlutterTask {
     @OutputDirectory
     File getOutputDirectory() {
         return intermediateDir
+    }
+
+    String getAssetsDirectory() {
+        return "${outputDirectory}/flutter_assets"
     }
 
     CopySpec getAssets() {

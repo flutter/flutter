@@ -73,7 +73,7 @@ Future<void> main(List<String> arguments) async {
 
   final StringBuffer contents = StringBuffer('library temp_doc;\n\n');
   for (final String libraryRef in libraryRefs()) {
-    contents.writeln('import \'package:$libraryRef\';');
+    contents.writeln("import 'package:$libraryRef';");
   }
   File('$kDocsRoot/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 

@@ -638,7 +638,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         if (widget is Tooltip) {
           final Iterable<Element> matches = find.byTooltip(widget.message).evaluate();
           if (matches.length == 1) {
-            debugPrint('  find.byTooltip(\'${widget.message}\')');
+            debugPrint("  find.byTooltip('${widget.message}')");
             continue;
           }
         }
@@ -648,7 +648,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           final Iterable<Element> matches = find.text(widget.data).evaluate();
           descendantText = widget.data;
           if (matches.length == 1) {
-            debugPrint('  find.text(\'${widget.data}\')');
+            debugPrint("  find.text('${widget.data}')");
             continue;
           }
         }
@@ -661,7 +661,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
               key is ValueKey<bool>) {
             keyLabel = 'const ${key.runtimeType}(${key.value})';
           } else if (key is ValueKey<String>) {
-            keyLabel = 'const Key(\'${key.value}\')';
+            keyLabel = "const Key('${key.value}')";
           }
           if (keyLabel != null) {
             final Iterable<Element> matches = find.byKey(key).evaluate();
@@ -685,7 +685,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           if (descendantText != null && numberOfWithTexts < 5) {
             final Iterable<Element> matches = find.widgetWithText(widget.runtimeType, descendantText).evaluate();
             if (matches.length == 1) {
-              debugPrint('  find.widgetWithText(${widget.runtimeType}, \'$descendantText\')');
+              debugPrint("  find.widgetWithText(${widget.runtimeType}, '$descendantText')");
               numberOfWithTexts += 1;
               continue;
             }

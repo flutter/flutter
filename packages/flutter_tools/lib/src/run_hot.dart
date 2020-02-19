@@ -1053,6 +1053,7 @@ class HotRunner extends ResidentRunner {
     if (_didAttach) {
       commandHelp.d.print();
     }
+    commandHelp.c.print();
     commandHelp.q.print();
     if (details) {
       printHelpDetails();

@@ -53,7 +53,7 @@ Future<void> main(List<String> arguments) async {
       'By default, the tool will generate the supported locales list in '
       'alphabetical order. Use this flag if you would like to default to '
       'a different locale. \n\n'
-      'For example, pass in [\'en_US\'] if you would like your app to '
+      "For example, pass in ['en_US'] if you would like your app to "
       'default to American English if a device supports it.',
   );
 

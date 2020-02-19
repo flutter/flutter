@@ -435,7 +435,7 @@ class _FocusDemoState extends State<FocusDemo> {
         kUndoActionKey: () => kUndoAction,
         kRedoActionKey: () => kRedoAction,
       },
-      child: DefaultFocusTraversal(
+      child: FocusTraversalGroup(
         policy: ReadingOrderTraversalPolicy(),
         child: Shortcuts(
           shortcuts: <LogicalKeySet, Intent>{

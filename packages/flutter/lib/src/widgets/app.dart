@@ -1250,7 +1250,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       final StringBuffer message = StringBuffer();
       message.writeln('\u2550' * 8);
       message.writeln(
-        'Warning: This application\'s locale, $appLocale, is not supported by all of its\n'
+        "Warning: This application's locale, $appLocale, is not supported by all of its\n"
         'localization delegates.'
       );
       for (final Type unsupportedType in unsupportedTypes) {
@@ -1265,7 +1265,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       }
       message.writeln(
         'See https://flutter.dev/tutorials/internationalization/ for more\n'
-        'information about configuring an app\'s locale, supportedLocales,\n'
+        "information about configuring an app's locale, supportedLocales,\n"
         'and localizationsDelegates parameters.'
       );
       message.writeln('\u2550' * 8);
@@ -1395,7 +1395,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       debugLabel: '<Default WidgetsApp Shortcuts>',
       child: Actions(
         actions: widget.actions ?? WidgetsApp.defaultActions,
-        child: DefaultFocusTraversal(
+        child: FocusTraversalGroup(
           policy: ReadingOrderTraversalPolicy(),
           child: _MediaQueryFromWindow(
             child: Localizations(

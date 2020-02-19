@@ -197,7 +197,8 @@ class StdoutHandler {
 class PackageUriMapper {
   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath)).map;
-    final String scriptUri = Uri.file(scriptPath, windows: globals.platform.isWindows).toString();
+    final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
+    final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
     for (final String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
       // Only perform a multi-root mapping if there are multiple roots.
@@ -463,6 +464,11 @@ abstract class ResidentCompiler {
     List<String> dartDefines,
   }) = DefaultResidentCompiler;
 
+  // TODO(jonahwilliams): find a better way to configure additional file system
+  // roots from the runner.
+  // See: https://github.com/flutter/flutter/issues/50494
+  void addFileSystemRoot(String root);
+
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -537,6 +543,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final bool unsafePackageSerialization;
   final List<String> experimentalFlags;
   final List<String> dartDefines;
+
+  @override
+  void addFileSystemRoot(String root) {
+    fileSystemRoots.add(root);
+  }
 
   /// The path to the root of the Dart SDK used to compile.
   ///

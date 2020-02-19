@@ -208,7 +208,7 @@ void main() {
       expect(_findStatic(), findsNothing);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
 
-    testWidgets('Backdrop is added using ModalRoute\'s filter parameter', (WidgetTester tester) async {
+    testWidgets("Backdrop is added using ModalRoute's filter parameter", (WidgetTester tester) async {
       final Widget child = _getChild();
       await tester.pumpWidget(_getContextMenu(child: child));
       expect(find.byType(BackdropFilter), findsNothing);
@@ -224,7 +224,7 @@ void main() {
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
   });
 
-  group('Open layout differs depending on child\'s position on screen', () {
+  group("Open layout differs depending on child's position on screen", () {
     testWidgets('Portrait', (WidgetTester tester) async {
       const Size portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);

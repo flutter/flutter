@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -321,6 +322,25 @@ void main() {
       ],
     );
     return _runFlutterTest(projectDir.childDirectory('example'));
+  }, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
+
+  testUsingContext('plugin example app depends on plugin', () async {
+    await _createProject(
+      projectDir,
+      <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
+      <String>[
+        'example/pubspec.yaml',
+      ],
+    );
+    final String rawPubspec = await projectDir.childDirectory('example').childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    final String pluginName = projectDir.basename;
+    expect(pubspec.dependencies, contains(pluginName));
+    expect(pubspec.dependencies[pluginName] is PathDependency, isTrue);
+    final PathDependency pathDependency = pubspec.dependencies[pluginName] as PathDependency;
+    expect(pathDependency.path, '../');
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
   });

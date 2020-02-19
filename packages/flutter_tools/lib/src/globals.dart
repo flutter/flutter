@@ -5,15 +5,20 @@
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import 'android/android_sdk.dart';
+import 'android/android_studio.dart';
 import 'artifacts.dart';
+import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/error_handling_file_system.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/net.dart';
 import 'base/os.dart';
 import 'base/terminal.dart';
+import 'base/user_messages.dart';
 import 'cache.dart';
 import 'ios/mac.dart';
 import 'macos/xcode.dart';
@@ -53,9 +58,23 @@ const Platform _kLocalPlatform = LocalPlatform();
 
 Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
-Xcode get xcode => context.get<Xcode>();
+AndroidStudio get androidStudio => context.get<AndroidStudio>();
+AndroidSdk get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
+UserMessages get userMessages => context.get<UserMessages>();
+Xcode get xcode => context.get<Xcode>();
+
+XCDevice get xcdevice => context.get<XCDevice>();
+
+final BotDetector _defaultBotDetector = BotDetector(
+  httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+  platform: platform,
+);
+
+BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
+
+Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.

@@ -131,7 +131,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('show-test-device',
         negatable: false,
         hide: !verboseHelp,
-        help: 'List the special \'flutter-tester\' device in device listings. '
+        help: "List the special 'flutter-tester' device in device listings. "
               'This headless device is used to\ntest Flutter tooling.');
   }
 

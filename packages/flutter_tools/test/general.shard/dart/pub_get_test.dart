@@ -365,7 +365,7 @@ void main() {
 class BotDetectorAlwaysNo implements BotDetector {
   const BotDetectorAlwaysNo();
   @override
-  bool get isRunningOnBot => false;
+  Future<bool> get isRunningOnBot async => false;
 }
 
 typedef StartCallback = void Function(List<dynamic> command);

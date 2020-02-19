@@ -63,15 +63,14 @@ class MDnsObservatoryDiscovery {
           )
           .toList();
       if (pointerRecords.isEmpty) {
-        globals. printTrace('No pointer records found.');
+        globals.printTrace('No pointer records found.');
         return null;
       }
       // We have no guarantee that we won't get multiple hits from the same
       // service on this.
-      final List<String> uniqueDomainNames = pointerRecords
+      final Set<String> uniqueDomainNames = pointerRecords
           .map<String>((PtrResourceRecord record) => record.domainName)
-          .toSet()
-          .toList();
+          .toSet();
 
       String domainName;
       if (applicationId != null) {

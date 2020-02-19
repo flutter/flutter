@@ -68,10 +68,10 @@ class WebFlutterDriver extends FlutterDriver {
     Map<String, dynamic> response;
     final Map<String, String> serialized = command.serialize();
     try {
-      final dynamic data = await _connection.sendCommand('window.\$flutterDriver(\'${jsonEncode(serialized)}\')', command.timeout);
+      final dynamic data = await _connection.sendCommand("window.\$flutterDriver('${jsonEncode(serialized)}')", command.timeout);
       response = data != null ? json.decode(data as String) as Map<String, dynamic> : <String, dynamic>{};
     } catch (error, stackTrace) {
-      throw DriverError('Failed to respond to $command due to remote error\n : \$flutterDriver(\'${jsonEncode(serialized)}\')',
+      throw DriverError("Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
           error,
           stackTrace
       );
@@ -212,17 +212,18 @@ class FlutterWebConnection {
     }
 
     try {
-      result = await waitFor<dynamic>(() => _driver.execute('r'
-          'eturn \$flutterDriverResult', <String>[]),
-          matcher: isNotNull,
-          timeout: duration ?? const Duration(days: 30));
+      result = await waitFor<dynamic>(
+        () => _driver.execute(r'return $flutterDriverResult', <String>[]),
+        matcher: isNotNull,
+        timeout: duration ?? const Duration(days: 30),
+      );
     } catch (_) {
       // Returns null if exception thrown.
       return null;
     } finally {
       // Resets the result.
-      _driver.execute('''
-        \$flutterDriverResult = null
+      _driver.execute(r'''
+        $flutterDriverResult = null
       ''', <void>[]);
     }
     return result;
@@ -243,7 +244,7 @@ class FlutterWebConnection {
 /// Waits until extension is installed.
 Future<void> waitUntilExtensionInstalled(sync_io.WebDriver driver, Duration timeout) async {
   await waitFor<void>(() =>
-      driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
+      driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',
       timeout: timeout ?? const Duration(days: 365));
 }

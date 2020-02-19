@@ -138,7 +138,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
-    ), throwsToolExit(message: 'make not found. Run \'flutter doctor\' for more information.'));
+    ), throwsToolExit(message: "make not found. Run 'flutter doctor' for more information."));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,

@@ -710,6 +710,9 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
     globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);
   }
+
+  @override
+  void addFileSystemRoot(String root) { }
 }
 
 /// A fake implementation of [ProcessResult].

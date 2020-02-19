@@ -77,18 +77,6 @@ enum RoutePopDisposition {
   bubble,
 }
 
-/// Name for the method which is used for sending messages from framework to
-/// engine after a route is popped.
-const String _routePoppedMethod = 'routePopped';
-
-/// Name for the method which is used for sending messages from framework to
-/// engine after a route is pushed.
-const String _routePushedMethod = 'routePushed';
-
-/// Name for the method which is used for sending messages from framework to
-/// engine after a route is replaced.
-const String _routeReplacedMethod = 'routeReplaced';
-
 /// An abstraction for an entry managed by a [Navigator].
 ///
 /// This class defines an abstract interface between the navigator and the
@@ -1793,7 +1781,6 @@ class _RouteEntry {
     if (isNewFirst) {
       route.didChangeNext(null);
     }
-    RouteNotificationMessages.maybeNotifyRouteChange(_routePushedMethod, route, previous);
     for (final NavigatorObserver observer in navigator.widget.observers)
       observer.didPush(route, previousPresent);
   }
@@ -1829,12 +1816,10 @@ class _RouteEntry {
     }
 
     if (previousState == _RouteLifecycle.replace || previousState == _RouteLifecycle.pushReplace) {
-      RouteNotificationMessages.maybeNotifyRouteChange(_routeReplacedMethod, route, previous);
       for (final NavigatorObserver observer in navigator.widget.observers)
         observer.didReplace(newRoute: route, oldRoute: previous);
     } else {
       assert(previousState == _RouteLifecycle.push);
-      RouteNotificationMessages.maybeNotifyRouteChange(_routePushedMethod, route, previous);
       for (final NavigatorObserver observer in navigator.widget.observers)
         observer.didPush(route, previousPresent);
     }
@@ -1852,11 +1837,6 @@ class _RouteEntry {
     currentState = _RouteLifecycle.popping;
     for (final NavigatorObserver observer in navigator.widget.observers)
       observer.didPop(route, previousPresent);
-    RouteNotificationMessages.maybeNotifyRouteChange(
-      _routePoppedMethod,
-      route,
-      previousPresent,
-    );
   }
 
   void handleRemoval({ @required NavigatorState navigator, @required Route<dynamic> previousPresent }) {
@@ -2009,6 +1989,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       yield* entry.route.overlayEntries;
   }
 
+  String _lastAnnouncedRouteName;
+
   void _flushHistoryUpdates({bool rearrangeOverlay = true}) {
     assert(_debugLocked);
     // Clean up the list, sending updates to the routes that changed. Notably,
@@ -2116,6 +2098,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     // Now that the list is clean, send the didChangeNext/didChangePrevious
     // notifications.
     _flushRouteAnnouncement();
+
+    // Announces route name changes.
+    final _RouteEntry lastEntry = _history.lastWhere(_RouteEntry.isPresentPredicate, orElse: () => null);
+    final String routeName = lastEntry?.route?.settings?.name;
+    if (routeName != _lastAnnouncedRouteName) {
+      RouteNotificationMessages.maybeNotifyRouteChange(routeName, _lastAnnouncedRouteName);
+      _lastAnnouncedRouteName = routeName;
+    }
 
     // Lastly, removes the overlay entries of all marked entries and disposes
     // them.

@@ -25,6 +25,7 @@ import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
 import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
+import 'src/commands/downgrade.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
@@ -39,12 +40,14 @@ import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
+import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
 import 'src/commands/train.dart';
 import 'src/commands/unpack.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
+import 'src/globals.dart' as globals;
 import 'src/runner/flutter_command.dart';
 import 'src/web/compile.dart';
 import 'src/web/web_runner.dart';
@@ -74,6 +77,7 @@ Future<void> main(List<String> args) async {
     DaemonCommand(hidden: !verboseHelp),
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
+    DowngradeCommand(),
     DriveCommand(),
     EmulatorsCommand(),
     FormatCommand(),
@@ -94,6 +98,10 @@ Future<void> main(List<String> args) async {
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
     VersionCommand(),
+    SymbolizeCommand(
+      stdio: globals.stdio,
+      fileSystem: globals.fs,
+    ),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp,

@@ -66,8 +66,8 @@ import 'messages_all.dart';
 /// Callers can lookup localized strings with an instance of @(className) returned
 /// by `@(className).of(context)`.
 ///
-/// Applications need to include `@(className).delegate()` in their app\'s
-/// localizationDelegates list, and the locales they support in the app\'s
+/// Applications need to include `@(className).delegate()` in their app's
+/// localizationDelegates list, and the locales they support in the app's
 /// supportedLocales list. For example:
 ///
 /// ```

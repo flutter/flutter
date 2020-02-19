@@ -63,7 +63,15 @@ abstract class AndroidAssetBundle extends Target {
     }
     if (_copyAssets) {
       final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
-      assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+      final DepfileService depfileService = DepfileService(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      );
+      depfileService.writeToFile(
+        assetDepfile,
+        environment.buildDir.childFile('flutter_assets.d'),
+      );
     }
   }
 
@@ -204,6 +212,7 @@ class AndroidAot extends AotElfBase {
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
     final Directory output = environment.buildDir.childDirectory(_androidAbiName);
+    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');
     }
@@ -221,6 +230,7 @@ class AndroidAot extends AotElfBase {
       outputPath: output.path,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
+      splitDebugInfo: splitDebugInfo,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
