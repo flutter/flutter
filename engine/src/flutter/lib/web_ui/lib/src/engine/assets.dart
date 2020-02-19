@@ -24,11 +24,28 @@ class AssetManager {
         ?.content;
   }
 
+  /// Returns the URL to load the asset from, given the asset key.
+  ///
+  /// We URL-encode the asset URL in order to correctly issue the right
+  /// HTTP request to the server.
+  ///
+  /// For example, if you have an asset in the file "assets/hello world.png",
+  /// two things will happen. When the app is built, the asset will be copied
+  /// to an asset directory with the file name URL-encoded. So our asset will
+  /// be copied to something like "assets/hello%20world.png". To account for
+  /// the assets being copied over with a URL-encoded name, the Flutter
+  /// framework URL-encodes the asset key  so when it sends a request to the
+  /// engine to load "assets/hello world.png", it actually sends a request to
+  /// load "assets/hello%20world.png". However, on the web, if we try to load
+  /// "assets/hello%20world.png", the request will be URL-decoded, we will
+  /// request "assets/hello world.png", and the request will 404. Therefore, we
+  /// must URL-encode the asset key *again* so when it is decoded, it is
+  /// requesting the once-URL-encoded asset key.
   String getAssetUrl(String asset) {
     if (Uri.parse(asset).hasScheme) {
-      return asset;
+      return Uri.encodeFull(asset);
     }
-    return (_baseUrl ?? '') + '$assetsDir/$asset';
+    return Uri.encodeFull((_baseUrl ?? '') + '$assetsDir/$asset');
   }
 
   Future<ByteData> load(String asset) async {
