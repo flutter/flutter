@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../cache.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
@@ -77,11 +78,17 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     ];
 
     print('starting process');
-    final ProcessResult result = await globals.processManager.run(command);
-    print('end process');
+    final Process process = await globals.processManager.start(command, runInShell: true);
+    print('process spawned');
+    final Stream<String> errorStream =
+        process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+    errorStream.listen(globals.printError);
 
-    if (result.exitCode != 0) {
-      stderr.write(result.stderr);
+    final Stream<String> outStream =
+        process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+    outStream.listen(globals.printStatus);
+    if (await process.exitCode != 0) {
+      //stderr.write(process.stderr);
       return FlutterCommandResult.fail();
     }
     return FlutterCommandResult.success();

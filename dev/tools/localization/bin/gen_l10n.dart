@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
@@ -14,6 +15,7 @@ import '../gen_l10n_types.dart';
 import '../localizations_utils.dart';
 
 Future<void> main(List<String> arguments) async {
+  stdout.write('Hello world!\n');
   final argslib.ArgParser parser = argslib.ArgParser();
   parser.addFlag(
     'help',
@@ -94,12 +96,18 @@ Future<void> main(List<String> arguments) async {
     exitWithError(e.message);
   }
 
-  final ProcessResult pubGetResult = await Process.run(flutterPath, <String>['pub', 'get']);
-  if (pubGetResult.exitCode != 0) {
-    stderr.write(pubGetResult.stderr);
+  stdout.write('About to invoke pub get\n');
+  final Process pubGetProcess = await Process.start(flutterPath, <String>['pub', 'get']);
+  pubGetProcess.stderr.transform<String>(const Utf8Decoder()).listen(print);
+  pubGetProcess.stdout.transform<String>(const Utf8Decoder()).listen(print);
+
+  if (await pubGetProcess.exitCode != 0) {
+    //stderr.write(pubGetProcess.stderr);
     exit(1);
   }
+  stdout.write('Finished invoking pub get\n');
 
+  stdout.write('About to invoke pub run\n');
   final ProcessResult generateFromArbResult = await Process.run(flutterPath, <String>[
     'pub',
     'run',
@@ -109,8 +117,12 @@ Future<void> main(List<String> arguments) async {
     localizationsGenerator.outputFile.path,
     ...localizationsGenerator.arbPathStrings,
   ]);
+  stdout.write('Finished invoking pub run\n');
+
   if (generateFromArbResult.exitCode != 0) {
     stderr.write(generateFromArbResult.stderr);
     exit(1);
   }
+
+  stdout.write('Goodbye world!\n');
 }
