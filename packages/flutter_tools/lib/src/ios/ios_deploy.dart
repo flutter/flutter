@@ -15,6 +15,12 @@ import '../build_info.dart';
 import '../cache.dart';
 import 'code_signing.dart';
 
+// Error message patterns from ios-deploy output
+const String noProvisioningProfileErrorOne = 'Error 0xe8008015';
+const String noProvisioningProfileErrorTwo = 'Error 0xe8000067';
+const String deviceLockedError = 'e80000e2';
+const String unknownAppLaunchError = 'Error 0xe8000022';
+
 class IOSDeploy {
   IOSDeploy({
     @required Artifacts artifacts,
@@ -63,7 +69,7 @@ class IOSDeploy {
       bundleId,
     ];
 
-    return await _processUtils.stream(
+    return _processUtils.stream(
       launchCommand,
       mapFunction: _monitorFailure,
       trace: true,
@@ -92,7 +98,7 @@ class IOSDeploy {
       ],
     ];
 
-    return await _processUtils.stream(
+    return _processUtils.stream(
       launchCommand,
       mapFunction: _monitorFailure,
       trace: true,
@@ -122,7 +128,7 @@ class IOSDeploy {
       ],
     ];
 
-    return await _processUtils.stream(
+    return _processUtils.stream(
       launchCommand,
       mapFunction: _monitorFailure,
       trace: true,
@@ -155,17 +161,17 @@ class IOSDeploy {
   // Maps stdout line stream. Must return original line.
   String _monitorFailure(String stdout) {
     // Installation issues.
-    if (stdout.contains('Error 0xe8008015') || stdout.contains('Error 0xe8000067')) {
+    if (stdout.contains(noProvisioningProfileErrorOne) || stdout.contains(noProvisioningProfileErrorTwo)) {
       _logger.printError(noProvisioningProfileInstruction, emphasis: true);
 
     // Launch issues.
-    } else if (stdout.contains('e80000e2')) {
+    } else if (stdout.contains(deviceLockedError)) {
       _logger.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Your device is locked. Unlock your device first before running.
 ═══════════════════════════════════════════════════════════════════════════════════''',
       emphasis: true);
-    } else if (stdout.contains('Error 0xe8000022')) {
+    } else if (stdout.contains(unknownAppLaunchError)) {
       _logger.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Error launching app. Try launching from within Xcode via:
