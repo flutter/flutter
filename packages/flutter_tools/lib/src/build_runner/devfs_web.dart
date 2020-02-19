@@ -321,6 +321,7 @@ class WebDevFS implements DevFS {
     @required this.buildMode,
     @required this.enableDwds,
     @required this.entrypoint,
+    this.testMode = false,
   });
 
   final Uri entrypoint;
@@ -338,6 +339,7 @@ class WebDevFS implements DevFS {
 
   Future<DebugConnection> _cachedExtensionFuture;
   StreamSubscription<void> _connectedApps;
+  bool testMode;
 
   // The engine last modification date for local engine build.s
   DateTime dartSdkLastModified;
@@ -393,6 +395,7 @@ class WebDevFS implements DevFS {
       buildMode,
       enableDwds,
       entrypoint,
+      testMode: testMode,
     );
     return Uri.parse('http://$hostname:$port');
   }
