@@ -230,7 +230,7 @@ void main() {
     expect(find.text('Subtitle'), findsOneWidget);
   });
 
-  testWidgets('ExpansionTile maintainsState', (WidgetTester tester) async {
+  testWidgets('ExpansionTile maintainState', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -244,7 +244,7 @@ void main() {
                 ExpansionTile(
                   title: Text('Tile 1'),
                   initiallyExpanded: false,
-                  maintainsState: true,
+                  maintainState: true,
                   children: <Widget>[
                     Text('Maintaining State'),
                   ],
@@ -252,7 +252,7 @@ void main() {
                 ExpansionTile(
                   title: Text('Title 2'),
                   initiallyExpanded: false,
-                  maintainsState: false,
+                  maintainState: false,
                   children: <Widget>[
                     Text('Discarding State'),
                   ],

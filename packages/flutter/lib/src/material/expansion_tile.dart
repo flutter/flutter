@@ -41,7 +41,7 @@ class ExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
-    this.maintainsState = false,
+    this.maintainState = false,
   }) : assert(initiallyExpanded != null),
        super(key: key);
 
@@ -86,7 +86,7 @@ class ExpansionTile extends StatefulWidget {
   /// When true, the children are kept in the tree while the tile is collapsed. 
   /// When false (default), the children are removed from the tree when the tile is 
   /// collapsed and recreated upon expansion.
-  final bool maintainsState;
+  final bool maintainState;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -212,7 +212,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final bool closed = !_isExpanded && _controller.isDismissed;
-    final bool shouldRemoveChildren = closed && !widget.maintainsState;
+    final bool shouldRemoveChildren = closed && !widget.maintainState;
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
