@@ -45,9 +45,6 @@ class WebAssetServer implements AssetReader {
 
   /// Start the web asset server on a [hostname] and [port].
   ///
-  /// [testMode] will disable the shelf static service, which may be required
-  /// for hermetic tests. By default this value is `false`.
-  ///
   /// Unhandled exceptions will throw a [ToolExit] with the error and stack
   /// trace.
   static Future<WebAssetServer> start(
@@ -56,9 +53,8 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     BuildMode buildMode,
     bool enableDwds,
-    Uri entrypoint, {
-    bool testMode = false,
-  }) async {
+    Uri entrypoint,
+  ) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
@@ -69,9 +65,7 @@ class WebAssetServer implements AssetReader {
       // In release builds deploy a simpler proxy server.
       if (buildMode != BuildMode.debug) {
         final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(entrypoint);
-        if (!testMode) {
-          shelf.serveRequests(httpServer, releaseAssetServer.handle);
-        }
+        shelf.serveRequests(httpServer, releaseAssetServer.handle);
         return server;
       }
       // In debug builds, spin up DWDS and the full asset server.
@@ -90,13 +84,11 @@ class WebAssetServer implements AssetReader {
       if (enableDwds) {
         pipeline = pipeline.addMiddleware(dwds.middleware);
       }
-      if (!testMode) {
-        final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
-        final shelf.Cascade cascade = shelf.Cascade()
-          .add(dwds.handler)
-          .add(dwdsHandler);
-          shelf.serveRequests(httpServer, cascade.handler);
-      }
+      final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
+      final shelf.Cascade cascade = shelf.Cascade()
+        .add(dwds.handler)
+        .add(dwdsHandler);
+        shelf.serveRequests(httpServer, cascade.handler);
       server.dwds = dwds;
       return server;
     } on SocketException catch (err) {
@@ -320,9 +312,6 @@ class ConnectionResult {
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
   /// Create a new [WebDevFS] instance.
-  ///
-  /// [testMode] will disable the shelf static service, which may be required
-  /// for hermetic tests. By default this value is `false`.
   WebDevFS({
     @required this.hostname,
     @required this.port,
@@ -331,7 +320,6 @@ class WebDevFS implements DevFS {
     @required this.buildMode,
     @required this.enableDwds,
     @required this.entrypoint,
-    this.testMode = false,
   });
 
   final Uri entrypoint;
@@ -349,7 +337,6 @@ class WebDevFS implements DevFS {
 
   Future<DebugConnection> _cachedExtensionFuture;
   StreamSubscription<void> _connectedApps;
-  bool testMode;
 
   // The engine last modification date for local engine build.s
   DateTime dartSdkLastModified;
@@ -405,7 +392,6 @@ class WebDevFS implements DevFS {
       buildMode,
       enableDwds,
       entrypoint,
-      testMode: testMode,
     );
     return Uri.parse('http://$hostname:$port');
   }
