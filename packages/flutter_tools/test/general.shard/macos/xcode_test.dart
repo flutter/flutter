@@ -359,6 +359,18 @@ void main() {
         Platform: () => macPlatform,
       });
 
+      testWithoutContext('uses timeout', () async {
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+
+        when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
+          .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
+
+        when(processManager.run(any))
+          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, '[]', '')));
+        await xcdevice.getAvailableTetheredIOSDevices(timeout: const Duration(seconds: 20));
+        verify(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '20'])).called(1);
+      });
+
       testUsingContext('ignores "Preparing debugger support for iPhone" error', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
 

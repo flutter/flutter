@@ -22,7 +22,7 @@ class FuchsiaDevFinder {
   /// Returns a list of attached devices as a list of strings with entries
   /// formatted as follows:
   /// 192.168.42.172 scare-cable-skip-joy
-  Future<List<String>> list() async {
+  Future<List<String>> list({ Duration timeout }) async {
     if (fuchsiaArtifacts.devFinder == null ||
         !fuchsiaArtifacts.devFinder.existsSync()) {
       throwToolExit('Fuchsia device-finder tool not found.');
@@ -31,6 +31,8 @@ class FuchsiaDevFinder {
       fuchsiaArtifacts.devFinder.path,
       'list',
       '-full',
+      if (timeout != null)
+        ...<String>['-timeout', '${timeout.inMilliseconds}ms']
     ];
     final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {

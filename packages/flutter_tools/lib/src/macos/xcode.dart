@@ -228,7 +228,10 @@ class XCDevice {
     return _xcdevicePath;
   }
 
-  Future<List<dynamic>> _getAllDevices({bool useCache = false}) async {
+  Future<List<dynamic>> _getAllDevices({
+    bool useCache = false,
+    @required Duration timeout
+  }) async {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
@@ -244,7 +247,7 @@ class XCDevice {
           'xcdevice',
           'list',
           '--timeout',
-          '1',
+          timeout.inSeconds.toString(),
         ],
         throwOnError: true,
       );
@@ -265,9 +268,9 @@ class XCDevice {
 
   List<dynamic> _cachedListResults;
 
-  /// List of devices available over USB.
-  Future<List<IOSDevice>> getAvailableTetheredIOSDevices() async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices();
+  /// [timeout] defaults to 1 second.
+  Future<List<IOSDevice>> getAvailableTetheredIOSDevices({ Duration timeout }) async {
+    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 1));
 
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
@@ -501,7 +504,10 @@ class XCDevice {
 
   /// List of all devices reporting errors.
   Future<List<String>> getDiagnostics() async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices(useCache: true);
+    final List<dynamic> allAvailableDevices = await _getAllDevices(
+      useCache: true,
+      timeout: const Duration(seconds: 1)
+    );
 
     if (allAvailableDevices == null) {
       return const <String>[];
