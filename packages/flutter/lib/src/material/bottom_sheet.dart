@@ -11,15 +11,17 @@ import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet_theme.dart';
 import 'colors.dart';
+import 'curves.dart';
 import 'debug.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
-const Duration _bottomSheetDuration = Duration(milliseconds: 250);
-const Curve _bottomSheetCurve = Curves.fastOutSlowIn;
-const Curve _bottomSheetFlingCurve = Curves.easeOutCubic;
+const Duration _bottomSheetEnterDuration = Duration(milliseconds: 250);
+const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
+const Curve _modalBottomSheetEnterCurve = decelerateEasing;
+const Curve _modalBottomSheetExitCurve = accelerateEasing;
 const double _minFlingVelocity = 700.0;
 const double _closeProgressThreshold = 0.5;
 
@@ -157,7 +159,8 @@ class BottomSheet extends StatefulWidget {
   /// animation controller could be provided.
   static AnimationController createAnimationController(TickerProvider vsync) {
     return AnimationController(
-      duration: _bottomSheetDuration,
+      duration: _bottomSheetEnterDuration,
+      reverseDuration: _bottomSheetExitDuration,
       debugLabel: 'BottomSheet',
       vsync: vsync,
     );
@@ -317,7 +320,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 }
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
-  Curve animationCurve = _bottomSheetCurve;
+  Curve animationCurve = _modalBottomSheetEnterCurve;
 
   String _getRouteLabel(MaterialLocalizations localizations) {
     switch (Theme.of(context).platform) {
@@ -337,16 +340,11 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 
   void handleDragEnd(DragEndDetails details, {bool isClosing}) {
-    if (isClosing) {
-      // shortened curve on exit minimizes risk of a visibly slow linear
-      // animation
-      animationCurve = const Interval(0.5, 1, curve: Curves.linear);
-    } else {
-      animationCurve = BottomSheetSuspendedCurve(
-        widget.route.animation.value,
-        curve: _bottomSheetFlingCurve,
-      );
-    }
+    // allows the bottom sheet to animate smoothly from its current position
+    animationCurve = BottomSheetSuspendedCurve(
+      widget.route.animation.value,
+      curve: isClosing ? _modalBottomSheetExitCurve : _modalBottomSheetEnterCurve,
+    );
   }
 
   @override
@@ -428,7 +426,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final bool enableDrag;
 
   @override
-  Duration get transitionDuration => _bottomSheetDuration;
+  Duration get transitionDuration => _bottomSheetEnterDuration;
+
+  @override
+  Duration get reverseTransitionDuration => _bottomSheetExitDuration;
 
   @override
   bool get barrierDismissible => isDismissible;
