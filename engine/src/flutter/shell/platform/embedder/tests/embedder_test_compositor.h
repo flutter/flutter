@@ -7,7 +7,6 @@
 
 #include <vector>
 
-#include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "third_party/skia/include/gpu/GrContext.h"
@@ -58,17 +57,7 @@ class EmbedderTestCompositor {
 
   sk_sp<SkImage> GetLastComposition();
 
-  size_t GetPendingBackingStoresCount() const;
-
-  size_t GetBackingStoresCreatedCount() const;
-
-  size_t GetBackingStoresCollectedCount() const;
-
-  void AddOnCreateRenderTargetCallback(fml::closure callback);
-
-  void AddOnCollectRenderTargetCallback(fml::closure callback);
-
-  void AddOnPresentCallback(fml::closure callback);
+  size_t GetBackingStoresCount() const;
 
  private:
   const SkISize surface_size_;
@@ -78,11 +67,8 @@ class EmbedderTestCompositor {
   PresentCallback next_present_callback_;
   NextSceneCallback next_scene_callback_;
   sk_sp<SkImage> last_composition_;
-  size_t backing_stores_created_ = 0;
-  size_t backing_stores_collected_ = 0;
-  std::vector<fml::closure> on_create_render_target_callbacks_;
-  std::vector<fml::closure> on_collect_render_target_callbacks_;
-  std::vector<fml::closure> on_present_callbacks_;
+  // The number of currently allocated backing stores (created - collected).
+  size_t backing_stores_count_ = 0;
 
   bool UpdateOffscrenComposition(const FlutterLayer** layers,
                                  size_t layers_count);

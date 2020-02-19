@@ -195,8 +195,9 @@ void EmbedderLayers::PushPlatformViewLayer(
   layer.size.height = transformed_layer_bounds.height();
 
   presented_layers_.push_back(layer);
-}
+}  // namespace flutter
 
+/// @note Procedure doesn't copy all closures.
 void EmbedderLayers::InvokePresentCallback(
     const PresentCallback& callback) const {
   std::vector<const FlutterLayer*> presented_layers_pointers;
