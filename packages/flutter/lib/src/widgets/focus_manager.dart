@@ -41,7 +41,7 @@ typedef FocusOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
 /// An attachment point for a [FocusNode].
 ///
 /// Using a [FocusAttachment] is rarely needed, unless you are building
-/// something akin to the [Focus] or [FocusScope] widgets.
+/// something akin to the [Focus] or [FocusScope] widgets from scratch.
 ///
 /// Once created, a [FocusNode] must be attached to the widget tree by its
 /// _host_ [StatefulWidget] via a [FocusAttachment] object. [FocusAttachment]s
@@ -137,7 +137,8 @@ class FocusAttachment {
 ///
 /// _Please see the [Focus] and [FocusScope] widgets, which are utility widgets
 /// that manage their own [FocusNode]s and [FocusScopeNode]s, respectively. If
-/// they aren't appropriate, [FocusNode]s can be managed directly._
+/// they aren't appropriate, [FocusNode]s can be managed directly, but doing
+/// this yourself is rare._
 ///
 /// [FocusNode]s are persistent objects that form a _focus tree_ that is a
 /// representation of the widgets in the hierarchy that are interested in focus.
@@ -147,9 +148,9 @@ class FocusAttachment {
 /// or if the [Focus] and [FocusScope] widgets provide insufficient control.
 ///
 /// [FocusNodes] are organized into _scopes_ (see [FocusScopeNode]), which form
-/// sub-trees of nodes that can be traversed as a group. Within a scope, the
-/// most recent nodes to have focus are remembered, and if a node is focused and
-/// then removed, the previous node receives focus again.
+/// sub-trees of nodes that restrict traversal to a group of nodes. Within a
+/// scope, the most recent nodes to have focus are remembered, and if a node is
+/// focused and then unfocused, the previous node receives focus again.
 ///
 /// The focus node hierarchy can be traversed using the [parent], [children],
 /// [ancestors] and [descendants] accessors.
@@ -211,13 +212,13 @@ class FocusAttachment {
 /// {@template flutter.widgets.focus_manager.focus.keyEvents}
 /// ## Key Event Propagation
 ///
-/// The [FocusManager] receives all key events and will pass them to the focused
-/// nodes. It starts with the node with the primary focus, and will call the
-/// [onKey] callback for that node. If the callback returns false, indicating
-/// that it did not handle the event, the [FocusManager] will move to the parent
-/// of that node and call its [onKey]. If that [onKey] returns true, then it
-/// will stop propagating the event. If it reaches the root [FocusScopeNode],
-/// [FocusManager.rootScope], the event is discarded.
+/// The [FocusManager] receives key events from [RawKeyboard] and will pass them
+/// to the focused nodes. It starts with the node with the primary focus, and
+/// will call the [onKey] callback for that node. If the callback returns false,
+/// indicating that it did not handle the event, the [FocusManager] will move to
+/// the parent of that node and call its [onKey]. If that [onKey] returns true,
+/// then it will stop propagating the event. If it reaches the root
+/// [FocusScopeNode], [FocusManager.rootScope], the event is discarded.
 /// {@endtemplate}
 ///
 /// ## Focus Traversal
@@ -360,16 +361,12 @@ class FocusAttachment {
 ///
 ///  * [Focus], a widget that manages a [FocusNode] and provides access to
 ///    focus information and actions to its descendant widgets.
-///  * [FocusScope], a widget that manages a [FocusScopeNode] and provides
-///    access to scope information and actions to its descendant widgets.
-///  * [FocusAttachment], a widget that connects a [FocusScopeNode] to the
-///    widget tree.
-///  * [FocusManager], a singleton that manages the focus and distributes key
-///    events to focused nodes.
-///  * [FocusTraversalPolicy], a class used to determine how to move the focus
-///    to other nodes.
 ///  * [FocusTraversalGroup], a widget used to group together and configure the
 ///    focus traversal policy for a widget subtree.
+///  * [FocusManager], a singleton that manages the primary focus and
+///    distributes key events to focused nodes.
+///  * [FocusTraversalPolicy], a class used to determine how to move the focus
+///    to other nodes.
 class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates a focus node.
   ///
@@ -531,7 +528,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// Iterates the ancestors of this node starting at the parent and iterating
   /// over successively more remote ancestors of this node, ending at the root
-  /// [FocusScope] ([FocusManager.rootScope]).
+  /// [FocusScopeNode] ([FocusManager.rootScope]).
   Iterable<FocusNode> get ancestors {
     if (_ancestors == null) {
       final List<FocusNode> result = <FocusNode>[];
@@ -990,14 +987,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 ///
 ///  * [Focus], a widget that manages a [FocusNode] and provides access to focus
 ///    information and actions to its descendant widgets.
-///  * [FocusScope], a widget that manages a [FocusScopeNode] and provides
-///    access to scope information and actions to its descendant widgets.
-///  * [FocusAttachment], a widget that connects a [FocusScopeNode] to the focus
-///    tree.
-///  * [FocusManager], a singleton that manages the focus and distributes key
-///    events to focused nodes.
+///  * [FocusManager], a singleton that manages the primary focus and
+///    distributes key events to focused nodes.
 class FocusScopeNode extends FocusNode {
-  /// Creates a FocusScope node.
+  /// Creates a [FocusScopeNode].
   ///
   /// All parameters are optional.
   FocusScopeNode({
@@ -1097,9 +1090,9 @@ class FocusScopeNode extends FocusNode {
         _markNextFocus(this);
       }
     } else {
-      // We found a FocusScope at the leaf, so ask it to focus itself instead of
-      // this scope. That will cause this scope to return true from hasFocus,
-      // but false from hasPrimaryFocus.
+      // We found a FocusScopeNode at the leaf, so ask it to focus itself
+      // instead of this scope. That will cause this scope to return true from
+      // hasFocus, but false from hasPrimaryFocus.
       primaryFocus._doRequestFocus();
     }
   }
@@ -1153,20 +1146,22 @@ enum FocusHighlightStrategy {
 
 /// Manages the focus tree.
 ///
+/// The focus tree is a separate, sparser, tree from the widget tree that
+/// maintains the hierarchical relationship between focusable widgets in the
+/// widget tree.
+///
 /// The focus manager is responsible for tracking which [FocusNode] has the
 /// primary input focus (the [primaryFocus]), holding the [FocusScopeNode] that
 /// is the root of the focus tree (the [rootScope]), and what the current
-/// [highlightMode] is.
+/// [highlightMode] is. It also distributes key events from [RawKeyboard] to the
+/// nodes in the focus tree.
 ///
-/// The [FocusManager] is held by the [WidgetsBinding] as
+/// The singleton [FocusManager] instance is held by the [WidgetsBinding] as
 /// [WidgetsBinding.focusManager], and can be conveniently accessed using the
 /// [FocusManager.instance] static accessor.
 ///
-/// To find the [FocusScopeNode] for a given [BuildContext], use
-/// [FocusScope.of].
-///
-/// The [FocusManager] knows nothing about [FocusNode]s other than the one that
-/// is currently focused (accessible via the [primaryFocus] global accessor).
+/// To find the [FocusNode] for a given [BuildContext], use [Focus.of]. To find
+/// the [FocusScopeNode] for a given [BuildContext], use [FocusScope.of].
 ///
 /// If you would like notification whenever the [primaryFocus] changes, register
 /// a listener with [addListener]. When you no longer want to receive these
@@ -1174,23 +1169,26 @@ enum FocusHighlightStrategy {
 /// with [removeListener] to avoid memory leaks. Removing listeners is typically
 /// done in [State.dispose] on stateful widgets.
 ///
-/// The [highlightMode] changes are notified separately via
-/// [addHighlightModeListener] and removed with [removeHighlightModeListener].
+/// The [highlightMode] describes how focus highlights should be displayed on
+/// components in the UI. The [highlightMode] changes are notified separately
+/// via [addHighlightModeListener] and removed with
+/// [removeHighlightModeListener]. The highlight mode changes when the user
+/// switches from a mouse to a touch interface, or vice versa.
+///
+/// The widgets that are used to manage focus in the widget tree are:
+///
+///  * [Focus], a widget that manages a [FocusNode] in the focus tree so that
+///    the focus tree reflects changes in the widget hierarchy.
+///  * [FocusScope], a widget that manages a [FocusScopeNode] in the focus tree,
+///    creating a new scope for restricting focus to a set of focus nodes.
+///  * [FocusTraversalGroup], a widget that groups together nodes that should be
+///    traversed using an order described by a given [FocusTraversalPolicy].
 ///
 /// See also:
 ///
-///  * [Focus], a widget that manages a [FocusNode] in the focus tree.
-///  * [FocusScope], a widget that manages a [FocusScopeNode] in the focus tree,
-///    creating a new scope for focus.
-///  * [FocusTraversalGroup], a widget that groups together nodes that should be
-///    traversed using an order described by a given [FocusTraversalPolicy].
 ///  * [FocusNode], which is a node in the focus tree that can receive focus.
 ///  * [FocusScopeNode], which is a node in the focus tree used to collect
-///    subtrees into groups.
-///  * [Focus.of], which provides the nearest ancestor [FocusNode] for a given
-///    [BuildContext].
-///  * [FocusScope.of], which provides the nearest ancestor [FocusScopeNode] for
-///    a given [BuildContext].
+///    subtrees into groups and restrict focus to them.
 ///  * The [primaryFocus] global accessor, for convenient access from anywhere
 ///    to the current focus manager state.
 class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagnosticable {

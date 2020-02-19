@@ -9,6 +9,8 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
 
+// TODO(gspencergoog): Add more information about unfocus here once https://github.com/flutter/flutter/pull/50831 lands.
+
 /// A widget that manages a [FocusNode] to allow keyboard focus to be given
 /// to this widget and its descendants.
 ///
@@ -153,7 +155,7 @@ import 'inherited_notifier.dart';
 ///       autofocus: autofocus,
 ///       child: Builder(builder: (BuildContext context) {
 ///         // The contents of this Builder are being made focusable. It is inside
-///         // of a Builder because the building provides the correct context
+///         // of a Builder because the builder provides the correct context
 ///         // variable for Focus.of() to be able to find the Focus widget that is
 ///         // the Builder's parent. Without the builder, the context variable used
 ///         // would be the one given the FocusableText build function, and that
