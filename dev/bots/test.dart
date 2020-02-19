@@ -758,6 +758,14 @@ Future<void> _pubRunTest(String workingDirectory, {
     deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
     deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
   }
+  // Ensure we run `pub get` with the same version of pub we will run `pub test` with.
+  final Stream<String> getOutput = runAndGetStdout(
+    pub,
+    <String>['get'],
+    workingDirectory: workingDirectory,
+    environment: pubEnvironment,
+  );
+  await getOutput.forEach(print);
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
     Stream<String> testOutput;
