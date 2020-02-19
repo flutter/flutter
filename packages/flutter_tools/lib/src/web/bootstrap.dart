@@ -59,18 +59,11 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
   if (window.\$dartStackTraceUtility && !window.\$dartStackTraceUtility.ready) {
     window.\$dartStackTraceUtility.ready = true;
     let dart = dart_sdk.dart;
-    window.\$dartStackTraceUtility.setSourceMapProvider(
-      function(url) {
-        url = url.replace(baseUrl, '/');
-        var module = window.\$requireLoader.urlToModuleId.get(url)
-        if (url.endsWith('dart_stack_trace_mapper.js')) {
-          module = 'dart_sdk.js';
-        }
-        if (!module) return null;
-        module = module.split('.')[0];
-        return dart.getSourceMap(module);
-      });
-    }
+    window.\$dartStackTraceUtility.setSourceMapProvider(function(url) {
+      url = url.replace(window.\$dartUriBase, '/');
+      return dart.getSourceMap(url);
+    });
+  }
 
   // See the generateMainModule doc comment.
   var child = {};
