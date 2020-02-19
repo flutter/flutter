@@ -194,11 +194,11 @@ class DriveCommand extends RunCommandBase {
           browser,
           argResults['headless'].toString() == 'true',
         );
-      } catch (ex) {
+      } on Exception catch (ex) {
         throwToolExit(
           'Unable to start WebDriver Session for Flutter for Web testing. \n'
           'Make sure you have the correct WebDriver Server running at $driverPort. \n'
-          'Make sure the WebDriver Server matches option browser-name. \n'
+          'Make sure the WebDriver Server matches option --browser-name. \n'
           '$ex'
         );
       }
@@ -211,10 +211,9 @@ class DriveCommand extends RunCommandBase {
         x = int.parse(dimensions[0]);
         y = int.parse(dimensions[1]);
       } on FormatException catch (ex) {
-        throw FormatException('''
-        Dimension provided is invalid.
-        Please fix 'browser-dimension' on your input.
-        $ex
+        throwToolExit('''
+Dimension provided to --browser-dimension is invalid:
+$ex
         ''');
       }
       final async_io.Window window = await driver.window;
@@ -242,7 +241,7 @@ class DriveCommand extends RunCommandBase {
       if (error is ToolExit) {
         rethrow;
       }
-      throw 'Unable to run test: $error\n$stackTrace';
+      throw Exception('Unable to run test: $error\n$stackTrace');
     } finally {
       await driver?.quit();
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
