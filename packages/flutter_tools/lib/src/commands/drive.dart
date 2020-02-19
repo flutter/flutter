@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/web/devfs_web.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 import 'package:meta/meta.dart';
 
@@ -21,7 +23,9 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
+import '../build_runner/resident_web_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../web/web_runner.dart';
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -157,7 +161,58 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
-      final LaunchResult result = await appStarter(this);
+      if (isWebPlatform && getBuildInfo().isDebug) {
+        // TODO(angjieli): remove this once running against
+        // target under test_driver in debug mode is supported
+        throwToolExit(
+            'Flutter Driver web does not support running in debug mode.\n'
+                '\n'
+                'Use --profile mode for testing application performance.\n'
+                'Use --release mode for testing correctness (with assertions).'
+        );
+      }
+
+      Uri webUri;
+
+      if (isWebPlatform) {
+        ResidentRunner runner;
+        final FlutterProject flutterProject = FlutterProject.current();
+        final FlutterDevice flutterDevice = await FlutterDevice.create(
+            device,
+            flutterProject: flutterProject,
+            trackWidgetCreation: boolArg('track-widget-creation'),
+            target: targetFile,
+            buildMode: getBuildMode()
+        );
+        runner = webRunnerFactory.createWebRunner(
+          flutterDevice,
+          target: targetFile,
+          flutterProject: flutterProject,
+          ipv6: ipv6,
+          debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
+          stayResident: false,
+          dartDefines: dartDefines,
+          urlTunneller: null,
+        );
+
+        // Sync completer so the completing agent attaching to the resident doesn't
+        // need to know about analytics.
+        //
+        // Do not add more operations to the future.
+        final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
+
+        final int result = await runner.run(
+          appStartedCompleter: appStartedTimeRecorder,
+          route: route,
+        );
+        if (result != 0) {
+          throwToolExit(null, exitCode: result);
+        }
+        final WebDevFS webDevFS = (runner as ResidentWebRunner).device.devFS as WebDevFS;
+        webUri = Uri.parse('http://${webDevFS.hostname}:${webDevFS.port}');
+      }
+
+      final LaunchResult result = await appStarter(this, webUri);
       if (result == null) {
         throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
       }
@@ -301,14 +356,14 @@ Future<Device> findTargetDevice() async {
 }
 
 /// Starts the application on the device given command configuration.
-typedef AppStarter = Future<LaunchResult> Function(DriveCommand command);
+typedef AppStarter = Future<LaunchResult> Function(DriveCommand command, Uri webUri);
 
 AppStarter appStarter = _startApp; // (mutable for testing)
 void restoreAppStarter() {
   appStarter = _startApp;
 }
 
-Future<LaunchResult> _startApp(DriveCommand command) async {
+Future<LaunchResult> _startApp(DriveCommand command, Uri webUri) async {
   final String mainPath = findMainDartFile(command.targetFile);
   if (await globals.fs.type(mainPath) != FileSystemEntityType.file) {
     globals.printError('Tried to run $mainPath, but that file does not exist.');
@@ -332,6 +387,10 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
   if (command.traceStartup) {
     platformArgs['trace-startup'] = command.traceStartup;
+  }
+
+  if (webUri != null) {
+    platformArgs['uri'] = webUri.toString();
   }
 
   globals.printTrace('Starting application.');

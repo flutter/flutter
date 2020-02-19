@@ -145,7 +145,7 @@ class ChromeDevice extends Device {
 
     globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': true});
 
-    return LaunchResult.succeeded(observatoryUri: null);
+    return LaunchResult.succeeded(observatoryUri: Uri.parse(url));
   }
 
   @override
@@ -268,7 +268,7 @@ class WebServerDevice extends Device {
       globals.printStatus('$mainPath is being served at $url', emphasis: true);
     }
     globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
-    return LaunchResult.succeeded(observatoryUri: null);
+    return LaunchResult.succeeded(observatoryUri: Uri.parse(url));
   }
 
   @override
