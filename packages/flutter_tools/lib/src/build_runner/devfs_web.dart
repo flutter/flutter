@@ -336,6 +336,9 @@ class WebDevFS implements DevFS {
   Future<DebugConnection> _cachedExtensionFuture;
   StreamSubscription<void> _connectedApps;
 
+  // The engine last modification date for local engine build.s
+  DateTime dartSdkLastModified;
+
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
   /// Only calls [AppConnection.runMain] on the subsequent connections.
@@ -452,6 +455,8 @@ class WebDevFS implements DevFS {
       webAssetServer.writeFile('/basic.digests', '{}');
       webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
       webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
+      dartSdkLastModified = dartSdk.lastModifiedSync();
+
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
       // be shared.
       if (bundle != null) {
@@ -498,6 +503,15 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
+
+    // Check if the dart_sdk was invalidated by a local engine rebuild.
+    final DateTime candidateLastModified = dartSdk.lastModifiedSync();
+    if (candidateLastModified.isAfter(dartSdkLastModified)) {
+      webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
+      webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
+      dartSdkLastModified = candidateLastModified;
+    }
+
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),
