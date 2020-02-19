@@ -702,6 +702,59 @@ void main() {
       expect(child1.hasPrimaryFocus, isFalse);
       expect(child2.hasPrimaryFocus, isFalse);
     });
+    testWidgets('Requesting focus on a scope works properly when some focusedChild nodes are unfocusable', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
+      final FocusAttachment scope1Attachment = scope1.attach(context);
+      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final FocusAttachment scope2Attachment = scope2.attach(context);
+      final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'parent2');
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode(debugLabel: 'child2');
+      final FocusAttachment child2Attachment = child2.attach(context);
+      final FocusNode child3 = FocusNode(debugLabel: 'child3');
+      final FocusAttachment child3Attachment = child3.attach(context);
+      final FocusNode child4 = FocusNode(debugLabel: 'child4');
+      final FocusAttachment child4Attachment = child4.attach(context);
+      scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope1);
+      parent2Attachment.reparent(parent: scope2);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent1);
+      child3Attachment.reparent(parent: parent2);
+      child4Attachment.reparent(parent: parent2);
+
+      // Build up a history.
+      child4.requestFocus();
+      await tester.pump();
+      child2.requestFocus();
+      await tester.pump();
+      child3.requestFocus();
+      await tester.pump();
+      child1.requestFocus();
+      await tester.pump();
+      expect(child1.hasPrimaryFocus, isTrue);
+
+      child1.canRequestFocus = false;
+      child3.canRequestFocus = false;
+      await tester.pump();
+      scope1.requestFocus();
+      await tester.pump();
+
+      expect(scope1.focusedChild, equals(child2));
+      expect(child2.hasPrimaryFocus, isTrue);
+
+      scope2.requestFocus();
+      await tester.pump();
+
+      expect(scope2.focusedChild, equals(child4));
+      expect(child4.hasPrimaryFocus, isTrue);
+    });
     testWidgets('Key handling bubbles up and terminates when handled.', (WidgetTester tester) async {
       final Set<FocusNode> receivedAnEvent = <FocusNode>{};
       final Set<FocusNode> shouldHandle = <FocusNode>{};

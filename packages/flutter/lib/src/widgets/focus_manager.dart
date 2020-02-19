@@ -1138,6 +1138,10 @@ class FocusScopeNode extends FocusNode {
 
   @override
   void _doRequestFocus({@required bool findFirstFocus}) {
+    // It is possible tha a previously focused child is no longer focusable.
+    while (focusedChild != null && !focusedChild.canRequestFocus)
+      _focusedChildren.removeLast();
+
     assert(findFirstFocus != null);
 
     // If findFirstFocus is false, then the request is to make this scope the
