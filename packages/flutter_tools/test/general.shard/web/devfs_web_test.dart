@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
-import '../../src/io.dart';
 import '../../src/testbed.dart';
 
 const List<int> kTransparentImage = <int>[
