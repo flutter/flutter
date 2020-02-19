@@ -14,8 +14,10 @@ import 'dart:ui' show
   hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
@@ -440,6 +442,7 @@ class TextInputConfiguration {
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
+    this.autofillConfiguration,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -449,6 +452,7 @@ class TextInputConfiguration {
        assert(keyboardAppearance != null),
        assert(inputAction != null),
        assert(textCapitalization != null);
+
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -462,6 +466,11 @@ class TextInputConfiguration {
   ///
   /// Defaults to true.
   final bool autocorrect;
+
+  /// The configuration to use for autofill.
+  ///
+  /// Defaults to null, which disables autofill on the input field.
+  final AutofillConfiguration autofillConfiguration;
 
   /// {@template flutter.services.textInput.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -564,6 +573,7 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
+      if (autofillConfiguration != null) 'autofill': autofillConfiguration.toJson(),
     };
   }
 }
@@ -744,6 +754,9 @@ abstract class TextInputClient {
   /// const constructors so that they can be used in const expressions.
   const TextInputClient();
 
+  /// The current state of the [TextEditingValue] held by this client.
+  TextEditingValue get currentTextEditingValue;
+
   /// Requests that this client update its editing state to the given value.
   void updateEditingValue(TextEditingValue value);
 
@@ -753,13 +766,11 @@ abstract class TextInputClient {
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
 
-  /// The current state of the [TextEditingValue] held by this client.
-  TextEditingValue get currentTextEditingValue;
-
   /// Platform notified framework of closed connection.
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
+
 }
 
 /// An interface for interacting with a text input control.
@@ -854,6 +865,11 @@ class TextInputConnection {
         'textDirectionIndex': textDirection.index,
       },
     );
+  }
+
+  void updateTextInputConfiguration(TextInputConfiguration configuration) {
+    if (attached)
+      TextInput._instance._attach(this, configuration);
   }
 
   /// Stop interacting with the text input control.
@@ -1058,6 +1074,24 @@ class TextInput {
     }
 
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
+
+    if (method == 'TextInputClient.updateEditingStateWithTag') {
+      final TextInputClient client = _currentConnection._client;
+      assert(client != null);
+      if (client is AutofillClient) {
+        final AutofillScope scope = client.currentAutofillScope;
+        final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
+        for (final String tag in editingValue.keys) {
+          final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
+            editingValue[tag] as Map<String, dynamic>,
+          );
+          scope.getAutofillClient(tag).updateEditingValue(textEditingValue);
+        }
+      }
+
+      return;
+    }
+
     final int client = args[0] as int;
     // The incoming message was for a different client.
     if (client != _currentConnection._id)
