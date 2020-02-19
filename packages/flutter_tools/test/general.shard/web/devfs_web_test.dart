@@ -46,7 +46,7 @@ void main() {
     linux = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
     testbed = Testbed(setup: () {
-      webAssetServer = WebAssetServer(mockHttpServer, packages, InternetAddress.loopbackIPv4);
+      webAssetServer = WebAssetServer(mockHttpServer, packages, InternetAddress.loopbackIPv4, null);
     });
   });
 

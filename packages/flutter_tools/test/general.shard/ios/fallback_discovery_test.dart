@@ -49,8 +49,12 @@ void main() {
 
   testUsingContext('Selects assumed port if VM service connection is successful', () async {
     when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
-      return VM()..isolates = <IsolateRef>[
-        IsolateRef(),
+      return VM(architectureBits: 64)..isolates = <IsolateRef>[
+        IsolateRef(
+          id: 'a',
+          name: 'isolate',
+          number: '1',
+        ),
       ];
     });
     when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
