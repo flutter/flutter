@@ -102,7 +102,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--name', name],
       for (final String plainName in plainNames)
         ...<String>['--plain-name', plainName],
-      '--test-randomize-ordering-seed=$randomSeed',
+      if (randomSeed != null && randomSeed != '0')
+        '--test-randomize-ordering-seed=$randomSeed',
     ];
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory
