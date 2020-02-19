@@ -647,6 +647,15 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
                 treeShakeIcons treeShakeIconsOptionsValue
+                doLast {
+                    project.exec {
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                            commandLine('cmd', '/c', 'attrib -r ${assetsDirectory}/* /s')
+                        } else {
+                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
+                        }
+                    }
+                }
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -857,6 +866,10 @@ class FlutterTask extends BaseFlutterTask {
     @OutputDirectory
     File getOutputDirectory() {
         return intermediateDir
+    }
+
+    String getAssetsDirectory() {
+        return "${outputDirectory}/flutter_assets"
     }
 
     CopySpec getAssets() {
