@@ -302,15 +302,17 @@ void main() {
       buildMode: BuildMode.debug,
       enableDwds: false,
       entrypoint: Uri.base,
+      testMode: true,
     );
     webDevFS.requireJS.createSync(recursive: true);
-    webDevFS.dartSdk
-      ..createSync(recursive: true)
-      ..writeAsStringSync('HELLO');
-    webDevFS.dartSdkSourcemap.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     await webDevFS.create();
+    webDevFS.webAssetServer.dartSdk
+      ..createSync(recursive: true)
+      ..writeAsStringSync('HELLO');
+    webDevFS.webAssetServer.dartSdkSourcemap.createSync(recursive: true);
+
     await webDevFS.update(
       mainPath: globals.fs.path.join('lib', 'main.dart'),
       generator: residentCompiler,
@@ -322,26 +324,15 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('/main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);
-    expect(webDevFS.webAssetServer.getFile('/dart_sdk.js'), utf8.encode('HELLO'));
+    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js'), 'HELLO');
 
     // Update to the SDK.
-    webDevFS.dartSdk.writeAsStringSync('BELLOW');
-
-    // Still old SDK.
-    expect(webDevFS.webAssetServer.getFile('/dart_sdk.js'), utf8.encode('HELLO'));
-    await webDevFS.update(
-      mainPath: globals.fs.path.join('lib', 'main.dart'),
-      generator: residentCompiler,
-      trackWidgetCreation: true,
-      bundleFirstUpload: true,
-      invalidatedFiles: <Uri>[],
-    );
+    webDevFS.webAssetServer.dartSdk.writeAsStringSync('BELLOW');
 
     // New SDK should be visible..
-    expect(webDevFS.webAssetServer.getFile('/dart_sdk.js'), utf8.encode('BELLOW'));
+    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js'), 'BELLOW');
 
     await webDevFS.destroy();
-    await webDevFS.dwds.stop();
   }));
 }
 
