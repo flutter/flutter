@@ -911,8 +911,8 @@ class ListView extends BoxScrollView {
   /// The `itemBuilder` should actually create the widget instances when called.
   /// Avoid using a builder that returns a previously-constructed widget; if the
   /// list view's children are created in advance, or all at once when the
-  /// [ListView] itself is created, it is more efficient to use the [ListView] 
-  /// constructor. Even more efficient, however, is to create the instances on 
+  /// [ListView] itself is created, it is more efficient to use the [ListView]
+  /// constructor. Even more efficient, however, is to create the instances on
   /// demand using this constructor's `itemBuilder` callback.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
