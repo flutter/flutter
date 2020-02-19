@@ -1,14 +1,14 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/io.dart' show stdout;
 import '../convert.dart';
+import '../globals.dart' as globals;
 import 'watcher.dart';
 
 /// Prints JSON events when running a test in --machine mode.
 class EventPrinter extends TestWatcher {
-  EventPrinter({StringSink out}) : _out = out ?? stdout;
+  EventPrinter({StringSink out}) : _out = out ?? globals.stdio.stdout;
 
   final StringSink _out;
 

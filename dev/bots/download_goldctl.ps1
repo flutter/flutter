@@ -1,3 +1,7 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 $url= "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
 $zipPath = "C:\Windows\Temp\depot_tools.zip"
 $path = "C:\Windows\Temp\depot_tools"

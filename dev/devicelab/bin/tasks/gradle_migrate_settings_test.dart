@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
 /// Tests that [settings_aar.gradle] is created when possible.
 Future<void> main() async {
@@ -53,7 +53,7 @@ Future<void> main() async {
         );
       });
 
-      const String newFileContent = 'include \':app\'';
+      const String newFileContent = "include ':app'";
 
       final File settingsGradle = File(path.join(projectDir.path, 'android', 'settings.gradle'));
       final File newSettingsGradle = File(path.join(projectDir.path, 'android', 'settings_aar.gradle'));
@@ -73,7 +73,7 @@ Future<void> main() async {
 
       section('Override settings.gradle V2');
 
-      const String deprecatedFileContentV2 = '''
+      const String deprecatedFileContentV2 = r'''
 include ':app'
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
@@ -86,8 +86,8 @@ if (pluginsFile.exists()) {
 
 plugins.each { name, path ->
     def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include ":\$name"
-    project(":\$name").projectDir = pluginDirectory
+    include ":$name"
+    project(":$name").projectDir = pluginDirectory
 }
 ''';
       settingsGradle.writeAsStringSync(deprecatedFileContentV2, flush: true);

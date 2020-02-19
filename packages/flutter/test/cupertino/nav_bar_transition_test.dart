@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -51,7 +51,7 @@ Future<void> startTransitionBetween(
 CupertinoPageScaffold scaffoldForNavBar(Widget navBar) {
   if (navBar is CupertinoNavigationBar || navBar == null) {
     return CupertinoPageScaffold(
-      navigationBar: navBar ?? const CupertinoNavigationBar(),
+      navigationBar: navBar as CupertinoNavigationBar ?? const CupertinoNavigationBar(),
       child: const Placeholder(),
     );
   } else if (navBar is CupertinoSliverNavigationBar) {
@@ -72,12 +72,9 @@ CupertinoPageScaffold scaffoldForNavBar(Widget navBar) {
 }
 
 Finder flying(WidgetTester tester, Finder finder) {
-  final RenderObjectWithChildMixin<RenderStack> theater =
-      tester.renderObject(find.byType(Overlay));
-  final RenderStack theaterStack = theater.child;
+  final ContainerRenderObjectMixin<RenderBox, StackParentData> theater = tester.renderObject(find.byType(Overlay));
   final Finder lastOverlayFinder = find.byElementPredicate((Element element) {
-    return element is RenderObjectElement &&
-        element.renderObject == theaterStack.lastChild;
+    return element is RenderObjectElement && element.renderObject == theater.lastChild;
   });
 
   assert(
@@ -226,7 +223,7 @@ void main() {
     // The transition's stack is ordered. The bottom middle is inserted first.
     final RenderParagraph bottomMiddle =
         tester.renderObject(flying(tester, find.text('Page 1')).first);
-    expect(bottomMiddle.text.style.color, const Color(0xfffffaf4));
+    expect(bottomMiddle.text.style.color, const Color(0xFFF4F9FF));
     expect(bottomMiddle.text.style.fontWeight, FontWeight.w600);
     expect(bottomMiddle.text.style.fontFamily, '.SF Pro Text');
     expect(bottomMiddle.text.style.letterSpacing, -0.41);
@@ -237,7 +234,7 @@ void main() {
     // are flipped.
     final RenderParagraph topBackLabel =
         tester.renderObject(flying(tester, find.text('Page 1')).last);
-    expect(topBackLabel.text.style.color, const Color(0xfffffaf4));
+    expect(topBackLabel.text.style.color, const Color(0xFFF4F9FF));
     expect(topBackLabel.text.style.fontWeight, FontWeight.w600);
     expect(topBackLabel.text.style.fontFamily, '.SF Pro Text');
     expect(topBackLabel.text.style.letterSpacing, -0.41);
@@ -246,14 +243,14 @@ void main() {
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
-    expect(bottomMiddle.text.style.color, const Color(0xffffa923));
+    expect(bottomMiddle.text.style.color, const Color(0xFF2390FF));
     expect(bottomMiddle.text.style.fontWeight, FontWeight.w400);
     expect(bottomMiddle.text.style.fontFamily, '.SF Pro Text');
     expect(bottomMiddle.text.style.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
-    expect(topBackLabel.text.style.color, const Color(0xffffa923));
+    expect(topBackLabel.text.style.color, const Color(0xFF2390FF));
     expect(topBackLabel.text.style.fontWeight, FontWeight.w400);
     expect(topBackLabel.text.style.fontFamily, '.SF Pro Text');
     expect(topBackLabel.text.style.letterSpacing, -0.41);

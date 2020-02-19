@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,10 +30,7 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Centered.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Centered.png'),
     );
 
     await tester.pumpWidget(
@@ -57,10 +54,7 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Centered.wrap.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Centered.wrap.png'),
     );
   });
 
@@ -91,10 +85,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'text_golden.Foreground.gradient.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Foreground.gradient.png'),
     );
 
     await tester.pumpWidget(
@@ -116,10 +107,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'text_golden.Foreground.stroke.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Foreground.stroke.png'),
     );
 
     await tester.pumpWidget(
@@ -142,10 +130,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'text_golden.Foreground.stroke_and_gradient.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
     );
   });
 
@@ -195,10 +180,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'text_golden.Background.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.Background.png'),
     );
   });
 
@@ -234,10 +216,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile(
-        'text_golden.Fade.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Fade.png'),
     );
   });
 
@@ -262,10 +241,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.StrutDefault.png',
-        version: null,
-      ),
+      matchesGoldenFile('text_golden.StrutDefault.png'),
     );
   });
 
@@ -292,10 +268,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Strut.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Strut.1.png'),
     );
   });
 
@@ -323,10 +296,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Strut.2.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Strut.2.png'),
     );
   });
 
@@ -377,10 +347,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Strut.3.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Strut.3.png'),
     );
   });
 
@@ -415,10 +382,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Strut.4.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.Strut.4.png'),
     );
   });
 
@@ -469,10 +433,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.StrutForce.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.StrutForce.1.png'),
     );
   });
 
@@ -510,10 +471,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.Decoration.1.png',
-        version: 0,
-      ),
+      matchesGoldenFile('text_golden.Decoration.1.png'),
     );
   });
 
@@ -552,10 +510,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.DecorationThickness.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.DecorationThickness.1.png'),
     );
   });
 
@@ -649,10 +604,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidget.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidget.1.png'),
     );
   });
 
@@ -697,10 +649,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidget.2.png',
-        version: 2,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidget.2.png'),
     );
   });
 
@@ -829,10 +778,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetNest.1.png',
-        version: 2,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetNest.1.png'),
     );
   });
 
@@ -939,10 +885,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetBaseline.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetBaseline.1.png'),
     );
   });
 
@@ -1049,10 +992,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetAboveBaseline.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetAboveBaseline.1.png'),
     );
   });
 
@@ -1159,10 +1099,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetBelowBaseline.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetBelowBaseline.1.png'),
     );
   });
 
@@ -1269,10 +1206,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetTop.1.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_golden.TextInlineWidgetTop.1.png'),
     );
   });
 
@@ -1379,10 +1313,50 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'text_golden.TextInlineWidgetMiddle.1.png',
-        version: 1,
+      matchesGoldenFile('text_golden.TextInlineWidgetMiddle.1.png'),
+    );
+  });
+
+  testWidgets('Text TextHeightBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 200.0,
+            height: 700.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: Column(
+              children: const <Widget>[
+                Text('Hello\nLine 2\nLine 3',
+                  textDirection: TextDirection.ltr,
+                  style: TextStyle(height: 5,),
+                ),
+                Text('Hello\nLine 2\nLine 3',
+                  textDirection: TextDirection.ltr,
+                  style: TextStyle(height: 5,),
+                  textHeightBehavior: TextHeightBehavior(
+                    applyHeightToFirstAscent: false,
+                    applyHeightToLastDescent: false,
+                  ),
+                ),
+                Text('Hello',
+                  textDirection: TextDirection.ltr,
+                  style: TextStyle(height: 5,),
+                  textHeightBehavior: TextHeightBehavior(
+                    applyHeightToFirstAscent: false,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextHeightBehavior.1.png'),
     );
   });
 }

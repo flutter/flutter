@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -40,7 +40,7 @@ void main() {
 
     expect(bundle.loadCallCount['one'], 1);
 
-    FlutterError loadException;
+    Object loadException;
     try {
       await bundle.loadString('foo');
     } catch (e) {
@@ -56,4 +56,24 @@ void main() {
     expect(key.name, 'one');
     expect(key.scale, 1.0);
   });
+
+  test('NetworkAssetBundle control test', () async {
+    final Uri uri = Uri.http('example.org', '/path');
+    final NetworkAssetBundle bundle = NetworkAssetBundle(uri);
+    FlutterError error;
+    try {
+      await bundle.load('key');
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.diagnostics.length, 2);
+    expect(error.diagnostics.last, isA<IntProperty>());
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   Unable to load asset: key\n'
+      '   HTTP status code: 404\n',
+    );
+  }, skip: true);
 }

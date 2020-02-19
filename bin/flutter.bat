@@ -1,8 +1,7 @@
 @ECHO off
-REM Copyright 2017 The Chromium Authors. All rights reserved.
+REM Copyright 2014 The Flutter Authors. All rights reserved.
 REM Use of this source code is governed by a BSD-style license that can be
 REM found in the LICENSE file.
-
 
 REM ---------------------------------- NOTE ----------------------------------
 REM
@@ -136,7 +135,7 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade...
-        CALL "%pub%" upgrade "%VERBOSITY%"
+        CALL "%pub%" upgrade "%VERBOSITY%" --no-precompile
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
         ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
         timeout /t 5 /nobreak 2>NUL

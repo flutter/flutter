@@ -1,9 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
@@ -185,6 +186,7 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
+  assert(testImage != null);
 
   setUp(() {
     transitionFromUserGestures = false;
@@ -477,11 +479,6 @@ Future<void> main() async {
 
     Navigator.pop(heroes.evaluate().first);
     await tester.pump(); // ...and removes it straight away (since it's already at 0.0)
-
-    // this is verifying that there's no crash
-
-    // TODO(ianh): once https://github.com/flutter/flutter/issues/5631 is fixed, remove this line:
-    await tester.pump(const Duration(hours: 1));
   });
 
   testWidgets('Overlapping starting and ending a hero transition works ok', (WidgetTester tester) async {
@@ -511,11 +508,6 @@ Future<void> main() async {
     Navigator.pop(heroes.evaluate().first);
     await tester.pump(const Duration(hours: 1)); // so the first transition is finished, but the second hasn't started
     await tester.pump();
-
-    // this is verifying that there's no crash
-
-    // TODO(ianh): once https://github.com/flutter/flutter/issues/5631 is fixed, remove this line:
-    await tester.pump(const Duration(hours: 1));
   });
 
   testWidgets('One route, two heroes, same tag, throws', (WidgetTester tester) async {
@@ -546,7 +538,31 @@ Future<void> main() async {
 
     await tester.tap(find.text('push'));
     await tester.pump();
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    final FlutterError error = exception as FlutterError;
+    expect(error.diagnostics.length, 3);
+    final DiagnosticsNode last = error.diagnostics.last;
+    expect(last, isA<DiagnosticsProperty<StatefulElement>>());
+    expect(
+      last.toStringDeep(),
+      equalsIgnoringHashCodes(
+        '# Here is the subtree for one of the offending heroes: Hero\n',
+      ),
+    );
+    expect(last.style, DiagnosticsTreeStyle.dense);
+    expect(
+      error.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   There are multiple heroes that share the same tag within a\n'
+        '   subtree.\n'
+        '   Within each subtree for which heroes are to be animated (i.e. a\n'
+        '   PageRoute subtree), each Hero must have a unique non-null tag.\n'
+        '   In this case, multiple heroes had the following tag: a\n'
+        '   ├# Here is the subtree for one of the offending heroes: Hero\n',
+      ),
+    );
   });
 
   testWidgets('Hero push transition interrupted by a pop', (WidgetTester tester) async {
@@ -1598,10 +1614,7 @@ Future<void> main() async {
 
   testWidgets('Heroes do not transition on back gestures by default', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
-      routes: routes,
+     routes: routes,
     ));
 
     expect(find.byKey(firstKey), isOnstage);
@@ -1636,14 +1649,11 @@ Future<void> main() async {
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Heroes can transition on gesture in one frame', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
       routes: routes,
     ));
 
@@ -1682,14 +1692,11 @@ Future<void> main() async {
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Heroes animate should hide destination hero and display original hero in case of dismissed', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
       routes: routes,
     ));
 
@@ -1721,14 +1728,16 @@ Future<void> main() async {
     expect(find.byKey(firstKey), findsNothing);
     expect(find.byKey(secondKey), isOnstage);
     expect(find.byKey(secondKey), isInCard);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       routes: routes,
       initialRoute: '/two',
     ));
-    expect(find.text('two'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    expect(find.text('two'), findsNothing);
+    expect(find.text('three'), findsOneWidget);
   });
 
   testWidgets('Can push/pop on outer Navigator if nested Navigator contains Heroes', (WidgetTester tester) async {
@@ -2179,7 +2188,7 @@ Future<void> main() async {
       // The element should be mounted and unique.
       expect(state1.mounted, isTrue);
 
-      expect(navigatorKey.currentState.pop(), isTrue);
+      navigatorKey.currentState.pop();
       await tester.pumpAndSettle();
 
       // State is preserved.
@@ -2280,9 +2289,6 @@ Future<void> main() async {
   testWidgets('Remove user gesture driven flights when the gesture is invalid', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        platform: TargetPlatform.iOS,
-      ),
       routes: routes,
     ));
 
@@ -2306,7 +2312,7 @@ Future<void> main() async {
     // The simple route should still be on top.
     expect(find.byKey(simpleKey), findsOneWidget);
     expect(tester.takeException(), isNull);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Regression test for https://github.com/flutter/flutter/issues/40239.
   testWidgets(

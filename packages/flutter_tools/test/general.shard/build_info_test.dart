@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,5 +53,44 @@ void main() {
       buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-');
       expect(buildName, 'abc+-');
     });
+
+    test('build mode configuration is correct', () {
+      expect(BuildMode.debug.isRelease, false);
+      expect(BuildMode.debug.isPrecompiled, false);
+      expect(BuildMode.debug.isJit, true);
+
+      expect(BuildMode.profile.isRelease, false);
+      expect(BuildMode.profile.isPrecompiled, true);
+      expect(BuildMode.profile.isJit, false);
+
+      expect(BuildMode.release.isRelease, true);
+      expect(BuildMode.release.isPrecompiled, true);
+      expect(BuildMode.release.isJit, false);
+
+      expect(BuildMode.jitRelease.isRelease, true);
+      expect(BuildMode.jitRelease.isPrecompiled, false);
+      expect(BuildMode.jitRelease.isJit, true);
+
+      expect(BuildMode.fromName('debug'), BuildMode.debug);
+      expect(BuildMode.fromName('profile'), BuildMode.profile);
+      expect(BuildMode.fromName('jit_release'), BuildMode.jitRelease);
+      expect(BuildMode.fromName('release'), BuildMode.release);
+      expect(() => BuildMode.fromName('foo'), throwsArgumentError);
+    });
+  });
+
+  test('getNameForTargetPlatform on Darwin arches', () {
+    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.arm64), 'ios-arm64');
+    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.armv7), 'ios-armv7');
+    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.x86_64), 'ios-x86_64');
+    expect(getNameForTargetPlatform(TargetPlatform.android), isNot(contains('ios')));
+  });
+
+  test('getIOSArchForName on Darwin arches', () {
+    expect(getIOSArchForName('armv7'), DarwinArch.armv7);
+    expect(getIOSArchForName('arm64'), DarwinArch.arm64);
+    expect(getIOSArchForName('arm64e'), DarwinArch.arm64);
+    expect(getIOSArchForName('x86_64'), DarwinArch.x86_64);
+    expect(() => getIOSArchForName('bogus'), throwsAssertionError);
   });
 }

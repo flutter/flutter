@@ -3,7 +3,7 @@
   "datePickerHourSemanticsLabelOther": "$hourak dira",
   "datePickerMinuteSemanticsLabelOne": "Minutu bat",
   "datePickerMinuteSemanticsLabelOther": "$minute minutu",
-  "datePickerDateOrder": "mdy",
+  "datePickerDateOrder": "ymd",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",

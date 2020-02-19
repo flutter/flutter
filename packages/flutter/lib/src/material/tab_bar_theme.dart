@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -96,7 +96,7 @@ class TabBarTheme extends Diagnosticable {
       indicator: Decoration.lerp(a.indicator, b.indicator, t),
       indicatorSize: t < 0.5 ? a.indicatorSize : b.indicatorSize,
       labelColor: Color.lerp(a.labelColor, b.labelColor, t),
-      labelPadding: EdgeInsets.lerp(a.labelPadding, b.labelPadding, t),
+      labelPadding: EdgeInsetsGeometry.lerp(a.labelPadding, b.labelPadding, t),
       labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
       unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
       unselectedLabelStyle: TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
@@ -117,18 +117,18 @@ class TabBarTheme extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final TabBarTheme typedOther = other;
-    return typedOther.indicator == indicator
-        && typedOther.indicatorSize == indicatorSize
-        && typedOther.labelColor == labelColor
-        && typedOther.labelPadding == labelPadding
-        && typedOther.labelStyle == labelStyle
-        && typedOther.unselectedLabelColor == unselectedLabelColor
-        && typedOther.unselectedLabelStyle == unselectedLabelStyle;
+    return other is TabBarTheme
+        && other.indicator == indicator
+        && other.indicatorSize == indicatorSize
+        && other.labelColor == labelColor
+        && other.labelPadding == labelPadding
+        && other.labelStyle == labelStyle
+        && other.unselectedLabelColor == unselectedLabelColor
+        && other.unselectedLabelStyle == unselectedLabelStyle;
   }
 }

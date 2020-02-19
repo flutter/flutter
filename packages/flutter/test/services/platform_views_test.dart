@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,7 +27,7 @@ void main() {
             layoutDirection: TextDirection.ltr,
           ).setSize(const Size(100.0, 100.0));
         },
-        throwsA(isInstanceOf<PlatformException>()),
+        throwsA(isA<PlatformException>()),
       );
     });
 
@@ -55,7 +55,7 @@ void main() {
       expect(
           () => PlatformViewsService.initAndroidView(
               id: 0, viewType: 'web', layoutDirection: TextDirection.ltr).setSize(const Size(100.0, 100.0)),
-          throwsA(isInstanceOf<PlatformException>()));
+          throwsA(isA<PlatformException>()));
     });
 
     test('dispose Android view', () async {
@@ -128,7 +128,7 @@ void main() {
 
     });
 
-    test('change Android view\'s directionality before creation', () async {
+    test("change Android view's directionality before creation", () async {
       viewsController.registerViewType('webview');
       final AndroidViewController viewController =
       PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
@@ -141,7 +141,7 @@ void main() {
           ]));
     });
 
-    test('change Android view\'s directionality after creation', () async {
+    test("change Android view's directionality after creation", () async {
       viewsController.registerViewType('webview');
       final AndroidViewController viewController =
       PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);
@@ -170,7 +170,7 @@ void main() {
             layoutDirection: TextDirection.ltr,
           );
         },
-        throwsA(isInstanceOf<PlatformException>()),
+        throwsA(isA<PlatformException>()),
       );
     });
 
@@ -199,7 +199,7 @@ void main() {
       expect(
             () => PlatformViewsService.initUiKitView(
             id: 0, viewType: 'web', layoutDirection: TextDirection.ltr),
-        throwsA(isInstanceOf<PlatformException>()),
+        throwsA(isA<PlatformException>()),
       );
     });
 
@@ -228,7 +228,7 @@ void main() {
           () async {
             await viewController.dispose();
           },
-          throwsA(isInstanceOf<PlatformException>()),
+          throwsA(isA<PlatformException>()),
       );
     });
   });

@@ -1,40 +1,33 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  MemoryFileSystem fs;
-  MockPlatform windowsPlatform;
-  MockXcode mockXcode;
-  FlutterProject projectUnderTest;
-  MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
-  Directory buildDirectory;
-
-  setUp(() {
-    fs = MemoryFileSystem();
-    mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-    windowsPlatform = MockPlatform();
-    mockXcode = MockXcode();
+  void test1() {
+    final MemoryFileSystem fs = MemoryFileSystem();
+    final MockXcodeProjectInterpreter mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+    final MockXcode mockXcode = MockXcode();
 
     final Directory currentDirectory = fs.currentDirectory;
-    buildDirectory = currentDirectory.childDirectory('build');
+    final Directory buildDirectory = currentDirectory.childDirectory('build');
     buildDirectory.createSync(recursive: true);
 
-    projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
+    final FlutterProject projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
     projectUnderTest.ios.xcodeWorkspace.createSync(recursive: true);
     projectUnderTest.macos.xcodeWorkspace.createSync(recursive: true);
 
@@ -44,10 +37,8 @@ void main() {
     projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
     projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
     projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
-  });
 
-  group(CleanCommand, () {
-    testUsingContext('removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
+    testUsingContext('$CleanCommand removes build and .dart_tool and ephemeral directories, cleans Xcode', () async {
       when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       await CleanCommand().runCommand();
 
@@ -62,30 +53,51 @@ void main() {
       verify(xcodeProjectInterpreter.cleanWorkspace(any, 'Runner')).called(2);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
       Xcode: () => mockXcode,
-      FileSystem: () => fs,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
+  }
 
-    testUsingContext('prints a helpful error message on Windows', () async {
+  void test2() {
+    final MockXcode mockXcode = MockXcode();
+    final MockPlatform windowsPlatform = MockPlatform();
+    testUsingContext('$CleanCommand prints a helpful error message on Windows', () async {
       when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
       when(windowsPlatform.isWindows).thenReturn(true);
 
       final MockFile mockFile = MockFile();
       when(mockFile.existsSync()).thenReturn(true);
 
-      final BufferLogger logger = context.get<Logger>();
       when(mockFile.deleteSync(recursive: true)).thenThrow(const FileSystemException('Deletion failed'));
       final CleanCommand command = CleanCommand();
       command.deleteFile(mockFile);
-      expect(logger.errorText, contains('A program may still be using a file'));
+      expect(testLogger.errorText, contains('A program may still be using a file'));
       verify(mockFile.deleteSync(recursive: true)).called(1);
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
-      Logger: () => BufferLogger(),
       Xcode: () => mockXcode,
     });
-  });
+
+    testUsingContext('$CleanCommand handles missing permissions;', () async {
+      when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
+
+      final MockFile mockFile = MockFile();
+      when(mockFile.existsSync()).thenThrow(const FileSystemException('OS error: Access Denied'));
+      when(mockFile.path).thenReturn('foo.dart');
+
+      final CleanCommand command = CleanCommand();
+      command.deleteFile(mockFile);
+      expect(testLogger.errorText, contains('Cannot clean foo.dart'));
+      verifyNever(mockFile.deleteSync(recursive: true));
+    }, overrides: <Type, Generator>{
+      Platform: () => windowsPlatform,
+      Xcode: () => mockXcode,
+    });
+  }
+
+  test1();
+  test2();
 }
 
 class MockFile extends Mock implements File {}

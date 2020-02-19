@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,6 +11,7 @@ import 'material_button.dart';
 import 'material_state.dart';
 import 'raised_button.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // The total time to make the button's fill color opaque and change
 // its elevation. Only applies when highlightElevation > 0.0.
@@ -28,7 +29,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 /// wide grey rounded rectangle that does not change when the button is
 /// pressed or disabled. By default the button's background is transparent.
 ///
-/// If the [onPressed] callback is null, then the button will be disabled and by
+/// If the [onPressed] or [onLongPress] callbacks are null, then the button will be disabled and by
 /// default will resemble a flat button in the [disabledColor].
 ///
 /// The button's [highlightElevation], which defines the size of the
@@ -61,6 +62,7 @@ class OutlineButton extends MaterialButton {
   const OutlineButton({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -74,6 +76,7 @@ class OutlineButton extends MaterialButton {
     this.disabledBorderColor,
     this.highlightedBorderColor,
     EdgeInsetsGeometry padding,
+    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
@@ -85,6 +88,7 @@ class OutlineButton extends MaterialButton {
        super(
          key: key,
          onPressed: onPressed,
+         onLongPress: onLongPress,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -95,6 +99,7 @@ class OutlineButton extends MaterialButton {
          splashColor: splashColor,
          highlightElevation: highlightElevation,
          padding: padding,
+         visualDensity: visualDensity,
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
@@ -113,6 +118,7 @@ class OutlineButton extends MaterialButton {
   factory OutlineButton.icon({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -126,6 +132,7 @@ class OutlineButton extends MaterialButton {
     Color disabledBorderColor,
     BorderSide borderSide,
     EdgeInsetsGeometry padding,
+    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior,
     FocusNode focusNode,
@@ -169,6 +176,7 @@ class OutlineButton extends MaterialButton {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return _OutlineButton(
       onPressed: onPressed,
+      onLongPress: onLongPress,
       brightness: buttonTheme.getBrightness(this),
       textTheme: textTheme,
       textColor: buttonTheme.getTextColor(this),
@@ -183,6 +191,7 @@ class OutlineButton extends MaterialButton {
       disabledBorderColor: disabledBorderColor,
       highlightedBorderColor: highlightedBorderColor ?? buttonTheme.colorScheme.primary,
       padding: buttonTheme.getPadding(this),
+      visualDensity: visualDensity,
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
       focusNode: focusNode,
@@ -199,7 +208,7 @@ class OutlineButton extends MaterialButton {
   }
 }
 
-// The type of of OutlineButtons created with OutlineButton.icon.
+// The type of OutlineButtons created with OutlineButton.icon.
 //
 // This class only exists to give OutlineButtons created with OutlineButton.icon
 // a distinct class for the sake of ButtonTheme. It can not be instantiated.
@@ -207,6 +216,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
   _OutlineButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -220,6 +230,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     Color disabledBorderColor,
     BorderSide borderSide,
     EdgeInsetsGeometry padding,
+    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
@@ -234,6 +245,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
        super(
          key: key,
          onPressed: onPressed,
+         onLongPress: onLongPress,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -247,6 +259,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          highlightedBorderColor: highlightedBorderColor,
          borderSide: borderSide,
          padding: padding,
+         visualDensity: visualDensity,
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
@@ -266,6 +279,7 @@ class _OutlineButton extends StatefulWidget {
   const _OutlineButton({
     Key key,
     @required this.onPressed,
+    this.onLongPress,
     this.brightness,
     this.textTheme,
     this.textColor,
@@ -280,6 +294,7 @@ class _OutlineButton extends StatefulWidget {
     this.disabledBorderColor,
     @required this.highlightedBorderColor,
     this.padding,
+    this.visualDensity,
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
@@ -292,6 +307,7 @@ class _OutlineButton extends StatefulWidget {
        super(key: key);
 
   final VoidCallback onPressed;
+  final VoidCallback onLongPress;
   final Brightness brightness;
   final ButtonTextTheme textTheme;
   final Color textColor;
@@ -306,13 +322,14 @@ class _OutlineButton extends StatefulWidget {
   final Color disabledBorderColor;
   final Color highlightedBorderColor;
   final EdgeInsetsGeometry padding;
+  final VisualDensity visualDensity;
   final ShapeBorder shape;
   final Clip clipBehavior;
   final FocusNode focusNode;
   final bool autofocus;
   final Widget child;
 
-  bool get enabled => onPressed != null;
+  bool get enabled => onPressed != null || onLongPress != null;
 
   @override
   _OutlineButtonState createState() => _OutlineButtonState();
@@ -427,6 +444,8 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget child) {
@@ -440,6 +459,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           highlightColor: widget.highlightColor,
           disabledColor: Colors.transparent,
           onPressed: widget.onPressed,
+          onLongPress: widget.onLongPress,
           elevation: 0.0,
           disabledElevation: 0.0,
           focusElevation: 0.0,
@@ -447,6 +467,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           highlightElevation: _getHighlightElevation(),
           onHighlightChanged: _handleHighlightChanged,
           padding: widget.padding,
+          visualDensity: widget.visualDensity ?? theme.visualDensity,
           shape: _OutlineBorder(
             shape: widget.shape,
             side: _getOutline(),
@@ -531,13 +552,14 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final _OutlineBorder typedOther = other;
-    return side == typedOther.side && shape == typedOther.shape;
+    return other is _OutlineBorder
+        && other.side == side
+        && other.shape == shape;
   }
 
   @override

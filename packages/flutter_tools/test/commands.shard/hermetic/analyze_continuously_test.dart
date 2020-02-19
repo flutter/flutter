@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -20,7 +21,7 @@ void main() {
 
   setUp(() {
     FlutterCommandRunner.initFlutterRoot();
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
+    tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
   });
 
   tearDown(() {
@@ -32,7 +33,7 @@ void main() {
     testUsingContext('AnalysisServer success', () async {
       _createSampleProject(tempDir);
 
-      await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+      await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -45,14 +46,15 @@ void main() {
 
       expect(errorCount, 0);
     }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => os,
+      OperatingSystemUtils: () => globals.os,
+      Pub: () => const Pub(),
     });
   });
 
   testUsingContext('AnalysisServer errors', () async {
     _createSampleProject(tempDir, brokenCode: true);
 
-    await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+    await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
     server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -67,7 +69,8 @@ void main() {
 
     expect(errorCount, greaterThan(0));
   }, overrides: <Type, Generator>{
-    OperatingSystemUtils: () => os,
+    OperatingSystemUtils: () => globals.os,
+    Pub: () => const Pub(),
   });
 
   testUsingContext('Returns no errors when source is error-free', () async {
@@ -84,17 +87,18 @@ void main() {
     await onDone;
     expect(errorCount, 0);
   }, overrides: <Type, Generator>{
-    OperatingSystemUtils: () => os,
+    OperatingSystemUtils: () => globals.os,
+    Pub: () => const Pub(),
   });
 }
 
 void _createSampleProject(Directory directory, { bool brokenCode = false }) {
-  final File pubspecFile = fs.file(fs.path.join(directory.path, 'pubspec.yaml'));
+  final File pubspecFile = globals.fs.file(globals.fs.path.join(directory.path, 'pubspec.yaml'));
   pubspecFile.writeAsStringSync('''
 name: foo_project
 ''');
 
-  final File dartFile = fs.file(fs.path.join(directory.path, 'lib', 'main.dart'));
+  final File dartFile = globals.fs.file(globals.fs.path.join(directory.path, 'lib', 'main.dart'));
   dartFile.parent.createSync();
   dartFile.writeAsStringSync('''
 void main() {

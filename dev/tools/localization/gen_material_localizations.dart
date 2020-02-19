@@ -1,8 +1,12 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'localizations_utils.dart';
 
 HeaderGenerator generateMaterialHeader = (String regenerateInstructions) {
   return '''
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,7 +38,7 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalization${camelCase(locale)}({
+  const MaterialLocalization${locale.camelCase()}({
     String localeName = '$localeName',
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat mediumDateFormat,

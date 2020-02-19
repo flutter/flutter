@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -460,6 +460,26 @@ void main() {
       'textfield',
     );
   });
+
+  testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
+    final UniqueKey debugger = UniqueKey();
+    const TextStyle labelStyle = TextStyle(color: Colors.amber);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          key: debugger,
+          labelStyle: labelStyle,
+          child: Semantics(
+            label: 'label',
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
+  });
 }
 
 String _getMessageShownInSemanticsDebugger({
@@ -468,7 +488,7 @@ String _getMessageShownInSemanticsDebugger({
   @required WidgetTester tester,
 }) {
   final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
-  return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics);
+  return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics) as String;
 }
 
 dynamic _getSemanticsDebuggerPainter({
@@ -478,7 +498,7 @@ dynamic _getSemanticsDebuggerPainter({
   final CustomPaint customPaint = tester.widgetList(find.descendant(
     of: find.byKey(debuggerKey),
     matching: find.byType(CustomPaint),
-  )).first;
+  )).first as CustomPaint;
   final dynamic semanticsDebuggerPainter = customPaint.foregroundPainter;
   expect(semanticsDebuggerPainter.runtimeType.toString(), '_SemanticsDebuggerPainter');
   return semanticsDebuggerPainter;

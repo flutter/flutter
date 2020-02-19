@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,12 +9,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
-import 'binding.dart';
 import 'debug.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
-/// The dart:io implemenation of [image_provider.NetworkImage].
+/// The dart:io implementation of [image_provider.NetworkImage].
 class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage> implements image_provider.NetworkImage {
   /// Creates an object that fetches the image at the given URL.
   ///
@@ -38,14 +37,14 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key) {
+  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents),
+      codec: _loadAsync(key as NetworkImage, chunkEvents, decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       informationCollector: () {
@@ -76,6 +75,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
+    image_provider.DecoderCallback decode,
   ) async {
     try {
       assert(key == this);
@@ -101,24 +101,24 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       if (bytes.lengthInBytes == 0)
         throw Exception('NetworkImage is an empty file: $resolved');
 
-      return PaintingBinding.instance.instantiateImageCodec(bytes);
+      return decode(bytes);
     } finally {
       chunkEvents.close();
     }
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final NetworkImage typedOther = other;
-    return url == typedOther.url
-        && scale == typedOther.scale;
+    return other is NetworkImage
+        && other.url == url
+        && other.scale == scale;
   }
 
   @override
   int get hashCode => ui.hashValues(url, scale);
 
   @override
-  String toString() => '$runtimeType("$url", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
 }

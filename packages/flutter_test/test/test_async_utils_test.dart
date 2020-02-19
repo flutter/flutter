@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_test/flutter_test.dart' as flutter_test show expect;
+
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as real_test show expect;
 
 // We have to use real_test's expect because the flutter_test expect() goes
@@ -151,15 +153,15 @@ void main() {
       real_test.expect(information[3].level, DiagnosticLevel.info);
       real_test.expect(information[4].level, DiagnosticLevel.info);
       real_test.expect(information[5].level, DiagnosticLevel.info);
-      real_test.expect(information[0], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[1], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[2], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[3], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[4], isInstanceOf<DiagnosticsProperty<void>>());
-      real_test.expect(information[5], isInstanceOf<DiagnosticsStackTrace>());
-      final DiagnosticsStackTrace stackTraceProperty = information[5];
+      real_test.expect(information[0], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[1], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[2], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[3], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[4], isA<DiagnosticsProperty<void>>());
+      real_test.expect(information[5], isA<DiagnosticsStackTrace>());
+      final DiagnosticsStackTrace stackTraceProperty = information[5] as DiagnosticsStackTrace;
       real_test.expect(stackTraceProperty.name, '\nWhen the first method was called, this was the stack');
-      real_test.expect(stackTraceProperty.value, isInstanceOf<StackTrace>());
+      real_test.expect(stackTraceProperty.value, isA<StackTrace>());
     }
     await f1;
     await f2;

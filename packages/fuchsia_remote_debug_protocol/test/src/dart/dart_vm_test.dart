@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -217,7 +217,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(isInstanceOf<RpcFormatError>()));
+      expect(failingFunction, throwsA(isA<RpcFormatError>()));
     });
 
     test('get isolates by pattern', () async {
@@ -311,7 +311,7 @@ void main() {
       }
 
       // Both views should be invalid as they were missing required fields.
-      expect(failingFunction, throwsA(isInstanceOf<RpcFormatError>()));
+      expect(failingFunction, throwsA(isA<RpcFormatError>()));
     });
   });
 
@@ -346,7 +346,7 @@ void main() {
         await vm.invokeRpc('somesillyfunction', timeout: timeoutTime);
       }
 
-      expect(failingFunction, throwsA(isInstanceOf<TimeoutException>()));
+      expect(failingFunction, throwsA(isA<TimeoutException>()));
     });
   });
 }

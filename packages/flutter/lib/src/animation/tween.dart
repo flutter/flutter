@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -128,7 +128,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// which results in two separate [Animation] objects, each configured with a
 /// single [Tween].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Suppose `_controller` is an [AnimationController], and we want to create an
 /// [Animation<Offset>] that is controlled by that controller, and save it in
@@ -143,7 +143,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// );
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// _animation = Tween<Offset>(
@@ -236,7 +236,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   T lerp(double t) {
     assert(begin != null);
     assert(end != null);
-    return begin + (end - begin) * t;
+    return begin + (end - begin) * t as T;
   }
 
   /// Returns the interpolated value for the current value of the given animation.
@@ -261,7 +261,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   }
 
   @override
-  String toString() => '$runtimeType($begin \u2192 $end)';
+  String toString() => '${objectRuntimeType(this, 'Animatable')}($begin \u2192 $end)';
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
@@ -396,12 +396,12 @@ class ConstantTween<T> extends Tween<T> {
   /// Create a tween whose [begin] and [end] values equal [value].
   ConstantTween(T value) : super(begin: value, end: value);
 
-  /// This tween doesn't interpolate, it always returns [value].
+  /// This tween doesn't interpolate, it always returns the same value.
   @override
   T lerp(double t) => begin;
 
   @override
-  String toString() => '$runtimeType(value: begin)';
+  String toString() => '${objectRuntimeType(this, 'ReverseTween')}(value: $begin)';
 }
 
 /// Transforms the value of the given animation by the given curve.
@@ -413,7 +413,7 @@ class ConstantTween<T> extends Tween<T> {
 /// curves when the animation is going forward vs when it is going backward,
 /// which can be useful in some scenarios.)
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following code snippet shows how you can apply a curve to a linear
 /// animation produced by an [AnimationController] `controller`:
@@ -450,5 +450,5 @@ class CurveTween extends Animatable<double> {
   }
 
   @override
-  String toString() => '$runtimeType(curve: $curve)';
+  String toString() => '${objectRuntimeType(this, 'CurveTween')}(curve: $curve)';
 }

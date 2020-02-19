@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,14 +34,6 @@ abstract class PageRoute<T> extends ModalRoute<T> {
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => previousRoute is PageRoute;
-
-  @override
-  AnimationController createAnimationController() {
-    final AnimationController controller = super.createAnimationController();
-    if (settings.isInitialRoute)
-      controller.value = 1.0;
-    return controller;
-  }
 }
 
 Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {

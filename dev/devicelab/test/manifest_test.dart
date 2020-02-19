@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ void main() {
       expect(task.stage, 'devicelab');
       expect(task.requiredAgentCapabilities, <String>['linux/android']);
 
-      for (ManifestTask task in manifest.tasks) {
+      for (final ManifestTask task in manifest.tasks) {
         final File taskFile = File('bin/tasks/${task.name}.dart');
         expect(taskFile.existsSync(), true,
           reason: 'File ${taskFile.path} corresponding to manifest task "${task.name}" not found');

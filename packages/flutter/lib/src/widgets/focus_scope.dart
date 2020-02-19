@@ -1,6 +1,7 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -37,7 +38,7 @@ import 'inherited_notifier.dart';
 ///
 /// To collect a sub-tree of nodes into a group, use a [FocusScope].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to manage focus using the [Focus] and [FocusScope]
 /// widgets. See [FocusNode] for a similar example that doesn't use [Focus] or
 /// [FocusScope].
@@ -82,7 +83,7 @@ import 'inherited_notifier.dart';
 ///     debugLabel: 'Scope',
 ///     autofocus: true,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: Focus(
 ///         onKey: _handleKeyPress,
 ///         debugLabel: 'Button',
@@ -119,25 +120,25 @@ import 'inherited_notifier.dart';
 ///
 /// See also:
 ///
-///   * [FocusNode], which represents a node in the focus hierarchy and
-///     [FocusNode]'s API documentation includes a detailed explanation of its
-///     role in the overall focus system.
-///   * [FocusScope], a widget that manages a group of focusable widgets using a
-///     [FocusScopeNode].
-///   * [FocusScopeNode], a node that collects focus nodes into a group for
-///     traversal.
-///   * [FocusManager], a singleton that manages the primary focus and
-///     distributes key events to focused nodes.
-///   * [FocusTraversalPolicy], an object used to determine how to move the
-///     focus to other nodes.
-///   * [DefaultFocusTraversal], a widget used to configure the default focus
-///     traversal policy for a widget subtree.
+///  * [FocusNode], which represents a node in the focus hierarchy and
+///    [FocusNode]'s API documentation includes a detailed explanation of its role
+///    in the overall focus system.
+///  * [FocusScope], a widget that manages a group of focusable widgets using a
+///    [FocusScopeNode].
+///  * [FocusScopeNode], a node that collects focus nodes into a group for
+///    traversal.
+///  * [FocusManager], a singleton that manages the primary focus and
+///    distributes key events to focused nodes.
+///  * [FocusTraversalPolicy], an object used to determine how to move the focus
+///    to other nodes.
+///  * [DefaultFocusTraversal], a widget used to configure the default focus
+///    traversal policy for a widget subtree.
 class Focus extends StatefulWidget {
   /// Creates a widget that manages a [FocusNode].
   ///
   /// The [child] argument is required and must not be null.
   ///
-  /// The [autofocus] and [skipTraversal] arguments must not be null.
+  /// The [autofocus] argument must not be null.
   const Focus({
     Key key,
     @required this.child,
@@ -146,11 +147,12 @@ class Focus extends StatefulWidget {
     this.onFocusChange,
     this.onKey,
     this.debugLabel,
-    this.canRequestFocus = true,
+    this.canRequestFocus,
     this.skipTraversal,
+    this.includeSemantics = true,
   })  : assert(child != null),
         assert(autofocus != null),
-        assert(canRequestFocus != null),
+        assert(includeSemantics != null),
         super(key: key);
 
   /// A debug label for this widget.
@@ -231,6 +233,17 @@ class Focus extends StatefulWidget {
   /// still be focused explicitly.
   final bool skipTraversal;
 
+  /// Include semantics information in this [Focus] widget.
+  ///
+  /// If true, this [Focus] widget will include a [Semantics] node that
+  /// indicates the [Semantics.focusable] and [Semantics.focused] properties.
+  ///
+  /// Is is not typical to set this to false, as that can affect the semantics
+  /// information available to accessibility systems.
+  ///
+  /// Must not be null, defaults to true.
+  final bool includeSemantics;
+
   /// {@template flutter.widgets.Focus.canRequestFocus}
   /// If true, this widget may request the primary focus.
   ///
@@ -247,10 +260,10 @@ class Focus extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   - [DefaultFocusTraversal], a widget that sets the traversal policy for
-  ///     its descendants.
-  ///   - [FocusTraversalPolicy], a class that can be extended to describe a
-  ///     traversal policy.
+  ///  * [DefaultFocusTraversal], a widget that sets the traversal policy for
+  ///    its descendants.
+  ///  * [FocusTraversalPolicy], a class that can be extended to describe a
+  ///    traversal policy.
   /// {@endtemplate}
   final bool canRequestFocus;
 
@@ -263,12 +276,26 @@ class Focus extends StatefulWidget {
   /// [nullOk].
   ///
   /// The [context] and [nullOk] arguments must not be null.
-  static FocusNode of(BuildContext context, { bool nullOk = false }) {
+  static FocusNode of(BuildContext context, { bool nullOk = false, bool scopeOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
+    assert(scopeOk != null);
+    final _FocusMarker marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     final FocusNode node = marker?.notifier;
-    if (node is FocusScopeNode) {
+    if (node == null) {
+      if (!nullOk) {
+        throw FlutterError(
+            'Focus.of() was called with a context that does not contain a Focus widget.\n'
+                'No Focus widget ancestor could be found starting from the context that was passed to '
+                'Focus.of(). This can happen because you are using a widget that looks for a Focus '
+                'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
+                'The context used was:\n'
+                '  $context'
+        );
+      }
+      return null;
+    }
+    if (!scopeOk && node is FocusScopeNode) {
       if (!nullOk) {
         throw FlutterError(
             'Focus.of() was called with a context that does not contain a Focus between the given '
@@ -277,19 +304,6 @@ class Focus extends StatefulWidget {
             'Focus.of() to the point where it found the nearest FocusScope widget. This can happen '
             'because you are using a widget that looks for a Focus ancestor, and do not have a '
             'Focus widget ancestor in the current FocusScope.\n'
-            'The context used was:\n'
-            '  $context'
-        );
-      }
-      return null;
-    }
-    if (node == null) {
-      if (!nullOk) {
-        throw FlutterError(
-            'Focus.of() was called with a context that does not contain a Focus widget.\n'
-            'No Focus widget ancestor could be found starting from the context that was passed to '
-            'Focus.of(). This can happen because you are using a widget that looks for a Focus '
-            'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
             'The context used was:\n'
             '  $context'
         );
@@ -325,7 +339,8 @@ class Focus extends StatefulWidget {
 class _FocusState extends State<Focus> {
   FocusNode _internalNode;
   FocusNode get focusNode => widget.focusNode ?? _internalNode;
-  bool _hasFocus;
+  bool _hasPrimaryFocus;
+  bool _canRequestFocus;
   bool _didAutofocus = false;
   FocusAttachment _focusAttachment;
 
@@ -342,10 +357,15 @@ class _FocusState extends State<Focus> {
       // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
     }
+    if (widget.skipTraversal != null) {
+      focusNode.skipTraversal = widget.skipTraversal;
+    }
+    if (widget.canRequestFocus != null) {
+      focusNode.canRequestFocus = widget.canRequestFocus;
+    }
+    _canRequestFocus = focusNode.canRequestFocus;
+    _hasPrimaryFocus = focusNode.hasPrimaryFocus;
     _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
-    focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
-    focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
-    _hasFocus = focusNode.hasFocus;
 
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should
@@ -391,6 +411,13 @@ class _FocusState extends State<Focus> {
   @override
   void deactivate() {
     super.deactivate();
+    // The focus node's location in the tree is no longer valid here. But
+    // we can't unfocus or remove the node from the tree because if the widget
+    // is moved to a different part of the tree (via global key) it should
+    // retain its focus state. That's why we temporarily park it on the root
+    // focus node (via reparent) until it either gets moved to a different part
+    // of the tree (via didChangeDependencies) or until it is disposed.
+    _focusAttachment?.reparent();
     _didAutofocus = false;
   }
 
@@ -407,8 +434,12 @@ class _FocusState extends State<Focus> {
     }());
 
     if (oldWidget.focusNode == widget.focusNode) {
-      focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
-      focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
+      if (widget.skipTraversal != null) {
+        focusNode.skipTraversal = widget.skipTraversal;
+      }
+      if (widget.canRequestFocus != null) {
+        focusNode.canRequestFocus = widget.canRequestFocus;
+      }
     } else {
       _focusAttachment.detach();
       focusNode.removeListener(_handleFocusChanged);
@@ -421,22 +452,37 @@ class _FocusState extends State<Focus> {
   }
 
   void _handleFocusChanged() {
-    if (_hasFocus != focusNode.hasFocus) {
+    final bool hasPrimaryFocus = focusNode.hasPrimaryFocus;
+    final bool canRequestFocus = focusNode.canRequestFocus;
+    if (widget.onFocusChange != null) {
+      widget.onFocusChange(focusNode.hasFocus);
+    }
+    if (_hasPrimaryFocus != hasPrimaryFocus) {
       setState(() {
-        _hasFocus = focusNode.hasFocus;
+        _hasPrimaryFocus = hasPrimaryFocus;
       });
-      if (widget.onFocusChange != null) {
-        widget.onFocusChange(focusNode.hasFocus);
-      }
+    }
+    if (_canRequestFocus != canRequestFocus) {
+      setState(() {
+        _canRequestFocus = canRequestFocus;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     _focusAttachment.reparent();
+    Widget child = widget.child;
+    if (widget.includeSemantics) {
+      child = Semantics(
+        focusable: _canRequestFocus,
+        focused: _hasPrimaryFocus,
+        child: widget.child,
+      );
+    }
     return _FocusMarker(
       node: focusNode,
-      child: widget.child,
+      child: child,
     );
   }
 }
@@ -475,17 +521,17 @@ class _FocusState extends State<Focus> {
 ///
 /// See also:
 ///
-///   * [FocusScopeNode], which represents a scope node in the focus hierarchy.
-///   * [FocusNode], which represents a node in the focus hierarchy and has an
-///     explanation of the focus system.
-///   * [Focus], a widget that manages a [FocusNode] and allows easy access to
-///     managing focus without having to manage the node.
-///   * [FocusManager], a singleton that manages the focus and distributes key
-///     events to focused nodes.
-///   * [FocusTraversalPolicy], an object used to determine how to move the
-///     focus to other nodes.
-///   * [DefaultFocusTraversal], a widget used to configure the default focus
-///     traversal policy for a widget subtree.
+///  * [FocusScopeNode], which represents a scope node in the focus hierarchy.
+///  * [FocusNode], which represents a node in the focus hierarchy and has an
+///    explanation of the focus system.
+///  * [Focus], a widget that manages a [FocusNode] and allows easy access to
+///    managing focus without having to manage the node.
+///  * [FocusManager], a singleton that manages the focus and distributes key
+///    events to focused nodes.
+///  * [FocusTraversalPolicy], an object used to determine how to move the focus
+///    to other nodes.
+///  * [DefaultFocusTraversal], a widget used to configure the default focus
+///    traversal policy for a widget subtree.
 class FocusScope extends Focus {
   /// Creates a widget that manages a [FocusScopeNode].
   ///
@@ -498,6 +544,8 @@ class FocusScope extends Focus {
     @required Widget child,
     bool autofocus = false,
     ValueChanged<bool> onFocusChange,
+    bool canRequestFocus,
+    bool skipTraversal,
     FocusOnKeyCallback onKey,
     String debugLabel,
   })  : assert(child != null),
@@ -508,6 +556,8 @@ class FocusScope extends Focus {
           focusNode: node,
           autofocus: autofocus,
           onFocusChange: onFocusChange,
+          canRequestFocus: canRequestFocus,
+          skipTraversal: skipTraversal,
           onKey: onKey,
           debugLabel: debugLabel,
         );
@@ -521,7 +571,7 @@ class FocusScope extends Focus {
   /// The [context] argument must not be null.
   static FocusScopeNode of(BuildContext context) {
     assert(context != null);
-    final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
+    final _FocusMarker marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     return marker?.notifier?.nearestScope ?? context.owner.focusManager.rootScope;
   }
 
@@ -534,6 +584,8 @@ class _FocusScopeState extends _FocusState {
   FocusScopeNode _createNode() {
     return FocusScopeNode(
       debugLabel: widget.debugLabel,
+      canRequestFocus: widget.canRequestFocus ?? true,
+      skipTraversal: widget.skipTraversal ?? false,
     );
   }
 

@@ -1,12 +1,11 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
 import 'material.dart';
@@ -28,7 +27,7 @@ import 'material_localizations.dart';
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// final List<MyDataObject> backingList = <MyDataObject>[/* ... */];
@@ -53,13 +52,17 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// those children that are actually visible.
 ///
 /// All [children] must have a key.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
   ReorderableListView({
+    Key key,
     this.header,
     @required this.children,
     @required this.onReorder,
+    this.scrollController,
     this.scrollDirection = Axis.vertical,
     this.padding,
     this.reverse = false,
@@ -69,7 +72,8 @@ class ReorderableListView extends StatefulWidget {
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
-       );
+       ),
+       super(key: key);
 
   /// A non-reorderable header widget to show before the list.
   ///
@@ -83,6 +87,15 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// List [children] can only drag along this [Axis].
   final Axis scrollDirection;
+
+  /// Creates a [ScrollPosition] to manage and determine which portion
+  /// of the content is visible in the scroll view.
+  ///
+  /// This can be used in many ways, such as setting an initial scroll offset,
+  /// (via [ScrollController.initialScrollOffset]), reading the current scroll position
+  /// (via [ScrollController.offset]), or changing it (via [ScrollController.jumpTo] or
+  /// [ScrollController.animateTo]).
+  final ScrollController scrollController;
 
   /// The amount of space by which to inset the [children].
   final EdgeInsets padding;
@@ -137,6 +150,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         return _ReorderableListContent(
           header: widget.header,
           children: widget.children,
+          scrollController: widget.scrollController,
           scrollDirection: widget.scrollDirection,
           onReorder: widget.onReorder,
           padding: widget.padding,
@@ -162,6 +176,7 @@ class _ReorderableListContent extends StatefulWidget {
   const _ReorderableListContent({
     @required this.header,
     @required this.children,
+    @required this.scrollController,
     @required this.scrollDirection,
     @required this.padding,
     @required this.onReorder,
@@ -170,6 +185,7 @@ class _ReorderableListContent extends StatefulWidget {
 
   final Widget header;
   final List<Widget> children;
+  final ScrollController scrollController;
   final Axis scrollDirection;
   final EdgeInsets padding;
   final ReorderCallback onReorder;
@@ -259,7 +275,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   @override
   void didChangeDependencies() {
-    _scrollController = PrimaryScrollController.of(context) ?? ScrollController();
+    _scrollController = widget.scrollController ?? PrimaryScrollController.of(context) ?? ScrollController();
     super.didChangeDependencies();
   }
 
@@ -345,11 +361,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final _ScopedValueGlobalKey<_ReorderableListContentState> keyIndexGlobalKey =
-        _ScopedValueGlobalKey<_ReorderableListContentState>(
-      scope: this,
-      value: toWrap.key,
-    );
+    final GlobalObjectKey keyIndexGlobalKey = GlobalObjectKey(toWrap.key);
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -533,7 +545,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           return _dragging == toAccept && toAccept != toWrap.key;
         },
         onAccept: (Key accepted) { },
-        onLeave: (Key leaving) { },
+        onLeave: (Object leaving) { },
       );
     });
   }
@@ -577,34 +589,5 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         ),
       );
     });
-  }
-}
-
-/// A [GlobalKey] that uses a scope and a value to determine equality.
-///
-/// The scope is compared using [identical], while the value is compared
-/// using [operator ==]. This allows a locally scoped value to be turned
-/// into a globally unique key.
-class _ScopedValueGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
-  const _ScopedValueGlobalKey({this.scope, this.value}) : super.constructor();
-
-  final Object scope;
-  final Object value;
-
-  @override
-  int get hashCode => hashValues(identityHashCode(scope), value.hashCode);
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    final _ScopedValueGlobalKey<T> typedOther = other;
-    return identical(scope, typedOther.scope) && value == typedOther.value;
-  }
-
-  @override
-  String toString() {
-    return '[$runtimeType ${describeIdentity(scope)} ${describeIdentity(value)}]';
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,7 +34,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
   Map<String, List<ProcessResult>> get fakeResults => _fakeResults;
   set fakeResults(Map<String, List<ProcessResult>> value) {
     _fakeResults = <String, List<ProcessResult>>{};
-    for (String key in value.keys) {
+    for (final String key in value.keys) {
       _fakeResults[key] = (value[key] ?? <ProcessResult>[ProcessResult(0, 0, '', '')]).toList();
     }
   }
@@ -46,8 +46,8 @@ class FakeProcessManager extends Mock implements ProcessManager {
   /// parameters were in the same order.
   void verifyCalls(List<String> calls) {
     int index = 0;
-    for (String call in calls) {
-      expect(call.split(' '), orderedEquals(invocations[index].positionalArguments[0]));
+    for (final String call in calls) {
+      expect(call.split(' '), orderedEquals(invocations[index].positionalArguments[0] as Iterable<dynamic>));
       index++;
     }
     expect(invocations.length, equals(calls.length));
@@ -66,17 +66,17 @@ class FakeProcessManager extends Mock implements ProcessManager {
 
   Future<Process> _nextProcess(Invocation invocation) async {
     invocations.add(invocation);
-    return Future<Process>.value(_popProcess(invocation.positionalArguments[0]));
+    return Future<Process>.value(_popProcess(invocation.positionalArguments[0] as List<String>));
   }
 
   ProcessResult _nextResultSync(Invocation invocation) {
     invocations.add(invocation);
-    return _popResult(invocation.positionalArguments[0]);
+    return _popResult(invocation.positionalArguments[0] as List<String>);
   }
 
   Future<ProcessResult> _nextResult(Invocation invocation) async {
     invocations.add(invocation);
-    return Future<ProcessResult>.value(_popResult(invocation.positionalArguments[0]));
+    return Future<ProcessResult>.value(_popResult(invocation.positionalArguments[0] as List<String>));
   }
 
   void _setupMock() {
@@ -117,8 +117,8 @@ class FakeProcessManager extends Mock implements ProcessManager {
 /// A fake process that can be used to interact with a process "started" by the FakeProcessManager.
 class FakeProcess extends Mock implements Process {
   FakeProcess(ProcessResult result, {void stdinResults(String input)})
-      : stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[result.stdout.codeUnits]),
-        stderrStream = Stream<List<int>>.fromIterable(<List<int>>[result.stderr.codeUnits]),
+      : stdoutStream = Stream<List<int>>.value((result.stdout as String).codeUnits),
+        stderrStream = Stream<List<int>>.value((result.stderr as String).codeUnits),
         desiredExitCode = result.exitCode,
         stdinSink = IOSink(StringStreamConsumer(stdinResults)) {
     _setupMock();
@@ -178,7 +178,7 @@ class StringStreamConsumer implements StreamConsumer<List<int>> {
 
   @override
   Future<dynamic> close() async {
-    for (Completer<dynamic> completer in completers) {
+    for (final Completer<dynamic> completer in completers) {
       await completer.future;
     }
     completers.clear();

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -66,7 +66,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// unless they start with the same number of spaces as the previous line, in
 /// which case it's assumed they are a continuation of an indented paragraph.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// For example, the BSD license in this format could be encoded as follows:
 ///
@@ -115,7 +115,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// license per frame is reasonable; doing more at the same time is ill-advised.
 /// Consider doing all the work at once using [compute] to move the work to
 /// another thread, or spreading the work across multiple frames using
-/// [scheduleTask].
+/// [SchedulerBinding.scheduleTask].
 class LicenseEntryWithLineBreaks extends LicenseEntry {
   /// Create a license entry for a license whose text is hard-wrapped within
   /// paragraphs and has paragraph breaks denoted by blank lines or with
@@ -288,6 +288,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 ///  * [AboutListTile], which is a widget that can be added to a [Drawer]. When
 ///    tapped it calls [showAboutDialog].
 class LicenseRegistry {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   LicenseRegistry._();
 
   static List<LicenseEntryCollector> _collectors;
@@ -310,7 +313,7 @@ class LicenseRegistry {
   static Stream<LicenseEntry> get licenses async* {
     if (_collectors == null)
       return;
-    for (LicenseEntryCollector collector in _collectors)
+    for (final LicenseEntryCollector collector in _collectors)
       yield* collector();
   }
 

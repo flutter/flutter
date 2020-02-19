@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('BackdropFilter\'s cull rect does not shrink', (WidgetTester tester) async {
+  testWidgets("BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {
     tester.binding.addTime(const Duration(seconds: 15));
     await tester.pumpWidget(
       MaterialApp(
@@ -43,10 +43,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile(
-        'backdrop_filter_test.cull_rect.png',
-        version: 1,
-      ),
+      matchesGoldenFile('backdrop_filter_test.cull_rect.png'),
     );
   }, skip: isBrowser);
 }

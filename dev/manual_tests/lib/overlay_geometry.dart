@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -159,7 +159,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       setState(() {
         final double dy = markersScrollOffset - notification.metrics.extentBefore;
         markersScrollOffset = notification.metrics.extentBefore;
-        for (MarkerType type in markers.keys) {
+        for (final MarkerType type in markers.keys) {
           final Offset oldPosition = markers[type];
           markers[type] = oldPosition.translate(0.0, dy);
         }
@@ -171,7 +171,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   void handleTapUp(GlobalKey target, Offset globalPosition) {
     setState(() {
       markers[MarkerType.touch] = globalPosition;
-      final RenderBox box = target.currentContext.findRenderObject();
+      final RenderBox box = target.currentContext.findRenderObject() as RenderBox;
       markers[MarkerType.topLeft] = box.localToGlobal(const Offset(0.0, 0.0));
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(Offset(size.width, size.height));
@@ -199,20 +199,24 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
             ),
           ),
         ),
-        for (MarkerType type in markers.keys)
+        for (final MarkerType type in markers.keys)
           Marker(type: type, position: markers[type]),
       ],
     );
   }
 }
 
-void main() {
-  if (Platform.isMacOS) {
-    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
-    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+// Sets a platform override for desktop to avoid exceptions. See
+// https://flutter.dev/desktop#target-platform-override for more info.
+// TODO(gspencergoog): Remove once TargetPlatform includes all desktop platforms.
+void _enablePlatformOverrideForDesktop() {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
+}
 
+void main() {
+  _enablePlatformOverrideForDesktop();
   runApp(MaterialApp(
     theme: ThemeData(
       brightness: Brightness.light,

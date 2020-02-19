@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -77,7 +77,7 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
-    final Map<int, double> cache = state.estimatedColumnWidths;
+    final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     expect(cache.isNotEmpty, isTrue);
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -91,7 +91,7 @@ void main() {
     expect(cache.isEmpty, isTrue);
     final Element element = tester.element(find.byType(CupertinoDatePicker));
     expect(element.dirty, isTrue);
-  });
+  }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
   testWidgets('CupertinoDatePicker reset cache upon system fonts change - date mode', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -103,7 +103,7 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
-    final Map<int, double> cache = state.estimatedColumnWidths;
+    final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
     // Simulates font missing.
     cache.clear();
     const Map<String, dynamic> data = <String, dynamic>{
@@ -118,7 +118,7 @@ void main() {
     expect(cache.isNotEmpty, isTrue);
     final Element element = tester.element(find.byType(CupertinoDatePicker));
     expect(element.dirty, isTrue);
-  });
+  }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
   testWidgets('CupertinoDatePicker reset cache upon system fonts change - time mode', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -147,7 +147,7 @@ void main() {
     expect(state.numberLabelBaseline - 18.400070190429688 < precisionErrorTolerance, isTrue);
     final Element element = tester.element(find.byType(CupertinoTimerPicker));
     expect(element.dirty, isTrue);
-  });
+  }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
   testWidgets('RangeSlider relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(

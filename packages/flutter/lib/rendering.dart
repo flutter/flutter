@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,6 +50,7 @@ export 'src/rendering/paragraph.dart';
 export 'src/rendering/performance_overlay.dart';
 export 'src/rendering/platform_view.dart';
 export 'src/rendering/proxy_box.dart';
+export 'src/rendering/proxy_sliver.dart';
 export 'src/rendering/rotated_box.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';

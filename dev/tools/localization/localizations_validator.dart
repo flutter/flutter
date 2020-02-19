@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,9 +36,9 @@ void validateEnglishLocalizations(File file) {
     throw ValidationError(errorMessages.toString());
   }
 
-  final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
+  final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 
-  for (String resourceId in bundle.keys) {
+  for (final String resourceId in bundle.keys) {
     if (resourceId.startsWith('@'))
       continue;
 
@@ -55,7 +55,7 @@ void validateEnglishLocalizations(File file) {
     errorMessages.writeln('A value was not specified for @$resourceId');
   }
 
-  for (String atResourceId in bundle.keys) {
+  for (final String atResourceId in bundle.keys) {
     if (!atResourceId.startsWith('@'))
       continue;
 
@@ -67,11 +67,11 @@ void validateEnglishLocalizations(File file) {
       continue;
     }
 
-    final String description = atResource['description'];
+    final String description = atResource['description'] as String;
     if (description == null)
       errorMessages.writeln('No description specified for $atResourceId');
 
-    final String plural = atResource['plural'];
+    final String plural = atResource['plural'] as String;
     final String resourceId = atResourceId.substring(1);
     if (plural != null) {
       final String resourceIdOther = '${resourceId}Other';

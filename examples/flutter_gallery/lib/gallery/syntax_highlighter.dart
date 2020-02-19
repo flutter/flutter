@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -94,7 +94,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
       final List<TextSpan> formattedText = <TextSpan>[];
       int currentPosition = 0;
 
-      for (_HighlightSpan span in _spans) {
+      for (final _HighlightSpan span in _spans) {
         if (currentPosition != span.start)
           formattedText.add(TextSpan(text: _src.substring(currentPosition, span.start)));
 

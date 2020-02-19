@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -101,7 +101,7 @@ mixin ServicesBinding on BindingBase {
     final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
     final List<LicenseEntry> result = <LicenseEntry>[];
     final List<String> licenses = rawLicenses.split(_licenseSeparator);
-    for (String license in licenses) {
+    for (final String license in licenses) {
       final int split = license.indexOf('\n\n');
       if (split >= 0) {
         result.add(LicenseEntryWithLineBreaks(
@@ -200,6 +200,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
         response = await handler(data);
       } else {
         ui.channelBuffers.push(channel, data, callback);
+        callback = null;
       }
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -209,7 +210,9 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
         context: ErrorDescription('during a platform message callback'),
       ));
     } finally {
-      callback(response);
+      if (callback != null) {
+        callback(response);
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,18 +8,30 @@ import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
 class SystemNavigator {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   SystemNavigator._();
 
-  /// Instructs the system navigator to remove this activity from the stack and
-  /// return to the previous activity.
+  /// Removes the topmost Flutter instance, presenting what was before
+  /// it.
   ///
-  /// On iOS, calls to this method are ignored because Apple's human interface
-  /// guidelines state that applications should not exit themselves.
+  /// On Android, removes this activity from the stack and returns to
+  /// the previous activity.
   ///
-  /// This method should be preferred over calling `dart:io`'s [exit] method, as
-  /// the latter may cause the underlying platform to act as if the application
-  /// had crashed.
-  static Future<void> pop() async {
-    await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop');
+  /// On iOS, calls `popViewControllerAnimated:` if the root view
+  /// controller is a `UINavigationController`, or
+  /// `dismissViewControllerAnimated:completion:` if the top view
+  /// controller is a `FlutterViewController`.
+  ///
+  /// The optional `animated` parameter is ignored on all platforms
+  /// except iOS where it is an argument to the aforementioned
+  /// methods.
+  ///
+  /// This method should be preferred over calling `dart:io`'s [exit]
+  /// method, as the latter may cause the underlying platform to act
+  /// as if the application had crashed.
+  static Future<void> pop({bool animated}) async {
+    await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop', animated);
   }
 }

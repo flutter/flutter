@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -75,6 +75,29 @@ void main() {
       tester.async.elapse(const Duration(milliseconds: 300));
       expect(longPressDown, isFalse);
       tester.async.elapse(const Duration(milliseconds: 700));
+      expect(longPressDown, isTrue);
+
+      longPress.dispose();
+    });
+
+    testGesture('Should recognize long press with altered duration', (GestureTester tester) {
+      longPress = LongPressGestureRecognizer(duration: const Duration(milliseconds: 100));
+      longPressDown = false;
+      longPress.onLongPress = () {
+        longPressDown = true;
+      };
+      longPressUp = false;
+      longPress.onLongPressUp = () {
+        longPressUp = true;
+      };
+      longPress.addPointer(down);
+      tester.closeArena(5);
+      expect(longPressDown, isFalse);
+      tester.route(down);
+      expect(longPressDown, isFalse);
+      tester.async.elapse(const Duration(milliseconds: 50));
+      expect(longPressDown, isFalse);
+      tester.async.elapse(const Duration(milliseconds: 50));
       expect(longPressDown, isTrue);
 
       longPress.dispose();

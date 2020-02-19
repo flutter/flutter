@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -60,6 +60,41 @@ void main() {
         selection: const TextSelection(baseOffset: 0, extentOffset: 3),
       ));
       expect(materialTextSelectionControls.canSelectAll(key.currentState), false);
+    });
+  });
+
+  group('material handles', () {
+    testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(RepaintBoundary(
+        child: Theme(
+          data: ThemeData(
+            textSelectionHandleColor: const Color(0x550000AA),
+          ),
+          isMaterialAppTheme: true,
+          child: Builder(
+            builder: (BuildContext context) {
+              return Container(
+                color: Colors.white,
+                height: 800,
+                width: 800,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 250),
+                  child: FittedBox(
+                    child: materialTextSelectionControls.buildHandle(
+                      context, TextSelectionHandleType.right, 10.0,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byType(RepaintBoundary),
+        matchesGoldenFile('transparent_handle.png'),
+      );
     });
   });
 }

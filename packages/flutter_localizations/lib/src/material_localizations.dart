@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,7 @@ import 'widgets_localizations.dart';
 ///
 /// {@macro flutter.localizations.material.languages}
 ///
-/// This list is available programatically via [kMaterialSupportedLanguages].
+/// This list is available programmatically via [kMaterialSupportedLanguages].
 ///
 /// ## Sample code
 ///

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -137,7 +137,7 @@ class FractionalOffset extends Alignment {
   Alignment operator -(Alignment other) {
     if (other is! FractionalOffset)
       return super - other;
-    final FractionalOffset typedOther = other;
+    final FractionalOffset typedOther = other as FractionalOffset;
     return FractionalOffset(dx - typedOther.dx, dy - typedOther.dy);
   }
 
@@ -145,7 +145,7 @@ class FractionalOffset extends Alignment {
   Alignment operator +(Alignment other) {
     if (other is! FractionalOffset)
       return super + other;
-    final FractionalOffset typedOther = other;
+    final FractionalOffset typedOther = other as FractionalOffset;
     return FractionalOffset(dx + typedOther.dx, dy + typedOther.dy);
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,7 +24,7 @@ import 'icon_theme_data.dart';
 /// This widget assumes that the rendered icon is squared. Non-squared icons may
 /// render incorrectly.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how to create a [Row] of [Icon]s in different colors and
 /// sizes. The first [Icon] uses a [semanticLabel] to announce in accessibility
@@ -113,14 +113,16 @@ class Icon extends StatelessWidget {
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   ///
+  /// {@tool snippet}
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
   /// Icon(
-  ///   icon: Icons.widgets,
+  ///   Icons.widgets,
   ///   color: Colors.blue.shade400,
   /// )
   /// ```
+  /// {@end-tool}
   final Color color;
 
   /// Semantic label for the icon.

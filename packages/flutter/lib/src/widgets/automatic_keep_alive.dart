@@ -1,10 +1,11 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'framework.dart';
@@ -66,7 +67,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   @override
   void dispose() {
     if (_handles != null) {
-      for (Listenable handle in _handles.keys)
+      for (final Listenable handle in _handles.keys)
         handle.removeListener(_handles[handle]);
     }
     super.dispose();
@@ -80,7 +81,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     handle.addListener(_handles[handle]);
     if (!_keepingAlive) {
       _keepingAlive = true;
-      final ParentDataElement<SliverWithKeepAliveWidget> childElement = _getChildElement();
+      final ParentDataElement<KeepAliveParentDataMixin> childElement = _getChildElement();
       if (childElement != null) {
         // If the child already exists, update it synchronously.
         _updateParentDataOfChild(childElement);
@@ -92,7 +93,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
           if (!mounted) {
             return;
           }
-          final ParentDataElement<SliverWithKeepAliveWidget> childElement = _getChildElement();
+          final ParentDataElement<KeepAliveParentDataMixin> childElement = _getChildElement();
           assert(childElement != null);
           _updateParentDataOfChild(childElement);
         });
@@ -105,9 +106,9 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   ///
   /// While this widget is guaranteed to have a child, this may return null if
   /// the first build of that child has not completed yet.
-  ParentDataElement<SliverWithKeepAliveWidget> _getChildElement() {
+  ParentDataElement<KeepAliveParentDataMixin> _getChildElement() {
     assert(mounted);
-    final Element element = context;
+    final Element element = context as Element;
     Element childElement;
     // We use Element.visitChildren rather than context.visitChildElements
     // because we might be called during build, and context.visitChildElements
@@ -131,12 +132,12 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     element.visitChildren((Element child) {
       childElement = child;
     });
-    assert(childElement == null || childElement is ParentDataElement<SliverWithKeepAliveWidget>);
-    return childElement;
+    assert(childElement == null || childElement is ParentDataElement<KeepAliveParentDataMixin>);
+    return childElement as ParentDataElement<KeepAliveParentDataMixin>;
   }
 
-  void _updateParentDataOfChild(ParentDataElement<SliverWithKeepAliveWidget> childElement) {
-    childElement.applyWidgetOutOfTurn(build(context));
+  void _updateParentDataOfChild(ParentDataElement<KeepAliveParentDataMixin> childElement) {
+    childElement.applyWidgetOutOfTurn(build(context) as ParentDataWidget<KeepAliveParentDataMixin>);
   }
 
   VoidCallback _createCallback(Listenable handle) {
@@ -144,7 +145,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       assert(() {
         if (!mounted) {
           throw FlutterError(
-            'AutomaticKeepAlive handle triggered after AutomaticKeepAlive was disposed.'
+            'AutomaticKeepAlive handle triggered after AutomaticKeepAlive was disposed.\n'
             'Widgets should always trigger their KeepAliveNotification handle when they are '
             'deactivated, so that they (or their handle) do not send spurious events later '
             'when they are no longer in the tree.'
@@ -214,7 +215,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
               // If mounted is false, we went away as well, so there's nothing to do.
               // If _handles is no longer empty, then another client (or the same
               // client in a new place) registered itself before we had a chance to
-              // turn off keep-alive, so again there's nothing to do.
+              // turn off keepalive, so again there's nothing to do.
               setState(() {
                 assert(!_keepingAlive);
               });
@@ -273,7 +274,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 /// Failure to trigger the [handle] in the manner described above will likely
 /// cause the [AutomaticKeepAlive] to lose track of whether the widget should be
 /// kept alive or not, leading to memory leaks or lost data. For example, if the
-/// widget that requested keep-alive is removed from the subtree but doesn't
+/// widget that requested keepalive is removed from the subtree but doesn't
 /// trigger its [Listenable] on the way out, then the subtree will continue to
 /// be kept alive until the list itself is disposed. Similarly, if the
 /// [Listenable] is triggered while the widget needs to be kept alive, but a new

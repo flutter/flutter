@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -228,7 +228,7 @@ void main() {
             ),
           ),
         );
-        fail('Should not be possible to create a toggle button with mismatching'
+        fail('Should not be possible to create a toggle button with mismatching '
             'children.length and isSelected.length.');
       } on AssertionError catch (e) {
         expect(e.toString(), contains('children.length'));
@@ -259,15 +259,15 @@ void main() {
         of: find.widgetWithText(RawMaterialButton, 'First child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.body1.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.body1.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
 
     textStyle = tester.widget<DefaultTextStyle>(find.descendant(
         of: find.widgetWithText(RawMaterialButton, 'Second child'),
         matching: find.byType(DefaultTextStyle),
     )).style;
-    expect(textStyle.fontFamily, theme.textTheme.body1.fontFamily);
-    expect(textStyle.decoration, theme.textTheme.body1.decoration);
+    expect(textStyle.fontFamily, theme.textTheme.bodyText2.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.bodyText2.decoration);
   });
 
   testWidgets('Custom text style except color is applied', (WidgetTester tester) async {

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,12 +50,12 @@ void main() {
     caughtByHandler = false;
     zone = Zone.current.fork(specification: ZoneSpecification(
       handleUncaughtError: (
-          Zone self,
-          ZoneDelegate parent,
-          Zone zone,
-          Object error,
-          StackTrace stackTrace,
-          ) {
+        Zone self,
+        ZoneDelegate parent,
+        Zone zone,
+        Object error,
+        StackTrace stackTrace,
+      ) {
         caughtByZone = true;
         if (!caughtInZone.isCompleted) {
           caughtInZone.complete();
@@ -181,7 +181,7 @@ void main() {
     expect(caughtByCatchError, true);
   });
 
-  test('asyncError is propagated correctly with onError callback', () async {
+  test('asyncError is propagated with binary onError', () async {
     bool caughtByZone = false;
     bool caughtByHandler = false;
     bool caughtByOnError = false;
@@ -217,5 +217,84 @@ void main() {
     expect(caughtByZone, false);
     expect(caughtByHandler, false);
     expect(caughtByOnError, true);
+  });
+
+  test('asyncError is propagated with unary onError', () async {
+    bool caughtByZone = false;
+    bool caughtByHandler = false;
+    bool caughtByOnError = false;
+
+    final Completer<void> completer = Completer<void>();
+    await FakeAsync().run((FakeAsync time) {
+      unawaited(runZoned(() async {
+        final Future<void> f = asyncGuard<void>(
+          () => delayedThrow(time),
+          onError: (Object e) {
+            caughtByOnError = true;
+          },
+        );
+        try {
+          await f;
+        } catch (e) {
+          caughtByHandler = true;
+        }
+        if (!completer.isCompleted) {
+          completer.complete(null);
+        }
+      }, onError: (Object e, StackTrace s) {
+        caughtByZone = true;
+        if (!completer.isCompleted) {
+          completer.complete(null);
+        }
+      }));
+      time.elapse(const Duration(seconds: 1));
+      time.flushMicrotasks();
+      return completer.future;
+    });
+
+    expect(caughtByZone, false);
+    expect(caughtByHandler, false);
+    expect(caughtByOnError, true);
+  });
+
+  test('asyncError is propagated with optional stack trace', () async {
+    bool caughtByZone = false;
+    bool caughtByHandler = false;
+    bool caughtByOnError = false;
+    bool nonNullStackTrace = false;
+
+    final Completer<void> completer = Completer<void>();
+    await FakeAsync().run((FakeAsync time) {
+      unawaited(runZoned(() async {
+        final Future<void> f = asyncGuard<void>(
+          () => delayedThrow(time),
+          onError: (Object e, [StackTrace s]) {
+            caughtByOnError = true;
+            nonNullStackTrace = s != null;
+          },
+        );
+        try {
+          await f;
+        } catch (e) {
+          caughtByHandler = true;
+        }
+        if (!completer.isCompleted) {
+          completer.complete(null);
+        }
+      }, onError: (Object e, StackTrace s) {
+        caughtByZone = true;
+        if (!completer.isCompleted) {
+          completer.complete(null);
+        }
+      }));
+      time.elapse(const Duration(seconds: 1));
+      time.flushMicrotasks();
+      return completer.future;
+    });
+
+    expect(caughtByZone, false);
+    expect(caughtByHandler, false);
+    expect(caughtByOnError, true);
+    expect(nonNullStackTrace, true);
   });
 }

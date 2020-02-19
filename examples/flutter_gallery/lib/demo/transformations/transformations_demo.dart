@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui' show Vertices;
 import 'package:flutter/material.dart';
 import 'transformations_demo_board.dart';
@@ -36,7 +40,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     // the GestureTransformable parent widget.
     return Scaffold(
       appBar: AppBar(
-        title: const Text('2D Tranformations'),
+        title: const Text('2D Transformations'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.help),

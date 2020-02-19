@@ -1,16 +1,6 @@
-// Copyright 2018-present the Flutter authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -67,7 +57,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                           ),
                           Text(
                             'CART',
-                            style: localTheme.textTheme.subhead.copyWith(fontWeight: FontWeight.w600),
+                            style: localTheme.textTheme.subtitle1.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(width: 16.0),
                           Text('${model.totalCartQuantity} ITEMS'),
@@ -118,8 +108,8 @@ class ShoppingCartSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle smallAmountStyle = Theme.of(context).textTheme.body1.copyWith(color: kShrineBrown600);
-    final TextStyle largeAmountStyle = Theme.of(context).textTheme.display1;
+    final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyText2.copyWith(color: kShrineBrown600);
+    final TextStyle largeAmountStyle = Theme.of(context).textTheme.headline4;
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 2,
       locale: Localizations.localeOf(context).toString(),
@@ -252,7 +242,7 @@ class ShoppingCartRow extends StatelessWidget {
                             ),
                             Text(
                               product.name,
-                              style: localTheme.textTheme.subhead.copyWith(fontWeight: FontWeight.w600),
+                              style: localTheme.textTheme.subtitle1.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),

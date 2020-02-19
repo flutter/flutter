@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,7 +45,7 @@ abstract class KeyboardKey extends Diagnosticable {
 /// look at the physical key to make sure that regardless of the character the
 /// key produces, you got the key that is in that location on the keyboard.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the logical "Q"
 /// key.
 ///
@@ -91,7 +91,7 @@ abstract class KeyboardKey extends Diagnosticable {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
@@ -127,7 +127,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// [keyId] must not be null.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// To save executable size, it is recommended that the [debugName] be null in
   /// release mode. You can do this by using the [kReleaseMode] constant.
   ///
@@ -167,12 +167,12 @@ class LogicalKeyboardKey extends KeyboardKey {
   int get hashCode => keyId.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final LogicalKeyboardKey typedOther = other;
-    return keyId == typedOther.keyId;
+    return other is LogicalKeyboardKey
+        && other.keyId == keyId;
   }
 
   /// Returns the [LogicalKeyboardKey] constant that matches the given ID, or
@@ -238,6 +238,21 @@ class LogicalKeyboardKey extends KeyboardKey {
     return result == null ? <LogicalKeyboardKey>{} : <LogicalKeyboardKey>{result};
   }
 
+  /// Takes a set of keys, and returns the same set, but with any keys that have
+  /// synonyms replaced.
+  ///
+  /// It is used, for example, to make sets of keys with members like
+  /// [controlRight] and [controlLeft] and convert that set to contain just
+  /// [control], so that the question "is any control key down?" can be asked.
+  static Set<LogicalKeyboardKey> collapseSynonyms(Set<LogicalKeyboardKey> input) {
+    final Set<LogicalKeyboardKey> result = <LogicalKeyboardKey>{};
+    for (final LogicalKeyboardKey key in input) {
+      final LogicalKeyboardKey synonym = _synonyms[key];
+      result.add(synonym ?? key);
+    }
+    return result;
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -299,11 +314,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey superKey = LogicalKeyboardKey(0x00100000011, debugName: kReleaseMode ? null : 'Super Key');
-
-  /// Represents the logical "Fn" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey fn = LogicalKeyboardKey(0x00100000012, debugName: kReleaseMode ? null : 'Fn');
 
   /// Represents the logical "Fn Lock" key on the keyboard.
   ///
@@ -1610,6 +1620,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey gameButtonZ = LogicalKeyboardKey(0x0010005ff1f, debugName: kReleaseMode ? null : 'Game Button Z');
 
+  /// Represents the logical "Fn" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey fn = LogicalKeyboardKey(0x00100000012, debugName: kReleaseMode ? null : 'Fn');
+
   /// Represents the logical "Shift" key on the keyboard.
   ///
   /// This key represents the union of the keys {shiftLeft, shiftRight} when
@@ -1644,7 +1659,6 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0100000000: none,
     0x0100000010: hyper,
     0x0100000011: superKey,
-    0x0100000012: fn,
     0x0100000013: fnLock,
     0x0100000014: suspend,
     0x0100000015: resume,
@@ -1906,6 +1920,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x010005ff1d: gameButtonX,
     0x010005ff1e: gameButtonY,
     0x010005ff1f: gameButtonZ,
+    0x0100000012: fn,
     0x201000700e1: shift,
     0x201000700e3: meta,
     0x201000700e2: alt,
@@ -1945,7 +1960,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 /// looking for "the key next next to the TAB key", since on a French keyboard,
 /// the key next to the TAB key has an "A" on it.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to detect if the user has selected the physical key
 /// to the right of the CAPS LOCK key.
 ///
@@ -1985,7 +2000,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///     color: Colors.white,
 ///     alignment: Alignment.center,
 ///     child: DefaultTextStyle(
-///       style: textTheme.display1,
+///       style: textTheme.headline4,
 ///       child: RawKeyboardListener(
 ///         focusNode: _focusNode,
 ///         onKey: _handleKeyEvent,
@@ -2021,7 +2036,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// The [usbHidUsage] must not be null.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// To save executable size, it is recommended that the [debugName] be null in
   /// release mode. You can do this using the [kReleaseMode] constant.
   ///
@@ -2054,12 +2069,12 @@ class PhysicalKeyboardKey extends KeyboardKey {
   int get hashCode => usbHidUsage.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final PhysicalKeyboardKey typedOther = other;
-    return usbHidUsage == typedOther.usbHidUsage;
+    return other is PhysicalKeyboardKey
+        && other.usbHidUsage == usbHidUsage;
   }
 
   @override
@@ -2086,11 +2101,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey superKey = PhysicalKeyboardKey(0x00000011, debugName: kReleaseMode ? null : 'Super Key');
-
-  /// Represents the location of the "Fn" key on a generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey fn = PhysicalKeyboardKey(0x00000012, debugName: kReleaseMode ? null : 'Fn');
 
   /// Represents the location of the "Fn Lock" key on a generalized keyboard.
   ///
@@ -3511,13 +3521,17 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey gameButtonZ = PhysicalKeyboardKey(0x0005ff1f, debugName: kReleaseMode ? null : 'Game Button Z');
 
+  /// Represents the location of the "Fn" key on a generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey fn = PhysicalKeyboardKey(0x00000012, debugName: kReleaseMode ? null : 'Fn');
+
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.
   static const Map<int, PhysicalKeyboardKey> _knownPhysicalKeys = <int, PhysicalKeyboardKey>{
     0x00000000: none,
     0x00000010: hyper,
     0x00000011: superKey,
-    0x00000012: fn,
     0x00000013: fnLock,
     0x00000014: suspend,
     0x00000015: resume,
@@ -3779,5 +3793,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x0005ff1d: gameButtonX,
     0x0005ff1e: gameButtonY,
     0x0005ff1f: gameButtonZ,
+    0x00000012: fn,
   };
 }

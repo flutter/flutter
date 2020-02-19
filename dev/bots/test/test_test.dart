@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,9 +27,13 @@ void main() {
         '1.2.3+hotfix.1',
         '1.2.3+hotfix.12-pre.12',
       ];
-      for (String version in valid_versions) {
+      for (final String version in valid_versions) {
         when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
-        expect(await verifyVersion(version, file), isTrue, reason: '$version is invalid');
+        expect(
+          await verifyVersion(file),
+          isNull,
+          reason: '$version is valid but verifyVersionFile said it was bad',
+        );
       }
     });
 
@@ -41,10 +45,15 @@ void main() {
         '1.2.3-pre',
         '1.2.3-pre.1+hotfix.1',
         '  1.2.3',
+        '1.2.3-hotfix.1',
       ];
-      for (String version in invalid_versions) {
+      for (final String version in invalid_versions) {
         when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
-        expect(await verifyVersion(version, file), isFalse);
+        expect(
+          await verifyVersion(file),
+          'The version logic generated an invalid version string: "$version".',
+          reason: '$version is invalid but verifyVersionFile said it was fine',
+        );
       }
     });
   });

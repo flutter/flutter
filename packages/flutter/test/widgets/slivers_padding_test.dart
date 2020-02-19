@@ -1,7 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -168,11 +169,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(10.0, 60.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(100.0, 490.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -190,11 +191,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-60.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(100.0, 600.0-490.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -212,11 +213,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(800.0-10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(800.0-60.0, 10.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(800.0-490.0, 100.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(800.0-520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -234,11 +235,11 @@ void main() {
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Offset(60.0, 10.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Offset(490.0, 100.0));
-    expect(result.path.first.target, isInstanceOf<RenderView>());
+    expect(result.path.first.target, isA<RenderView>());
     result = tester.hitTestOnBinding(const Offset(520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -421,6 +422,39 @@ void main() {
     expect(
       tester.getRect(find.widgetWithText(Container, '0')),
       const Rect.fromLTRB(0.0, -200.0, 800.0, 200.0),
+    );
+  });
+
+  testWidgets('SliverPadding includes preceding padding in the precedingScrollExtent provided to child', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/49195
+    final UniqueKey key = UniqueKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverPadding(
+            padding: const EdgeInsets.only(top: 30),
+            sliver: SliverFillRemaining(
+              hasScrollBody: false,
+              child: Container(
+                key: key,
+                color: Colors.red,
+              ),
+            )
+          ),
+        ]
+      ),
+    ));
+    await tester.pump();
+
+    // The value of 570 is expected since SliverFillRemaining will fill all of
+    // the space available to it. In this test, the extent of the viewport is
+    // 600 pixels. If the SliverPadding widget provides the right constraints
+    // to SliverFillRemaining, with 30 pixels preceding it, it should only have
+    // a height of 570.
+    expect(
+      tester.renderObject<RenderBox>(find.byKey(key)).size.height,
+      equals(570),
     );
   });
 }

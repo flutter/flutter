@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,14 +50,14 @@ class IconData {
   final bool matchTextDirection;
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
-    final IconData typedOther = other;
-    return codePoint == typedOther.codePoint
-        && fontFamily == typedOther.fontFamily
-        && fontPackage == typedOther.fontPackage
-        && matchTextDirection == typedOther.matchTextDirection;
+    return other is IconData
+        && other.codePoint == codePoint
+        && other.fontFamily == fontFamily
+        && other.fontPackage == fontPackage
+        && other.matchTextDirection == matchTextDirection;
   }
 
   @override
@@ -75,10 +75,10 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   IconDataProperty(
     String name,
     IconData value, {
-      String ifNull,
-      bool showName = true,
-      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-      DiagnosticLevel level = DiagnosticLevel.info,
+    String ifNull,
+    bool showName = true,
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+    DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(style != null),
        assert(level != null),

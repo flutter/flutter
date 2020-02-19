@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,13 +6,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -21,6 +22,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -36,7 +38,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
     android: AndroidApk(
       id: 'io.flutter.android.mock',
-      file: fs.file('/mock/path/to/android/SkyShell.apk'),
+      file: globals.fs.file('/mock/path/to/android/SkyShell.apk'),
       versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
@@ -67,9 +69,9 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     bool withPlatformTools = true,
     bool withBuildTools = true,
   }) {
-    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
-    final String exe = platform.isWindows ? '.exe' : '';
-    final String bat = platform.isWindows ? '.bat' : '';
+    final Directory dir = globals.fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+    final String exe = globals.platform.isWindows ? '.exe' : '';
+    final String bat = globals.platform.isWindows ? '.bat' : '';
 
     _createDir(dir, 'licenses');
 
@@ -98,7 +100,7 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     }
 
     if (withNdkDir != null) {
-      final String ndkToolchainBin = fs.path.join(
+      final String ndkToolchainBin = globals.fs.path.join(
         'ndk-bundle',
         'toolchains',
         'arm-linux-androideabi-4.9',
@@ -106,24 +108,24 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
         withNdkDir,
         'bin',
       );
-      final String ndkCompiler = fs.path.join(
+      final String ndkCompiler = globals.fs.path.join(
         ndkToolchainBin,
         'arm-linux-androideabi-gcc',
       );
-      final String ndkLinker = fs.path.join(
+      final String ndkLinker = globals.fs.path.join(
         ndkToolchainBin,
         'arm-linux-androideabi-ld',
       );
       _createSdkFile(dir, ndkCompiler);
       _createSdkFile(dir, ndkLinker);
-      _createSdkFile(dir, fs.path.join('ndk-bundle', 'source.properties'), contents: '''
+      _createSdkFile(dir, globals.fs.path.join('ndk-bundle', 'source.properties'), contents: '''
 Pkg.Desc = Android NDK[]
 Pkg.Revision = $ndkVersion.1.5063045
 
 ''');
     }
     if (withNdkSysroot) {
-      final String armPlatform = fs.path.join(
+      final String armPlatform = globals.fs.path.join(
         'ndk-bundle',
         'platforms',
         'android-9',
@@ -144,7 +146,7 @@ Pkg.Revision = $ndkVersion.1.5063045
   }
 
   static void _createDir(Directory dir, String path) {
-    final Directory directory = fs.directory(fs.path.join(dir.path, path));
+    final Directory directory = globals.fs.directory(globals.fs.path.join(dir.path, path));
     directory.createSync(recursive: true);
   }
 
@@ -177,14 +179,15 @@ class MockProcessManager extends Mock implements ProcessManager {
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
+    final List<String> commands = command.cast<String>();
     if (!runSucceeds) {
-      final String executable = command[0];
-      final List<String> arguments = command.length > 1 ? command.sublist(1) : <String>[];
+      final String executable = commands[0];
+      final List<String> arguments = commands.length > 1 ? commands.sublist(1) : <String>[];
       throw ProcessException(executable, arguments);
     }
 
-    commands = command;
-    return Future<Process>.value(processFactory(command));
+    this.commands = commands;
+    return Future<Process>.value(processFactory(commands));
   }
 }
 
@@ -192,12 +195,12 @@ class MockProcessManager extends Mock implements ProcessManager {
 /// a given number of times before succeeding. The returned processes will
 /// fail after a delay if one is supplied.
 ProcessFactory flakyProcessFactory({
-    int flakes,
-    bool Function(List<String> command) filter,
-    Duration delay,
-    Stream<List<int>> Function() stdout,
-    Stream<List<int>> Function() stderr,
-  }) {
+  int flakes,
+  bool Function(List<String> command) filter,
+  Duration delay,
+  Stream<List<int>> Function() stdout,
+  Stream<List<int>> Function() stderr,
+}) {
   int flakesLeft = flakes;
   stdout ??= () => const Stream<List<int>>.empty();
   stderr ??= () => const Stream<List<int>>.empty();
@@ -254,7 +257,7 @@ class MockProcess extends Mock implements Process {
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin ?? MemoryIOSink();
+       stdin = stdin as IOSink ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -272,7 +275,7 @@ class MockProcess extends Mock implements Process {
   final Stream<List<int>> stderr;
 }
 
-/// A fake process implemenation which can be provided all necessary values.
+/// A fake process implementation which can be provided all necessary values.
 class FakeProcess implements Process {
   FakeProcess({
     this.pid = 1,
@@ -281,7 +284,7 @@ class FakeProcess implements Process {
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin ?? MemoryIOSink();
+       stdin = stdin as IOSink ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -307,21 +310,28 @@ class FakeProcess implements Process {
 /// A process that prompts the user to proceed, then asynchronously writes
 /// some lines to stdout before it exits.
 class PromptingProcess implements Process {
+  PromptingProcess({
+    bool stdinError = false,
+  }) : _stdin = CompleterIOSink(throwOnAdd: stdinError);
+
   Future<void> showPrompt(String prompt, List<String> outputLines) async {
-    _stdoutController.add(utf8.encode(prompt));
-    final List<int> bytesOnStdin = await _stdin.future;
-    // Echo stdin to stdout.
-    _stdoutController.add(bytesOnStdin);
-    if (bytesOnStdin[0] == utf8.encode('y')[0]) {
-      for (final String line in outputLines) {
-        _stdoutController.add(utf8.encode('$line\n'));
+    try {
+      _stdoutController.add(utf8.encode(prompt));
+      final List<int> bytesOnStdin = await _stdin.future;
+      // Echo stdin to stdout.
+      _stdoutController.add(bytesOnStdin);
+      if (bytesOnStdin.isNotEmpty && bytesOnStdin[0] == utf8.encode('y')[0]) {
+        for (final String line in outputLines) {
+          _stdoutController.add(utf8.encode('$line\n'));
+        }
       }
+    } finally {
+      await _stdoutController.close();
     }
-    await _stdoutController.close();
   }
 
   final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
-  final CompleterIOSink _stdin = CompleterIOSink();
+  final CompleterIOSink _stdin;
 
   @override
   Stream<List<int>> get stdout => _stdoutController.stream;
@@ -344,6 +354,12 @@ class PromptingProcess implements Process {
 
 /// An IOSink that completes a future with the first line written to it.
 class CompleterIOSink extends MemoryIOSink {
+  CompleterIOSink({
+    this.throwOnAdd = false,
+  });
+
+  final bool throwOnAdd;
+
   final Completer<List<int>> _completer = Completer<List<int>>();
 
   Future<List<int>> get future => _completer.future;
@@ -351,7 +367,12 @@ class CompleterIOSink extends MemoryIOSink {
   @override
   void add(List<int> data) {
     if (!_completer.isCompleted) {
-      _completer.complete(data);
+      // When throwOnAdd is true, complete with empty so any expected output
+      // doesn't appear.
+      _completer.complete(throwOnAdd ? <int>[] : data);
+    }
+    if (throwOnAdd) {
+      throw Exception('CompleterIOSink Error');
     }
     super.add(data);
   }
@@ -372,9 +393,20 @@ class MemoryIOSink implements IOSink {
   @override
   Future<void> addStream(Stream<List<int>> stream) {
     final Completer<void> completer = Completer<void>();
-    stream.listen((List<int> data) {
-      add(data);
-    }).onDone(() => completer.complete());
+    StreamSubscription<List<int>> sub;
+    sub = stream.listen(
+      (List<int> data) {
+        try {
+          add(data);
+        } catch (err, stack) {
+          sub.cancel();
+          completer.completeError(err, stack);
+        }
+      },
+      onError: completer.completeError,
+      onDone: completer.complete,
+      cancelOnError: true,
+    );
     return completer.future;
   }
 
@@ -396,7 +428,7 @@ class MemoryIOSink implements IOSink {
   @override
   void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
     bool addSeparator = false;
-    for (dynamic object in objects) {
+    for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);
       }
@@ -534,6 +566,12 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
   bool isSupported() => true;
 
   @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsFlutterExit => false;
+
+  @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
@@ -563,15 +601,33 @@ class MockDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'MockLogReader';
 
-  final StreamController<String> _linesController = StreamController<String>.broadcast();
+  StreamController<String> _cachedLinesController;
+
+  final List<String> _lineQueue = <String>[];
+  StreamController<String> get _linesController {
+    _cachedLinesController ??= StreamController<String>
+      .broadcast(onListen: () {
+        _lineQueue.forEach(_linesController.add);
+        _lineQueue.clear();
+     });
+    return _cachedLinesController;
+  }
 
   @override
   Stream<String> get logLines => _linesController.stream;
 
-  void addLine(String line) => _linesController.add(line);
+  void addLine(String line) {
+    if (_linesController.hasListener) {
+      _linesController.add(line);
+    } else {
+      _lineQueue.add(line);
+    }
+  }
 
-  void dispose() {
-    _linesController.close();
+  @override
+  Future<void> dispose() async {
+    _lineQueue.clear();
+    await _linesController.close();
   }
 }
 
@@ -650,10 +706,13 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   }
   @override
   Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
-    fs.file(outputPath).createSync(recursive: true);
-    fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
+    globals.fs.file(outputPath).createSync(recursive: true);
+    globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);
   }
+
+  @override
+  void addFileSystemRoot(String root) { }
 }
 
 /// A fake implementation of [ProcessResult].

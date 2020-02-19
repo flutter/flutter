@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,9 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+
+final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
 
 /// Tests that the Android app containing a Flutter module can be built when
 /// it has custom build types and flavors.
@@ -53,7 +55,14 @@ Future<void> main() async {
       final Directory hostAppDir = Directory(path.join(tempDir.path, 'hello_host_app_with_custom_build'));
       mkdir(hostAppDir);
       recursiveCopy(
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'module_host_with_custom_build')),
+        Directory(
+          path.join(
+            flutterDirectory.path,
+            'dev',
+            'integration_tests',
+             useAndroidEmbeddingV2 ? 'module_host_with_custom_build_v2_embedding' : 'module_host_with_custom_build',
+          ),
+        ),
         hostAppDir,
       );
       copy(
@@ -114,11 +123,9 @@ Future<void> main() async {
 
       section('Verify snapshots in app-demo-debug.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
+        ...debugAssets,
       ], await getFilesInApk(demoDebugApk));
 
       await clean();
@@ -159,11 +166,9 @@ Future<void> main() async {
 
       section('Verify snapshots in app-demo-debug.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
+        ...debugAssets,
       ], await getFilesInApk(demoDebugApk2));
 
       await clean();
@@ -196,11 +201,9 @@ Future<void> main() async {
 
       section('Verify snapshots in app-demo-staging.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
+        ...debugAssets,
       ], await getFilesInApk(demoStagingApk));
 
       await clean();
@@ -233,14 +236,14 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build app-demo-release-unsigned.apk');
       }
 
-      section('Verify AOT blobs in app-demo-release-unsigned.apk');
+      section('Verify AOT ELF in app-demo-release-unsigned.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
-        'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',
-        'lib/armeabi-v7a/libapp.so',
+        'lib/arm64-v8a/libapp.so',
         'lib/armeabi-v7a/libflutter.so',
+        'lib/armeabi-v7a/libapp.so',
       ], await getFilesInApk(demoReleaseApk));
 
       await clean();
@@ -271,9 +274,9 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build app-demo-prod-unsigned.apk');
       }
 
-      section('Verify AOT blobs in app-demo-prod-unsigned.apk');
+      section('Verify AOT ELF in app-demo-prod-unsigned.apk');
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',

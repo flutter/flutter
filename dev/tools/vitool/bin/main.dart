@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,7 +18,7 @@ void main(List<String> args) {
       'help',
       abbr: 'h',
       negatable: false,
-      help: 'Display the tool\'s usage instructions and quit.',
+      help: "Display the tool's usage instructions and quit.",
   );
 
   parser.addOption(
@@ -36,7 +36,7 @@ void main(List<String> args) {
   parser.addOption(
       'part-of',
       abbr: 'p',
-      help: 'Library name to add a dart \'part of\' clause for.',
+      help: "Library name to add a dart 'part of' clause for.",
   );
 
   parser.addOption(
@@ -56,7 +56,7 @@ void main(List<String> args) {
 
   final ArgResults argResults = parser.parse(args);
 
-  if (argResults['help'] ||
+  if (argResults['help'] as bool ||
     !argResults.wasParsed('output') ||
     !argResults.wasParsed('asset-name') ||
     argResults.rest.isEmpty) {
@@ -65,26 +65,26 @@ void main(List<String> args) {
   }
 
   final List<FrameData> frames = <FrameData>[
-    for (String filePath in argResults.rest) interpretSvg(filePath),
+    for (final String filePath in argResults.rest) interpretSvg(filePath),
   ];
 
   final StringBuffer generatedSb = StringBuffer();
 
   if (argResults.wasParsed('header')) {
-    generatedSb.write(File(argResults['header']).readAsStringSync());
+    generatedSb.write(File(argResults['header'] as String).readAsStringSync());
     generatedSb.write('\n');
   }
 
-  if (argResults['codegen_comment'])
+  if (argResults['codegen_comment'] as bool)
     generatedSb.write(kCodegenComment);
 
   if (argResults.wasParsed('part-of'))
     generatedSb.write('part of ${argResults['part-of']};\n');
 
   final Animation animation = Animation.fromFrameData(frames);
-  generatedSb.write(animation.toDart('_AnimatedIconData', argResults['asset-name']));
+  generatedSb.write(animation.toDart('_AnimatedIconData', argResults['asset-name'] as String));
 
-  final File outFile = File(argResults['output']);
+  final File outFile = File(argResults['output'] as String);
   outFile.writeAsStringSync(generatedSb.toString());
 }
 

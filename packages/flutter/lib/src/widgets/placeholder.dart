@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -49,6 +49,8 @@ class _PlaceholderPainter extends CustomPainter {
 /// By default, the placeholder is sized to fit its container. If the
 /// placeholder is in an unbounded space, it will size itself according to the
 /// given [fallbackWidth] and [fallbackHeight].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=LPe56fezmoo}
 class Placeholder extends StatelessWidget {
   /// Creates a widget which draws a box.
   const Placeholder({

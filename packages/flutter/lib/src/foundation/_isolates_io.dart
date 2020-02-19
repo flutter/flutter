@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,9 +12,7 @@ import 'isolates.dart' as isolates;
 
 /// The dart:io implementation of [isolate.compute].
 Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
-  if (!kReleaseMode) {
-    debugLabel ??= callback.toString();
-  }
+  debugLabel ??= kReleaseMode ? 'compute' : callback.toString();
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);
   final ReceivePort resultPort = ReceivePort();
@@ -38,7 +36,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
     assert(errorData is List<dynamic>);
     assert(errorData.length == 2);
     final Exception exception = Exception(errorData[0]);
-    final StackTrace stack = StackTrace.fromString(errorData[1]);
+    final StackTrace stack = StackTrace.fromString(errorData[1] as String);
     if (result.isCompleted) {
       Zone.current.handleUncaughtError(exception, stack);
     } else {
@@ -48,7 +46,7 @@ Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { St
   resultPort.listen((dynamic resultData) {
     assert(resultData == null || resultData is R);
     if (!result.isCompleted)
-      result.complete(resultData);
+      result.complete(resultData as R);
   });
   await result.future;
   Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
@@ -74,14 +72,17 @@ class _IsolateConfiguration<Q, R> {
   final String debugLabel;
   final int flowId;
 
-  R apply() => callback(message);
+  FutureOr<R> apply() => callback(message);
 }
 
 Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
   R result;
   await Timeline.timeSync(
-    '${configuration.debugLabel}',
-    () async { result = await configuration.apply(); },
+    configuration.debugLabel,
+    () async {
+      final FutureOr<R> applicationResult = await configuration.apply();
+      result = await applicationResult;
+    },
     flow: Flow.step(configuration.flowId),
   );
   Timeline.timeSync(

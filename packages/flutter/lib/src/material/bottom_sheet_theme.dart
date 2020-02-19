@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -123,13 +123,13 @@ class BottomSheetThemeData extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final BottomSheetThemeData typedOther = other;
-    return typedOther.backgroundColor == backgroundColor
-        && typedOther.elevation == elevation
-        && typedOther.modalBackgroundColor == modalBackgroundColor
-        && typedOther.modalElevation == modalElevation
-        && typedOther.shape == shape
-        && typedOther.clipBehavior == clipBehavior;
+    return other is BottomSheetThemeData
+        && other.backgroundColor == backgroundColor
+        && other.elevation == elevation
+        && other.modalBackgroundColor == modalBackgroundColor
+        && other.modalElevation == modalElevation
+        && other.shape == shape
+        && other.clipBehavior == clipBehavior;
   }
 
   @override

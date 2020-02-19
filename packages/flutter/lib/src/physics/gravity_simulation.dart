@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,7 @@ import 'simulation.dart';
 /// Models a particle that follows Newton's second law of motion. The simulation
 /// ends when the position reaches a defined point.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This method triggers an [AnimationController] (a previously constructed
 /// `_controller` field) to simulate a fall of 300 pixels.

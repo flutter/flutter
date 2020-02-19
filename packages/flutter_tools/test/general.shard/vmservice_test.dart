@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,8 +7,13 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
@@ -16,6 +21,8 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 class MockPeer implements rpc.Peer {
+
+  Function _versionFn = (dynamic _) => null;
 
   @override
   rpc.ErrorCallback get onUnhandledError => null;
@@ -26,13 +33,11 @@ class MockPeer implements rpc.Peer {
   }
 
   @override
-  bool get isClosed {
-    throw 'unexpected call to isClosed';
-  }
+  bool get isClosed => _isClosed;
 
   @override
   Future<dynamic> close() async {
-    throw 'unexpected call to close()';
+    _isClosed = true;
   }
 
   @override
@@ -47,7 +52,10 @@ class MockPeer implements rpc.Peer {
 
   @override
   void registerMethod(String name, Function callback) {
-    // this does get called
+    registeredMethods.add(name);
+    if (name == 'flutterVersion') {
+      _versionFn = callback;
+    }
   }
 
   @override
@@ -57,8 +65,10 @@ class MockPeer implements rpc.Peer {
   }
 
   Map<String, List<dynamic>> sentNotifications = <String, List<dynamic>>{};
+  List<String> registeredMethods = <String>[];
 
   bool isolatesEnabled = false;
+  bool _isClosed = false;
 
   Future<void> _getVMLatch;
   Completer<void> _currentGetVMLatchCompleter;
@@ -152,6 +162,9 @@ class MockPeer implements rpc.Peer {
         ] : <dynamic>[],
       };
     }
+    if (method == 'flutterVersion') {
+      return _versionFn(parameters);
+    }
     return null;
   }
 
@@ -163,7 +176,9 @@ class MockPeer implements rpc.Peer {
 
 void main() {
   MockStdio mockStdio;
+  final MockFlutterVersion mockVersion = MockFlutterVersion();
   group('VMService', () {
+
     setUp(() {
       mockStdio = MockStdio();
     });
@@ -185,9 +200,24 @@ void main() {
         expect(mockStdio.writtenToStderr.join(''), '');
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: OutputPreferences.test(),
+        stdio: mockStdio,
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
       WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
+    });
+
+    testUsingContext('closing VMService closes Peer', () async {
+      final MockPeer mockPeer = MockPeer();
+      final VMService vmService = VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
+      expect(mockPeer.isClosed, equals(false));
+      await vmService.close();
+      expect(mockPeer.isClosed, equals(true));
     });
 
     testUsingContext('refreshViews', () {
@@ -195,7 +225,7 @@ void main() {
         bool done = false;
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
-        final VMService vmService = VMService(mockPeer, null, null, null, null, null);
+        final VMService vmService = VMService(mockPeer, null, null, null, null, null, null, null);
         expect(mockPeer.sentNotifications, contains('registerService'));
         final List<String> registeredServices =
           mockPeer.sentNotifications['registerService']
@@ -260,8 +290,75 @@ void main() {
         expect(mockStdio.writtenToStderr.join(''), '');
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
+    });
+
+    testUsingContext('registers hot UI method', () {
+      FakeAsync().run((FakeAsync time) {
+        final MockPeer mockPeer = MockPeer();
+        Future<void> reloadMethod({ String classId, String libraryId }) async {}
+        VMService(mockPeer, null, null, null, null, null, null, reloadMethod);
+
+        expect(mockPeer.registeredMethods, contains('reloadMethod'));
+      });
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
+    });
+
+    testUsingContext('registers flutterMemoryInfo service', () {
+      FakeAsync().run((FakeAsync time) {
+        final MockDevice mockDevice = MockDevice();
+        final MockPeer mockPeer = MockPeer();
+        Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+        VMService(mockPeer, null, null, reloadSources, null, null, mockDevice, null);
+
+        expect(mockPeer.registeredMethods, contains('flutterMemoryInfo'));
+      });
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
+    });
+
+    testUsingContext('returns correct FlutterVersion', () {
+      FakeAsync().run((FakeAsync time) async {
+        final MockPeer mockPeer = MockPeer();
+        VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
+
+        expect(mockPeer.registeredMethods, contains('flutterVersion'));
+        expect(await mockPeer.sendRequest('flutterVersion'), equals(mockVersion.toJson()));
+      });
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => mockVersion,
     });
   });
+}
+
+class MockDevice extends Mock implements Device {}
+
+class MockFlutterVersion extends Mock implements FlutterVersion {
+  @override
+  Map<String, Object> toJson() => const <String, Object>{'Mock': 'Version'};
 }

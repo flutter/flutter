@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -90,8 +90,8 @@ class _DatePickerHeader extends StatelessWidget {
         yearColor = mode == DatePickerMode.year ? Colors.white : Colors.white70;
         break;
     }
-    final TextStyle dayStyle = headerTextTheme.display1.copyWith(color: dayColor);
-    final TextStyle yearStyle = headerTextTheme.subhead.copyWith(color: yearColor);
+    final TextStyle dayStyle = headerTextTheme.headline4.copyWith(color: dayColor);
+    final TextStyle yearStyle = headerTextTheme.subtitle1.copyWith(color: yearColor);
 
     Color backgroundColor;
     switch (themeData.brightness) {
@@ -409,21 +409,21 @@ class DayPicker extends StatelessWidget {
             || (selectableDayPredicate != null && !selectableDayPredicate(dayToBuild));
 
         BoxDecoration decoration;
-        TextStyle itemStyle = themeData.textTheme.body1;
+        TextStyle itemStyle = themeData.textTheme.bodyText2;
 
         final bool isSelectedDay = selectedDate.year == year && selectedDate.month == month && selectedDate.day == day;
         if (isSelectedDay) {
           // The selected day gets a circle background highlight, and a contrasting text color.
-          itemStyle = themeData.accentTextTheme.body2;
+          itemStyle = themeData.accentTextTheme.bodyText1;
           decoration = BoxDecoration(
             color: themeData.accentColor,
             shape: BoxShape.circle,
           );
         } else if (disabled) {
-          itemStyle = themeData.textTheme.body1.copyWith(color: themeData.disabledColor);
+          itemStyle = themeData.textTheme.bodyText2.copyWith(color: themeData.disabledColor);
         } else if (currentDate.year == year && currentDate.month == month && currentDate.day == day) {
           // The current day gets a different text color.
-          itemStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
+          itemStyle = themeData.textTheme.bodyText1.copyWith(color: themeData.accentColor);
         }
 
         Widget dayWidget = Container(
@@ -471,7 +471,7 @@ class DayPicker extends StatelessWidget {
               child: ExcludeSemantics(
                 child: Text(
                   localizations.formatMonthYear(displayedMonth),
-                  style: themeData.textTheme.subhead,
+                  style: themeData.textTheme.subtitle1,
                 ),
               ),
             ),
@@ -824,7 +824,7 @@ class _YearPickerState extends State<YearPicker> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
-    final TextStyle style = themeData.textTheme.body1;
+    final TextStyle style = themeData.textTheme.bodyText2;
     return ListView.builder(
       dragStartBehavior: widget.dragStartBehavior,
       controller: scrollController,
@@ -834,7 +834,7 @@ class _YearPickerState extends State<YearPicker> {
         final int year = widget.firstDate.year + index;
         final bool isSelected = year == widget.selectedDate.year;
         final TextStyle itemStyle = isSelected
-          ? themeData.textTheme.headline.copyWith(color: themeData.accentColor)
+          ? themeData.textTheme.headline5.copyWith(color: themeData.accentColor)
           : style;
         return InkWell(
           key: ValueKey<int>(year),
@@ -911,6 +911,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         HapticFeedback.vibrate();
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
   }
@@ -1085,13 +1086,15 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// provided by [Directionality]. If both [locale] and [textDirection] are not
 /// null, [textDirection] overrides the direction chosen for the [locale].
 ///
-/// The [context] argument is passed to [showDialog], the documentation for
-/// which discusses how it is used.
+/// The [context] and [useRootNavigator] arguments are passed to [showDialog],
+/// the documentation for which discusses how it is used.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
 ///
-/// {@tool sample}
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_date_picker.mp4}
+///
+/// {@tool snippet}
 /// Show a date picker with the dark theme.
 ///
 /// ```dart
@@ -1133,10 +1136,12 @@ Future<DateTime> showDatePicker({
   Locale locale,
   TextDirection textDirection,
   TransitionBuilder builder,
+  bool useRootNavigator = true,
 }) async {
   assert(initialDate != null);
   assert(firstDate != null);
   assert(lastDate != null);
+  assert(useRootNavigator != null);
   assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
   assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
   assert(!firstDate.isAfter(lastDate), 'lastDate must be on or after firstDate');
@@ -1173,6 +1178,7 @@ Future<DateTime> showDatePicker({
 
   return await showDialog<DateTime>(
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {
       return builder == null ? child : builder(context, child);
     },

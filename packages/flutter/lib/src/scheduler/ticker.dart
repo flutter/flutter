@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,6 +38,8 @@ abstract class TickerProvider {
   Ticker createTicker(TickerCallback onTick);
 }
 
+// TODO(jacobr): make Ticker use DiagnosticableMixin to simplify reporting errors
+// related to a ticker.
 /// Calls its callback once per animation frame.
 ///
 /// When created, a ticker is initially disabled. Call [start] to
@@ -145,11 +147,11 @@ class Ticker {
   TickerFuture start() {
     assert(() {
       if (isActive) {
-        throw FlutterError(
-          'A ticker was started twice.\n'
-          'A ticker that is already active cannot be started again without first stopping it.\n'
-          'The affected ticker was: ${ toString(debugIncludeStack: true) }'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('A ticker was started twice.'),
+          ErrorDescription('A ticker that is already active cannot be started again without first stopping it.'),
+          describeForError('The affected ticker was'),
+        ]);
       }
       return true;
     }());
@@ -162,6 +164,13 @@ class Ticker {
         SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.postFrameCallbacks.index)
       _startTime = SchedulerBinding.instance.currentFrameTimeStamp;
     return _future;
+  }
+
+  /// Adds a debug representation of a [Ticker] optimized for including in error
+  /// messages.
+  DiagnosticsNode describeForError(String name) {
+    // TODO(jacobr): make this more structured.
+    return DiagnosticsProperty<Ticker>(name, this, description: toString(debugIncludeStack: true));
   }
 
   /// Stops calling this [Ticker]'s callback.
@@ -313,7 +322,7 @@ class Ticker {
   @override
   String toString({ bool debugIncludeStack = false }) {
     final StringBuffer buffer = StringBuffer();
-    buffer.write('$runtimeType(');
+    buffer.write('${objectRuntimeType(this, 'Ticker')}(');
     assert(() {
       buffer.write(debugLabel ?? '');
       return true;
@@ -424,8 +433,8 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  Future<E> then<E>(dynamic f(void value), { Function onError }) {
-    return _primaryCompleter.future.then<E>(f, onError: onError);
+  Future<R> then<R>(FutureOr<R> onValue(void value), { Function onError }) {
+    return _primaryCompleter.future.then<R>(onValue, onError: onError);
   }
 
   @override

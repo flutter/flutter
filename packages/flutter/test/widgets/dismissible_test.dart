@@ -1,11 +1,11 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 const double itemExtent = 100.0;
 Axis scrollDirection = Axis.vertical;
@@ -208,7 +208,7 @@ Future<void> rollbackElement(WidgetTester tester, Finder finder, { @required Axi
 }
 
 class Test1215DismissibleWidget extends StatelessWidget {
-  const Test1215DismissibleWidget(this.text);
+  const Test1215DismissibleWidget(this.text, { Key key }) : super(key: key);
 
   final String text;
 
@@ -731,5 +731,69 @@ void main() {
     expect(find.text('1'), findsOneWidget);
     expect(dismissedItems, isEmpty);
     expect(confirmDismissDirection, DismissDirection.endToStart);
+  });
+
+  testWidgets('setState that does not remove the Dismissible from tree should throws Error', (WidgetTester tester) async {
+    scrollDirection = Axis.vertical;
+    dismissDirection = DismissDirection.horizontal;
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return ListView(
+            dragStartBehavior: DragStartBehavior.down,
+            scrollDirection: scrollDirection,
+            itemExtent: itemExtent,
+            children: <Widget>[
+              Dismissible(
+                dragStartBehavior: DragStartBehavior.down,
+                key: const ValueKey<int>(1),
+                direction: dismissDirection,
+                onDismissed: (DismissDirection direction) {
+                  setState(() {
+                    reportedDismissDirection = direction;
+                    expect(dismissedItems.contains(1), isFalse);
+                    dismissedItems.add(1);
+                  });
+                },
+                background: background,
+                dismissThresholds: const <DismissDirection, double>{},
+                crossAxisEndOffset: crossAxisEndOffset,
+                child: Container(
+                  width: itemExtent,
+                  height: itemExtent,
+                  child: Text(1.toString()),
+                ),
+              ),
+            ]
+          );
+        },
+      ),
+    ));
+    expect(dismissedItems, isEmpty);
+    await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(dismissedItems, equals(<int>[1]));
+    final dynamic exception =  tester.takeException();
+    expect(exception, isNotNull);
+    expect(exception, isFlutterError);
+    final FlutterError error = exception as FlutterError;
+    expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics.last.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'Make sure to implement the onDismissed handler and to immediately\n'
+        'remove the Dismissible widget from the application once that\n'
+        'handler has fired.\n',
+      ),
+    );
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   A dismissed Dismissible widget is still part of the tree.\n'
+      '   Make sure to implement the onDismissed handler and to immediately\n'
+      '   remove the Dismissible widget from the application once that\n'
+      '   handler has fired.\n',
+    );
   });
 }

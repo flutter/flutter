@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -428,7 +428,7 @@ void main() {
 
   test('ColorDiagnosticsProperty includes valueProperties in JSON', () {
     ColorProperty property = ColorProperty('foo', const Color.fromARGB(10, 20, 30, 40));
-    final Map<String, Object> valueProperties = property.toJsonMap(const DiagnosticsSerializationDelegate())['valueProperties'];
+    final Map<String, Object> valueProperties = property.toJsonMap(const DiagnosticsSerializationDelegate())['valueProperties'] as Map<String, Object>;
     expect(valueProperties['alpha'], 10);
     expect(valueProperties['red'], 20);
     expect(valueProperties['green'], 30);

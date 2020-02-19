@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 
 /// Tests that plugins that don't define a `androidx.annotation:annotation:+` or
 /// `com.android.support:support-annotations:+` dependency can be built as AAR.
@@ -59,6 +59,12 @@ Future<void> main() async {
           options: <String>['get'],
         );
       });
+
+      section('Update proguard rules');
+
+      // Don't obfuscate the input class files, since the test is checking if some classes are in the DEX.
+      final File proguardRules = File(path.join(projectDir.path, 'android', 'app', 'proguard-rules.pro'));
+      proguardRules.writeAsStringSync('-dontobfuscate', flush: true);
 
       section('Build release APK');
 

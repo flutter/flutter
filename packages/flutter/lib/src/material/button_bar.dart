@@ -1,8 +1,9 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
@@ -10,7 +11,8 @@ import 'dialog.dart';
 import 'flat_button.dart';
 import 'raised_button.dart';
 
-/// An end-aligned row of buttons.
+/// An end-aligned row of buttons, laying out into a column if there is not
+/// enough horizontal space.
 ///
 /// Places the buttons horizontally according to the [buttonPadding]. The
 /// children are laid out in a [Row] with [MainAxisAlignment.end]. When the
@@ -18,6 +20,13 @@ import 'raised_button.dart';
 /// right justified and the last child becomes the rightmost child. When the
 /// [Directionality] [TextDirection.rtl] the children are left justified and
 /// the last child becomes the leftmost child.
+///
+/// If the button bar's width exceeds the maximum width constraint on the
+/// widget, it aligns its buttons in a column. The key difference here
+/// is that the [MainAxisAlignment] will then be treated as a
+/// cross-axis/horizontal alignment. For example, if the buttons overflow and
+/// [ButtonBar.alignment] was set to [MainAxisAlignment.start], the buttons would
+/// align to the horizontal start of the button bar.
 ///
 /// The [ButtonBar] can be configured with a [ButtonBarTheme]. For any null
 /// property on the ButtonBar, the surrounding ButtonBarTheme's property
@@ -55,9 +64,12 @@ class ButtonBar extends StatelessWidget {
     this.buttonPadding,
     this.buttonAlignedDropdown,
     this.layoutBehavior,
+    this.overflowDirection,
+    this.overflowButtonSpacing,
     this.children = const <Widget>[],
   }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
        assert(buttonHeight == null || buttonHeight >= 0.0),
+       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0.0),
        super(key: key);
 
   /// How the children should be placed along the horizontal axis.
@@ -117,6 +129,38 @@ class ButtonBar extends StatelessWidget {
   /// If that is null, it will default [ButtonBarLayoutBehavior.padded].
   final ButtonBarLayoutBehavior layoutBehavior;
 
+  /// Defines the vertical direction of a [ButtonBar]'s children if it
+  /// overflows.
+  ///
+  /// If [children] do not fit into a single row, then they
+  /// are arranged in a column. The first action is at the top of the
+  /// column if this property is set to [VerticalDirection.down], since it
+  /// "starts" at the top and "ends" at the bottom. On the other hand,
+  /// the first action will be at the bottom of the column if this
+  /// property is set to [VerticalDirection.up], since it "starts" at the
+  /// bottom and "ends" at the top.
+  ///
+  /// If null then it will use the surrounding
+  /// [ButtonBarTheme.overflowDirection]. If that is null, it will
+  /// default to [VerticalDirection.down].
+  final VerticalDirection overflowDirection;
+
+  /// The spacing between buttons when the button bar overflows.
+  ///
+  /// If the [children] do not fit into a single row, they are
+  /// arranged into a column. This parameter provides additional
+  /// vertical space in between buttons when it does overflow.
+  ///
+  /// Note that the button spacing may appear to be more than
+  /// the value provided. This is because most buttons adhere to the
+  /// [MaterialTapTargetSize] of 48px. So, even though a button
+  /// might visually be 36px in height, it might still take up to
+  /// 48px vertically.
+  ///
+  /// If null then no spacing will be added in between buttons in
+  /// an overflow state.
+  final double overflowButtonSpacing;
+
   /// The buttons to arrange horizontally.
   ///
   /// Typically [RaisedButton] or [FlatButton] widgets.
@@ -140,15 +184,17 @@ class ButtonBar extends StatelessWidget {
     final double paddingUnit = buttonTheme.padding.horizontal / 4.0;
     final Widget child = ButtonTheme.fromButtonThemeData(
       data: buttonTheme,
-      child: Row(
+      child: _ButtonBarRow(
         mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
+        overflowDirection: overflowDirection ?? barTheme.overflowDirection ?? VerticalDirection.down,
         children: children.map<Widget>((Widget child) {
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: paddingUnit),
             child: child,
           );
         }).toList(),
+        overflowButtonSpacing: overflowButtonSpacing,
       ),
     );
     switch (buttonTheme.layoutBehavior) {
@@ -170,5 +216,213 @@ class ButtonBar extends StatelessWidget {
     }
     assert(false);
     return null;
+  }
+}
+
+/// Attempts to display buttons in a row, but displays them in a column if
+/// there is not enough horizontal space.
+///
+/// It first attempts to lay out its buttons as though there were no
+/// maximum width constraints on the widget. If the button bar's width is
+/// less than the maximum width constraints of the widget, it then lays
+/// out the widget as though it were placed in a [Row].
+///
+/// However, if the button bar's width exceeds the maximum width constraint on
+/// the widget, it then aligns its buttons in a column. The key difference here
+/// is that the [MainAxisAlignment] will then be treated as a
+/// cross-axis/horizontal alignment. For example, if the buttons overflow and
+/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the column of
+/// buttons would align to the horizontal start of the button bar.
+class _ButtonBarRow extends Flex {
+  /// Creates a button bar that attempts to display in a row, but displays in
+  /// a column if there is insufficient horizontal space.
+  _ButtonBarRow({
+    List<Widget> children,
+    Axis direction = Axis.horizontal,
+    MainAxisSize mainAxisSize = MainAxisSize.max,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    TextDirection textDirection,
+    VerticalDirection overflowDirection = VerticalDirection.down,
+    TextBaseline textBaseline,
+    this.overflowButtonSpacing,
+  }) : super(
+    children: children,
+    direction: direction,
+    mainAxisSize: mainAxisSize,
+    mainAxisAlignment: mainAxisAlignment,
+    crossAxisAlignment: crossAxisAlignment,
+    textDirection: textDirection,
+    verticalDirection: overflowDirection,
+    textBaseline: textBaseline,
+  );
+
+  final double overflowButtonSpacing;
+
+  @override
+  _RenderButtonBarRow createRenderObject(BuildContext context) {
+    return _RenderButtonBarRow(
+      direction: direction,
+      mainAxisAlignment: mainAxisAlignment,
+      mainAxisSize: mainAxisSize,
+      crossAxisAlignment: crossAxisAlignment,
+      textDirection: getEffectiveTextDirection(context),
+      verticalDirection: verticalDirection,
+      textBaseline: textBaseline,
+      overflowButtonSpacing: overflowButtonSpacing,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderButtonBarRow renderObject) {
+    renderObject
+      ..direction = direction
+      ..mainAxisAlignment = mainAxisAlignment
+      ..mainAxisSize = mainAxisSize
+      ..crossAxisAlignment = crossAxisAlignment
+      ..textDirection = getEffectiveTextDirection(context)
+      ..verticalDirection = verticalDirection
+      ..textBaseline = textBaseline
+      ..overflowButtonSpacing = overflowButtonSpacing;
+  }
+}
+
+/// Attempts to display buttons in a row, but displays them in a column if
+/// there is not enough horizontal space.
+///
+/// It first attempts to lay out its buttons as though there were no
+/// maximum width constraints on the widget. If the button bar's width is
+/// less than the maximum width constraints of the widget, it then lays
+/// out the widget as though it were placed in a [Row].
+///
+/// However, if the button bar's width exceeds the maximum width constraint on
+/// the widget, it then aligns its buttons in a column. The key difference here
+/// is that the [MainAxisAlignment] will then be treated as a
+/// cross-axis/horizontal alignment. For example, if the buttons overflow and
+/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
+/// align to the horizontal start of the button bar.
+class _RenderButtonBarRow extends RenderFlex {
+  /// Creates a button bar that attempts to display in a row, but displays in
+  /// a column if there is insufficient horizontal space.
+  _RenderButtonBarRow({
+    List<RenderBox> children,
+    Axis direction = Axis.horizontal,
+    MainAxisSize mainAxisSize = MainAxisSize.max,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    @required TextDirection textDirection,
+    VerticalDirection verticalDirection = VerticalDirection.down,
+    TextBaseline textBaseline,
+    this.overflowButtonSpacing,
+  }) : assert(textDirection != null),
+       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0),
+       super(
+         children: children,
+         direction: direction,
+         mainAxisSize: mainAxisSize,
+         mainAxisAlignment: mainAxisAlignment,
+         crossAxisAlignment: crossAxisAlignment,
+         textDirection: textDirection,
+         verticalDirection: verticalDirection,
+         textBaseline: textBaseline,
+       );
+
+  bool _hasCheckedLayoutWidth = false;
+  double overflowButtonSpacing;
+
+  @override
+  BoxConstraints get constraints {
+    if (_hasCheckedLayoutWidth)
+      return super.constraints;
+    return super.constraints.copyWith(maxWidth: double.infinity);
+  }
+
+  @override
+  void performLayout() {
+    // Set check layout width to false in reload or update cases.
+    _hasCheckedLayoutWidth = false;
+
+    // Perform layout to ensure that button bar knows how wide it would
+    // ideally want to be.
+    super.performLayout();
+    _hasCheckedLayoutWidth = true;
+
+    // If the button bar is constrained by width and it overflows, set the
+    // buttons to align vertically. Otherwise, lay out the button bar
+    // horizontally.
+    if (size.width <= constraints.maxWidth) {
+      // A second performLayout is required to ensure that the original maximum
+      // width constraints are used. The original perform layout call assumes
+      // a maximum width constraint of infinity.
+      super.performLayout();
+    } else {
+      final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
+      RenderBox child;
+      double currentHeight = 0.0;
+      switch (verticalDirection) {
+        case VerticalDirection.down:
+          child = firstChild;
+          break;
+        case VerticalDirection.up:
+          child = lastChild;
+          break;
+      }
+
+      while (child != null) {
+        final FlexParentData childParentData = child.parentData as FlexParentData;
+
+        // Lay out the child with the button bar's original constraints, but
+        // with minimum width set to zero.
+        child.layout(childConstraints, parentUsesSize: true);
+
+        // Set the cross axis alignment for the column to match the main axis
+        // alignment for a row. For [MainAxisAligment.spaceAround],
+        // [MainAxisAligment.spaceBetween] and [MainAxisAlignment.spaceEvenly]
+        // cases, use [MainAxisAligmnent.start].
+        switch (textDirection) {
+          case TextDirection.ltr:
+            switch (mainAxisAlignment) {
+              case MainAxisAlignment.center:
+                final double midpoint = (constraints.maxWidth - child.size.width) / 2.0;
+                childParentData.offset = Offset(midpoint, currentHeight);
+                break;
+              case MainAxisAlignment.end:
+                childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
+                break;
+              default:
+                childParentData.offset = Offset(0, currentHeight);
+                break;
+            }
+            break;
+          case TextDirection.rtl:
+            switch (mainAxisAlignment) {
+              case MainAxisAlignment.center:
+                final double midpoint = constraints.maxWidth / 2.0 - child.size.width / 2.0;
+                childParentData.offset = Offset(midpoint, currentHeight);
+                break;
+              case MainAxisAlignment.end:
+                childParentData.offset = Offset(0, currentHeight);
+                break;
+              default:
+                childParentData.offset = Offset(constraints.maxWidth - child.size.width, currentHeight);
+                break;
+            }
+            break;
+        }
+        currentHeight += child.size.height;
+        switch (verticalDirection) {
+          case VerticalDirection.down:
+            child = childParentData.nextSibling;
+            break;
+          case VerticalDirection.up:
+            child = childParentData.previousSibling;
+            break;
+        }
+
+        if (overflowButtonSpacing != null && child != null)
+          currentHeight += overflowButtonSpacing;
+      }
+      size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
+    }
   }
 }

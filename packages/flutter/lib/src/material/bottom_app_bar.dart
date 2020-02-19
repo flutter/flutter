@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_app_bar_theme.dart';
+import 'elevation_overlay.dart';
 import 'material.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -20,7 +21,7 @@ import 'theme.dart';
 ///
 /// Typically used with a [Scaffold] and a [FloatingActionButton].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// ```dart
 /// Scaffold(
 ///   bottomNavigationBar: BottomAppBar(
@@ -34,9 +35,7 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [ComputeNotch] a function used for creating a notch in a shape.
-///  * [ScaffoldGeometry.floatingActionBarComputeNotch] the [ComputeNotch] used to
-///    make a notch for the [FloatingActionButton].
+///  * [NotchedShape] which calculates the notch for a notched [BottomAppBar].
 ///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
 ///  * [AppBar] for a toolbar that is shown at the top of the screen.
 class BottomAppBar extends StatefulWidget {
@@ -127,10 +126,13 @@ class _BottomAppBarState extends State<BottomAppBar> {
         notchMargin: widget.notchMargin,
       )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
+    final double elevation = widget.elevation ?? babTheme.elevation ?? _defaultElevation;
+    final Color color = widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor;
+    final Color effectiveColor = ElevationOverlay.applyOverlay(context, color, elevation);
     return PhysicalShape(
       clipper: clipper,
-      elevation: widget.elevation ?? babTheme.elevation ?? _defaultElevation,
-      color: widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor,
+      elevation: elevation,
+      color: effectiveColor,
       clipBehavior: widget.clipBehavior,
       child: Material(
         type: MaterialType.transparency,

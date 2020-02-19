@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,9 @@ import 'platform_channel.dart';
 
 /// Platform channels used by the Flutter system.
 class SystemChannels {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   SystemChannels._();
 
   /// A JSON [MethodChannel] for navigation.
@@ -22,25 +25,22 @@ class SystemChannels {
   ///  * `pushRoute`, which is called with a single string argument when the
   ///    operating system instructs the application to open a particular page.
   ///
-  /// See also:
-  ///
-  ///  * [WidgetsBindingObserver.didPopRoute] and
-  ///    [WidgetsBindingObserver.didPushRoute], which expose this channel's
-  ///    methods.
-  ///
   /// The following methods are used for the opposite direction data flow. The
   /// framework notifies the engine about the route changes.
   ///
   ///  * `routePushed`, which is called when a route is pushed. (e.g. A modal
-  ///  replaces the entire screen.)
+  ///    replaces the entire screen.)
   ///
   ///  * `routePopped`, which is called when a route is popped. (e.g. A dialog,
-  ///  such as time picker is closed.)
+  ///    such as time picker is closed.)
   ///
   ///  * `routeReplaced`, which is called when a route is replaced.
   ///
   /// See also:
   ///
+  ///  * [WidgetsBindingObserver.didPopRoute] and
+  ///    [WidgetsBindingObserver.didPushRoute], which expose this channel's
+  ///    methods.
   ///  * [Navigator] which manages transitions from one page to another.
   ///    [Navigator.push], [Navigator.pushReplacement], [Navigator.pop] and
   ///    [Navigator.replace], utilize this channel's methods to send route
@@ -159,6 +159,21 @@ class SystemChannels {
   ///    second argument is a [String] consisting of the stringification of one
   ///    of the values of the [TextInputAction] enum.
   ///
+  ///  * `TextInputClient.requestExistingInputState`: The embedding may have
+  ///    lost its internal state about the current editing client, if there is
+  ///    one. The framework should call `TextInput.setClient` and
+  ///    `TextInput.setEditingState` again with its most recent information. If
+  ///    there is no existing state on the framework side, the call should
+  ///    fizzle.
+  ///
+  ///  * `TextInputClient.onConnectionClosed`: The text input connection closed
+  ///    on the platform side. For example the application is moved to
+  ///    background or used closed the virtual keyboard. This method informs
+  ///    [TextInputClient] to clear connection and finalize editing.
+  ///    `TextInput.clearClient` and `TextInput.hide` is not called after
+  ///    clearing the connection since on the platform side the connection is
+  ///    already finalized.
+  ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel textInput = OptionalMethodChannel(
@@ -236,7 +251,9 @@ class SystemChannels {
 
   /// A [MethodChannel] for controlling platform views.
   ///
-  /// See also: [PlatformViewsService] for the available operations on this channel.
+  /// See also:
+  ///
+  ///  * [PlatformViewsService] for the available operations on this channel.
   static const MethodChannel platform_views = MethodChannel(
     'flutter/platform_views',
     StandardMethodCodec(),

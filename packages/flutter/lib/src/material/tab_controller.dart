@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,10 +8,13 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].
 ///
 /// The [index] property is the index of the selected tab and the [animation]
-/// represents the current scroll positions of the tab bar and the tar bar view.
+/// represents the current scroll positions of the tab bar and the tab bar view.
 /// The selected tab's index can be changed with [animateTo].
 ///
 /// A stateful widget that builds a [TabBar] or a [TabBarView] can create
@@ -23,7 +26,7 @@ import 'constants.dart';
 ///
 /// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
@@ -313,7 +316,7 @@ class DefaultTabController extends StatefulWidget {
     @required this.child,
   }) : assert(initialIndex != null),
        assert(length >= 0),
-       assert(initialIndex >= 0 && initialIndex < length),
+       assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
        super(key: key);
 
   /// The total number of tabs.
@@ -336,13 +339,15 @@ class DefaultTabController extends StatefulWidget {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// Typical usage:
+  /// {@tool snippet}
+  /// Typical usage is as follows:
   ///
   /// ```dart
-  /// TabController controller = DefaultTabBarController.of(context);
+  /// TabController controller = DefaultTabController.of(context);
   /// ```
+  /// {@end-tool}
   static TabController of(BuildContext context) {
-    final _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
+    final _TabControllerScope scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
     return scope?.controller;
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,10 +20,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'invert_colors_test.0.png',
-        version: null,
-      ),
+      matchesGoldenFile('invert_colors_test.0.png'),
     );
   }, skip: isBrowser);
 
@@ -41,10 +38,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile(
-        'invert_colors_test.1.png',
-        version: null,
-      ),
+      matchesGoldenFile('invert_colors_test.1.png'),
     );
   }, skip: isBrowser);
 }

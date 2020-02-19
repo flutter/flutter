@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -92,8 +92,7 @@ class FuchsiaAmberCtl {
 
   /// Instructs the pkg_resolver instance running on [device] to prefetch the
   /// package [packageName].
-  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server,
-                             String packageName) async {
+  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
     final String packageUrl = 'fuchsia-pkg://${server.name}/$packageName';
     final RunResult result = await device.shell('pkgctl resolve $packageUrl');
     return result.exitCode == 0;
@@ -103,7 +102,7 @@ class FuchsiaAmberCtl {
   /// the Fuchsia package server that it was accessing via [serverUrl].
   Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
     final String repoUrl = 'fuchsia-pkg://${server.name}';
-    final RunResult result = await device.shell('pkgctl repo remove --repo-url $repoUrl');
+    final RunResult result = await device.shell('pkgctl repo rm $repoUrl');
     return result.exitCode == 0;
   }
 }

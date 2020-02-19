@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,7 @@ import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
-import 'package:test_core/backend.dart';
+import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 const String ddcBootstrapExtension = '.dart.bootstrap.js';
 const String jsEntrypointExtension = '.dart.js';
@@ -35,21 +35,6 @@ const String jsModuleExtension = '.ddc.js';
 const String jsSourceMapExtension = '.ddc.js.map';
 const String kReleaseFlag = 'release';
 const String kProfileFlag = 'profile';
-
-// A minimum set of libraries to skip checks for to keep the examples compiling
-// until we make a decision on whether to support dart:io on the web.
-// See https://github.com/dart-lang/sdk/issues/35969
-// See https://github.com/flutter/flutter/issues/39998
-const Set<String> skipPlatformCheckPackages = <String>{
-  'flutter',
-  'flutter_test',
-  'flutter_driver',
-  'flutter_goldens',
-  'flutter_goldens_client',
-  'flutter_gallery',
-  'connectivity',
-  'video_player',
-};
 
 final DartPlatform flutterWebPlatform = DartPlatform.register('flutter_web', <String>[
   'async',
@@ -133,12 +118,12 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       'flutter_tools:ddc',
       <Builder Function(BuilderOptions)>[
         (BuilderOptions builderOptions) => KernelBuilder(
-              platformSdk: builderOptions.config['flutterWebSdk'],
+              platformSdk: builderOptions.config['flutterWebSdk'] as String,
               summaryOnly: true,
               sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
               outputExtension: ddcKernelExtension,
               platform: flutterWebPlatform,
-              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
+              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'] as String, 'libraries.json')),
               kernelTargetName: 'ddc',
               useIncrementalCompiler: true,
               trackUnusedInputs: true,
@@ -147,9 +132,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               useIncrementalCompiler: true,
               trackUnusedInputs: true,
               platform: flutterWebPlatform,
-              platformSdk: builderOptions.config['flutterWebSdk'],
+              platformSdk: builderOptions.config['flutterWebSdk'] as String,
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
-              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
+              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'] as String, 'libraries.json')),
             ),
       ],
       core.toAllPackages(),
@@ -160,9 +145,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     'flutter_tools:entrypoint',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebEntrypointBuilder(
-          options.config[kReleaseFlag] ?? false,
-          options.config[kProfileFlag] ?? false,
-          options.config['flutterWebSdk'],
+          options.config[kReleaseFlag] as bool ?? false,
+          options.config[kProfileFlag] as bool ?? false,
+          options.config['flutterWebSdk'] as String,
       ),
     ],
     core.toRoot(),
@@ -190,14 +175,14 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       defaultGenerateFor: const InputSet()),
 ];
 
-/// The entrypoint to this build script.
+/// The entry point to this build script.
 Future<void> main(List<String> args, [SendPort sendPort]) async {
   core.overrideGeneratedOutputDirectory('flutter_web');
   final int result = await build_runner.run(args, builders);
   sendPort?.send(result);
 }
 
-/// A ddc-only entrypoint builder that respects the Flutter target flag.
+/// A ddc-only entry point builder that respects the Flutter target flag.
 class FlutterWebTestEntrypointBuilder implements Builder {
   const FlutterWebTestEntrypointBuilder();
 
@@ -215,12 +200,15 @@ class FlutterWebTestEntrypointBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     log.info('building for target ${buildStep.inputId.path}');
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform,
-        skipPlatformCheckPackages: skipPlatformCheckPackages);
+    await bootstrapDdc(
+      buildStep,
+      platform: flutterWebPlatform,
+      skipPlatformCheck: true,
+    );
   }
 }
 
-/// A ddc-only entrypoint builder that respects the Flutter target flag.
+/// A ddc-only entry point builder that respects the Flutter target flag.
 class FlutterWebEntrypointBuilder implements Builder {
   const FlutterWebEntrypointBuilder(this.release, this.profile, this.flutterWebSdk);
 
@@ -241,12 +229,15 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform,
-        skipPlatformCheckPackages: skipPlatformCheckPackages);
+    await bootstrapDdc(
+      buildStep,
+      platform: flutterWebPlatform,
+      skipPlatformCheck: true,
+    );
   }
 }
 
-/// Bootstraps the test entrypoint.
+/// Bootstraps the test entry point.
 class FlutterWebTestBootstrapBuilder implements Builder {
   const FlutterWebTestBootstrapBuilder();
 
@@ -264,6 +255,7 @@ class FlutterWebTestBootstrapBuilder implements Builder {
     final String assetPath = id.pathSegments.first == 'lib'
         ? path.url.join('packages', id.package, id.path)
         : id.path;
+    final Uri testUrl = path.toUri(path.absolute(assetPath));
     final Metadata metadata = parseMetadata(
         assetPath, contents, Runtime.builtIn.map((Runtime runtime) => runtime.name).toSet());
 
@@ -274,8 +266,8 @@ import 'dart:html';
 import 'dart:js';
 
 import 'package:stream_channel/stream_channel.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
-import 'package:test_api/src/util/stack_trace_mapper.dart'; // ignore: implementation_imports
 import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
 import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
 
@@ -286,7 +278,9 @@ Future<void> main() async {
   // The following parameters are hard-coded in Flutter's test embedder. Since
   // we don't have an embedder yet this is the lowest-most layer we can put
   // this stuff in.
-  await ui.webOnlyInitializeEngine();
+  ui.debugEmulateFlutterTesterEnvironment = true;
+  await ui.webOnlyInitializePlatform();
+  webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$testUrl'));
   // TODO(flutterweb): remove need for dynamic cast.
   (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
   (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
@@ -294,12 +288,7 @@ Future<void> main() async {
 }
 
 void internalBootstrapBrowserTest(Function getMain()) {
-  var channel =
-      serializeSuite(getMain, hidePrints: false, beforeLoad: () async {
-    var serialized =
-        await suiteChannel("test.browser.mapper").stream.first as Map;
-    if (serialized == null) return;
-  });
+  var channel = serializeSuite(getMain, hidePrints: false);
   postMessageChannel().pipe(channel);
 }
 StreamChannel serializeSuite(Function getMain(),
@@ -340,22 +329,12 @@ StreamChannel postMessageChannel() {
   ]);
   return controller.foreign;
 }
-
-void setStackTraceMapper(StackTraceMapper mapper) {
-  var formatter = StackTraceFormatter.current;
-  if (formatter == null) {
-    throw StateError(
-        'setStackTraceMapper() may only be called within a test worker.');
-  }
-
-  formatter.configure(mapper: mapper);
-}
 ''');
     }
   }
 }
 
-/// A shell builder which generates the web specific entrypoint.
+/// A shell builder which generates the web specific entry point.
 class FlutterWebShellBuilder implements Builder {
   const FlutterWebShellBuilder({this.hasPlugins = false, this.initializePlatform = true});
 
@@ -372,13 +351,14 @@ class FlutterWebShellBuilder implements Builder {
       return;
     }
     final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
+    final String pluginRegistrantPath = _getPluginRegistrantPath(dartEntrypointId.path);
     if (hasPlugins) {
       await buildStep.writeAsString(outputId, '''
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import 'generated_plugin_registrant.dart';
+import '$pluginRegistrantPath';
 import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
 
 Future<void> main() async {
@@ -405,13 +385,20 @@ Future<void> main() async {
     }
   }
 
+  /// Gets the relative path to the generated plugin registrant from the app
+  /// app entrypoint.
+  String _getPluginRegistrantPath(String entrypoint) {
+    return path.url.relative('lib/generated_plugin_registrant.dart',
+        from: path.url.dirname(entrypoint));
+  }
+
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
     '.dart': <String>['_web_entrypoint.dart'],
   };
 }
 
-/// Returns whether or not [dartId] is an app entrypoint (basically, whether
+/// Returns whether or not [dartId] is an app entry point (basically, whether
 /// or not it has a `main` function).
 Future<bool> _isAppEntryPoint(AssetId dartId, AssetReader reader) async {
   assert(dartId.extension == '.dart');

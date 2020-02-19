@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,14 +8,17 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'binding.dart';
+import 'disposable_build_context.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'scroll_aware_image_provider.dart';
 import 'ticker_provider.dart';
 
 export 'package:flutter/painting.dart' show
@@ -63,7 +66,30 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// If the image is later used by an [Image] or [BoxDecoration] or [FadeInImage],
 /// it will probably be loaded faster. The consumer of the image does not need
 /// to use the same [ImageProvider] instance. The [ImageCache] will find the image
-/// as long as both images share the same key.
+/// as long as both images share the same key, and the image is held by the
+/// cache.
+///
+/// The cache may refuse to hold the image if it is disabled, the image is too
+/// large, or some other criteria implemented by a custom [ImageCache]
+/// implementation.
+///
+/// The [ImageCache] holds a reference to all images passed to [putIfAbsent] as
+/// long as their [ImageStreamCompleter] has at least one listener. This method
+/// will wait until the end of the frame after its future completes before
+/// releasing its own listener. This gives callers a chance to listen to the
+/// stream if necessary. A caller can determine if the image ended up in the
+/// cache by calling [ImageProvider.obtainCacheStatus]. If it is only held as
+/// [ImageCacheStatus.live], and the caller wishes to keep the resolved
+/// image in memory, the caller should immediately call `provider.resolve` and
+/// add a listener to the returned [ImageStream]. The image will remain pinned
+/// in memory at least until the caller removes its listener from the stream,
+/// even if it would not otherwise fit into the cache.
+///
+/// Callers should be cautious about pinning large images or a large number of
+/// images in memory, as this can result in running out of memory and being
+/// killed by the operating system. The lower the avilable physical memory, the
+/// more susceptible callers will be to running into OOM issues. These issues
+/// manifest as immediate process death, sometimes with no other error messages.
 ///
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
@@ -86,11 +112,20 @@ Future<void> precacheImage(
   ImageStreamListener listener;
   listener = ImageStreamListener(
     (ImageInfo image, bool sync) {
-      completer.complete();
-      stream.removeListener(listener);
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+      // Give callers until at least the end of the frame to subscribe to the
+      // image stream.
+      // See ImageCache._liveImages
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        stream.removeListener(listener);
+      });
     },
     onError: (dynamic exception, StackTrace stackTrace) {
-      completer.complete();
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
       stream.removeListener(listener);
       if (onError != null) {
         onError(exception, stackTrace);
@@ -207,7 +242,7 @@ typedef ImageLoadingBuilder = Widget Function(
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The default constructor can be used with any [ImageProvider], such as a
 /// [NetworkImage], to display an image from the internet.
 ///
@@ -220,7 +255,7 @@ typedef ImageLoadingBuilder = Widget Function(
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The [Image] Widget also provides several constructors to display different
 /// types of images for convenience. In this example, use the [Image.network]
 /// constructor to display an image from the internet.
@@ -231,6 +266,17 @@ typedef ImageLoadingBuilder = Widget Function(
 /// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
 /// ```
 /// {@end-tool}
+///
+/// The [Image.asset], [Image.network], [Image.file], and [Image.memory]
+/// constructors allow a custom decode size to be specified through
+/// [cacheWidth] and [cacheHeight] parameters. The engine will decode the
+/// image to the specified size, which is primarily intended to reduce the
+/// memory usage of [ImageCache].
+///
+/// In the case where a network image is used on the Web platform, the
+/// [cacheWidth] and [cacheHeight] parameters are ignored as the Web engine
+/// delegates image decoding of network images to the Web, which does not support
+/// custom decode sizes.
 ///
 /// See also:
 ///
@@ -305,6 +351,19 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image should be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
+  ///
+  /// In the case where the network image is on the Web platform, the [cacheWidth]
+  /// and [cacheHeight] parameters are ignored as the web engine delegates
+  /// image decoding to the web which does not support custom decode sizes.
+  //
+  // TODO(garyq): We should eventually support custom decoding of network images
+  // on Web as well, see https://github.com/flutter/flutter/issues/42789.
   Image.network(
     String src, {
     Key key,
@@ -325,10 +384,14 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-  }) : image = NetworkImage(src, scale: scale, headers: headers),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
@@ -349,6 +412,12 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   Image.file(
     File file, {
     Key key,
@@ -367,12 +436,16 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = FileImage(file, scale: scale),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
 
@@ -404,6 +477,12 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
+  ///
   /// The [name] and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
@@ -416,7 +495,7 @@ class Image extends StatefulWidget {
   /// which corresponds to bilinear interpolation, rather than the default
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Suppose that the project's `pubspec.yaml` file contains the following:
   ///
@@ -455,7 +534,7 @@ class Image extends StatefulWidget {
   /// must be provided. For instance, suppose a package called `my_icons` has
   /// `icons/heart.png` .
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// Then to display the image, use:
   ///
   /// ```dart
@@ -520,13 +599,18 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     String package,
     this.filterQuality = FilterQuality.low,
-  }) : image = scale != null
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, scale != null
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package),
+         : AssetImage(name, bundle: bundle, package: package)
+       ),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
@@ -548,6 +632,12 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   Image.memory(
     Uint8List bytes, {
     Key key,
@@ -566,11 +656,15 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = MemoryImage(bytes, scale: scale),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// The image to display.
@@ -623,7 +717,7 @@ class Image extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool snippet --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material}
   ///
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
@@ -641,7 +735,7 @@ class Image extends StatefulWidget {
   ///       borderRadius: BorderRadius.circular(20),
   ///     ),
   ///     child: Image.network(
-  ///       'https://example.com/image.jpg',
+  ///       'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
   ///       frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
   ///         if (wasSynchronouslyLoaded) {
   ///           return child;
@@ -658,11 +752,6 @@ class Image extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// Run against a real-world image, the previous example renders the following
-  /// image.
-  ///
-  /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/frame_builder_image.mp4}
   final ImageFrameBuilder frameBuilder;
 
   /// A builder that specifies the widget to display to the user while an image
@@ -694,7 +783,7 @@ class Image extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.image.chainedBuildersExample}
   ///
-  /// {@tool snippet --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material}
   ///
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.
@@ -726,9 +815,9 @@ class Image extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// Run against a real-world image, the previous example renders the following
-  /// loading progress indicator while the image loads before rendering the
-  /// completed image.
+  /// Run against a real-world image on a slow network, the previous example
+  /// renders the following loading progress indicator while the image loads
+  /// before rendering the completed image.
   ///
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
   final ImageLoadingBuilder loadingBuilder;
@@ -887,11 +976,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   bool _invertColors;
   int _frameNumber;
   bool _wasSynchronouslyLoaded;
+  DisposableBuildContext<State<Image>> _scrollAwareContext;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scrollAwareContext = DisposableBuildContext<State<Image>>(this);
   }
 
   @override
@@ -899,6 +990,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     assert(_imageStream != null);
     WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
+    _scrollAwareContext.dispose();
     super.dispose();
   }
 
@@ -947,8 +1039,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _resolveImage() {
+    final ScrollAwareImageProvider provider = ScrollAwareImageProvider<dynamic>(
+      context: _scrollAwareContext,
+      imageProvider: widget.image,
+    );
     final ImageStream newStream =
-      widget.image.resolve(createLocalImageConfiguration(
+      provider.resolve(createLocalImageConfiguration(
         context,
         size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
       ));

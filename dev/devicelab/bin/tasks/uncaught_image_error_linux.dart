@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,7 +37,7 @@ Future<void> main() async {
         .transform(utf8.decoder)
         .transform(const LineSplitter());
 
-      await for (String line in lines) {
+      await for (final String line in lines) {
         print(line);
         if (line.contains('ERROR caught by framework')) {
           passed = true;

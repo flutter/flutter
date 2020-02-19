@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -61,7 +61,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
@@ -98,10 +98,10 @@ class ViewportOffsetSpy extends ViewportOffset {
 
   @override
   Future<void> animateTo(
-      double to, {
-        @required Duration duration,
-        @required Curve curve,
-      }) async {
+    double to, {
+    @required Duration duration,
+    @required Curve curve,
+  }) async {
     // Do nothing, not required in test.
   }
 
@@ -287,7 +287,7 @@ void main() {
     );
     layout(root);
 
-    final SliverMultiBoxAdaptorParentData parentData = a.parentData;
+    final SliverMultiBoxAdaptorParentData parentData = a.parentData as SliverMultiBoxAdaptorParentData;
     parentData.layoutOffset = 0.001;
 
     root.offset = ViewportOffset.fixed(900.0);
@@ -322,7 +322,7 @@ void main() {
     );
     layout(root);
 
-    final SliverMultiBoxAdaptorParentData parentData = a.parentData;
+    final SliverMultiBoxAdaptorParentData parentData = a.parentData as SliverMultiBoxAdaptorParentData;
     // Simulate double precision error.
     parentData.layoutOffset = -0.0000000000001;
 

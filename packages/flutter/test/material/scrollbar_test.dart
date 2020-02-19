@@ -1,7 +1,9 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,9 +22,9 @@ class TestCanvas implements Canvas {
 }
 
 Widget _buildBoilerplate({
-    TextDirection textDirection = TextDirection.ltr,
-    EdgeInsets padding = EdgeInsets.zero,
-    Widget child,
+  TextDirection textDirection = TextDirection.ltr,
+  EdgeInsets padding = EdgeInsets.zero,
+  Widget child,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -34,7 +36,7 @@ Widget _buildBoilerplate({
 }
 
 void main() {
-  testWidgets('Scrollbar doesn\'t show when tapping list', (WidgetTester tester) async {
+  testWidgets("Scrollbar doesn't show when tapping list", (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildBoilerplate(
         child: Center(
@@ -152,5 +154,51 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.byType(Scrollbar), paints..rrect());
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(viewWithScroll(TargetPlatform.macOS));
+    await gesture.down(
+      tester.getCenter(find.byType(SingleChildScrollView)),
+    );
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(Scrollbar), paints..rrect());
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
+
+  testWidgets('Scrollbar passes controller to CupertinoScrollbar', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    Widget viewWithScroll(TargetPlatform platform) {
+      return _buildBoilerplate(
+        child: Theme(
+          data: ThemeData(
+            platform: platform
+          ),
+          child: Scrollbar(
+            controller: controller,
+            child: const SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll(debugDefaultTargetPlatformOverride));
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView))
+    );
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(CupertinoScrollbar), paints..rrect());
+    final CupertinoScrollbar scrollbar = find.byType(CupertinoScrollbar).evaluate().first.widget as CupertinoScrollbar;
+    expect(scrollbar.controller, isNotNull);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
 }

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -55,11 +55,11 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
-  final bool silent = args['silent'];
-  final String localEngine = args['local-engine'];
-  final String localEngineSrcPath = args['local-engine-src-path'];
+  final bool silent = args['silent'] as bool;
+  final String localEngine = args['local-engine'] as String;
+  final String localEngineSrcPath = args['local-engine-src-path'] as String;
 
-  for (String taskName in _taskNames) {
+  for (final String taskName in _taskNames) {
     section('Running task "$taskName"');
     final Map<String, dynamic> result = await runTask(
       taskName,
@@ -72,9 +72,9 @@ Future<void> main(List<String> rawArgs) async {
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
 
-    if (!result['success']) {
+    if (!(result['success'] as bool)) {
       exitCode = 1;
-      if (args['exit']) {
+      if (args['exit'] as bool) {
         return;
       }
     }
@@ -94,10 +94,10 @@ void addTasks({
     tasks.removeRange(0, index);
   }
   // Only start skipping if user specified a task to continue from
-  final String stage = args['stage'];
-  for (ManifestTask task in tasks) {
+  final String stage = args['stage'] as String;
+  for (final ManifestTask task in tasks) {
     final bool isQualifyingStage = stage == null || task.stage == stage;
-    final bool isQualifyingHost = !args['match-host-platform'] || task.isSupportedByHost();
+    final bool isQualifyingHost = !(args['match-host-platform'] as bool) || task.isSupportedByHost();
     if (isQualifyingHost && isQualifyingStage) {
       taskNames.add(task.name);
     }
@@ -116,7 +116,7 @@ final ArgParser _argParser = ArgParser()
         '\n'
         'This option may be repeated to specify multiple tasks.',
     callback: (List<String> value) {
-      for (String nameOrPath in value) {
+      for (final String nameOrPath in value) {
         final List<String> fragments = path.split(nameOrPath);
         final bool isDartFile = fragments.last.endsWith('.dart');
 
@@ -157,7 +157,7 @@ final ArgParser _argParser = ArgParser()
   ..addFlag(
     'list',
     abbr: 'l',
-    help: 'Don\'t actually run the tasks, but list out the tasks that would\n'
+    help: "Don't actually run the tasks, but list out the tasks that would\n"
           'have been run, in the order they would have run.',
   )
   ..addOption(
@@ -171,7 +171,7 @@ final ArgParser _argParser = ArgParser()
     defaultsTo: true,
     help: 'Only run tests that match the host platform (e.g. do not run a\n'
           'test with a `required_agent_capabilities` value of "mac/android"\n'
-          'on a windows host). Each test publishes its'
+          'on a windows host). Each test publishes its '
           '`required_agent_capabilities`\nin the `manifest.yaml` file.',
   )
   ..addOption(

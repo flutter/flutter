@@ -1,4 +1,9 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
+import 'package:flutter_gallery/gallery/app.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/demo/all.dart';
 import 'package:flutter_gallery/gallery/themes.dart';
@@ -45,7 +50,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: ChipDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
-    });
+    }, skip: true); // TODO(gspencergoog): Stop skipping when issue is fixed. https://github.com/flutter/flutter/issues/42455
 
     testWidgets('data_table_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -751,5 +756,36 @@ void main() {
         handle.dispose();
       });
     }
+  });
+
+  group('Gallery home page meets text contrast guidelines', () {
+    testWidgets('options menu', (WidgetTester tester) async {
+      await tester.pumpWidget(const GalleryApp(testMode: true));
+      await tester.tap(find.byTooltip('Toggle options page'));
+      await tester.pumpAndSettle();
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    });
+
+    testWidgets('options menu - dark theme', (WidgetTester tester) async {
+      await tester.pumpWidget(const GalleryApp(testMode: true));
+      await tester.tap(find.byTooltip('Toggle options page'));
+      await tester.pumpAndSettle();
+
+      // Toggle dark mode.
+      final Finder themeToggleContainer = find.ancestor(
+        of: find.text('Theme'),
+        matching: find.byType(Container),
+      );
+      final Finder themeMenuButton = find.descendant(
+        of: themeToggleContainer,
+        matching: find.byIcon(Icons.arrow_drop_down),
+      );
+      await tester.tap(themeMenuButton);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Dark'));
+      await tester.pumpAndSettle();
+
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    });
   });
 }

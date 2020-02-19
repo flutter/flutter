@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,14 +34,14 @@ class _LinkTextSpan extends TextSpan {
 
 void showGalleryAboutDialog(BuildContext context) {
   final ThemeData themeData = Theme.of(context);
-  final TextStyle aboutTextStyle = themeData.textTheme.body2;
-  final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
+  final TextStyle aboutTextStyle = themeData.textTheme.bodyText1;
+  final TextStyle linkStyle = themeData.textTheme.bodyText1.copyWith(color: themeData.accentColor);
 
   showAboutDialog(
     context: context,
     applicationVersion: 'January 2019',
     applicationIcon: const FlutterLogo(),
-    applicationLegalese: '© 2019 The Chromium Authors',
+    applicationLegalese: '© 2014 The Flutter Authors',
     children: <Widget>[
       Padding(
         padding: const EdgeInsets.only(top: 24.0),

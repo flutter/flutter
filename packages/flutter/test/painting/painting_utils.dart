@@ -1,4 +1,4 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,7 +14,7 @@ class PaintingBindingSpy extends BindingBase with ServicesBinding, PaintingBindi
   int get instantiateImageCodecCalledCount => counter;
 
   @override
-  Future<ui.Codec> instantiateImageCodec(Uint8List list) {
+  Future<ui.Codec> instantiateImageCodec(Uint8List list, {int cacheWidth, int cacheHeight}) {
     counter++;
     return ui.instantiateImageCodec(list);
   }

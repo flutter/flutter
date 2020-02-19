@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -233,8 +233,8 @@ class ProxyAnimation extends Animation<double>
   @override
   String toString() {
     if (parent == null)
-      return '$runtimeType(null; ${super.toStringDetails()} ${value.toStringAsFixed(3)})';
-    return '$parent\u27A9$runtimeType';
+      return '${objectRuntimeType(this, 'ProxyAnimation')}(null; ${super.toStringDetails()} ${value.toStringAsFixed(3)})';
+    return '$parent\u27A9${objectRuntimeType(this, 'ProxyAnimation')}';
   }
 }
 
@@ -310,7 +310,7 @@ class ReverseAnimation extends Animation<double>
 
   @override
   String toString() {
-    return '$parent\u27AA$runtimeType';
+    return '$parent\u27AA${objectRuntimeType(this, 'ReverseAnimation')}';
   }
 }
 
@@ -327,7 +327,7 @@ class ReverseAnimation extends Animation<double>
 ///
 /// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following code snippet shows how you can apply a curve to a linear
 /// animation produced by an [AnimationController] `controller`.
@@ -339,7 +339,7 @@ class ReverseAnimation extends Animation<double>
 /// );
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This second code snippet shows how to apply a different curve in the forward
 /// direction than in the reverse direction. This can't be done using a
@@ -439,12 +439,14 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
         final double transformedValue = activeCurve.transform(t);
         final double roundedTransformedValue = transformedValue.round().toDouble();
         if (roundedTransformedValue != t) {
-          throw FlutterError(
-            'Invalid curve endpoint at $t.\n'
-            'Curves must map 0.0 to near zero and 1.0 to near one but '
-            '${activeCurve.runtimeType} mapped $t to $transformedValue, which '
-            'is near $roundedTransformedValue.'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Invalid curve endpoint at $t.'),
+            ErrorDescription(
+              'Curves must map 0.0 to near zero and 1.0 to near one but '
+              '${activeCurve.runtimeType} mapped $t to $transformedValue, which '
+              'is near $roundedTransformedValue.'
+            )
+          ]);
         }
         return true;
       }());
@@ -592,8 +594,8 @@ class TrainHoppingAnimation extends Animation<double>
   @override
   String toString() {
     if (_nextTrain != null)
-      return '$currentTrain\u27A9$runtimeType(next: $_nextTrain)';
-    return '$currentTrain\u27A9$runtimeType(no next)';
+      return '$currentTrain\u27A9${objectRuntimeType(this, 'TrainHoppingAnimation')}(next: $_nextTrain)';
+    return '$currentTrain\u27A9${objectRuntimeType(this, 'TrainHoppingAnimation')}(no next)';
   }
 }
 
@@ -653,7 +655,7 @@ abstract class CompoundAnimation<T> extends Animation<T>
 
   @override
   String toString() {
-    return '$runtimeType($first, $next)';
+    return '${objectRuntimeType(this, 'CompoundAnimation')}($first, $next)';
   }
 
   AnimationStatus _lastStatus;

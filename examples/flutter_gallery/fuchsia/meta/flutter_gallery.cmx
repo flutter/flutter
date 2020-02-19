@@ -1,0 +1,18 @@
+{
+    "program": {
+        "data": "data/flutter_gallery"
+    },
+    "sandbox": {
+        "services": [
+            "fuchsia.cobalt.LoggerFactory",
+            "fuchsia.fonts.Provider",
+            "fuchsia.logger.LogSink",
+            "fuchsia.modular.Clipboard",
+            "fuchsia.sys.Environment",
+            "fuchsia.sys.Launcher",
+            "fuchsia.ui.input.ImeService",
+            "fuchsia.ui.policy.Presenter",
+            "fuchsia.ui.scenic.Scenic"
+        ]
+    }
+}

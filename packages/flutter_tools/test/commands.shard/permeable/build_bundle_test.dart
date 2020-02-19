@@ -1,17 +1,21 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,7 +27,7 @@ void main() {
   MockBundleBuilder mockBundleBuilder;
 
   setUp(() {
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+    tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
 
     mockBundleBuilder = MockBundleBuilder();
     when(
@@ -44,6 +48,7 @@ void main() {
         extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),
         fileSystemRoots: anyNamed('fileSystemRoots'),
         fileSystemScheme: anyNamed('fileSystemScheme'),
+        treeShakeIcons: anyNamed('treeShakeIcons'),
       ),
     ).thenAnswer((_) => Future<void>.value());
   });
@@ -59,6 +64,7 @@ void main() {
       'bundle',
       ...?arguments,
       '--target=$projectPath/lib/main.dart',
+      '--no-pub'
     ]);
     return command;
   }
@@ -71,7 +77,7 @@ void main() {
 
     expect(await command.usageValues,
         containsPair(CustomDimensions.commandBuildBundleIsModule, 'true'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('bundle getUsage indicate that project is not a module', () async {
     final String projectPath = await createProject(tempDir,
@@ -81,7 +87,7 @@ void main() {
 
     expect(await command.usageValues,
         containsPair(CustomDimensions.commandBuildBundleIsModule, 'false'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('bundle getUsage indicate the target platform', () async {
     final String projectPath = await createProject(tempDir,
@@ -91,12 +97,12 @@ void main() {
 
     expect(await command.usageValues,
         containsPair(CustomDimensions.commandBuildBundleTargetPlatform, 'android-arm'));
-  }, timeout: allowForCreateFlutterProject);
+  });
 
   testUsingContext('bundle fails to build for Windows if feature is disabled', () async {
-    fs.file('lib/main.dart').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync(recursive: true);
-    fs.file('.packages').createSync(recursive: true);
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync(recursive: true);
+    globals.fs.file('.packages').createSync(recursive: true);
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
         ..bundleBuilder = MockBundleBuilder());
 
@@ -104,16 +110,17 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=windows-x64',
-    ]), throwsA(isInstanceOf<ToolExit>()));
+    ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
   });
 
   testUsingContext('bundle fails to build for Linux if feature is disabled', () async {
-    fs.file('lib/main.dart').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
         ..bundleBuilder = MockBundleBuilder());
 
@@ -121,16 +128,17 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=linux-x64',
-    ]), throwsA(isInstanceOf<ToolExit>()));
+    ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
   testUsingContext('bundle fails to build for macOS if feature is disabled', () async {
-    fs.file('lib/main.dart').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
         ..bundleBuilder = MockBundleBuilder());
 
@@ -138,16 +146,17 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=darwin-x64',
-    ]), throwsA(isInstanceOf<ToolExit>()));
+    ]), throwsToolExit());
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('bundle can build for Windows if feature is enabled', () async {
-    fs.file('lib/main.dart').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
         ..bundleBuilder = MockBundleBuilder());
 
@@ -158,13 +167,14 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
   testUsingContext('bundle can build for Linux if feature is enabled', () async {
-    fs.file('lib/main.dart').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
         ..bundleBuilder = MockBundleBuilder());
 
@@ -175,13 +185,14 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
   testUsingContext('bundle can build for macOS if feature is enabled', () async {
-    fs.file('lib/main.dart').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand()
         ..bundleBuilder = MockBundleBuilder());
 
@@ -192,8 +203,41 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('passes track widget creation through', () async {
+    globals.fs.file('lib/main.dart').createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
+    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      final Environment environment = invocation.positionalArguments[1] as Environment;
+      expect(environment.defines, <String, String>{
+        kTargetFile: globals.fs.path.join('lib', 'main.dart'),
+        kBuildMode: 'debug',
+        kTargetPlatform: 'android-arm',
+        kTrackWidgetCreation: 'true',
+        kIconTreeShakerFlag: null,
+      });
+
+      return BuildResult(success: true);
+    });
+
+    await runner.run(<String>[
+      'bundle',
+      '--no-pub',
+      '--debug',
+      '--target-platform=android-arm',
+      '--track-widget-creation'
+    ]);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => MockBuildSystem(),
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
 
 class MockBundleBuilder extends Mock implements BundleBuilder {}
+class MockBuildSystem extends Mock implements BuildSystem {}

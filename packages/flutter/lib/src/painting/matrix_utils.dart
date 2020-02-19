@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,6 +11,9 @@ import 'basic_types.dart';
 
 /// Utility functions for working with matrices.
 class MatrixUtils {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   MatrixUtils._();
 
   /// Returns the given [transform] matrix as an [Offset], if the matrix is
@@ -164,9 +167,7 @@ class MatrixUtils {
   }
 
   static Float64List _minMax;
-  static void _accumulate(Float64List m, double x, double y,
-      bool first, bool isAffine)
-  {
+  static void _accumulate(Float64List m, double x, double y, bool first, bool isAffine) {
     final double w = isAffine ? 1.0 : 1.0 / (m[3] * x + m[7] * y + m[15]);
     final double tx = (m[0] * x + m[4] * y + m[12]) * w;
     final double ty = (m[1] * x + m[5] * y + m[13]) * w;
@@ -509,11 +510,11 @@ class MatrixUtils {
 
     // Model matrix by first translating the object from the origin of the world
     // by radius in the z axis and then rotating against the world.
-    result *= (
+    result = result * ((
         orientation == Axis.horizontal
             ? Matrix4.rotationY(angle)
             : Matrix4.rotationX(angle)
-    ) * Matrix4.translationValues(0.0, 0.0, radius);
+    ) * Matrix4.translationValues(0.0, 0.0, radius)) as Matrix4;
 
     // Essentially perspective * view * model.
     return result;

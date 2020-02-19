@@ -1,9 +1,13 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
+
+import 'base/common.dart';
+import 'base/file_system.dart';
+import 'globals.dart' as globals;
 
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
@@ -17,18 +21,20 @@ abstract class PluginPlatform {
 /// The required fields include: [name] of the plugin, [package] of the plugin and
 /// the [pluginClass] that will be the entry point to the plugin's native code.
 class AndroidPlugin extends PluginPlatform {
-  const AndroidPlugin({
+  AndroidPlugin({
     @required this.name,
     @required this.package,
     @required this.pluginClass,
+    @required this.pluginPath,
   });
 
-  factory AndroidPlugin.fromYaml(String name, YamlMap yaml) {
+  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath) {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
-      package: yaml['package'],
-      pluginClass: yaml['pluginClass'],
+      package: yaml['package'] as String,
+      pluginClass: yaml['pluginClass'] as String,
+      pluginPath: pluginPath,
     );
   }
 
@@ -41,9 +47,17 @@ class AndroidPlugin extends PluginPlatform {
 
   static const String kConfigKey = 'android';
 
+  /// The plugin name defined in pubspec.yaml.
   final String name;
+
+  /// The plugin package name defined in pubspec.yaml.
   final String package;
+
+  /// The plugin main class defined in pubspec.yaml.
   final String pluginClass;
+
+  /// The absolute path to the plugin in the pub cache.
+  final String pluginPath;
 
   @override
   Map<String, dynamic> toMap() {
@@ -51,7 +65,81 @@ class AndroidPlugin extends PluginPlatform {
       'name': name,
       'package': package,
       'class': pluginClass,
+      // Mustache doesn't support complex types.
+      'supportsEmbeddingV1': _supportedEmbedings.contains('1'),
+      'supportsEmbeddingV2': _supportedEmbedings.contains('2'),
     };
+  }
+
+  Set<String> _cachedEmbeddingVersion;
+
+  /// Returns the version of the Android embedding.
+  Set<String> get _supportedEmbedings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
+
+  Set<String> _getSupportedEmbeddings() {
+    assert(pluginPath != null);
+    final Set<String> supportedEmbeddings = <String>{};
+    final String baseMainPath = globals.fs.path.join(
+      pluginPath,
+      'android',
+      'src',
+      'main',
+    );
+
+    final List<String> mainClassCandidates = <String>[
+      globals.fs.path.join(
+        baseMainPath,
+        'java',
+        package.replaceAll('.', globals.fs.path.separator),
+        '$pluginClass.java',
+      ),
+      globals.fs.path.join(
+        baseMainPath,
+        'kotlin',
+        package.replaceAll('.', globals.fs.path.separator),
+        '$pluginClass.kt',
+      )
+    ];
+
+    File mainPluginClass;
+    bool mainClassFound = false;
+    for (final String mainClassCandidate in mainClassCandidates) {
+      mainPluginClass = globals.fs.file(mainClassCandidate);
+      if (mainPluginClass.existsSync()) {
+        mainClassFound = true;
+        break;
+      }
+    }
+    if (!mainClassFound) {
+      assert(mainClassCandidates.length <= 2);
+      throwToolExit(
+        "The plugin `$name` doesn't have a main class defined in ${mainClassCandidates.join(' or ')}. "
+        "This is likely to due to an incorrect `androidPackage: $package` or `mainClass` entry in the plugin's pubspec.yaml.\n"
+        'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
+        'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile. '
+      );
+    }
+
+    String mainClassContent;
+    try {
+      mainClassContent = mainPluginClass.readAsStringSync();
+    } on FileSystemException {
+      throwToolExit(
+        "Couldn't read file ${mainPluginClass.path} even though it exists. "
+        'Please verify that this file has read permission and try again.'
+      );
+    }
+    if (mainClassContent
+        .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
+      supportedEmbeddings.add('2');
+    } else {
+      supportedEmbeddings.add('1');
+    }
+    if (mainClassContent.contains('PluginRegistry')
+        && mainClassContent.contains('registerWith')) {
+      supportedEmbeddings.add('1');
+    }
+    return supportedEmbeddings;
   }
 }
 
@@ -71,7 +159,7 @@ class IOSPlugin extends PluginPlatform {
     return IOSPlugin(
       name: name,
       classPrefix: '',
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -115,7 +203,7 @@ class MacOSPlugin extends PluginPlatform {
     assert(validate(yaml));
     return MacOSPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -154,7 +242,7 @@ class WindowsPlugin extends PluginPlatform {
     assert(validate(yaml));
     return WindowsPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -194,7 +282,7 @@ class LinuxPlugin extends PluginPlatform {
     assert(validate(yaml));
     return LinuxPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -236,8 +324,8 @@ class WebPlugin extends PluginPlatform {
     assert(validate(yaml));
     return WebPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
-      fileName: yaml['fileName'],
+      pluginClass: yaml['pluginClass'] as String,
+      fileName: yaml['fileName'] as String,
     );
   }
 

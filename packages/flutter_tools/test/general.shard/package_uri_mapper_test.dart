@@ -1,10 +1,13 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:typed_data';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -29,9 +32,9 @@ void main() {
   setUp(() {
     mockFileSystem = MockFileSystem();
     mockFile = MockFile();
-    when(mockFileSystem.path).thenReturn(fs.path);
+    when(mockFileSystem.path).thenReturn(globals.fs.path);
     when(mockFileSystem.file(any)).thenReturn(mockFile);
-    when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(packagesContents));
+    when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(packagesContents) as Uint8List);
   });
 
   testUsingContext('Can map main.dart to correct package', () async {
@@ -40,6 +43,7 @@ void main() {
         'package:example/main.dart');
   }, overrides: <Type, Generator>{
     FileSystem: () => mockFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('single-root maps file from other package to null', () async {
@@ -47,6 +51,7 @@ void main() {
     expect(packageUriMapper.map('/xml/lib/xml.dart'), null);
   }, overrides: <Type, Generator>{
     FileSystem: () => mockFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('single-root maps non-main file from same package', () async {
@@ -55,15 +60,16 @@ void main() {
         'package:example/src/foo.dart');
   }, overrides: <Type, Generator>{
     FileSystem: () => mockFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('multi-root maps main file from same package on multiroot scheme', () async {
     final MockFileSystem mockFileSystem = MockFileSystem();
     final MockFile mockFile = MockFile();
-    when(mockFileSystem.path).thenReturn(fs.path);
+    when(mockFileSystem.path).thenReturn(globals.fs.path);
     when(mockFileSystem.file(any)).thenReturn(mockFile);
     when(mockFile.readAsBytesSync())
-        .thenReturn(utf8.encode(multiRootPackagesContents));
+        .thenReturn(utf8.encode(multiRootPackagesContents) as Uint8List);
     final PackageUriMapper packageUriMapper = PackageUriMapper(
         '/example/lib/main.dart',
         '.packages',
@@ -73,6 +79,7 @@ void main() {
         'package:example/main.dart');
   }, overrides: <Type, Generator>{
     FileSystem: () => mockFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
 

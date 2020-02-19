@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -247,7 +247,7 @@ class _ResultCard extends StatelessWidget {
               Text(title),
               Text(
                 '$integer',
-                style: theme.textTheme.headline.copyWith(fontSize: 72.0),
+                style: theme.textTheme.headline5.copyWith(fontSize: 72.0),
               ),
             ],
           ),
@@ -276,11 +276,11 @@ class _SuggestionList extends StatelessWidget {
           title: RichText(
             text: TextSpan(
               text: suggestion.substring(0, query.length),
-              style: theme.textTheme.subhead.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.subtitle1.copyWith(fontWeight: FontWeight.bold),
               children: <TextSpan>[
                 TextSpan(
                   text: suggestion.substring(query.length),
-                  style: theme.textTheme.subhead,
+                  style: theme.textTheme.subtitle1,
                 ),
               ],
             ),

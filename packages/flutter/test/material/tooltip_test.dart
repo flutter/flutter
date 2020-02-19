@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -521,7 +521,7 @@ void main() {
     expect(textStyle.color, Colors.white);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
-    expect(textStyle.debugLabel, '((englishLike body1 2014).merge(blackMountainView body1)).copyWith');
+    expect(textStyle.debugLabel, '((englishLike body1 2014).merge(blackMountainView bodyText2)).copyWith');
   });
 
   testWidgets('Default tooltip message textStyle - dark', (WidgetTester tester) async {
@@ -547,7 +547,7 @@ void main() {
     expect(textStyle.color, Colors.black);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
-    expect(textStyle.debugLabel, '((englishLike body1 2014).merge(whiteMountainView body1)).copyWith');
+    expect(textStyle.debugLabel, '((englishLike body1 2014).merge(whiteMountainView bodyText2)).copyWith');
   });
 
   testWidgets('Custom tooltip message textStyle', (WidgetTester tester) async {
@@ -574,6 +574,39 @@ void main() {
     expect(textStyle.color, Colors.orange);
     expect(textStyle.fontFamily, null);
     expect(textStyle.decoration, TextDecoration.underline);
+  });
+
+  testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/40702.
+    Widget buildApp(String text, TextDirection textDirection) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: Center(
+            child: Tooltip(
+              message: text,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: Colors.green[500],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(tooltipText, TextDirection.rtl));
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsOneWidget);
+    RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(tooltipRenderParagraph.textDirection, TextDirection.rtl);
+
+    await tester.pumpWidget(buildApp(tooltipText, TextDirection.ltr));
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsOneWidget);
+    tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(tooltipRenderParagraph.textDirection, TextDirection.ltr);
   });
 
   testWidgets('Tooltip overlay wrapped with a non-fallback DefaultTextStyle widget', (WidgetTester tester) async {
@@ -1103,5 +1136,5 @@ void main() {
 SemanticsNode findDebugSemantics(RenderObject object) {
   if (object.debugSemantics != null)
     return object.debugSemantics;
-  return findDebugSemantics(object.parent);
+  return findDebugSemantics(object.parent as RenderObject);
 }
