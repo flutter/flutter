@@ -349,6 +349,16 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// True if this field has any validation errors.
   bool get hasError => _errorText != null;
 
+  /// True if the current value is valid.
+  ///
+  /// This will not set [errorText] or [hasError] and it will not update
+  /// error display.
+  ///
+  /// See also:
+  ///
+  ///  * [validate], which may update [errorText] and [hasError].
+  bool get isValid => widget.validator?.call(_value) == null;
+
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
     if (widget.onSaved != null)
@@ -365,6 +375,11 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
   /// were no errors.
+  ///
+  /// See also:
+  ///
+  ///  * [isValid], which passively gets the validity without setting
+  ///    [errorText] or [hasError].
   bool validate() {
     setState(() {
       _validate();
