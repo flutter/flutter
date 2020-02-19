@@ -45,6 +45,9 @@ class WebAssetServer implements AssetReader {
 
   /// Start the web asset server on a [hostname] and [port].
   ///
+  /// [testMode] will disable the shelf static service, which may be required
+  /// for hermetic tests. By default this value is `false`.
+  ///
   /// Unhandled exceptions will throw a [ToolExit] with the error and stack
   /// trace.
   static Future<WebAssetServer> start(
@@ -314,7 +317,12 @@ class ConnectionResult {
   final DebugConnection debugConnection;
 }
 
+/// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
+  /// Create a new [WebDevFS] instance.
+  ///
+  /// [testMode] will disable the shelf static service, which may be required
+  /// for hermetic tests. By default this value is `false`.
   WebDevFS({
     @required this.hostname,
     @required this.port,
