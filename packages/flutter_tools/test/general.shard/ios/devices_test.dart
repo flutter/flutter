@@ -926,6 +926,7 @@ void main() {
         }, overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeIosDoctorProvider(),
           IMobileDevice: () => mockIMobileDevice,
+          Platform: () => macPlatform,
           ProcessManager: () => mockProcessManager,
         });
       }
