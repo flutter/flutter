@@ -16,16 +16,14 @@ class BenchCardInfiniteScroll extends WidgetRecorder {
   static const String benchmarkName = 'bench_card_infinite_scroll';
 
   @override
-  Widget createWidget() {
-    return MaterialApp(
-      title: 'Infinite Card Scroll Benchmark',
-      home: _InfiniteScrollCards(),
-    );
-  }
+  Widget createWidget() => const MaterialApp(
+        title: 'Infinite Card Scroll Benchmark',
+        home: _InfiniteScrollCards(),
+      );
 }
 
 class _InfiniteScrollCards extends StatefulWidget {
-  _InfiniteScrollCards({Key key}) : super(key: key);
+  const _InfiniteScrollCards({Key key}) : super(key: key);
 
   @override
   State<_InfiniteScrollCards> createState() => _InfiniteScrollCardsState();
@@ -35,7 +33,7 @@ class _InfiniteScrollCardsState extends State<_InfiniteScrollCards> {
   ScrollController scrollController;
 
   double offset;
-  static const double distance = 500;
+  static const double distance = 1000;
   static const Duration stepDuration = Duration(seconds: 1);
 
   @override
