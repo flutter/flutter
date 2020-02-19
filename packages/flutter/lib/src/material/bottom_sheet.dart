@@ -557,7 +557,7 @@ class BottomSheetSuspendedCurve extends Curve {
 /// dismissed when user taps on the scrim.
 ///
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
-/// dragged up and down and dismissed by swiping downards.
+/// dragged up and down and dismissed by swiping downwards.
 ///
 /// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
 /// parameters can be passed in to customize the appearance and behavior of
