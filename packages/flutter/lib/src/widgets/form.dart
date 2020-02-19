@@ -182,7 +182,7 @@ class FormState extends State<Form> {
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its
-  /// [FormField.initialState].
+  /// [FormField.initialValue].
   ///
   /// The [Form.onChanged] callback will be called.
   ///
