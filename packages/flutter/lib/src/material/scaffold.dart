@@ -1115,9 +1115,10 @@ class Scaffold extends StatefulWidget {
   /// To close the drawer, use [Navigator.pop].
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth] to 0.
-  /// Then, use [ScaffoldState.openDrawer] to open the drawer and
-  /// [Navigator.pop] to close it.
+  /// To disable the drawer edge swipe, set the
+  /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
+  /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
+  /// it.
   ///
   /// ```dart
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -1155,7 +1156,8 @@ class Scaffold extends StatefulWidget {
   ///         ),
   ///       ),
   ///     ),
-  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///     // Disable opening the drawer with a swipe gesture.
+  ///     drawerEnableOpenDragGesture: false,
   ///   );
   /// }
   /// ```
@@ -1173,9 +1175,10 @@ class Scaffold extends StatefulWidget {
   /// To close the drawer, use [Navigator.pop].
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
-  /// to 0. Then, use [ScaffoldState.openEndDrawer] to open the drawer and
-  /// [Navigator.pop] to close it.
+  /// To disable the drawer edge swipe, set the
+  /// [Scaffold.endDrawerEnableOpenDragGesture] to false. Then, use
+  /// [ScaffoldState.openEndDrawer] to open the drawer and [Navigator.pop] to
+  /// close it.
   ///
   /// ```dart
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -1213,7 +1216,8 @@ class Scaffold extends StatefulWidget {
   ///         ),
   ///       ),
   ///     ),
-  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///     // Disable opening the end drawer with a swipe gesture.
+  ///     endDrawerEnableOpenDragGesture: false,
   ///   );
   /// }
   /// ```
