@@ -15,6 +15,7 @@ import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
 import 'colors.dart';
+import 'curves.dart';
 import 'divider.dart';
 import 'drawer.dart';
 import 'flexible_space_bar.dart';
@@ -36,8 +37,7 @@ import 'theme_data.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
-const Curve _kBottomSheetCurve = Curves.fastOutSlowIn;
-const Curve _kBottomSheetFlingCurve = Curves.easeOutCubic;
+const Curve _persistentBottomSheetCurve = standardEasing;
 // When the top of the BottomSheet crosses this threshold, it will start to
 // shrink the FAB and show a scrim.
 const double _kBottomSheetDominatesPercentage = 0.3;
@@ -2518,7 +2518,7 @@ class _StandardBottomSheet extends StatefulWidget {
 }
 
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
-  Curve animationCurve = _kBottomSheetCurve;
+  Curve animationCurve = _persistentBottomSheetCurve;
 
   @override
   void initState() {
@@ -2550,16 +2550,11 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   }
 
   void _handleDragEnd(DragEndDetails details, { bool isClosing }) {
-    if (isClosing) {
-      // shortened curve on exit minimizes risk of a visibly slow linear
-      // animation
-      animationCurve = const Interval(0.5, 1, curve: Curves.linear);
-    } else {
-      animationCurve = BottomSheetSuspendedCurve(
-        widget.animationController.value,
-        curve: _kBottomSheetFlingCurve,
-      );
-    }
+    // allows the bottom sheet to animate smoothly from its current position
+    animationCurve = BottomSheetSuspendedCurve(
+      widget.animationController.value,
+      curve: _persistentBottomSheetCurve,
+    );
   }
 
   void _handleStatusChange(AnimationStatus status) {
