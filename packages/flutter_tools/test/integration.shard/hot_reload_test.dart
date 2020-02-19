@@ -126,20 +126,14 @@ void main() {
 
   test("hot reload doesn't reassemble if paused", () async {
     final Completer<void> sawTick1 = Completer<void>();
-    final Completer<void> sawTick2 = Completer<void>();
     final Completer<void> sawTick3 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(
       (String line) {
-        print(line);
         if (line.contains('(((TICK 1)))')) {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();
-        }
-        if (line.contains('((((TICK 2))))')) {
-          expect(sawTick2.isCompleted, isFalse);
-          sawTick2.complete();
         }
         if (line.contains('The application is paused in the debugger on a breakpoint.')) {
           expect(sawDebuggerPausedMessage1.isCompleted, isFalse);
@@ -159,7 +153,6 @@ void main() {
     );
     bool reloaded = false;
     final Future<void> reloadFuture = _flutter.hotReload().then((void value) { reloaded = true; });
-    await sawTick2.future; // this should happen before it pauses
     final Isolate isolate = await _flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
     expect(reloaded, isFalse);
