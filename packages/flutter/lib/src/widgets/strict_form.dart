@@ -70,7 +70,7 @@ class StrictForm extends StatefulWidget {
 /// Typically obtained via [Form.of].
 class StrictFormState extends State<StrictForm> {
   int _generation = 0;
-  final Set<TextEditingController> _fields = <TextEditingController>{};
+  final Map<String, TextEditingController> _fields = <String, TextEditingController>{};
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -87,11 +87,20 @@ class StrictFormState extends State<StrictForm> {
   }
 
   void register(TextEditingController field) {
-    _fields.add(field);
+    final String identifier = field.textInputConfiguration?.autofillConfiguration?.uniqueIdentifier;
+    assert(identifier != null);
+    // Remove from and then put back to the Map,
+    // because the order of the fields matters to autofill.
+    _fields.remove(identifier);
+    _fields.putIfAbsent(identifier, () => field);
   }
 
-  void unregister(TextEditingController field) {
-    _fields.remove(field);
+  void unregister(String identifier) {
+    _fields.remove(identifier);
+  }
+
+  TextEditingController controller(String tag) {
+    return _fields[tag];
   }
 
   @override
@@ -114,7 +123,7 @@ class StrictFormState extends State<StrictForm> {
   /// If the form's [Form.autovalidate] property is true, the fields will all be
   /// revalidated after being reset.
   void reset() {
-    for (final TextEditingController field in _fields)
+    for (final TextEditingController field in _fields.values)
       field.clear();
     _fieldDidChange();
   }

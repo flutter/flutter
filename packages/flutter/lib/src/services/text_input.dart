@@ -14,6 +14,7 @@ import 'dart:ui' show
   hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
@@ -769,6 +770,7 @@ abstract class TextInputClient {
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
+
 }
 
 /// An interface for interacting with a text input control.
@@ -1067,6 +1069,21 @@ class TextInput {
     }
 
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
+
+    if (method == 'TextInputClient.updateEditingStateWithTag') {
+      final TextInputClient client = _currentConnection._client;
+      assert(client != null);
+      if (client is AutofillClient) {
+        final AutofillScope scope = (client as AutofillClient).currentScope;
+        final Map<String, Map<String, dynamic>> editingValue = args[1] as Map<String, Map<String, dynamic>>;
+        for (final String tag in editingValue.keys) {
+          final TextEditingValue textEditingValue = TextEditingValue.fromJSON(editingValue[tag]);
+          scope.getClient(tag).updateEditingValue(textEditingValue);
+        }
+      }
+
+    }
+
     final int client = args[0] as int;
     // The incoming message was for a different client.
     if (client != _currentConnection._id)
