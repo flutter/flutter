@@ -122,15 +122,18 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// This constructor treats a null [text] argument as if it were the empty
   /// string.
-  TextEditingController({ String text })
-    : super(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
+  TextEditingController({
+    String text,
+    this.textInputConfiguration,
+  }) : super(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
 
   /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
   /// This constructor treats a null [value] argument as if it were
   /// [TextEditingValue.empty].
-  TextEditingController.fromValue(TextEditingValue value)
-    : super(value ?? TextEditingValue.empty);
+  TextEditingController.fromValue(TextEditingValue value, {
+    this.textInputConfiguration,
+  }) : super(value ?? TextEditingValue.empty);
 
   /// The current string the user is editing.
   String get text => value.text;
@@ -219,6 +222,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
+  }
+
+  final TextInputConfiguration textInputConfiguration;
+
+  void updateEditingValue(TextEditingValue newValue) {
   }
 }
 
@@ -1441,16 +1449,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _lastFormattedUnmodifiedTextEditingValue = localValue;
       _textInputConnection = TextInput.attach(
         this,
-        TextInputConfiguration(
-          inputType: widget.keyboardType,
+        widget.controller.textInputConfiguration
+        ?? TextInputConfiguration(inputType: widget.keyboardType,
           obscureText: widget.obscureText,
           autocorrect: widget.autocorrect,
           smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
           smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
           enableSuggestions: widget.enableSuggestions,
           inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
-              ? TextInputAction.newline
-              : TextInputAction.done
+            ? TextInputAction.newline
+            : TextInputAction.done
           ),
           textCapitalization: widget.textCapitalization,
           keyboardAppearance: widget.keyboardAppearance,

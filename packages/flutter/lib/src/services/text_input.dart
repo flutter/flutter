@@ -16,6 +16,7 @@ import 'dart:ui' show
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+import 'autofill.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
@@ -440,6 +441,7 @@ class TextInputConfiguration {
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
     this.textCapitalization = TextCapitalization.none,
+    this.autofillConfiguration,
   }) : assert(inputType != null),
        assert(obscureText != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -449,6 +451,7 @@ class TextInputConfiguration {
        assert(keyboardAppearance != null),
        assert(inputAction != null),
        assert(textCapitalization != null);
+
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -462,6 +465,11 @@ class TextInputConfiguration {
   ///
   /// Defaults to true.
   final bool autocorrect;
+
+  /// The configuration to use for autofill.
+  ///
+  /// Defaults to null, which disables autofill on the input field.
+  final AutofillConfiguration autofillConfiguration;
 
   /// {@template flutter.services.textInput.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
@@ -564,6 +572,7 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
+      'autofill': autofillConfiguration.toJson(),
     };
   }
 }
