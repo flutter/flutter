@@ -53,8 +53,9 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     BuildMode buildMode,
     bool enableDwds,
-    Uri entrypoint,
-  ) async {
+    Uri entrypoint, {
+    bool testMode = false,
+  }) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
@@ -88,7 +89,9 @@ class WebAssetServer implements AssetReader {
       final shelf.Cascade cascade = shelf.Cascade()
         .add(dwds.handler)
         .add(dwdsHandler);
-      shelf.serveRequests(httpServer, cascade.handler);
+      if (!testMode) {
+        shelf.serveRequests(httpServer, cascade.handler);
+      }
       server.dwds = dwds;
       return server;
     } on SocketException catch (err) {
