@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.6
 import 'package:test/test.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';

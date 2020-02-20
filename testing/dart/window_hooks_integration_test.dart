@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // HACK: pretend to be dart.ui in order to access its internals
+// @dart = 2.6
 library dart.ui;
 
 import 'dart:async';

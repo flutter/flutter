@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.6
 part of engine;
 
 /// Contains a whitelist of keys that must be sent to Flutter under all

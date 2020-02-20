@@ -7,6 +7,7 @@
 // - avoid producing DOM-based clips if there is no text
 // - evaluate using stylesheets for static CSS properties
 // - evaluate reusing houdini canvases
+// @dart = 2.6
 part of engine;
 
 /// A canvas that renders to a combination of HTML DOM and CSS Custom Paint API.

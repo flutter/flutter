@@ -5,6 +5,7 @@
 /// This library defines the web equivalent of the native dart:ui.
 ///
 /// All types in this library are public.
+// @dart = 2.6
 library ui;
 
 import 'dart:async';
