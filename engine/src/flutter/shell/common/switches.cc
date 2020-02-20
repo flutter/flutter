@@ -41,8 +41,8 @@ struct SwitchDesc {
 
 // clang-format off
 static const std::string gDartFlagsWhitelist[] = {
-    "--no-causal_async_stacks",
     "--lazy_async_stacks",
+    "--no-causal_async_stacks",
 };
 // clang-format on
 
