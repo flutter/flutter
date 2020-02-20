@@ -41,7 +41,6 @@ class WebAssetServer implements AssetReader {
     this._httpServer,
     this._packages,
     this.internetAddress,
-    this._controller,
     this._digests,
     this._modules,
   );
@@ -50,7 +49,6 @@ class WebAssetServer implements AssetReader {
   // makes no claims as to the structure of the data.
   static const String _kDefaultMimeType = 'application/octet-stream';
 
-  final StreamController<BuildResult> _controller;
   final Map<String, String> _digests;
   final Map<String, String> _modules;
 
@@ -64,7 +62,6 @@ class WebAssetServer implements AssetReader {
         ? key.split('.lib.js')[0]
         : key;
     }
-    _controller.add(BuildResult((BuildResultBuilder b) => b.status = BuildStatus.succeeded));
   }
 
   /// Start the web asset server on a [hostname] and [port].
@@ -84,14 +81,12 @@ class WebAssetServer implements AssetReader {
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final Packages packages = await loadPackagesFile(
         Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
-      final StreamController<BuildResult> controller = StreamController<BuildResult>();
       final Map<String, String> digests = <String, String>{};
       final Map<String, String> modules = <String, String>{};
       final WebAssetServer server = WebAssetServer(
         httpServer,
         packages,
         address,
-        controller,
         digests,
         modules,
       );
@@ -105,7 +100,7 @@ class WebAssetServer implements AssetReader {
       // In debug builds, spin up DWDS and the full asset server.
       final Dwds dwds = await Dwds.start(
         assetReader: server,
-        buildResults: controller.stream,
+        buildResults: const Stream<BuildResult>.empty(),
         chromeConnection: () async {
           final Chrome chrome = await ChromeLauncher.connectedInstance;
           return chrome.chromeConnection;

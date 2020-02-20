@@ -50,7 +50,6 @@ void main() {
         mockHttpServer,
         packages,
         InternetAddress.loopbackIPv4,
-        null,
         <String, String>{},
         <String, String>{},
       );
