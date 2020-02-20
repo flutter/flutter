@@ -1,10 +1,11 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
 
 // The easing curves of the Material Library
+
 /// The standard easing curve in the Material specification.
 ///
 /// Elements that begin and end at rest use standard easing.

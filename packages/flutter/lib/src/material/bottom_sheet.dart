@@ -334,12 +334,12 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 
   void handleDragStart(DragStartDetails details) {
-    // allows the bottom sheet to track the user's finger accurately
+    // Allow the bottom sheet to track the user's finger accurately.
     animationCurve = Curves.linear;
   }
 
   void handleDragEnd(DragEndDetails details, {bool isClosing}) {
-    // allows the bottom sheet to animate smoothly from its current position
+    // Allow the bottom sheet to animate smoothly from its current position.
     animationCurve = BottomSheetSuspendedCurve(
       widget.route.animation.value,
       curve: _modalBottomSheetCurve,
@@ -490,10 +490,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// The [startingPoint] and [curve] arguments must not be null.
 class BottomSheetSuspendedCurve extends Curve {
   /// Creates a suspended curve.
-  const BottomSheetSuspendedCurve(this.startingPoint,
-      {this.curve = Curves.easeOutCubic})
-      : assert(startingPoint != null),
-        assert(curve != null);
+  const BottomSheetSuspendedCurve(
+    this.startingPoint, {
+    this.curve = Curves.easeOutCubic,
+  }) : assert(startingPoint != null),
+       assert(curve != null);
 
   /// The progress value at which [curve] should begin.
   final double startingPoint;

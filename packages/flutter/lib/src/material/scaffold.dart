@@ -2593,7 +2593,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   }
 
   Future<void> close() {
-    print('close');
     assert(widget.animationController != null);
     widget.animationController.reverse();
     if (widget.onClosing != null) {
@@ -2603,12 +2602,12 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   }
 
   void _handleDragStart(DragStartDetails details) {
-    // allows the bottom sheet to track the user's finger accurately
+    // Allow the bottom sheet to track the user's finger accurately.
     animationCurve = Curves.linear;
   }
 
   void _handleDragEnd(DragEndDetails details, { bool isClosing }) {
-    // allows the bottom sheet to animate smoothly from its current position
+    // Allow the bottom sheet to animate smoothly from its current position.
     animationCurve = BottomSheetSuspendedCurve(
       widget.animationController.value,
       curve: _standardBottomSheetCurve,
