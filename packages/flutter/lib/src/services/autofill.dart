@@ -1,19 +1,5 @@
-import 'dart:ui' show
-  FontWeight,
-  Offset,
-  Size,
-  TextAffinity,
-  TextAlign,
-  TextDirection,
-  hashValues;
-
 import 'package:flutter/foundation.dart';
 
-import 'message_codec.dart';
-import 'platform_channel.dart';
-import 'system_channels.dart';
-import 'system_chrome.dart';
-import 'text_editing.dart';
 import 'text_input.dart' show TextEditingValue, TextInputConfiguration;
 
 @immutable
@@ -43,4 +29,15 @@ class AutofillConfiguration {
         .toList(growable: false),
     };
   }
+}
+
+abstract class AutofillClient<EditingValue> {
+  TextInputConfiguration get textInputConfiguration;
+
+  AutofillScope get currentScope;
+  void updateEditingValue(EditingValue textEditingValue);
+}
+
+abstract class AutofillScope {
+  AutofillClient getClient(String tag);
 }

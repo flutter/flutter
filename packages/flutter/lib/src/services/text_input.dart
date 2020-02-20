@@ -766,7 +766,6 @@ abstract class TextInputClient {
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue get currentTextEditingValue;
 
-  StrictFormState get currentScope;
   /// Platform notified framework of closed connection.
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
@@ -1072,13 +1071,17 @@ class TextInput {
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
 
     if (method == 'TextInputClient.updateEditingStateWithTag') {
-      final Map<String, Map<String, dynamic>> editingValue = args[1] as Map<String, Map<String, dynamic>>;
-      assert(_currentConnection._client != null);
-      final StrictFormState form = _currentConnection._client.currentScope;
-      for (final String tag in editingValue.keys) {
-        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(editingValue[tag]);
-        form.controller(tag).updateEditingValue(textEditingValue);
+      final TextInputClient client = _currentConnection._client;
+      assert(client != null);
+      if (client is AutofillClient) {
+        final AutofillScope scope = (client as AutofillClient).currentScope;
+        final Map<String, Map<String, dynamic>> editingValue = args[1] as Map<String, Map<String, dynamic>>;
+        for (final String tag in editingValue.keys) {
+          final TextEditingValue textEditingValue = TextEditingValue.fromJSON(editingValue[tag]);
+          scope.getClient(tag).updateEditingValue(textEditingValue);
+        }
       }
+
     }
 
     final int client = args[0] as int;
