@@ -471,6 +471,7 @@ class IOSSimulator extends Device {
       buildInfo: buildInfo,
       targetOverride: mainPath,
       buildForDevice: false,
+      deviceID: id,
     );
     if (!buildResult.success) {
       throwToolExit('Could not build the application for the simulator.');

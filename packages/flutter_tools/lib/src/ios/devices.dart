@@ -239,6 +239,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           buildForDevice: true,
           activeArch: cpuArchitecture,
+          deviceID: id,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');

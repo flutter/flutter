@@ -87,6 +87,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   DarwinArch activeArch,
   bool codesign = true,
+  String deviceID = '',
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -227,10 +228,27 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
   }
 
-  if (buildForDevice) {
-    buildCommands.addAll(<String>['-sdk', 'iphoneos']);
+  // Check if the project contains a watchOS companion app.
+  final bool hasWatchCompanion = await app.project.containsWatchCompanion(projectInfo.targets);
+  if (hasWatchCompanion) {
+    // The -sdk argument has to be omitted if a watchOS companion app exists.
+    // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.
+    printStatus('Watch companion app found. Adjusting build settings.');
+    if (! buildForDevice && deviceID == '') {
+      printError('No simulator device ID has been set.');
+      printError('A device ID is required to build a flutter a flutter app with a companion watch app.');
+      printError('Please run "flutter devices" to get a list of available device IDs.');
+      return XcodeBuildResult(success: false);
+    }
+    if (! buildForDevice) {
+      buildCommands.addAll(<String>['-destination', 'id=$deviceID']);
+    }
   } else {
-    buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+    if (buildForDevice) {
+      buildCommands.addAll(<String>['-sdk', 'iphoneos']);
+    } else {
+      buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+    }
   }
 
   if (activeArch != null) {
