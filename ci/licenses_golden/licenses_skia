@@ -1,4 +1,4 @@
-Signature: 59fe0d011fd084487873ebb2f0c35cd2
+Signature: 6309623482e0efe4d26e9ea4eb39c2f1
 
 UNUSED LICENSES:
 
@@ -3977,6 +3977,8 @@ FILE: ../../../third_party/skia/gm/crbug_1041204.cpp
 FILE: ../../../third_party/skia/gm/crbug_224618.cpp
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
 FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.h
+FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google LLC
 
