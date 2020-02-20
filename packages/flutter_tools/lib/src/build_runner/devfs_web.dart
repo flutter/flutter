@@ -373,9 +373,6 @@ class WebDevFS implements DevFS {
   Future<DebugConnection> _cachedExtensionFuture;
   StreamSubscription<void> _connectedApps;
 
-  // The engine last modification date for local engine build.s
-  DateTime dartSdkLastModified;
-
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
   /// Only calls [AppConnection.runMain] on the subsequent connections.
