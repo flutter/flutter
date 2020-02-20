@@ -7,12 +7,13 @@
 
 #include "flutter/shell/common/shell_test_platform_view.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan_delegate.h"
+#include "flutter/vulkan/vulkan_application.h"
+#include "flutter/vulkan/vulkan_device.h"
 
 namespace flutter {
 namespace testing {
 
-class ShellTestPlatformViewVulkan : public ShellTestPlatformView,
-                                    public GPUSurfaceVulkanDelegate {
+class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
  public:
   ShellTestPlatformViewVulkan(PlatformView::Delegate& delegate,
                               TaskRunners task_runners,
@@ -24,6 +25,36 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView,
   void SimulateVSync() override;
 
  private:
+  class OffScreenSurface : public flutter::Surface {
+   public:
+    OffScreenSurface(fml::RefPtr<vulkan::VulkanProcTable> vk);
+
+    ~OffScreenSurface() override;
+
+    // |Surface|
+    bool IsValid() override;
+
+    // |Surface|
+    std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
+
+    SkMatrix GetRootTransformation() const override;
+
+    // |Surface|
+    GrContext* GetContext() override;
+
+   private:
+    bool valid_;
+    fml::RefPtr<vulkan::VulkanProcTable> vk_;
+    std::unique_ptr<vulkan::VulkanApplication> application_;
+    std::unique_ptr<vulkan::VulkanDevice> logical_device_;
+    sk_sp<GrContext> context_;
+
+    bool CreateSkiaGrContext();
+    bool CreateSkiaBackendContext(GrVkBackendContext* context);
+
+    FML_DISALLOW_COPY_AND_ASSIGN(OffScreenSurface);
+  };
+
   CreateVsyncWaiter create_vsync_waiter_;
 
   std::shared_ptr<ShellTestVsyncClock> vsync_clock_;
@@ -38,9 +69,6 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView,
 
   // |PlatformView|
   PointerDataDispatcherMaker GetDispatcherMaker() override;
-
-  // |GPUSurfaceVulkanDelegate|
-  fml::RefPtr<vulkan::VulkanProcTable> vk() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTestPlatformViewVulkan);
 };
