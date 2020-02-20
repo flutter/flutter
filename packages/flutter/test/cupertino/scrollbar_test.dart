@@ -178,7 +178,11 @@ void main() {
               displayAlways: true,
               controller: controller,
               child: const SingleChildScrollView(
-                  child: SizedBox(width: 4000.0, height: 4000.0)),
+                child: SizedBox(
+                  width: 4000.0,
+                  height: 4000.0,
+                ),
+              ),
             ),
           ),
         ),
@@ -204,7 +208,11 @@ void main() {
               displayAlways: false,
               controller: controller,
               child: const SingleChildScrollView(
-                  child: SizedBox(width: 4000.0, height: 4000.0)),
+                child: SizedBox(
+                  width: 4000.0,
+                  height: 4000.0,
+                ),
+              ),
             ),
           ),
         ),
@@ -234,8 +242,12 @@ void main() {
                     displayAlways: displayAlways,
                     controller: controller,
                     child: SingleChildScrollView(
-                        controller: controller,
-                        child: const SizedBox(width: 4000.0, height: 4000.0)),
+                      controller: controller,
+                      child: const SizedBox(
+                        width: 4000.0,
+                        height: 4000.0,
+                      ),
+                    ),
                   ),
                   Positioned(
                     bottom: 10,
@@ -259,7 +271,10 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     await tester.fling(
-        find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10);
+      find.byType(SingleChildScrollView),
+      const Offset(0.0, -10.0),
+      10,
+    );
     expect(find.byType(CupertinoScrollbar), paints..rrect());
 
     await tester.tap(find.byType(CupertinoButton));
@@ -285,8 +300,12 @@ void main() {
                     displayAlways: displayAlways,
                     controller: controller,
                     child: SingleChildScrollView(
-                        controller: controller,
-                        child: const SizedBox(width: 4000.0, height: 4000.0)),
+                      controller: controller,
+                      child: const SizedBox(
+                        width: 4000.0,
+                        height: 4000.0,
+                      ),
+                    ),
                   ),
                   Positioned(
                     bottom: 10,
@@ -310,7 +329,10 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     await tester.fling(
-        find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10);
+      find.byType(SingleChildScrollView),
+      const Offset(0.0, -10.0),
+      10,
+    );
     expect(find.byType(CupertinoScrollbar), paints..rrect());
 
     await tester.tap(find.byType(CupertinoButton));
@@ -336,8 +358,12 @@ void main() {
                     displayAlways: displayAlways,
                     controller: controller,
                     child: SingleChildScrollView(
-                        controller: controller,
-                        child: const SizedBox(width: 4000.0, height: 4000.0)),
+                      controller: controller,
+                      child: const SizedBox(
+                        width: 4000.0,
+                        height: 4000.0,
+                      ),
+                    ),
                   ),
                   Positioned(
                     bottom: 10,

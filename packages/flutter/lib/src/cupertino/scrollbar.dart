@@ -126,9 +126,13 @@ class CupertinoScrollbar extends StatefulWidget {
   /// {@endtemplate}
   final ScrollController controller;
 
-  /// The default value of displayAlways is false,
-  /// When displayAlways property is true, the [Scrollbar] will be always shown.
-  /// but to show the [Scrollbar] always, you need to pass the [Scrollable]'s controller. see [ScrollController]
+  /// {@template flutter.cupertino.cupertinoScrollbar.displayAlways}
+  /// A [bool] property for showing [Scrollbar] always.
+  ///
+  /// To show [ScrollBar] always you need to make this property true,
+  /// however the [controller] shouldn't be null.
+  ///
+  /// You should pass the [Scrollable]'s [ScrollController] to [controller].
   ///
   /// {@tool snippet}
   ///
@@ -141,7 +145,7 @@ class CupertinoScrollbar extends StatefulWidget {
   ///   children: <Widget>[
   ///     Container(
   ///        height: 200,
-  ///        child: CupertinoScrollbar(
+  ///        child: Scrollbar(
   ///          displayAlways: true,
   ///          controller: _controllerOne,
   ///          child: ListView.builder(
@@ -167,6 +171,7 @@ class CupertinoScrollbar extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  /// {@endtemplate}
   final bool displayAlways;
 
   @override
@@ -282,7 +287,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
         DragStartDetails(
           globalPosition: Offset(0.0, scrollOffsetGlobal),
         ),
-            () {},
+        () {},
       );
     } else {
       _drag.update(DragUpdateDetails(
@@ -403,22 +408,22 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   // thumb.
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures =
-    <Type, GestureRecognizerFactory>{};
+        <Type, GestureRecognizerFactory>{};
 
     gestures[_ThumbPressGestureRecognizer] =
         GestureRecognizerFactoryWithHandlers<_ThumbPressGestureRecognizer>(
-              () => _ThumbPressGestureRecognizer(
-            debugOwner: this,
-            customPaintKey: _customPaintKey,
-          ),
-              (_ThumbPressGestureRecognizer instance) {
-            instance
-              ..onLongPressStart = _handleLongPressStart
-              ..onLongPress = _handleLongPress
-              ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
-              ..onLongPressEnd = _handleLongPressEnd;
-          },
-        );
+      () => _ThumbPressGestureRecognizer(
+        debugOwner: this,
+        customPaintKey: _customPaintKey,
+      ),
+      (_ThumbPressGestureRecognizer instance) {
+        instance
+          ..onLongPressStart = _handleLongPressStart
+          ..onLongPress = _handleLongPress
+          ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
+          ..onLongPressEnd = _handleLongPressEnd;
+      },
+    );
 
     return gestures;
   }
@@ -460,11 +465,11 @@ class _ThumbPressGestureRecognizer extends LongPressGestureRecognizer {
     GlobalKey customPaintKey,
   }) :  _customPaintKey = customPaintKey,
         super(
-        postAcceptSlopTolerance: postAcceptSlopTolerance,
-        kind: kind,
-        debugOwner: debugOwner,
-        duration: const Duration(milliseconds: 100),
-      );
+          postAcceptSlopTolerance: postAcceptSlopTolerance,
+          kind: kind,
+          debugOwner: debugOwner,
+          duration: const Duration(milliseconds: 100),
+        );
 
   final GlobalKey _customPaintKey;
 

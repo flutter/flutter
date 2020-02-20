@@ -51,47 +51,7 @@ class Scrollbar extends StatefulWidget {
   /// {@macro flutter.cupertino.cupertinoScrollbar.controller}
   final ScrollController controller;
 
-  /// The default value of displayAlways is false,
-  /// When displayAlways property is true, the [Scrollbar] will be always shown.
-  /// but to show the [Scrollbar] always, you need to pass the [Scrollable]'s controller. see [ScrollController]
-  ///
-  /// {@tool snippet}
-  ///
-  /// ```dart
-  /// final ScrollController _controllerOne = ScrollController();
-  /// final ScrollController _controllerTwo = ScrollController();
-  ///
-  /// build(BuildContext context) {
-  /// return Column(
-  ///   children: <Widget>[
-  ///     Container(
-  ///        height: 200,
-  ///        child: Scrollbar(
-  ///          displayAlways: true,
-  ///          controller: _controllerOne,
-  ///          child: ListView.builder(
-  ///            controller: _controllerOne,
-  ///            itemCount: 120,
-  ///            itemBuilder: (BuildContext context, int index) => Text('item $index'),
-  ///          ),
-  ///        ),
-  ///      ),
-  ///      Container(
-  ///        height: 200,
-  ///        child: Scrollbar(
-  ///          displayAlways: true,
-  ///          controller: _controllerTwo,
-  ///          child: SingleChildScrollView(
-  ///            controller: _controllerTwo,
-  ///            child: SizedBox(height: 2000, width: 500,),
-  ///          ),
-  ///        ),
-  ///      ),
-  ///    ],
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
+  /// {@macro flutter.cupertino.cupertinoScrollbar.displayAlways}
   final bool displayAlways;
 
   @override

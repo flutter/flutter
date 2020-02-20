@@ -213,7 +213,10 @@ void main() {
             controller: controller,
             child: SingleChildScrollView(
               controller: controller,
-              child: const SizedBox(width: 4000.0, height: 4000.0),
+              child: const SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
             ),
           ),
         ),
@@ -237,7 +240,10 @@ void main() {
             controller: controller,
             child: SingleChildScrollView(
               controller: controller,
-              child: const SizedBox(width: 4000.0, height: 4000.0),
+              child: const SizedBox(
+                width: 4000.0,
+                height: 4000.0,
+              ),
             ),
           ),
         ),
@@ -274,7 +280,10 @@ void main() {
                   controller: controller,
                   child: SingleChildScrollView(
                     controller: controller,
-                    child: const SizedBox(width: 4000.0, height: 4000.0),
+                    child: const SizedBox(
+                      width: 4000.0,
+                      height: 4000.0,
+                    ),
                   ),
                 ),
               ),
@@ -287,7 +296,10 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     await tester.fling(
-        find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10);
+      find.byType(SingleChildScrollView),
+      const Offset(0.0, -10.0),
+      10,
+    );
     expect(find.byType(Scrollbar), paints..rect());
 
     await tester.tap(find.byType(FloatingActionButton));
@@ -321,7 +333,10 @@ void main() {
                   controller: controller,
                   child: SingleChildScrollView(
                     controller: controller,
-                    child: const SizedBox(width: 4000.0, height: 4000.0),
+                    child: const SizedBox(
+                      width: 4000.0,
+                      height: 4000.0,
+                    ),
                   ),
                 ),
               ),
@@ -334,7 +349,10 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     await tester.fling(
-        find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10);
+      find.byType(SingleChildScrollView),
+      const Offset(0.0, -10.0),
+      10,
+    );
     expect(find.byType(Scrollbar), paints..rect());
 
     await tester.tap(find.byType(FloatingActionButton));
@@ -368,7 +386,10 @@ void main() {
                   controller: controller,
                   child: SingleChildScrollView(
                     controller: controller,
-                    child: const SizedBox(width: 4000.0, height: 4000.0),
+                    child: const SizedBox(
+                      width: 4000.0,
+                      height: 4000.0,
+                    ),
                   ),
                 ),
               ),
