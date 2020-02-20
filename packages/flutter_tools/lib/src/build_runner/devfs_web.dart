@@ -95,7 +95,7 @@ class WebAssetServer implements AssetReader {
       final shelf.Cascade cascade = shelf.Cascade()
         .add(dwds.handler)
         .add(dwdsHandler);
-        shelf.serveRequests(httpServer, cascade.handler);
+      shelf.serveRequests(httpServer, cascade.handler);
       server.dwds = dwds;
       return server;
     } on SocketException catch (err) {
