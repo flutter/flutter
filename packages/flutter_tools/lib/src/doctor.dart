@@ -878,7 +878,7 @@ class DeviceValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<Device> devices = await deviceManager.getAllConnectedDevices().toList();
+    final List<Device> devices = await deviceManager.getAllConnectedDevices();
     List<ValidationMessage> messages;
     if (devices.isEmpty) {
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();

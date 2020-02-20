@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:webdriver/sync_io.dart' as sync_io;
 import 'package:meta/meta.dart';
+import 'package:webdriver/async_io.dart' as async_io;
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -146,6 +146,13 @@ class DriveCommand extends RunCommandBase {
     if (argResults['use-existing-app'] == null) {
       globals.printStatus('Starting application: $targetFile');
 
+      if (isWebPlatform) {
+        throwToolExit(
+          'Flutter Driver (web) does not support running without use-existing-app.\n'
+          'Please launch your application beforehand and connects via use-existing-app.'
+        );
+      }
+
       if (getBuildInfo().isRelease && !isWebPlatform) {
         // This is because we need VM service to be able to drive the app.
         // For Flutter Web, testing in release mode is allowed.
@@ -173,27 +180,46 @@ class DriveCommand extends RunCommandBase {
       'VM_SERVICE_URL': observatoryUri,
     };
 
-    sync_io.WebDriver driver;
+    async_io.WebDriver driver;
     // For web device, WebDriver session will be launched beforehand
     // so that FlutterDriver can reuse it.
     if (isWebPlatform) {
+      final Browser browser = _browserNameToEnum(
+          argResults['browser-name'].toString());
+      final String driverPort = argResults['driver-port'].toString();
       // start WebDriver
-      final Browser browser = _browserNameToEnum(argResults['browser-name'].toString());
-      driver = _createDriver(
-        argResults['driver-port'].toString(),
-        browser,
-        argResults['headless'].toString() == 'true',
-      );
+      try {
+        driver = await _createDriver(
+          driverPort,
+          browser,
+          argResults['headless'].toString() == 'true',
+        );
+      } on Exception catch (ex) {
+        throwToolExit(
+          'Unable to start WebDriver Session for Flutter for Web testing. \n'
+          'Make sure you have the correct WebDriver Server running at $driverPort. \n'
+          'Make sure the WebDriver Server matches option --browser-name. \n'
+          '$ex'
+        );
+      }
 
       // set window size
       final List<String> dimensions = argResults['browser-dimension'].split(',') as List<String>;
       assert(dimensions.length == 2);
-      final int x = int.parse(dimensions[0]);
-      final int y = int.parse(dimensions[1]);
-      final sync_io.Window window = driver.window;
+      int x, y;
       try {
-        window.setLocation(const math.Point<int>(0, 0));
-        window.setSize(math.Rectangle<int>(0, 0, x, y));
+        x = int.parse(dimensions[0]);
+        y = int.parse(dimensions[1]);
+      } on FormatException catch (ex) {
+        throwToolExit('''
+Dimension provided to --browser-dimension is invalid:
+$ex
+        ''');
+      }
+      final async_io.Window window = await driver.window;
+      try {
+        await window.setLocation(const math.Point<int>(0, 0));
+        await window.setSize(math.Rectangle<int>(0, 0, x, y));
       } catch (_) {
        // Error might be thrown in some browsers.
       }
@@ -215,9 +241,9 @@ class DriveCommand extends RunCommandBase {
       if (error is ToolExit) {
         rethrow;
       }
-      throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
+      throw Exception('Unable to run test: $error\n$stackTrace');
     } finally {
-      driver?.quit();
+      await driver?.quit();
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         globals.printStatus('Leaving the application running.');
       } else {
@@ -437,11 +463,11 @@ Browser _browserNameToEnum(String browserName){
   throw UnsupportedError('Browser $browserName not supported');
 }
 
-sync_io.WebDriver _createDriver(String driverPort, Browser browser, bool headless) {
-  return sync_io.createDriver(
-      uri: Uri.parse('http://localhost:$driverPort/wd/hub/'),
+Future<async_io.WebDriver> _createDriver(String driverPort, Browser browser, bool headless) async {
+  return async_io.createDriver(
+      uri: Uri.parse('http://localhost:$driverPort/'),
       desired: getDesiredCapabilities(browser, headless),
-      spec: browser != Browser.iosSafari ? sync_io.WebDriverSpec.JsonWire : sync_io.WebDriverSpec.W3c
+      spec: async_io.WebDriverSpec.Auto
   );
 }
 
@@ -453,7 +479,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
-        'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
+        'goog:loggingPrefs': <String, String>{ async_io.LogType.performance: 'ALL'},
         'chromeOptions': <String, dynamic>{
           'w3c': false,
           'args': <String>[
@@ -508,10 +534,6 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
     case Browser.safari:
       return <String, dynamic>{
         'browserName': 'safari',
-        'safari.options': <String, dynamic>{
-          'skipExtensionInstallation': true,
-          'cleanSession': true
-        }
       };
       break;
     case Browser.iosSafari:
