@@ -699,10 +699,6 @@ void main() {
     test('macOS Safari', () {
       final Map<String, dynamic> expected = <String, dynamic>{
         'browserName': 'safari',
-        'safari.options': <String, dynamic>{
-          'skipExtensionInstallation': true,
-          'cleanSession': true
-        }
       };
 
       expect(getDesiredCapabilities(Browser.safari, false), expected);

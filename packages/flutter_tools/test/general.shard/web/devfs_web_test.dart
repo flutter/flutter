@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/web/devfs_web.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_config/discovery.dart';
 import 'package:package_config/packages.dart';
@@ -148,6 +148,20 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
     Platform: () => windows,
+  }));
+
+   test('serves asset files from in filesystem with url-encoded paths', () => testbed.run(() async {
+    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', Uri.encodeFull('abcd象形字.png')))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/assets/abcd%25E8%25B1%25A1%25E5%25BD%25A2%25E5%25AD%2597.png')));
+
+    expect(response.headers, allOf(<Matcher>[
+      containsPair('content-length', source.lengthSync().toString()),
+      containsPair('content-type', 'image/png'),
+    ]));
+    expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
 
    test('serves asset files from in filesystem with known mime type on Windows', () => testbed.run(() async {
@@ -305,6 +319,7 @@ void main() {
         invalidatedFiles: <Uri>[],
       );
 
+      expect(webDevFS.webAssetServer.getFile('/main.dart'), isNotNull);
       expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
       expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);
 
