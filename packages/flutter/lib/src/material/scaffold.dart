@@ -41,7 +41,7 @@ import 'theme_data.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
-const Curve _persistentBottomSheetCurve = standardEasing;
+const Curve _standardBottomSheetCurve = standardEasing;
 // When the top of the BottomSheet crosses this threshold, it will start to
 // shrink the FAB and show a scrim.
 const double _kBottomSheetDominatesPercentage = 0.3;
@@ -2575,7 +2575,7 @@ class _StandardBottomSheet extends StatefulWidget {
 }
 
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
-  Curve animationCurve = _persistentBottomSheetCurve;
+  Curve animationCurve = _standardBottomSheetCurve;
 
   @override
   void initState() {
@@ -2593,6 +2593,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   }
 
   Future<void> close() {
+    print('close');
     assert(widget.animationController != null);
     widget.animationController.reverse();
     if (widget.onClosing != null) {
@@ -2610,7 +2611,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     // allows the bottom sheet to animate smoothly from its current position
     animationCurve = BottomSheetSuspendedCurve(
       widget.animationController.value,
-      curve: _persistentBottomSheetCurve,
+      curve: _standardBottomSheetCurve,
     );
   }
 
