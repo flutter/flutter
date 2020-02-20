@@ -191,11 +191,7 @@ class DriveCommand extends RunCommandBase {
           dartDefines: dartDefines,
           urlTunneller: null,
         );
-
-        // Sync completer so the completing agent attaching to the resident doesn't
-        // need to know about analytics.
-        //
-        // Do not add more operations to the future.
+        
         final Completer<void> appStartedCompleter = Completer<void>.sync();
 
         final int result = await residentRunner.run(
