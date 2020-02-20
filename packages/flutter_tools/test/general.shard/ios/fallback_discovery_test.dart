@@ -24,6 +24,18 @@ void main() {
   MockPrototcolDiscovery mockPrototcolDiscovery;
   MockPortForwarder mockPortForwarder;
   MockVmService mockVmService;
+  final VM vm = VM(
+    name: null,
+    architectureBits: null,
+    hostCPU: null,
+    operatingSystem: null,
+    targetCPU: null,
+    version: null,
+    pid: null,
+    startTime: null,
+    isolates: null,
+    isolateGroups: null,
+  );
 
   setUp(() {
     logger = BufferLogger(
@@ -49,7 +61,7 @@ void main() {
 
   testUsingContext('Selects assumed port if VM service connection is successful', () async {
     when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
-      return VM(architectureBits: 64)..isolates = <IsolateRef>[
+      return vm..isolates = <IsolateRef>[
         IsolateRef(
           id: 'a',
           name: 'isolate',
@@ -59,7 +71,7 @@ void main() {
     });
     when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
       return Isolate()
-        ..rootLib = (LibraryRef()..uri = 'package:hello/main.dart');
+        ..rootLib = (LibraryRef(name: 'main', uri: 'package:hello/main.dart'));
     });
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
@@ -73,12 +85,16 @@ void main() {
 
   testUsingContext('Selects mdns discovery if VM service connecton fails due to Sentinel', () async {
     when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
-      return VM()..isolates = <IsolateRef>[
-        IsolateRef(),
+      return vm..isolates = <IsolateRef>[
+        IsolateRef(
+          id: 'a',
+          name: 'isolate',
+          number: '1',
+        ),
       ];
     });
     when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
-      return Sentinel();
+      return Sentinel(kind: 'Something', valueAsString: 'Something');
     });
 
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(

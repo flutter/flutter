@@ -482,7 +482,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         await device.generator.reject();
         return OperationResult(1, 'Failed to recompile application.');
       }
-      await _vmService.callMethod('hotRestart');
     } else {
       try {
         await buildWeb(
@@ -498,7 +497,25 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
     }
 
-    // Duration transferMarker;
+    try {
+      if (!deviceIsDebuggable) {
+        globals.printStatus('Recompile complete. Page requires refresh.');
+      } else if (isRunningDebug) {
+        await _vmService.callMethod('hotRestart');
+      } else {
+        // On non-debug builds, a hard refresh is required to ensure the
+        // up to date sources are loaded.
+        await _wipConnection?.sendCommand('Page.reload', <String, Object>{
+          'ignoreCache': !debuggingOptions.buildInfo.isDebug,
+        });
+      }
+    } on rpc.RPCException {
+    } on WipError catch (err) {
+      globals.printError(err.toString());
+      return OperationResult(1, err.toString());
+    } finally {
+      status.stop();
+    }
     // try {
     //   if (!deviceIsDebuggable) {
     //     globals.printStatus('Recompile complete. Page requires refresh.');
