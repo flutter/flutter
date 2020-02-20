@@ -183,7 +183,7 @@ abstract class RawRecorder extends Recorder {
 ///   }
 /// }
 /// ```
-abstract class WidgetRecorder extends Recorder {
+abstract class WidgetRecorder extends Recorder implements _RecordingWidgetsBindingListener {
   WidgetRecorder({@required String name}) : super._(name);
 
   /// Creates a widget to be benchmarked.
@@ -198,10 +198,12 @@ abstract class WidgetRecorder extends Recorder {
 
   Stopwatch _drawFrameStopwatch;
 
+  @override
   void _frameWillDraw() {
     _drawFrameStopwatch = Stopwatch()..start();
   }
 
+  @override
   void _frameDidDraw() {
     _frames.add(FrameMetrics._(
       drawFrameDuration: _drawFrameStopwatch.elapsed,
@@ -223,6 +225,100 @@ abstract class WidgetRecorder extends Recorder {
     final Widget widget = createWidget();
     binding._beginRecording(this, widget);
     return _profileCompleter.future;
+  }
+}
+
+/// A recorder for measuring the performance of building a widget from scratch
+/// starting from an empty frame.
+///
+/// The recorder will call [createWidget] and render it, then it will pump
+/// another frame that clears the screen. It repeats this process, measuring the
+/// performance of frames that render the widget and ignoring the frames that
+/// clear the screen.
+abstract class WidgetBuildRecorder extends Recorder implements _RecordingWidgetsBindingListener {
+  WidgetBuildRecorder({@required String name}) : super._(name);
+
+  /// Creates a widget to be benchmarked.
+  ///
+  /// The widget is not expected to animate as we only care about construction
+  /// of the widget. If you are interested in benchmarking an animation,
+  /// consider using [WidgetRecorder].
+  Widget createWidget();
+
+  final Completer<Profile> _profileCompleter = Completer<Profile>();
+
+  Stopwatch _drawFrameStopwatch;
+
+  /// Whether in this frame we should call [createWidget] and render it.
+  ///
+  /// If false, then this frame will clear the screen.
+  bool _showWidget = true;
+
+  /// The state that hosts the widget under test.
+  _WidgetBuildRecorderHostState _hostState;
+
+  Widget _getWidgetForFrame() {
+    if (_showWidget) {
+      return createWidget();
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  void _frameWillDraw() {
+    _drawFrameStopwatch = Stopwatch()..start();
+  }
+
+  @override
+  void _frameDidDraw() {
+    // Only record frames that show the widget.
+    if (_showWidget) {
+      _frames.add(FrameMetrics._(
+        drawFrameDuration: _drawFrameStopwatch.elapsed,
+        sceneBuildDuration: null,
+        windowRenderDuration: null,
+      ));
+    }
+    if (_shouldContinue()) {
+      _showWidget = !_showWidget;
+      _hostState._setStateTrampoline();
+    } else {
+      final Profile profile = _generateProfile();
+      _profileCompleter.complete(profile);
+    }
+  }
+
+  @override
+  Future<Profile> run() {
+    final _RecordingWidgetsBinding binding =
+        _RecordingWidgetsBinding.ensureInitialized();
+    binding._beginRecording(this, _WidgetBuildRecorderHost(this));
+    return _profileCompleter.future;
+  }
+}
+
+/// Hosts widgets created by [WidgetBuildRecorder].
+class _WidgetBuildRecorderHost extends StatefulWidget {
+  const _WidgetBuildRecorderHost(this.recorder);
+
+  final WidgetBuildRecorder recorder;
+
+  @override
+  State<StatefulWidget> createState() => recorder._hostState = _WidgetBuildRecorderHostState();
+}
+
+class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
+  // This is just to bypass the @protected on setState.
+  void _setStateTrampoline() {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.expand(
+      child: widget.recorder._getWidgetForFrame(),
+    );
   }
 }
 
@@ -413,6 +509,14 @@ double _computeStandardDeviationForPopulation(Iterable<double> population) {
   return math.sqrt(sumOfSquaredDeltas / population.length);
 }
 
+/// Implemented by recorders that use [_RecordingWidgetsBinding] to receive
+/// frame life-cycle calls.
+abstract class _RecordingWidgetsBindingListener {
+  bool _shouldContinue();
+  void _frameWillDraw();
+  void _frameDidDraw();
+}
+
 /// A variant of [WidgetsBinding] that collaborates with a [Recorder] to decide
 /// when to stop pumping frames.
 ///
@@ -438,10 +542,10 @@ class _RecordingWidgetsBinding extends BindingBase
     return WidgetsBinding.instance as _RecordingWidgetsBinding;
   }
 
-  WidgetRecorder _recorder;
+  _RecordingWidgetsBindingListener _listener;
 
-  void _beginRecording(WidgetRecorder recorder, Widget widget) {
-    _recorder = recorder;
+  void _beginRecording(_RecordingWidgetsBindingListener recorder, Widget widget) {
+    _listener = recorder;
     runApp(widget);
   }
 
@@ -451,7 +555,7 @@ class _RecordingWidgetsBinding extends BindingBase
 
   @override
   void handleBeginFrame(Duration rawTimeStamp) {
-    _benchmarkStopped = !_recorder._shouldContinue();
+    _benchmarkStopped = !_listener._shouldContinue();
     super.handleBeginFrame(rawTimeStamp);
   }
 
@@ -464,8 +568,8 @@ class _RecordingWidgetsBinding extends BindingBase
 
   @override
   void handleDrawFrame() {
-    _recorder._frameWillDraw();
+    _listener._frameWillDraw();
     super.handleDrawFrame();
-    _recorder._frameDidDraw();
+    _listener._frameDidDraw();
   }
 }
