@@ -229,4 +229,43 @@ void main() {
 
     expect(find.text('Subtitle'), findsOneWidget);
   });
+
+  testWidgets('ExpansionTile maintainState', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          dividerColor: _dividerColor,
+        ),
+        home: Material(
+          child: SingleChildScrollView(
+            child: Column(
+              children: const <Widget>[
+                ExpansionTile(
+                  title: Text('Tile 1'),
+                  initiallyExpanded: false,
+                  maintainState: true,
+                  children: <Widget>[
+                    Text('Maintaining State'),
+                  ],
+                ),
+                ExpansionTile(
+                  title: Text('Title 2'),
+                  initiallyExpanded: false,
+                  maintainState: false,
+                  children: <Widget>[
+                    Text('Discarding State'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+    ));
+
+    // This text should be there while ExpansionTile collapsed
+    expect(find.text('Maintaining State'), findsOneWidget);
+    // This text shouldn't be there while ExpansionTile collapsed
+    expect(find.text('Discarding State'), findsNothing);
+  });
 }
