@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -316,7 +317,7 @@ void main() {
 
     final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-    expect(testLogger.statusText, contains('Reloaded application in'));
+    expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
@@ -835,6 +836,112 @@ void main() {
     ));
   }, overrides: <Type, Generator>{
     Logger: () => DelegateLogger(MockLogger())
+  }));
+
+  test('Successfully turns WebSocketException into ToolExit', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+     when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw const WebSocketException();
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsToolExit());
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+  test('Successfully turns AppConnectionException into ToolExit', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+    when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw AppConnectionException('Could not connect to application with appInstanceId: c0ae0750-ee91-11e9-cea6-35d95a968356');
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsToolExit());
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+  test('Successfully turns ChromeDebugError into ToolExit', () => testbed.run(() async {
+     _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+     when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw ChromeDebugException(<String, dynamic>{});
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsToolExit());
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+
+  test('Rethrows Exception type', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+     when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw Exception('Something went wrong');
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsException);
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+  }));
+  test('Rethrows unknown exception type from web tooling', () => testbed.run(() async {
+    _setupMocks();
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
+    final MockStatus mockStatus = MockStatus();
+    delegateLogger.status = mockStatus;
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<void> unhandledErrorCompleter = Completer<void>();
+    when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
+      unawaited(unhandledErrorCompleter.future.then((void value) {
+        throw StateError('Something went wrong');
+      }));
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
+
+    final Future<void> expectation = expectLater(() => residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ), throwsStateError);
+
+    unhandledErrorCompleter.complete();
+    await expectation;
+    verify(mockStatus.stop()).called(1);
+  }, overrides: <Type, Generator>{
+    Logger: () => DelegateLogger(BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: null,
+        platform: const LocalPlatform(),
+      ),
+      outputPreferences: OutputPreferences.test(),
+    ))
   }));
 }
 

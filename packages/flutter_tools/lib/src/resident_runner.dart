@@ -110,13 +110,15 @@ class FlutterDevice {
         experimentalFlags: experimentalFlags,
         dartDefines: dartDefines,
       );
-      if (flutterProject.hasBuilders) {
-        generator = await CodeGeneratingResidentCompiler.create(
-          residentCompiler: generator,
-          flutterProject: flutterProject,
-        );
-      }
     }
+
+    if (flutterProject.hasBuilders) {
+      generator = await CodeGeneratingResidentCompiler.create(
+        residentCompiler: generator,
+        flutterProject: flutterProject,
+      );
+    }
+
     return FlutterDevice(
       device,
       trackWidgetCreation: trackWidgetCreation,

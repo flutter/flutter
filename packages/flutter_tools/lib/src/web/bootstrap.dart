@@ -194,7 +194,17 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
       function(url) {
         url = url.replace(baseUrl, '/');
         var module = window.\$dartLoader.urlToModuleId.get(url);
-        if (!module) return null;
+        if (!module) {
+          if (url.endsWith('dart_sdk.js')) {
+            module = 'dart_sdk';
+          } else {
+            try {
+              module = '/packages' + url.split('packages')[1].split('.')[0] + '.dart';
+            } catch (e) {
+              return null;
+            }
+          }
+        }
         return dart.getSourceMap(module);
       });
   }
