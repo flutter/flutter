@@ -35,8 +35,7 @@ namespace {
 
 const char* kDartVMArgs[] = {
     // clang-format off
-    // TODO(FL-117): Re-enable causal async stack traces when this issue is
-    // addressed.
+    "--lazy_async_stacks",
     "--no_causal_async_stacks",
 
 #if !defined(FLUTTER_PROFILE)
