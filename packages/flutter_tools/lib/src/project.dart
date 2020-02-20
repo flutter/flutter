@@ -493,7 +493,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     if (bundleIdentifier == null) {
       return false;
     }
-    for (String target in targets) {
+    for (final String target in targets) {
       // Create path to Info.plist file of the target.
       final String infoFile = globals.fs.path.join(hostAppRoot.path, target, 'Info.plist');
       // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
