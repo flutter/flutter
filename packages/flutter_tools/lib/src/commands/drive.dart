@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/web/devfs_web.dart';
 import 'package:meta/meta.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
@@ -15,6 +13,8 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../build_runner/devfs_web.dart';
+import '../build_runner/resident_web_runner.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
@@ -23,7 +23,6 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
-import '../build_runner/resident_web_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import '../web/web_runner.dart';
 import 'run.dart';
@@ -149,13 +148,6 @@ class DriveCommand extends RunCommandBase {
     final bool isWebPlatform = await device.targetPlatform == TargetPlatform.web_javascript;
     if (argResults['use-existing-app'] == null) {
       globals.printStatus('Starting application: $targetFile');
-
-      if (isWebPlatform) {
-        throwToolExit(
-          'Flutter Driver (web) does not support running without use-existing-app.\n'
-          'Please launch your application beforehand and connects via use-existing-app.'
-        );
-      }
 
       if (getBuildInfo().isRelease && !isWebPlatform) {
         // This is because we need VM service to be able to drive the app.
