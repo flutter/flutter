@@ -100,8 +100,8 @@ class DeviceManager {
   /// specifiedDeviceId = 'all'.
   bool get hasSpecifiedAllDevices => _specifiedDeviceId == 'all';
 
-  Stream<Device> getDevicesById(String deviceId) async* {
-    final List<Device> devices = await getAllConnectedDevices().toList();
+  Future<List<Device>> getDevicesById(String deviceId) async {
+    final List<Device> devices = await getAllConnectedDevices();
     deviceId = deviceId.toLowerCase();
     bool exactlyMatchesDeviceId(Device device) =>
         device.id.toLowerCase() == deviceId ||
@@ -113,18 +113,15 @@ class DeviceManager {
     final Device exactMatch = devices.firstWhere(
         exactlyMatchesDeviceId, orElse: () => null);
     if (exactMatch != null) {
-      yield exactMatch;
-      return;
+      return <Device>[exactMatch];
     }
 
     // Match on a id or name starting with [deviceId].
-    for (final Device device in devices.where(startsWithDeviceId)) {
-      yield device;
-    }
+    return devices.where(startsWithDeviceId).toList();
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
-  Stream<Device> getDevices() {
+  Future<List<Device>> getDevices() {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId)
         : getAllConnectedDevices();
@@ -135,12 +132,13 @@ class DeviceManager {
   }
 
   /// Return the list of all connected devices.
-  Stream<Device> getAllConnectedDevices() async* {
-    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
-      for (final Device device in await discoverer.devices) {
-        yield device;
-      }
-    }
+  Future<List<Device>> getAllConnectedDevices() async {
+    final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
+        discoverer.devices,
+    ]);
+
+    return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
   }
 
   /// Whether we're capable of listing any devices given the current environment configuration.
@@ -170,7 +168,7 @@ class DeviceManager {
   /// device connected, then filter out unsupported devices and prioritize
   /// ephemeral devices.
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
-    List<Device> devices = await getDevices().toList();
+    List<Device> devices = await getDevices();
 
     // Always remove web and fuchsia devices from `--all`. This setting
     // currently requires devices to share a frontend_server and resident
