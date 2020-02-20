@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -509,32 +510,16 @@ class _ResidentWebRunner extends ResidentWebRunner {
           'ignoreCache': !debuggingOptions.buildInfo.isDebug,
         });
       }
-    } on rpc.RPCException {
+    } on RpcException catch (err) {
+      globals.printError(err.toString());
+      return OperationResult(1, err.toString());
     } on WipError catch (err) {
       globals.printError(err.toString());
       return OperationResult(1, err.toString());
     } finally {
       status.stop();
     }
-    // try {
-    //   if (!deviceIsDebuggable) {
-    //     globals.printStatus('Recompile complete. Page requires refresh.');
-    //   } else if (deviceIsDebuggable && !debuggingOptions.buildInfo.isDebug) {
-    //     // On non-debug builds, a hard refresh is required to ensure the
-    //     // up to date sources are loaded.
-    //     await _wipConnection?.sendCommand('Page.reload', <String, Object>{
-    //       'ignoreCache': !debuggingOptions.buildInfo.isDebug,
-    //     });
-    //   } else {
-    //     transferMarker = timer.elapsed;
-    //   }
-    // } on WipError catch (err) {
-    //   globals.printError(err.toString());
-    //   return OperationResult(1, err.toString());
-    // } finally {
-    //   status.stop();
-    // }
-    status.stop();
+
     final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
     globals.printStatus('Restarted application in $elapsed.');
 
@@ -549,7 +534,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
-        // transferTimeInMs: timer.elapsed.inMilliseconds - transferMarker.inMilliseconds
       ).send();
     }
     return OperationResult.ok;
