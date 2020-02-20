@@ -105,6 +105,44 @@ void main() {
       }
     }, skip: kIsWeb);
 
+    testWidgets('keysPressed is correct when modifier is released before key', (WidgetTester tester) async {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia']) {
+        RawKeyboard.instance.clearKeysPressed();
+        expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+        await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.keyA,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.keyA,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform);
+        expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+      }
+    }, skip: kIsWeb);
+
     testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
