@@ -67,14 +67,30 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
   /* MAIN_EXTENSION_MARKER */
   child.main();
 
+window.\$dartLoader = {};
+window.\$dartLoader.rootDirectories = [];
 window.\$requireLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
   if (window.\$dartStackTraceUtility && !window.\$dartStackTraceUtility.ready) {
     window.\$dartStackTraceUtility.ready = true;
     let dart = dart_sdk.dart;
     window.\$dartStackTraceUtility.setSourceMapProvider(function(url) {
+      url = url.replace(window.\$dartUriBase, window.\$dartUriBase + '/');
+      // special handling for dart_sdk
+      if (url.indexOf('dart_sdk.js') != -1) {
+        return dart.getSourceMap('dart_sdk');
+      }
+      if (url.endsWith('.dart.lib.js')) {
+        url = url.replace('.dart.lib.js', '.dart.js');
+      }
       var module = window.\$requireLoader.urlToModuleId.get(url);
       if (!module) return;
-      return dart.getSourceMap(url);
+      // Remove leading `/` and trailing `.js`.
+      try {
+        module = module.replace('.lib.js', '').replace('.js', '');
+      } catch (err) {
+        return;
+      }
+      return dart.getSourceMap(module);
     });
   }
 });
