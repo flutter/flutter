@@ -18,7 +18,8 @@ final String defaultArbPathString = path.join('lib', 'l10n');
 const String defaultTemplateArbFileName = 'app_en_US.arb';
 const String defaultOutputFileString = 'output-localization-file';
 const String defaultClassNameString = 'AppLocalizations';
-const String singleMessageArbFileString = '''{
+const String singleMessageArbFileString = '''
+{
   "title": "Title",
   "@title": {
     "description": "Title for the application"
@@ -26,10 +27,12 @@ const String singleMessageArbFileString = '''{
 }''';
 
 const String esArbFileName = 'app_es.arb';
-const String singleEsMessageArbFileString = '''{
+const String singleEsMessageArbFileString = '''
+{
   "title": "Título"
 }''';
-const String singleZhMessageArbFileString = '''{
+const String singleZhMessageArbFileString = '''
+{
   "title": "标题"
 }''';
 
@@ -431,7 +434,8 @@ void main() {
     });
 
     test('correctly parses @@locale property in arb file', () {
-      const String arbFileWithEnLocale = '''{
+      const String arbFileWithEnLocale = '''
+{
   "@@locale": "en",
   "title": "Title",
   "@title": {
@@ -439,7 +443,8 @@ void main() {
   }
 }''';
 
-      const String arbFileWithZhLocale = '''{
+      const String arbFileWithZhLocale = '''
+{
   "@@locale": "zh",
   "title": "标题",
   "@title": {
@@ -473,7 +478,8 @@ void main() {
     });
 
     test('correctly prioritizes @@locale property in arb file over filename', () {
-      const String arbFileWithEnLocale = '''{
+      const String arbFileWithEnLocale = '''
+{
   "@@locale": "en",
   "title": "Stocks",
   "@title": {
@@ -481,7 +487,8 @@ void main() {
   }
 }''';
 
-      const String arbFileWithZhLocale = '''{
+      const String arbFileWithZhLocale = '''
+{
   "@@locale": "zh",
   "title": "标题",
   "@title": {
@@ -542,7 +549,8 @@ void main() {
       );
     });
     test('throws when the same locale is detected more than once', () {
-      const String secondMessageArbFileString = '''{
+      const String secondMessageArbFileString = '''
+{
   "market": "MARKET",
   "@market": {
     "description": "Label for the Market tab"
@@ -580,7 +588,8 @@ void main() {
   group('generateClassMethods', () {
     group('DateTime tests', () {
       test('throws an exception when improperly formatted date is passed in', () {
-        const String singleDateMessageArbFileString = '''{
+        const String singleDateMessageArbFileString = '''
+{
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
       "description": "The first day of spring",
@@ -618,7 +627,8 @@ void main() {
       });
 
       test('throws an exception when no format attribute is passed in', () {
-        const String singleDateMessageArbFileString = '''{
+        const String singleDateMessageArbFileString = '''
+{
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
       "description": "The first day of spring",
@@ -653,7 +663,8 @@ void main() {
       });
 
       test('correctly generates simple message with date along with other placeholders', () {
-        const String singleDateMessageArbFileString = '''{
+        const String singleDateMessageArbFileString = '''
+{
   "springGreetings": "Since it's {springStartDate}, it's finally spring! {helloWorld}!",
   "@springGreetings": {
       "description": "A realization that it's finally the spring season, followed by a greeting.",
@@ -721,7 +732,8 @@ void main() {
         };
 
         for (final String numberFormat in numberFormatsWithNamedParameters) {
-          final String singleNumberMessage = '''{
+          final String singleNumberMessage = '''
+{
   "courseCompletion": "You have completed {progress} of the course.",
   "@courseCompletion": {
     "description": "The amount of progress the student has made in their class.",
@@ -788,7 +800,8 @@ void main() {
         };
 
         for (final String numberFormat in numberFormatsWithPositionalParameters) {
-          final String singleNumberMessage = '''{
+          final String singleNumberMessage = '''
+{
   "courseCompletion": "You have completed {progress} of the course.",
   "@courseCompletion": {
     "description": "The amount of progress the student has made in their class.",
@@ -843,7 +856,8 @@ void main() {
       });
 
       test('throws an exception when improperly formatted number is passed in', () {
-        const String singleDateMessageArbFileString = '''{
+        const String singleDateMessageArbFileString = '''
+{
   "courseCompletion": "You have completed {progress} of the course.",
   "@courseCompletion": {
     "description": "The amount of progress the student has made in their class.",
@@ -883,7 +897,8 @@ void main() {
 
     group('plural messages', () {
       test('should throw attempting to generate a plural message without placeholders', () {
-        const String pluralMessageWithoutPlaceholdersAttribute = '''{
+        const String pluralMessageWithoutPlaceholdersAttribute = '''
+{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
   "@helloWorlds": {
     "description": "Improperly formatted since it has no placeholder attribute."
@@ -913,7 +928,8 @@ void main() {
       });
 
       test('should throw attempting to generate a plural message with an empty placeholders map', () {
-        const String pluralMessageWithEmptyPlaceholdersMap = '''{
+        const String pluralMessageWithEmptyPlaceholdersMap = '''
+{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
   "@helloWorlds": {
     "description": "Improperly formatted since it has no placeholder attribute.",
@@ -944,7 +960,8 @@ void main() {
       });
 
       test('should throw attempting to generate a plural message with no resource attributes', () {
-        const String pluralMessageWithoutResourceAttributes = '''{
+        const String pluralMessageWithoutResourceAttributes = '''
+{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}"
 }''';
 
@@ -971,7 +988,8 @@ void main() {
       });
 
       test('should throw attempting to generate a plural message with incorrect format for placeholders', () {
-        const String pluralMessageWithIncorrectPlaceholderFormat = '''{
+        const String pluralMessageWithIncorrectPlaceholderFormat = '''
+{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
   "@helloWorlds": {
     "placeholders": "Incorrectly a string, should be a map."
@@ -1003,7 +1021,8 @@ void main() {
     });
 
     test('should throw when failing to parse the arb file', () {
-      const String arbFileWithTrailingComma = '''{
+      const String arbFileWithTrailingComma = '''
+{
   "title": "Stocks",
   "@title": {
     "description": "Title for the Stocks application"
@@ -1036,7 +1055,8 @@ void main() {
     });
 
     test('should throw when resource is missing resource attribute', () {
-      const String arbFileWithMissingResourceAttribute = '''{
+      const String arbFileWithMissingResourceAttribute = '''
+{
   "title": "Stocks"
 }''';
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -1067,7 +1087,8 @@ void main() {
 
     group('checks for method/getter formatting', () {
       test('cannot contain non-alphanumeric symbols', () {
-        const String nonAlphaNumericArbFile = '''{
+        const String nonAlphaNumericArbFile = '''
+{
     "title!!": "Stocks",
     "@title!!": {
       "description": "Title for the Stocks application"
@@ -1097,7 +1118,8 @@ void main() {
       });
 
       test('must start with lowercase character', () {
-        const String nonAlphaNumericArbFile = '''{
+        const String nonAlphaNumericArbFile = '''
+{
     "Title": "Stocks",
     "@Title": {
       "description": "Title for the Stocks application"
@@ -1127,7 +1149,8 @@ void main() {
       });
 
       test('cannot start with a number', () {
-        const String nonAlphaNumericArbFile = '''{
+        const String nonAlphaNumericArbFile = '''
+{
     "123title": "Stocks",
     "@123title": {
       "description": "Title for the Stocks application"

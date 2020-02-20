@@ -201,16 +201,15 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Stream<Device> getAllConnectedDevices() => Stream<Device>.fromIterable(devices);
+  Future<List<Device>> getAllConnectedDevices() async => devices;
 
   @override
-  Stream<Device> getDevicesById(String deviceId) {
-    return Stream<Device>.fromIterable(
-        devices.where((Device device) => device.id == deviceId));
+  Future<List<Device>> getDevicesById(String deviceId) async {
+    return devices.where((Device device) => device.id == deviceId).toList();
   }
 
   @override
-  Stream<Device> getDevices() {
+  Future<List<Device>> getDevices() {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId)
         : getAllConnectedDevices();

@@ -1013,6 +1013,8 @@ class Scaffold extends StatefulWidget {
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
+    this.drawerEnableOpenDragGesture = true,
+    this.endDrawerEnableOpenDragGesture = true,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1115,9 +1117,10 @@ class Scaffold extends StatefulWidget {
   /// To close the drawer, use [Navigator.pop].
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth] to 0.
-  /// Then, use [ScaffoldState.openDrawer] to open the drawer and
-  /// [Navigator.pop] to close it.
+  /// To disable the drawer edge swipe, set the
+  /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
+  /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
+  /// it.
   ///
   /// ```dart
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -1155,7 +1158,8 @@ class Scaffold extends StatefulWidget {
   ///         ),
   ///       ),
   ///     ),
-  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///     // Disable opening the drawer with a swipe gesture.
+  ///     drawerEnableOpenDragGesture: false,
   ///   );
   /// }
   /// ```
@@ -1173,9 +1177,10 @@ class Scaffold extends StatefulWidget {
   /// To close the drawer, use [Navigator.pop].
   ///
   /// {@tool dartpad --template=stateful_widget_material}
-  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
-  /// to 0. Then, use [ScaffoldState.openEndDrawer] to open the drawer and
-  /// [Navigator.pop] to close it.
+  /// To disable the drawer edge swipe, set the
+  /// [Scaffold.endDrawerEnableOpenDragGesture] to false. Then, use
+  /// [ScaffoldState.openEndDrawer] to open the drawer and [Navigator.pop] to
+  /// close it.
   ///
   /// ```dart
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -1213,7 +1218,8 @@ class Scaffold extends StatefulWidget {
   ///         ),
   ///       ),
   ///     ),
-  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///     // Disable opening the end drawer with a swipe gesture.
+  ///     endDrawerEnableOpenDragGesture: false,
   ///   );
   /// }
   /// ```
@@ -1314,6 +1320,18 @@ class Scaffold extends StatefulWidget {
   /// example, if `TextDirection.of(context)` is set to [TextDirection.ltr],
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double drawerEdgeDragWidth;
+
+  /// Determines if the [Scaffold.drawer] can be opened with a drag
+  /// gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool drawerEnableOpenDragGesture;
+
+  /// Determines if the [Scaffold.endDrawer] can be opened with a
+  /// drag gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool endDrawerEnableOpenDragGesture;
 
   /// This flag is deprecated and fixes and issue with incorrect clipping
   /// and positioning of the [SnackBar] set to [SnackBarBehavior.floating].
@@ -2232,6 +2250,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
+          enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2256,6 +2275,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
+          enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
