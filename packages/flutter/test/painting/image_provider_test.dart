@@ -400,12 +400,6 @@ void main() {
     final MemoryImage memoryImage = MemoryImage(bytes);
     final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
 
-    final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-      expect(cacheWidth, 123);
-      expect(cacheHeight, 321);
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
-    };
-
     bool isAsync = false;
     resizeImage.obtainKey(ImageConfiguration.empty).then((Object key) {
       expect(isAsync, false);
@@ -418,12 +412,6 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MockMemoryImage memoryImage = MockMemoryImage(bytes);
     final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
-
-    final DecoderCallback decode = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-      expect(cacheWidth, 123);
-      expect(cacheHeight, 321);
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
-    };
 
     bool isAsync = false;
     resizeImage.obtainKey(ImageConfiguration.empty).then((Object key) {
@@ -464,7 +452,7 @@ Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
 }
 
 class MockMemoryImage extends MemoryImage {
-  MockMemoryImage(Uint8List bytes) : super(bytes) {}
+  MockMemoryImage(Uint8List bytes) : super(bytes);
 
   @override
   Future<MemoryImage> obtainKey(ImageConfiguration configuration) {
