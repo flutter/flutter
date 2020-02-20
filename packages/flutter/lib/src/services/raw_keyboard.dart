@@ -516,14 +516,15 @@ class RawKeyboard {
     }
     if (event is RawKeyUpEvent) {
       // Since the value of the logical key is affected by the modifiers that
-      // are down, the logical key in the key up event can't just be removed,
-      // the same logical key as was added in the key down event needs to be
-      // removed. To do that, we match the physical key in this key up event
-      // with the physical key in the key down event, since the physical keys
-      // are unaffected by the modifiers present.
+      // are down (most notably shift), the logical key in the key up event
+      // can't just be removed, because it may not match the logical key from
+      // the down event ("A" isn't the same logical key as "a"). The same
+      // logical key as was added in the key down event needs to be removed. To
+      // do that, we match the physical key in this key up event with the
+      // physical key in the key down event, since the physical keys are
+      // unaffected by any modifiers present.
       _keysDown.remove(event.physicalKey);
     }
-
     // Make sure that the modifiers reflect reality, in case a modifier key was
     // pressed/released while the app didn't have focus.
     _synchronizeModifiers(event);
@@ -562,7 +563,7 @@ class RawKeyboard {
     // platforms, so don't map it here.
   };
 
-  // The list of all modifier keys that are represented in modifier key bit
+  // The map of all modifier keys that are represented in modifier key bit
   // masks on all platforms, so that they can be cleared out of pressedKeys when
   // synchronizing.
   static final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _allModifiers = <PhysicalKeyboardKey, LogicalKeyboardKey>{

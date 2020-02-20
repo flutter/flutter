@@ -22,7 +22,7 @@ void main() {
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
+            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
           ),
           reason: 'on $platform',
         );
@@ -64,7 +64,7 @@ void main() {
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
+            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
           ),
           reason: 'on $platform',
         );
@@ -73,13 +73,14 @@ void main() {
         // The Fn key isn't mapped on linux.
         if (platform != 'linux') {
           await simulateKeyDownEvent(LogicalKeyboardKey.fn, platform: platform);
-          expect(RawKeyboard.instance.keysPressed,
-            equals(
-              <LogicalKeyboardKey>{
-                if (platform != 'macos') LogicalKeyboardKey.fn,
-              },
-            ),
-            reason: 'on $platform');
+          expect(
+              RawKeyboard.instance.keysPressed,
+              equals(
+                <LogicalKeyboardKey>{
+                  if (platform != 'macos') LogicalKeyboardKey.fn,
+                },
+              ),
+              reason: 'on $platform');
           await simulateKeyDownEvent(LogicalKeyboardKey.f12, platform: platform);
           expect(
             RawKeyboard.instance.keysPressed,
@@ -95,7 +96,7 @@ void main() {
           expect(
             RawKeyboard.instance.keysPressed,
             equals(
-              <LogicalKeyboardKey>{ LogicalKeyboardKey.f12 },
+              <LogicalKeyboardKey>{LogicalKeyboardKey.f12},
             ),
             reason: 'on $platform',
           );
@@ -109,15 +110,22 @@ void main() {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia']) {
         RawKeyboard.instance.clearKeysPressed();
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
-        await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform, physicalKey: PhysicalKeyboardKey.shiftLeft);
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
+            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
           ),
           reason: 'on $platform',
         );
-        await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);
+        // TODO(gspencergoog): Switch to capital A when the new key event code
+        // is finished that can simulate real keys.
+        // https://github.com/flutter/flutter/issues/33521
+        // This should really be done with a simulated capital A, but the event
+        // simulation code doesn't really support that, since it only can
+        // simulate events that appear in the key maps (and capital letters
+        // don't appear there).
+        await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform, physicalKey: PhysicalKeyboardKey.keyA);
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
@@ -128,7 +136,7 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform, physicalKey: PhysicalKeyboardKey.shiftLeft);
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
@@ -138,7 +146,7 @@ void main() {
           ),
           reason: 'on $platform',
         );
-        await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform);
+        await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform, physicalKey: PhysicalKeyboardKey.keyA);
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
       }
     }, skip: kIsWeb);
@@ -887,6 +895,7 @@ void main() {
           'modifiers': 0x0,
         });
       }
+
       expect(() => _createFailingKey(), throwsAssertionError);
     });
     test('Control keyboard keys are correctly translated', () {
