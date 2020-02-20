@@ -268,7 +268,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
 
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       // TODO(PIINKS): I don't think this key exists in post-submit luci checks, verify.
-      && platform.environment['upload_packages'];
+      && platform.environment['upload_packages'] as bool;
 
     return cirrusPostSubmit || luciPostSubmit;
   }
