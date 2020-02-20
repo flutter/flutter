@@ -515,14 +515,9 @@ class RawKeyboard {
       _keysPressed[event.physicalKey] = event.logicalKey;
     }
     if (event is RawKeyUpEvent) {
-      // Since the value of the logical key is affected by the modifiers that
-      // are down (most notably shift), the logical key in the key up event
-      // can't just be removed, because it may not match the logical key from
-      // the down event ("A" isn't the same logical key as "a"). The same
-      // logical key as was added in the key down event needs to be removed. To
-      // do that, we match the physical key in this key up event with the
-      // physical key in the key down event, since the physical keys are
-      // unaffected by any modifiers present.
+      // Use the physical key in the key up event to find the physical key from
+      // the corresponding key down event and remove it, even if the logical
+      // keys don't match.
       _keysPressed.remove(event.physicalKey);
     }
     // Make sure that the modifiers reflect reality, in case a modifier key was
