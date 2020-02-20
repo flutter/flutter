@@ -54,8 +54,8 @@ class WebAssetServer implements AssetReader {
   final Map<String, String> _digests;
   final Map<String, String> _modules;
 
-  void performRestart() {
-    for (final String key in _files.keys) {
+  void performRestart(List<String> modules) {
+    for (final String key in modules) {
       // We skip computing the digest by using the hashCode of the underlying buffer.
       // Whenever a file is updated, the corresponding Uint8List.view it corresponds
       // to will change.
@@ -539,7 +539,7 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
-    webAssetServer.performRestart();
+    webAssetServer.performRestart(modules);
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),
