@@ -392,8 +392,16 @@ Future<XcodeBuildResult> buildXcodeProject({
       ),
     );
   } else {
+    // If the app contains a watch companion target, the sdk argument of xcodebuild has to be omitted.
+    // For some reason this leads to TARGET_BUILD_DIR always ending in 'iphoneos' even though the
+    // actual directory will end with 'iphonesimulator' for simulator builds.
+    // The value of TARGET_BUILD_DIR is adjusted to accommodate for this effect.
+    String targetBuildDir = buildSettings['TARGET_BUILD_DIR'];
+    if (hasWatchCompanion && ! buildForDevice) {
+      targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
+    }
     final String expectedOutputDirectory = globals.fs.path.join(
-      buildSettings['TARGET_BUILD_DIR'],
+      targetBuildDir,
       buildSettings['WRAPPER_NAME'],
     );
 
