@@ -313,12 +313,12 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
   @override
   void dispose() {
-    super.dispose();
     _tap.dispose();
     _drag.dispose();
 
     _positionController.dispose();
     _reactionController.dispose();
+    super.dispose();
   }
 }
 
