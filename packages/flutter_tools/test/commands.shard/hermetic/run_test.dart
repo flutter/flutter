@@ -95,7 +95,7 @@ void main() {
         return Future<List<Device>>.value(<Device>[mockDevice]);
       });
       when(deviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.value(mockDevice);
+        return Future<List<Device>>.value(<Device>[mockDevice]);
       });
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
@@ -215,7 +215,7 @@ void main() {
 
         const List<Device> noDevices = <Device>[];
         when(mockDeviceManager.getDevices()).thenAnswer(
-          (Invocation invocation) => Stream<Device>.fromIterable(noDevices)
+          (Invocation invocation) => Future<List<Device>>.value(noDevices)
         );
         when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(noDevices)
@@ -245,7 +245,7 @@ void main() {
 
         // Called as part of requiredArtifacts()
         when(mockDeviceManager.getDevices()).thenAnswer(
-          (Invocation invocation) => Stream<Device>.fromIterable(<Device>[])
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[])
         );
         // No devices are attached, we just want to verify update the cache
         // BEFORE checking for devices
@@ -308,7 +308,7 @@ void main() {
         )).thenReturn('/path/to/sdk');
 
         when(mockDeviceManager.getDevices()).thenAnswer(
-          (Invocation invocation) => Stream<Device>.fromIterable(<Device>[mockDevice]),
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
 
         when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
@@ -366,9 +366,7 @@ void main() {
       setUpAll(() {
         final FakeDevice fakeDevice = FakeDevice();
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-          return Stream<Device>.fromIterable(<Device>[
-            fakeDevice,
-          ]);
+          return Future<List<Device>>.value(<Device>[fakeDevice]);
         });
         when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
@@ -454,7 +452,7 @@ void main() {
 
     testUsingContext('should only request artifacts corresponding to connected devices', () async {
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
+        return Future<List<Device>>.value(<Device>[
           MockDevice(TargetPlatform.android_arm),
         ]);
       });
@@ -465,7 +463,7 @@ void main() {
       }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
+        return Future<List<Device>>.value(<Device>[
           MockDevice(TargetPlatform.ios),
         ]);
       });
@@ -476,7 +474,7 @@ void main() {
       }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
+        return Future<List<Device>>.value(<Device>[
           MockDevice(TargetPlatform.ios),
           MockDevice(TargetPlatform.android_arm),
         ]);
@@ -489,7 +487,7 @@ void main() {
       }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
+        return Future<List<Device>>.value(<Device>[
           MockDevice(TargetPlatform.web_javascript),
         ]);
       });
@@ -510,7 +508,7 @@ void main() {
       setUpAll(() {
         final FakeDevice fakeDevice = FakeDevice().._targetPlatform = TargetPlatform.web_javascript;
         when(mockDeviceManager.getDevices()).thenAnswer(
-          (Invocation invocation) => Stream<Device>.fromIterable(<Device>[fakeDevice])
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
         );
         when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
@@ -612,7 +610,7 @@ class TestRunCommand extends RunCommand {
   @override
   // ignore: must_call_super
   Future<void> validateCommand() async {
-    devices = await deviceManager.getDevices().toList();
+    devices = await deviceManager.getDevices();
   }
 }
 
