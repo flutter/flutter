@@ -90,6 +90,7 @@ void main() {
     expect(response.headers, allOf(<Matcher>[
       containsPair('content-length', source.lengthSync().toString()),
       containsPair('content-type', 'application/javascript'),
+      containsPair('etag', isNotNull)
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
@@ -144,6 +145,7 @@ void main() {
     expect(response.headers, allOf(<Matcher>[
       containsPair('content-length', source.lengthSync().toString()),
       containsPair('content-type', 'application/javascript'),
+      containsPair('etag', isNotNull)
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{

@@ -141,6 +141,7 @@ class WebAssetServer implements AssetReader {
       final List<int> bytes = getFile(requestPath);
       headers[HttpHeaders.contentLengthHeader] = bytes.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/javascript';
+      headers[HttpHeaders.etagHeader] = bytes.hashCode.toString();
       return shelf.Response.ok(bytes, headers: headers);
     }
     // If this is a sourcemap file, then it might be in the in-memory cache.
@@ -149,6 +150,7 @@ class WebAssetServer implements AssetReader {
       final List<int> bytes = getSourceMap(requestPath);
       headers[HttpHeaders.contentLengthHeader] = bytes.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/json';
+      headers[HttpHeaders.etagHeader] = bytes.hashCode.toString();
       return shelf.Response.ok(bytes, headers: headers);
     }
 
