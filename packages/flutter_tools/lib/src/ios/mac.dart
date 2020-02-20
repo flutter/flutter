@@ -233,11 +233,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (hasWatchCompanion) {
     // The -sdk argument has to be omitted if a watchOS companion app exists.
     // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.
-    printStatus('Watch companion app found. Adjusting build settings.');
+    globals.printStatus('Watch companion app found. Adjusting build settings.');
     if (! buildForDevice && deviceID == '') {
-      printError('No simulator device ID has been set.');
-      printError('A device ID is required to build a flutter a flutter app with a companion watch app.');
-      printError('Please run "flutter devices" to get a list of available device IDs.');
+      globals.printError('No simulator device ID has been set.');
+      globals.printError('A device ID is required to build a flutter a flutter app with a companion watch app.');
+      globals.printError('Please run "flutter devices" to get a list of available device IDs.');
       return XcodeBuildResult(success: false);
     }
     if (! buildForDevice) {
