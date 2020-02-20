@@ -277,6 +277,7 @@ task:
         - cd web_installers/packages/web_drivers/
         - pub get
         - dart lib/web_driver_installer.dart &
+        - sleep 20
         - chromedriver/chromedriver --port=4444
         - sleep 5
         - cd ../../../examples/hello_world/
