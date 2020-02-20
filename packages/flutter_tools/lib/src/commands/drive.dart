@@ -143,6 +143,7 @@ class DriveCommand extends RunCommandBase {
     }
 
     String observatoryUri;
+    ResidentRunner residentRunner;
     final bool isWebPlatform = await device.targetPlatform == TargetPlatform.web_javascript;
     if (argResults['use-existing-app'] == null) {
       globals.printStatus('Starting application: $targetFile');
@@ -172,16 +173,15 @@ class DriveCommand extends RunCommandBase {
       Uri webUri;
 
       if (isWebPlatform) {
-        ResidentRunner runner;
         final FlutterProject flutterProject = FlutterProject.current();
         final FlutterDevice flutterDevice = await FlutterDevice.create(
-            device,
-            flutterProject: flutterProject,
-            trackWidgetCreation: boolArg('track-widget-creation'),
-            target: targetFile,
-            buildMode: getBuildMode()
+          device,
+          flutterProject: flutterProject,
+          trackWidgetCreation: boolArg('track-widget-creation'),
+          target: targetFile,
+          buildMode: getBuildMode()
         );
-        runner = webRunnerFactory.createWebRunner(
+        residentRunner = webRunnerFactory.createWebRunner(
           flutterDevice,
           target: targetFile,
           flutterProject: flutterProject,
@@ -196,16 +196,18 @@ class DriveCommand extends RunCommandBase {
         // need to know about analytics.
         //
         // Do not add more operations to the future.
-        final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
+        final Completer<void> appStartedCompleter = Completer<void>.sync();
 
-        final int result = await runner.run(
-          appStartedCompleter: appStartedTimeRecorder,
+        final int result = await residentRunner.run(
+          appStartedCompleter: appStartedCompleter,
           route: route,
         );
         if (result != 0) {
           throwToolExit(null, exitCode: result);
         }
-        webUri = runner.uri;
+        // Wait until the app is started.
+        await appStartedCompleter.future;
+        webUri = residentRunner.uri;
       }
 
       final LaunchResult result = await appStarter(this, webUri);
@@ -287,6 +289,7 @@ $ex
       }
       throw Exception('Unable to run test: $error\n$stackTrace');
     } finally {
+      await residentRunner?.exit();
       await driver?.quit();
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         globals.printStatus('Leaving the application running.');
