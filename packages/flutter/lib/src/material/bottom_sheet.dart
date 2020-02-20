@@ -522,7 +522,7 @@ class BottomSheetSuspendedCurve extends Curve {
 
   @override
   String toString() {
-    return '$runtimeType($startingPoint, $curve)';
+    return '${describeIdentity(this)}($startingPoint, $curve)';
   }
 }
 
