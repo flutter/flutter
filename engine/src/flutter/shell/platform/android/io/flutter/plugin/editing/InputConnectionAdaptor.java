@@ -10,6 +10,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.text.DynamicLayout;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.TextPaint;
@@ -274,8 +275,11 @@ class InputConnectionAdaptor extends BaseInputConnection {
         int newSel = Math.min(selStart + 1, mEditable.length());
         setSelection(newSel, newSel);
         return true;
-      } else if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER
-          || event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER) {
+        // When the enter key is pressed on a non-multiline field, consider it a
+        // submit instead of a newline.
+      } else if ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+              || event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)
+          && (InputType.TYPE_TEXT_FLAG_MULTI_LINE & mEditorInfo.inputType) == 0) {
         performEditorAction(mEditorInfo.imeOptions & EditorInfo.IME_MASK_ACTION);
         return true;
       } else {
