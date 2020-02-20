@@ -1018,14 +1018,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     final Route<dynamic> result = widget.onUnknownRoute(settings);
     assert(() {
       if (result == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The onUnknownRoute callback returned null.'),
-          ErrorDescription(
-            'When the $runtimeType requested the route $settings from its '
-            'onUnknownRoute callback, the callback returned null. Such callbacks '
-            'must never return null.'
-          )
-        ]);
+        throw FlutterError(
+          'The onUnknownRoute callback returned null.\n'
+          'When the $runtimeType requested the route $settings from its '
+          'onUnknownRoute callback, the callback returned null. Such callbacks '
+          'must never return null.'
+        );
       }
       return true;
     }());
