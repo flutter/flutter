@@ -512,7 +512,7 @@ class RawKeyboard {
       return;
     }
     if (event is RawKeyDownEvent) {
-      _keysDown[event.physicalKey] = event.logicalKey;
+      _keysPressed[event.physicalKey] = event.logicalKey;
     }
     if (event is RawKeyUpEvent) {
       // Since the value of the logical key is affected by the modifiers that
@@ -523,7 +523,7 @@ class RawKeyboard {
       // do that, we match the physical key in this key up event with the
       // physical key in the key down event, since the physical keys are
       // unaffected by any modifiers present.
-      _keysDown.remove(event.physicalKey);
+      _keysPressed.remove(event.physicalKey);
     }
     // Make sure that the modifiers reflect reality, in case a modifier key was
     // pressed/released while the app didn't have focus.
@@ -563,10 +563,9 @@ class RawKeyboard {
     // platforms, so don't map it here.
   };
 
-  // The map of all modifier keys that are represented in modifier key bit
-  // masks on all platforms, so that they can be cleared out of pressedKeys when
-  // synchronizing.
-  static final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _allModifiers = <PhysicalKeyboardKey, LogicalKeyboardKey>{
+  // The map of all modifier keys except Fn, since that is treated differently
+  // on some platforms.
+  static final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _allModifiersExceptFn = <PhysicalKeyboardKey, LogicalKeyboardKey>{
     PhysicalKeyboardKey.altLeft: LogicalKeyboardKey.altLeft,
     PhysicalKeyboardKey.altRight: LogicalKeyboardKey.altRight,
     PhysicalKeyboardKey.shiftLeft: LogicalKeyboardKey.shiftLeft,
@@ -580,7 +579,21 @@ class RawKeyboard {
     PhysicalKeyboardKey.scrollLock: LogicalKeyboardKey.scrollLock,
   };
 
+  // The map of all modifier keys that are represented in modifier key bit
+  // masks on all platforms, so that they can be cleared out of pressedKeys when
+  // synchronizing.
+  static final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _allModifiers = <PhysicalKeyboardKey, LogicalKeyboardKey>{
+    PhysicalKeyboardKey.fn: LogicalKeyboardKey.fn,
+    ..._allModifiersExceptFn,
+  };
+
   void _synchronizeModifiers(RawKeyEvent event) {
+    // Don't send any key events for these changes, since there *should* be
+    // separate events for each modifier key down/up that occurs while the app
+    // has focus. This is just to synchronize the modifier keys when they are
+    // pressed/released while the app doesn't have focus, to make sure that
+    // _keysPressed reflects reality at all times.
+
     final Map<ModifierKey, KeyboardSide> modifiersPressed = event.data.modifiersPressed;
     final Map<PhysicalKeyboardKey, LogicalKeyboardKey> modifierKeys = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
     for (final ModifierKey key in modifiersPressed.keys) {
@@ -592,32 +605,27 @@ class RawKeyboard {
         modifierKeys[physicalModifier] = _allModifiers[physicalModifier];
       }
     }
-    // Don't send any key events for these changes, since there *should* be
-    // separate events for each modifier key down/up that occurs while the app
-    // has focus. This is just to synchronize the modifier keys when they are
-    // pressed/released while the app doesn't have focus, to make sure that
-    // _keysPressed reflects reality at all times.
-    _allModifiers.keys.forEach(_keysDown.remove);
+    _allModifiersExceptFn.keys.forEach(_keysPressed.remove);
     if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
       // On Fuchsia and macOS, the Fn key is not considered a modifier key.
-      _keysDown.remove(PhysicalKeyboardKey.fn);
+      _keysPressed.remove(PhysicalKeyboardKey.fn);
     }
-    _keysDown.addAll(modifierKeys);
+    _keysPressed.addAll(modifierKeys);
   }
 
-  final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _keysDown = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
+  final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _keysPressed = <PhysicalKeyboardKey, LogicalKeyboardKey>{};
 
   /// Returns the set of keys currently pressed.
-  Set<LogicalKeyboardKey> get keysPressed => _keysDown.values.toSet();
+  Set<LogicalKeyboardKey> get keysPressed => _keysPressed.values.toSet();
 
   /// Returns the set of physical keys currently pressed.
-  Set<PhysicalKeyboardKey> get physicalKeysPressed => _keysDown.keys.toSet();
+  Set<PhysicalKeyboardKey> get physicalKeysPressed => _keysPressed.keys.toSet();
 
   /// Clears the list of keys returned from [keysPressed].
   ///
   /// This is used by the testing framework to make sure tests are hermetic.
   @visibleForTesting
-  void clearKeysPressed() => _keysDown.clear();
+  void clearKeysPressed() => _keysPressed.clear();
 }
 
 class _ModifierSidePair extends Object {

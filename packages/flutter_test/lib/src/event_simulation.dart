@@ -414,8 +414,11 @@ class KeyEventSimulator {
 
 /// Simulates sending a hardware key down event through the system channel.
 ///
+/// It is intended for use in writing tests.
+///
 /// This only simulates key presses coming from a physical keyboard, not from a
-/// soft keyboard.
+/// soft keyboard, and it can only simulate keys that appear in the key maps
+/// such as [kAndroidToLogicalKey], [kMacOsToPhysicalKey], etc.
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
@@ -433,8 +436,11 @@ Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String platform, Phys
 
 /// Simulates sending a hardware key up event through the system channel.
 ///
+/// It is intended for use in writing tests.
+///
 /// This only simulates key presses coming from a physical keyboard, not from a
-/// soft keyboard.
+/// soft keyboard, and it can only simulate keys that appear in the key maps
+/// such as [kAndroidToLogicalKey], [kMacOsToPhysicalKey], etc.
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of

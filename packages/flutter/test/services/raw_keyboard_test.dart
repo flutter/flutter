@@ -22,7 +22,7 @@ void main() {
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
           ),
           reason: 'on $platform',
         );
@@ -64,7 +64,7 @@ void main() {
         expect(
           RawKeyboard.instance.keysPressed,
           equals(
-            <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft},
+            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
           ),
           reason: 'on $platform',
         );
@@ -96,7 +96,7 @@ void main() {
           expect(
             RawKeyboard.instance.keysPressed,
             equals(
-              <LogicalKeyboardKey>{LogicalKeyboardKey.f12},
+              <LogicalKeyboardKey>{ LogicalKeyboardKey.f12 },
             ),
             reason: 'on $platform',
           );
