@@ -678,6 +678,8 @@ abstract class ResidentRunner {
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
 
+  Uri get uri => flutterDevices.first.devFS.baseUri;
+
   /// Returns [true] if the resident runner exited after invoking [exit()].
   bool get exited => _exited;
 

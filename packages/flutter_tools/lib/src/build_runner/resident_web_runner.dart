@@ -79,7 +79,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     bool stayResident = true,
     @required this.dartDefines,
   }) : super(
-          <FlutterDevice>[],
+          <FlutterDevice>[device],
           target: target ?? globals.fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,

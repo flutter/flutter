@@ -13,8 +13,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../build_runner/devfs_web.dart';
-import '../build_runner/resident_web_runner.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
@@ -164,10 +162,10 @@ class DriveCommand extends RunCommandBase {
         // TODO(angjieli): remove this once running against
         // target under test_driver in debug mode is supported
         throwToolExit(
-            'Flutter Driver web does not support running in debug mode.\n'
-                '\n'
-                'Use --profile mode for testing application performance.\n'
-                'Use --release mode for testing correctness (with assertions).'
+          'Flutter Driver web does not support running in debug mode.\n'
+          '\n'
+          'Use --profile mode for testing application performance.\n'
+          'Use --release mode for testing correctness (with assertions).'
         );
       }
 
@@ -207,8 +205,7 @@ class DriveCommand extends RunCommandBase {
         if (result != 0) {
           throwToolExit(null, exitCode: result);
         }
-        final WebDevFS webDevFS = (runner as ResidentWebRunner).device.devFS as WebDevFS;
-        webUri = Uri.parse('http://${webDevFS.hostname}:${webDevFS.port}');
+        webUri = runner.uri;
       }
 
       final LaunchResult result = await appStarter(this, webUri);
