@@ -311,7 +311,7 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets) {
-      throw FlutterError('$reason');
+      throw FlutterError(reason);
     }
     return true;
   }());
