@@ -106,7 +106,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
     if (widget.handleSelectAll != null) {
       items.add(FlatButton(
         child: Text(localizations.selectAllButtonLabel),
-        //child: Text('Select absolutely everything'),
         onPressed: () {
           setState(() {
             _overflowOpen = false;
@@ -126,16 +125,17 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
         isAbove: widget.isAbove,
         overflowOpen: _overflowOpen,
         children: <Widget>[
+          // The navButton that shows and hides the overflow menu is the first
+          // child.
           Material(
             child: IconButton(
-              icon: Icon(Icons.more_vert),
+              icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
               onPressed: () {
-                print('justin pressed more.');
                 setState(() {
                   _overflowOpen = !_overflowOpen;
                 });
               },
-              tooltip: 'More',
+              tooltip: _overflowOpen ? 'Back' : 'More',
             ),
           ),
           ...items,
@@ -196,77 +196,6 @@ class _TextSelectionToolbarContainerState extends State<_TextSelectionToolbarCon
   }
 }
 
-// The content of the text selection menu when the overflow menu is closed,
-// including when the more button is not shown at all.
-class _TextSelectionToolbarContent extends StatelessWidget {
-  const _TextSelectionToolbarContent({
-    Key key,
-    @required this.items,
-    this.onMorePressed,
-    this.showMoreButton = false,
-  }) : assert(items != null),
-       super(key: key);
-
-  final List<Widget> items;
-  final VoidCallback onMorePressed;
-  final bool showMoreButton;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: _kToolbarHeight,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          ...items,
-          if (showMoreButton) IconButton(
-            icon: Icon(Icons.more_vert),
-            tooltip: 'More',
-            onPressed: onMorePressed,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// The content of the text selection menu when the overflow menu is open.
-class _TextSelectionToolbarContentOverflow extends StatelessWidget {
-  const _TextSelectionToolbarContentOverflow({
-    Key key,
-    @required this.items,
-    @required this.onBackPressed,
-    @required this.isAbove,
-  }) : assert(items != null),
-       assert(onBackPressed != null),
-       super(key: key);
-
-  final List<Widget> items;
-  final VoidCallback onBackPressed;
-
-  // Whether the menu appears above or below the anchor.
-  final bool isAbove;
-
-  @override
-  Widget build(BuildContext context) {
-    final IconButton moreButton = IconButton(
-      icon: const Icon(Icons.arrow_back),
-      tooltip: 'Back',
-      onPressed: onBackPressed,
-    );
-    final List<Widget> children = <Widget>[...items];
-    children.insert(isAbove ? children.length : 0, moreButton);
-
-    return Container(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
-      ),
-    );
-  }
-}
-
 // TODO(justinmc): Rename.
 class _TextSelectionToolbarROW extends MultiChildRenderObjectWidget {
   _TextSelectionToolbarROW({
@@ -301,15 +230,35 @@ class _TextSelectionToolbarROW extends MultiChildRenderObjectWidget {
 
 class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>, RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
   _TextSelectionToolbarRB({
-    @required this.isAbove,
-    @required this.overflowOpen,
+    @required bool isAbove,
+    @required bool overflowOpen,
   }) : assert(overflowOpen != null),
        assert(isAbove != null),
+       _isAbove = isAbove,
+       _overflowOpen = overflowOpen,
        super();
 
-  bool isAbove;
-  bool overflowOpen;
   int _lastIndexThatFits = -1;
+
+  bool _isAbove;
+  bool get isAbove => _isAbove;
+  set isAbove(bool value) {
+    if (value == isAbove) {
+      return;
+    }
+    _isAbove = value;
+    markNeedsLayout();
+  }
+
+  bool _overflowOpen;
+  bool get overflowOpen => _overflowOpen;
+  set overflowOpen(bool value) {
+    if (value == overflowOpen) {
+      return;
+    }
+    _overflowOpen = value;
+    markNeedsLayout();
+  }
 
   // Lay out all children, regardless of whether or not they will be painted or
   // placed with an offset. Find which child overflows, if any.
