@@ -951,8 +951,8 @@ class _ReadingOrderDirectionalGroupData extends Diagnosticable {
 /// 3. Pick the closest to the beginning of the reading order from among the
 ///    nodes discovered above.
 ///
-/// It uses the ambient [Directionality] in the context for the enclosing scope
-/// to determine which direction is "reading order".
+/// It uses the ambient [Directionality] in the context for the enclosing
+/// [FocusTraversalGroup] to determine which direction is "reading order".
 ///
 /// See also:
 ///
@@ -1296,11 +1296,14 @@ class _OrderedFocusInfo {
 ///     ),
 ///   );
 /// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///  * [FocusTraversalGroup], a widget that groups together and imposes a
+///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
+///  * [WidgetOrderTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
 ///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
 ///    natural "reading order" for the current [Directionality].
