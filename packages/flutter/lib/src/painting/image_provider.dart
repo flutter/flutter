@@ -728,7 +728,7 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
   @override
   Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) {
     Completer<_SizeAwareCacheKey> completer;
-    // If the imageProvider future is synchronous, then we will be able to fill in result with
+    // If the imageProvider.obtainKey future is synchronous, then we will be able to fill in result with
     // a value before completer is initialized below.
     SynchronousFuture<_SizeAwareCacheKey> result;
     imageProvider.obtainKey(configuration).then((Object key) {

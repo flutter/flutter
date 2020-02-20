@@ -410,7 +410,7 @@ void main() {
 
   test('ResizeImage handles async obtainKey', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MockMemoryImage memoryImage = MockMemoryImage(bytes);
+    final AsyncKeyMemoryImage memoryImage = AsyncKeyMemoryImage(bytes);
     final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321);
 
     bool isAsync = false;
@@ -451,8 +451,10 @@ Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
   return await completer.future;
 }
 
-class MockMemoryImage extends MemoryImage {
-  MockMemoryImage(Uint8List bytes) : super(bytes);
+// This version of MemoryImage guarantees obtainKey returns a future that has not been
+// completed synchronously.
+class AsyncKeyMemoryImage extends MemoryImage {
+  AsyncKeyMemoryImage(Uint8List bytes) : super(bytes);
 
   @override
   Future<MemoryImage> obtainKey(ImageConfiguration configuration) {
