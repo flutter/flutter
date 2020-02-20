@@ -4,6 +4,7 @@
 
 // TODO(flutter_web): the Web-only API below need to be cleaned up.
 
+// @dart = 2.6
 part of ui;
 
 /// Used to track when the platform is initialized. This ensures the test fonts

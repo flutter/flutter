@@ -16,6 +16,7 @@
 // ```
 //
 // Then we could lazily build the lookup instance on demand.
+// @dart = 2.6
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
@@ -113,6 +114,7 @@ class WordBreakPropertiesSyncer extends PropertiesSyncer {
 // Source:
 // ${header.join('\n// ')}
 
+// @dart = 2.6
 part of engine;
 
 CharProperty getCharProperty(String text, int index) {

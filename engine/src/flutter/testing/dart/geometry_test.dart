@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.6
 import 'dart:math' as math show sqrt;
 import 'dart:math' show pi;
 import 'dart:ui';
