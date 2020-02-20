@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import '../flutter_test_alternative.dart';
 
