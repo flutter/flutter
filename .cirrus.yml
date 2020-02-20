@@ -278,7 +278,7 @@ task:
         - pub get
         - dart lib/web_driver_installer.dart &
         - sleep 20
-        - chromedriver/chromedriver --port=4444
+        - chromedriver/chromedriver --port=4444 &
         - sleep 5
         - cd ../../../examples/hello_world/
         - flutter run -v -d web-server --profile --local-engine=host_debug_unopt --target=test_driver/smoke_web_engine.dart --web-port=8080 &
