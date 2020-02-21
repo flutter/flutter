@@ -323,6 +323,7 @@ tasks:
     description: >
       Builds an obfuscated APK and verifies a dart identifier cannot be found
     stage: devicelab
+    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   complex_layout_semantics_perf:
@@ -400,6 +401,7 @@ tasks:
     description: >
       Builds an obfuscated APK and verifies a dart identifier cannot be found
     stage: devicelab
+    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   tiles_scroll_perf_ios__timeline_summary:
