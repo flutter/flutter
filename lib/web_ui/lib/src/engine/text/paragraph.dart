@@ -210,12 +210,6 @@ class EngineParagraph implements ui.Paragraph {
       return maxWidth;
     }
 
-    // In the single-line case, the longest line is equal to the maximum
-    // intrinsic width of the paragraph.
-    if (_measurementResult.isSingleLine) {
-      return _measurementResult.maxIntrinsicWidth;
-    }
-
     // If we don't have any line metrics information, there's no way to know the
     // longest line in a multi-line paragraph.
     return 0.0;
