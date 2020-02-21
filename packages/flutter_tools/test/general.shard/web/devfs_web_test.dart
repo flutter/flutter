@@ -125,6 +125,7 @@ void main() {
       }));
 
     expect(cachedResponse.statusCode, HttpStatus.notModified);
+    expect(cachedResponse.body, isEmpty);
   }));
 
   test('handles missing JavaScript files from in memory cache', () => testbed.run(() async {
