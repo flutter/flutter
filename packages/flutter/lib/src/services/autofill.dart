@@ -18,6 +18,7 @@ class AutofillConfiguration {
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'uniqueIdentifier': uniqueIdentifier,
       'hints': autofillHints,
       'editingValue': currentEditingValue.toJSON(),
     };
@@ -50,8 +51,11 @@ abstract class AutofillScope {
   String get uniqueIdentifier;
 
   AutofillClient getAutofillClient(String tag);
-  void updateTextInputConfigurationIfNeeded();
-  void markNeedsTextInputConfigurationUpdate();
+
+  // Updating TextInputConfiguration is not needed as far as autofill goes,
+  // because changing focus is the only way to trigger autofill.
+  //void updateTextInputConfigurationIfNeeded();
+  //void markNeedsTextInputConfigurationUpdate();
 }
 
 @immutable
@@ -90,10 +94,10 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
 }
 
 mixin AutofillScopeMixin implements AutofillScope {
-  bool _needsTextInputConfigurationUpdate = false;
+  //bool _needsTextInputConfigurationUpdate = false;
   TextInputConnection _textInputConnection;
-  String _currentClientTag;
-  AutofillClient get _currentClient => _currentClientTag == null ? null : _clients[_currentClientTag];
+  //String _currentClientTag;
+  //AutofillClient get _currentClient => _currentClientTag == null ? null : _clients[_currentClientTag];
   final Map<String, AutofillClient> _clients = <String, AutofillClient>{};
 
   @protected
@@ -122,28 +126,28 @@ mixin AutofillScopeMixin implements AutofillScope {
         currentClientConfiguration: client.textInputConfiguration,
       ),
     );
-    _currentClientTag = client.uniqueIdentifier;
+    //_currentClientTag = client.uniqueIdentifier;
     return _textInputConnection;
   }
 
-  @override
-  void updateTextInputConfigurationIfNeeded() {
-    if (!_needsTextInputConfigurationUpdate)
-      return;
-    if (_textInputConnection?.attached ?? false) {
-      final TextInputConfiguration newConfiguration = _AutofillScopeTextInputConfiguration(
-        allConfigurations: _clients.values.map((AutofillClient client) => client.textInputConfiguration),
-        currentClientConfiguration: _currentClient.textInputConfiguration,
-      );
-      _textInputConnection.updateTextInputConfiguration(newConfiguration);
-    }
-    _needsTextInputConfigurationUpdate = false;
-  }
+  //@override
+  //void updateTextInputConfigurationIfNeeded() {
+  //  if (!_needsTextInputConfigurationUpdate)
+  //    return;
+  //  if (_textInputConnection?.attached ?? false) {
+  //    final TextInputConfiguration newConfiguration = _AutofillScopeTextInputConfiguration(
+  //      allConfigurations: _clients.values.map((AutofillClient client) => client.textInputConfiguration),
+  //      currentClientConfiguration: _currentClient.textInputConfiguration,
+  //    );
+  //    _textInputConnection.updateTextInputConfiguration(newConfiguration);
+  //  }
+  //  _needsTextInputConfigurationUpdate = false;
+  //}
 
-  @override
-  void markNeedsTextInputConfigurationUpdate() {
-    // No need to update if the connection is closed because the configuration is
-    // also updated on connection open.
-    _needsTextInputConfigurationUpdate = _textInputConnection?.attached ?? false;
-  }
+  //@override
+  //void markNeedsTextInputConfigurationUpdate() {
+  //  // No need to update if the connection is closed because the configuration is
+  //  // also updated on connection open.
+  //  _needsTextInputConfigurationUpdate = _textInputConnection?.attached ?? false;
+  //}
 }

@@ -9,6 +9,8 @@ import 'framework.dart';
 import 'navigator.dart';
 import 'will_pop_scope.dart';
 
+/// This is an example class demonstrates what an autofillable form will look
+/// like.
 class ExampleAutofillForm extends StatefulWidget {
   /// Creates a container for form fields.
   ///
@@ -84,6 +86,7 @@ class ExampleAutofillFormState extends State<ExampleAutofillForm> with AutofillS
   void _fieldDidChange() {
     if (widget.onChanged != null)
       widget.onChanged();
+    markNeedsTextInputConfigurationUpdate();
     _forceRebuild();
   }
 
@@ -110,6 +113,7 @@ class ExampleAutofillFormState extends State<ExampleAutofillForm> with AutofillS
 
   @override
   Widget build(BuildContext context) {
+    updateTextInputConfigurationIfNeeded();
     return WillPopScope(
       onWillPop: widget.onWillPop,
       child: _FormScope(
@@ -118,6 +122,12 @@ class ExampleAutofillFormState extends State<ExampleAutofillForm> with AutofillS
         child: widget.child,
       ),
     );
+  }
+
+  @override
+  void markNeedsTextInputConfigurationUpdate() {
+    super.markNeedsTextInputConfigurationUpdate();
+    setState(() {});
   }
 }
 

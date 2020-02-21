@@ -1079,18 +1079,12 @@ class TextInput {
       final TextInputClient client = _currentConnection._client;
       assert(client != null);
       if (client is AutofillClient) {
-        final AutofillClient autofillClient = client as AutofillClient;
-        bool hasDirtyClient = false;
-        final AutofillScope scope = autofillClient.currentAutofillScope;
+        final AutofillScope scope = client.currentAutofillScope;
         final Map<String, Map<String, dynamic>> editingValue = args[1] as Map<String, Map<String, dynamic>>;
         for (final String tag in editingValue.keys) {
           final TextEditingValue textEditingValue = TextEditingValue.fromJSON(editingValue[tag]);
-          final AutofillClient c = scope.getAutofillClient(tag);
-          c.updateEditingValue(textEditingValue);
-          hasDirtyClient = hasDirtyClient || c.currentTextEditingValue != textEditingValue;
+          scope.getAutofillClient(tag).updateEditingValue(textEditingValue);
         }
-        if (hasDirtyClient)
-          scope.markNeedsTextInputConfigurationUpdate();
       }
 
       return;
