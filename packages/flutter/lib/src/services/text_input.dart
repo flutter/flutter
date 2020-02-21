@@ -573,7 +573,7 @@ class TextInputConfiguration {
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
-      'autofill': autofillConfiguration.toJson(),
+      if (autofillConfiguration != null) 'autofill': autofillConfiguration.toJson(),
     };
   }
 }
@@ -754,6 +754,9 @@ abstract class TextInputClient {
   /// const constructors so that they can be used in const expressions.
   const TextInputClient();
 
+  /// The current state of the [TextEditingValue] held by this client.
+  TextEditingValue get currentTextEditingValue;
+
   /// Requests that this client update its editing state to the given value.
   void updateEditingValue(TextEditingValue value);
 
@@ -762,9 +765,6 @@ abstract class TextInputClient {
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
-
-  /// The current state of the [TextEditingValue] held by this client.
-  TextEditingValue get currentTextEditingValue;
 
   /// Platform notified framework of closed connection.
   ///
@@ -865,6 +865,11 @@ class TextInputConnection {
         'textDirectionIndex': textDirection.index,
       },
     );
+  }
+
+  void updateTextInputConfiguration(TextInputConfiguration configuration) {
+    if (attached)
+      TextInput._instance._attach(this, configuration);
   }
 
   /// Stop interacting with the text input control.
@@ -1074,14 +1079,21 @@ class TextInput {
       final TextInputClient client = _currentConnection._client;
       assert(client != null);
       if (client is AutofillClient) {
-        final AutofillScope scope = (client as AutofillClient).currentScope;
+        final AutofillClient autofillClient = client as AutofillClient;
+        bool hasDirtyClient = false;
+        final AutofillScope scope = autofillClient.currentAutofillScope;
         final Map<String, Map<String, dynamic>> editingValue = args[1] as Map<String, Map<String, dynamic>>;
         for (final String tag in editingValue.keys) {
           final TextEditingValue textEditingValue = TextEditingValue.fromJSON(editingValue[tag]);
-          scope.getClient(tag).updateEditingValue(textEditingValue);
+          final AutofillClient c = scope.getAutofillClient(tag);
+          c.updateEditingValue(textEditingValue);
+          hasDirtyClient = hasDirtyClient || c.currentTextEditingValue != textEditingValue;
         }
+        if (hasDirtyClient)
+          scope.markNeedsTextInputConfigurationUpdate();
       }
 
+      return;
     }
 
     final int client = args[0] as int;

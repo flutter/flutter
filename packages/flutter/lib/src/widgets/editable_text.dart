@@ -125,16 +125,13 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// string.
   TextEditingController({
     String text,
-    this.textInputConfiguration,
   }) : super(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
 
   /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
   /// This constructor treats a null [value] argument as if it were
   /// [TextEditingValue.empty].
-  TextEditingController.fromValue(TextEditingValue value, {
-    this.textInputConfiguration,
-  }) : super(value ?? TextEditingValue.empty);
+  TextEditingController.fromValue(TextEditingValue value) : super(value ?? TextEditingValue.empty);
 
   /// The current string the user is editing.
   String get text => value.text;
@@ -223,11 +220,6 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
-  }
-
-  final TextInputConfiguration textInputConfiguration;
-
-  void updateEditingValue(TextEditingValue newValue) {
   }
 }
 
@@ -360,6 +352,7 @@ class EditableText extends StatefulWidget {
     @required this.controller,
     @required this.focusNode,
     this.readOnly = false,
+    this.uniqueIdentifier,
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType smartDashesType,
@@ -406,6 +399,7 @@ class EditableText extends StatefulWidget {
     this.enableInteractiveSelection = true,
     this.scrollController,
     this.scrollPhysics,
+    this.autofillHints,
     this.toolbarOptions = const ToolbarOptions(
       copy: true,
       cut: true,
@@ -448,6 +442,10 @@ class EditableText extends StatefulWidget {
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
        assert(toolbarOptions != null),
+       assert(
+         uniqueIdentifier != null || autofillHints == null,
+         'a unique identifier is required for autofill',
+       ),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
@@ -779,6 +777,9 @@ class EditableText extends StatefulWidget {
   /// The type of action button to use with the soft keyboard.
   final TextInputAction textInputAction;
 
+  final String uniqueIdentifier;
+
+  final List<String> autofillHints;
   /// {@template flutter.widgets.editableText.onChanged}
   /// Called when the user initiates a change to the TextField's
   /// value: when they have inserted or deleted text.
@@ -1095,7 +1096,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, AutofillClientMixin implements TextInputClient, TextSelectionDelegate, AutofillClient {
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -1266,9 +1267,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _stopCursorTimer(resetCharTicks: false);
     _startCursorTimer();
   }
-
-  @override
-  StrictFormState get currentScope => StrictForm.of(context);
 
   @override
   void performAction(TextInputAction action) {
@@ -1451,23 +1449,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastFormattedUnmodifiedTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(
-        this,
-        widget.controller.textInputConfiguration
-        ?? TextInputConfiguration(inputType: widget.keyboardType,
-          obscureText: widget.obscureText,
-          autocorrect: widget.autocorrect,
-          smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-          smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-          enableSuggestions: widget.enableSuggestions,
-          inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
-            ? TextInputAction.newline
-            : TextInputAction.done
-          ),
-          textCapitalization: widget.textCapitalization,
-          keyboardAppearance: widget.keyboardAppearance,
-        ),
-      );
+
+      _textInputConnection = currentAutofillScope?.attach(this)
+        ?? TextInput.attach(this, textInputConfiguration);
       _textInputConnection.show();
 
       _updateSizeAndTransform();
@@ -1861,6 +1845,35 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       showToolbar();
     }
   }
+
+  // AutofillClient
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    final AutofillConfiguration autofill = widget.uniqueIdentifier == null
+      ? null
+      : AutofillConfiguration(
+        uniqueIdentifier: widget.uniqueIdentifier,
+        autofillHints: widget.autofillHints,
+        currentEditingValue: widget.controller.value,
+      );
+    return TextInputConfiguration(inputType: widget.keyboardType,
+      obscureText: widget.obscureText,
+      autocorrect: widget.autocorrect,
+      smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+      smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+      enableSuggestions: widget.enableSuggestions,
+      inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
+        ? TextInputAction.newline
+        : TextInputAction.done
+      ),
+      textCapitalization: widget.textCapitalization,
+      keyboardAppearance: widget.keyboardAppearance,
+      autofillConfiguration: autofill,
+    );
+  }
+
+  @override
+  ExampleAutofillFormState get currentAutofillScope => ExampleAutofillForm.of(context);
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
     return widget.selectionEnabled && copyEnabled && _hasFocus && controls?.canCopy(this) == true

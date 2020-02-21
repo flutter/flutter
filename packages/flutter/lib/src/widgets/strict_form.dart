@@ -3,17 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'framework.dart';
 import 'navigator.dart';
 import 'will_pop_scope.dart';
 
-class StrictForm extends StatefulWidget {
+class ExampleAutofillForm extends StatefulWidget {
   /// Creates a container for form fields.
   ///
   /// The [child] argument must not be null.
-  const StrictForm({
+  const ExampleAutofillForm({
     Key key,
+    @required this.uniqueIdentifier,
     @required this.child,
     this.onWillPop,
     this.onChanged,
@@ -28,7 +30,7 @@ class StrictForm extends StatefulWidget {
   /// FormState form = Form.of(context);
   /// form.save();
   /// ```
-  static StrictFormState of(BuildContext context) {
+  static ExampleAutofillFormState of(BuildContext context) {
     final _FormScope scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
   }
@@ -40,6 +42,7 @@ class StrictForm extends StatefulWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  final String uniqueIdentifier;
   /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
   /// that contains the form.
   ///
@@ -59,7 +62,7 @@ class StrictForm extends StatefulWidget {
   final VoidCallback onChanged;
 
   @override
-  StrictFormState createState() => StrictFormState();
+  ExampleAutofillFormState createState() => ExampleAutofillFormState();
 }
 
 /// State associated with a [Form] widget.
@@ -68,9 +71,13 @@ class StrictForm extends StatefulWidget {
 /// [FormField] that is a descendant of the associated [Form].
 ///
 /// Typically obtained via [Form.of].
-class StrictFormState extends State<StrictForm> {
+class ExampleAutofillFormState extends State<ExampleAutofillForm> with AutofillScopeMixin implements AutofillScope {
   int _generation = 0;
-  final Map<String, TextEditingController> _fields = <String, TextEditingController>{};
+
+  @override
+  String get uniqueIdentifier => widget.uniqueIdentifier;
+
+  final Map<String, AutofillClient> _fields = <String, AutofillClient>{};
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -86,21 +93,19 @@ class StrictFormState extends State<StrictForm> {
     });
   }
 
-  void register(TextEditingController field) {
-    final String identifier = field.textInputConfiguration?.autofillConfiguration?.uniqueIdentifier;
+  void register(AutofillClient client) {
+    registerAutofillClient(client);
+    final String identifier = client.uniqueIdentifier;
     assert(identifier != null);
     // Remove from and then put back to the Map,
     // because the order of the fields matters to autofill.
     _fields.remove(identifier);
-    _fields.putIfAbsent(identifier, () => field);
+    _fields.putIfAbsent(identifier, () => client);
   }
 
   void unregister(String identifier) {
     _fields.remove(identifier);
-  }
-
-  TextEditingController controller(String tag) {
-    return _fields[tag];
+    unregisterAutofillClient(identifier);
   }
 
   @override
@@ -114,39 +119,26 @@ class StrictFormState extends State<StrictForm> {
       ),
     );
   }
-
-  /// Resets every [FormField] that is a descendant of this [Form] back to its
-  /// [FormField.initialState].
-  ///
-  /// The [Form.onChanged] callback will be called.
-  ///
-  /// If the form's [Form.autovalidate] property is true, the fields will all be
-  /// revalidated after being reset.
-  void reset() {
-    for (final TextEditingController field in _fields.values)
-      field.clear();
-    _fieldDidChange();
-  }
 }
 
 class _FormScope extends InheritedWidget {
   const _FormScope({
     Key key,
     Widget child,
-    StrictFormState formState,
+    ExampleAutofillFormState formState,
     int generation,
   }) : _formState = formState,
        _generation = generation,
        super(key: key, child: child);
 
-  final StrictFormState _formState;
+  final ExampleAutofillFormState _formState;
 
   /// Incremented every time a form field has changed. This lets us know when
   /// to rebuild the form.
   final int _generation;
 
   /// The [Form] associated with this widget.
-  StrictForm get form => _formState.widget;
+  ExampleAutofillForm get form => _formState.widget;
 
   @override
   bool updateShouldNotify(_FormScope old) => _generation != old._generation;
