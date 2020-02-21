@@ -1893,6 +1893,12 @@ class Path extends NativeFieldWrapperClass2 {
   Path() { _constructor(); }
   void _constructor() native 'Path_constructor';
 
+  // Workaround for tonic, which expects classes with native fields to have a
+  // private constructor.
+  // TODO(dnfield): rework this to use ClaimNativeField - https://github.com/flutter/flutter/issues/50997
+  @pragma('vm:entry-point')
+  Path._() { _constructor(); }
+
   /// Creates a copy of another [Path].
   ///
   /// This copy is fast and does not require additional memory unless either
@@ -4159,7 +4165,13 @@ class PictureRecorder extends NativeFieldWrapperClass2 {
   /// and the canvas objects are invalid and cannot be used further.
   ///
   /// Returns null if the PictureRecorder is not associated with a canvas.
-  Picture endRecording() native 'PictureRecorder_endRecording';
+  Picture endRecording() {
+    final Picture picture = Picture._();
+    _endRecording(picture);
+    return picture;
+  }
+
+  void _endRecording(Picture outPicture) native 'PictureRecorder_endRecording';
 }
 
 /// A single shadow.

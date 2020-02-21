@@ -15,6 +15,7 @@ DartWrappable::~DartWrappable() {
   TONIC_CHECK(!dart_wrapper_);
 }
 
+// TODO(dnfield): Delete this. https://github.com/flutter/flutter/issues/50997
 Dart_Handle DartWrappable::CreateDartWrapper(DartState* dart_state) {
   TONIC_DCHECK(!dart_wrapper_);
   const DartWrapperInfo& info = GetDartWrapperInfo();
@@ -22,18 +23,39 @@ Dart_Handle DartWrappable::CreateDartWrapper(DartState* dart_state) {
   Dart_PersistentHandle type = dart_state->class_library().GetClass(info);
   TONIC_DCHECK(!LogIfError(type));
 
-  intptr_t native_fields[kNumberOfNativeFields];
-  native_fields[kPeerIndex] = reinterpret_cast<intptr_t>(this);
-  native_fields[kWrapperInfoIndex] = reinterpret_cast<intptr_t>(&info);
   Dart_Handle wrapper =
-      Dart_AllocateWithNativeFields(type, kNumberOfNativeFields, native_fields);
+      Dart_New(type, dart_state->private_constructor_name(), 0, nullptr);
+
   TONIC_DCHECK(!LogIfError(wrapper));
+
+  Dart_Handle res = Dart_SetNativeInstanceField(
+      wrapper, kPeerIndex, reinterpret_cast<intptr_t>(this));
+  TONIC_DCHECK(!LogIfError(res));
+  res = Dart_SetNativeInstanceField(wrapper, kWrapperInfoIndex,
+                                    reinterpret_cast<intptr_t>(&info));
+  TONIC_DCHECK(!LogIfError(res));
 
   this->RetainDartWrappableReference();  // Balanced in FinalizeDartWrapper.
   dart_wrapper_ = Dart_NewWeakPersistentHandle(
       wrapper, this, GetAllocationSize(), &FinalizeDartWrapper);
 
   return wrapper;
+}
+
+void DartWrappable::ClaimDartHandle(Dart_Handle wrapper) {
+  TONIC_DCHECK(!dart_wrapper_);
+  TONIC_CHECK(!LogIfError(wrapper));
+
+  const DartWrapperInfo& info = GetDartWrapperInfo();
+
+  TONIC_CHECK(!LogIfError(Dart_SetNativeInstanceField(
+      wrapper, kPeerIndex, reinterpret_cast<intptr_t>(this))));
+  TONIC_CHECK(!LogIfError(Dart_SetNativeInstanceField(
+      wrapper, kWrapperInfoIndex, reinterpret_cast<intptr_t>(&info))));
+
+  this->RetainDartWrappableReference();  // Balanced in FinalizeDartWrapper.
+  dart_wrapper_ = Dart_NewWeakPersistentHandle(
+      wrapper, this, GetAllocationSize(), &FinalizeDartWrapper);
 }
 
 void DartWrappable::AssociateWithDartWrapper(Dart_NativeArguments args) {
