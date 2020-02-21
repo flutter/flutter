@@ -5,7 +5,8 @@ Who lives, who dies, who tells your story\?
 
 When the exception was thrown, this was the stack:
 #0      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:10:5\)
-#1      .+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
+<<skip until matching line>>
+#(1|2)      .+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
 <asynchronous suspension>
 <<skip until matching line>>
 ^\(elided [0-9]+ frames.+$
@@ -24,7 +25,8 @@ Who lives, who dies, who tells your story\?
 
 When the exception was thrown, this was the stack:
 #0      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:13:5\)
-#1      .+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
+<<skip until matching line>>
+#(1|2)      .+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
 <asynchronous suspension>
 <<skip until matching line>>
 ^\(elided [0-9]+ .+$
@@ -43,7 +45,9 @@ Who lives, who dies, who tells your story\?
 
 When the exception was thrown, this was the stack:
 #[0-9]+ +main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:15:105\)
+<<skip until matching line>>
 #[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
+<<skip until matching line>>
 #[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]binding.dart:[0-9]+:[0-9]+\)
 <<skip until matching line>>
 #[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
