@@ -13,7 +13,7 @@ dependencies:
   meta: 1.1.8
   path: 1.6.4
   web_socket_channel: 1.1.0
-  vm_service_client: 0.2.6+2
+  vm_service_client: 0.2.6+3
   webdriver: 2.1.2
   flutter:
     sdk: flutter
@@ -52,4 +52,4 @@ dev_dependencies:
   mockito: 4.1.1
   quiver: 2.0.5
 
-# PUBSPEC CHECKSUM: 22b5
+# PUBSPEC CHECKSUM: 89b6
