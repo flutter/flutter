@@ -639,15 +639,6 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  /// Populate the cache.
-  ///
-  /// This should be called before any command is run, and before pub get is run
-  /// to make sure that the Dart SDK is available and any precompiled dart files
-  /// have the right snapshot version.
-  Future<void> _maybeUpdateCache() async {
-
-  }
-
   /// Perform validation then call [runCommand] to execute the command.
   /// Return a [Future] that completes with an exit code
   /// indicating whether execution was successful.
