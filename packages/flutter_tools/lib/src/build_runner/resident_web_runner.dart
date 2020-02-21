@@ -510,6 +510,9 @@ class _ResidentWebRunner extends ResidentWebRunner {
           'ignoreCache': !debuggingOptions.buildInfo.isDebug,
         });
       }
+    } catch (err) {
+      globals.printError(err.toString());
+      return OperationResult(1, err.toString());
     } on RpcException catch (err) {
       globals.printError(err.toString());
       return OperationResult(1, err.toString());

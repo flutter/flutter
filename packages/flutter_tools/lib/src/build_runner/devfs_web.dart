@@ -58,9 +58,14 @@ class WebAssetServer implements AssetReader {
       // Whenever a file is updated, the corresponding Uint8List.view it corresponds
       // to will change.
       _digests[key] = _files[key].hashCode.toString();
-      _modules[key] = key.endsWith('.lib.js')
-        ? key.split('.lib.js')[0]
-        : key;
+      String moduleName = key;
+      if (moduleName.startsWith('/')) {
+        moduleName = moduleName.substring(1);
+      }
+      if (moduleName.endsWith('.js')) {
+        moduleName = moduleName.split('.js')[0];
+      }
+      _modules[key] = moduleName;
     }
   }
 
@@ -110,7 +115,7 @@ class WebAssetServer implements AssetReader {
         logWriter: (Level logLevel, String message) => globals.printTrace(message),
         loadStrategy: RequireStrategy(
           ReloadConfiguration.none,
-          '.lib.js',
+          '',
           (String path) async => modules,
           (String path) async => digests,
         ),
