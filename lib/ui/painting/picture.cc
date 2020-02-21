@@ -31,7 +31,7 @@ fml::RefPtr<Picture> Picture::Create(
     flutter::SkiaGPUObject<SkPicture> picture) {
   auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(picture));
 
-  canvas_picture->ClaimDartHandle(dart_handle);
+  canvas_picture->AssociateWithDartWrapper(dart_handle);
   return canvas_picture;
 }
 
