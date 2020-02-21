@@ -447,7 +447,7 @@ class BitmapCanvas extends EngineCanvas {
     x += line.left;
     final double letterSpacing = style.letterSpacing;
     if (letterSpacing == null || letterSpacing == 0.0) {
-      ctx.fillText(line.text, x, y);
+      ctx.fillText(line.displayText, x, y);
     } else {
       // When letter-spacing is set, we go through a more expensive code path
       // that renders each character separately with the correct spacing
@@ -459,9 +459,9 @@ class BitmapCanvas extends EngineCanvas {
       // would put 5px before each letter and 5px after it, but on the web, we
       // put no spacing before the letter and 10px after it. This is how the DOM
       // does it.
-      final int len = line.text.length;
+      final int len = line.displayText.length;
       for (int i = 0; i < len; i++) {
-        final String char = line.text[i];
+        final String char = line.displayText[i];
         ctx.fillText(char, x, y);
         x += letterSpacing + ctx.measureText(char).width;
       }
