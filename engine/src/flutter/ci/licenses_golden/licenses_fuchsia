@@ -1,4 +1,4 @@
-Signature: 74b7add93eb2256d93ffe50c2ea2c08b
+Signature: 3c6334fa1834da348a24a8ef79fc184e
 
 UNUSED LICENSES:
 
@@ -488,6 +488,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
@@ -1423,6 +1424,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/player.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/publisher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/sound_player.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_consumer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_core.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
@@ -2203,6 +2205,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sounds/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
@@ -3090,6 +3093,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/error.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keys.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/target_discovery.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/memorypressure.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl
