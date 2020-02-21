@@ -645,13 +645,7 @@ abstract class FlutterCommand extends Command<void> {
   /// to make sure that the Dart SDK is available and any precompiled dart files
   /// have the right snapshot version.
   Future<void> _maybeUpdateCache() async {
-    if (shouldUpdateCache) {
-      // First always update universal artifacts, as some of these (e.g.
-      // idevice_id on macOS) are required to determine `requiredArtifacts`.
-      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
 
-      await globals.cache.updateAll(await requiredArtifacts);
-    }
   }
 
   /// Perform validation then call [runCommand] to execute the command.
@@ -663,7 +657,15 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
-    await _maybeUpdateCache();
+    // Populate the cache. We call this before pub get below so that the
+    // sky_engine package is available in the flutter cache for pub to find.
+    if (shouldUpdateCache) {
+      // First always update universal artifacts, as some of these (e.g.
+      // idevice_id on macOS) are required to determine `requiredArtifacts`.
+      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+
+      await globals.cache.updateAll(await requiredArtifacts);
+    }
 
     await validateCommand();
 
@@ -887,19 +889,4 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       return null;
   }
   return null;
-}
-
-/// A command which runs less analytics and checks to speed up startup time.
-abstract class FastFlutterCommand extends FlutterCommand {
-  @override
-  Future<void> run() {
-    return context.run<void>(
-      name: 'command',
-      overrides: <Type, Generator>{FlutterCommand: () => this},
-      body: () async {
-        await _maybeUpdateCache();
-        await runCommand();
-      }
-    );
-  }
 }

@@ -19,7 +19,6 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import 'flutter_command_runner_test.dart';
 import 'utils.dart';
 
 void main() {
@@ -41,15 +40,6 @@ void main() {
         (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
       when(mockProcessInfo.maxRss).thenReturn(10);
-    });
-
-    testUsingContext('FastFlutterCommand updates artifacts', () async {
-      final FakeFastCommand fakeFlutterCommand = FakeFastCommand()..result = FlutterCommandResult.success();
-      await fakeFlutterCommand.run();
-      expect(fakeFlutterCommand.runCalled, true);
-      verify(cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal})).called(1);
-    }, overrides: <Type, Generator>{
-      Cache: () => cache,
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
@@ -437,20 +427,4 @@ class FakeSignals implements Signals {
 
   @override
   Stream<Object> get errors => delegate.errors;
-}
-
-class FakeFastCommand extends FastFlutterCommand {
-  FlutterCommandResult result;
-  bool runCalled = false;
-  @override
-  String get description => 'FakeFastCommand';
-
-  @override
-  String get name => 'FakeFastCommand';
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    runCalled = true;
-    return result;
-  }
 }
