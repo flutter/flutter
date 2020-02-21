@@ -22,6 +22,7 @@ DartState::Scope::~Scope() {}
 DartState::DartState(int dirfd,
                      std::function<void(Dart_Handle)> message_epilogue)
     : isolate_(nullptr),
+      private_constructor_name_(),
       class_library_(new DartClassLibrary),
       message_handler_(new DartMessageHandler()),
       file_loader_(new FileLoader(dirfd)),
@@ -32,8 +33,16 @@ DartState::~DartState() {}
 
 void DartState::SetIsolate(Dart_Isolate isolate) {
   isolate_ = isolate;
+
   if (!isolate_)
     return;
+
+  private_constructor_name_.Clear();
+  Dart_EnterScope();
+  private_constructor_name_.Set(
+      this, Dart_NewPersistentHandle(Dart_NewStringFromCString("_")));
+  Dart_ExitScope();
+
   DidSetIsolate();
 }
 
