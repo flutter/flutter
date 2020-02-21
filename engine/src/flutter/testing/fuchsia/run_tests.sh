@@ -72,5 +72,5 @@ done
 ./fuchsia_ctl -d $device_name test \
     -f shell_tests-0.far  \
     -t shell_tests \
-    -a "--gtest_filter=-ShellTest.HandlesActualIphoneXsInputEvents:ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.Screenshot:ShellTest.WaitForFirstFrameTimeout"
+    -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*"
 
