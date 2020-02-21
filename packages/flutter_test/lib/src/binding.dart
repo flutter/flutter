@@ -275,6 +275,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 
+  /// For using the default implementaion of [BinaryMessenger] instead of
+  /// test version.
+  ///
+  /// This method is useful for integration tests which uses real platform
+  /// messages such as e2e.
+  ///
+  /// See: https://pub.dev/packages/e2e
+  BinaryMessenger createRealBinaryMessenger() {
+    return super.createBinaryMessenger();
+  }
+
   /// Whether there is currently a test executing.
   bool get inTest;
 
