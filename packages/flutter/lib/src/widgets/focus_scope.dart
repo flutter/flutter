@@ -9,6 +9,8 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
 
+// TODO(gspencergoog): Add more information about unfocus here once https://github.com/flutter/flutter/pull/50831 lands.
+
 /// A widget that manages a [FocusNode] to allow keyboard focus to be given
 /// to this widget and its descendants.
 ///
@@ -33,10 +35,20 @@ import 'inherited_notifier.dart';
 ///
 /// Managing a [FocusNode] means managing its lifecycle, listening for changes
 /// in focus, and re-parenting it when needed to keep the focus hierarchy in
-/// sync with the widget hierarchy. See [FocusNode] for more information about
-/// the details of what node management entails if not using a [Focus] widget.
+/// sync with the widget hierarchy. This widget does all of those things for
+/// you. See [FocusNode] for more information about the details of what node
+/// management entails if you are not using a [Focus] widget and you need to do
+/// it yourself.
 ///
-/// To collect a sub-tree of nodes into a group, use a [FocusScope].
+/// To collect a sub-tree of nodes into an exclusive group that restricts focus
+/// traversal to the group, use a [FocusScope]. To collect a sub-tree of nodes
+/// into a group that has a specific order to its traversal but allows the
+/// traversal to escape the group, use a [FocusTraversalGroup].
+///
+/// To move the focus, use methods on [FocusNode] by getting the [FocusNode]
+/// through the [of] method. For instance, to move the focus to the next node in
+/// the focus traversal order, call `Focus.of(context).nextFocus()`. To unfocus
+/// a widget, call `Focus.of(context).unfocus()`.
 ///
 /// {@tool dartpad --template=stateful_widget_scaffold}
 /// This example shows how to manage focus using the [Focus] and [FocusScope]
@@ -118,6 +130,128 @@ import 'inherited_notifier.dart';
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=stateless_widget_material}
+/// This example shows how to wrap another widget in a [Focus] widget to make it
+/// focusable. It wraps a [Container], and changes the container's color when it
+/// is set as the [FocusManager.primaryFocus].
+///
+/// If you also want to handle mouse hover and/or keyboard actions on a widget,
+/// consider using a [FocusableActionDetector], which combines several different
+/// widgets to provide those capabilities.
+///
+/// ```dart preamble
+/// class FocusableText extends StatelessWidget {
+///   const FocusableText(this.data, {Key key, this.autofocus}) : super(key: key);
+///
+///   /// The string to display as the text for this widget.
+///   final String data;
+///
+///   /// Whether or not to focus this widget initially if nothing else is focused.
+///   final bool autofocus;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Focus(
+///       autofocus: autofocus,
+///       child: Builder(builder: (BuildContext context) {
+///         // The contents of this Builder are being made focusable. It is inside
+///         // of a Builder because the builder provides the correct context
+///         // variable for Focus.of() to be able to find the Focus widget that is
+///         // the Builder's parent. Without the builder, the context variable used
+///         // would be the one given the FocusableText build function, and that
+///         // would start looking for a Focus widget ancestor of the FocusableText
+///         // instead of finding the one inside of its build function.
+///         return Container(
+///           padding: EdgeInsets.all(8.0),
+///           // Change the color based on whether or not this Container has focus.
+///           color: Focus.of(context).hasPrimaryFocus ? Colors.black12 : null,
+///           child: Text(data),
+///         );
+///       }),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: ListView.builder(
+///       itemBuilder: (context, index) => FocusableText(
+///         'Item $index',
+///         autofocus: index == 0,
+///       ),
+///       itemCount: 50,
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example shows how to focus a newly-created widget immediately after it
+/// is created.
+///
+/// The focus node will not actually be given the focus until after the frame in
+/// which it has requested focus is drawn, so it is OK to call
+/// [FocusNode.requestFocus] on a node which is not yet in the focus tree.
+///
+/// ```dart
+/// int focusedChild = 0;
+/// List<Widget> children = <Widget>[];
+/// List<FocusNode> childFocusNodes = <FocusNode>[];
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   // Add the first child.
+///   _addChild();
+/// }
+///
+/// @override
+/// void dispose() {
+///   super.dispose();
+///   childFocusNodes.forEach((FocusNode node) => node.dispose());
+/// }
+///
+/// void _addChild() {
+///   // Calling requestFocus here creates a deferred request for focus, since the
+///   // node is not yet part of the focus tree.
+///   childFocusNodes
+///       .add(FocusNode(debugLabel: 'Child ${children.length}')..requestFocus());
+///
+///   children.add(Padding(
+///     padding: const EdgeInsets.all(2.0),
+///     child: ActionChip(
+///       focusNode: childFocusNodes.last,
+///       label: Text('CHILD ${children.length}'),
+///       onPressed: () {},
+///     ),
+///   ));
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: Wrap(
+///         children: children,
+///       ),
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () {
+///         setState(() {
+///           focusedChild = children.length;
+///           _addChild();
+///         });
+///       },
+///       child: Icon(Icons.add),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [FocusNode], which represents a node in the focus hierarchy and
@@ -131,8 +265,8 @@ import 'inherited_notifier.dart';
 ///    distributes key events to focused nodes.
 ///  * [FocusTraversalPolicy], an object used to determine how to move the focus
 ///    to other nodes.
-///  * [DefaultFocusTraversal], a widget used to configure the default focus
-///    traversal policy for a widget subtree.
+///  * [FocusTraversalGroup], a widget that groups together and imposes a
+///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 class Focus extends StatefulWidget {
   /// Creates a widget that manages a [FocusNode].
   ///
@@ -225,7 +359,7 @@ class Focus extends StatefulWidget {
   /// Sets the [FocusNode.skipTraversal] flag on the focus node so that it won't
   /// be visited by the [FocusTraversalPolicy].
   ///
-  /// This is sometimes useful if a Focus widget should receive key events as
+  /// This is sometimes useful if a [Focus] widget should receive key events as
   /// part of the focus chain, but shouldn't be accessible via focus traversal.
   ///
   /// This is different from [canRequestFocus] because it only implies that the
@@ -276,6 +410,9 @@ class Focus extends StatefulWidget {
   /// [nullOk].
   ///
   /// The [context] and [nullOk] arguments must not be null.
+  ///
+  /// Calling this function creates a dependency that will rebuild the given
+  /// context when the focus changes.
   static FocusNode of(BuildContext context, { bool nullOk = false, bool scopeOk = false }) {
     assert(context != null);
     assert(nullOk != null);
@@ -322,6 +459,9 @@ class Focus extends StatefulWidget {
   /// Returns false if no [Focus] widget is found before reaching the nearest
   /// [FocusScope], or if the root of the focus tree is reached without finding
   /// a [Focus] widget.
+  ///
+  /// Calling this function creates a dependency that will rebuild the given
+  /// context when the focus changes.
   static bool isAt(BuildContext context) => Focus.of(context, nullOk: true)?.hasFocus ?? false;
 
   @override
@@ -487,8 +627,16 @@ class _FocusState extends State<Focus> {
   }
 }
 
-/// A [FocusScope] is similar to a [Focus], but also serves as a scope for other
-/// [Focus]s and [FocusScope]s, grouping them together.
+/// A [FocusScope] is similar to a [Focus], but also serves as a scope for its
+/// descendants, restricting focus traversal to the scoped controls.
+///
+/// For example a new [FocusScope] is created automatically when a route is
+/// pushed, keeping the focus traversal from moving to a control in a previous
+/// route.
+///
+/// If you just want to group widgets together in a group so that they are
+/// traversed in a particular order, but the focus can still leave the group,
+/// use a [FocusTraversalGroup].
 ///
 /// Like [Focus], [FocusScope] provides an [onFocusChange] as a way to be
 /// notified when the focus is given to or removed from this widget.
@@ -499,16 +647,12 @@ class _FocusState extends State<Focus> {
 /// ancestors of that node, stopping if one of them returns true from [onKey],
 /// indicating that it has handled the event.
 ///
-/// A [FocusScope] manages a [FocusScopeNode]. Managing a [FocusScopeNode] means
-/// managing its lifecycle, listening for changes in focus, and re-parenting it
-/// when the widget hierarchy changes. See [FocusNode] and [FocusScopeNode] for
-/// more information about the details of what node management entails if not
-/// using a [FocusScope] widget.
-///
-/// A [DefaultTraversalPolicy] widget provides the [FocusTraversalPolicy] for
-/// the [FocusScopeNode]s owned by its descendant widgets. Each [FocusScopeNode]
-/// has [FocusNode] descendants. The traversal policy defines what "previous
-/// focus", "next focus", and "move focus in this direction" means for them.
+/// Managing a [FocusScopeNode] means managing its lifecycle, listening for
+/// changes in focus, and re-parenting it when needed to keep the focus
+/// hierarchy in sync with the widget hierarchy. This widget does all of those
+/// things for you. See [FocusScopeNode] for more information about the details
+/// of what node management entails if you are not using a [FocusScope] widget
+/// and you need to do it yourself.
 ///
 /// [FocusScopeNode]s remember the last [FocusNode] that was focused within
 /// their descendants, and can move that focus to the next/previous node, or a
@@ -516,8 +660,153 @@ class _FocusState extends State<Focus> {
 /// [FocusNode.previousFocus], or [FocusNode.focusInDirection] are called on a
 /// [FocusNode] or [FocusScopeNode].
 ///
-/// To move the focus, use methods on [FocusScopeNode]. For instance, to move
-/// the focus to the next node, call `Focus.of(context).nextFocus()`.
+/// To move the focus, use methods on [FocusNode] by getting the [FocusNode]
+/// through the [of] method. For instance, to move the focus to the next node in
+/// the focus traversal order, call `Focus.of(context).nextFocus()`. To unfocus
+/// a widget, call `Focus.of(context).unfocus()`.
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example demonstrates using a [FocusScope] to restrict focus to a particular
+/// portion of the app. In this case, restricting focus to the visible part of a
+/// Stack.
+///
+/// ```dart preamble
+/// /// A demonstration pane.
+/// ///
+/// /// This is just a separate widget to simplify the example.
+/// class Pane extends StatelessWidget {
+///   const Pane({
+///     Key key,
+///     this.focusNode,
+///     this.onPressed,
+///     this.child,
+///     this.backgroundColor,
+///     this.icon,
+///   }) : super(key: key);
+///
+///   final FocusNode focusNode;
+///   final VoidCallback onPressed;
+///   final Widget child;
+///   final Color backgroundColor;
+///   final Widget icon;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Material(
+///       color: backgroundColor,
+///       child: Stack(
+///         fit: StackFit.expand,
+///         children: <Widget>[
+///           Center(
+///             child: child,
+///           ),
+///           Align(
+///             alignment: Alignment.topLeft,
+///             child: IconButton(
+///               autofocus: true,
+///               focusNode: focusNode,
+///               onPressed: onPressed,
+///               icon: icon,
+///             ),
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+///   bool backdropIsVisible = false;
+///   FocusNode backdropNode = FocusNode(debugLabel: 'Close Backdrop Button');
+///   FocusNode foregroundNode = FocusNode(debugLabel: 'Option Button');
+///
+///   @override
+///   void dispose() {
+///     super.dispose();
+///     backdropNode.dispose();
+///     foregroundNode.dispose();
+///   }
+///
+///   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
+///     Size stackSize = constraints.biggest;
+///     return Stack(
+///       fit: StackFit.expand,
+///       // The backdrop is behind the front widget in the Stack, but the widgets
+///       // would still be active and traversable without the FocusScope.
+///       children: <Widget>[
+///         // TRY THIS: Try removing this FocusScope entirely to see how it affects
+///         // the behavior. Without this FocusScope, the "ANOTHER BUTTON TO FOCUS"
+///         // button, and the IconButton in the backdrop Pane would be focusable
+///         // even when the backdrop wasn't visible.
+///         FocusScope(
+///           // TRY THIS: Try commenting out this line. Notice that the focus
+///           // starts on the backdrop and is stuck there? It seems like the app is
+///           // non-responsive, but it actually isn't. This line makes sure that
+///           // this focus scope and its children can't be focused when they're not
+///           // visible. It might help to make the background color of the
+///           // foreground pane semi-transparent to see it clearly.
+///           canRequestFocus: backdropIsVisible,
+///           child: Pane(
+///             icon: Icon(Icons.close),
+///             focusNode: backdropNode,
+///             backgroundColor: Colors.lightBlue,
+///             onPressed: () => setState(() => backdropIsVisible = false),
+///             child: Column(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: <Widget>[
+///                 // This button would be not visible, but still focusable from
+///                 // the foreground pane without the FocusScope.
+///                 RaisedButton(
+///                   onPressed: () => print('You pressed the other button!'),
+///                   child: Text('ANOTHER BUTTON TO FOCUS'),
+///                 ),
+///                 DefaultTextStyle(
+///                     style: Theme.of(context).textTheme.headline2,
+///                     child: Text('BACKDROP')),
+///               ],
+///             ),
+///           ),
+///         ),
+///         AnimatedPositioned(
+///           curve: Curves.easeInOut,
+///           duration: const Duration(milliseconds: 300),
+///           top: backdropIsVisible ? stackSize.height * 0.9 : 0.0,
+///           width: stackSize.width,
+///           height: stackSize.height,
+///           onEnd: () {
+///             if (backdropIsVisible) {
+///               backdropNode.requestFocus();
+///             } else {
+///               foregroundNode.requestFocus();
+///             }
+///           },
+///           child: Pane(
+///             icon: Icon(Icons.menu),
+///             focusNode: foregroundNode,
+///             // TRY THIS: Try changing this to Colors.green.withOpacity(0.8) to see for
+///             // yourself that the hidden components do/don't get focus.
+///             backgroundColor: Colors.green,
+///             onPressed: backdropIsVisible
+///                 ? null
+///                 : () => setState(() => backdropIsVisible = true),
+///             child: DefaultTextStyle(
+///                 style: Theme.of(context).textTheme.headline2,
+///                 child: Text('FOREGROUND')),
+///           ),
+///         ),
+///       ],
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     // Use a LayoutBuilder so that we can base the size of the stack on the size
+///     // of its parent.
+///     return LayoutBuilder(builder: _buildStack);
+///   }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -530,8 +819,8 @@ class _FocusState extends State<Focus> {
 ///    events to focused nodes.
 ///  * [FocusTraversalPolicy], an object used to determine how to move the focus
 ///    to other nodes.
-///  * [DefaultFocusTraversal], a widget used to configure the default focus
-///    traversal policy for a widget subtree.
+///  * [FocusTraversalGroup], a widget used to configure the focus traversal
+///    policy for a widget subtree.
 class FocusScope extends Focus {
   /// Creates a widget that manages a [FocusScopeNode].
   ///
