@@ -73,7 +73,6 @@ void _expectTimelineEvents(
   List<Map<String, dynamic>> expected,
 ) {
   for (final Map<String, dynamic> event in events) {
-
     for (int index = 0; index < expected.length; index += 1) {
       if (expected[index]['name'] == event['name']) {
         final Map<String, dynamic> expectedArgs = expected[index]['args'] as Map<String, dynamic>;
@@ -91,9 +90,6 @@ void _expectTimelineEvents(
 }
 
 bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
-  if (expectedArgs.length != args.length) {
-    return false;
-  }
   for (final String key in expectedArgs.keys) {
     if (expectedArgs[key] != args[key]) {
       return false;
