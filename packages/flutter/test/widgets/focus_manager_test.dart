@@ -605,7 +605,7 @@ void main() {
       child1.unfocus(disposition: UnfocusDisposition.scope);
       await tester.pump();
       // Focused child doesn't change.
-      expect(scope1.focusedChild, equals(child2));
+      expect(scope1.focusedChild, isNull);
       expect(scope2.focusedChild, equals(child3));
       // Focus does change.
       expect(scope1.hasPrimaryFocus, isTrue);
@@ -626,7 +626,7 @@ void main() {
       // The same thing happens when unfocusing a second time.
       child1.unfocus(disposition: UnfocusDisposition.scope);
       await tester.pump();
-      expect(scope1.focusedChild, equals(child2));
+      expect(scope1.focusedChild, isNull);
       expect(scope2.focusedChild, equals(child3));
       expect(scope1.hasPrimaryFocus, isTrue);
       expect(scope2.hasFocus, isFalse);
@@ -634,7 +634,7 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
 
       // When the scope gets unfocused, then its parent scope (the root scope)
-      // gets focus.
+      // gets focus, but it doesn't mess with the focused children.
       child1.requestFocus();
       await tester.pump();
       scope1.unfocus(disposition: UnfocusDisposition.scope);

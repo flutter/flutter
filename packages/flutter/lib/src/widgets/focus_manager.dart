@@ -715,6 +715,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     FocusScopeNode scope = enclosingScope;
+    if (scope == null) {
+      // Attempting to unfocus the root scope isn't allowed.
+      return;
+    }
     switch (disposition) {
       case UnfocusDisposition.scope:
         // Focus the nearest scope without focusing its "focused child" or
@@ -725,8 +729,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         // If it can't request focus, then don't modify its focused children.
         if (scope.canRequestFocus) {
           // This prevents re-focusing the node that we just unfocused if we
-          // immediately hit "next" after unfocusing.
-          scope._focusedChildren.remove(this);
+          // immediately hit "next" after unfocusing, and also prevents the odd
+          // choices for refocusing of the next-to-last focused child.
+          scope._focusedChildren.clear();
         }
 
         while (!scope.canRequestFocus) {
