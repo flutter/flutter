@@ -647,6 +647,15 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
                 treeShakeIcons treeShakeIconsOptionsValue
+                doLast {
+                    project.exec {
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                            commandLine('cmd', '/c', 'attrib -r ${assetsDirectory}/* /s')
+                        } else {
+                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
+                        }
+                    }
+                }
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -859,6 +868,10 @@ class FlutterTask extends BaseFlutterTask {
         return intermediateDir
     }
 
+    String getAssetsDirectory() {
+        return "${outputDirectory}/flutter_assets"
+    }
+
     CopySpec getAssets() {
         return project.copySpec {
             from "${intermediateDir}"
@@ -878,13 +891,13 @@ class FlutterTask extends BaseFlutterTask {
         }
     }
 
-    FileCollection readDependencies(File dependenciesFile) {
+    FileCollection readDependencies(File dependenciesFile, Boolean inputs) {
       if (dependenciesFile.exists()) {
         // Dependencies file has Makefile syntax:
         //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
         String depText = dependenciesFile.text
         // So we split list of files by non-escaped(by backslash) space,
-        def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
+        def matcher = depText.split(': ')[inputs ? 1 : 0] =~ /(\\ |[^\s])+/
         // then we replace all escaped spaces with regular spaces
         def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
         return project.files(depList)
@@ -896,9 +909,18 @@ class FlutterTask extends BaseFlutterTask {
     FileCollection getSourceFiles() {
         FileCollection sources = project.files()
         for (File depfile in getDependenciesFiles()) {
-          sources += readDependencies(depfile)
+          sources += readDependencies(depfile, true)
         }
         return sources + project.files('pubspec.yaml')
+    }
+
+    @OutputFiles
+    FileCollection getOutputFiles() {
+        FileCollection sources = project.files()
+        for (File depfile in getDependenciesFiles()) {
+          sources += readDependencies(depfile, false)
+        }
+        return sources
     }
 
     @TaskAction

@@ -8,7 +8,6 @@ import 'dart:io' as io show ProcessSignal;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-
 import 'common.dart';
 
 export 'package:process/process.dart' show ProcessManager;

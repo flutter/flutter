@@ -29,8 +29,8 @@ import '../compile.dart';
 import '../convert.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
-import 'bootstrap.dart';
-import 'chrome.dart';
+import '../web/bootstrap.dart';
+import '../web/chrome.dart';
 
 /// A web server which handles serving JavaScript and assets.
 ///
@@ -45,6 +45,9 @@ class WebAssetServer implements AssetReader {
 
   /// Start the web asset server on a [hostname] and [port].
   ///
+  /// If [testMode] is true, do not actually initialize dwds or the shelf static
+  /// server.
+  ///
   /// Unhandled exceptions will throw a [ToolExit] with the error and stack
   /// trace.
   static Future<WebAssetServer> start(
@@ -53,14 +56,18 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     BuildMode buildMode,
     bool enableDwds,
-    Uri entrypoint,
-  ) async {
+    Uri entrypoint, {
+    bool testMode = false,
+  }) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final Packages packages = await loadPackagesFile(
         Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
       final WebAssetServer server = WebAssetServer(httpServer, packages, address);
+      if (testMode) {
+        return server;
+      }
 
       // In release builds deploy a simpler proxy server.
       if (buildMode != BuildMode.debug) {
@@ -157,11 +164,9 @@ class WebAssetServer implements AssetReader {
     // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
-      final String assetPath = requestPath.replaceFirst('/assets/', '');
-      file = globals.fs.file(
-        globals.fs.path.join(getAssetBuildDirectory(),
-        globals.fs.path.relative(assetPath)),
-      );
+      final Uri potential = globals.fs.directory(getAssetBuildDirectory())
+        .uri.resolve( requestPath.replaceFirst('/assets/', ''));
+      file = globals.fs.file(potential);
     }
 
     if (!file.existsSync()) {
@@ -246,8 +251,31 @@ class WebAssetServer implements AssetReader {
     return modules;
   }
 
+  @visibleForTesting
+  final File dartSdk = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd',
+    'dart_sdk.js',
+  ));
+
+  @visibleForTesting
+  final File dartSdkSourcemap = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd',
+    'dart_sdk.js.map',
+  ));
+
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
+    // Return the actual file objects so that local engine changes are automatically picked up.
+    switch (path) {
+      case '/dart_sdk.js':
+        return dartSdk;
+      case '.dart_sdk.js.map':
+        return dartSdkSourcemap;
+    }
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. The tool doesn't currently
     // consider the case of Dart files as assets.
@@ -311,7 +339,12 @@ class ConnectionResult {
   final DebugConnection debugConnection;
 }
 
+/// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
+  /// Create a new [WebDevFS] instance.
+  ///
+  /// [testMode] is true, do not actually initialize dwds or the shelf static
+  /// server.
   WebDevFS({
     @required this.hostname,
     @required this.port,
@@ -320,6 +353,7 @@ class WebDevFS implements DevFS {
     @required this.buildMode,
     @required this.enableDwds,
     @required this.entrypoint,
+    this.testMode = false,
   });
 
   final Uri entrypoint;
@@ -329,6 +363,7 @@ class WebDevFS implements DevFS {
   final UrlTunneller urlTunneller;
   final BuildMode buildMode;
   final bool enableDwds;
+  final bool testMode;
 
   @visibleForTesting
   WebAssetServer webAssetServer;
@@ -389,6 +424,7 @@ class WebDevFS implements DevFS {
       buildMode,
       enableDwds,
       entrypoint,
+      testMode: testMode,
     );
     return Uri.parse('http://$hostname:$port');
   }
@@ -433,6 +469,7 @@ class WebDevFS implements DevFS {
     if (bundleFirstUpload) {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainPath);
+      webAssetServer.writeFile('/$entrypoint', globals.fs.file(mainPath).readAsStringSync());
       webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -451,8 +488,7 @@ class WebDevFS implements DevFS {
       );
       // TODO(jonahwilliams): switch to DWDS provided APIs when they are ready.
       webAssetServer.writeFile('/basic.digests', '{}');
-      webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
-      webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
+
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
       // be shared.
       if (bundle != null) {
@@ -499,6 +535,7 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
+
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),
@@ -514,22 +551,6 @@ class WebDevFS implements DevFS {
     'kernel',
     'amd',
     'require.js',
-  ));
-
-  @visibleForTesting
-  final File dartSdk = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd',
-    'dart_sdk.js',
-  ));
-
-  @visibleForTesting
-  final File dartSdkSourcemap = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd',
-    'dart_sdk.js.map',
   ));
 
   @visibleForTesting

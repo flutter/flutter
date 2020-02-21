@@ -191,11 +191,19 @@ class Dart2JSTarget extends Target {
         '${dart2jsDeps.path}');
       return;
     }
-    final Depfile depfile = Depfile.parseDart2js(
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    final Depfile depfile = depfileService.parseDart2js(
       environment.buildDir.childFile('main.dart.js.deps'),
       outputFile,
     );
-    depfile.writeToFile(environment.buildDir.childFile('dart2js.d'));
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('dart2js.d'),
+    );
   }
 }
 
@@ -247,7 +255,15 @@ class WebReleaseBundle extends Target {
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
 
     final Directory webResources = environment.projectDir
       .childDirectory('web');
@@ -269,8 +285,10 @@ class WebReleaseBundle extends Target {
       outputResourcesFiles.add(outputFile);
     }
     final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
-    resourceFile.writeToFile(environment.buildDir.childFile('web_resources.d'));
-
+    depfileService.writeToFile(
+      resourceFile,
+      environment.buildDir.childFile('web_resources.d'),
+    );
   }
 }
 
@@ -320,7 +338,15 @@ class WebServiceWorker extends Target {
     final String serviceWorker = generateServiceWorker(uriToHash);
     serviceWorkerFile
       .writeAsStringSync(serviceWorker);
-    depfile.writeToFile(environment.buildDir.childFile('service_worker.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('service_worker.d'),
+    );
   }
 }
 

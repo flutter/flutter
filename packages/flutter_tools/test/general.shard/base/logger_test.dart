@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert' show jsonEncode;
 
 import 'package:platform/platform.dart';
@@ -90,7 +91,7 @@ void main() {
     });
   });
 
-  testWithoutContext('Logger does not throw when stdio write throws', () async {
+  testWithoutContext('Logger does not throw when stdio write throws synchronously', () async {
     final MockStdout stdout = MockStdout();
     final MockStdout stderr = MockStdout();
     final ThrowingStdio stdio = ThrowingStdio(stdout, stderr);
@@ -115,6 +116,45 @@ void main() {
     );
     logger.printStatus('message');
     logger.printError('error message');
+    expect(stdoutThrew, true);
+    expect(stderrThrew, true);
+  });
+
+  testWithoutContext('Logger does not throw when stdio write throws asynchronously', () async {
+    final MockStdout stdout = MockStdout();
+    final MockStdout stderr = MockStdout();
+    final ThrowingStdio stdio = ThrowingStdio(stdout, stderr);
+    bool stdoutThrew = false;
+    bool stderrThrew = false;
+    final Completer<void> stdoutCompleter = Completer<void>();
+    final Completer<void> stderrCompleter = Completer<void>();
+    when(stdout.write(any)).thenAnswer((_) {
+      Zone.current.runUnaryGuarded<void>((_) {
+        stdoutThrew = true;
+        stdoutCompleter.complete();
+        throw 'Error';
+      }, null);
+    });
+    when(stderr.write(any)).thenAnswer((_) {
+      Zone.current.runUnaryGuarded<void>((_) {
+        stderrThrew = true;
+        stderrCompleter.complete();
+        throw 'Error';
+      }, null);
+    });
+    final Logger logger = StdoutLogger(
+      terminal: AnsiTerminal(
+        stdio: stdio,
+        platform: _kNoAnsiPlatform,
+      ),
+      stdio: stdio,
+      outputPreferences: OutputPreferences.test(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+    );
+    logger.printStatus('message');
+    logger.printError('error message');
+    await stdoutCompleter.future;
+    await stderrCompleter.future;
     expect(stdoutThrew, true);
     expect(stderrThrew, true);
   });

@@ -120,13 +120,19 @@ class FallbackDiscovery {
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
       _logger.printTrace('Failed to connect directly, falling back to mDNS');
-      UsageEvent(_kEventName, 'failure').send();
+      UsageEvent(
+        _kEventName,
+        'failure',
+        label: err.toString(),
+        value: hostPort,
+      ).send();
       return null;
     }
 
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
     const int kDelaySeconds = 2;
+    Object firstException;
     while (attempts < 5) {
       try {
         final VmService vmService = await _vmServiceConnectUri(assumedWsUri.toString());
@@ -145,6 +151,7 @@ class FallbackDiscovery {
         }
       } on Exception catch (err) {
         // No action, we might have failed to connect.
+        firstException ??= err;
         _logger.printTrace(err.toString());
       }
 
@@ -156,7 +163,12 @@ class FallbackDiscovery {
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
-    UsageEvent(_kEventName, 'failure').send();
+    UsageEvent(
+      _kEventName,
+      'failure',
+      label: firstException?.toString() ?? 'Connection attempts exhausted',
+      value: hostPort,
+    ).send();
     return null;
   }
 }

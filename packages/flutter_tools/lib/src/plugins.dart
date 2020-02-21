@@ -19,6 +19,7 @@ import 'globals.dart' as globals;
 import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
+import 'windows/property_sheet.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
@@ -488,7 +489,8 @@ String _readFileContent(File file) {
   return file.existsSync() ? file.readAsStringSync() : null;
 }
 
-const String _androidPluginRegistryTemplateOldEmbedding = '''package io.flutter.plugins;
+const String _androidPluginRegistryTemplateOldEmbedding = '''
+package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
 {{#plugins}}
@@ -519,7 +521,8 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-const String _androidPluginRegistryTemplateNewEmbedding = '''package io.flutter.plugins;
+const String _androidPluginRegistryTemplateNewEmbedding = '''
+package io.flutter.plugins;
 
 {{#androidX}}
 import androidx.annotation.Keep;
@@ -645,7 +648,8 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   );
 }
 
-const String _objcPluginRegistryHeaderTemplate = '''//
+const String _objcPluginRegistryHeaderTemplate = '''
+//
 //  Generated file. Do not edit.
 //
 
@@ -664,7 +668,8 @@ NS_ASSUME_NONNULL_END
 #endif /* GeneratedPluginRegistrant_h */
 ''';
 
-const String _objcPluginRegistryImplementationTemplate = '''//
+const String _objcPluginRegistryImplementationTemplate = '''
+//
 //  Generated file. Do not edit.
 //
 
@@ -689,7 +694,8 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 @end
 ''';
 
-const String _swiftPluginRegistryTemplate = '''//
+const String _swiftPluginRegistryTemplate = '''
+//
 //  Generated file. Do not edit.
 //
 
@@ -735,7 +741,8 @@ Depends on all your plugins, and provides a function to register them.
 end
 ''';
 
-const String _dartPluginRegistryTemplate = '''//
+const String _dartPluginRegistryTemplate = '''
+//
 // Generated file. Do not edit.
 //
 
@@ -756,7 +763,8 @@ void registerPlugins(PluginRegistry registry) {
 }
 ''';
 
-const String _cppPluginRegistryHeaderTemplate = '''//
+const String _cppPluginRegistryHeaderTemplate = '''
+//
 //  Generated file. Do not edit.
 //
 
@@ -771,7 +779,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry);
 #endif  // GENERATED_PLUGIN_REGISTRANT_
 ''';
 
-const String _cppPluginRegistryImplementationTemplate = '''//
+const String _cppPluginRegistryImplementationTemplate = '''
+//
 //  Generated file. Do not edit.
 //
 
@@ -852,12 +861,13 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
-Future<void> _writeWindowsPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(plugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': windowsPlugins,
   };
   await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
+  await _writeWindowsPluginProperties(project.windows, windowsPlugins);
 }
 
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
@@ -872,6 +882,20 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynami
     templateContext,
     globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
   );
+}
+
+Future<void> _writeWindowsPluginProperties(WindowsProject project, List<Map<String, dynamic>> windowsPlugins) async {
+  final List<String> pluginLibraryFilenames = windowsPlugins.map(
+    (Map<String, dynamic> plugin) => '${plugin['name']}_plugin.lib').toList();
+  // Use paths relative to the VS project directory.
+  final String projectDir = project.vcprojFile.parent.path;
+  final String symlinkDirPath = project.pluginSymlinkDirectory.path.substring(projectDir.length + 1);
+  final List<String> pluginIncludePaths = windowsPlugins.map((Map<String, dynamic> plugin) =>
+    globals.fs.path.join(symlinkDirPath, plugin['name'] as String, 'windows')).toList();
+  project.generatedPluginPropertySheetFile.writeAsStringSync(PropertySheet(
+    includePaths: pluginIncludePaths,
+    libraryDependencies: pluginLibraryFilenames,
+  ).toString());
 }
 
 Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -1013,7 +1037,7 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
-    await _writeWindowsPluginRegistrant(project, plugins);
+    await _writeWindowsPluginFiles(project, plugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {

@@ -134,10 +134,14 @@ class ChromeDevice extends Device {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
     final String url = platformArgs['uri'] as String;
-    _chrome = await chromeLauncher.launch(url,
+    _chrome = await chromeLauncher.launch(
+      url,
       dataDir: globals.fs.currentDirectory
         .childDirectory('.dart_tool')
-        .childDirectory('chrome-device'));
+        .childDirectory('chrome-device'),
+      headless: debuggingOptions.webRunHeadless,
+      debugPort: debuggingOptions.webBrowserDebugPort,
+    );
 
     globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': true});
 

@@ -9,6 +9,7 @@ import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
 import '../artifacts.dart';
@@ -186,10 +187,10 @@ class BuildDaemonCreator {
     bool hasPlugins,
     bool initializePlatform,
     WebTestTargetManifest testTargets,
-  }) {
-    // The build script is stored in an auxillary package to reduce
+  }) async {
+    // The build script is stored in an auxiliary package to reduce
     // dependencies of the main tool.
-    final String flutterToolsPackages = globals.fs.path.join(
+    final String buildScriptPackages = globals.fs.path.join(
       Cache.flutterRoot,
       'packages',
       '_flutter_web_build_script',
@@ -202,6 +203,16 @@ class BuildDaemonCreator {
       'lib',
       'build_script.dart',
     );
+    if (!globals.fs.isFileSync(buildScript)) {
+      throwToolExit('Expected a file $buildScript to exist in the Flutter SDK.');
+    }
+    // If we're missing the .packages file, perform a pub get.
+    if (!globals.fs.isFileSync(buildScriptPackages)) {
+      await pub.get(
+        context: PubContext.pubGet,
+        directory: globals.fs.file(buildScriptPackages).parent.path,
+      );
+    }
     final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
 
     // On Windows we need to call the snapshot directly otherwise
@@ -209,7 +220,7 @@ class BuildDaemonCreator {
     // STDIO.
     final List<String> args = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-      '--packages=$flutterToolsPackages',
+      '--packages=$buildScriptPackages',
       buildScript,
       'daemon',
       '--skip-build-script-check',

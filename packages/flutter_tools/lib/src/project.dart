@@ -952,6 +952,9 @@ class WindowsProject extends FlutterProjectPlatform {
   /// the build.
   File get generatedPropertySheetFile => ephemeralDirectory.childFile('Generated.props');
 
+  /// Contains configuration to add plugins to the build.
+  File get generatedPluginPropertySheetFile => managedDirectory.childFile('GeneratedPlugins.props');
+
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
 

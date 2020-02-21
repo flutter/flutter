@@ -73,7 +73,11 @@ void main() {
       windowsProject = MockWindowsProject();
       when(flutterProject.windows).thenReturn(windowsProject);
       when(windowsProject.pluginConfigKey).thenReturn('windows');
-      when(windowsProject.pluginSymlinkDirectory).thenReturn(flutterProject.directory.childDirectory('windows').childDirectory('symlinks'));
+      final Directory windowsManagedDirectory = flutterProject.directory.childDirectory('windows').childDirectory('flutter');
+      when(windowsProject.managedDirectory).thenReturn(windowsManagedDirectory);
+      when(windowsProject.vcprojFile).thenReturn(windowsManagedDirectory.parent.childFile('Runner.vcxproj'));
+      when(windowsProject.pluginSymlinkDirectory).thenReturn(windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks'));
+      when(windowsProject.generatedPluginPropertySheetFile).thenReturn(windowsManagedDirectory.childFile('GeneratedPlugins.props'));
       when(windowsProject.existsSync()).thenReturn(false);
       linuxProject = MockLinuxProject();
       when(flutterProject.linux).thenReturn(linuxProject);
@@ -106,9 +110,9 @@ void main() {
         macos:
           pluginClass: FLESomePlugin
         windows:
-          pluginClass: FLESomePlugin
+          pluginClass: SomePlugin
         linux:
-          pluginClass: FLESomePlugin
+          pluginClass: SomePlugin
         web:
           pluginClass: SomePlugin
           fileName: lib/SomeFile.dart
@@ -822,6 +826,46 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Windows registrant', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyPackageAsPlugin();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantHeader = windowsProject.managedDirectory.childFile('generated_plugin_registrant.h');
+        final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantHeader.existsSync(), isTrue);
+        expect(registrantImpl.existsSync(), isTrue);
+        expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Windows plugin properties', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyPackageAsPlugin();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File properties = windowsProject.generatedPluginPropertySheetFile;
+        final String includePath = fs.path.join('flutter', 'ephemeral', '.plugin_symlinks', 'apackage', 'windows');
+
+        expect(properties.existsSync(), isTrue);
+        expect(properties.readAsStringSync(), contains('apackage_plugin.lib'));
+        expect(properties.readAsStringSync(), contains('>$includePath;'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

@@ -4,7 +4,7 @@
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/web/devfs_web.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
