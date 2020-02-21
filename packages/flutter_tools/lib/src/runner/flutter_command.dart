@@ -564,22 +564,22 @@ abstract class FlutterCommand extends Command<void> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<void> run() {
-    final DateTime startTime = systemClock.now();
+    final DateTime startTime = systemClock?.now() ?? DateTime.now();
 
     return context.run<void>(
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
         // Prints the welcome message if needed.
-        flutterUsage.printWelcome();
+        flutterUsage?.printWelcome();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult = FlutterCommandResult.fail();
         try {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
-          final DateTime endTime = systemClock.now();
-          globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
+          final DateTime endTime = systemClock?.now() ?? DateTime.now();
+          globals.printTrace(userMessages?.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           _sendPostUsage(commandPath, commandResult, startTime, endTime);
         }
       },
@@ -595,8 +595,8 @@ abstract class FlutterCommand extends Command<void> {
         systemClock.now(),
       );
     };
-    signals.addHandler(io.ProcessSignal.SIGTERM, handler);
-    signals.addHandler(io.ProcessSignal.SIGINT, handler);
+    signals?.addHandler(io.ProcessSignal.SIGTERM, handler);
+    signals?.addHandler(io.ProcessSignal.SIGINT, handler);
   }
 
   /// Logs data about this command.
@@ -627,7 +627,7 @@ abstract class FlutterCommand extends Command<void> {
     final String label = labels
         .where((String label) => !isBlank(label))
         .join('-');
-    flutterUsage.sendTiming(
+    flutterUsage?.sendTiming(
       'flutter',
       name,
       // If the command provides its own end time, use it. Otherwise report
@@ -653,9 +653,9 @@ abstract class FlutterCommand extends Command<void> {
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
       // idevice_id on macOS) are required to determine `requiredArtifacts`.
-      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      await globals.cache?.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
 
-      await globals.cache.updateAll(await requiredArtifacts);
+      await globals.cache?.updateAll(await requiredArtifacts);
     }
 
     await validateCommand();

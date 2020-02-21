@@ -89,7 +89,7 @@ abstract class Usage {
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
     Map<CustomDimensions, String> parameters,
-  }) => flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
+  }) => flutterUsage?.sendCommand(command, parameters: _useCdKeys(parameters));
 
   /// Whether this is the first run of the tool.
   bool get isFirstRun;

@@ -14,6 +14,7 @@ import 'src/build_runner/resident_web_runner.dart';
 import 'src/build_runner/web_compilation_delegate.dart';
 
 import 'src/codegen.dart';
+import 'src/commands/add_to_path.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -66,6 +67,11 @@ Future<void> main(List<String> args) async {
   final bool verboseHelp = help && verbose;
 
   await runner.run(args, <FlutterCommand>[
+    AddToPathCommand(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    ),
     AnalyzeCommand(verboseHelp: verboseHelp),
     AssembleCommand(),
     AttachCommand(verboseHelp: verboseHelp),

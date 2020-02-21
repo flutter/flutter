@@ -290,9 +290,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
-        globals.logger.quiet = topLevelResults['quiet'] as bool;
+        globals.logger?.quiet = topLevelResults['quiet'] as bool;
 
-        if (globals.platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
+        if (globals.platform?.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
           await Cache.lock();
         }
 
@@ -302,7 +302,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         _checkFlutterCopy();
         try {
-          await globals.flutterVersion.ensureVersionFile();
+          await globals.flutterVersion?.ensureVersionFile();
         } on FileSystemException catch (e) {
           globals.printError('Failed to write the version file to the artifact cache: "$e".');
           globals.printError('Please ensure you have permissions in the artifact cache directory.');
@@ -310,7 +310,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
         final bool machineFlag = topLevelResults['machine'] as bool;
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
-          await globals.flutterVersion.checkFlutterVersionFreshness();
+          await globals.flutterVersion?.checkFlutterVersionFreshness();
         }
 
         if (topLevelResults.wasParsed('packages')) {
@@ -318,7 +318,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // See if the user specified a specific device.
-        deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
+        deviceManager?.specifiedDeviceId = topLevelResults['device-id'] as String;
 
         if (topLevelResults['version'] as bool) {
           flutterUsage.sendCommand('version');
