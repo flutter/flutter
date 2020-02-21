@@ -165,7 +165,7 @@ Future<void> updatePluginsInSolution(WindowsProject project, List<Plugin> plugin
         'Unable to find a "${project.vcprojFile.basename}" project in ${project.solutionFile.path}');
   }
 
-  await project.solutionFile.writeAsString(newSolutionContent.toString());
+  await project.solutionFile.writeAsString(newSolutionContent.toString().trimRight());
 }
 
 /// Advances [iterator] it reaches an element that matches [pattern].
