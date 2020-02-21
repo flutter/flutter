@@ -33,7 +33,7 @@ class EngineLayer : public RefCountedDartWrappable<EngineLayer> {
   static void MakeRetained(Dart_Handle dart_handle,
                            std::shared_ptr<flutter::ContainerLayer> layer) {
     auto engine_layer = fml::MakeRefCounted<EngineLayer>(layer);
-    engine_layer->ClaimDartHandle(dart_handle);
+    engine_layer->AssociateWithDartWrapper(dart_handle);
   }
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);

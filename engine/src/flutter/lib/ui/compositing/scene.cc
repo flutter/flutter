@@ -34,7 +34,7 @@ void Scene::create(Dart_Handle scene_handle,
   auto scene = fml::MakeRefCounted<Scene>(
       std::move(rootLayer), rasterizerTracingThreshold,
       checkerboardRasterCacheImages, checkerboardOffscreenLayers);
-  scene->ClaimDartHandle(scene_handle);
+  scene->AssociateWithDartWrapper(scene_handle);
 }
 
 Scene::Scene(std::shared_ptr<flutter::Layer> rootLayer,
