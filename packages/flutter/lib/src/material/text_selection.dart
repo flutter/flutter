@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:collection' show HashSet;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'debug.dart';
 import 'flat_button.dart';
 import 'icon_button.dart';
@@ -62,13 +60,24 @@ class _TextSelectionToolbar extends StatefulWidget {
 }
 
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
+  final GlobalKey _key = GlobalKey();
+
   // Whether or not the overflow menu is open.
   bool _overflowOpen = false;
+  // The greatest width ever measured for this widget.
+  double _maxWidth;
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    // Keep track of the largest child width.
+    if (_key.currentContext != null) {
+      final RenderBox renderBoxChild = _key.currentContext.findRenderObject() as RenderBox;
+      if (_maxWidth == null || renderBoxChild.size.width > _maxWidth) {
+        _maxWidth = renderBoxChild.size.width;
+      }
+    }
 
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> items = <Widget>[];
     if (widget.handleCut != null) {
       items.add(FlatButton(
@@ -120,75 +129,45 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return Container(width: 0.0, height: 0.0);
     }
 
-    return _TextSelectionToolbarContainer(
-      child: _TextSelectionToolbarROW(
-        isAbove: widget.isAbove,
-        overflowOpen: _overflowOpen,
-        children: <Widget>[
-          // The navButton that shows and hides the overflow menu is the first
-          // child.
-          Material(
-            child: IconButton(
-              // TODO(justinmc): This should be an AnimatedIcon, but
-              // AnimatedIcons doesn't yet support arrow_back to more_vert.
-              // https://github.com/flutter/flutter/issues/51209
-              icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
-              onPressed: () {
-                setState(() {
-                  _overflowOpen = !_overflowOpen;
-                });
-              },
-              tooltip: _overflowOpen ? 'Back' : 'More',
-            ),
-          ),
-          ...items,
-        ],
-      ),
-    );
-  }
-}
-
-class _TextSelectionToolbarContainer extends StatefulWidget {
-  const _TextSelectionToolbarContainer({
-    Key key,
-    this.width,
-    this.child,
-  }) : super(key: key);
-
-  final Widget child;
-  final double width;
-
-  @override
-  _TextSelectionToolbarContainerState createState() => _TextSelectionToolbarContainerState();
-}
-
-class _TextSelectionToolbarContainerState extends State<_TextSelectionToolbarContainer> with TickerProviderStateMixin {
-  final GlobalKey _childKey = GlobalKey();
-  double _maxChildWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    // Keep track of the largest child width.
-    if (_childKey.currentContext != null) {
-      final RenderBox renderBoxChild = _childKey.currentContext.findRenderObject() as RenderBox;
-      if (_maxChildWidth == null || renderBoxChild.size.width > _maxChildWidth) {
-        _maxChildWidth = renderBoxChild.size.width;
-      }
-    }
-
     final Material child = Material(
+      key: _key,
       elevation: 1.0,
       child: AnimatedSize(
-        key: _childKey,
         vsync: this,
         // This duration was eyeballed on a Pixel 2 emulator running Android
         // API 28.
         duration: const Duration(milliseconds: 140),
-        child: widget.child,
+        child: _TextSelectionToolbarItems(
+          isAbove: widget.isAbove,
+          overflowOpen: _overflowOpen,
+          children: <Widget>[
+            // The navButton that shows and hides the overflow menu is the first
+            // child.
+            Material(
+              child: IconButton(
+                // TODO(justinmc): This should be an AnimatedIcon, but
+                // AnimatedIcons doesn't yet support arrow_back to more_vert.
+                // https://github.com/flutter/flutter/issues/51209
+                icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
+                onPressed: () {
+                  setState(() {
+                    _overflowOpen = !_overflowOpen;
+                  });
+                },
+                tooltip: _overflowOpen ? 'Back' : 'More',
+              ),
+            ),
+            ...items,
+          ],
+        ),
       ),
     );
-    return _maxChildWidth == null ? child : SizedBox(
-      width: _maxChildWidth,
+
+    // When the menu shrinks as the overflow is opened, then it occupies the
+    // same size as it did with overflow closed and aligns itself to the right
+    // of its original size.
+    return _maxWidth == null ? child : SizedBox(
+      width: _maxWidth,
       child: Align(
         alignment: Alignment.topRight,
         heightFactor: 1.0,
@@ -196,43 +175,47 @@ class _TextSelectionToolbarContainerState extends State<_TextSelectionToolbarCon
         child: child,
       ),
     );
+
   }
 }
 
-// TODO(justinmc): Rename.
-class _TextSelectionToolbarROW extends MultiChildRenderObjectWidget {
-  _TextSelectionToolbarROW({
+// Renders the menu items in the correct positions in the menu and its overflow
+// submenu based on calculating which item would first overflow.
+class _TextSelectionToolbarItems extends MultiChildRenderObjectWidget {
+  _TextSelectionToolbarItems({
     Key key,
-    @required this.children,
+    @required List<Widget> children,
     @required this.isAbove,
     @required this.overflowOpen,
-  }) : super(key: key, children: children);
+  }) : assert(children != null),
+       assert(isAbove != null),
+       assert(overflowOpen != null),
+       super(key: key, children: children);
 
-  final List<Widget> children;
   final bool isAbove;
   final bool overflowOpen;
 
   @override
-  _TextSelectionToolbarRB createRenderObject(BuildContext context) {
-    return _TextSelectionToolbarRB(
+  _TextSelectionToolbarItemsRenderBox createRenderObject(BuildContext context) {
+    return _TextSelectionToolbarItemsRenderBox(
       isAbove: isAbove,
       overflowOpen: overflowOpen,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _TextSelectionToolbarRB renderObject) {
+  void updateRenderObject(BuildContext context, _TextSelectionToolbarItemsRenderBox renderObject) {
     renderObject
       ..isAbove = isAbove
       ..overflowOpen = overflowOpen;
   }
 
   @override
-  _TextSelectionToolbarElement createElement() => _TextSelectionToolbarElement(this);
+  MultiChildRenderObjectElement createElement() => MultiChildRenderObjectElement(this);
 }
 
-class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>, RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
-  _TextSelectionToolbarRB({
+class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>, RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
+  _TextSelectionToolbarItemsRenderBox({
     @required bool isAbove,
     @required bool overflowOpen,
   }) : assert(overflowOpen != null),
@@ -281,7 +264,7 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
 
     // If the last child overflows, but only because of the width of the
     // overflow button, then just show it and hide the overflow button.
-    final RenderBox navButton = firstChild as RenderBox;
+    final RenderBox navButton = firstChild;
     if (_lastIndexThatFits != -1 && _lastIndexThatFits == childCount - 2
       && width - navButton.size.width <= constraints.maxWidth) {
       _lastIndexThatFits = -1;
@@ -291,9 +274,9 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
   // Set the offset of all of the children that will be painted.
   void _placeChildren() {
     int i = -1;
-    Size nextSize = Size(0.0, 0.0);
+    Size nextSize = const Size(0.0, 0.0);
     double fitWidth = 0.0;
-    RenderBox navButton = firstChild as RenderBox;
+    final RenderBox navButton = firstChild;
     double overflowHeight = overflowOpen && !isAbove ? navButton.size.height : 0.0;
     visitChildren((RenderObject renderObjectChild) {
       i++;
@@ -335,8 +318,6 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
 
     // Place the navigation button if there is overflow.
     if (_lastIndexThatFits >= 0) {
-      // TODO(justinmc): The navButton is just the first child in the array of
-      // children. Should I create a separate slot for it?
       final FlexParentData navButtonParentData = navButton.parentData as FlexParentData;
       if (overflowOpen) {
         navButtonParentData.offset = isAbove
@@ -369,9 +350,6 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Rect overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width, 0.0);
-
-    double lastY = 0.0;
     int i = -1;
     bool fits = true;
     visitChildren((RenderObject renderObjectChild) {
@@ -395,7 +373,6 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
       final RenderBox child = renderObjectChild as RenderBox;
       final FlexParentData childParentData = child.parentData as FlexParentData;
       context.paintChild(child, childParentData.offset + offset);
-      lastY = childParentData.offset.dy + offset.dy;
       if (fits && i == _lastIndexThatFits) {
         fits = false;
       }
@@ -413,15 +390,6 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
-}
-
-class _TextSelectionToolbarElement extends MultiChildRenderObjectElement {
-  _TextSelectionToolbarElement(_TextSelectionToolbarROW widget)
-    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
-      super(widget as MultiChildRenderObjectWidget);
-
-  @override
-  _TextSelectionToolbarROW get widget => super.widget as _TextSelectionToolbarROW;
 }
 
 /// Centers the toolbar around the given anchor, ensuring that it remains on
