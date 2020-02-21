@@ -404,11 +404,11 @@ static void CommonInit(FlutterViewController* controller) {
   NSPoint locationInBackingCoordinates = [self.view convertPointToBacking:locationInView];
   FlutterPointerEvent flutterEvent = {
       .struct_size = sizeof(flutterEvent),
-      .device_kind = kFlutterPointerDeviceKindMouse,
       .phase = phase,
+      .timestamp = static_cast<size_t>(event.timestamp * NSEC_PER_MSEC),
       .x = locationInBackingCoordinates.x,
       .y = -locationInBackingCoordinates.y,  // convertPointToBacking makes this negative.
-      .timestamp = static_cast<size_t>(event.timestamp * NSEC_PER_MSEC),
+      .device_kind = kFlutterPointerDeviceKindMouse,
       // If a click triggered a synthesized kAdd, don't pass the buttons in that event.
       .buttons = phase == kAdd ? 0 : _mouseState.buttons,
   };
