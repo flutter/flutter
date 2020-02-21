@@ -2971,12 +2971,13 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-      final List<FadeTransition> transitions =
-        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-      // On Android, an empty app contains a single FadeTransition. The following
-      // two are the left and right text selection handles, respectively.
-      final FadeTransition left = transitions[1];
-      final FadeTransition right = transitions[2];
+      // [EditableText] handlers are created in an [Overlay] widget.
+      final List<FadeTransition> transitions = find.descendant(
+        of: find.byType(Overlay),
+        matching: find.byType(FadeTransition),
+      ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+      final FadeTransition left = transitions[0];
+      final FadeTransition right = transitions[1];
 
       if (expectedLeftVisibleBefore)
         expect(left.opacity.value, equals(1.0));
