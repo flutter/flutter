@@ -2971,11 +2971,11 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-      // [EditableText] handlers are created in an [Overlay] widget.
       final List<FadeTransition> transitions = find.descendant(
-        of: find.byType(Overlay),
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
         matching: find.byType(FadeTransition),
       ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+      expect(transitions.length, 2);
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
 
