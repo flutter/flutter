@@ -9,8 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import 'debug.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'flat_button.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -61,7 +61,7 @@ class _TextSelectionToolbar extends StatefulWidget {
   _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
 
-class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
+class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
   // Whether or not the overflow menu is open.
   bool _overflowOpen = false;
 
@@ -129,6 +129,9 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
           // child.
           Material(
             child: IconButton(
+              // TODO(justinmc): This should be an AnimatedIcon, but
+              // AnimatedIcons doesn't yet support arrow_back to more_vert.
+              // https://github.com/flutter/flutter/issues/51209
               icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
               onPressed: () {
                 setState(() {
@@ -300,16 +303,18 @@ class _TextSelectionToolbarRB extends RenderBox with ContainerRenderObjectMixin<
         return;
       }
 
-      // If the current child is not displayed, no need to place it.
+      final RenderBox child = renderObjectChild as RenderBox;
+      final FlexParentData childParentData = child.parentData as FlexParentData;
+
+      // If the current child is not displayed, place it offscreen to avoid it
+      // interfering with hit detection.
       if (_lastIndexThatFits != -1) {
         if ((!overflowOpen && i > _lastIndexThatFits)
           || (overflowOpen && i <= _lastIndexThatFits)) {
+          childParentData.offset = Offset(-child.size.width, -child.size.height);
           return;
         }
       }
-
-      final RenderBox child = renderObjectChild as RenderBox;
-      final FlexParentData childParentData = child.parentData as FlexParentData;
 
       if (!overflowOpen) {
         childParentData.offset = Offset(fitWidth, 0.0);
