@@ -396,8 +396,10 @@ void _testVerticalScrolling() {
 
     semantics().semanticsEnabled = false;
   },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+      skip: browserEngine == BrowserEngine.webkit ||
+          browserEngine == BrowserEngine.edge);
 
   test('scrollable node with children has a container node', () async {
     semantics()
@@ -432,8 +434,10 @@ void _testVerticalScrolling() {
 
     semantics().semanticsEnabled = false;
   },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+      skip: browserEngine == BrowserEngine.webkit ||
+          browserEngine == BrowserEngine.edge);
 
   test('scrollable node dispatches scroll events', () async {
     final StreamController<int> idLogController = StreamController<int>();
@@ -544,8 +548,10 @@ void _testHorizontalScrolling() {
 
     semantics().semanticsEnabled = false;
   },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+      skip: browserEngine == BrowserEngine.webkit ||
+          browserEngine == BrowserEngine.edge);
 
   test('scrollable node with children has a container node', () async {
     semantics()
@@ -580,8 +586,10 @@ void _testHorizontalScrolling() {
 
     semantics().semanticsEnabled = false;
   },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+      skip: browserEngine == BrowserEngine.webkit ||
+          browserEngine == BrowserEngine.edge);
 
   test('scrollable node dispatches scroll events', () async {
     final SemanticsActionLogger logger = SemanticsActionLogger();
@@ -1140,8 +1148,10 @@ void _testTappable() {
 
     semantics().semanticsEnabled = false;
   },
+      // TODO(nurhan): https://github.com/flutter/flutter/issues/50590
       // TODO(nurhan): https://github.com/flutter/flutter/issues/50754
-      skip: browserEngine == BrowserEngine.edge);
+      skip: browserEngine == BrowserEngine.webkit ||
+          browserEngine == BrowserEngine.edge);
 }
 
 void _testImage() {
