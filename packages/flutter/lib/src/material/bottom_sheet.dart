@@ -497,7 +497,7 @@ class BottomSheetSuspendedCurve extends Curve {
        assert(curve != null);
 
   /// The progress value at which [curve] should begin.
-  /// 
+  ///
   /// This defaults to [Curves.easeOutCubic].
   final double startingPoint;
 
