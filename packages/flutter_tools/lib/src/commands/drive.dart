@@ -173,6 +173,7 @@ class DriveCommand extends RunCommandBase {
       Uri webUri;
 
       if (isWebPlatform) {
+        // Start Flutter web application for current test
         final FlutterProject flutterProject = FlutterProject.current();
         final FlutterDevice flutterDevice = await FlutterDevice.create(
           device,
