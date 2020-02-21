@@ -23,7 +23,8 @@ class Picture : public RefCountedDartWrappable<Picture> {
 
  public:
   ~Picture() override;
-  static fml::RefPtr<Picture> Create(flutter::SkiaGPUObject<SkPicture> picture);
+  static fml::RefPtr<Picture> Create(Dart_Handle dart_handle,
+                                     flutter::SkiaGPUObject<SkPicture> picture);
 
   sk_sp<SkPicture> picture() const { return picture_.get(); }
 

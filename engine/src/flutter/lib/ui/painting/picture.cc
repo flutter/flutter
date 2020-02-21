@@ -27,8 +27,12 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
 fml::RefPtr<Picture> Picture::Create(
+    Dart_Handle dart_handle,
     flutter::SkiaGPUObject<SkPicture> picture) {
-  return fml::MakeRefCounted<Picture>(std::move(picture));
+  auto canvas_picture = fml::MakeRefCounted<Picture>(std::move(picture));
+
+  canvas_picture->ClaimDartHandle(dart_handle);
+  return canvas_picture;
 }
 
 Picture::Picture(flutter::SkiaGPUObject<SkPicture> picture)
