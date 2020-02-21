@@ -20,6 +20,7 @@ import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
 import 'windows/property_sheet.dart';
+import 'windows/visual_studio_solution_utils.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
@@ -1030,6 +1031,7 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
     await _writeWindowsPluginFiles(project, plugins);
+    await updatePluginsInSolution(project.windows, plugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {
