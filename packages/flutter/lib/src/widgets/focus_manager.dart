@@ -146,11 +146,8 @@ enum UnfocusDisposition {
   /// look to its [FocusScopeNode.focusedChild], or use the
   /// [FocusTraversalPolicy] in effect to find the first focus.
   ///
-  /// Focusing the scope in this way doesn't affect the
-  /// [FocusScopeNode.focusedChild] of this scope or its descendants. It allows
-  /// the scope to receive focus so that
-  /// [FocusNode.nextFocus]/[FocusNode.previousFocus] still work as expected,
-  /// but removes the focus from the current primary focus.
+  /// Focusing the scope in this way clears the [FocusScopeNode.focusedChild]
+  /// history for the enclosing scope when it receives focus.
   ///
   /// It is possible that calling [FocusNode.nextFocus] after unfocusing with
   /// this disposition will re-focus the node that just had focus.
@@ -164,11 +161,13 @@ enum UnfocusDisposition {
   /// If there is no previously focused child, then this is equivalent to
   /// [scope].
   ///
-  /// Unfocusing with this disposition will cause [FocusNode.unfocus] to walk
-  /// down the tree, starting at its [FocusScopeNode.focusedChild].  If the
-  /// [FocusScopeNode.focusedChild] is another scope, then follow its
-  /// [FocusScopeNode.focusedChild], and so on, finding the leaf
-  /// [FocusScopeNode.focusedChild].
+  /// Unfocusing with this disposition will cause [FocusNode.unfocus] to walk up
+  /// the tree to the nearest focusable enclosing scope, then start to walk down
+  /// the tree, looking for a focused child at its
+  /// [FocusScopeNode.focusedChild].  If the [FocusScopeNode.focusedChild] is a
+  /// scope, then look for its [FocusScopeNode.focusedChild], and so on, finding
+  /// the leaf [FocusScopeNode.focusedChild] that is not a scope, or, failing
+  /// that, a leaf scope that has no focused child.
   previouslyFocusedChild,
 }
 
@@ -707,6 +706,83 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// If you want this node to lose focus and move the focus to the next or
   /// previous node in the enclosing [FocusTraversalGroup], call [nextFocus] or
   /// [previousFocus] instead of calling `unfocus`.
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  /// This example shows the difference between the different [UnfocusDisposition]
+  /// values for [unfocus].
+  ///
+  /// Try setting focus on the four text fields, and then click "UNFOCUS" to see
+  /// what happens when the current [FocusManager.primaryFocus] is unfocused.
+  ///
+  /// Try pressing the TAB key after unfocusing to see what the next widget
+  /// chosen is.
+  ///
+  /// ```dart imports
+  /// import 'package:flutter/foundation.dart';
+  /// ```
+  ///
+  /// ```dart
+  /// UnfocusDisposition disposition = UnfocusDisposition.scope;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Material(
+  ///     child: Container(
+  ///       color: Colors.white,
+  ///       child: Column(
+  ///         mainAxisAlignment: MainAxisAlignment.center,
+  ///         children: <Widget>[
+  ///           Wrap(
+  ///             children: List<Widget>.generate(4, (int index) {
+  ///               return SizedBox(
+  ///                 width: 200,
+  ///                 child: Padding(
+  ///                   padding: const EdgeInsets.all(8.0),
+  ///                   child: TextField(
+  ///                     decoration: InputDecoration(border: OutlineInputBorder()),
+  ///                   ),
+  ///                 ),
+  ///               );
+  ///             }),
+  ///           ),
+  ///           Row(
+  ///             mainAxisAlignment: MainAxisAlignment.spaceAround,
+  ///             children: <Widget>[
+  ///               ...List<Widget>.generate(UnfocusDisposition.values.length,
+  ///                   (int index) {
+  ///                 return Row(
+  ///                   mainAxisSize: MainAxisSize.min,
+  ///                   children: <Widget>[
+  ///                     Radio<UnfocusDisposition>(
+  ///                       groupValue: disposition,
+  ///                       onChanged: (UnfocusDisposition value) {
+  ///                         setState(() {
+  ///                           disposition = value;
+  ///                         });
+  ///                       },
+  ///                       value: UnfocusDisposition.values[index],
+  ///                     ),
+  ///                     Text(describeEnum(UnfocusDisposition.values[index])),
+  ///                   ],
+  ///                 );
+  ///               }),
+  ///               OutlineButton(
+  ///                 child: const Text('UNFOCUS'),
+  ///                 onPressed: () {
+  ///                   setState(() {
+  ///                     primaryFocus.unfocus(disposition: disposition);
+  ///                   });
+  ///                 },
+  ///               ),
+  ///             ],
+  ///           ),
+  ///         ],
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   void unfocus({
     UnfocusDisposition disposition = UnfocusDisposition.scope,
   }) {
