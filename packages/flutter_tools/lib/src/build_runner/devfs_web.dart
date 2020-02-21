@@ -143,6 +143,9 @@ class WebAssetServer implements AssetReader {
     // Attempt to look up the file by URI.
     if (_files.containsKey(requestPath)) {
       final List<int> bytes = getFile(requestPath);
+      // Use the underlying buffer hashCode as a revision string. This buffer is
+      // replaced whenever the frontend_server produces new output files, which
+      // will also change the hashCode.
       final String etag = bytes.hashCode.toString();
       if (ifNoneMatch == etag) {
         return shelf.Response.notModified();
