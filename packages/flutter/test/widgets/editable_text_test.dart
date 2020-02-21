@@ -968,8 +968,6 @@ void main() {
     );
     await tester.pump();
     expect(state.showToolbar(), true);
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
     expect(find.text('PASTE'), findsOneWidget);
 
@@ -982,8 +980,6 @@ void main() {
     controller.text = 'blah';
     await tester.pump();
     expect(state.showToolbar(), true);
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
     expect(find.text('PASTE'), findsOneWidget);
   }, skip: isBrowser);
@@ -1013,8 +1009,6 @@ void main() {
       from: const Offset(0, 0),
       cause: SelectionChangedCause.tap,
     );
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
 
     // Clear the text and selection.
@@ -1026,8 +1020,6 @@ void main() {
 
     // Should be able to show the toolbar.
     expect(state.showToolbar(), true);
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
     expect(find.text('PASTE'), findsOneWidget);
   });
@@ -1060,8 +1052,6 @@ void main() {
     );
     await tester.pump();
     expect(state.showToolbar(), true);
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
     expect(find.text('SELECT ALL'), findsOneWidget);
     expect(find.text('COPY'), findsOneWidget);
@@ -1128,8 +1118,6 @@ void main() {
     );
     await tester.pump();
     expect(state.showToolbar(), true);
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
     expect(find.text('SELECT ALL'), findsNothing);
     expect(find.text('COPY'), findsOneWidget);
@@ -1168,8 +1156,6 @@ void main() {
     );
     await tester.pump();
     expect(state.showToolbar(), true);
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
     expect(find.text('SELECT ALL'), findsOneWidget);
     expect(find.text('COPY'), findsOneWidget);
@@ -1203,8 +1189,6 @@ void main() {
     final Finder textFinder = find.byType(EditableText);
     await tester.longPress(textFinder);
     tester.state<EditableTextState>(textFinder).showToolbar();
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
 
     await tester.tap(find.text('PASTE'));

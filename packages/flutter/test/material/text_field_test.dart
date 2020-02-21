@@ -618,8 +618,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
 
     // Selected text shows 'COPY', and not 'PASTE', 'CUT', 'SELECT ALL'.
@@ -1038,8 +1036,6 @@ void main() {
     const int dIndex = 3;
     final Offset dPos = textOffsetToPosition(tester, dIndex);
     await tester.longPressAt(dPos);
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
 
     // Context menu should not have paste and cut.
@@ -1583,8 +1579,6 @@ void main() {
 
     // SELECT ALL should select all the text.
     await tester.tap(find.text('SELECT ALL'));
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
     expect(controller.selection.baseOffset, 0);
     expect(controller.selection.extentOffset, testValue.length);
@@ -1780,8 +1774,6 @@ void main() {
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
 
     // Toolbar should fade in. Starting at 0% opacity.
@@ -1892,8 +1884,6 @@ void main() {
     // Long press to select text.
     final Offset bPos = textOffsetToPosition(tester, 1);
     await tester.longPressAt(bPos, pointer: 7);
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
 
     // Should only have paste option when whole obscure text is selected.
@@ -5752,8 +5742,6 @@ void main() {
         const TextSelection.collapsed(offset: 9),
       );
       await tester.tapAt(textfieldStart + const Offset(150.0, 9.0));
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
 
       // Second tap selects the word around the cursor.
@@ -5806,8 +5794,6 @@ void main() {
       // Second tap selects the word around the cursor.
       await tester.tapAt(textOffsetToPosition(tester, index));
       await tester.pump();
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       expect(
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
@@ -5839,8 +5825,6 @@ void main() {
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, 0));
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
 
@@ -5848,8 +5832,6 @@ void main() {
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, 0));
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
     },
@@ -5875,8 +5857,6 @@ void main() {
 
       // Long press shows the selection menu.
       await tester.longPressAt(textOffsetToPosition(tester, 0));
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
 
@@ -5907,8 +5887,6 @@ void main() {
 
       // Long press shows the selection menu.
       await tester.longPress(find.byType(TextField));
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
 
@@ -5944,8 +5922,6 @@ void main() {
       // Long press shows the selection menu.
       expect(find.text('PASTE'), findsNothing);
       await tester.longPress(find.byType(TextField));
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
     },
@@ -6098,8 +6074,6 @@ void main() {
       final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
       await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
 
       expect(

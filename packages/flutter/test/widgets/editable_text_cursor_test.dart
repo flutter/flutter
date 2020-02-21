@@ -132,8 +132,6 @@ void main() {
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.longPress(textFinder);
     tester.state<EditableTextState>(textFinder).showToolbar();
-    // Selection menu renders one frame offstage, so pump twice.
-    await tester.pump();
     await tester.pump();
 
     await tester.tap(find.text('PASTE'));
