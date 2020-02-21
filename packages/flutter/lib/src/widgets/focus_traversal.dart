@@ -1432,11 +1432,12 @@ class FocusTraversalOrder extends InheritedWidget {
 /// /// A button wrapper that adds either a numerical or lexical order, depending on
 /// /// the type of T.
 /// class OrderedButton<T> extends StatefulWidget {
-///   const OrderedButton(
-///       {this.name,
-///       this.canRequestFocus = true,
-///       this.autofocus = false,
-///       this.order});
+///   const OrderedButton({
+///     this.name,
+///     this.canRequestFocus = true,
+///     this.autofocus = false,
+///     this.order,
+///   });
 ///
 ///   final String name;
 ///   final bool canRequestFocus;
@@ -1545,11 +1546,11 @@ class FocusTraversalOrder extends InheritedWidget {
 ///           ),
 ///           // A group that orders in widget order, regardless of what the order is set to.
 ///           FocusTraversalGroup(
-///             // Note that because this is NOT an OrderedTraversalPolicy, these
-///             // "OrderedButtons" their assigned order is ignored, and they are
-///             // traversed in widget order.
-///             // TRY THIS: change this to "OrderedTraversalPolicy()" and see that
-///             // it now follows the order set instead of widget order.
+///             // Note that because this is NOT an OrderedTraversalPolicy, the
+///             // assigned order of these OrderedButtons is ignored, and they
+///             // are traversed in widget order. TRY THIS: change this to
+///             // "OrderedTraversalPolicy()" and see that it now follows the
+///             // numeric order set on them instead of the widget order.
 ///             policy: WidgetOrderTraversalPolicy(),
 ///             child: Row(
 ///               mainAxisAlignment: MainAxisAlignment.center,
