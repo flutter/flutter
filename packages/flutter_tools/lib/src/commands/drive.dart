@@ -192,9 +192,7 @@ class DriveCommand extends RunCommandBase {
           dartDefines: dartDefines,
           urlTunneller: null,
         );
-        
         final Completer<void> appStartedCompleter = Completer<void>.sync();
-
         final int result = await residentRunner.run(
           appStartedCompleter: appStartedCompleter,
           route: route,
