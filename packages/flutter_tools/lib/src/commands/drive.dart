@@ -405,7 +405,7 @@ Future<LaunchResult> _startApp(DriveCommand command, Uri webUri) async {
   if (webUri != null) {
     platformArgs['uri'] = webUri.toString();
     // For web device, startApp will be triggered twice
-    // and it will error out for chrome on the second time
+    // and it will error out for chrome the second time.
     platformArgs['no-launch-chrome'] = true;
   }
 
