@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -400,6 +401,21 @@ EndGlobal''');
       // And plugin C should still be before plugin A in the Flutter Plugins nesting list.
       expect(newSolutionContents.indexOf('{$pluginCGuid} = {$flutterPluginSolutionFolderGuid}'),
           lessThan(newSolutionContents.indexOf('{$pluginAGuid} = {$flutterPluginSolutionFolderGuid}')));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Updating solution preserves BOM', () async {
+      writeSolutionWithPlugins();
+
+      final List<Plugin> plugins = <Plugin>[];
+      await updatePluginsInSolution(project, plugins);
+
+      // Visual Studio expects sln files to start with a BOM.
+      final List<int> solutionStartingBytes = project.solutionFile.readAsBytesSync().take(3).toList();
+      final List<int> bomBytes = utf8.encode(String.fromCharCode(unicodeBomCharacterRune));
+      expect(solutionStartingBytes, bomBytes);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),

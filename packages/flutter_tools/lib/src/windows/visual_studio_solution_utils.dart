@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/base/common.dart';
 
 import '../base/file_system.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
@@ -77,6 +78,9 @@ Future<void> updatePluginsInSolution(WindowsProject project, List<Plugin> plugin
   final RegExp globalSectionNestedProjectsStartPattern = RegExp(r'^\s*GlobalSection\(NestedProjects\)\s*=\s*preSolution\s*$');
 
   final StringBuffer newSolutionContent = StringBuffer();
+  // readAsString drops the BOM; re-add it.
+  newSolutionContent.writeCharCode(unicodeBomCharacterRune);
+
   final Iterator<String> lineIterator = solutionContent.split('\n').iterator;
   bool foundFlutterPluginsFolder = false;
   bool foundNestedProjectsSection = false;
