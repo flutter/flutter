@@ -1,4 +1,4 @@
-Signature: 8528ab1e026569ddcc9970f0d52a4eb7
+Signature: be6c19483a4658977e6c92d871ad8bb1
 
 UNUSED LICENSES:
 
@@ -1007,6 +1007,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/cmake_mac/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/gcloud_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go_win/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/ios-dev-image-11.4/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_sdk/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/lottie-samples/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/mesa_intel_driver_linux/VERSION
@@ -1143,6 +1144,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/exceptions.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/failed_infra_step.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/failed_read_version.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/ios_rerun_with_debug.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/retry_adb_command.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/retry_adb_command_retries_exhausted.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/retry_ios_install.json
@@ -3694,6 +3696,7 @@ FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextFont.h
 FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextRenderer.h
 FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextTarget.h
 FILE: ../../../third_party/skia/include/codec/SkEncodedOrigin.h
+FILE: ../../../third_party/skia/include/core/SkDeferredDisplayList.h
 FILE: ../../../third_party/skia/include/core/SkDeferredDisplayListRecorder.h
 FILE: ../../../third_party/skia/include/core/SkExecutor.h
 FILE: ../../../third_party/skia/include/core/SkFontArguments.h
@@ -3712,7 +3715,6 @@ FILE: ../../../third_party/skia/include/gpu/GrBackendSurface.h
 FILE: ../../../third_party/skia/include/gpu/mock/GrMockTypes.h
 FILE: ../../../third_party/skia/include/gpu/mtl/GrMtlTypes.h
 FILE: ../../../third_party/skia/include/private/GrSharedEnums.h
-FILE: ../../../third_party/skia/include/private/SkDeferredDisplayList.h
 FILE: ../../../third_party/skia/include/private/SkImageInfoPriv.h
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/SkShadowFlags.h
@@ -6375,7 +6377,6 @@ ORIGIN: ../../../third_party/skia/modules/canvaskit/canvaskit/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/NotoSerif-Regular.ttf
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.ttf
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.woff
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
