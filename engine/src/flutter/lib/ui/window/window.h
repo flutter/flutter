@@ -44,6 +44,7 @@ enum class AccessibilityFeatureFlag : int32_t {
   kDisableAnimations = 1 << 2,
   kBoldText = 1 << 3,
   kReduceMotion = 1 << 4,
+  kHighContrast = 1 << 5,
 };
 
 class WindowClient {
