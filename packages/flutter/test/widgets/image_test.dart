@@ -1535,6 +1535,35 @@ void main() {
     expect(imageCache.containsKey(provider), true);
     expect(provider.loadCallCount, 1);
   });
+
+  testWidgets('evict an image during precache', (WidgetTester tester) async {
+    // This test checks that the live image tracking does not hold on to a
+    // pending image that will never complete because it has been evicted from
+    // the cache.
+    // The scenario may arise if a caller that previously tried to precached the
+    // decides it has to invalidate the attempt and try again.
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage provider = MemoryImage(bytes);
+
+    await tester.runAsync(() async {
+      final List<Future<void>> futures = <Future<void>>[];
+      await tester.pumpWidget(Builder(builder: (BuildContext context) {
+        futures.add(precacheImage(provider, context));
+        imageCache.evict(provider);
+        futures.add(precacheImage(provider, context));
+        return const SizedBox.expand();
+      }));
+      await Future.wait<void>(futures);
+      expect(imageCache.statusForKey(provider).keepAlive, true);
+      expect(imageCache.statusForKey(provider).live, true);
+
+      // Schedule a frame to get precacheImage to stop listening.
+      SchedulerBinding.instance.scheduleFrame();
+      await tester.pump();
+      expect(imageCache.statusForKey(provider).keepAlive, true);
+      expect(imageCache.statusForKey(provider).live, false);
+    });
+  });
 }
 
 class ConfigurationAwareKey {
