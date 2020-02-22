@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import '../aot.dart';
-import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -38,13 +37,14 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     FlutterVersion flutterVersion, // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
     @required AotBuilder aotBuilder,
     @required BundleBuilder bundleBuilder,
-    @required Cache cache,
-    @required Platform platform
+    Cache cache,
+    Platform platform
   }) : _flutterVersion = flutterVersion,
        _aotBuilder = aotBuilder,
        _bundleBuilder = bundleBuilder,
-       _cache = cache,
-       _platform = platform {
+       _injectedCache = cache,
+       _injectedPlatform = platform {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -84,13 +84,22 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         abbr: 'o',
         valueHelp: 'path/to/directory/',
         help: 'Location to write the frameworks.',
+      )
+      ..addFlag('force',
+        abbr: 'f',
+        help: 'Force Flutter.podspec creation on the master channel. For testing only.',
+        hide: true
       );
   }
 
   final AotBuilder _aotBuilder;
   final BundleBuilder _bundleBuilder;
-  final Cache _cache;
-  final Platform _platform;
+
+  Cache get _cache => _injectedCache ?? globals.cache;
+  final Cache _injectedCache;
+
+  Platform get _platform => _injectedPlatform ?? globals.platform;
+  final Platform _injectedPlatform;
 
   FlutterVersion _flutterVersion;
 
@@ -159,16 +168,15 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('--output is required.');
     }
 
-    final BuildableIOSApp iosProject = await applicationPackages.getPackageForPlatform(TargetPlatform.ios) as BuildableIOSApp;
-
-    if (iosProject == null) {
-      throwToolExit("Module's iOS folder missing");
+    if (!_project.ios.existsSync()) {
+      throwToolExit('Module does not support iOS');
     }
 
     final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
+    final String productBundleIdentifier = await _project.ios.productBundleIdentifier;
     for (final BuildMode mode in buildModes) {
-      globals.printStatus('Building frameworks for $iosProject in ${getNameForBuildMode(mode)} mode...');
+      globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
@@ -181,7 +189,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       if (boolArg('cocoapods')) {
         // FlutterVersion.instance kicks off git processing which can sometimes fail, so don't try it until needed.
         _flutterVersion ??= globals.flutterVersion;
-        produceFlutterPodspec(mode, modeDirectory);
+        produceFlutterPodspec(mode, modeDirectory, force: boolArg('force'));
       } else {
         // Copy Flutter.framework.
         await _produceFlutterFramework(mode, modeDirectory);
@@ -219,11 +227,11 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   /// Create podspec that will download and unzip remote engine assets so host apps can leverage CocoaPods
   /// vendored framework caching.
   @visibleForTesting
-  void produceFlutterPodspec(BuildMode mode, Directory modeDirectory) {
+  void produceFlutterPodspec(BuildMode mode, Directory modeDirectory, { bool force = false }) {
     final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...', timeout: timeoutConfiguration.fastOperation);
     try {
       final GitTagVersion gitTagVersion = _flutterVersion.gitTagVersion;
-      if (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0) {
+      if (!force && (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0)) {
         throwToolExit(
             '--cocoapods is only supported on the dev, beta, or stable channels. Detected version is ${_flutterVersion.frameworkVersion}');
       }
@@ -296,7 +304,7 @@ end
 
     try {
       // Copy universal engine cache framework to mode directory.
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         globals.fs.directory(engineCacheFlutterFrameworkDirectory),
         fatFlutterFrameworkCopy,
       );
@@ -314,7 +322,7 @@ end
           '-output',
           fatFlutterFrameworkBinary.path
         ];
-        final RunResult lipoResult = processUtils.runSync(
+        final RunResult lipoResult = await processUtils.run(
           lipoCommand,
           allowReentrantFlutter: false,
         );
@@ -329,7 +337,7 @@ end
       status.stop();
     }
 
-    _produceXCFramework(mode, fatFlutterFrameworkCopy);
+    await _produceXCFramework(mode, fatFlutterFrameworkCopy);
   }
 
   Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
@@ -363,11 +371,12 @@ end
         mainPath: globals.fs.path.absolute(targetFile),
         assetDirPath: destinationAppFrameworkDirectory.childDirectory('flutter_assets').path,
         precompiledSnapshot: mode != BuildMode.debug,
+        treeShakeIcons: boolArg('tree-shake-icons')
       );
     } finally {
       status.stop();
     }
-    _produceXCFramework(mode, destinationAppFrameworkDirectory);
+    await _produceXCFramework(mode, destinationAppFrameworkDirectory);
   }
 
   Future<void> _produceStubAppFrameworkIfNeeded(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory destinationAppFrameworkDirectory) async {
@@ -395,7 +404,7 @@ end
       destinationAppFrameworkDirectory.childFile(binaryName).path
     ];
 
-    final RunResult lipoResult = processUtils.runSync(
+    final RunResult lipoResult = await processUtils.run(
       lipoCommand,
       allowReentrantFlutter: false,
     );
@@ -428,6 +437,7 @@ end
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
         dartDefines: dartDefines,
+        treeShakeIcons: boolArg('tree-shake-icons'),
       );
     } finally {
       status.stop();
@@ -462,12 +472,14 @@ end
         'iphoneos',
         '-configuration',
         xcodeBuildConfiguration,
+        '-destination generic/platform=iOS',
         'SYMROOT=${iPhoneBuildOutput.path}',
         'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
-        'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
+        'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
+        'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];
 
-      RunResult buildPluginsResult = processUtils.runSync(
+      RunResult buildPluginsResult = await processUtils.run(
         pluginsBuildCommand,
         workingDirectory: _project.ios.hostAppRoot.childDirectory('Pods').path,
         allowReentrantFlutter: false,
@@ -486,13 +498,14 @@ end
           'iphonesimulator',
           '-configuration',
           xcodeBuildConfiguration,
+          '-destination generic/platform=iOS',
           'SYMROOT=${simulatorBuildOutput.path}',
           'ARCHS=x86_64',
-          'ONLY_ACTIVE_ARCH=NO'
-          // No device targeted, so build all valid architectures.
+          'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
+          'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
         ];
 
-        buildPluginsResult = processUtils.runSync(
+        buildPluginsResult = await processUtils.run(
           pluginsBuildCommand,
           workingDirectory: _project.ios.hostAppRoot
             .childDirectory('Pods')
@@ -525,7 +538,7 @@ end
           }
           final String binaryName = globals.fs.path.basenameWithoutExtension(podFrameworkName);
           if (boolArg('universal')) {
-            fsUtils.copyDirectorySync(
+            globals.fsUtils.copyDirectorySync(
               podProduct as Directory,
               modeDirectory.childDirectory(podFrameworkName),
             );
@@ -544,7 +557,7 @@ end
               modeDirectory.childDirectory(podFrameworkName).childFile(binaryName).path
             ];
 
-            final RunResult pluginsLipoResult = processUtils.runSync(
+            final RunResult pluginsLipoResult = await processUtils.run(
               lipoCommand,
               workingDirectory: outputDirectory.path,
               allowReentrantFlutter: false,
@@ -575,7 +588,7 @@ end
               modeDirectory.childFile('$binaryName.xcframework').path
             ];
 
-            final RunResult xcframeworkResult = processUtils.runSync(
+            final RunResult xcframeworkResult = await processUtils.run(
               xcframeworkCommand,
               workingDirectory: outputDirectory.path,
               allowReentrantFlutter: false,
@@ -594,7 +607,7 @@ end
     }
   }
 
-  void _produceXCFramework(BuildMode mode, Directory fatFramework) {
+  Future<void> _produceXCFramework(BuildMode mode, Directory fatFramework) async {
     if (boolArg('xcframework')) {
       final String frameworkBinaryName = globals.fs.path.basenameWithoutExtension(
           fatFramework.basename);
@@ -605,9 +618,9 @@ end
       );
       try {
         if (mode == BuildMode.debug) {
-          _produceDebugXCFramework(fatFramework, frameworkBinaryName);
+          await _produceDebugXCFramework(fatFramework, frameworkBinaryName);
         } else {
-          _produceNonDebugXCFramework(mode, fatFramework, frameworkBinaryName);
+          await _produceNonDebugXCFramework(mode, fatFramework, frameworkBinaryName);
         }
       } finally {
         status.stop();
@@ -619,7 +632,7 @@ end
     }
   }
 
-  void _produceDebugXCFramework(Directory fatFramework, String frameworkBinaryName) {
+  Future<void> _produceDebugXCFramework(Directory fatFramework, String frameworkBinaryName) async {
     final String frameworkFileName = fatFramework.basename;
     final File fatFlutterFrameworkBinary = fatFramework.childFile(
       frameworkBinaryName,
@@ -639,7 +652,7 @@ end
         .childDirectory(frameworkFileName);
       final File armFlutterFrameworkBinary = armFlutterFrameworkDirectory
         .childFile(frameworkBinaryName);
-      fsUtils.copyDirectorySync(fatFramework, armFlutterFrameworkDirectory);
+      globals.fsUtils.copyDirectorySync(fatFramework, armFlutterFrameworkDirectory);
 
       // Create iOS framework.
       List<String> lipoCommand = <String>[
@@ -652,7 +665,7 @@ end
         armFlutterFrameworkBinary.path
       ];
 
-      RunResult lipoResult = processUtils.runSync(
+      RunResult lipoResult = await processUtils.run(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -666,7 +679,7 @@ end
         .childDirectory(frameworkFileName);
       final File simulatorFlutterFrameworkBinary = simulatorFlutterFrameworkDirectory
         .childFile(frameworkBinaryName);
-      fsUtils.copyDirectorySync(fatFramework, simulatorFlutterFrameworkDirectory);
+      globals.fsUtils.copyDirectorySync(fatFramework, simulatorFlutterFrameworkDirectory);
 
       lipoCommand = <String>[
         'xcrun',
@@ -678,7 +691,7 @@ end
         simulatorFlutterFrameworkBinary.path
       ];
 
-      lipoResult = processUtils.runSync(
+      lipoResult = await processUtils.run(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -700,7 +713,7 @@ end
             .path
       ];
 
-      final RunResult xcframeworkResult = processUtils.runSync(
+      final RunResult xcframeworkResult = await processUtils.run(
         xcframeworkCommand,
         allowReentrantFlutter: false,
       );
@@ -715,11 +728,11 @@ end
     }
   }
 
-  void _produceNonDebugXCFramework(
+  Future<void> _produceNonDebugXCFramework(
     BuildMode mode,
     Directory fatFramework,
     String frameworkBinaryName,
-  ) {
+  ) async {
     // Simulator is only supported in Debug mode.
     // "Fat" framework here must only contain arm.
     final List<String> xcframeworkCommand = <String>[
@@ -732,7 +745,7 @@ end
           .path
     ];
 
-    final RunResult xcframeworkResult = processUtils.runSync(
+    final RunResult xcframeworkResult = await processUtils.run(
       xcframeworkCommand,
       allowReentrantFlutter: false,
     );

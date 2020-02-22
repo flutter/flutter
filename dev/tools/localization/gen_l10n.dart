@@ -126,7 +126,7 @@ const Set<String> numberFormatsWithNamedParameters = <String>{
 };
 
 List<String> generateIntlMethodArgs(Message message) {
-  final List<String> methodArgs = <String>['name: \'${message.resourceId}\''];
+  final List<String> methodArgs = <String>["name: '${message.resourceId}'"];
   if (message.description != null)
     methodArgs.add('desc: ${generateString(message.description)}');
   if (message.placeholders.isNotEmpty) {
@@ -159,7 +159,7 @@ String generateDateFormattingLogic(Message message) {
         'the "${placeholder.type}" type. To properly resolve for the right '
         '${placeholder.type} format, the "format" attribute needs to be set '
         'to determine which DateFormat to use. \n'
-        'Check the intl library\'s DateFormat class constructors for allowed '
+        "Check the intl library's DateFormat class constructors for allowed "
         'date formats.'
       );
     }
@@ -167,7 +167,7 @@ String generateDateFormattingLogic(Message message) {
       throw L10nException(
         'Date format "${placeholder.format}" for placeholder '
         '${placeholder.name} does not have a corresponding DateFormat '
-        'constructor\n. Check the intl library\'s DateFormat class '
+        "constructor\n. Check the intl library's DateFormat class "
         'constructors for allowed date formats.'
       );
     }
@@ -192,7 +192,7 @@ String generateNumberFormattingLogic(Message message) {
       throw L10nException(
         'Number format ${placeholder.format} for the ${placeholder.name} '
         'placeholder does not have a corresponding NumberFormat constructor.\n'
-        'Check the intl library\'s NumberFormat class constructors for allowed '
+        "Check the intl library's NumberFormat class constructors for allowed "
         'number formats.'
       );
     }
@@ -223,10 +223,10 @@ String genSimpleMethod(Message message) {
   String genSimpleMethodMessage() {
     String messageValue = message.value;
     for (final Placeholder placeholder in message.placeholders) {
-        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\$${placeholder.name}');
+        messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
     }
-    final String rawMessage = generateString(messageValue); // "r'...'"
-    return rawMessage.substring(1);
+    final String generatedMessage = generateString(messageValue); // "r'...'"
+    return generatedMessage.startsWith('r') ? generatedMessage.substring(1) : generatedMessage;
   }
 
   List<String> genMethodParameters([String type]) {
@@ -257,7 +257,7 @@ String genSimpleMethod(Message message) {
 
   return getterMethodTemplate
     .replaceAll('@(methodName)', message.resourceId)
-    .replaceAll('@(message)', '${genSimpleMethodMessage()}')
+    .replaceAll('@(message)', genSimpleMethodMessage())
     .replaceAll('@(intlMethodArgs)', generateIntlMethodArgs(message).join(',\n      '));
 }
 
@@ -286,9 +286,17 @@ String generatePluralMethod(Message message) {
     'other': 'other'
   };
 
-  final String countPlaceholder = message.value.split(',')[0].substring(1);
+  final Placeholder countPlaceholder = message.getCountPlaceholder();
+  if (countPlaceholder == null) {
+    throw L10nException(
+      'Unable to find the count placeholder for the plural message: ${message.resourceId}.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+  }
+
   final List<String> intlMethodArgs = <String>[
-    countPlaceholder,
+    countPlaceholder.name,
     'locale: _localeName',
     ...generateIntlMethodArgs(message),
   ];
@@ -300,9 +308,9 @@ String generatePluralMethod(Message message) {
       String argValue = match.group(2);
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder.requiresFormatting) {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}String');
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
         } else {
-          argValue = argValue.replaceAll('#${placeholder.name}#', '\$${placeholder.name}');
+          argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
         }
       }
       intlMethodArgs.add("${pluralIds[pluralKey]}: '$argValue'");
@@ -311,7 +319,7 @@ String generatePluralMethod(Message message) {
 
   List<String> generatePluralMethodParameters([String type]) {
     return message.placeholders.map((Placeholder placeholder) {
-      final String placeholderType = placeholder.name == countPlaceholder ? 'int' : (type ?? placeholder.type);
+      final String placeholderType = placeholder == countPlaceholder ? 'int' : (type ?? placeholder.type);
       return '$placeholderType ${placeholder.name}';
     }).toList();
   }
@@ -346,7 +354,6 @@ class LocalizationsGenerator {
 
   static RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
   static RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
-  static RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
 
   final file.FileSystem _fs;
 
@@ -577,14 +584,14 @@ class LocalizationsGenerator {
     arbPathStrings.sort();
     localeInfoList.sort();
     supportedLanguageCodes.addAll(localeInfoList.map((LocaleInfo localeInfo) {
-      return '\'${localeInfo.languageCode}\'';
+      return "'${localeInfo.languageCode}'";
     }));
 
     if (preferredSupportedLocales != null) {
       for (final LocaleInfo preferredLocale in preferredSupportedLocales) {
         if (!localeInfoList.contains(preferredLocale)) {
           throw L10nException(
-            'The preferred supported locale, \'$preferredLocale\', cannot be '
+            "The preferred supported locale, '$preferredLocale', cannot be "
             'added. Please make sure that there is a corresponding arb file '
             'with translations for the locale, or remove the locale from the '
             'preferred supported locale list if there is no intent to support '
@@ -624,9 +631,9 @@ class LocalizationsGenerator {
       final String languageCode = locale.languageCode;
       final String countryCode = locale.countryCode;
 
-      resultingProperty += '\'$languageCode\'';
+      resultingProperty += "'$languageCode'";
       if (countryCode != null)
-        resultingProperty += ', \'$countryCode\'';
+        resultingProperty += ", '$countryCode'";
       resultingProperty += '),\n    Locale(';
     }
     resultingProperty = resultingProperty.substring(0, resultingProperty.length - '),\n    Locale('.length);
@@ -673,7 +680,7 @@ class LocalizationsGenerator {
       }
 
       final Message message = Message(bundle, key);
-      if (pluralValueRE.hasMatch(message.value))
+      if (message.isPlural)
         classMethods.add(generatePluralMethod(message));
       else
         classMethods.add(genSimpleMethod(message));

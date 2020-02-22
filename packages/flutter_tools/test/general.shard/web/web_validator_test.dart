@@ -46,7 +46,7 @@ void main() {
       expect(result.type, ValidationType.missing);
     }));
 
-    test('Doesn\'t warn about CHROME_EXECUTABLE unless it cant find chrome ', () => testbed.run(() async {
+    test("Doesn't warn about CHROME_EXECUTABLE unless it cant find chrome ", () => testbed.run(() async {
       when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(false);
       final ValidationResult result = await webValidator.validate();
       expect(result.messages, <ValidationMessage>[

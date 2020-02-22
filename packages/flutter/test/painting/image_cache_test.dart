@@ -199,7 +199,7 @@ void main() {
       expect(resultingCompleter2, completer2);
     });
 
-    test('failed image can successfully be removed from the cache\'s pending images', () async {
+    test("failed image can successfully be removed from the cache's pending images", () async {
       const TestImage testImage = TestImage(width: 8, height: 8);
 
       const FailingTestImageProvider(1, 1, image: testImage)
@@ -211,6 +211,36 @@ void main() {
               expect(evicationResult, isTrue);
             },
           ));
+    });
+
+    test('containsKey - pending', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      }) as TestImageStreamCompleter;
+
+      expect(resultingCompleter1, completer1);
+      expect(imageCache.containsKey(testImage), true);
+    });
+
+    test('containsKey - completed', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      }) as TestImageStreamCompleter;
+
+      // Mark as complete
+      completer1.testSetImage(testImage);
+
+      expect(resultingCompleter1, completer1);
+      expect(imageCache.containsKey(testImage), true);
+
     });
   });
 }

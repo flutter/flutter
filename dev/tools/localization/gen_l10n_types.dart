@@ -81,14 +81,31 @@ class Message {
       assert(resourceId != null && resourceId.isNotEmpty),
       value = _value(bundle, resourceId),
       description = _description(bundle, resourceId),
-      placeholders = _placeholders(bundle, resourceId);
+      placeholders = _placeholders(bundle, resourceId),
+      _pluralMatch = _pluralRE.firstMatch(_value(bundle, resourceId));
+
+  static final RegExp _pluralRE = RegExp(r'\s*\{([\w\s,]*),\s*plural\s*,');
 
   final String resourceId;
   final String value;
   final String description;
   final List<Placeholder> placeholders;
+  final RegExpMatch _pluralMatch;
+
+  bool get isPlural => _pluralMatch != null && _pluralMatch.groupCount == 1;
 
   bool get placeholdersRequireFormatting => placeholders.any((Placeholder p) => p.requiresFormatting);
+
+  Placeholder getCountPlaceholder() {
+    assert(isPlural);
+    final String countPlaceholderName = _pluralMatch[1];
+    return placeholders.firstWhere(
+      (Placeholder p) => p.name == countPlaceholderName,
+      orElse: () {
+        throw L10nException('Cannot find the $countPlaceholderName placeholder in plural message "$resourceId".');
+      }
+    );
+  }
 
   static String _value(Map<String, dynamic> bundle, String resourceId) {
     final dynamic value = bundle[resourceId];

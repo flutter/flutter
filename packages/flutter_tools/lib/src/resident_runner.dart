@@ -52,7 +52,7 @@ class FlutterDevice {
          ),
          buildMode: buildMode,
          trackWidgetCreation: trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots,
+         fileSystemRoots: fileSystemRoots ?? <String>[],
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
          experimentalFlags: experimentalFlags,
@@ -79,26 +79,20 @@ class FlutterDevice {
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
-    if (featureFlags.isWebIncrementalCompilerEnabled &&
-        targetPlatform == TargetPlatform.web_javascript) {
+    if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildMode),
         buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots,
-        fileSystemScheme: fileSystemScheme,
+        fileSystemRoots: fileSystemRoots ?? <String>[],
+        // Override the filesystem scheme so that the frontend_server can find
+        // the generated entrypoint code.
+        fileSystemScheme: 'org-dartlang-app',
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
           .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode))
           .absolute.uri.toString(),
-        dartDefines: dartDefines,
-      );
-    } else if (flutterProject.hasBuilders) {
-      generator = await CodeGeneratingResidentCompiler.create(
-        targetPlatform: targetPlatform,
-        buildMode: buildMode,
-        flutterProject: flutterProject,
         dartDefines: dartDefines,
       );
     } else {
@@ -117,6 +111,14 @@ class FlutterDevice {
         dartDefines: dartDefines,
       );
     }
+
+    if (flutterProject.hasBuilders) {
+      generator = await CodeGeneratingResidentCompiler.create(
+        residentCompiler: generator,
+        flutterProject: flutterProject,
+      );
+    }
+
     return FlutterDevice(
       device,
       trackWidgetCreation: trackWidgetCreation,
@@ -406,7 +408,7 @@ class FlutterDevice {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-      'Launching ${fsUtils.getDisplayPath(hotRunner.mainPath)} '
+      'Launching ${globals.fsUtils.getDisplayPath(hotRunner.mainPath)} '
       'on ${device.name} in $modeName mode...',
     );
 
@@ -481,7 +483,7 @@ class FlutterDevice {
       );
     } else {
       globals.printStatus(
-        'Launching ${fsUtils.getDisplayPath(coldRunner.mainPath)} '
+        'Launching ${globals.fsUtils.getDisplayPath(coldRunner.mainPath)} '
         'on ${device.name} in $modeName mode...',
       );
     }
@@ -862,7 +864,7 @@ abstract class ResidentRunner {
       'Taking screenshot for ${device.device.name}...',
       timeout: timeoutConfiguration.fastOperation,
     );
-    final File outputFile = fsUtils.getUniqueFile(
+    final File outputFile = globals.fsUtils.getUniqueFile(
       globals.fs.currentDirectory,
       'flutter',
       'png',
@@ -1052,9 +1054,6 @@ abstract class ResidentRunner {
       commandHelp.P.print();
       commandHelp.a.print();
     }
-    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
-      commandHelp.s.print();
-    }
   }
 
   /// Called when a signal has requested we exit.
@@ -1062,6 +1061,9 @@ abstract class ResidentRunner {
 
   /// Called right before we exit.
   Future<void> cleanupAtFinish();
+
+  // Clears the screen.
+  void clearScreen() => globals.logger.clear();
 }
 
 class OperationResult {
@@ -1167,6 +1169,9 @@ class TerminalHandler {
           return true;
         }
         return false;
+      case 'c':
+        residentRunner.clearScreen();
+        return true;
       case 'd':
       case 'D':
         await residentRunner.detach();

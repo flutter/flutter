@@ -375,10 +375,10 @@ void main() {
   });
 
   test('Decoration.lerp with unrelated decorations', () {
-    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.0), isA<FlutterLogoDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
-    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.25), isA<FlutterLogoDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
-    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.75), isA<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
-    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 1.0), isA<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.0), isA<FlutterLogoDecoration>());
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.25), isA<FlutterLogoDecoration>());
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.75), isA<BoxDecoration>());
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 1.0), isA<BoxDecoration>());
   });
 
   test('paintImage BoxFit.none scale test', () {

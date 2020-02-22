@@ -266,6 +266,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -278,6 +279,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -290,6 +292,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -316,6 +319,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: true,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -326,6 +330,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         '--no-causal-async-stacks',
@@ -375,6 +380,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: true,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -434,6 +440,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -444,10 +451,66 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=$assembly',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         '--no-causal-async-stacks',
         '--lazy-async-stacks',
+        'main.dill',
+      ]);
+      verifyNever(mockXcode.cc(argThat(contains('-fembed-bitcode'))));
+      verifyNever(mockXcode.clang(argThat(contains('-fembed-bitcode'))));
+
+      verify(mockXcode.cc(argThat(contains('-isysroot')))).called(1);
+      verify(mockXcode.clang(argThat(contains('-isysroot')))).called(1);
+
+      final File assemblyFile = globals.fs.file(assembly);
+      expect(assemblyFile.existsSync(), true);
+      expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds iOS armv7 profile AOT snapshot with dwarf stack traces', () async {
+      globals.fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = globals.fs.path.join('build', 'foo');
+      globals.fs.directory(outputPath).createSync(recursive: true);
+
+      final String assembly = globals.fs.path.join(outputPath, 'snapshot_assembly.S');
+      genSnapshot.outputs = <String, String>{
+        assembly: 'blah blah\n.section __DWARF\nblah blah\n',
+      };
+      final String debugPath = globals.fs.path.join('foo', 'app.ios-armv7.symbols');
+
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.ios,
+        buildMode: BuildMode.profile,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+        darwinArch: DarwinArch.armv7,
+        bitcode: false,
+        splitDebugInfo: 'foo',
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
+      expect(genSnapshot.snapshotType.mode, BuildMode.profile);
+      expect(genSnapshot.additionalArgs, <String>[
+        '--deterministic',
+        '--snapshot_kind=app-aot-assembly',
+        '--assembly=$assembly',
+        '--strip',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        '--dwarf-stack-traces',
+        '--save-debugging-info=$debugPath',
         'main.dill',
       ]);
       verifyNever(mockXcode.cc(argThat(contains('-fembed-bitcode'))));
@@ -483,6 +546,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -493,6 +557,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
         '--no-causal-async-stacks',
         '--lazy-async-stacks',
         'main.dill',
@@ -521,6 +586,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.armv7,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -531,6 +597,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         '--no-causal-async-stacks',
@@ -561,6 +628,7 @@ void main() {
         outputPath: outputPath,
         darwinArch: DarwinArch.arm64,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -571,6 +639,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${globals.fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--strip',
         '--no-causal-async-stacks',
         '--lazy-async-stacks',
         'main.dill',
@@ -590,6 +659,76 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
+      expect(genSnapshot.snapshotType.mode, BuildMode.release);
+      expect(genSnapshot.additionalArgs, <String>[
+        '--deterministic',
+        '--snapshot_kind=app-aot-elf',
+        '--elf=build/foo/app.so',
+        '--strip',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds shared library for android-arm with dwarf stack traces', () async {
+      globals.fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = globals.fs.path.join('build', 'foo');
+      final String debugPath = globals.fs.path.join('foo', 'app.android-arm.symbols');
+      globals.fs.directory(outputPath).createSync(recursive: true);
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+        bitcode: false,
+        splitDebugInfo: 'foo',
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
+      expect(genSnapshot.snapshotType.mode, BuildMode.release);
+      expect(genSnapshot.additionalArgs, <String>[
+        '--deterministic',
+        '--snapshot_kind=app-aot-elf',
+        '--elf=build/foo/app.so',
+        '--strip',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        '--no-causal-async-stacks',
+        '--lazy-async-stacks',
+        '--dwarf-stack-traces',
+        '--save-debugging-info=$debugPath',
+        'main.dill',
+      ]);
+    }, overrides: contextOverrides);
+
+    testUsingContext('builds shared library for android-arm without dwarf stack traces due to empty string', () async {
+      globals.fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = globals.fs.path.join('build', 'foo');
+      globals.fs.directory(outputPath).createSync(recursive: true);
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.android_arm,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+        bitcode: false,
+        splitDebugInfo: '',
       );
 
       expect(genSnapshotExitCode, 0);
@@ -622,6 +761,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -660,6 +800,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         bitcode: false,
+        splitDebugInfo: null,
       );
 
       expect(genSnapshotExitCode, 0);

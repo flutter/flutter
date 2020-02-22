@@ -1197,6 +1197,41 @@ void main() {
     expect(rootObserver.menuCount, 1);
     expect(nestedObserver.menuCount, 0);
   });
+
+  testWidgets('PopupMenuButton calling showButtonMenu manually', (WidgetTester tester) async {
+    final GlobalKey<PopupMenuButtonState<int>> globalKey = GlobalKey();
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                PopupMenuButton<int>(
+                  key: globalKey,
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<int>>[
+                      const PopupMenuItem<int>(
+                        value: 1,
+                        child: Text('Tap me please!'),
+                      ),
+                    ];
+                  },
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
+    expect(find.text('Tap me please!'), findsNothing);
+
+    globalKey.currentState.showButtonMenu();
+    // The PopupMenuItem will appear after an animation, hence,
+    // we have to first wait for the tester to settle.
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tap me please!'), findsOneWidget);
+  });
 }
 
 class TestApp extends StatefulWidget {

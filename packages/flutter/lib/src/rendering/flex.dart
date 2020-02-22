@@ -711,7 +711,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.errorProperty),
             ...addendum,
             ErrorDescription(
-              'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
+              "If none of the above helps enough to fix this problem, please don't hesitate to file a bug:\n"
               '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
             ),
           ]);

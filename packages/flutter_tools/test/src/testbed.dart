@@ -622,7 +622,7 @@ class FakeHttpHeaders extends HttpHeaders {
   List<String> operator [](String name) => <String>[];
 
   @override
-  void add(String name, Object value) { }
+  void add(String name, Object value, {bool preserveHeaderCase = false}) { }
 
   @override
   void clear() { }
@@ -640,7 +640,7 @@ class FakeHttpHeaders extends HttpHeaders {
   void removeAll(String name) { }
 
   @override
-  void set(String name, Object value) { }
+  void set(String name, Object value, {bool preserveHeaderCase = false}) { }
 
   @override
   String value(String name) => null;
@@ -722,7 +722,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
     this.isAndroidEmbeddingV2Enabled = false,
-    this.isWebIncrementalCompilerEnabled = false,
 });
 
   @override
@@ -741,9 +740,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isAndroidEmbeddingV2Enabled;
 
   @override
-  final bool isWebIncrementalCompilerEnabled;
-
-  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -756,8 +752,6 @@ class TestFeatureFlags implements FeatureFlags {
         return isWindowsEnabled;
       case flutterAndroidEmbeddingV2Feature:
         return isAndroidEmbeddingV2Enabled;
-      case flutterWebIncrementalCompiler:
-        return isWebIncrementalCompilerEnabled;
     }
     return false;
   }
@@ -822,6 +816,9 @@ class DelegateLogger implements Logger {
 
   @override
   bool get supportsColor => delegate.supportsColor;
+
+  @override
+  void clear() => delegate.clear();
 }
 
 /// An implementation of the Cache which does not download or require locking.

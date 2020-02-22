@@ -582,6 +582,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'trace-skia', 'true'],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
+      if (debuggingOptions.endlessTraceBuffer)
+        ...<String>['--ez', 'endless-trace-buffer', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
       if (debuggingOptions.cacheSkSL)
@@ -659,9 +661,10 @@ class AndroidDevice extends Device {
       'shell',
       'dumpsys',
       'meminfo',
-      _package.launchActivity,
+      _package.id,
       '-d',
     ]));
+
     if (runResult.exitCode != 0) {
       return const MemoryInfo.empty();
     }
@@ -801,8 +804,15 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 @visibleForTesting
 AndroidMemoryInfo parseMeminfoDump(String input) {
   final AndroidMemoryInfo androidMemoryInfo = AndroidMemoryInfo();
-  input
-    .split('\n')
+
+  final List<String> lines = input.split('\n');
+
+  final String timelineData = lines.firstWhere((String line) =>
+    line.startsWith('${AndroidMemoryInfo._kUpTimeKey}: '));
+  final List<String> times = timelineData.trim().split('${AndroidMemoryInfo._kRealTimeKey}:');
+  androidMemoryInfo.realTime = int.tryParse(times.last.trim()) ?? 0;
+
+  lines
     .skipWhile((String line) => !line.contains('App Summary'))
     .takeWhile((String line) => !line.contains('TOTAL'))
     .where((String line) => line.contains(':'))
@@ -863,6 +873,8 @@ List<AndroidDevice> getAdbDevices() {
 
 /// Android specific implementation of memory info.
 class AndroidMemoryInfo extends MemoryInfo {
+  static const String _kUpTimeKey = 'Uptime';
+  static const String _kRealTimeKey = 'Realtime';
   static const String _kJavaHeapKey = 'Java Heap';
   static const String _kNativeHeapKey = 'Native Heap';
   static const String _kCodeKey = 'Code';
@@ -871,6 +883,10 @@ class AndroidMemoryInfo extends MemoryInfo {
   static const String _kPrivateOtherKey = 'Private Other';
   static const String _kSystemKey = 'System';
   static const String _kTotalKey = 'Total';
+
+  // Realtime is time since the system was booted includes deep sleep. Clock
+  // is monotonic, and ticks even when the CPU is in power saving modes.
+  int realTime = 0;
 
   // Each measurement has KB as a unit.
   int javaHeap = 0;
@@ -885,6 +901,7 @@ class AndroidMemoryInfo extends MemoryInfo {
   Map<String, Object> toJson() {
     return <String, Object>{
       'platform': 'Android',
+      _kRealTimeKey: realTime,
       _kJavaHeapKey: javaHeap,
       _kNativeHeapKey: nativeHeap,
       _kCodeKey: code,
@@ -1025,7 +1042,11 @@ class _AdbLogReader extends DeviceLogReader {
     ];
     // logcat -T is not supported on Android releases before Lollipop.
     const int kLollipopVersionCode = 21;
-    final int apiVersion = int.tryParse(await device._apiVersion);
+    final int apiVersion = (String v) {
+      // If the API version string isn't found, conservatively assume that the
+      // version is less recent than the one we're looking for.
+      return v == null ? kLollipopVersionCode - 1 : int.tryParse(v);
+    }(await device._apiVersion);
     if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
       args.addAll(<String>[
         '-T',

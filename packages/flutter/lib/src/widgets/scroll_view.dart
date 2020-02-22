@@ -796,7 +796,7 @@ abstract class BoxScrollView extends ScrollView {
 ///   shrinkWrap: true,
 ///   padding: const EdgeInsets.all(20.0),
 ///   children: <Widget>[
-///     const Text('I\'m dedicating every day to you'),
+///     const Text("I'm dedicating every day to you"),
 ///     const Text('Domestic life was never quite my style'),
 ///     const Text('When you smile, you knock me out, I fall apart'),
 ///     const Text('And I thought I was so smart'),
@@ -815,7 +815,7 @@ abstract class BoxScrollView extends ScrollView {
 ///       sliver: SliverList(
 ///         delegate: SliverChildListDelegate(
 ///           <Widget>[
-///             const Text('I\'m dedicating every day to you'),
+///             const Text("I'm dedicating every day to you"),
 ///             const Text('Domestic life was never quite my style'),
 ///             const Text('When you smile, you knock me out, I fall apart'),
 ///             const Text('And I thought I was so smart'),
@@ -1307,7 +1307,7 @@ class ListView extends BoxScrollView {
 ///   children: <Widget>[
 ///     Container(
 ///       padding: const EdgeInsets.all(8),
-///       child: const Text('He\'d have you all unravel at the'),
+///       child: const Text("He'd have you all unravel at the"),
 ///       color: Colors.teal[100],
 ///     ),
 ///     Container(
@@ -1359,7 +1359,7 @@ class ListView extends BoxScrollView {
 ///         children: <Widget>[
 ///           Container(
 ///             padding: const EdgeInsets.all(8),
-///             child: const Text('He\'d have you all unravel at the'),
+///             child: const Text("He'd have you all unravel at the"),
 ///             color: Colors.green[100],
 ///           ),
 ///           Container(

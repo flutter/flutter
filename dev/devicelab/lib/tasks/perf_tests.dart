@@ -81,6 +81,15 @@ TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/animated_placeholder_perf.dart',
+    'animated_placeholder_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
 TaskFunction createPictureCachePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -409,6 +418,8 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -422,6 +433,8 @@ class CompileTest {
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -773,7 +786,7 @@ class ListStatistics {
 
 class _UnzipListEntry {
   factory _UnzipListEntry.fromLine(String line) {
-    final List<String> data = line.trim().split(RegExp('\\s+'));
+    final List<String> data = line.trim().split(RegExp(r'\s+'));
     assert(data.length == 8);
     return _UnzipListEntry._(
       uncompressedSize:  int.parse(data[0]),

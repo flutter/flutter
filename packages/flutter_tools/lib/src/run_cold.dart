@@ -189,6 +189,7 @@ class ColdRunner extends ResidentRunner {
     if (_didAttach) {
       commandHelp.d.print();
     }
+    commandHelp.c.print();
     commandHelp.q.print();
     for (final FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;

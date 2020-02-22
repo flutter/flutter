@@ -77,7 +77,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            title: const Text('Couldn\'t display URL:'),
+            title: const Text("Couldn't display URL:"),
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),

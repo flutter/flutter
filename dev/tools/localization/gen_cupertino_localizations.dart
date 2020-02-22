@@ -38,7 +38,7 @@ ConstructorGenerator generateCupertinoConstructor = (LocaleInfo locale) {
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
-  const CupertinoLocalization${camelCase(locale)}({
+  const CupertinoLocalization${locale.camelCase()}({
     String localeName = '$localeName',
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat dayFormat,

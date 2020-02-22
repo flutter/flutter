@@ -161,7 +161,11 @@ class FlutterManifest {
     if (isPlugin) {
       final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
       if (plugin.containsKey('platforms')) {
-        return plugin['platforms']['android']['package'] as String;
+        final YamlMap platforms = plugin['platforms'] as YamlMap;
+
+        if (platforms.containsKey('android')) {
+          return platforms['android']['package'] as String;
+        }
       } else {
         return plugin['androidPackage'] as String;
       }

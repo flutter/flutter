@@ -124,7 +124,7 @@ void main() {
     await subscription.cancel();
   });
 
-  test('hot reload doesn\'t reassemble if paused', () async {
+  test("hot reload doesn't reassemble if paused", () async {
     await _flutter.run(withDebugger: true);
     final Completer<void> sawTick2 = Completer<void>();
     final Completer<void> sawTick3 = Completer<void>();

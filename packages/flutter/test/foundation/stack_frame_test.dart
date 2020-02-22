@@ -71,7 +71,8 @@ void main() {
   }, skip: isBrowser);
 }
 
-const String stackString = '''#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
+const String stackString = '''
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
 #1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
 #2      new Text (package:flutter/src/widgets/text.dart:287:10)
 #3      _MyHomePageState.build (package:hello_flutter/main.dart:72:16)
@@ -104,7 +105,8 @@ const List<StackFrame> stackFrames = <StackFrame>[
 ];
 
 
-const String asyncStackString = '''#0      getSampleStack.<anonymous closure> (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:40:57)
+const String asyncStackString = '''
+#0      getSampleStack.<anonymous closure> (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:40:57)
 #1      new Future.sync (dart:async/future.dart:224:31)
 #2      getSampleStack (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:40:10)
 #3      main (file:///path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart:46:40)
@@ -190,7 +192,8 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
   StackFrame(number: 38, className: '_RawReceivePortImpl', method: '_handleMessage', packageScheme: 'dart',    package: 'isolate-patch',  packagePath: 'isolate_patch.dart',                                                          line: 174,  column: 12, source: '#38     _RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:174:12)'),
 ];
 
-const String stackFrameNoCols = '''#0      blah (package:assertions/main.dart:4)
+const String stackFrameNoCols = '''
+#0      blah (package:assertions/main.dart:4)
 #1      main (package:assertions/main.dart:8)
 #2      _runMainZoned.<anonymous closure>.<anonymous closure> (dart:ui/hooks.dart:239)
 #3      _rootRun (dart:async/zone.dart:1126)
@@ -214,7 +217,8 @@ const List<StackFrame> stackFrameNoColsFrames = <StackFrame>[
   StackFrame(number: 9,  className: '_RawReceivePortImpl', method: '_handleMessage', packageScheme: 'dart',    package: 'isolate-patch', packagePath: 'isolate-patch.dart', line: 174,  column: -1, source: '#9      _RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:174)'),
 ];
 
-const String webStackTrace = r'''package:dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 196:49  throw_
+const String webStackTrace = r'''
+package:dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 196:49  throw_
 package:assertions/main.dart 4:3                                                      blah
 package:assertions/main.dart 8:5                                                      main$
 package:assertions/main_web_entrypoint.dart 9:3                                       main$

@@ -268,7 +268,6 @@ import 'dart:js';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
-import 'package:test_api/src/util/stack_trace_mapper.dart'; // ignore: implementation_imports
 import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
 import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
 
@@ -289,12 +288,7 @@ Future<void> main() async {
 }
 
 void internalBootstrapBrowserTest(Function getMain()) {
-  var channel =
-      serializeSuite(getMain, hidePrints: false, beforeLoad: () async {
-    var serialized =
-        await suiteChannel("test.browser.mapper").stream.first as Map;
-    if (serialized == null) return;
-  });
+  var channel = serializeSuite(getMain, hidePrints: false);
   postMessageChannel().pipe(channel);
 }
 StreamChannel serializeSuite(Function getMain(),
@@ -335,16 +329,6 @@ StreamChannel postMessageChannel() {
   ]);
   return controller.foreign;
 }
-
-void setStackTraceMapper(StackTraceMapper mapper) {
-  var formatter = StackTraceFormatter.current;
-  if (formatter == null) {
-    throw StateError(
-        'setStackTraceMapper() may only be called within a test worker.');
-  }
-
-  formatter.configure(mapper: mapper);
-}
 ''');
     }
   }
@@ -367,13 +351,14 @@ class FlutterWebShellBuilder implements Builder {
       return;
     }
     final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
+    final String pluginRegistrantPath = _getPluginRegistrantPath(dartEntrypointId.path);
     if (hasPlugins) {
       await buildStep.writeAsString(outputId, '''
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import 'generated_plugin_registrant.dart';
+import '$pluginRegistrantPath';
 import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
 
 Future<void> main() async {
@@ -398,6 +383,13 @@ Future<void> main() async {
 }
 ''');
     }
+  }
+
+  /// Gets the relative path to the generated plugin registrant from the app
+  /// app entrypoint.
+  String _getPluginRegistrantPath(String entrypoint) {
+    return path.url.relative('lib/generated_plugin_registrant.dart',
+        from: path.url.dirname(entrypoint));
   }
 
   @override

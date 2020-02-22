@@ -270,6 +270,7 @@ void main() {
         r'TransformLayer#[0-9a-f]{5}\n'
         r'   owner: RenderView#[0-9a-f]{5}\n'
         r'   creator: RenderView\n'
+        r'   engine layer: (TransformEngineLayer|PersistedTransform)#[0-9a-f]{5}\n'
         r'   offset: Offset\(0\.0, 0\.0\)\n'
         r'   transform:\n'
         r'     \[0] 3\.0,0\.0,0\.0,0\.0\n'

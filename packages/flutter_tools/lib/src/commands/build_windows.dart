@@ -17,6 +17,7 @@ import 'build.dart';
 /// A command to build a windows desktop target through a build shell script.
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand() {
+    addTreeShakeIconsFlag();
     addBuildModeFlags();
     usesTargetOption();
   }

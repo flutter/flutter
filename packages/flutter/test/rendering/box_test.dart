@@ -941,12 +941,12 @@ void main() {
             '     constraints: MISSING\n'
             '     size: MISSING\n'
             '     additionalConstraints: BoxConstraints(0.0<=w<=Infinity, h=100.0)\n'
-            '   Unfortunately, this object\'s geometry is not known at this time,\n'
+            "   Unfortunately, this object's geometry is not known at this time,\n"
             '   probably because it has never been laid out. This means it cannot\n'
             '   be accurately hit-tested.\n'
             '   If you are trying to perform a hit test during the layout phase\n'
             '   itself, make sure you only hit test nodes that have completed\n'
-            '   layout (e.g. the node\'s children, after their layout() method has\n'
+            "   layout (e.g. the node's children, after their layout() method has\n"
             '   been called).\n'
           ),
         );
@@ -954,7 +954,7 @@ void main() {
           result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
           'If you are trying to perform a hit test during the layout phase '
           'itself, make sure you only hit test nodes that have completed '
-          'layout (e.g. the node\'s children, after their layout() method has '
+          "layout (e.g. the node's children, after their layout() method has "
           'been called).',
         );
       }

@@ -78,17 +78,23 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    final File settingsFile = globals.fs.file(
-      globals.fs.path.join(configDir.path, '.flutter_settings')
+    configDir ??= globals.fs.systemTempDirectory.createTempSync(
+      'flutter_config_dir_test.',
     );
-    return Config(settingsFile);
+    return Config.test(
+      Config.kFlutterSettings,
+      directory: configDir,
+      logger: globals.logger,
+    );
   }
   PersistentToolState buildPersistentToolState(FileSystem fs) {
-    configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    final File toolStateFile = globals.fs.file(
-      globals.fs.path.join(configDir.path, '.flutter_tool_state'));
-    return PersistentToolState(toolStateFile);
+    configDir ??= globals.fs.systemTempDirectory.createTempSync(
+      'flutter_config_dir_test.',
+    );
+    return PersistentToolState.test(
+      directory: configDir,
+      logger: globals.logger,
+    );
   }
 
   test(description, () async {
@@ -195,16 +201,15 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Stream<Device> getAllConnectedDevices() => Stream<Device>.fromIterable(devices);
+  Future<List<Device>> getAllConnectedDevices() async => devices;
 
   @override
-  Stream<Device> getDevicesById(String deviceId) {
-    return Stream<Device>.fromIterable(
-        devices.where((Device device) => device.id == deviceId));
+  Future<List<Device>> getDevicesById(String deviceId) async {
+    return devices.where((Device device) => device.id == deviceId).toList();
   }
 
   @override
-  Stream<Device> getDevices() {
+  Future<List<Device>> getDevices() {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId)
         : getAllConnectedDevices();
@@ -360,13 +365,13 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 10.2';
+  String get versionText => 'Xcode 11.0';
 
   @override
-  int get majorVersion => 10;
+  int get majorVersion => 11;
 
   @override
-  int get minorVersion => 2;
+  int get minorVersion => 0;
 
   @override
   Future<Map<String, String>> getBuildSettings(

@@ -104,7 +104,7 @@ class RenderListBody extends RenderBox
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderListBody must have a bounded constraint for its cross axis.'),
         ErrorDescription(
-          'RenderListBody forces its children to expand to fit the RenderListBody\'s container, '
+          "RenderListBody forces its children to expand to fit the RenderListBody's container, "
           'so it must be placed in a parent that constrains the cross '
           'axis to a finite dimension.'
         ),

@@ -2188,7 +2188,7 @@ Future<void> main() async {
       // The element should be mounted and unique.
       expect(state1.mounted, isTrue);
 
-      expect(navigatorKey.currentState.pop(), isTrue);
+      navigatorKey.currentState.pop();
       await tester.pumpAndSettle();
 
       // State is preserved.

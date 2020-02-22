@@ -162,7 +162,7 @@ void main() {
     expect(painter, doesNotOverscroll);
   });
 
-  group('Flipping direction of scrollable doesn\'t change overscroll behavior', () {
+  group("Flipping direction of scrollable doesn't change overscroll behavior", () {
     testWidgets('down', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(

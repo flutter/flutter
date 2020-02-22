@@ -133,4 +133,8 @@ class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterIm
   }
 }
 
-class TestImageStreamCompleter extends ImageStreamCompleter {}
+class TestImageStreamCompleter extends ImageStreamCompleter {
+  void testSetImage(TestImage image) {
+    setImage(ImageInfo(image: image, scale: 1.0));
+  }
+}

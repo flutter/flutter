@@ -9,7 +9,6 @@ import 'package:coverage/coverage.dart' as coverage;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../dart/package_map.dart';
@@ -55,7 +54,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     print('($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage'] as List<dynamic>));
+    _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
     print('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -87,7 +86,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     globals.printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage'] as List<dynamic>));
+    _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
     globals.printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -139,7 +138,7 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      if (os.which('lcov') == null) {
+      if (globals.os.which('lcov') == null) {
         String installMessage = 'Please install lcov.';
         if (globals.platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
@@ -182,7 +181,10 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
 }) async {
   final VMService vmService = await connector(serviceUri);
   await vmService.getVM();
-  return _getAllCoverage(vmService, libraryPredicate);
+  final Map<String, dynamic> result = await _getAllCoverage(
+      vmService, libraryPredicate);
+  await vmService.close();
+  return result;
 }
 
 Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {

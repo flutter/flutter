@@ -408,7 +408,7 @@ void main() {
     expect(inheritedValue, equals(3));
   });
 
-  testWidgets('Inherited widget doesn\'t notify descendants when descendant did not previously fail to find a match and had no dependencies', (WidgetTester tester) async {
+  testWidgets("Inherited widget doesn't notify descendants when descendant did not previously fail to find a match and had no dependencies", (WidgetTester tester) async {
     int buildCount = 0;
 
     final Widget inner = Container(
