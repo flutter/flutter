@@ -157,12 +157,10 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   // inner content of each destination so that the rail can adapt to various
   // icon sizes, font sizes, and textScaleFactors.
   bool _contentMeasured = false;
-  GlobalKey _offstageLeadingKey;
   List<GlobalKey> _offstageActiveIconKeys;
   List<GlobalKey> _offstageIconKeys;
   List<GlobalKey> _offstageSelectedLabelKeys;
   List<GlobalKey> _offstageLabelKeys;
-  Size _leadingSize;
   List<Size> _activeIconSizes = <Size>[];
   List<Size> _iconSizes = <Size>[];
   List<Size> _selectedLabelSizes = <Size>[];
@@ -174,7 +172,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     super.initState();
     _initControllers();
     _initKeys();
-    _measureLabelsAndResize(false);
+    _measureContentsThenResize(false);
   }
 
   @override
@@ -218,7 +216,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       return;
     }
 
-    _measureLabelsAndResize(true);
+    _measureContentsThenResize(true);
   }
 
   @override
@@ -226,16 +224,19 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     print('build()');
     final Widget leading = widget.leading;
     final Widget trailing = widget.trailing;
+    final bool isNoLabelOrExtended = widget.labelType != NavigationRailLabelType.none || _extendedAnimation.value > 0;
+    // The width of that content inside of the destination. This does not
+    // the label for the extended rail.
     final double maxDestinationContentWidth = <double>[
-      _railWidth,
+      widget.minWidth - 2 * _horizontalDestinationPadding,
       ...<Size>[
         ..._activeIconSizes,
         ..._iconSizes,
-        ..._selectedLabelSizes,
-        ..._labelSizes,
+        if (isNoLabelOrExtended) ..._selectedLabelSizes,
+        if (isNoLabelOrExtended) ..._labelSizes,
       ].map((Size size) => size.width)].reduce(max);
-    final double maxDestinationWidth = maxDestinationContentWidth + 2 * _horizontalDestinationPadding;
-    final double railWidth = maxDestinationWidth + _extendedAnimation.value * (_extendedRailWidth - _railWidth) * maxDestinationWidth / _minDestinationContentWidth;
+    final double destinationWidth = maxDestinationContentWidth + 2 * _horizontalDestinationPadding;
+    final double railWidth = destinationWidth + _extendedAnimation.value * (widget.extendedWidth - widget.minWidth) * destinationWidth / (widget.minWidth - 2 * _horizontalDestinationPadding);
     final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment();
 
     final Color baseSelectedColor = Theme.of(context).colorScheme.primary;
@@ -292,31 +293,24 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                     ),
                   ),
                 ],
-                Offstage(
-                  child: KeyedSubtree(
-                    key: _offstageLeadingKey,
-                    child: leading,
-                  ),
-                ),
           ],
         ),
       ) : Material(
         elevation: widget.elevation,
         child: Container(
           width: railWidth,
-          padding: const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
           color: widget.backgroundColor ?? Theme.of(context).colorScheme.surface,
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _verticalSpacing,
+              _verticalSpacer,
               if (leading != null)
                 ...<Widget>[
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: (maxDestinationContentWidth - _leadingSize.width) / 2),
+                    padding: const EdgeInsets.only(left: _horizontalDestinationPadding),
                     child: leading,
                   ),
-                  _verticalSpacing,
+                  _verticalSpacer,
                 ],
               Expanded(
                 child: Column(
@@ -324,7 +318,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                   children: <Widget>[
                     for (int i = 0; i < widget.destinations.length; i++)
                       _RailDestinationBox(
-                        width: railWidth,
+                        width: destinationWidth,
                         extendedTransitionAnimation: _extendedAnimation,
                         selected: widget.currentIndex == i,
                         icon: widget.currentIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
@@ -351,7 +345,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     );
   }
 
-  void _measureLabelsAndResize(bool shouldSetState) {
+  void _measureContentsThenResize(bool shouldSetState) {
     if (widget.labelType != NavigationRailLabelType.none) {
       SchedulerBinding.instance.addPostFrameCallback(_resize);
       if (shouldSetState) {
@@ -367,7 +361,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     if (_contentMeasured == false) {
       setState(() {
         _contentMeasured = true;
-        _leadingSize = _toRenderBoxSize(_offstageLeadingKey);
         _activeIconSizes = _toRenderBoxSizes(_offstageActiveIconKeys);
         _iconSizes = _toRenderBoxSizes(_offstageIconKeys);
         _selectedLabelSizes = _toRenderBoxSizes(_offstageSelectedLabelKeys);
@@ -377,7 +370,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   }
 
   void _initKeys() {
-    _offstageLeadingKey = GlobalKey();
     _offstageActiveIconKeys = _keysFromDestinations();
     _offstageIconKeys = _keysFromDestinations();
     _offstageSelectedLabelKeys = _keysFromDestinations();
@@ -492,27 +484,10 @@ class _RailDestinationBox extends StatelessWidget {
   final VoidCallback onTap;
 
   final Animation<double> _positionAnimation;
-
-  double _normalLabelFadeInValue() {
-    if (destinationAnimation.value < 0.25) {
-      return 0;
-    } else if (destinationAnimation.value < 0.75) {
-      return (destinationAnimation.value - 0.25) * 2;
-    } else {
-      return 1;
-    }
-  }
-
-  double _normalLabelFadeOutValue() {
-    if (destinationAnimation.value > 0.75) {
-      return (destinationAnimation.value - 0.75) * 4;
-    } else {
-      return 0;
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
+    print('width $width');
     final Widget themedIcon = IconTheme(
       data: iconTheme,
       child: icon,
@@ -521,13 +496,9 @@ class _RailDestinationBox extends StatelessWidget {
       style: labelTextStyle,
       child: label,
     );
-    final double textScaleRatio = labelSize.height < 14 ? 1 : labelSize.height / 14;
-//    final double verticalPaddingNoLabel = _verticalDestinationPaddingNoLabel * textScaleRatio;
-//    final double verticalPaddingWithLabel = _verticalDestinationPaddingWithLabel * textScaleRatio;
-    final double verticalPaddingNoLabel = _verticalDestinationPaddingNoLabel;
-    final double verticalPaddingWithLabel = _verticalDestinationPaddingWithLabel;
     Widget content;
     if (extendedTransitionAnimation.value > 0) {
+      final double height = max(labelSize.height, _verticalDestinationPaddingNoLabel * 2 + iconSize.height);
       content = SizedBox(
         width: double.infinity,
         child: Stack(
@@ -535,17 +506,17 @@ class _RailDestinationBox extends StatelessWidget {
             Positioned(
               child: SizedBox(
                 width: width,
-                height: width,
+                height: height,
                 child: themedIcon,
               ),
             ),
             Positioned(
               left: width,
+              height: height,
               child: Opacity(
-                opacity: extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4 : 1,
+                opacity: _extendedLabelFadeValue(),
                 child: Container(
                   alignment: AlignmentDirectional.centerStart,
-                  height: width,
                   child: styledLabel,
                 ),
               ),
@@ -558,7 +529,7 @@ class _RailDestinationBox extends StatelessWidget {
         case NavigationRailLabelType.none:
           content = SizedBox(
             width: width,
-            height: verticalPaddingNoLabel * 2 + iconSize.height,
+            height: _verticalDestinationPaddingNoLabel * 2 + iconSize.height,
             child: themedIcon,
           );
           break;
@@ -566,21 +537,21 @@ class _RailDestinationBox extends StatelessWidget {
           final double animationValue = 1 - _positionAnimation.value;
           content = SizedBox(
             width: width,
-            height: iconSize.height + animationValue * labelSize.height + 2 * lerpDouble(verticalPaddingNoLabel, verticalPaddingWithLabel, animationValue),
+            height: iconSize.height + animationValue * labelSize.height + 2 * lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, animationValue),
             child: Stack(
               children: <Widget>[
                 Positioned(
-                  top: lerpDouble(verticalPaddingNoLabel, verticalPaddingWithLabel, animationValue),
-                  left: (width - iconSize.width) / 2 - _horizontalDestinationPadding,
+                  top: lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, animationValue),
+                  left: (width - iconSize.width) / 2,
                   child: themedIcon,
                 ),
                 Positioned(
-                  top: iconSize.height + lerpDouble(verticalPaddingNoLabel, verticalPaddingWithLabel, animationValue),
-                  left: (width - labelSize.width) / 2 - _horizontalDestinationPadding,
+                  top: iconSize.height + lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, animationValue),
+                  left: (width - labelSize.width) / 2,
                   child: Opacity(
                     alwaysIncludeSemantics: true,
 //                    opacity: (selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue()).clamp(0, 0.9).toDouble() + 0.1,
-                    opacity: (selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue()),
+                    opacity: selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue(),
                     child: styledLabel,
                   ),
                 ),
@@ -591,7 +562,7 @@ class _RailDestinationBox extends StatelessWidget {
         case NavigationRailLabelType.all:
           content = SizedBox(
             width: width,
-            height: verticalPaddingWithLabel * 2 + labelSize.height + iconSize.height,
+            height: _verticalDestinationPaddingWithLabel * 2 + labelSize.height + iconSize.height,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -620,6 +591,29 @@ class _RailDestinationBox extends StatelessWidget {
       ),
     );
   }
+
+  double _normalLabelFadeInValue() {
+    if (destinationAnimation.value < 0.25) {
+      return 0;
+    } else if (destinationAnimation.value < 0.75) {
+      return (destinationAnimation.value - 0.25) * 2;
+    } else {
+      return 1;
+    }
+  }
+
+  double _normalLabelFadeOutValue() {
+    if (destinationAnimation.value > 0.75) {
+      return (destinationAnimation.value - 0.75) * 4;
+    } else {
+      return 0;
+    }
+  }
+  
+  double _extendedLabelFadeValue() {
+    return extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4 : 1;
+  }
+
 }
 
 /// Defines the behavior of the labels of a [NavigationRail].
@@ -733,11 +727,9 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
   bool updateShouldNotify(_ExtendedNavigationRailAnimation old) => animation != old.animation;
 }
 
-const double _minDestinationContentWidth = 56;
+const double _railWidth = 72;
+const double _extendedRailWidth = 256;
 const double _horizontalDestinationPadding = 8;
 const double _verticalDestinationPaddingNoLabel = 24;
 const double _verticalDestinationPaddingWithLabel = 16;
-const double _railWidth = 72;
-const double _extendedRailWidth = 256;
-const double _spacing = 8;
-const Widget _verticalSpacing = SizedBox(height: _spacing);
+const Widget _verticalSpacer = SizedBox(height: 8);
