@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/project.dart';
 
 /// A list of fake devices to test JSON serialization
 /// (`Device.toJson()` and `--machine` flag for `devices` command)
-List<MockDeviceJson> mockDevices = [
+List<MockDeviceJson> mockDevices = <MockDeviceJson>[
   MockDeviceJson(
     MockDevice('ephemeral', 'ephemeral', true),
     <String, Object>{
@@ -19,7 +19,7 @@ List<MockDeviceJson> mockDevices = [
       'targetPlatform': 'android-arm',
       'emulator': true,
       'sdk': 'Test SDK (1.2.3)',
-      'capabilities': {
+      'capabilities': <String, Object>{
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,
@@ -41,7 +41,7 @@ List<MockDeviceJson> mockDevices = [
       'targetPlatform': 'web-javascript',
       'emulator': true,
       'sdk': 'Web SDK (1.2.4)',
-      'capabilities': {
+      'capabilities': <String, Object>{
         'hotReload': true,
         'hotRestart': true,
         'screenshot': false,

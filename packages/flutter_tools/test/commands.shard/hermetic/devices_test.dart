@@ -43,7 +43,7 @@ void main() {
       await createTestCommandRunner(command).run(<String>['devices', '--machine']);
       expect(
         json.decode(testLogger.statusText),
-        mockDevices.map((d) => d.json)
+        mockDevices.map((MockDeviceJson d) => d.json)
       );
     }, overrides: <Type, Generator>{
       DeviceManager: () => _MockDeviceManager(),
@@ -85,6 +85,6 @@ class _MockDeviceManager extends DeviceManager {
 
   @override
   Future<List<Device>> getAllConnectedDevices() {
-    return Future<List<Device>>.value(mockDevices.map((d) => d.dev).toList());
+    return Future<List<Device>>.value(mockDevices.map((MockDeviceJson d) => d.dev).toList());
   }
 }

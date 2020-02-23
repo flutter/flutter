@@ -166,8 +166,8 @@ void main() {
   group('JSON encode devices', () {
     testUsingContext('Consistency of JSON representation', () async {
       expect(
-        await Future.wait(mockDevices.map((d) => d.dev.toJson())),
-        mockDevices.map((d) => d.json)
+        await Future.wait(mockDevices.map((MockDeviceJson d) => d.dev.toJson())),
+        mockDevices.map((MockDeviceJson d) => d.json)
       );
     });
   });
