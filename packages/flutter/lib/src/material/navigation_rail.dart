@@ -9,23 +9,27 @@ import '../../scheduler.dart';
 class NavigationRail extends StatefulWidget {
   /// TODO
   NavigationRail({
+    this.backgroundColor,
     this.extended,
     this.leading,
     this.trailing,
     this.destinations,
     this.currentIndex,
     this.onDestinationSelected,
-    this.elevation = 0,
+    this.elevation,
     this.groupAlignment = NavigationRailGroupAlignment.top,
     this.labelType = NavigationRailLabelType.none,
     this.unselectedLabelTextStyle,
     this.selectedLabelTextStyle,
     this.unselectedIconTheme,
     this.selectedIconTheme,
-    this.backgroundColor,
     this.minWidth = _railWidth,
     this.extendedWidth = _extendedRailWidth,
   }) : assert(extendedWidth >= _railWidth);
+
+  /// Sets the color of the Container that holds all of the [NavigationRail]'s
+  /// contents.
+  final Color backgroundColor;
 
   /// Indicates of the [NavigationRail] should be in the extended state.
   ///
@@ -113,10 +117,6 @@ class NavigationRail extends StatefulWidget {
   /// [unselectedIconTheme] will be used.
   final IconThemeData selectedIconTheme;
 
-  /// Sets the color of the Container that holds all of the [NavigationRail]'s
-  /// contents.
-  final Color backgroundColor;
-
   /// The smallest possible width for the rail regardless of the destination
   /// content size.
   ///
@@ -172,7 +172,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     super.initState();
     _initControllers();
     _initKeys();
-    _measureContentsThenResize(false);
+    _measureContentsThenResize(false, context);
   }
 
   @override
@@ -199,11 +199,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       }
     }
 
-//    if (widget.destinations != oldWidget.destinations) {
-//      print('destinations not equal');
-//      _measureLabelsAndResize(true);
-//    }
-
     // No animated segue if the length of the items list changes.
     if (widget.destinations.length != oldWidget.destinations.length) {
       _resetState();
@@ -216,15 +211,30 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       return;
     }
 
-    _measureContentsThenResize(true);
+    _measureContentsThenResize(true, context);
   }
 
   @override
   Widget build(BuildContext context) {
     print('build()');
+    final NavigationRailThemeData navigationRailTheme = Theme.of(context).navigationRailTheme;
     final Widget leading = widget.leading;
     final Widget trailing = widget.trailing;
+
+    final Color backgroundColor = widget.backgroundColor ?? navigationRailTheme.backgroundColor ?? Theme.of(context).colorScheme.surface;
+    final double elevation = widget.elevation ?? navigationRailTheme.elevation ?? 0;
+    final Color baseSelectedColor = Theme.of(context).colorScheme.primary;
+    final Color baseColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.64);
+    final IconThemeData unselectedIconTheme = const IconThemeData.fallback().copyWith(color: baseColor).merge(widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme);
+    final IconThemeData selectedIconTheme = const IconThemeData.fallback().copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme);
+    final TextStyle unselectedLabelTextStyle = TextStyle(color: baseColor, fontSize: 14).merge(widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle);
+    final TextStyle selectedLabelTextStyle = TextStyle(color: baseSelectedColor, fontSize: 14).merge(widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle);
+    final NavigationRailGroupAlignment groupAlignment = widget.groupAlignment ?? navigationRailTheme.groupAlignment ?? NavigationRailGroupAlignment.top;
+    final NavigationRailLabelType labelType = widget.labelType ?? navigationRailTheme.labelType ?? NavigationRailLabelType.none;
+    final TextDirection textDirection = Directionality.of(context);
+    final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment(groupAlignment);
     final bool isNoLabelOrExtended = widget.labelType != NavigationRailLabelType.none || _extendedAnimation.value > 0;
+
     // The width of that content inside of the destination. This does not
     // the label for the extended rail.
     final double maxDestinationContentWidth = <double>[
@@ -237,14 +247,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       ].map((Size size) => size.width)].reduce(max);
     final double destinationWidth = maxDestinationContentWidth + 2 * _horizontalDestinationPadding;
     final double railWidth = destinationWidth + _extendedAnimation.value * (widget.extendedWidth - widget.minWidth) * destinationWidth / (widget.minWidth - 2 * _horizontalDestinationPadding);
-    final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment();
 
-    final Color baseSelectedColor = Theme.of(context).colorScheme.primary;
-    final Color baseColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.64);
-    final IconThemeData unselectedIconTheme = const IconThemeData.fallback().copyWith(color: baseColor).merge(widget.unselectedIconTheme);
-    final IconThemeData selectedIconTheme = const IconThemeData.fallback().copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme);
-    final TextStyle unselectedLabelTextStyle = TextStyle(color: baseColor, fontSize: 14).merge(widget.unselectedLabelTextStyle);
-    final TextStyle selectedLabelTextStyle = TextStyle(color: baseSelectedColor, fontSize: 14).merge(widget.selectedLabelTextStyle);
 
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
@@ -296,20 +299,25 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
           ],
         ),
       ) : Material(
-        elevation: widget.elevation,
+        elevation: elevation,
         child: Container(
           width: railWidth,
-          color: widget.backgroundColor ?? Theme.of(context).colorScheme.surface,
+          color: backgroundColor,
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               _verticalSpacer,
               if (leading != null)
                 ...<Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(left: _horizontalDestinationPadding),
-                    child: leading,
-                  ),
+                  if (_extendedAnimation.value > 0)
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: _horizontalDestinationPadding),
+                        child: leading,
+                      ),
+                    )
+                  else
+                    leading,
                   _verticalSpacer,
                 ],
               Expanded(
@@ -324,7 +332,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                         icon: widget.currentIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
                         label: _extendedAnimation.value > 0 ? widget.destinations[i].extendedLabel : widget.destinations[i].label,
                         destinationAnimation: _destinationAnimations[i],
-                        labelType: widget.labelType,
+                        labelType: labelType,
                         iconTheme: widget.currentIndex == i ? selectedIconTheme : unselectedIconTheme,
                         labelTextStyle: widget.currentIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                         iconSize: widget.currentIndex == i ? _activeIconSizes[i] : _iconSizes[i],
@@ -345,8 +353,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     );
   }
 
-  void _measureContentsThenResize(bool shouldSetState) {
-    if (widget.labelType != NavigationRailLabelType.none) {
+  void _measureContentsThenResize(bool shouldSetState, BuildContext context) {
+    if ((widget.labelType ?? Theme.of(context).navigationRailTheme.labelType) != NavigationRailLabelType.none) {
       SchedulerBinding.instance.addPostFrameCallback(_resize);
       if (shouldSetState) {
         setState(() {
@@ -382,8 +390,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   List<GlobalKey> _keysFromDestinations() => widget.destinations.map((NavigationRailDestination destination) => GlobalKey()).toList();
 
-  MainAxisAlignment _resolveGroupAlignment() {
-    switch (widget.groupAlignment) {
+  MainAxisAlignment _resolveGroupAlignment(NavigationRailGroupAlignment groupAlignment) {
+    switch (groupAlignment) {
       case NavigationRailGroupAlignment.top:
         return MainAxisAlignment.start;
       case NavigationRailGroupAlignment.center:
