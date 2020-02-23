@@ -84,7 +84,7 @@ class _MockDeviceManager extends DeviceManager {
   _MockDeviceManager();
 
   @override
-  Stream<Device> getAllConnectedDevices() {
-    return Stream<Device>.fromIterable(mockDevices.map((d) => d.dev));
+  Future<List<Device>> getAllConnectedDevices() {
+    return Future<List<Device>>.value(mockDevices.map((d) => d.dev).toList());
   }
 }
