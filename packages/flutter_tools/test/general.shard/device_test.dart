@@ -12,6 +12,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mock_devices.dart';
 
 void main() {
   group('DeviceManager', () {
@@ -23,9 +24,9 @@ void main() {
     });
 
     testUsingContext('getDeviceById', () async {
-      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
-      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
-      final _MockDevice device3 = _MockDevice('iPod touch', '82564b38861a9a5');
+      final MockDevice device1 = MockDevice('Nexus 5', '0553790d0a4e726f');
+      final MockDevice device2 = MockDevice('Nexus 5X', '01abfc49119c410e');
+      final MockDevice device3 = MockDevice('iPod touch', '82564b38861a9a5');
       final List<Device> devices = <Device>[device1, device2, device3];
       final DeviceManager deviceManager = TestDeviceManager(devices);
 
@@ -42,21 +43,21 @@ void main() {
   });
 
   group('Filter devices', () {
-    _MockDevice ephemeral;
-    _MockDevice nonEphemeralOne;
-    _MockDevice nonEphemeralTwo;
-    _MockDevice unsupported;
-    _MockDevice webDevice;
-    _MockDevice fuchsiaDevice;
+    MockDevice ephemeral;
+    MockDevice nonEphemeralOne;
+    MockDevice nonEphemeralTwo;
+    MockDevice unsupported;
+    MockDevice webDevice;
+    MockDevice fuchsiaDevice;
 
     setUp(() {
-      ephemeral = _MockDevice('ephemeral', 'ephemeral', true);
-      nonEphemeralOne = _MockDevice('nonEphemeralOne', 'nonEphemeralOne', false);
-      nonEphemeralTwo = _MockDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
-      unsupported = _MockDevice('unsupported', 'unsupported', true, false);
-      webDevice = _MockDevice('webby', 'webby')
+      ephemeral = MockDevice('ephemeral', 'ephemeral', true);
+      nonEphemeralOne = MockDevice('nonEphemeralOne', 'nonEphemeralOne', false);
+      nonEphemeralTwo = MockDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
+      unsupported = MockDevice('unsupported', 'unsupported', true, false);
+      webDevice = MockDevice('webby', 'webby')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
-      fuchsiaDevice = _MockDevice('fuchsiay', 'fuchsiay')
+      fuchsiaDevice = MockDevice('fuchsiay', 'fuchsiay')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
     });
 
@@ -188,29 +189,6 @@ class TestDeviceManager extends DeviceManager {
     }
     return super.isDeviceSupportedForProject(device, flutterProject);
   }
-}
-
-class _MockDevice extends Device {
-  _MockDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true]) : super(
-      id,
-      platformType: PlatformType.web,
-      category: Category.mobile,
-      ephemeral: ephemeral,
-  );
-
-  final bool _isSupported;
-
-  @override
-  final String name;
-
-  @override
-  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
-
-  @override
-  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 }
 
 class MockProcess extends Mock implements Process {}
