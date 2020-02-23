@@ -71,7 +71,7 @@ const String kExitMessage =  'Failed to establish connection with the applicatio
 /// A hot-runner which handles browser specific delegation.
 abstract class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
-    this.device, {
+    FlutterDevice device, {
     String target,
     @required this.flutterProject,
     @required bool ipv6,
@@ -79,14 +79,14 @@ abstract class ResidentWebRunner extends ResidentRunner {
     bool stayResident = true,
     @required this.dartDefines,
   }) : super(
-          <FlutterDevice>[],
+          <FlutterDevice>[device],
           target: target ?? globals.fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
         );
 
-  final FlutterDevice device;
+  FlutterDevice get device => flutterDevices.first;
   final FlutterProject flutterProject;
   final List<String> dartDefines;
   DateTime firstBuildTime;
@@ -247,6 +247,12 @@ abstract class ResidentWebRunner extends ResidentRunner {
     } on vmservice.RPCError {
       return;
     }
+  }
+
+  @override
+  Future<void> stopEchoingDeviceLog() async {
+    // Do nothing for ResidentWebRunner
+    await device.stopEchoingDeviceLog();
   }
 
   @override
@@ -704,5 +710,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
     }
     await cleanupAtFinish();
     return 0;
+  }
+
+  @override
+  Future<void> exitApp() async {
+    await device.exitApps();
+    appFinished();
   }
 }
