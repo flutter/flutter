@@ -94,4 +94,3 @@ class MockDeviceJson {
   final MockDevice dev;
   final Map<String, Object> json;
 }
-
