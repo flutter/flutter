@@ -498,7 +498,7 @@ abstract class Device {
     await descriptions(devices).forEach(globals.printStatus);
   }
 
-  /// Returns a representation of this Device object as a JSON object
+  /// Convert the Device object to a JSON representation suitable for serialization.
   Future<Map<String, Object>> toJson() async =>
     <String, Object>{
       'name': name,
