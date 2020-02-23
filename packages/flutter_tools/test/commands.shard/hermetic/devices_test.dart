@@ -15,6 +15,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mock_devices.dart';
 
 void main() {
   group('devices', () {
@@ -34,6 +35,18 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
       DeviceManager: () => DeviceManager(),
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('Outputs parsable JSON with --machine flag', () async {
+      final DevicesCommand command = DevicesCommand();
+      await createTestCommandRunner(command).run(<String>['devices', '--machine']);
+      expect(
+        json.decode(testLogger.statusText),
+        mockDevices.map((d) => d.json)
+      );
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => _MockDeviceManager(),
       ProcessManager: () => MockProcessManager(),
     });
   });
@@ -64,5 +77,14 @@ class MockProcessManager extends Mock implements ProcessManager {
     Encoding stderrEncoding = systemEncoding,
   }) {
     return ProcessResult(0, 0, '', '');
+  }
+}
+
+class _MockDeviceManager extends DeviceManager {
+  _MockDeviceManager();
+
+  @override
+  Stream<Device> getAllConnectedDevices() {
+    return Stream<Device>.fromIterable(mockDevices.map((d) => d.dev));
   }
 }

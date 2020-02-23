@@ -161,6 +161,15 @@ void main() {
       });
     });
   });
+
+  group('JSON encode devices', () {
+    testUsingContext('Consistency of JSON representation', () async {
+      expect(
+        await Future.wait(mockDevices.map((d) => d.dev.toJson())),
+        mockDevices.map((d) => d.json)
+      );
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
