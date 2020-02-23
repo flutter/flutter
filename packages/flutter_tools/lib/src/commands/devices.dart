@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:flutter_tools/src/convert.dart';
 import '../base/common.dart';
 import '../base/utils.dart';
 import '../device.dart';
