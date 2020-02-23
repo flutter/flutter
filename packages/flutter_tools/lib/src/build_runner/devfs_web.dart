@@ -438,7 +438,8 @@ class WebDevFS implements DevFS {
   Set<String> get assetPathsToEvict => const <String>{};
 
   @override
-  Uri get baseUri => null;
+  Uri get baseUri => _baseUri;
+  Uri _baseUri;
 
   @override
   Future<Uri> create() async {
@@ -451,7 +452,8 @@ class WebDevFS implements DevFS {
       entrypoint,
       testMode: testMode,
     );
-    return Uri.parse('http://$hostname:$port');
+    _baseUri = Uri.parse('http://$hostname:$port');
+    return _baseUri;
   }
 
   @override
