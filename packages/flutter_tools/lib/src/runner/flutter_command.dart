@@ -881,15 +881,3 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
   }
   return null;
 }
-
-/// A command which runs less analytics and checks to speed up startup time.
-abstract class FastFlutterCommand extends FlutterCommand {
-  @override
-  Future<void> run() {
-    return context.run<void>(
-      name: 'command',
-      overrides: <Type, Generator>{FlutterCommand: () => this},
-      body: runCommand,
-    );
-  }
-}
