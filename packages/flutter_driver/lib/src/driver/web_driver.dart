@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service_client/vm_service_client.dart';
-import 'package:webdriver/sync_io.dart' as sync_io;
+import 'package:webdriver/async_io.dart' as async_io;
 import 'package:webdriver/support/async.dart';
 
 import '../common/error.dart';
@@ -109,7 +109,7 @@ class WebFlutterDriver extends FlutterDriver {
     _checkBrowserSupportsTimeline();
 
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-    for (final sync_io.LogEntry entry in _connection.logs) {
+    for (final async_io.LogEntry entry in await _connection.logs.toList()) {
       if (_startTime.isBefore(entry.timestamp)) {
         final Map<String, dynamic> data = jsonDecode(entry.message)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {
@@ -168,7 +168,7 @@ class FlutterWebConnection {
   /// and whether the WebDriver supports timeline action
   FlutterWebConnection(this._driver, this._supportsTimelineAction);
 
-  final sync_io.WebDriver _driver;
+  final async_io.WebDriver _driver;
 
 
   bool _supportsTimelineAction;
@@ -191,12 +191,11 @@ class FlutterWebConnection {
       {Duration timeout}) async {
     // Use sync WebDriver because async version will create a 15 seconds
     // overhead when quitting.
-    final sync_io.WebDriver driver = sync_io.fromExistingSession(
+    final async_io.WebDriver driver = await async_io.fromExistingSession(
         settings['session-id'].toString(),
         uri: Uri.parse(settings['session-uri'].toString()),
-        spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()),
-        capabilities: jsonDecode(settings['session-capabilities'].toString()) as Map<String, dynamic>);
-    driver.get(url);
+        spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()));
+    await driver.get(url);
 
     await waitUntilExtensionInstalled(driver, timeout);
     return FlutterWebConnection(driver, settings['support-timeline-action'] as bool);
@@ -206,7 +205,7 @@ class FlutterWebConnection {
   Future<dynamic> sendCommand(String script, Duration duration) async {
     dynamic result;
     try {
-      _driver.execute(script, <void>[]);
+      await _driver.execute(script, <void>[]);
     } catch (_) {
       // In case there is an exception, do nothing
     }
@@ -222,7 +221,7 @@ class FlutterWebConnection {
       return null;
     } finally {
       // Resets the result.
-      _driver.execute(r'''
+      await _driver.execute(r'''
         $flutterDriverResult = null
       ''', <void>[]);
     }
@@ -230,32 +229,32 @@ class FlutterWebConnection {
   }
 
   /// Gets performance log from WebDriver.
-  List<sync_io.LogEntry> get logs => _driver.logs.get(sync_io.LogType.performance);
+  Stream<async_io.LogEntry> get logs => _driver.logs.get(async_io.LogType.performance);
 
   /// Takes screenshot via WebDriver.
-  List<int> screenshot()  => _driver.captureScreenshotAsList();
+  Future<List<int>> screenshot()  => _driver.captureScreenshotAsList();
 
   /// Closes the WebDriver.
   Future<void> close() async {
-    _driver.quit(closeSession: false);
+    await _driver.quit(closeSession: false);
   }
 }
 
 /// Waits until extension is installed.
-Future<void> waitUntilExtensionInstalled(sync_io.WebDriver driver, Duration timeout) async {
+Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration timeout) async {
   await waitFor<void>(() =>
       driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',
       timeout: timeout ?? const Duration(days: 365));
 }
 
-sync_io.WebDriverSpec _convertToSpec(String specString) {
+async_io.WebDriverSpec _convertToSpec(String specString) {
   switch (specString.toLowerCase()) {
     case 'webdriverspec.w3c':
-      return sync_io.WebDriverSpec.W3c;
+      return async_io.WebDriverSpec.W3c;
     case 'webdriverspec.jsonwire':
-      return sync_io.WebDriverSpec.JsonWire;
+      return async_io.WebDriverSpec.JsonWire;
     default:
-      return sync_io.WebDriverSpec.Auto;
+      return async_io.WebDriverSpec.Auto;
   }
 }

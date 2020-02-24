@@ -134,18 +134,20 @@ class ChromeDevice extends Device {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
     final String url = platformArgs['uri'] as String;
-    _chrome = await chromeLauncher.launch(
-      url,
-      dataDir: globals.fs.currentDirectory
-        .childDirectory('.dart_tool')
-        .childDirectory('chrome-device'),
-      headless: debuggingOptions.webRunHeadless,
-      debugPort: debuggingOptions.webBrowserDebugPort,
-    );
+    final bool launchChrome = platformArgs['no-launch-chrome'] != true;
+    if (launchChrome) {
+      _chrome = await chromeLauncher.launch(
+        url,
+        dataDir: globals.fs.currentDirectory
+            .childDirectory('.dart_tool')
+            .childDirectory('chrome-device'),
+        headless: debuggingOptions.webRunHeadless,
+        debugPort: debuggingOptions.webBrowserDebugPort,
+      );
+    }
 
-    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': true});
-
-    return LaunchResult.succeeded(observatoryUri: null);
+    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': launchChrome});
+    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
   }
 
   @override
@@ -268,7 +270,7 @@ class WebServerDevice extends Device {
       globals.printStatus('$mainPath is being served at $url', emphasis: true);
     }
     globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
-    return LaunchResult.succeeded(observatoryUri: null);
+    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
   }
 
   @override
