@@ -374,6 +374,10 @@ class EngineParagraph implements ui.Paragraph {
     }
 
     final List<EngineLineMetrics> lines = _measurementResult.lines;
+    if (start >= lines.last.endIndex) {
+      return <ui.TextBox>[];
+    }
+
     final EngineLineMetrics startLine = _getLineForIndex(start);
     EngineLineMetrics endLine = _getLineForIndex(end);
 
@@ -535,8 +539,7 @@ class EngineParagraph implements ui.Paragraph {
   EngineLineMetrics _getLineForIndex(int index) {
     assert(_hasLineMetrics);
     final List<EngineLineMetrics> lines = _measurementResult.lines;
-    assert(index >= lines.first.startIndex);
-    assert(index <= lines.last.endIndex);
+    assert(index >= 0);
 
     for (int i = 0; i < lines.length; i++) {
       final EngineLineMetrics line = lines[i];
@@ -545,7 +548,6 @@ class EngineParagraph implements ui.Paragraph {
       }
     }
 
-    assert(index == lines.last.endIndex);
     return lines.last;
   }
 
