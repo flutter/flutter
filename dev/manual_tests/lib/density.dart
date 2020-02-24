@@ -433,6 +433,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final List<Widget> tiles = <Widget>[
       _ControlTile(
+        label: _model.rtl ? 'حقل النص' : 'Text Field',
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const <Widget>[
+            TextField(decoration: InputDecoration(border: OutlineInputBorder())),
+            TextField(),
+            TextField(maxLines: 3,),
+          ],
+        ),
+      ),
+      _ControlTile(
         label: _model.rtl ? 'رقائق' : 'Chips',
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
