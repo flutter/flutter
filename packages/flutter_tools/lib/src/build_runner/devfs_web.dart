@@ -612,7 +612,9 @@ class ReleaseAssetServer {
   final List<Uri> _searchPaths = <Uri>[
     globals.fs.directory(getWebBuildDirectory()).uri,
     globals.fs.directory(Cache.flutterRoot).uri,
+    globals.fs.directory(Cache.flutterRoot).parent.uri,
     globals.fs.currentDirectory.uri,
+    globals.fs.directory(globals.fsUtils.homeDirPath).uri,
   ];
 
   Future<shelf.Response> handle(shelf.Request request) async {
