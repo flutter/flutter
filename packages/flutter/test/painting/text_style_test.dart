@@ -4,7 +4,6 @@
 
 import 'dart:ui' as ui show TextStyle, ParagraphStyle, FontFeature, Shadow;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import '../flutter_test_alternative.dart';
 
@@ -262,7 +261,7 @@ void main() {
     const TextStyle b = TextStyle(fontFamilyFallback: <String>['Noto'], shadows: <ui.Shadow>[ui.Shadow()], fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')]);
     expect(a.hashCode, a.hashCode);
     expect(a.hashCode, isNot(equals(b.hashCode)));
-  }, skip: kIsWeb);
+  });
 
   test('TextStyle foreground and color combos', () {
     const Color red = Color.fromARGB(255, 255, 0, 0);

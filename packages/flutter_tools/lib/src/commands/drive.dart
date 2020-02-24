@@ -22,6 +22,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../web/web_runner.dart';
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -142,16 +143,10 @@ class DriveCommand extends RunCommandBase {
     }
 
     String observatoryUri;
+    ResidentRunner residentRunner;
     final bool isWebPlatform = await device.targetPlatform == TargetPlatform.web_javascript;
     if (argResults['use-existing-app'] == null) {
       globals.printStatus('Starting application: $targetFile');
-
-      if (isWebPlatform) {
-        throwToolExit(
-          'Flutter Driver (web) does not support running without use-existing-app.\n'
-          'Please launch your application beforehand and connects via use-existing-app.'
-        );
-      }
 
       if (getBuildInfo().isRelease && !isWebPlatform) {
         // This is because we need VM service to be able to drive the app.
@@ -164,7 +159,53 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
-      final LaunchResult result = await appStarter(this);
+      if (isWebPlatform && getBuildInfo().isDebug) {
+        // TODO(angjieli): remove this once running against
+        // target under test_driver in debug mode is supported
+        throwToolExit(
+          'Flutter Driver web does not support running in debug mode.\n'
+          '\n'
+          'Use --profile mode for testing application performance.\n'
+          'Use --release mode for testing correctness (with assertions).'
+        );
+      }
+
+      Uri webUri;
+
+      if (isWebPlatform) {
+        // Start Flutter web application for current test
+        final FlutterProject flutterProject = FlutterProject.current();
+        final FlutterDevice flutterDevice = await FlutterDevice.create(
+          device,
+          flutterProject: flutterProject,
+          trackWidgetCreation: boolArg('track-widget-creation'),
+          target: targetFile,
+          buildMode: getBuildMode()
+        );
+        residentRunner = webRunnerFactory.createWebRunner(
+          flutterDevice,
+          target: targetFile,
+          flutterProject: flutterProject,
+          ipv6: ipv6,
+          debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
+          stayResident: false,
+          dartDefines: dartDefines,
+          urlTunneller: null,
+        );
+        final Completer<void> appStartedCompleter = Completer<void>.sync();
+        final int result = await residentRunner.run(
+          appStartedCompleter: appStartedCompleter,
+          route: route,
+        );
+        if (result != 0) {
+          throwToolExit(null, exitCode: result);
+        }
+        // Wait until the app is started.
+        await appStartedCompleter.future;
+        webUri = residentRunner.uri;
+      }
+
+      final LaunchResult result = await appStarter(this, webUri);
       if (result == null) {
         throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
       }
@@ -243,6 +284,7 @@ $ex
       }
       throw Exception('Unable to run test: $error\n$stackTrace');
     } finally {
+      await residentRunner?.exit();
       await driver?.quit();
       if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         globals.printStatus('Leaving the application running.');
@@ -327,14 +369,14 @@ Future<Device> findTargetDevice() async {
 }
 
 /// Starts the application on the device given command configuration.
-typedef AppStarter = Future<LaunchResult> Function(DriveCommand command);
+typedef AppStarter = Future<LaunchResult> Function(DriveCommand command, Uri webUri);
 
 AppStarter appStarter = _startApp; // (mutable for testing)
 void restoreAppStarter() {
   appStarter = _startApp;
 }
 
-Future<LaunchResult> _startApp(DriveCommand command) async {
+Future<LaunchResult> _startApp(DriveCommand command, Uri webUri) async {
   final String mainPath = findMainDartFile(command.targetFile);
   if (await globals.fs.type(mainPath) != FileSystemEntityType.file) {
     globals.printError('Tried to run $mainPath, but that file does not exist.');
@@ -358,6 +400,15 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
   if (command.traceStartup) {
     platformArgs['trace-startup'] = command.traceStartup;
+  }
+
+  if (webUri != null) {
+    platformArgs['uri'] = webUri.toString();
+    if (!command.getBuildInfo().isDebug) {
+      // For web device, startApp will be triggered twice
+      // and it will error out for chrome the second time.
+      platformArgs['no-launch-chrome'] = true;
+    }
   }
 
   globals.printTrace('Starting application.');
