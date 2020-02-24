@@ -177,10 +177,6 @@ class ChromeLauncher {
       })
       .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
         return 'Failed to spawn stderr';
-      })
-      .timeout(const Duration(seconds: 60), onTimeout: () {
-        throwToolExit('Unable to connect to Chrome DevTools.');
-        return null;
       });
     final Uri remoteDebuggerUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
     return _connect(Chrome._(
