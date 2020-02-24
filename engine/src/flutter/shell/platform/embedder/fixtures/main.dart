@@ -689,3 +689,43 @@ void objects_can_be_posted() {
   signalNativeCount(port.sendPort.nativePort);
 }
 
+@pragma('vm:entry-point')
+void empty_scene_posts_zero_layers_to_compositor() {
+  window.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    // Should not render anything.
+    builder.pushClipRect(Rect.fromLTRB(0.0, 0.0, 300.0, 200.0));
+    window.render(builder.build());
+  };
+  window.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void compositor_can_post_only_platform_views() {
+  window.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    builder.addPlatformView(42, width: 300.0, height: 200.0);
+    builder.addPlatformView(24, width: 300.0, height: 200.0);
+    window.render(builder.build());
+  };
+  window.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void render_targets_are_recycled() {
+  int frame_count = 0;
+  window.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    for (int i = 0; i < 10; i++) {
+      builder.addPicture(Offset(0.0, 0.0), CreateGradientBox(Size(30.0, 20.0)));
+      builder.addPlatformView(42 + i, width: 30.0, height: 20.0);
+    }
+    window.render(builder.build());
+    window.scheduleFrame();
+    frame_count++;
+    if (frame_count == 8) {
+      signalNativeTest();
+    }
+  };
+  window.scheduleFrame();
+}

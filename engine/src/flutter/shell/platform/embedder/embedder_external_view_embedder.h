@@ -9,10 +9,10 @@
 #include <unordered_map>
 
 #include "flutter/flow/embedded_views.h"
+#include "flutter/fml/hash_combine.h"
 #include "flutter/fml/macros.h"
-#include "flutter/shell/common/canvas_spy.h"
-#include "flutter/shell/platform/embedder/embedder_render_target.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "flutter/shell/platform/embedder/embedder_external_view.h"
+#include "flutter/shell/platform/embedder/embedder_render_target_cache.h"
 
 namespace flutter {
 
@@ -95,58 +95,19 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   SkCanvas* GetRootCanvas() override;
 
  private:
-  using ViewIdentifier = int64_t;
-  struct RegistryKey {
-    ViewIdentifier view_identifier = 0;
-    SkISize size = SkISize::Make(0, 0);
-
-    RegistryKey(ViewIdentifier view_identifier,
-                const FlutterBackingStoreConfig& config)
-        : view_identifier(view_identifier),
-          size(SkISize::Make(config.size.width, config.size.height)) {}
-
-    struct Hash {
-      constexpr std::size_t operator()(RegistryKey const& key) const {
-        return key.view_identifier;
-      };
-    };
-
-    struct Equal {
-      constexpr bool operator()(const RegistryKey& lhs,
-                                const RegistryKey& rhs) const {
-        return lhs.view_identifier == rhs.view_identifier &&
-               lhs.size == rhs.size;
-      }
-    };
-  };
-
   const CreateRenderTargetCallback create_render_target_callback_;
   const PresentCallback present_callback_;
   SurfaceTransformationCallback surface_transformation_callback_;
-  using Registry = std::unordered_map<RegistryKey,
-                                      std::shared_ptr<EmbedderRenderTarget>,
-                                      RegistryKey::Hash,
-                                      RegistryKey::Equal>;
-
   SkISize pending_frame_size_ = SkISize::Make(0, 0);
   double pending_device_pixel_ratio_ = 1.0;
   SkMatrix pending_surface_transformation_;
-  std::map<ViewIdentifier, std::unique_ptr<SkPictureRecorder>>
-      pending_recorders_;
-  std::map<ViewIdentifier, std::unique_ptr<CanvasSpy>> pending_canvas_spies_;
-  std::map<ViewIdentifier, EmbeddedViewParams> pending_params_;
-  std::vector<ViewIdentifier> composition_order_;
-  std::shared_ptr<EmbedderRenderTarget> root_render_target_;
-  std::unique_ptr<SkPictureRecorder> root_picture_recorder_;
-  Registry registry_;
+  EmbedderExternalView::PendingViews pending_views_;
+  std::vector<EmbedderExternalView::ViewIdentifier> composition_order_;
+  EmbedderRenderTargetCache render_target_cache_;
 
   void Reset();
 
   SkMatrix GetSurfaceTransformation() const;
-
-  bool RenderPictureToRenderTarget(
-      sk_sp<SkPicture> picture,
-      const EmbedderRenderTarget* render_target) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalViewEmbedder);
 };
