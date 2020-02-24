@@ -281,9 +281,7 @@ task:
         - chromedriver/chromedriver --port=4444 &
         - sleep 5
         - cd ../../../examples/hello_world/
-        - flutter run -v -d web-server --profile --local-engine=host_debug_unopt --target=test_driver/smoke_web_engine.dart --web-port=8080 &
-        - sleep 20
-        - flutter drive -v --target=test_driver/smoke_web_engine.dart --use-existing-app=http://localhost:8080/
+        - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome
 
     - name: deploy_gallery-linux # linux- and macos- only
       # Do not add more tasks here. Nothing is currently deployed from master branch, so it is safe to run
