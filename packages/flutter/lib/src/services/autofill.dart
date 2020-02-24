@@ -83,10 +83,10 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> result = super.toJson();
-    final Map<String, dynamic> allFields = <String, dynamic>{};
-
-    for (final TextInputConfiguration configuration in allConfigurations)
-      allFields[configuration.autofillConfiguration.uniqueIdentifier] = configuration.toJson();
+    // allFields needs to be a List instead of a Map to preserve the correct order.
+    final List<Map<String, dynamic>> allFields = allConfigurations
+      .map((TextInputConfiguration configuration) => configuration.toJson())
+      .toList(growable: false);
 
     result['allFields'] = allFields;
     return result;
