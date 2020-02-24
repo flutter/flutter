@@ -23,8 +23,12 @@ void _validate(List<String> args) {
   }
 }
 
+const String engineRepo = '../engine/src/flutter';
+
 Future<void> main(List<String> args) async {
   _validate(args);
+  await _fetchUpstream();
+  await _fetchUpstream(engineRepo);
   String flutterRevision;
   await for (final FlutterEngineRevision revision in _logEngineVersions()) {
     if (!await containsRevision(args[0], revision.engineRevision)) {
@@ -38,6 +42,20 @@ Future<void> main(List<String> args) async {
       exit(0);
     }
     flutterRevision = revision.flutterRevision;
+  }
+}
+
+Future<void> _fetchUpstream([String workingDirectory = '.']) async {
+  final ProcessResult fetchResult = await Process.run(
+    'git',
+    <String>[
+      'fetch',
+      'upstream',
+    ],
+    workingDirectory: workingDirectory,
+  );
+  if (fetchResult.exitCode != 0) {
+    throw Exception('Failed to fetch upstream in repository $workingDirectory');
   }
 }
 
@@ -62,7 +80,7 @@ Future<bool> containsRevision(String ancestorRevision, String revision) async {
       ancestorRevision,
       revision,
     ],
-    workingDirectory: '../engine/src/flutter',
+    workingDirectory: engineRepo,
   );
   return result.exitCode == 0;
 }
