@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -168,7 +168,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   void initState() {
-    print('initState()');
     super.initState();
     _initControllers();
     _initKeys();
@@ -188,7 +187,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   void didUpdateWidget(NavigationRail oldWidget) {
-    print('didUpdateWidget()');
     super.didUpdateWidget(oldWidget);
 
     if (widget.extended != oldWidget.extended) {
@@ -216,7 +214,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    print('build()');
     final NavigationRailThemeData navigationRailTheme = Theme.of(context).navigationRailTheme;
     final Widget leading = widget.leading;
     final Widget trailing = widget.trailing;
@@ -231,7 +228,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final TextStyle selectedLabelTextStyle = TextStyle(color: baseSelectedColor, fontSize: 14).merge(widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle);
     final NavigationRailGroupAlignment groupAlignment = widget.groupAlignment ?? navigationRailTheme.groupAlignment ?? NavigationRailGroupAlignment.top;
     final NavigationRailLabelType labelType = widget.labelType ?? navigationRailTheme.labelType ?? NavigationRailLabelType.none;
-    final TextDirection textDirection = Directionality.of(context);
     final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment(groupAlignment);
     final bool isNoLabelOrExtended = widget.labelType != NavigationRailLabelType.none || _extendedAnimation.value > 0;
 
@@ -244,7 +240,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
         ..._iconSizes,
         if (isNoLabelOrExtended) ..._selectedLabelSizes,
         if (isNoLabelOrExtended) ..._labelSizes,
-      ].map((Size size) => size.width)].reduce(max);
+      ].map((Size size) => size.width)].reduce(math.max);
     final double destinationWidth = maxDestinationContentWidth + 2 * _horizontalDestinationPadding;
     final double railWidth = destinationWidth + _extendedAnimation.value * (widget.extendedWidth - widget.minWidth) * destinationWidth / (widget.minWidth - 2 * _horizontalDestinationPadding);
 
@@ -330,7 +326,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                         extendedTransitionAnimation: _extendedAnimation,
                         selected: widget.currentIndex == i,
                         icon: widget.currentIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
-                        label: _extendedAnimation.value > 0 ? widget.destinations[i].extendedLabel : widget.destinations[i].label,
+                        label: widget.destinations[i].label,
                         destinationAnimation: _destinationAnimations[i],
                         labelType: labelType,
                         iconTheme: widget.currentIndex == i ? selectedIconTheme : unselectedIconTheme,
@@ -365,7 +361,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   }
 
   void _resize(Duration duration) {
-    print('_resize()');
     if (_contentMeasured == false) {
       setState(() {
         _contentMeasured = true;
@@ -495,7 +490,6 @@ class _RailDestinationBox extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    print('width $width');
     final Widget themedIcon = IconTheme(
       data: iconTheme,
       child: icon,
@@ -506,7 +500,8 @@ class _RailDestinationBox extends StatelessWidget {
     );
     Widget content;
     if (extendedTransitionAnimation.value > 0) {
-      final double height = max(labelSize.height, _verticalDestinationPaddingNoLabel * 2 + iconSize.height);
+      final double height = math.max(labelSize.height, _verticalDestinationPaddingNoLabel * 2 + iconSize.height);
+      final TextDirection textDirection = Directionality.of(context);
       content = SizedBox(
         width: double.infinity,
         child: Stack(
@@ -518,8 +513,9 @@ class _RailDestinationBox extends StatelessWidget {
                 child: themedIcon,
               ),
             ),
-            Positioned(
-              left: width,
+            Positioned.directional(
+              textDirection: textDirection,
+              start: width,
               height: height,
               child: Opacity(
                 opacity: _extendedLabelFadeValue(),
@@ -542,23 +538,23 @@ class _RailDestinationBox extends StatelessWidget {
           );
           break;
         case NavigationRailLabelType.selected:
-          final double animationValue = 1 - _positionAnimation.value;
+          final double appearingAnimationValue = 1 - _positionAnimation.value;
+          final double lerpedPadding = lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, appearingAnimationValue);
           content = SizedBox(
             width: width,
-            height: iconSize.height + animationValue * labelSize.height + 2 * lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, animationValue),
+            height: iconSize.height + appearingAnimationValue * labelSize.height + 2 * lerpedPadding,
             child: Stack(
               children: <Widget>[
                 Positioned(
-                  top: lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, animationValue),
+                  top: lerpedPadding,
                   left: (width - iconSize.width) / 2,
                   child: themedIcon,
                 ),
                 Positioned(
-                  top: iconSize.height + lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, animationValue),
+                  top: iconSize.height + lerpedPadding,
                   left: (width - labelSize.width) / 2,
                   child: Opacity(
                     alwaysIncludeSemantics: true,
-//                    opacity: (selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue()).clamp(0, 0.9).toDouble() + 0.1,
                     opacity: selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue(),
                     child: styledLabel,
                   ),
@@ -584,18 +580,21 @@ class _RailDestinationBox extends StatelessWidget {
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
-    return Material(
-      type: MaterialType.transparency,
-      clipBehavior: Clip.none,
-      child: InkResponse(
-        onTap: onTap,
-        onHover: (_) {},
-        highlightShape: BoxShape.rectangle,
-        borderRadius: BorderRadius.all(Radius.circular(width / 2)),
-        containedInkWell: true,
-        splashColor: colors.primary.withOpacity(0.12),
-        hoverColor: colors.primary.withOpacity(0.04),
-        child: content,
+    return Semantics(
+      explicitChildNodes: false,
+      child: Material(
+        type: MaterialType.transparency,
+        clipBehavior: Clip.none,
+        child: InkResponse(
+          onTap: onTap,
+          onHover: (_) {},
+          highlightShape: BoxShape.rectangle,
+          borderRadius: BorderRadius.all(Radius.circular(width / 2)),
+          containedInkWell: true,
+          splashColor: colors.primary.withOpacity(0.12),
+          hoverColor: colors.primary.withOpacity(0.04),
+          child: content,
+        ),
       ),
     );
   }
@@ -672,10 +671,8 @@ class NavigationRailDestination {
     @required this.icon,
     Widget activeIcon,
     this.label,
-    Widget extendedLabel,
   }) : activeIcon = activeIcon ?? icon,
-        extendedLabel = extendedLabel ?? label,
-        assert(icon != null);
+       assert(icon != null);
   /// The icon of the destination.
   ///
   /// Typically the icon is an [Icon] or an [ImageIcon] widget. If another type
@@ -707,14 +704,6 @@ class NavigationRailDestination {
   /// The label should be provided when used with the [NavigationRail], unless
   /// [NavigationRailLabelType.none] used and the rail will not be extended.
   final Widget label;
-
-  /// The override for the label for the destination in the extended state.
-  ///
-  /// If null, then the [label] is used.
-  ///
-  /// This is useful when the [label] has multi-lined text, but the
-  /// [extendedLabel] should be on one line.
-  final Widget extendedLabel;
 }
 
 class _ExtendedNavigationRailAnimation extends InheritedWidget {
