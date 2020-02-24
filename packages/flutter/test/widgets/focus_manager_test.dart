@@ -647,7 +647,7 @@ void main() {
       expect(child3.hasPrimaryFocus, isFalse);
       expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
     });
-    testWidgets('Unfocus with disposition scope works properly when some nodes are unfocusable', (WidgetTester tester) async {
+    testWidgets('Unfocus works properly when some nodes are unfocusable', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       final FocusAttachment scope1Attachment = scope1.attach(context);
@@ -693,6 +693,16 @@ void main() {
       expect(child3.hasPrimaryFocus, isTrue);
 
       child1.unfocus(disposition: UnfocusDisposition.scope);
+      await tester.pump();
+      expect(child3.hasPrimaryFocus, isTrue);
+      expect(scope1.focusedChild, equals(child1));
+      expect(scope2.focusedChild, equals(child3));
+      expect(scope1.hasPrimaryFocus, isFalse);
+      expect(scope2.hasFocus, isTrue);
+      expect(child1.hasPrimaryFocus, isFalse);
+      expect(child2.hasPrimaryFocus, isFalse);
+
+      child1.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       await tester.pump();
       expect(child3.hasPrimaryFocus, isTrue);
       expect(scope1.focusedChild, equals(child1));

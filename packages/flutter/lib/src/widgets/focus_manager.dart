@@ -138,19 +138,14 @@ class FocusAttachment {
 ///  * [FocusNode.unfocus], which takes this as its `disposition` parameter.
 enum UnfocusDisposition {
   /// Focus the nearest focusable enclosing scope of this node, but do not
-  /// descend to locate the leaf [FocusScopeNode.focusedChild] like
+  /// descend to locate the leaf [FocusScopeNode.focusedChild] the way
   /// [previouslyFocusedChild] does.
   ///
-  /// This will end up with the nearest focusable enclosing scope receiving the
-  /// focus, so that if [FocusNode.nextFocus] is called, it will either
-  /// look to its [FocusScopeNode.focusedChild], or use the
-  /// [FocusTraversalPolicy] in effect to find the first focus.
-  ///
   /// Focusing the scope in this way clears the [FocusScopeNode.focusedChild]
-  /// history for the enclosing scope when it receives focus.
-  ///
-  /// It is possible that calling [FocusNode.nextFocus] after unfocusing with
-  /// this disposition will re-focus the node that just had focus.
+  /// history for the enclosing scope when it receives focus. Because of this,
+  /// calling a traversal method like [FocusNode.nextFocus] after unfocusing
+  /// will cause the [FocusTraversalPolicy] to pick the node it thinks should be
+  /// first in the scope.
   ///
   /// This is the default disposition for [FocusNode.unfocus].
   scope,
@@ -159,15 +154,17 @@ enum UnfocusDisposition {
   /// scope of this node.
   ///
   /// If there is no previously focused child, then this is equivalent to
-  /// [scope].
+  /// using the [scope] disposition.
   ///
   /// Unfocusing with this disposition will cause [FocusNode.unfocus] to walk up
   /// the tree to the nearest focusable enclosing scope, then start to walk down
   /// the tree, looking for a focused child at its
-  /// [FocusScopeNode.focusedChild].  If the [FocusScopeNode.focusedChild] is a
-  /// scope, then look for its [FocusScopeNode.focusedChild], and so on, finding
-  /// the leaf [FocusScopeNode.focusedChild] that is not a scope, or, failing
-  /// that, a leaf scope that has no focused child.
+  /// [FocusScopeNode.focusedChild].
+  ///
+  /// If the [FocusScopeNode.focusedChild] is a scope, then look for its
+  /// [FocusScopeNode.focusedChild], and so on, finding the leaf
+  /// [FocusScopeNode.focusedChild] that is not a scope, or, failing that, a
+  /// leaf scope that has no focused child.
   previouslyFocusedChild,
 }
 
@@ -678,32 +675,34 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return globalOffset & object.semanticBounds.size;
   }
 
-  /// Moves the focus to another node when this one is done with it.
+  /// Removes the focus on this node by moving the primary focus to another node.
   ///
-  /// Removes focus from a node that has the primary focus, cancels any
-  /// outstanding requests to focus it, while setting to focus to another node
-  /// according to the `disposition`.
+  /// This method removes focus from a node that has the primary focus, cancels
+  /// any outstanding requests to focus it, while setting the primary focus to
+  /// another node according to the `disposition`.
   ///
-  /// This method is safe to call regardless of whether this node has ever
-  /// requested focus. If this node doesn't have focus, nothing happens.
+  /// It is safe to call regardless of whether this node has ever requested
+  /// focus or not. If this node doesn't have focus or primary focus, nothing
+  /// happens.
   ///
-  /// The `disposition` argument determines which node will receive focus after
-  /// this one loses it.
+  /// The `disposition` argument determines which node will receive primary
+  /// focus after this one loses it.
   ///
   /// If `disposition` is set to [UnfocusDisposition.scope] (the default), then
-  /// the focus will be moved to the nearest enclosing [FocusScopeNode] ancestor
-  /// that is enabled for focus, ignoring the [FocusScopeNode.focusedChild] for
-  /// that scope. This node will be unset as the focused child in its enclosing
-  /// scope if that scope can request focus.
+  /// the previously focused node history of the enclosing scope will be
+  /// cleared, and the primary focus will be moved to the nearest enclosing
+  /// scope ancestor that is enabled for focus, ignoring the
+  /// [FocusScopeNode.focusedChild] for that scope.
   ///
   /// If `disposition` is set to [UnfocusDisposition.previouslyFocusedChild],
-  /// then the focus will be moved to the [FocusScopeNode.focusedChild] node of
-  /// the [enclosingScope], which (if it is a scope itself), will find its
-  /// focused child, etc., until a leaf focus node is found. If there is no
+  /// then this node will be removed from the previously focused list in the
+  /// [enclosingScope], and the focus will be moved to the previously focused
+  /// node of the [enclosingScope], which (if it is a scope itself), will find
+  /// its focused child, etc., until a leaf focus node is found. If there is no
   /// previously focused child, then the scope itself will receive focus, as if
   /// [UnfocusDisposition.scope] were specified.
   ///
-  /// If you want this node to lose focus and move the focus to the next or
+  /// If you want this node to lose focus and the focus to move to the next or
   /// previous node in the enclosing [FocusTraversalGroup], call [nextFocus] or
   /// [previousFocus] instead of calling `unfocus`.
   ///
@@ -711,8 +710,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// This example shows the difference between the different [UnfocusDisposition]
   /// values for [unfocus].
   ///
-  /// Try setting focus on the four text fields, and then click "UNFOCUS" to see
-  /// what happens when the current [FocusManager.primaryFocus] is unfocused.
+  /// Try setting focus on the four text fields by selecting them, and then
+  /// select "UNFOCUS" to see what happens when the current
+  /// [FocusManager.primaryFocus] is unfocused.
   ///
   /// Try pressing the TAB key after unfocusing to see what the next widget
   /// chosen is.
@@ -792,21 +792,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
     FocusScopeNode scope = enclosingScope;
     if (scope == null) {
-      // Attempting to unfocus the root scope isn't allowed.
+      // If the scope is null, then this is either the root node, or a node that
+      // is not yet in the tree, neither of which do anything when unfocused.
       return;
     }
     switch (disposition) {
       case UnfocusDisposition.scope:
-        // Focus the nearest scope without focusing its "focused child" or
-        // modifying the first focus for itself or any descendant scopes, except
-        // for removing the currently focused node from its _focusedChildren,
-        // but only if it is focusable.
-
         // If it can't request focus, then don't modify its focused children.
         if (scope.canRequestFocus) {
-          // This prevents re-focusing the node that we just unfocused if we
-          // immediately hit "next" after unfocusing, and also prevents the odd
-          // choices for refocusing of the next-to-last focused child.
+          // Clearing the focused children here prevents re-focusing the node
+          // that we just unfocused if we immediately hit "next" after
+          // unfocusing, and also prevents choosing to refocus the next-to-last
+          // focused child if unfocus is called more than once.
           scope._focusedChildren.clear();
         }
 
@@ -1219,11 +1216,11 @@ class FocusScopeNode extends FocusNode {
 
   @override
   void _doRequestFocus({@required bool findFirstFocus}) {
-    // It is possible tha a previously focused child is no longer focusable.
+    assert(findFirstFocus != null);
+
+    // It is possible that a previously focused child is no longer focusable.
     while (focusedChild != null && !focusedChild.canRequestFocus)
       _focusedChildren.removeLast();
-
-    assert(findFirstFocus != null);
 
     // If findFirstFocus is false, then the request is to make this scope the
     // focus instead of looking for the ultimate first focus for this scope and

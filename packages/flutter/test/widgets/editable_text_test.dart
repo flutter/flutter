@@ -914,6 +914,7 @@ void main() {
 
     tester.testTextInput.log.clear();
     tester.testTextInput.closeConnection();
+    // A pump is needed to allow the focus change (unfocus) to be resolved.
     await tester.pump();
 
     // Widget does not have focus anymore.
