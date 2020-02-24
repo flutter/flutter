@@ -534,6 +534,39 @@ class PointerDataConverter {
               scrollDeltaY: scrollDeltaY,
             )
           );
+          if (kind == ui.PointerDeviceKind.touch) {
+            // The browser sends a new device ID for each touch gesture. To
+            // avoid memory leaks, we send a "remove" event when the gesture is
+            // over (i.e. when "up" or "cancel" is received).
+            result.add(
+              _synthesizePointerData(
+                timeStamp: timeStamp,
+                change: ui.PointerChange.remove,
+                kind: kind,
+                device: device,
+                physicalX: physicalX,
+                physicalY: physicalY,
+                buttons: 0,
+                obscured: obscured,
+                pressure: 0.0,
+                pressureMin: pressureMin,
+                pressureMax: pressureMax,
+                distance: distance,
+                distanceMax: distanceMax,
+                size: size,
+                radiusMajor: radiusMajor,
+                radiusMinor: radiusMinor,
+                radiusMin: radiusMin,
+                radiusMax: radiusMax,
+                orientation: orientation,
+                tilt: tilt,
+                platformData: platformData,
+                scrollDeltaX: scrollDeltaX,
+                scrollDeltaY: scrollDeltaY,
+              )
+            );
+            _pointers.remove(device);
+          }
           break;
         case ui.PointerChange.remove:
           assert(_pointers.containsKey(device));
