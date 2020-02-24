@@ -46,11 +46,12 @@ Future<void> main(List<String> args) async {
 }
 
 Future<void> _fetchUpstream([String workingDirectory = '.']) async {
+  print('Fetching remotes for "$workingDirectory" - you may be prompted for SSH credentials by git.');
   final ProcessResult fetchResult = await Process.run(
     'git',
     <String>[
       'fetch',
-      'upstream',
+      '--all',
     ],
     workingDirectory: workingDirectory,
   );
