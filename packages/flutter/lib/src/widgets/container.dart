@@ -363,7 +363,13 @@ class Container extends StatelessWidget {
 
   /// The color to paint behind the [child].
   ///
-  /// This will paint behind the [decoration], if any.
+  /// This property should be preferred when the background is a simple color.
+  /// For other cases, such as gradients or images, use the [decoration]
+  /// property.
+  ///
+  /// If the [decoration] is used, this property must be null. A background
+  /// color may still be painted by the [decoration] even if this property is
+  /// null.
   final Color color;
 
   /// The decoration to paint behind the [child].
