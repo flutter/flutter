@@ -1,4 +1,4 @@
-Signature: 3a2abee2c789153df3b9b6d50dec25d7
+Signature: 5f29ffacb0033394f097f6078047c59f
 
 UNUSED LICENSES:
 
@@ -6377,6 +6377,8 @@ ORIGIN: ../../../third_party/skia/modules/canvaskit/canvaskit/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/NotoSerif-Regular.ttf
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.ttf
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/brickwork-texture.jpg
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/brickwork_normal-map.jpg
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
