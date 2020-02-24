@@ -30,7 +30,12 @@ void main() {
       );
     }
 
-    Widget build({ Widget header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr }) {
+    Widget build({
+      Widget header,
+      Widget footer,
+      Axis scrollDirection = Axis.vertical,
+      TextDirection textDirection = TextDirection.ltr,
+    }) {
       return MaterialApp(
         home: Directionality(
           textDirection: textDirection,
@@ -39,6 +44,7 @@ void main() {
             width: itemHeight * 10,
             child: ReorderableListView(
               header: header,
+              footer: footer,
               children: listItems.map<Widget>(listItemToWidget).toList(),
               scrollDirection: scrollDirection,
               onReorder: onReorder,
@@ -109,6 +115,19 @@ void main() {
           tester.getCenter(find.text('Item 4')) + const Offset(0.0, itemHeight * 2),
         );
         expect(find.text('Header Text'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+      });
+
+      testWidgets('properly reorders with a footer', (WidgetTester tester) async {
+        await tester.pumpWidget(build(footer: const Text('Footer Text')));
+        expect(find.text('Footer Text'), findsOneWidget);
+        expect(listItems, orderedEquals(originalListItems));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 1')),
+          tester.getCenter(find.text('Item 4')) + const Offset(0.0, itemHeight * 2),
+        );
+        expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
       });
 
@@ -597,6 +616,34 @@ void main() {
           tester.getCenter(find.text('Item 3')),
         );
         expect(find.text('Header Text'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
+      });
+
+      testWidgets('properly reorders with a footer', (WidgetTester tester) async {
+        await tester.pumpWidget(build(
+          footer: const SizedBox(
+            width: itemHeight,
+            child: Text('Footer'),
+          ),
+          scrollDirection: Axis.horizontal),
+        );
+        expect(find.text('Footer'), findsOneWidget);
+        expect(listItems, orderedEquals(originalListItems));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 1')),
+          tester.getCenter(find.text('Item 4')) + const Offset(itemHeight * 2, 0.0),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Footer'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+        await tester.pumpWidget(build(footer: const Text('Footer'), scrollDirection: Axis.horizontal));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 4')),
+          tester.getCenter(find.text('Item 3')),
+        );
+        expect(find.text('Footer'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
       });
 
