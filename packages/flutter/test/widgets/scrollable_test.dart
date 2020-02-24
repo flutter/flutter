@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -17,6 +16,7 @@ Future<void> pumpTest(
   bool scrollable = true,
   bool reverse = false,
   ScrollController controller,
+  Widget Function(Widget) wrapper,
 }) async {
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
@@ -34,30 +34,58 @@ Future<void> pumpTest(
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
 }
 
+// Pump a nested scrollable. The outer scrollable contains a sliver of a
+// 300-pixel-long scrollable followed by a 2000-pixel-long content.
+Future<void> pumpDoubleScrollableTest(
+  WidgetTester tester,
+  TargetPlatform platform,
+) async {
+  await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(
+      platform: platform,
+    ),
+    home: CustomScrollView(
+      slivers: <Widget>[
+        SliverToBoxAdapter(
+          child: Container(
+            height: 300,
+            child: const CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+              ],
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+      ],
+    ),
+  ));
+  await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+}
+
 const double dragOffset = 200.0;
 
-// TODO(gspencergoog): Change this to use TargetPlatform.macOS once that is available.
-// https://github.com/flutter/flutter/issues/31366
-// Can't be const, since Platform.macOS asserts if called in const context.
-// ignore: prefer_const_declarations
-final LogicalKeyboardKey modifierKey = (!kIsWeb && Platform.isMacOS)
+final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
     : LogicalKeyboardKey.controlLeft;
 
-double getScrollOffset(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+double getScrollOffset(WidgetTester tester, {bool last = true}) {
+  Finder viewportFinder = find.byType(Viewport);
+  if (last)
+    viewportFinder = viewportFinder.last;
+  final RenderViewport viewport = tester.renderObject(viewportFinder);
   return viewport.offset.pixels;
 }
 
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset;
+  final ScrollPosition position = viewport.offset as ScrollPosition;
   return position.activity.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset;
+  final ScrollPosition position = viewport.offset as ScrollPosition;
   position.jumpTo(0.0);
 }
 
@@ -69,7 +97,7 @@ void main() {
     await tester.pump(); // trigger fling
     expect(getScrollOffset(tester), dragOffset);
     await tester.pump(const Duration(seconds: 5));
-    final double result1 = getScrollOffset(tester);
+    final double androidResult = getScrollOffset(tester);
 
     resetScrollOffset(tester);
 
@@ -80,13 +108,25 @@ void main() {
     await tester.pump(); // trigger fling
     expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
     await tester.pump(const Duration(seconds: 5));
-    final double result2 = getScrollOffset(tester);
+    final double iOSResult = getScrollOffset(tester);
 
-    expect(result1, lessThan(result2)); // iOS (result2) is slipperier than Android (result1)
+    resetScrollOffset(tester);
+
+    await pumpTest(tester, TargetPlatform.macOS);
+    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
+    // Scroll starts ease into the scroll on iOS.
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(const Duration(seconds: 5));
+    final double macOSResult = getScrollOffset(tester);
+
+    expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
+    expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
   });
 
   testWidgets('Holding scroll', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.iOS);
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.drag(find.byType(Viewport), const Offset(0.0, 200.0), touchSlopY: 0.0);
     expect(getScrollOffset(tester), -200.0);
     await tester.pump(); // trigger ballistic
@@ -102,10 +142,10 @@ void main() {
     // Once the hold is let go, it should still snap back to origin.
     expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     expect(getScrollOffset(tester), 0.0);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Repeated flings builds momentum on iOS', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.iOS);
+  testWidgets('Repeated flings builds momentum', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
     await tester.pump(const Duration(milliseconds: 10));
@@ -115,9 +155,9 @@ void main() {
     // On iOS, the velocity will be larger than the velocity of the last fling by a
     // non-trivial amount.
     expect(getScrollVelocity(tester), greaterThan(1100.0));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    resetScrollOffset(tester);
-
+  testWidgets('Repeated flings do not build momentum on Android', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
@@ -130,8 +170,8 @@ void main() {
     expect(getScrollVelocity(tester), moreOrLessEquals(1000.0));
   });
 
-  testWidgets('No iOS momentum build with flings in opposite directions', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.iOS);
+  testWidgets('No iOS/macOS momentum build with flings in opposite directions', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
     await tester.pump(const Duration(milliseconds: 10));
@@ -142,10 +182,10 @@ void main() {
     // opposite direction.
     expect(getScrollVelocity(tester), greaterThan(-1000.0));
     expect(getScrollVelocity(tester), lessThan(0.0));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('No iOS momentum kept on hold gestures', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.iOS);
+  testWidgets('No iOS/macOS momentum kept on hold gestures', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
     await tester.pump(); // trigger fling
     await tester.pump(const Duration(milliseconds: 10));
@@ -155,7 +195,7 @@ void main() {
     await gesture.up();
     // After a hold longer than 2 frames, previous velocity is lost.
     expect(getScrollVelocity(tester), 0.0);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Drags creeping unaffected on Android', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
@@ -168,8 +208,8 @@ void main() {
     expect(getScrollOffset(tester), 1.5);
   });
 
-  testWidgets('Drags creeping must break threshold on iOS', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.iOS);
+  testWidgets('Drags creeping must break threshold on iOS/macOS', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
     await gesture.moveBy(const Offset(0.0, -0.5));
     expect(getScrollOffset(tester), 0.0);
@@ -186,18 +226,18 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 50));
     // -0.5 over threshold transferred.
     expect(getScrollOffset(tester), 0.5);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Big drag over threshold magnitude preserved on iOS', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.iOS);
+  testWidgets('Big drag over threshold magnitude preserved on iOS/macOS', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
     await gesture.moveBy(const Offset(0.0, -30.0));
     // No offset lost from threshold.
     expect(getScrollOffset(tester), 30.0);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Slow threshold breaks are attenuated on iOS', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.iOS);
+  testWidgets('Slow threshold breaks are attenuated on iOS/macOS', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
     // This is a typical 'hesitant' iOS scroll start.
     await gesture.moveBy(const Offset(0.0, -10.0));
@@ -205,10 +245,10 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -10.0), timeStamp: const Duration(milliseconds: 20));
     // Subsequent motions unaffected.
     expect(getScrollOffset(tester), moreOrLessEquals(11.16666666666666673));
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Small continuing motion preserved on iOS', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.iOS);
+  testWidgets('Small continuing motion preserved on iOS/macOS', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
     await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
     expect(getScrollOffset(tester), 30.0);
@@ -218,10 +258,10 @@ void main() {
     expect(getScrollOffset(tester), 31.0);
     await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 60));
     expect(getScrollOffset(tester), 31.5);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Motion stop resets threshold on iOS', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.iOS);
+  testWidgets('Motion stop resets threshold on iOS/macOS', (WidgetTester tester) async {
+    await pumpTest(tester, debugDefaultTargetPlatformOverride);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
     await gesture.moveBy(const Offset(0.0, -30.0)); // Break threshold.
     expect(getScrollOffset(tester), 30.0);
@@ -241,9 +281,9 @@ void main() {
     expect(getScrollOffset(tester), 31.5);
     await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 180));
     expect(getScrollOffset(tester), 32.5);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Scroll pointer signals are handled', (WidgetTester tester) async {
+  testWidgets('Scroll pointer signals are handled on Fuchsia', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia);
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
@@ -255,6 +295,24 @@ void main() {
     // Pointer signals should not cause overscroll.
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
     expect(getScrollOffset(tester), 0.0);
+  });
+
+  testWidgets('Scroll pointer signals are handled when there is competion', (WidgetTester tester) async {
+    // This is a regression test. When there are multiple scrollables listening
+    // to the same event, for example when scrollables are nested, there used
+    // to be exceptions at scrolling events.
+
+    await pumpDoubleScrollableTest(tester, TargetPlatform.fuchsia);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport).last);
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    expect(getScrollOffset(tester, last: true), 20.0);
+    // Pointer signals should not cause overscroll.
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
+    expect(getScrollOffset(tester, last: true), 0.0);
   });
 
   testWidgets('Scroll pointer signals are ignored when scrolling is disabled', (WidgetTester tester) async {
@@ -630,4 +688,213 @@ void main() {
     // of Platform.isMacOS, don't skip this on web anymore.
     // https://github.com/flutter/flutter/issues/31366
   }, skip: kIsWeb);
+
+  testWidgets('Can recommendDeferredLoadingForContext - animation', (WidgetTester tester) async {
+    final List<String> widgetTracker = <String>[];
+    int cheapWidgets = 0;
+    int expensiveWidgets = 0;
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        controller: controller,
+        itemBuilder: (BuildContext context, int index) {
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            cheapWidgets += 1;
+            widgetTracker.add('cheap');
+            return const SizedBox(height: 50.0);
+          }
+          widgetTracker.add('expensive');
+          expensiveWidgets += 1;
+          return const SizedBox(height: 50.0);
+        },
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 0);
+
+    // The position value here is different from the maximum velocity we will
+    // reach, which is controlled by a combination of curve, duration, and
+    // position.
+    // This is just meant to be a pretty good simulation. A linear curve
+    // with these same parameters will never back off on the velocity enough
+    // to reset here.
+    controller.animateTo(
+      5000,
+      duration: const Duration(seconds: 2),
+      curve: Curves.linear,
+    );
+
+    expect(expensiveWidgets, 17);
+    expect(widgetTracker.every((String type) => type == 'expensive'), true);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 25);
+    expect(widgetTracker.skip(17).every((String type) => type == 'cheap'), true);
+
+    await tester.pumpAndSettle();
+
+    expect(expensiveWidgets, 22);
+    expect(cheapWidgets, 95);
+    expect(widgetTracker.skip(17).skip(25).take(70).every((String type) => type == 'cheap'), true);
+    expect(widgetTracker.skip(17).skip(25).skip(70).every((String type) => type == 'expensive'), true);
+  });
+
+  testWidgets('Can recommendDeferredLoadingForContext - ballistics', (WidgetTester tester) async {
+    int cheapWidgets = 0;
+    int expensiveWidgets = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            cheapWidgets += 1;
+            return const SizedBox(height: 50.0);
+          }
+          expensiveWidgets += 1;
+          return SizedBox(key: ValueKey<String>('Box $index'), height: 50.0);
+        },
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('Box 52')), findsNothing);
+
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 0);
+
+    // Getting the tester to simulate a life-like fling is difficult.
+    // Instead, just manually drive the activity with a ballistic simulation as
+    // if the user has flung the list.
+    Scrollable.of(find.byType(SizedBox).evaluate().first).position.activity.delegate.goBallistic(4000);
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('Box 52')), findsOneWidget);
+
+    expect(expensiveWidgets, 38);
+    expect(cheapWidgets, 20);
+  });
+
+  testWidgets('Can recommendDeferredLoadingForContext - override heuristic', (WidgetTester tester) async {
+    int cheapWidgets = 0;
+    int expensiveWidgets = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        physics: SuperPessimisticScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            cheapWidgets += 1;
+            return SizedBox(key: ValueKey<String>('Cheap box $index'), height: 50.0);
+          }
+          expensiveWidgets += 1;
+          return SizedBox(key: ValueKey<String>('Box $index'), height: 50.0);
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+    final SuperPessimisticScrollPhysics physics = position.physics as SuperPessimisticScrollPhysics;
+
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
+
+    expect(physics.count, 17);
+    expect(expensiveWidgets, 17);
+    expect(cheapWidgets, 0);
+
+    // Getting the tester to simulate a life-like fling is difficult.
+    // Instead, just manually drive the activity with a ballistic simulation as
+    // if the user has flung the list.
+    position.activity.delegate.goBallistic(4000);
+
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('Box 0')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
+
+    expect(expensiveWidgets, 18);
+    expect(cheapWidgets, 40);
+    expect(physics.count, 40 + 18);
+  });
+
+  testWidgets('Can recommendDeferredLoadingForContext - override heuristic and always return true', (WidgetTester tester) async {
+    int cheapWidgets = 0;
+    int expensiveWidgets = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        physics: const ExtraSuperPessimisticScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            cheapWidgets += 1;
+            return SizedBox(key: ValueKey<String>('Cheap box $index'), height: 50.0);
+          }
+          expensiveWidgets += 1;
+          return SizedBox(key: ValueKey<String>('Box $index'), height: 50.0);
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    final ScrollPosition position = Scrollable.of(find.byType(SizedBox).evaluate().first).position;
+
+    expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsNothing);
+
+    expect(expensiveWidgets, 0);
+    expect(cheapWidgets, 17);
+
+    // Getting the tester to simulate a life-like fling is difficult.
+    // Instead, just manually drive the activity with a ballistic simulation as
+    // if the user has flung the list.
+    position.activity.delegate.goBallistic(4000);
+
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('Cheap box 0')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('Cheap box 52')), findsOneWidget);
+
+    expect(expensiveWidgets, 0);
+    expect(cheapWidgets, 58);
+  });
+}
+
+// ignore: must_be_immutable
+class SuperPessimisticScrollPhysics extends ScrollPhysics {
+  SuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+
+  int count = 0;
+
+  @override
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
+    count++;
+    return velocity > 1;
+  }
+
+  @override
+  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return SuperPessimisticScrollPhysics(parent: buildParent(ancestor));
+  }
+}
+
+class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
+  const ExtraSuperPessimisticScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+
+  @override
+  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
+    return true;
+  }
+
+  @override
+  ScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return ExtraSuperPessimisticScrollPhysics(parent: buildParent(ancestor));
+  }
 }

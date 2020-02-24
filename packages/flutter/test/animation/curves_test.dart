@@ -244,4 +244,336 @@ void main() {
     expect(Curves.bounceInOut.transform(1), 1);
   });
 
+  test('CatmullRomSpline interpolates values properly', () {
+    final CatmullRomSpline curve = CatmullRomSpline(
+      const <Offset>[
+        Offset(0.0, 0.0),
+        Offset(0.01, 0.25),
+        Offset(0.2, 0.25),
+        Offset(0.33, 0.25),
+        Offset(0.5, 1.0),
+        Offset(0.66, 0.75),
+        Offset(1.0, 1.0),
+      ],
+      tension: 0.0,
+      startHandle: const Offset(0.0, -0.3),
+      endHandle: const Offset(1.3, 1.3),
+    );
+    expect(curve.transform(0.0).dx, closeTo(0.0, 1e-6));
+    expect(curve.transform(0.0).dy, closeTo(0.0, 1e-6));
+    expect(curve.transform(0.25).dx, closeTo(0.0966945, 1e-6));
+    expect(curve.transform(0.25).dy, closeTo(0.2626806, 1e-6));
+    expect(curve.transform(0.5).dx, closeTo(0.33, 1e-6));
+    expect(curve.transform(0.5).dy, closeTo(0.25, 1e-6));
+    expect(curve.transform(0.75).dx, closeTo(0.570260, 1e-6));
+    expect(curve.transform(0.75).dy, closeTo(0.883085, 1e-6));
+    expect(curve.transform(1.0).dx, closeTo(1.0, 1e-6));
+    expect(curve.transform(1.0).dy, closeTo(1.0, 1e-6));
+  });
+  test('CatmullRomSpline enforces contract', () {
+    expect(() {
+      CatmullRomSpline(null);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: -1.0);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: 2.0);
+    }, throwsAssertionError);
+  });
+  test('CatmullRomSpline interpolates values properly when precomputed', () {
+    final CatmullRomSpline curve = CatmullRomSpline.precompute(
+      const <Offset>[
+        Offset(0.0, 0.0),
+        Offset(0.01, 0.25),
+        Offset(0.2, 0.25),
+        Offset(0.33, 0.25),
+        Offset(0.5, 1.0),
+        Offset(0.66, 0.75),
+        Offset(1.0, 1.0),
+      ],
+      tension: 0.0,
+      startHandle: const Offset(0.0, -0.3),
+      endHandle: const Offset(1.3, 1.3),
+    );
+    expect(curve.transform(0.0).dx, closeTo(0.0, 1e-6));
+    expect(curve.transform(0.0).dy, closeTo(0.0, 1e-6));
+    expect(curve.transform(0.25).dx, closeTo(0.0966945, 1e-6));
+    expect(curve.transform(0.25).dy, closeTo(0.2626806, 1e-6));
+    expect(curve.transform(0.5).dx, closeTo(0.33, 1e-6));
+    expect(curve.transform(0.5).dy, closeTo(0.25, 1e-6));
+    expect(curve.transform(0.75).dx, closeTo(0.570260, 1e-6));
+    expect(curve.transform(0.75).dy, closeTo(0.883085, 1e-6));
+    expect(curve.transform(1.0).dx, closeTo(1.0, 1e-6));
+    expect(curve.transform(1.0).dy, closeTo(1.0, 1e-6));
+  });
+  test('CatmullRomSpline enforces contract when precomputed', () {
+    expect(() {
+      CatmullRomSpline.precompute(null);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(const <Offset>[]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(const <Offset>[Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(const <Offset>[Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(const <Offset>[Offset.zero, Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: -1.0);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline.precompute(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: 2.0);
+    }, throwsAssertionError);
+  });
+  test('CatmullRomCurve interpolates given points correctly', () {
+    final CatmullRomCurve curve = CatmullRomCurve(
+      const <Offset>[
+        Offset(0.2, 0.25),
+        Offset(0.33, 0.25),
+        Offset(0.5, 1.0),
+        Offset(0.8, 0.75),
+      ],
+    );
+
+    // These values are approximations.
+    const double tolerance = 1e-6;
+    expect(curve.transform(0.0), closeTo(0.0, tolerance));
+    expect(curve.transform(0.01), closeTo(0.012874734350170863, tolerance));
+    expect(curve.transform(0.2), closeTo(0.24989646045277542, tolerance));
+    expect(curve.transform(0.33), closeTo(0.250037698527661, tolerance));
+    expect(curve.transform(0.5), closeTo(0.9999057323235939, tolerance));
+    expect(curve.transform(0.6), closeTo(0.9357294964536621, tolerance));
+    expect(curve.transform(0.8), closeTo(0.7500423402378034, tolerance));
+    expect(curve.transform(1.0), closeTo(1.0, tolerance));
+  });
+  test('CatmullRomCurve interpolates given points correctly when precomputed', () {
+    final CatmullRomCurve curve = CatmullRomCurve.precompute(
+      const <Offset>[
+        Offset(0.2, 0.25),
+        Offset(0.33, 0.25),
+        Offset(0.5, 1.0),
+        Offset(0.8, 0.75),
+      ],
+    );
+
+    // These values are approximations.
+    const double tolerance = 1e-6;
+    expect(curve.transform(0.0), closeTo(0.0, tolerance));
+    expect(curve.transform(0.01), closeTo(0.012874734350170863, tolerance));
+    expect(curve.transform(0.2), closeTo(0.24989646045277542, tolerance));
+    expect(curve.transform(0.33), closeTo(0.250037698527661, tolerance));
+    expect(curve.transform(0.5), closeTo(0.9999057323235939, tolerance));
+    expect(curve.transform(0.6), closeTo(0.9357294964536621, tolerance));
+    expect(curve.transform(0.8), closeTo(0.7500423402378034, tolerance));
+    expect(curve.transform(1.0), closeTo(1.0, tolerance));
+  });
+  test('CatmullRomCurve enforces contract', () {
+    expect(() {
+      CatmullRomCurve(null);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomCurve(const <Offset>[]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomCurve(const <Offset>[Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomCurve(const <Offset>[Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+
+    // Monotonically increasing in X.
+    expect(
+        CatmullRomCurve.validateControlPoints(
+          const <Offset>[
+            Offset(0.2, 0.25),
+            Offset(0.01, 0.25),
+          ],
+          tension: 0.0,
+        ),
+        isFalse);
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.2, 0.25),
+          Offset(0.01, 0.25),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // X within range (0.0, 1.0).
+    expect(
+        CatmullRomCurve.validateControlPoints(
+          const <Offset>[
+            Offset(0.2, 0.25),
+            Offset(1.01, 0.25),
+          ],
+          tension: 0.0,
+        ),
+        isFalse);
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.2, 0.25),
+          Offset(1.01, 0.25),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // Not multi-valued in Y at x=0.0.
+    expect(
+      CatmullRomCurve.validateControlPoints(
+        const <Offset>[
+          Offset(0.05, 0.50),
+          Offset(0.50, 0.50),
+          Offset(0.75, 0.75),
+        ],
+        tension: 0.0,
+      ),
+      isFalse,
+    );
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.05, 0.50),
+          Offset(0.50, 0.50),
+          Offset(0.75, 0.75),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // Not multi-valued in Y at x=1.0.
+    expect(
+      CatmullRomCurve.validateControlPoints(
+        const <Offset>[
+          Offset(0.25, 0.25),
+          Offset(0.50, 0.50),
+          Offset(0.95, 0.51),
+        ],
+        tension: 0.0,
+      ),
+      isFalse,
+    );
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.25, 0.25),
+          Offset(0.50, 0.50),
+          Offset(0.95, 0.51),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // Not multi-valued in Y in between x = 0.0 and x = 1.0.
+    expect(
+      CatmullRomCurve.validateControlPoints(
+        const <Offset>[
+          Offset(0.5, 0.05),
+          Offset(0.5, 0.95),
+        ],
+        tension: 0.0,
+      ),
+      isFalse,
+    );
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.5, 0.05),
+          Offset(0.5, 0.95),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+  });
+  test('CatmullRomCurve enforces contract when precomputed', () {
+    expect(() {
+      CatmullRomCurve.precompute(null);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomCurve.precompute(const <Offset>[]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomCurve.precompute(const <Offset>[Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomCurve.precompute(const <Offset>[Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+
+    // Monotonically increasing in X.
+    expect(() {
+      CatmullRomCurve.precompute(
+        const <Offset>[
+          Offset(0.2, 0.25),
+          Offset(0.01, 0.25),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // X within range (0.0, 1.0).
+    expect(() {
+      CatmullRomCurve.precompute(
+        const <Offset>[
+          Offset(0.2, 0.25),
+          Offset(1.01, 0.25),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // Not multi-valued in Y at x=0.0.
+    expect(() {
+      CatmullRomCurve.precompute(
+        const <Offset>[
+          Offset(0.05, 0.50),
+          Offset(0.50, 0.50),
+          Offset(0.75, 0.75),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // Not multi-valued in Y at x=1.0.
+    expect(() {
+      CatmullRomCurve.precompute(
+        const <Offset>[
+          Offset(0.25, 0.25),
+          Offset(0.50, 0.50),
+          Offset(0.95, 0.51),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // Not multi-valued in Y in between x = 0.0 and x = 1.0.
+    expect(() {
+      CatmullRomCurve.precompute(
+        const <Offset>[
+          Offset(0.5, 0.05),
+          Offset(0.5, 0.95),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+  });
 }

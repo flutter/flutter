@@ -183,17 +183,17 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
           assert(notification.overscroll != 0.0);
           if (notification.dragDetails != null) {
             assert(notification.dragDetails.globalPosition != null);
-            final RenderBox renderer = notification.context.findRenderObject();
+            final RenderBox renderer = notification.context.findRenderObject() as RenderBox;
             assert(renderer != null);
             assert(renderer.hasSize);
             final Size size = renderer.size;
             final Offset position = renderer.globalToLocal(notification.dragDetails.globalPosition);
             switch (notification.metrics.axis) {
               case Axis.horizontal:
-                controller.pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height), size.height);
+                controller.pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height) as double, size.height);
                 break;
               case Axis.vertical:
-                controller.pull(notification.overscroll.abs(), size.height, position.dx.clamp(0.0, size.width), size.width);
+                controller.pull(notification.overscroll.abs(), size.height, position.dx.clamp(0.0, size.width) as double, size.width);
                 break;
             }
           }
@@ -335,9 +335,9 @@ class _GlowController extends ChangeNotifier {
     assert(velocity >= 0.0);
     _pullRecedeTimer?.cancel();
     _pullRecedeTimer = null;
-    velocity = velocity.clamp(_minVelocity, _maxVelocity);
+    velocity = velocity.clamp(_minVelocity, _maxVelocity) as double;
     _glowOpacityTween.begin = _state == _GlowState.idle ? 0.3 : _glowOpacity.value;
-    _glowOpacityTween.end = (velocity * _velocityGlowFactor).clamp(_glowOpacityTween.begin, _maxOpacity);
+    _glowOpacityTween.end = (velocity * _velocityGlowFactor).clamp(_glowOpacityTween.begin, _maxOpacity) as double;
     _glowSizeTween.begin = _glowSize.value;
     _glowSizeTween.end = math.min(0.025 + 7.5e-7 * velocity * velocity, 1.0);
     _glowController.duration = Duration(milliseconds: (0.15 + velocity * 0.02).round());

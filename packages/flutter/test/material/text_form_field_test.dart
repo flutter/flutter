@@ -32,6 +32,28 @@ void main() {
     expect(textFieldWidget.textAlign, alignment);
   });
 
+  testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
+    const ScrollPhysics scrollPhysics = ScrollPhysics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              scrollPhysics: scrollPhysics,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.scrollPhysics, scrollPhysics);
+  });
+
   testWidgets('Passes textAlignVertical to underlying TextField', (WidgetTester tester) async {
     const TextAlignVertical textAlignVertical = TextAlignVertical.bottom;
 

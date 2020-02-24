@@ -79,12 +79,12 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
               onTap: () {
                 _focusNode.requestFocus();
               },
-              child: Text('Tap to focus', style: textTheme.display1),
+              child: Text('Tap to focus', style: textTheme.headline4),
             );
           }
 
           if (_event == null) {
-            return Text('Press a key', style: textTheme.display1);
+            return Text('Press a key', style: textTheme.headline4);
           }
 
           final RawKeyEventData data = _event.data;
@@ -127,8 +127,8 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           if (_event.character != null) {
             dataText.add(Text('character: ${_event.character}'));
           }
-          for (ModifierKey modifier in data.modifiersPressed.keys) {
-            for (KeyboardSide side in KeyboardSide.values) {
+          for (final ModifierKey modifier in data.modifiersPressed.keys) {
+            for (final KeyboardSide side in KeyboardSide.values) {
               if (data.isModifierPressed(modifier, side: side)) {
                 dataText.add(
                   Text('${_getEnumName(side)} ${_getEnumName(modifier).replaceAll('Modifier', '')} pressed'),
@@ -136,8 +136,13 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
               }
             }
           }
+          final List<String> pressed = <String>['Pressed:'];
+          for (final LogicalKeyboardKey key in RawKeyboard.instance.keysPressed) {
+            pressed.add(key.debugName);
+          }
+          dataText.add(Text(pressed.join(' ')));
           return DefaultTextStyle(
-            style: textTheme.subhead,
+            style: textTheme.subtitle1,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: dataText,

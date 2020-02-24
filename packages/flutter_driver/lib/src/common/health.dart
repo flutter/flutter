@@ -46,7 +46,7 @@ class Health extends Result {
 
   /// Deserializes the result from JSON.
   static Health fromJson(Map<String, dynamic> json) {
-    return Health(_healthStatusIndex.lookupBySimpleName(json['status']));
+    return Health(_healthStatusIndex.lookupBySimpleName(json['status'] as String));
   }
 
   @override

@@ -122,6 +122,19 @@ void main() {
       expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
     });
 
+    test('Legacy Format and Multi-Platform Format together is not allowed and error message contains plugin name', () {
+      const String pluginYamlRaw = 'androidPackage: com.flutter.dev\n'
+          'platforms:\n'
+          ' android:\n'
+          '  package: com.flutter.dev\n';
+
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+        () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
+        throwsToolExit(message: _kTestPluginName),
+      );
+    });
+
     test('A default_package field is allowed', () {
       const String pluginYamlRaw =
           'platforms:\n'
@@ -143,6 +156,28 @@ void main() {
       Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml as YamlMap, const <String>[]);
 
       expect(plugin.platforms, <String, PluginPlatform> {});
+    });
+
+    test('error on empty platforms', () {
+      const String pluginYamlRaw = 'platforms:\n';
+
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+            () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
+        throwsToolExit(message: 'Invalid "platforms" specification.'),
+      );
+    });
+
+    test('error on empty platform', () {
+      const String pluginYamlRaw =
+          'platforms:\n'
+          ' android:\n';
+
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+            () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
+        throwsToolExit(message: 'Invalid "android" plugin specification.'),
+      );
     });
   });
 }

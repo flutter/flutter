@@ -53,7 +53,7 @@ void main() {
     expect(error.toString(), startsWith('Multiple widgets used the same GlobalKey.\n'));
     expect(error.toString(), isNot(contains('different widgets that both had the following description')));
     expect(error.toString(), contains('Container'));
-    expect(error.toString(), contains('Container-[<\'x\'>]'));
+    expect(error.toString(), contains("Container-[<'x'>]"));
     expect(error.toString(), contains('[GlobalObjectKey ${describeIdentity(0)}]'));
     expect(error.toString(), endsWith('\nA GlobalKey can only be specified on one widget at a time in the widget tree.'));
   });

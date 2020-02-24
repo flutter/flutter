@@ -20,7 +20,7 @@ void testConfig(
 
   test(description, () {
     expect(actualStringValue, expectedStringValue);
-    for (Type key in otherExpectedValues.keys) {
+    for (final Type key in otherExpectedValues.keys) {
       expect(otherActualValues[key], otherExpectedValues[key]);
     }
   });

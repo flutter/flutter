@@ -57,27 +57,27 @@ class TimelineSummary {
   ///
   /// Returns null if no frames were recorded.
   double computeAverageFrameRasterizerTimeMillis() {
-    return _averageInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()));
+    return _averageInMillis(_extractGpuRasterizerDrawDurations());
   }
 
   /// The longest frame rasterization time in milliseconds.
   ///
   /// Returns null if no frames were recorded.
   double computeWorstFrameRasterizerTimeMillis() {
-    return _maxInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()));
+    return _maxInMillis(_extractGpuRasterizerDrawDurations());
   }
 
   /// The [p]-th percentile frame rasterization time in milliseconds.
   ///
   /// Returns null if no frames were recorded.
   double computePercentileFrameRasterizerTimeMillis(double p) {
-    return _percentileInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()), p);
+    return _percentileInMillis(_extractGpuRasterizerDrawDurations(), p);
   }
 
   /// The number of frames that missed the [kBuildBudget] on the GPU and
   /// therefore are in the danger of missing frames.
-  int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawEvents()
-      .where((TimedEvent event) => event.duration > kBuildBudget)
+  int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawDurations()
+      .where((Duration duration) => duration > kBuildBudget)
       .length;
 
   /// The total number of frames recorded in the timeline.
@@ -100,8 +100,8 @@ class TimelineSummary {
       'frame_build_times': _extractFrameDurations()
         .map<int>((Duration duration) => duration.inMicroseconds)
         .toList(),
-      'frame_rasterizer_times': _extractGpuRasterizerDrawEvents()
-        .map<int>((TimedEvent event) => event.duration.inMicroseconds)
+      'frame_rasterizer_times': _extractGpuRasterizerDrawDurations()
+        .map<int>((Duration duration) => duration.inMicroseconds)
         .toList(),
     };
   }
@@ -142,15 +142,11 @@ class TimelineSummary {
       .toList();
   }
 
-  List<Duration> _extractDurations(String name) {
-    return _extractNamedEvents(name).map<Duration>((TimelineEvent event) => event.duration).toList();
-  }
-
-  /// Extracts timed events that are reported as a pair of begin/end events.
+  /// Extracts Duration list that are reported as a pair of begin/end events.
   ///
   /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
-  List<TimedEvent> _extractBeginEndEvents(String name) {
-    final List<TimedEvent> result = <TimedEvent>[];
+  List<Duration> _extractBeginEndEvents(String name) {
+    final List<Duration> result = <Duration>[];
 
     // Timeline does not guarantee that the first event is the "begin" event.
     final Iterator<TimelineEvent> events = _extractNamedEvents(name)
@@ -159,10 +155,7 @@ class TimelineSummary {
       final TimelineEvent beginEvent = events.current;
       if (events.moveNext()) {
         final TimelineEvent endEvent = events.current;
-        result.add(TimedEvent(
-          beginEvent.timestampMicros,
-          endEvent.timestampMicros,
-        ));
+        result.add(Duration(microseconds: endEvent.timestampMicros - beginEvent.timestampMicros));
       }
     }
 
@@ -194,21 +187,7 @@ class TimelineSummary {
         .reduce(math.max);
   }
 
-  List<TimedEvent> _extractGpuRasterizerDrawEvents() => _extractBeginEndEvents('GPURasterizer::Draw');
+  List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents('GPURasterizer::Draw');
 
-  List<Duration> _extractFrameDurations() => _extractDurations('Frame');
-
-  Iterable<Duration> _extractDuration(Iterable<TimedEvent> events) {
-    return events.map<Duration>((TimedEvent e) => e.duration);
-  }
-}
-
-/// Timing information about an event that happened in the event loop.
-class TimedEvent {
-  /// Creates a timed event given begin and end timestamps in microseconds.
-  TimedEvent(int beginTimeMicros, int endTimeMicros)
-    : duration = Duration(microseconds: endTimeMicros - beginTimeMicros);
-
-  /// The duration of the event.
-  final Duration duration;
+  List<Duration> _extractFrameDurations() => _extractBeginEndEvents('Frame');
 }

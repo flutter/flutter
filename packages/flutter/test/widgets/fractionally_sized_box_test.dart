@@ -25,7 +25,7 @@ void main() {
         ),
       ),
     ));
-    final RenderBox box = inner.currentContext.findRenderObject();
+    final RenderBox box = inner.currentContext.findRenderObject() as RenderBox;
     expect(box.size, equals(const Size(50.0, 25.0)));
     expect(box.localToGlobal(Offset.zero), equals(const Offset(25.0, 37.5)));
   });
@@ -41,7 +41,7 @@ void main() {
         child: Placeholder(key: inner),
       ),
     ));
-    final RenderBox box = inner.currentContext.findRenderObject();
+    final RenderBox box = inner.currentContext.findRenderObject() as RenderBox;
     expect(box.size, equals(const Size(400.0, 300.0)));
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(800.0 - 400.0 / 2.0, 0.0 + 300.0 / 2.0)));
   });
@@ -57,7 +57,7 @@ void main() {
         child: Placeholder(key: inner),
       ),
     ));
-    final RenderBox box = inner.currentContext.findRenderObject();
+    final RenderBox box = inner.currentContext.findRenderObject() as RenderBox;
     expect(box.size, equals(const Size(400.0, 300.0)));
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(0.0 + 400.0 / 2.0, 0.0 + 300.0 / 2.0)));
   });
@@ -83,7 +83,7 @@ void main() {
         ),
       ),
     ));
-    final RenderBox box = inner.currentContext.findRenderObject();
+    final RenderBox box = inner.currentContext.findRenderObject() as RenderBox;
     expect(box.size, equals(const Size(50.0, 25.0)));
     expect(box.localToGlobal(Offset.zero), equals(const Offset(25.0, 37.5)));
   });

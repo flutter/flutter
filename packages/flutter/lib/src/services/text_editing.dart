@@ -94,20 +94,18 @@ class TextSelection extends TextRange {
 
   @override
   String toString() {
-    return '$runtimeType(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
+    return '${objectRuntimeType(this, 'TextSelection')}(baseOffset: $baseOffset, extentOffset: $extentOffset, affinity: $affinity, isDirectional: $isDirectional)';
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (other is! TextSelection)
-      return false;
-    final TextSelection typedOther = other;
-    return typedOther.baseOffset == baseOffset
-        && typedOther.extentOffset == extentOffset
-        && typedOther.affinity == affinity
-        && typedOther.isDirectional == isDirectional;
+    return other is TextSelection
+        && other.baseOffset == baseOffset
+        && other.extentOffset == extentOffset
+        && other.affinity == affinity
+        && other.isDirectional == isDirectional;
   }
 
   @override

@@ -200,7 +200,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 ///
 /// Used by [CupertinoPageScaffold] to either shift away fully obstructed content
 /// or provide a padding guide to partially obstructed content.
-abstract class ObstructingPreferredSizeWidget extends PreferredSizeWidget {
+abstract class ObstructingPreferredSizeWidget implements PreferredSizeWidget {
   /// If true, this widget fully obstructs widgets behind it by the specified
   /// size.
   ///

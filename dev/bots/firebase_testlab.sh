@@ -21,7 +21,7 @@ tests=(
 devices=(
   # Pixel 3
   "model=blueline,version=28"
-  "model=blueline,version=Q-beta-3"
+  "model=blueline,version=29"
 
   # Moto Z XT1650
   "model=griffin,version=24"

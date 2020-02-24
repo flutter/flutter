@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
@@ -342,4 +343,217 @@ Future<void> main() async {
 
   });
 
+  testWidgets('Can hit test on BoxDecoration border', (WidgetTester tester) async {
+    List<int> itemsTapped;
+    const Key key = Key('Container with BoxDecoration');
+    Widget buildFrame(Border border) {
+      itemsTapped = <int>[];
+      return Center(
+        child: GestureDetector(
+          behavior: HitTestBehavior.deferToChild,
+          child: Container(
+            key: key,
+            width: 100.0,
+            height: 50.0,
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle, borderRadius: BorderRadius.circular(20.0)),
+          ),
+          onTap: () {
+            itemsTapped.add(1);
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Border.all()));
+
+    expect(itemsTapped, isEmpty);
+
+    await tester.tapAt(const Offset(0.0, 0.0));
+    expect(itemsTapped, isEmpty);
+
+    await tester.tapAt(const Offset(350.0, 275.0));
+    expect(itemsTapped, isEmpty);
+
+    await tester.tapAt(const Offset(400.0, 300.0));
+    expect(itemsTapped, <int>[1]);
+
+    await tester.tap(find.byKey(key));
+    expect(itemsTapped, <int>[1,1]);
+  });
+
+  testWidgets('BoxDecoration not tap outside rounded angles - Top Left', (WidgetTester tester) async {
+    const double height = 50.0;
+    const double width = 50.0;
+    const double radius = 12.3;
+
+    List<int> itemsTapped;
+    const Key key = Key('Container with BoxDecoration');
+    Widget buildFrame(Border border) {
+      itemsTapped = <int>[];
+      return Align(
+        alignment: Alignment.topLeft,
+        child:GestureDetector(
+          behavior: HitTestBehavior.deferToChild,
+          child: Container(
+            key: key,
+            width: width,
+            height: height,
+            decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius))
+          ),
+          onTap: () {
+            itemsTapped.add(1);
+          },
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Border.all()));
+
+    expect(itemsTapped, isEmpty);
+    // x, y
+    const Offset topLeft = Offset(0.0, 0.0);
+    const Offset borderTopTangent = Offset(radius-1, 0.0);
+    const Offset borderLeftTangent = Offset(0.0,radius-1);
+    //the borderDiagonalOffset is the backslash line
+    //\\######@@@
+    //#\\###@####
+    //##\\@######
+    //##@########
+    //@##########
+    //@##########
+    const double borderDiagonalOffset = radius - radius * math.sqrt1_2;
+    const Offset fartherBorderRadiusPoint = Offset(borderDiagonalOffset,borderDiagonalOffset);
+
+    await tester.tapAt(topLeft);
+    expect(itemsTapped, isEmpty,reason: 'top left tapped');
+
+    await tester.tapAt(borderTopTangent);
+    expect(itemsTapped, isEmpty,reason: 'border top tapped');
+
+    await tester.tapAt(borderLeftTangent);
+    expect(itemsTapped, isEmpty,reason: 'border left tapped');
+
+    await tester.tapAt(fartherBorderRadiusPoint);
+    expect(itemsTapped, isEmpty,reason: 'border center tapped');
+
+    await tester.tap(find.byKey(key));
+    expect(itemsTapped, <int>[1]);
+
+  });
+
+  testWidgets('BoxDecoration tap inside rounded angles - Top Left', (WidgetTester tester) async {
+    const double height = 50.0;
+    const double width = 50.0;
+    const double radius = 12.3;
+
+    List<int> itemsTapped;
+    const Key key = Key('Container with BoxDecoration');
+    Widget buildFrame(Border border) {
+      itemsTapped = <int>[];
+      return Align(
+          alignment: Alignment.topLeft,
+          child:GestureDetector(
+            behavior: HitTestBehavior.deferToChild,
+            child: Container(
+                key: key,
+                width: width,
+                height: height,
+                decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius))
+            ),
+            onTap: () {
+              itemsTapped.add(1);
+            },
+          )
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Border.all()));
+
+    expect(itemsTapped, isEmpty);
+    // x, y
+    const Offset borderTopTangent = Offset(radius, 0.0);
+    const Offset borderLeftTangent = Offset(0.0,radius);
+    const double borderDiagonalOffset = radius - radius * math.sqrt1_2;
+    const Offset fartherBorderRadiusPoint = Offset(borderDiagonalOffset+1,borderDiagonalOffset+1);
+
+    await tester.tapAt(borderTopTangent);
+    expect(itemsTapped, <int>[1],reason: 'border Top not tapped');
+
+    await tester.tapAt(borderLeftTangent);
+    expect(itemsTapped, <int>[1,1],reason: 'border Left not tapped');
+
+    await tester.tapAt(fartherBorderRadiusPoint);
+    expect(itemsTapped, <int>[1,1,1],reason: 'border center not tapped');
+
+    await tester.tap(find.byKey(key));
+    expect(itemsTapped, <int>[1,1,1,1]);
+  });
+
+  testWidgets('BoxDecoration rounded angles other corner works', (WidgetTester tester) async {
+    const double height = 50.0;
+    const double width = 50.0;
+    const double radius = 20;
+
+    List<int> itemsTapped;
+    const Key key = Key('Container with BoxDecoration');
+    Widget buildFrame(Border border) {
+      itemsTapped = <int>[];
+      return Align(
+          alignment: Alignment.topLeft,
+          child:GestureDetector(
+            behavior: HitTestBehavior.deferToChild,
+            child: Container(
+                key: key,
+                width: width,
+                height: height,
+                decoration: BoxDecoration(border: border, shape: BoxShape.rectangle,borderRadius: BorderRadius.circular(radius))
+            ),
+            onTap: () {
+              itemsTapped.add(1);
+            },
+          )
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(Border.all()));
+
+    expect(itemsTapped, isEmpty);
+
+    await tester.tap(find.byKey(key));
+    expect(itemsTapped, <int>[1]);
+
+    // x, y
+    const Offset topRightOutside = Offset(width, 0.0);
+    const Offset topRightInside = Offset(width-radius, radius);
+    const Offset bottomRightOutside = Offset(width, height);
+    const Offset bottomRightInside = Offset(width-radius, height-radius);
+    const Offset bottomLeftOutside = Offset(0, height);
+    const Offset bottomLeftInside = Offset(radius, height-radius);
+    const Offset topLeftOutside = Offset(0, 0);
+    const Offset topLeftInside = Offset(radius, radius);
+
+    await tester.tapAt(topRightInside);
+    expect(itemsTapped, <int>[1,1],reason: 'top right not tapped');
+
+    await tester.tapAt(topRightOutside);
+    expect(itemsTapped, <int>[1,1],reason: 'top right tapped');
+
+    await tester.tapAt(bottomRightInside);
+    expect(itemsTapped, <int>[1,1,1],reason: 'bottom right not tapped');
+
+    await tester.tapAt(bottomRightOutside);
+    expect(itemsTapped, <int>[1,1,1],reason: 'bottom right tapped');
+
+    await tester.tapAt(bottomLeftInside);
+    expect(itemsTapped, <int>[1,1,1,1],reason: 'bottom left not tapped');
+
+    await tester.tapAt(bottomLeftOutside);
+    expect(itemsTapped, <int>[1,1,1,1],reason: 'bottom left tapped');
+
+    await tester.tapAt(topLeftInside);
+    expect(itemsTapped, <int>[1,1,1,1,1],reason: 'top left not tapped');
+
+    await tester.tapAt(topLeftOutside);
+    expect(itemsTapped, <int>[1,1,1,1,1],reason: 'top left tapped');
+  });
 }

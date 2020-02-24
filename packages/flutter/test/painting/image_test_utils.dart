@@ -18,6 +18,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   final Completer<ImageInfo> _completer = Completer<ImageInfo>.sync();
   ImageConfiguration configuration;
+  int loadCallCount = 0;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -25,14 +26,16 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStream resolve(ImageConfiguration config) {
+  void resolveStreamForKey(ImageConfiguration config, ImageStream stream, TestImageProvider key, ImageErrorListener handleError) {
     configuration = config;
-    return super.resolve(configuration);
+    super.resolveStreamForKey(config, stream, key, handleError);
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) =>
-      OneFrameImageStreamCompleter(_completer.future);
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+    loadCallCount += 1;
+    return OneFrameImageStreamCompleter(_completer.future);
+  }
 
   ImageInfo complete() {
     final ImageInfo imageInfo = ImageInfo(image: testImage);

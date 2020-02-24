@@ -87,7 +87,10 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   Offset _clampOffset(Offset offset) {
     final Size size = context.size;
     final Offset minOffset = Offset(size.width, size.height) * (1.0 - _scale);
-    return Offset(offset.dx.clamp(minOffset.dx, 0.0), offset.dy.clamp(minOffset.dy, 0.0));
+    return Offset(
+      offset.dx.clamp(minOffset.dx, 0.0) as double,
+      offset.dy.clamp(minOffset.dy, 0.0) as double,
+    );
   }
 
   void _handleFlingAnimation() {
@@ -107,7 +110,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
   void _handleOnScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
-      _scale = (_previousScale * details.scale).clamp(1.0, 4.0);
+      _scale = (_previousScale * details.scale).clamp(1.0, 4.0) as double;
       // Ensure that image location under the focal point stays in the same place despite scaling.
       _offset = _clampOffset(details.focalPoint - _normalizedOffset * _scale);
     });

@@ -246,9 +246,33 @@ class Scrollable extends StatefulWidget {
   /// ```dart
   /// ScrollableState scrollable = Scrollable.of(context);
   /// ```
+  ///
+  /// Calling this method will create a dependency on the closest [Scrollable]
+  /// in the [context], if there is one.
   static ScrollableState of(BuildContext context) {
     final _ScrollableScope widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
+  }
+
+  /// Provides a heuristic to determine if expensive frame-bound tasks should be
+  /// deferred for the [context] at a specific point in time.
+  ///
+  /// Calling this method does _not_ create a dependency on any other widget.
+  /// This also means that the value returned is only good for the point in time
+  /// when it is called, and callers will not get updated if the value changes.
+  ///
+  /// The heuristic used is determined by the [physics] of this [Scrollable]
+  /// via [ScrollPhysics.recommendDeferredScrolling]. That method is called with
+  /// the current [activity]'s [ScrollActivity.velocity].
+  ///
+  /// If there is no [Scrollable] in the widget tree above the [context], this
+  /// method returns false.
+  static bool recommendDeferredLoadingForContext(BuildContext context) {
+    final _ScrollableScope widget = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()?.widget as _ScrollableScope;
+    if (widget == null) {
+      return false;
+    }
+    return widget.position.recommendDeferredLoading(context);
   }
 
   /// Scrolls the scrollables that enclose the given context so as to make the
@@ -481,7 +505,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       return;
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject();
+      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject() as RenderIgnorePointer;
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -576,7 +600,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (_physics != null && !_physics.shouldAcceptUserOffset(position)) {
       return;
     }
-    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
     if (targetScrollOffset != position.pixels) {
       position.jumpTo(targetScrollOffset);
     }
@@ -763,7 +787,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
     int firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
-    for (SemanticsNode child in children) {
+    for (final SemanticsNode child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);

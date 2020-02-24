@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -72,9 +72,10 @@ class RenderParagraph extends RenderBox
     TextOverflow overflow = TextOverflow.clip,
     double textScaleFactor = 1.0,
     int maxLines,
-    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     Locale locale,
     StrutStyle strutStyle,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    ui.TextHeightBehavior textHeightBehavior,
     List<RenderBox> children,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
@@ -97,6 +98,7 @@ class RenderParagraph extends RenderBox
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
+         textHeightBehavior: textHeightBehavior
        ) {
     addAll(children);
     _extractPlaceholderSpans(text);
@@ -275,6 +277,16 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  ui.TextHeightBehavior get textHeightBehavior => _textPainter.textHeightBehavior;
+  set textHeightBehavior(ui.TextHeightBehavior value) {
+    if (_textPainter.textHeightBehavior == value)
+      return;
+    _textPainter.textHeightBehavior = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
   @override
   double computeMinIntrinsicWidth(double height) {
     if (!_canComputeIntrinsics()) {
@@ -333,7 +345,7 @@ class RenderParagraph extends RenderBox
   // alignments that require the baseline (baseline, aboveBaseline,
   // belowBaseline).
   bool _canComputeIntrinsics() {
-    for (PlaceholderSpan span in _placeholderSpans) {
+    for (final PlaceholderSpan span in _placeholderSpans) {
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
@@ -414,7 +426,7 @@ class RenderParagraph extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     RenderBox child = firstChild;
     while (child != null) {
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
       final Matrix4 transform = Matrix4.translationValues(
         textParentData.offset.dx,
         textParentData.offset.dy,
@@ -458,7 +470,7 @@ class RenderParagraph extends RenderBox
     }
     if (span is TextSpan) {
       final TextSpan textSpan = span;
-      textSpan.recognizer?.addPointer(event);
+      textSpan.recognizer?.addPointer(event as PointerDownEvent);
     }
   }
 
@@ -550,7 +562,7 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
         _textPainter.inlinePlaceholderBoxes[childIndex].top,
@@ -681,7 +693,7 @@ class RenderParagraph extends RenderBox
     // it until we finish layout, and RenderObject is in immutable state at
     // this point.
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
 
       final double scale = textParentData.scale;
       context.pushTransform(
@@ -781,7 +793,7 @@ class RenderParagraph extends RenderBox
     final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
     String workingText = '';
     String workingLabel;
-    for (InlineSpanSemanticsInformation info in _semanticsInfo) {
+    for (final InlineSpanSemanticsInformation info in _semanticsInfo) {
       if (info.requiresOwnNode) {
         if (workingText != null) {
           combined.add(InlineSpanSemanticsInformation(
@@ -823,7 +835,7 @@ class RenderParagraph extends RenderBox
       config.isSemanticBoundary = true;
     } else {
       final StringBuffer buffer = StringBuffer();
-      for (InlineSpanSemanticsInformation info in _semanticsInfo) {
+      for (final InlineSpanSemanticsInformation info in _semanticsInfo) {
         buffer.write(info.semanticsLabel ?? info.text);
       }
       config.label = buffer.toString();
@@ -841,7 +853,7 @@ class RenderParagraph extends RenderBox
     int start = 0;
     int placeholderIndex = 0;
     RenderBox child = firstChild;
-    for (InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
+    for (final InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
       final TextDirection initialDirection = currentDirection;
       final TextSelection selection = TextSelection(
         baseOffset: start,
@@ -853,7 +865,7 @@ class RenderParagraph extends RenderBox
       }
       Rect rect = rects.first.toRect();
       currentDirection = rects.first.direction;
-      for (ui.TextBox textBox in rects.skip(1)) {
+      for (final ui.TextBox textBox in rects.skip(1)) {
         rect = rect.expandToInclude(textBox.toRect());
         currentDirection = textBox.direction;
       }
@@ -876,7 +888,7 @@ class RenderParagraph extends RenderBox
 
       if (info.isPlaceholder) {
         final SemanticsNode childNode = children.elementAt(placeholderIndex++);
-        final TextParentData parentData = child.parentData;
+        final TextParentData parentData = child.parentData as TextParentData;
         childNode.rect = Rect.fromLTWH(
           childNode.rect.left,
           childNode.rect.top,
@@ -890,13 +902,12 @@ class RenderParagraph extends RenderBox
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
           ..label = info.semanticsLabel ?? info.text;
-        if (info.recognizer != null) {
-          if (info.recognizer is TapGestureRecognizer) {
-            final TapGestureRecognizer recognizer = info.recognizer;
+        final GestureRecognizer recognizer = info.recognizer;
+        if (recognizer != null) {
+          if (recognizer is TapGestureRecognizer) {
             configuration.onTap = recognizer.onTap;
             configuration.isLink = true;
-          } else if (info.recognizer is LongPressGestureRecognizer) {
-            final LongPressGestureRecognizer recognizer = info.recognizer;
+          } else if (recognizer is LongPressGestureRecognizer) {
             configuration.onLongPress = recognizer.onLongPress;
           } else {
             assert(false);

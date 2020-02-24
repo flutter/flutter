@@ -5,27 +5,25 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:build_daemon/client.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
-import 'package:flutter_tools/src/build_runner/web_fs.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
-import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
@@ -35,7 +33,6 @@ import '../src/testbed.dart';
 
 void main() {
   Testbed testbed;
-  MockFlutterWebFs mockWebFs;
   ResidentWebRunner residentWebRunner;
   MockDebugConnection mockDebugConnection;
   MockVmService mockVmService;
@@ -50,14 +47,13 @@ void main() {
   MockWipConnection mockWipConnection;
   MockWipDebugger mockWipDebugger;
   MockWebServerDevice mockWebServerDevice;
-  bool didSkipDwds;
+  MockDevice mockDevice;
 
   setUp(() {
     resetChromeForTesting();
-    mockWebFs = MockFlutterWebFs();
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
-    mockChromeDevice = MockChromeDevice();
+    mockDevice = MockDevice();
     mockAppConnection = MockAppConnection();
     mockFlutterDevice = MockFlutterDevice();
     mockWebDevFS = MockWebDevFS();
@@ -68,7 +64,11 @@ void main() {
     mockWipConnection = MockWipConnection();
     mockWipDebugger = MockWipDebugger();
     mockWebServerDevice = MockWebServerDevice();
-    when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
+    when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
+    when(mockFlutterDevice.device).thenReturn(mockDevice);
+    when(mockWebDevFS.connect(any)).thenAnswer((Invocation invocation) async {
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    });
     testbed = Testbed(
       setup: () {
         residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
@@ -78,37 +78,34 @@ void main() {
           ipv6: true,
           stayResident: true,
           dartDefines: const <String>[],
+          urlTunneller: null,
         ) as ResidentWebRunner;
-      },
-      overrides: <Type, Generator>{
-        WebFsFactory: () => ({
-          @required String target,
-          @required FlutterProject flutterProject,
-          @required BuildInfo buildInfo,
-          @required bool skipDwds,
-          @required bool initializePlatform,
-          @required String hostname,
-          @required String port,
-          @required List<String> dartDefines,
-        }) async {
-          didSkipDwds = skipDwds;
-          return mockWebFs;
-        },
+        globals.fs.currentDirectory.childFile('.packages')
+          ..writeAsStringSync('\n');
       },
     );
   });
 
   void _setupMocks() {
-    fs.file('pubspec.yaml').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
-      return ConnectionResult(mockAppConnection, mockDebugConnection);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
+    when(mockWebDevFS.update(
+      mainPath: anyNamed('mainPath'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      trackWidgetCreation: true,
+    )).thenAnswer((Invocation _) async {
+      return UpdateFSReport(success: true,  syncedBytes: 0)..invalidatedModules = <String>[];
     });
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) {
-      return Future<bool>.value(false);
-    });
-    when(mockWebFs.uri).thenReturn('http://localhost:8765/app/');
     when(mockDebugConnection.vmService).thenReturn(mockVmService);
     when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
       return Completer<void>().future;
@@ -122,6 +119,7 @@ void main() {
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
     when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
     when(mockWebDevFS.sources).thenReturn(<Uri>[]);
+    when(mockWebDevFS.baseUri).thenReturn(Uri.parse('http://localhost:12345'));
     when(mockFlutterDevice.generator).thenReturn(mockResidentCompiler);
     when(mockChrome.chromeConnection).thenReturn(mockChromeConnection);
     when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
@@ -142,6 +140,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -150,20 +149,8 @@ void main() {
     expect(residentWebRunner.debuggingEnabled, true);
   }));
 
-  test('runner with web server device does not initialize dwds', () => testbed.run(() async {
-    _setupMocks();
-    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
-
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    expect(didSkipDwds, true);
-  }));
-
   test('runner with web server device supports debugging with --start-paused', () => testbed.run(() {
+    _setupMocks();
     when(mockFlutterDevice.device).thenReturn(WebServerDevice());
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
@@ -172,37 +159,15 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: <String>[],
+      urlTunneller: null,
     );
 
+    expect(profileResidentWebRunner.uri, mockWebDevFS.baseUri);
     expect(profileResidentWebRunner.debuggingEnabled, true);
   }));
 
-  test('runner with web server device uses debug extension with --start-paused', () => testbed.run(() async {
-    _setupMocks();
-    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
-    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
-      mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
-      ipv6: true,
-      stayResident: true,
-      dartDefines: <String>[],
-    ) as ResidentWebRunner;
-
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(runner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-
-    // Check connect() was told to use the debug extension.
-    verify(mockWebFs.connect(true)).called(1);
-    // And ensure the debug services was started.
-    expect(testLogger.statusText, contains('Debug service listening on'));
-  }));
-
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
-     when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
+    when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
@@ -210,6 +175,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -217,24 +183,24 @@ void main() {
   }));
 
   test('Exits on run if application does not support the web', () => testbed.run(() async {
-    fs.file('pubspec.yaml').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
 
     expect(await residentWebRunner.run(), 1);
     expect(testLogger.errorText, contains('This application is not configured to build on the web'));
   }));
 
   test('Exits on run if target file does not exist', () => testbed.run(() async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
 
     expect(await residentWebRunner.run(), 1);
-    final String absoluteMain = fs.path.absolute(fs.path.join('lib', 'main.dart'));
+    final String absoluteMain = globals.fs.path.absolute(globals.fs.path.join('lib', 'main.dart'));
     expect(testLogger.errorText, contains('Tried to run $absoluteMain, but that file does not exist.'));
   }));
 
   test('Can successfully run and connect to vmservice', () => testbed.run(() async {
     _setupMocks();
-    final DelegateLogger delegateLogger = logger as DelegateLogger;
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final BufferLogger bufferLogger = delegateLogger.delegate as BufferLogger;
     final MockStatus status = MockStatus();
     delegateLogger.status = status;
@@ -246,12 +212,18 @@ void main() {
 
     verify(mockAppConnection.runMain()).called(1);
     verify(mockVmService.registerService('reloadSources', 'FlutterTools')).called(1);
-    verify(status.stop()).called(2);
+    verify(status.stop()).called(1);
 
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(BufferLogger()),
+    Logger: () => DelegateLogger(BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: null,
+        platform: const LocalPlatform(),
+      ),
+      outputPreferences: OutputPreferences.test(),
+    )),
   }));
 
   test('Can successfully run and disconnect with --no-resident', () => testbed.run(() async {
@@ -263,6 +235,7 @@ void main() {
       ipv6: true,
       stayResident: false,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
@@ -299,6 +272,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -316,37 +290,6 @@ void main() {
 
   test('Can hot reload after attaching', () => testbed.run(() async {
     _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
-      return true;
-    });
-    when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
-      return Response.parse(<String, Object>{'type': 'Success'});
-    });
-    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
-
-    expect(testLogger.statusText, contains('Reloaded application in'));
-    expect(result.code, 0);
-	  // ensure that analytics are sent.
-    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript',
-      'cd28': null,
-      'cd29': 'false',
-      'cd30': 'true',
-    })).called(1);
-    verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
-    verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
-    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
-  }, overrides: <Type, Generator>{
-    Usage: () => MockFlutterUsage(),
-  }));
-
-  test('Can hot reload after attaching - experimental', () => testbed.run(() async {
-    _setupMocks();
     launchChromeInstance(mockChrome);
     when(mockWebDevFS.update(
       mainPath: anyNamed('mainPath'),
@@ -362,6 +305,8 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
     )).thenAnswer((Invocation invocation) async {
+      // Generated entrypoint file in temp dir.
+      expect(invocation.namedArguments[#mainPath], contains('entrypoint.dart'));
       return UpdateFSReport(success: true)
         ..invalidatedModules = <String>['example'];
     });
@@ -369,28 +314,34 @@ void main() {
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
-    await connectionInfoCompleter.future;
+    final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
+
+    expect(debugConnectionInfo, isNotNull);
+
     final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-    expect(testLogger.statusText, contains('Reloaded application in'));
+    expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript',
-      'cd28': null,
-      'cd29': 'false',
-      'cd30': 'true',
-    })).called(1);
+    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+      parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
+
+    expect(config, allOf(<Matcher>[
+      containsPair('cd27', 'web-javascript'),
+      containsPair('cd28', null),
+      containsPair('cd29', 'false'),
+      containsPair('cd30', 'true'),
+    ]));
     verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
-    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
-  test('Can hot restart after attaching - experimental', () => testbed.run(() async {
+  test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
     launchChromeInstance(mockChrome);
+    String entrypointFileName;
     when(mockWebDevFS.update(
       mainPath: anyNamed('mainPath'),
       target: anyNamed('target'),
@@ -405,6 +356,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
     )).thenAnswer((Invocation invocation) async {
+      entrypointFileName = invocation.namedArguments[#mainPath] as String;
       return UpdateFSReport(success: true)
         ..invalidatedModules = <String>['example'];
     });
@@ -415,23 +367,31 @@ void main() {
     await connectionInfoCompleter.future;
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
+    // Ensure that generated entrypoint is generated correctly.
+    expect(entrypointFileName, isNotNull);
+    expect(globals.fs.file(entrypointFileName).readAsStringSync(), contains(
+      'await ui.webOnlyInitializePlatform();'
+    ));
+
     expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript',
-      'cd28': null,
-      'cd29': 'false',
-      'cd30': 'true',
-    })).called(1);
-    verifyNever(Usage.instance.sendTiming('hot', 'web-incremental-restart', any));
+    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+      parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
+
+    expect(config, allOf(<Matcher>[
+      containsPair('cd27', 'web-javascript'),
+      containsPair('cd28', null),
+      containsPair('cd29', 'false'),
+      containsPair('cd30', 'true'),
+    ]));
+    verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
-    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
-  test('Can hot restart after attaching - experimental with web-server device', () => testbed.run(() async {
+  test('Can hot restart after attaching with web-server device', () => testbed.run(() async {
     _setupMocks();
     when(mockFlutterDevice.device).thenReturn(mockWebServerDevice);
     when(mockWebDevFS.update(
@@ -462,62 +422,43 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
     // ensure that analytics are sent.
-    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript',
-      'cd28': null,
-      'cd29': 'false',
-      'cd30': 'true',
-    })).called(1);
     verifyNever(Usage.instance.sendTiming('hot', 'web-incremental-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
-    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
-  test('Can hot restart after attaching', () => testbed.run(() async {
+  test('web resident runner iss debuggable', () => testbed.run(() {
+    expect(residentWebRunner.debuggingEnabled, true);
+  }, overrides: <Type, Generator>{
+  }));
+
+  test('Exits when initial compile fails', () => testbed.run(() async {
     _setupMocks();
+    when(mockWebDevFS.update(
+      mainPath: anyNamed('mainPath'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      trackWidgetCreation: true,
+    )).thenAnswer((Invocation _) async {
+      return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
+    });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
-    await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
-      return true;
-    });
-    when(mockVmService.callServiceExtension('fullReload')).thenAnswer((Invocation _) async {
-      return Response.parse(<String, Object>{'type': 'Success'});
-    });
-    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
-    expect(testLogger.statusText, contains('Restarted application in'));
-    expect(result.code, 0);
-	  // ensure that analytics are sent.
-    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript',
-      'cd28': null,
-      'cd29': 'false',
-      'cd30': 'true',
-    })).called(1);
+    expect(await residentWebRunner.run(), 1);
     verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
-    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
-  }));
-
-  test('Selects Dwds runner in profile mode with incremental compiler enabled', () => testbed.run(() async {
-    final ResidentWebRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
-      mockFlutterDevice,
-      flutterProject: FlutterProject.current(),
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-      ipv6: true,
-      stayResident: true,
-      dartDefines: const <String>[],
-    ) as ResidentWebRunner;
-
-    expect(residentWebRunner.runtimeType.toString(), '_DwdsResidentWebRunner');
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
@@ -527,84 +468,80 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
-      return false;
+    when(mockWebDevFS.update(
+      mainPath: anyNamed('mainPath'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      trackWidgetCreation: true,
+    )).thenAnswer((Invocation _) async {
+      return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
     });
+
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
     verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-recompile', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
 
-  test('Fails on vmservice response error for hot restart', () => testbed.run(() async {
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
-      return true;
-    });
-    when(mockVmService.callServiceExtension('fullReload')).thenAnswer((Invocation _) async {
-      return Response.parse(<String, Object>{'type': 'Failed'});
-    });
-    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+  // TODO(jonahwilliams): re-enable tests once we switch back to DWDS for hot reload/restart.
+  // test('Fails on vmservice response error for hot restart', () => testbed.run(() async {
+  //   _setupMocks();
+  //   final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+  //   unawaited(residentWebRunner.run(
+  //     connectionInfoCompleter: connectionInfoCompleter,
+  //   ));
+  //   await connectionInfoCompleter.future;
+  //   when(mockVmService.callServiceExtension('fullReload')).thenAnswer((Invocation _) async {
+  //     return Response.parse(<String, Object>{'type': 'Failed'});
+  //   });
+  //   final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
-    expect(result.code, 1);
-    expect(result.message, contains('Failed'));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
-    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
-  }, overrides: <Type, Generator>{
-    Usage: () => MockFlutterUsage(),
-  }));
+  //   expect(result.code, 1);
+  //   expect(result.message, contains('Failed'));
+  // }));
 
-  test('Fails on vmservice response error for hot reload', () => testbed.run(() async {
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
-      return true;
-    });
-    when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
-      return Response.parse(<String, Object>{'type': 'Failed'});
-    });
-    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
+  // TODO(jonahwilliams): re-enable tests once we switch back to DWDS for hot reload/restart.
+  // test('Fails on vmservice response error for hot reload', () => testbed.run(() async {
+  //   _setupMocks();
+  //   final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+  //   unawaited(residentWebRunner.run(
+  //     connectionInfoCompleter: connectionInfoCompleter,
+  //   ));
+  //   await connectionInfoCompleter.future;
+  //   when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
+  //     return Response.parse(<String, Object>{'type': 'Failed'});
+  //   });
+  //   final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-    expect(result.code, 1);
-    expect(result.message, contains('Failed'));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
-    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
-  }, overrides: <Type, Generator>{
-    Usage: () => MockFlutterUsage(),
-  }));
+  //   expect(result.code, 1);
+  //   expect(result.message, contains('Failed'));
+  // }));
 
-  test('Fails on vmservice RpcError', () => testbed.run(() async {
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    unawaited(residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ));
-    await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
-      return true;
-    });
-    when(mockVmService.callServiceExtension('hotRestart')).thenThrow(RPCError('', 2, '123'));
-    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
+  // TODO(jonahwilliams): re-enable tests once we switch back to DWDS for hot reload/restart.
+  // test('Fails on vmservice RpcError', () => testbed.run(() async {
+  //   _setupMocks();
+  //   final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+  //   unawaited(residentWebRunner.run(
+  //     connectionInfoCompleter: connectionInfoCompleter,
+  //   ));
+  //   await connectionInfoCompleter.future;
+  //   when(mockVmService.callServiceExtension('hotRestart')).thenThrow(RPCError('', 2, '123'));
+  //   final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-    expect(result.code, 1);
-    expect(result.message, contains('Page requires refresh'));
-  }));
+  //   expect(result.code, 1);
+  //   expect(result.message, contains('Page requires refresh'));
+  // }));
 
   test('printHelp without details has web warning', () => testbed.run(() async {
     residentWebRunner.printHelp(details: false);
@@ -760,15 +697,15 @@ void main() {
 
     await residentWebRunner.debugTogglePlatform();
 
-    expect(testLogger.statusText, contains('Switched operating system to android'));
+    expect(testLogger.statusText, contains('Switched operating system to fuchsia'));
     verify(mockVmService.callServiceExtension('ext.flutter.platformOverride',
-        args: <String, Object>{'value': 'android'})).called(1);
+        args: <String, Object>{'value': 'fuchsia'})).called(1);
   }));
 
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
     _setupMocks();
     bool debugClosed = false;
-    when(mockChromeDevice.stopApp(any)).thenAnswer((Invocation invocation) async {
+    when(mockDevice.stopApp(any)).thenAnswer((Invocation invocation) async {
       if (debugClosed) {
         throw StateError('debug connection closed twice');
       }
@@ -801,26 +738,40 @@ void main() {
     onDone.complete();
 
     await result;
-    verify(mockWebFs.stop()).called(1);
   }));
 
   test('Prints target and device name on run', () => testbed.run(() async {
     _setupMocks();
-    when(mockChromeDevice.name).thenReturn('Chromez');
+    when(mockDevice.name).thenReturn('Chromez');
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
 
-    expect(testLogger.statusText, contains('Launching ${fs.path.join('lib', 'main.dart')} on Chromez in debug mode'));
+    expect(testLogger.statusText, contains('Launching ${globals.fs.path.join('lib', 'main.dart')} on Chromez in debug mode'));
   }));
 
   test('Sends launched app.webLaunchUrl event for Chrome device', () => testbed.run(() async {
     _setupMocks();
     when(mockFlutterDevice.device).thenReturn(ChromeDevice());
+    when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
+      return Uri.parse('http://localhost:8765/app/');
+    });
+    final MockChrome chrome = MockChrome();
+    final MockChromeConnection mockChromeConnection = MockChromeConnection();
+    final MockChromeTab mockChromeTab = MockChromeTab();
+    final MockWipConnection mockWipConnection = MockWipConnection();
+    when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
+      return mockChromeTab;
+    });
+    when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
+      return mockWipConnection;
+    });
+    when(chrome.chromeConnection).thenReturn(mockChromeConnection);
+    launchChromeInstance(chrome);
 
-    final DelegateLogger delegateLogger = logger as DelegateLogger;
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final MockStatus mockStatus = MockStatus();
     delegateLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
@@ -830,6 +781,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -839,7 +791,7 @@ void main() {
     await connectionInfoCompleter.future;
 
     // Ensure we got the URL and that it was already launched.
-    verify(logger.sendEvent(
+    verify(globals.logger.sendEvent(
       'app.webLaunchUrl',
       argThat(allOf(
         containsPair('url', 'http://localhost:8765/app/'),
@@ -854,8 +806,11 @@ void main() {
   test('Sends unlaunched app.webLaunchUrl event for Web Server device', () => testbed.run(() async {
     _setupMocks();
     when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+    when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
+      return Uri.parse('http://localhost:8765/app/');
+    });
 
-    final DelegateLogger delegateLogger = logger as DelegateLogger;
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final MockStatus mockStatus = MockStatus();
     delegateLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
@@ -865,6 +820,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -874,7 +830,7 @@ void main() {
     await connectionInfoCompleter.future;
 
     // Ensure we got the URL and that it was not already launched.
-    verify(logger.sendEvent(
+    verify(globals.logger.sendEvent(
       'app.webLaunchUrl',
       argThat(allOf(
         containsPair('url', 'http://localhost:8765/app/'),
@@ -889,7 +845,7 @@ void main() {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Completer<void> unhandledErrorCompleter = Completer<void>();
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+     when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
       unawaited(unhandledErrorCompleter.future.then((void value) {
         throw const WebSocketException();
       }));
@@ -898,7 +854,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -908,7 +864,7 @@ void main() {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Completer<void> unhandledErrorCompleter = Completer<void>();
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+    when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
       unawaited(unhandledErrorCompleter.future.then((void value) {
         throw AppConnectionException('Could not connect to application with appInstanceId: c0ae0750-ee91-11e9-cea6-35d95a968356');
       }));
@@ -917,7 +873,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
@@ -927,7 +883,7 @@ void main() {
      _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Completer<void> unhandledErrorCompleter = Completer<void>();
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+     when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
       unawaited(unhandledErrorCompleter.future.then((void value) {
         throw ChromeDebugException(<String, dynamic>{});
       }));
@@ -936,75 +892,17 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit());
 
     unhandledErrorCompleter.complete();
     await expectation;
   }));
-
-  test('Successfully turns OptionsSkew error into ToolExit', () => testbed.run(() async {
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    final Completer<void> unhandledErrorCompleter = Completer<void>();
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
-      unawaited(unhandledErrorCompleter.future.then((void value) {
-        throw OptionsSkew();
-      }));
-      return ConnectionResult(mockAppConnection, mockDebugConnection);
-    });
-
-    final Future<void> expectation = expectLater(() => residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
-
-    unhandledErrorCompleter.complete();
-    await expectation;
-  }));
-
-  test('Successfully turns VersionSkew error into ToolExit', () => testbed.run(() async {
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    final Completer<void> unhandledErrorCompleter = Completer<void>();
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
-      unawaited(unhandledErrorCompleter.future.then((void value) {
-        throw VersionSkew();
-      }));
-      return ConnectionResult(mockAppConnection, mockDebugConnection);
-    });
-
-    final Future<void> expectation = expectLater(() => residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
-
-    unhandledErrorCompleter.complete();
-    await expectation;
-  }));
-
-  test('Successfully turns failed startup StateError error into ToolExit', () => testbed.run(() async {
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    final Completer<void> unhandledErrorCompleter = Completer<void>();
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
-      unawaited(unhandledErrorCompleter.future.then((void value) {
-        throw StateError('Unable to start build daemon');
-      }));
-      return ConnectionResult(mockAppConnection, mockDebugConnection);
-    });
-
-    final Future<void> expectation = expectLater(() => residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
-
-    unhandledErrorCompleter.complete();
-    await expectation;
-  }));
-
 
   test('Rethrows Exception type', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Completer<void> unhandledErrorCompleter = Completer<void>();
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+     when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
       unawaited(unhandledErrorCompleter.future.then((void value) {
         throw Exception('Something went wrong');
       }));
@@ -1013,39 +911,19 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<Exception>()));
+    ), throwsException);
 
     unhandledErrorCompleter.complete();
     await expectation;
   }));
-
-  test('Successfully turns MissingPortFile error into ToolExit', () => testbed.run(() async {
-    _setupMocks();
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    final Completer<void> unhandledErrorCompleter = Completer<void>();
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
-      unawaited(unhandledErrorCompleter.future.then((void value) {
-        throw MissingPortFile();
-      }));
-      return ConnectionResult(mockAppConnection, mockDebugConnection);
-    });
-
-    final Future<void> expectation = expectLater(() => residentWebRunner.run(
-      connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
-
-    unhandledErrorCompleter.complete();
-    await expectation;
-  }));
-
   test('Rethrows unknown exception type from web tooling', () => testbed.run(() async {
     _setupMocks();
-    final DelegateLogger delegateLogger = logger as DelegateLogger;
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final MockStatus mockStatus = MockStatus();
     delegateLogger.status = mockStatus;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Completer<void> unhandledErrorCompleter = Completer<void>();
-    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+    when(mockWebDevFS.connect(any)).thenAnswer((Invocation _) async {
       unawaited(unhandledErrorCompleter.future.then((void value) {
         throw StateError('Something went wrong');
       }));
@@ -1054,27 +932,31 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<StateError>()));
+    ), throwsStateError);
 
     unhandledErrorCompleter.complete();
     await expectation;
-    verify(mockStatus.stop()).called(2);
+    verify(mockStatus.stop()).called(1);
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(BufferLogger())
+    Logger: () => DelegateLogger(BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: null,
+        platform: const LocalPlatform(),
+      ),
+      outputPreferences: OutputPreferences.test(),
+    ))
   }));
 }
 
 class MockChromeLauncher extends Mock implements ChromeLauncher {}
 class MockFlutterUsage extends Mock implements Usage {}
 class MockChromeDevice extends Mock implements ChromeDevice {}
-class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
-class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
-class MockWebDevFS extends Mock implements DevFS {}
+class MockWebDevFS extends Mock implements WebDevFS {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
 class MockChrome extends Mock implements Chrome {}
 class MockChromeConnection extends Mock implements ChromeConnection {}
@@ -1083,3 +965,4 @@ class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
 class MockLogger extends Mock implements Logger {}
 class MockWebServerDevice extends Mock implements WebServerDevice {}
+class MockDevice extends Mock implements Device {}

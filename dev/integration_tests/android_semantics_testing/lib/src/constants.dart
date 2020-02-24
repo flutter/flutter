@@ -196,8 +196,8 @@ class AndroidSemanticsAction {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final AndroidSemanticsAction typedOther = other;
-    return id == typedOther.id;
+    return other is AndroidSemanticsAction
+        && other.id == id;
   }
 
   /// Creates a new [AndroidSemanticsAction] from an integer `value`.

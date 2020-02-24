@@ -158,14 +158,14 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
   @override
   void dispose() {
-    for (NavigationIconView view in _navigationViews)
+    for (final NavigationIconView view in _navigationViews)
       view.controller.dispose();
     super.dispose();
   }
 
   Widget _buildTransitionsStack() {
     final List<FadeTransition> transitions = <FadeTransition>[
-      for (NavigationIconView view in _navigationViews) view.transition(_type, context),
+      for (final NavigationIconView view in _navigationViews) view.transition(_type, context),
     ];
 
     // We want to have the newly animating (fading in) views on top.

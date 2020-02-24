@@ -122,7 +122,7 @@ class ListModel<E> {
        _items = initialItems?.toList() ?? <E>[];
 
   final GlobalKey<AnimatedListState> listKey;
-  final dynamic removedItemBuilder;
+  final Widget Function(E item, BuildContext context, Animation<double> animation) removedItemBuilder;
   final List<E> _items;
 
   AnimatedListState get _animatedList => listKey.currentState;
@@ -170,7 +170,7 @@ class CardItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle textStyle = Theme.of(context).textTheme.display1;
+    TextStyle textStyle = Theme.of(context).textTheme.headline4;
     if (selected)
       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
     return Padding(

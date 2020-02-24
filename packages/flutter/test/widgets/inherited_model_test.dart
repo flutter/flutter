@@ -227,7 +227,7 @@ void main() {
         final Widget showABC = Builder(
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context);
-            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.title);
+            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.headline6);
           }
         );
 
@@ -344,7 +344,7 @@ void main() {
         final Widget showABC = Builder(
           builder: (BuildContext context) {
             final ABCModel abc = ABCModel.of(context);
-            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.title);
+            return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.headline6);
           }
         );
 

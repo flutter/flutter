@@ -26,7 +26,7 @@ bool setEquals<T>(Set<T> a, Set<T> b) {
     return false;
   if (identical(a, b))
     return true;
-  for (T value in a) {
+  for (final T value in a) {
     if (!b.contains(value))
       return false;
   }
@@ -84,7 +84,7 @@ bool mapEquals<T, U>(Map<T, U> a, Map<T, U> b) {
     return false;
   if (identical(a, b))
     return true;
-  for (T key in a.keys) {
+  for (final T key in a.keys) {
     if (!b.containsKey(key) || b[key] != a[key]) {
       return false;
     }

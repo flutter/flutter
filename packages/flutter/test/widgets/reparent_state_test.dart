@@ -71,9 +71,9 @@ void main() {
       ),
     );
 
-    final StateMarkerState leftState = left.currentState;
+    final StateMarkerState leftState = left.currentState as StateMarkerState;
     leftState.marker = 'left';
-    final StateMarkerState rightState = right.currentState;
+    final StateMarkerState rightState = right.currentState as StateMarkerState;
     rightState.marker = 'right';
 
     final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
@@ -142,9 +142,9 @@ void main() {
       ),
     );
 
-    final StateMarkerState leftState = left.currentState;
+    final StateMarkerState leftState = left.currentState as StateMarkerState;
     leftState.marker = 'left';
-    final StateMarkerState rightState = right.currentState;
+    final StateMarkerState rightState = right.currentState as StateMarkerState;
     rightState.marker = 'right';
 
     final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
@@ -196,7 +196,7 @@ void main() {
 
     await tester.pumpWidget(StateMarker(key: key));
 
-    final StateMarkerState keyState = key.currentState;
+    final StateMarkerState keyState = key.currentState as StateMarkerState;
     keyState.marker = 'marked';
 
     await tester.pumpWidget(
@@ -235,7 +235,7 @@ void main() {
       ],
     ));
 
-    final StateMarkerState keyState = key.currentState;
+    final StateMarkerState keyState = key.currentState as StateMarkerState;
     keyState.marker = 'marked';
 
     await tester.pumpWidget(Stack(
@@ -273,7 +273,7 @@ void main() {
       ],
     ));
 
-    final StateMarkerState keyState = key.currentState;
+    final StateMarkerState keyState = key.currentState as StateMarkerState;
     keyState.marker = 'marked';
 
     await tester.pumpWidget(Stack(

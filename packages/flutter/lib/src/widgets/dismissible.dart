@@ -149,10 +149,14 @@ class Dismissible extends StatefulWidget {
   /// Flinging is treated as being equivalent to dragging almost to 1.0, so
   /// flinging can dismiss an item past any threshold less than 1.0.
   ///
-  /// See also [direction], which controls the directions in which the items can
-  /// be dismissed. Setting a threshold of 1.0 (or greater) prevents a drag in
-  /// the given [DismissDirection] even if it would be allowed by the
-  /// [direction] property.
+  /// Setting a threshold of 1.0 (or greater) prevents a drag in the given
+  /// [DismissDirection] even if it would be allowed by the [direction]
+  /// property.
+  ///
+  /// See also:
+  ///
+  ///  * [direction], which controls the directions in which the items can
+  ///    be dismissed.
   final Map<DismissDirection, double> dismissThresholds;
 
   /// Defines the duration for card to dismiss or to come back to original position if not dismissed.

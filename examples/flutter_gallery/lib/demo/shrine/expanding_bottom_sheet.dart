@@ -476,7 +476,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
       return;
     }
 
-    for (int product in difference) {
+    for (final int product in difference) {
       if (_internalList.length < _list.length) {
         _list.remove(product);
       } else if (_internalList.length > _list.length) {
@@ -604,7 +604,7 @@ class _ListModel {
        _items = initialItems?.toList() ?? <int>[];
 
   final GlobalKey<AnimatedListState> listKey;
-  final dynamic removedItemBuilder;
+  final Widget Function(int item, BuildContext context, Animation<double> animation) removedItemBuilder;
   final List<int> _items;
 
   AnimatedListState get _animatedList => listKey.currentState;

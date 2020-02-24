@@ -37,7 +37,7 @@ class SetSemanticsResult extends Result {
 
   /// Deserializes this result from JSON.
   static SetSemanticsResult fromJson(Map<String, dynamic> json) {
-    return SetSemanticsResult(json['changedState']);
+    return SetSemanticsResult(json['changedState'] as bool);
   }
 
   @override

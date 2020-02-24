@@ -155,4 +155,3 @@ class RenderBoundaryBlockSemantics extends RenderProxyBox {
       ..isSemanticBoundary = true;
   }
 }
-

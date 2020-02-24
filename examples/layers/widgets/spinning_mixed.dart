@@ -11,7 +11,7 @@ import '../rendering/src/solid_color_box.dart';
 void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex = 0 }) {
   final RenderSolidColorBox child = RenderSolidColorBox(backgroundColor);
   parent.add(child);
-  final FlexParentData childParentData = child.parentData;
+  final FlexParentData childParentData = child.parentData as FlexParentData;
   childParentData.flex = flex;
 }
 

@@ -13,7 +13,7 @@ class DoctorCommand extends FlutterCommand {
     argParser.addFlag('android-licenses',
       defaultsTo: false,
       negatable: false,
-      help: 'Run the Android SDK manager tool to accept the SDK\'s licenses.',
+      help: "Run the Android SDK manager tool to accept the SDK's licenses.",
     );
     argParser.addOption('check-for-remote-artifacts',
       hide: !verbose,

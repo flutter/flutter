@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import '../base/io.dart';
-import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 
 /// A validator that checks for Clang and Make build dependencies
 class LinuxDoctorValidator extends DoctorValidator {
@@ -21,7 +21,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     /// Check for a minimum version of Clang.
     ProcessResult clangResult;
     try {
-      clangResult = await processManager.run(const <String>[
+      clangResult = await globals.processManager.run(const <String>[
         'clang++',
         '--version',
       ]);
@@ -48,7 +48,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     // a better idea about what is supported.
     ProcessResult makeResult;
     try {
-      makeResult = await processManager.run(const <String>[
+      makeResult = await globals.processManager.run(const <String>[
         'make',
         '--version',
       ]);

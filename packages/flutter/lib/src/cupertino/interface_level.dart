@@ -11,7 +11,7 @@ import '../widgets/framework.dart';
 ///
 /// See also:
 ///
-/// * `UIUserInterfaceLevel`, the UIKit equivalent: https://developer.apple.com/documentation/uikit/uiuserinterfacelevel.
+///  * `UIUserInterfaceLevel`, the UIKit equivalent: https://developer.apple.com/documentation/uikit/uiuserinterfacelevel.
 enum CupertinoUserInterfaceLevelData {
   /// The level for your window's main content.
   base,
@@ -33,8 +33,8 @@ enum CupertinoUserInterfaceLevelData {
 ///
 /// See also:
 ///
-/// * [CupertinoUserInterfaceLevelData], specifies the visual level for the content
-/// in the subtree [CupertinoUserInterfaceLevel] established.
+///  * [CupertinoUserInterfaceLevelData], specifies the visual level for the content
+///    in the subtree [CupertinoUserInterfaceLevel] established.
 class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// Creates a [CupertinoUserInterfaceLevel] to change descendant Cupertino widget's
   /// visual level.

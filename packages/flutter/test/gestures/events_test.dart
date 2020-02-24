@@ -248,7 +248,7 @@ void main() {
   });
 
   test('transforming events', () {
-    final Matrix4 transform = (Matrix4.identity()..scale(2.0, 2.0, 1.0)) * Matrix4.translationValues(10.0, 20.0, 0.0);
+    final Matrix4 transform = (Matrix4.identity()..scale(2.0, 2.0, 1.0)).multiplied(Matrix4.translationValues(10.0, 20.0, 0.0));
     const Offset localPosition = Offset(60, 100);
     const Offset localDelta = Offset(10, 10);
 

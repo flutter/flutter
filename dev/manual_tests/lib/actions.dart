@@ -77,7 +77,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   /// May only be called by subclasses.
   @protected
   void notifyListeners() {
-    for (VoidCallback callback in _listeners) {
+    for (final VoidCallback callback in _listeners) {
       callback();
     }
   }
@@ -166,7 +166,7 @@ class UndoIntent extends Intent {
 
   @override
   bool isEnabled(BuildContext context) {
-    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 }
@@ -176,7 +176,7 @@ class RedoIntent extends Intent {
 
   @override
   bool isEnabled(BuildContext context) {
-    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 }
@@ -189,7 +189,7 @@ final Action kUndoAction = CallbackAction(
     if (node?.context == null) {
       return;
     }
-    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true) as UndoableActionDispatcher;
     manager?.undo();
   },
 );
@@ -202,7 +202,7 @@ final Action kRedoAction = CallbackAction(
     if (node?.context == null) {
       return;
     }
-    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true) as UndoableActionDispatcher;
     manager?.redo();
   },
 );
@@ -435,7 +435,7 @@ class _FocusDemoState extends State<FocusDemo> {
         kUndoActionKey: () => kUndoAction,
         kRedoActionKey: () => kRedoAction,
       },
-      child: DefaultFocusTraversal(
+      child: FocusTraversalGroup(
         policy: ReadingOrderTraversalPolicy(),
         child: Shortcuts(
           shortcuts: <LogicalKeySet, Intent>{
@@ -446,7 +446,7 @@ class _FocusDemoState extends State<FocusDemo> {
             debugLabel: 'Scope',
             autofocus: true,
             child: DefaultTextStyle(
-              style: textTheme.display1,
+              style: textTheme.headline4,
               child: Scaffold(
                 appBar: AppBar(
                   title: const Text('Actions Demo'),

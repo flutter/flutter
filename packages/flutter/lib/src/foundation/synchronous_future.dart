@@ -17,7 +17,10 @@ import 'dart:async';
 class SynchronousFuture<T> implements Future<T> {
   /// Creates a synchronous future.
   ///
-  /// See also [new Future.value].
+  /// See also:
+  ///
+  ///  * [new Future.value] for information about creating a regular
+  ///    [Future] that completes with a value.
   SynchronousFuture(this._value);
 
   final T _value;

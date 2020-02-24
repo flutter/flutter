@@ -17,12 +17,11 @@ import 'base/context.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/signals.dart';
+import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
-import 'base/utils.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -35,6 +34,7 @@ import 'features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
+import 'globals.dart' as globals;
 import 'ios/devices.dart' show IOSDeploy;
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -61,26 +61,55 @@ Future<T> runInContext<T>(
   FutureOr<T> runner(), {
   Map<Type, Generator> overrides,
 }) async {
+
+  // Wrap runner with any asynchronous initialization that should run with the
+  // overrides and callbacks.
+  bool runningOnBot;
+  FutureOr<T> runnerWrapper() async {
+    runningOnBot = await globals.isRunningOnBot;
+    return runner();
+  }
+
   return await context.run<T>(
     name: 'global fallbacks',
-    body: runner,
+    body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
       AndroidLicenseValidator: () => AndroidLicenseValidator(),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
-      AndroidValidator: () => AndroidValidator(),
+      AndroidValidator: () => AndroidValidator(
+        androidStudio: globals.androidStudio,
+        androidSdk: globals.androidSdk,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        userMessages: globals.userMessages,
+      ),
       AndroidWorkflow: () => AndroidWorkflow(),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
-      Artifacts: () => CachedArtifacts(),
+      Artifacts: () => CachedArtifacts(
+        fileSystem: globals.fs,
+        cache: globals.cache,
+        platform: globals.platform,
+      ),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
-      BotDetector: () => const BotDetector(),
       BuildSystem: () => const BuildSystem(),
-      Cache: () => Cache(),
+      Cache: () => Cache(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
-      Config: () => Config(),
+      Config: () => Config(
+        Config.kFlutterSettings,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
@@ -101,27 +130,71 @@ Future<T> runInContext<T>(
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
-      Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
+      Logger: () => globals.platform.isWindows
+        ? WindowsStdoutLogger(
+            terminal: globals.terminal,
+            stdio: globals.stdio,
+            outputPreferences: outputPreferences,
+            timeoutConfiguration: timeoutConfiguration,
+          )
+        : StdoutLogger(
+            terminal: globals.terminal,
+            stdio: globals.stdio,
+            outputPreferences: outputPreferences,
+            timeoutConfiguration: timeoutConfiguration,
+          ),
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
-      OperatingSystemUtils: () => OperatingSystemUtils(),
-      PersistentToolState: () => PersistentToolState(),
+      OperatingSystemUtils: () => OperatingSystemUtils(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
+      PersistentToolState: () => PersistentToolState(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       ProcessInfo: () => ProcessInfo(),
-      ProcessUtils: () => ProcessUtils(),
+      ProcessUtils: () => ProcessUtils(
+        processManager: globals.processManager,
+        logger: globals.logger,
+      ),
       Pub: () => const Pub(),
+      ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
-      Usage: () => Usage(),
+      Usage: () => Usage(
+        runningOnBot: runningOnBot,
+      ),
       UserMessages: () => UserMessages(),
       VisualStudio: () => VisualStudio(),
       VisualStudioValidator: () => const VisualStudioValidator(),
       WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
-      Xcode: () => Xcode(),
-      XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
+      Xcode: () => Xcode(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
+      ),
+      XCDevice: () => XCDevice(
+        processManager: globals.processManager,
+        logger: globals.logger,
+        xcode: globals.xcode,
+      ),
+      XcodeProjectInterpreter: () => XcodeProjectInterpreter(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+        terminal: globals.terminal,
+      ),
       XcodeValidator: () => const XcodeValidator(),
     },
   );

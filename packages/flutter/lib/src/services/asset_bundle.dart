@@ -178,7 +178,7 @@ abstract class CachingAssetBundle extends AssetBundle {
     assert(key != null);
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
-      return _structuredDataCache[key];
+      return _structuredDataCache[key] as Future<T>;
     Completer<T> completer;
     Future<T> result;
     loadString(key, cache: false).then<T>(parser).then<void>((T value) {

@@ -194,7 +194,7 @@ void main() {
     expect(material.color, persistentBackgroundColor);
   });
 
-  testWidgets('Modal bottom sheet-specific parameters don\'t apply to persistent bottom sheets', (WidgetTester tester) async {
+  testWidgets("Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const Color modalBackgroundColor = Colors.yellow;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(

@@ -66,21 +66,23 @@ class ShortAppBar extends StatelessWidget {
 }
 
 class FruitPage extends StatelessWidget {
-  static final String paragraph1 = '''Have you ever held a quince? It\'s strange;
- covered in a fuzz somewhere between peach skin and a spider web. And it\'s
- hard as soft lumber. You\'d be forgiven for thinking it\'s veneered Larch-wood.
- But inhale the aroma and you\'ll instantly know you have something wonderful.
- Its scent can fill a room for days. And all this before you\'ve even cooked it.
-'''.replaceAll('\n', '');
+  static final String paragraph1 = '''
+Have you ever held a quince? It's strange;
+covered in a fuzz somewhere between peach skin and a spider web. And it's
+hard as soft lumber. You'd be forgiven for thinking it's veneered Larch-wood.
+But inhale the aroma and you'll instantly know you have something wonderful.
+Its scent can fill a room for days. And all this before you've even cooked it.
+'''.replaceAll('\n', ' ');
 
-  static final String paragraph2 = '''Pomegranates on the other hand have become
- almost ubiquitous. You can find its juice in any bodega, Walmart, and even some
- gas stations. But at what cost? The pomegranate juice craze of the aughts made
- \"megafarmers\" Lynda and Stewart Resnick billions. Unfortunately, it takes a lot
- of water to make that much pomegranate juice. Water the Resnicks get from their
- majority stake in the Kern Water Bank. How did one family come to hold control
- over water meant for the whole central valley of California? The story will shock you.
-'''.replaceAll('\n', '');
+  static final String paragraph2 = '''
+Pomegranates on the other hand have become
+almost ubiquitous. You can find its juice in any bodega, Walmart, and even some
+gas stations. But at what cost? The pomegranate juice craze of the aughts made
+"megafarmers" Lynda and Stewart Resnick billions. Unfortunately, it takes a lot
+of water to make that much pomegranate juice. Water the Resnicks get from their
+majority stake in the Kern Water Bank. How did one family come to hold control
+over water meant for the whole central valley of California? The story will shock you.
+'''.replaceAll('\n', ' ');
 
   @override
   Widget build(BuildContext context) {
@@ -115,8 +117,8 @@ class FruitPage extends StatelessWidget {
                         ),
                         Text(
                           ' ¬ ',
-                          // TODO(larche): Replace textTheme.display3.color with a ColorScheme value when known.
-                          style: textTheme.overline.apply(color: textTheme.display3.color),
+                          // TODO(larche): Replace textTheme.headline2.color with a ColorScheme value when known.
+                          style: textTheme.overline.apply(color: textTheme.headline2.color),
                         ),
                         Text(
                           'CULTURE',
@@ -127,13 +129,13 @@ class FruitPage extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       'Quince for Wisdom, Persimmon for Luck, Pomegranate for Love',
-                      style: textTheme.display1,
+                      style: textTheme.headline4,
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'How these crazy fruits sweetened our hearts, relationships,'
+                      'How these crazy fruits sweetened our hearts, relationships, '
                           'and puffed pastries',
-                      style: textTheme.body1,
+                      style: textTheme.bodyText2,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -149,7 +151,7 @@ class FruitPage extends StatelessWidget {
                           const SizedBox(width: 12),
                           Text(
                             'by',
-                            style: textTheme.display3,
+                            style: textTheme.headline2,
                           ),
                           const SizedBox(width: 4),
                           const Text(
@@ -166,7 +168,7 @@ class FruitPage extends StatelessWidget {
                     ),
                     Text(
                       '$paragraph1\n\n$paragraph2',
-                      style: textTheme.body2,
+                      style: textTheme.bodyText1,
                     ),
                   ],
                 ),
@@ -194,7 +196,7 @@ TextTheme _buildTextTheme(TextTheme base) {
   theme = theme.apply(displayColor: Colors.black);
 
   theme = theme.copyWith(
-    display1: base.display1.copyWith(
+    headline4: base.headline4.copyWith(
       fontFamily: 'Merriweather',
       fontStyle: FontStyle.italic,
       fontSize: 28,
@@ -202,21 +204,21 @@ TextTheme _buildTextTheme(TextTheme base) {
       color: Colors.black,
       height: .88,
     ),
-    display3: base.display3.copyWith(
+    headline2: base.headline2.copyWith(
       fontFamily: 'LibreFranklin',
       fontSize: 18,
       fontWeight: FontWeight.w500,
       color: Colors.black.withAlpha(153),
     ),
-    headline: base.headline.copyWith(fontWeight: FontWeight.w500),
-    body1: base.body1.copyWith(
+    headline5: base.headline5.copyWith(fontWeight: FontWeight.w500),
+    bodyText2: base.bodyText2.copyWith(
       fontFamily: 'Merriweather',
       fontSize: 14,
       fontWeight: FontWeight.w300,
       color: const Color(0xFF666666),
       height: 1.11,
     ),
-    body2: base.body2.copyWith(
+    bodyText1: base.bodyText1.copyWith(
       fontFamily: 'Merriweather',
       fontSize: 16,
       fontWeight: FontWeight.w300,

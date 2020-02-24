@@ -4,9 +4,9 @@
 
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -440,6 +440,36 @@ void main() {
 
       expect(featureFlags.isWindowsEnabled, false);
     }));
+
+    group('isAndroidEmbeddingV2Enabled', () {
+      test('is enabled on beta', () => testbed.run(() {
+        when(mockFlutterVerion.channel).thenReturn('beta');
+        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
+
+        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
+      }));
+
+      test('is enabled on dev', () => testbed.run(() {
+        when(mockFlutterVerion.channel).thenReturn('dev');
+        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
+
+        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
+      }));
+
+      test('is enabled on master', () => testbed.run(() {
+        when(mockFlutterVerion.channel).thenReturn('master');
+        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
+
+        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
+      }));
+
+      test('is enabled on stable', () => testbed.run(() {
+        when(mockFlutterVerion.channel).thenReturn('stable');
+        when<bool>(mockFlutterConfig.getValue('enable-android-embedding-v2') as bool).thenReturn(true);
+
+        expect(featureFlags.isAndroidEmbeddingV2Enabled, true);
+      }));
+    });
   });
 }
 

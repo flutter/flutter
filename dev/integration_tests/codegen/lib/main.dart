@@ -45,6 +45,6 @@ class _ExampleWidgetState extends State<ExampleWidget> {
 class GeneratedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Text(generated.message);
+    return Text(generated.message as String);
   }
 }

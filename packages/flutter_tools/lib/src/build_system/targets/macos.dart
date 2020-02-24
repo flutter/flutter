@@ -7,15 +7,14 @@ import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
-import '../../base/process_manager.dart';
 import '../../build_info.dart';
-import '../../globals.dart';
-import '../../macos/xcode.dart';
+import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 const String _kOutputPrefix = '{OUTPUT_DIR}/FlutterMacOS.framework';
 
@@ -76,14 +75,14 @@ abstract class UnpackMacOS extends Target {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
+    final String basePath = globals.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
     final Directory targetDirectory = environment
       .outputDir
       .childDirectory('FlutterMacOS.framework');
     if (targetDirectory.existsSync()) {
       targetDirectory.deleteSync(recursive: true);
     }
-    final ProcessResult result = await processManager
+    final ProcessResult result = await globals.processManager
         .run(<String>['cp', '-R', basePath, targetDirectory.path]);
     if (result.exitCode != 0) {
       throw Exception(
@@ -149,14 +148,14 @@ class DebugMacOSFramework extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final File outputFile = fs.file(fs.path.join(
+    final File outputFile = globals.fs.file(globals.fs.path.join(
         environment.buildDir.path, 'App.framework', 'App'));
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
         ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
-    final RunResult result = await xcode.clang(<String>[
+    final RunResult result = await globals.xcode.clang(<String>[
       '-x',
       'c',
       debugApp.path,
@@ -201,6 +200,7 @@ class CompileMacOSFramework extends Target {
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
+    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
       buildMode: buildMode,
@@ -209,6 +209,7 @@ class CompileMacOSFramework extends Target {
       platform: TargetPlatform.darwin_x64,
       darwinArch: DarwinArch.x86_64,
       packagesPath: environment.projectDir.childFile('.packages').path,
+      splitDebugInfo: splitDebugInfo,
     );
     if (result != 0) {
       throw Exception('gen shapshot failed.');
@@ -245,6 +246,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
@@ -284,7 +286,15 @@ abstract class MacOSBundleFlutterAssets extends Target {
       .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(environment, assetDirectory);
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
 
     // Copy Info.plist template.
     assetDirectory.parent.childFile('Info.plist')
@@ -324,13 +334,13 @@ abstract class MacOSBundleFlutterAssets extends Target {
       }
       // Copy precompiled runtimes.
       try {
-        final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData,
+        final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData,
             platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
-        final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData,
+        final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData,
             platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
-        fs.file(vmSnapshotData).copySync(
+        globals.fs.file(vmSnapshotData).copySync(
             assetDirectory.childFile('vm_snapshot_data').path);
-        fs.file(isolateSnapshotData).copySync(
+        globals.fs.file(isolateSnapshotData).copySync(
             assetDirectory.childFile('isolate_snapshot_data').path);
       } catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
@@ -343,7 +353,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       final Link currentVersion = outputDirectory.parent
           .childLink('Current');
       if (!currentVersion.existsSync()) {
-        final String linkPath = fs.path.relative(outputDirectory.path,
+        final String linkPath = globals.fs.path.relative(outputDirectory.path,
             from: outputDirectory.parent.path);
         currentVersion.createSync(linkPath);
       }
@@ -351,7 +361,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       final Link currentResources = frameworkRootDirectory
           .childLink('Resources');
       if (!currentResources.existsSync()) {
-        final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'Resources'),
+        final String linkPath = globals.fs.path.relative(globals.fs.path.join(currentVersion.path, 'Resources'),
             from: frameworkRootDirectory.path);
         currentResources.createSync(linkPath);
       }
@@ -359,7 +369,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       final Link currentFramework = frameworkRootDirectory
           .childLink('App');
       if (!currentFramework.existsSync()) {
-        final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'App'),
+        final String linkPath = globals.fs.path.relative(globals.fs.path.join(currentVersion.path, 'App'),
             from: frameworkRootDirectory.path);
         currentFramework.createSync(linkPath);
       }

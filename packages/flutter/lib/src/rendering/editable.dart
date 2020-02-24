@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox, lerpDouble;
+import 'dart:ui' as ui show TextBox, lerpDouble, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -208,6 +208,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     bool paintCursorAboveText = false,
     Offset cursorOffset,
     double devicePixelRatio = 1.0,
+    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
     bool enableInteractiveSelection,
     EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     @required this.textSelectionDelegate,
@@ -219,7 +221,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(endHandleLayerLink != null),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         'minLines can\'t be greater than maxLines',
+         "minLines can't be greater than maxLines",
        ),
        assert(expands != null),
        assert(
@@ -237,6 +239,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(readOnly != null),
        assert(forceLine != null),
        assert(devicePixelRatio != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -262,6 +266,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _floatingCursorAddedMargin = floatingCursorAddedMargin,
        _enableInteractiveSelection = enableInteractiveSelection,
        _devicePixelRatio = devicePixelRatio,
+       _selectionHeightStyle = selectionHeightStyle,
+       _selectionWidthStyle = selectionWidthStyle,
        _startHandleLayerLink = startHandleLayerLink,
        _endHandleLayerLink = endHandleLayerLink,
        _obscureText = obscureText,
@@ -365,7 +371,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final Offset startOffset = _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
-      Rect.zero,
+      _caretPrototype,
     );
     // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
     // Check if the selection is visible with an approximation because a
@@ -381,7 +387,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.end, affinity: _selection.affinity),
-      Rect.zero,
+      _caretPrototype,
     );
     _selectionEndInViewport.value = visibleRegion
       .inflate(visibleRegionSlop)
@@ -409,8 +415,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   ) {
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
-    // changed.
-    if (nextSelection == selection && cause != SelectionChangedCause.keyboard) {
+    // changed. Also, focusing an empty field is sent as a selection change even
+    // if the selection offset didn't change.
+    final bool focusingEmpty = nextSelection.baseOffset == 0
+      && nextSelection.extentOffset == 0
+      && !hasFocus;
+    if (nextSelection == selection
+        && cause != SelectionChangedCause.keyboard
+        && !focusingEmpty) {
       return;
     }
     if (onSelectionChanged != null) {
@@ -425,12 +437,17 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     LogicalKeyboardKey.arrowDown,
   };
 
+  static final Set<LogicalKeyboardKey> _deleteKeys = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.delete,
+    LogicalKeyboardKey.backspace,
+  };
+
   static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.keyA,
     LogicalKeyboardKey.keyC,
     LogicalKeyboardKey.keyV,
     LogicalKeyboardKey.keyX,
-    LogicalKeyboardKey.delete,
+    ..._deleteKeys,
   };
 
   static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
@@ -485,7 +502,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
-    } else if (key == LogicalKeyboardKey.delete) {
+    } else if (_deleteKeys.contains(key)) {
       _handleDelete();
     }
   }
@@ -733,7 +750,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// The text to display.
-  TextSpan get text => _textPainter.text;
+  TextSpan get text => _textPainter.text as TextSpan;
   final TextPainter _textPainter;
   set text(TextSpan value) {
     if (_textPainter.text == value)
@@ -1082,6 +1099,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _floatingCursorOn = false;
   Offset _floatingCursorOffset;
   TextPosition _floatingCursorTextPosition;
+
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxHeightStyle] for details on available styles.
+  ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
+  ui.BoxHeightStyle _selectionHeightStyle;
+  set selectionHeightStyle(ui.BoxHeightStyle value) {
+    assert(value != null);
+    if (_selectionHeightStyle == value)
+      return;
+    _selectionHeightStyle = value;
+    markNeedsPaint();
+  }
+
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxWidthStyle] for details on available styles.
+  ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
+  ui.BoxWidthStyle _selectionWidthStyle;
+  set selectionWidthStyle(ui.BoxWidthStyle value) {
+    assert(value != null);
+    if (_selectionWidthStyle == value)
+      return;
+    _selectionWidthStyle = value;
+    markNeedsPaint();
+  }
 
   /// If false, [describeSemanticsConfiguration] will not set the
   /// configuration's cursor motion or set selection callbacks.
@@ -1908,7 +1951,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
     assert(_selectionRects != null);
     final Paint paint = Paint()..color = _selectionColor;
-    for (ui.TextBox box in _selectionRects)
+    for (final ui.TextBox box in _selectionRects)
       canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
 
@@ -1930,7 +1973,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (showSelection) {
-      _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
+      _selectionRects ??= _textPainter.getBoxesForSelection(_selection, boxHeightStyle: _selectionHeightStyle, boxWidthStyle: _selectionWidthStyle);
       _paintSelection(context.canvas, effectiveOffset);
     }
 
@@ -1955,8 +1998,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints) {
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
-      startPoint.dx.clamp(0.0, size.width),
-      startPoint.dy.clamp(0.0, size.height),
+      startPoint.dx.clamp(0.0, size.width) as double,
+      startPoint.dy.clamp(0.0, size.height) as double,
     );
     context.pushLayer(
       LeaderLayer(link: startHandleLayerLink, offset: startPoint),
@@ -1966,8 +2009,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (endpoints.length == 2) {
       Offset endPoint = endpoints[1].point;
       endPoint = Offset(
-        endPoint.dx.clamp(0.0, size.width),
-        endPoint.dy.clamp(0.0, size.height),
+        endPoint.dx.clamp(0.0, size.width) as double,
+        endPoint.dy.clamp(0.0, size.height) as double,
       );
       context.pushLayer(
         LeaderLayer(link: endHandleLayerLink, offset: endPoint),

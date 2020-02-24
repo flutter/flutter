@@ -16,7 +16,7 @@
 ///
 /// A class can have multiple categories.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// /// A copper coffee pot, as desired by Ben Turpin.
@@ -54,7 +54,7 @@ class Category {
 ///
 /// Each class should only have one [DocumentationIcon].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// /// Utility class for beginning a dream-sharing sequence.
@@ -87,7 +87,7 @@ class DocumentationIcon {
 /// for this purpose, but on occasion the first paragraph is either too short
 /// or too long for use in isolation, without the remainder of the documentation.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// /// A famous cat.

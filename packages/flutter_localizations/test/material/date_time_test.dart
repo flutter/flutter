@@ -11,12 +11,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group(GlobalMaterialLocalizations, () {
     test('uses exact locale when exists', () async {
-      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT'));
+      final GlobalMaterialLocalizations localizations =
+        await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT')) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10\u00A0000');
     });
 
     test('falls back to language code when exact locale is missing', () async {
-      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX'));
+      final GlobalMaterialLocalizations localizations =
+        await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX')) as GlobalMaterialLocalizations;
       expect(localizations.formatDecimal(10000), '10.000');
     });
 
@@ -67,7 +69,8 @@ void main() {
 
     group('formatMinute', () {
       test('formats English', () async {
-        final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US'));
+        final GlobalMaterialLocalizations localizations =
+          await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US')) as GlobalMaterialLocalizations;
         expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '32');
       });
     });

@@ -229,14 +229,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       assert(() {
         final double delta = newPixels - pixels;
         if (overscroll.abs() > delta.abs()) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('$runtimeType.applyBoundaryConditions returned invalid overscroll value.'),
-            ErrorDescription(
-              'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
-              'That is a delta of $delta units.\n'
-              '$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.'
-            )
-          ]);
+          throw FlutterError(
+            '$runtimeType.applyBoundaryConditions returned invalid overscroll value.\n'
+            'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
+            'That is a delta of $delta units.\n'
+            '$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.'
+          );
         }
         return true;
       }());
@@ -381,7 +379,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void restoreScrollOffset() {
     if (pixels == null) {
-      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext);
+      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext) as double;
       if (value != null)
         correctPixels(value);
     }
@@ -402,18 +400,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(() {
       final double delta = value - pixels;
       if (result.abs() > delta.abs()) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.'),
-          ErrorDescription(
-            'The method was called to consider a change from $pixels to $value, which is a '
-            'delta of ${delta.toStringAsFixed(1)} units. However, it returned an overscroll of '
-            '${result.toStringAsFixed(1)} units, which has a greater magnitude than the delta. '
-            'The applyBoundaryConditions method is only supposed to reduce the possible range '
-            'of movement, not increase it.\n'
-            'The scroll extents are $minScrollExtent .. $maxScrollExtent, and the '
-            'viewport dimension is $viewportDimension.'
-          )
-        ]);
+        throw FlutterError(
+          '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.\n'
+          'The method was called to consider a change from $pixels to $value, which is a '
+          'delta of ${delta.toStringAsFixed(1)} units. However, it returned an overscroll of '
+          '${result.toStringAsFixed(1)} units, which has a greater magnitude than the delta. '
+          'The applyBoundaryConditions method is only supposed to reduce the possible range '
+          'of movement, not increase it.\n'
+          'The scroll extents are $minScrollExtent .. $maxScrollExtent, and the '
+          'viewport dimension is $viewportDimension.'
+        );
       }
       return true;
     }());
@@ -526,8 +522,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// See also:
   ///
-  /// * [ScrollPositionAlignmentPolicy] for the way in which `alignment` is
-  ///   applied, and the way the given `object` is aligned.
+  ///  * [ScrollPositionAlignmentPolicy] for the way in which `alignment` is
+  ///    applied, and the way the given `object` is aligned.
   Future<void> ensureVisible(
     RenderObject object, {
     double alignment = 0.0,
@@ -543,16 +539,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     double target;
     switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
-        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent) as double;
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent) as double;
         if (target < pixels) {
           target = pixels;
         }
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent) as double;
         if (target > pixels) {
           target = pixels;
         }
@@ -641,7 +637,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(clamp != null);
 
     if (clamp)
-      to = to.clamp(minScrollExtent, maxScrollExtent);
+      to = to.clamp(minScrollExtent, maxScrollExtent) as double;
 
     return super.moveTo(to, duration: duration, curve: curve);
   }
@@ -739,6 +735,23 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Subclasses should call this function when they change [userScrollDirection].
   void didUpdateScrollDirection(ScrollDirection direction) {
     UserScrollNotification(metrics: copyWith(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
+  }
+
+  /// Provides a heuristic to determine if expensive frame-bound tasks should be
+  /// deferred.
+  ///
+  /// The actual work of this is delegated to the [physics] via
+  /// [ScrollPhysics.recommendDeferredScrolling] called with the current
+  /// [activity]'s [ScrollActivity.velocity].
+  ///
+  /// Returning true from this method indicates that the [ScrollPhysics]
+  /// evaluate the current scroll velocity to be great enough that expensive
+  /// operations impacting the UI should be deferred.
+  bool recommendDeferredLoading(BuildContext context) {
+    assert(context != null);
+    assert(activity != null);
+    assert(activity.velocity != null);
+    return physics.recommendDeferredLoading(activity.velocity, copyWith(), context);
   }
 
   @override
