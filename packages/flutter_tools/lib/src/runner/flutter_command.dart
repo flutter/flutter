@@ -397,10 +397,11 @@ abstract class FlutterCommand extends Command<void> {
   void addDartObfuscationOption() {
     argParser.addFlag(FlutterOptions.kDartObfuscationOption,
       help: 'In a release build, this flag removes identifiers and replaces them '
-        'with randomized values for the purposes of source code obfuscation. The '
-        'mapping between the values and the original identifiers is stored the '
-        'symbol map created with the "--split-debug-info" option. For an app built '
-        "with this flag, the 'flutter symbolize' command with the right program "
+        'with randomized values for the purposes of source code obfuscation. This '
+        'flag should always be combined with "--split-debug-info" option, the '
+        'mapping between the values and the original identifiers is stored in the '
+        'symbol map created in the specified directory. For an app built with this '
+        'flag, the \'flutter symbolize\' command with the right program '
         'symbol file is required to obtain a human readable stack trace.',
     );
   }
