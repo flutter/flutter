@@ -9,6 +9,7 @@
       "root-ssl-certificates"
     ],
     "services": [
+      "fuchsia.deprecatedtimezone.Timezone",
       "fuchsia.feedback.CrashReporter",
       "fuchsia.intl.PropertyProvider",
       "fuchsia.logger.LogSink",
@@ -17,7 +18,6 @@
       "fuchsia.posix.socket.Provider",
       "fuchsia.process.Launcher",
       "fuchsia.process.Resolver",
-      "fuchsia.timezone.Timezone",
       "fuchsia.tracing.provider.Registry"
     ]
   }
