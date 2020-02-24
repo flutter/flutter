@@ -441,11 +441,185 @@ void main() async {
     final Paragraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 100));
 
-    // In the dom-based measurement (except Firefox), there will be some
-    // discrepancies around line ends.
-    final isDiscrepancyExpected =
-      !TextMeasurementService.enableExperimentalCanvasImplementation &&
-          browserEngine != BrowserEngine.firefox;
+    // First line: "abcd\n"
+
+    // At the beginning of the first line.
+    expect(
+      paragraph.getBoxesForRange(0, 0),
+      <TextBox>[],
+    );
+    // At the end of the first line.
+    expect(
+      paragraph.getBoxesForRange(4, 4),
+      <TextBox>[],
+    );
+    // Between "b" and "c" in the first line.
+    expect(
+      paragraph.getBoxesForRange(2, 2),
+      <TextBox>[],
+    );
+    // The range "ab" in the first line.
+    expect(
+      paragraph.getBoxesForRange(0, 2),
+      <TextBox>[
+        TextBox.fromLTRBD(0.0, 0.0, 20.0, 10.0, TextDirection.ltr),
+      ],
+    );
+    // The range "bc" in the first line.
+    expect(
+      paragraph.getBoxesForRange(1, 3),
+      <TextBox>[
+        TextBox.fromLTRBD(10.0, 0.0, 30.0, 10.0, TextDirection.ltr),
+      ],
+    );
+    // The range "d" in the first line.
+    expect(
+      paragraph.getBoxesForRange(3, 4),
+      <TextBox>[
+        TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+      ],
+    );
+    // The range "\n" in the first line.
+    expect(
+      paragraph.getBoxesForRange(4, 5),
+      <TextBox>[
+        TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+      ],
+    );
+    // The range "cd\n" in the first line.
+    expect(
+      paragraph.getBoxesForRange(2, 5),
+      <TextBox>[
+        TextBox.fromLTRBD(20.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+      ],
+    );
+
+    // Second line: "abcdefg\n"
+
+    // At the beginning of the second line.
+    expect(
+      paragraph.getBoxesForRange(5, 5),
+      <TextBox>[],
+    );
+    // At the end of the second line.
+    expect(
+      paragraph.getBoxesForRange(12, 12),
+      <TextBox>[],
+    );
+    // The range "efg" in the second line.
+    expect(
+      paragraph.getBoxesForRange(9, 12),
+      <TextBox>[
+        TextBox.fromLTRBD(40.0, 10.0, 70.0, 20.0, TextDirection.ltr),
+      ],
+    );
+    // The range "bcde" in the second line.
+    expect(
+      paragraph.getBoxesForRange(6, 10),
+      <TextBox>[
+        TextBox.fromLTRBD(10.0, 10.0, 50.0, 20.0, TextDirection.ltr),
+      ],
+    );
+    // The range "fg\n" in the second line.
+    expect(
+      paragraph.getBoxesForRange(10, 13),
+      <TextBox>[
+        TextBox.fromLTRBD(50.0, 10.0, 70.0, 20.0, TextDirection.ltr),
+      ],
+    );
+
+    // Last (third) line: "ab"
+
+    // At the beginning of the last line.
+    expect(
+      paragraph.getBoxesForRange(13, 13),
+      <TextBox>[],
+    );
+    // At the end of the last line.
+    expect(
+      paragraph.getBoxesForRange(15, 15),
+      <TextBox>[],
+    );
+    // The range "a" in the last line.
+    expect(
+      paragraph.getBoxesForRange(14, 15),
+      <TextBox>[
+        TextBox.fromLTRBD(10.0, 20.0, 20.0, 30.0, TextDirection.ltr),
+      ],
+    );
+    // The range "ab" in the last line.
+    expect(
+      paragraph.getBoxesForRange(13, 15),
+      <TextBox>[
+        TextBox.fromLTRBD(0.0, 20.0, 20.0, 30.0, TextDirection.ltr),
+      ],
+    );
+
+
+    // Combine multiple lines
+
+    // The range "cd\nabc".
+    expect(
+      paragraph.getBoxesForRange(2, 8),
+      <TextBox>[
+        TextBox.fromLTRBD(20.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+        TextBox.fromLTRBD(0.0, 10.0, 30.0, 20.0, TextDirection.ltr),
+      ],
+    );
+
+    // The range "\nabcd".
+    expect(
+      paragraph.getBoxesForRange(4, 9),
+      <TextBox>[
+        TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+        TextBox.fromLTRBD(0.0, 10.0, 40.0, 20.0, TextDirection.ltr),
+      ],
+    );
+
+    // The range "d\nabcdefg\na".
+    expect(
+      paragraph.getBoxesForRange(3, 14),
+      <TextBox>[
+        TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+        TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
+        TextBox.fromLTRBD(0.0, 20.0, 10.0, 30.0, TextDirection.ltr),
+      ],
+    );
+
+    // The range "abcd\nabcdefg\n".
+    expect(
+      paragraph.getBoxesForRange(0, 13),
+      <TextBox>[
+        TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+        TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
+      ],
+    );
+
+    // The range "abcd\nabcdefg\nab".
+    expect(
+      paragraph.getBoxesForRange(0, 15),
+      <TextBox>[
+        TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+        TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
+        TextBox.fromLTRBD(0.0, 20.0, 20.0, 30.0, TextDirection.ltr),
+      ],
+    );
+  });
+
+  testEachMeasurement('getBoxesForRange with maxLines', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+      textDirection: TextDirection.ltr,
+      maxLines: 2,
+    ));
+    builder.addText('abcd\n');
+    builder.addText('abcdefg\n');
+    builder.addText('ab');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 100));
 
     // First line: "abcd\n"
 
@@ -497,8 +671,6 @@ void main() async {
       paragraph.getBoxesForRange(2, 5),
       <TextBox>[
         TextBox.fromLTRBD(20.0, 0.0, 40.0, 10.0, TextDirection.ltr),
-        if (isDiscrepancyExpected)
-          TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
       ],
     );
 
@@ -533,8 +705,6 @@ void main() async {
       paragraph.getBoxesForRange(10, 13),
       <TextBox>[
         TextBox.fromLTRBD(50.0, 10.0, 70.0, 20.0, TextDirection.ltr),
-        if (isDiscrepancyExpected)
-          TextBox.fromLTRBD(70.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
     );
 
@@ -553,16 +723,12 @@ void main() async {
     // The range "a" in the last line.
     expect(
       paragraph.getBoxesForRange(14, 15),
-      <TextBox>[
-        TextBox.fromLTRBD(10.0, 20.0, 20.0, 30.0, TextDirection.ltr),
-      ],
+      <TextBox>[],
     );
     // The range "ab" in the last line.
     expect(
       paragraph.getBoxesForRange(13, 15),
-      <TextBox>[
-        TextBox.fromLTRBD(0.0, 20.0, 20.0, 30.0, TextDirection.ltr),
-      ],
+      <TextBox>[],
     );
 
 
@@ -573,8 +739,6 @@ void main() async {
       paragraph.getBoxesForRange(2, 8),
       <TextBox>[
         TextBox.fromLTRBD(20.0, 0.0, 40.0, 10.0, TextDirection.ltr),
-        if (isDiscrepancyExpected)
-          TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 30.0, 20.0, TextDirection.ltr),
       ],
     );
@@ -593,12 +757,7 @@ void main() async {
       paragraph.getBoxesForRange(3, 14),
       <TextBox>[
         TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.ltr),
-        if (isDiscrepancyExpected)
-          TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
-        if (isDiscrepancyExpected)
-          TextBox.fromLTRBD(70.0, 10.0, 70.0, 20.0, TextDirection.ltr),
-        TextBox.fromLTRBD(0.0, 20.0, 10.0, 30.0, TextDirection.ltr),
       ],
     );
 
@@ -607,11 +766,7 @@ void main() async {
       paragraph.getBoxesForRange(0, 13),
       <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
-        if (isDiscrepancyExpected)
-          TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
-        if (isDiscrepancyExpected)
-          TextBox.fromLTRBD(70.0, 10.0, 70.0, 20.0, TextDirection.ltr),
       ],
     );
 
@@ -620,12 +775,7 @@ void main() async {
       paragraph.getBoxesForRange(0, 15),
       <TextBox>[
         TextBox.fromLTRBD(0.0, 0.0, 40.0, 10.0, TextDirection.ltr),
-        if (isDiscrepancyExpected)
-          TextBox.fromLTRBD(40.0, 0.0, 40.0, 10.0, TextDirection.ltr),
         TextBox.fromLTRBD(0.0, 10.0, 70.0, 20.0, TextDirection.ltr),
-        if (isDiscrepancyExpected)
-          TextBox.fromLTRBD(70.0, 10.0, 70.0, 20.0, TextDirection.ltr),
-        TextBox.fromLTRBD(0.0, 20.0, 20.0, 30.0, TextDirection.ltr),
       ],
     );
   });
