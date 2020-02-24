@@ -265,6 +265,25 @@ task:
       script:
         - ./dev/bots/firebase_testlab.sh
 
+    - name: web_smoke_test
+      only_if: "changesInclude('.cirrus.yml', 'examples/hello_world/**' ,'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # Tests Hello World with Flutter Web Engine using Flutter Driver. Should not need more resources.
+        CPU: 2
+        MEMORY: 2G
+        CHROME_NO_SANDBOX: true
+      script:
+        - flutter config --enable-web
+        - git clone https://github.com/flutter/web_installers.git
+        - cd web_installers/packages/web_drivers/
+        - pub get
+        - dart lib/web_driver_installer.dart &
+        - sleep 20
+        - chromedriver/chromedriver --port=4444 &
+        - sleep 5
+        - cd ../../../examples/hello_world/
+        - flutter drive --target=test_driver/smoke_web_engine.dart -d web-server --profile --browser-name=chrome
+
     - name: deploy_gallery-linux # linux- and macos- only
       # Do not add more tasks here. Nothing is currently deployed from master branch, so it is safe to run
       # even if a test has failed. The behavior of failing dependencies is non-ideal for infra health.
