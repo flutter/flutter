@@ -46,7 +46,6 @@ shared_library("create_flutter_framework_dylib") {
 
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
-    "framework/Source/FlutterAppDelegate_Internal.h",
     "framework/Source/FlutterBinaryMessengerRelay.mm",
     "framework/Source/FlutterCallbackCache.mm",
     "framework/Source/FlutterCallbackCache_Internal.h",
