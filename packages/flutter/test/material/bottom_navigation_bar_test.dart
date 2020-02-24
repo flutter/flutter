@@ -119,7 +119,18 @@ void main() {
     expect(selectedIcon.fontSize, equals(24.0));
     expect(unselectedIcon.color, equals(captionColor));
     expect(unselectedIcon.fontSize, equals(24.0));
-    expect(_getOpacity(tester, 'Alarm'), equals(1.0));
+    // There should not be any [Opacity] or [FadeTransition] widgets
+    // since showUnselectedLabels and showSelectedLabels are true.
+    final Finder findOpacity = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(Opacity),
+    );
+    final Finder findFadeTransition = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(FadeTransition),
+    );
+    expect(findOpacity, findsNothing);
+    expect(findFadeTransition, findsNothing);
     expect(_getMaterial(tester).elevation, equals(8.0));
   });
 
@@ -472,7 +483,18 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(selectedColor));
     expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.color, equals(unselectedColor));
-    expect(_getOpacity(tester, 'Alarm'), equals(1.0));
+    // There should not be any [Opacity] or [FadeTransition] widgets
+    // since showUnselectedLabels and showSelectedLabels are true.
+    final Finder findOpacity = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(Opacity),
+    );
+    final Finder findFadeTransition = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byType(FadeTransition),
+    );
+    expect(findOpacity, findsNothing);
+    expect(findFadeTransition, findsNothing);
   });
 
 

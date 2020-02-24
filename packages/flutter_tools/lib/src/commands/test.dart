@@ -23,7 +23,7 @@ import '../test/runner.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
-class TestCommand extends FastFlutterCommand {
+class TestCommand extends FlutterCommand {
   TestCommand({
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),

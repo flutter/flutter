@@ -951,8 +951,8 @@ class _ReadingOrderDirectionalGroupData extends Diagnosticable {
 /// 3. Pick the closest to the beginning of the reading order from among the
 ///    nodes discovered above.
 ///
-/// It uses the ambient [Directionality] in the context for the enclosing scope
-/// to determine which direction is "reading order".
+/// It uses the ambient [Directionality] in the context for the enclosing
+/// [FocusTraversalGroup] to determine which direction is "reading order".
 ///
 /// See also:
 ///
@@ -1296,11 +1296,14 @@ class _OrderedFocusInfo {
 ///     ),
 ///   );
 /// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///  * [FocusTraversalGroup], a widget that groups together and imposes a
+///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
+///  * [WidgetOrderTraversalPolicy], a policy that relies on the widget
 ///    creation order to describe the order of traversal.
 ///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
 ///    natural "reading order" for the current [Directionality].
@@ -1416,6 +1419,156 @@ class FocusTraversalOrder extends InheritedWidget {
 /// group itself will be ordered using the parent group's policy.
 ///
 /// By default, traverses in reading order using [ReadingOrderTraversalPolicy].
+///
+/// {@tool dartpad --template=stateless_widget_material}
+/// This sample shows three rows of buttons, each grouped by a
+/// [FocusTraversalGroup], each with different traversal order policies. Use tab
+/// traversal to see the order they are traversed in.  The first row follows a
+/// numerical order, the second follows a lexical order (ordered to traverse
+/// right to left), and the third ignores the numerical order assigned to it and
+/// traverses in widget order.
+///
+/// ```dart preamble
+/// /// A button wrapper that adds either a numerical or lexical order, depending on
+/// /// the type of T.
+/// class OrderedButton<T> extends StatefulWidget {
+///   const OrderedButton({
+///     this.name,
+///     this.canRequestFocus = true,
+///     this.autofocus = false,
+///     this.order,
+///   });
+///
+///   final String name;
+///   final bool canRequestFocus;
+///   final bool autofocus;
+///   final T order;
+///
+///   @override
+///   _OrderedButtonState createState() => _OrderedButtonState();
+/// }
+///
+/// class _OrderedButtonState<T> extends State<OrderedButton<T>> {
+///   FocusNode focusNode;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     focusNode = FocusNode(
+///       debugLabel: widget.name,
+///       canRequestFocus: widget.canRequestFocus,
+///     );
+///   }
+///
+///   @override
+///   void dispose() {
+///     focusNode?.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   void didUpdateWidget(OrderedButton oldWidget) {
+///     super.didUpdateWidget(oldWidget);
+///     focusNode.canRequestFocus = widget.canRequestFocus;
+///   }
+///
+///   void _handleOnPressed() {
+///     focusNode.requestFocus();
+///     print('Button ${widget.name} pressed.');
+///     debugDumpFocusTree();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     FocusOrder order;
+///     if (widget.order is num) {
+///       order = NumericFocusOrder((widget.order as num).toDouble());
+///     } else {
+///       order = LexicalFocusOrder(widget.order.toString());
+///     }
+///
+///     return FocusTraversalOrder(
+///       order: order,
+///       child: Padding(
+///         padding: const EdgeInsets.all(8.0),
+///         child: OutlineButton(
+///           focusNode: focusNode,
+///           autofocus: widget.autofocus,
+///           focusColor: Colors.red,
+///           hoverColor: Colors.blue,
+///           onPressed: () => _handleOnPressed(),
+///           child: Text(widget.name),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.white,
+///     child: FocusTraversalGroup(
+///       policy: OrderedTraversalPolicy(),
+///       child: Column(
+///         mainAxisAlignment: MainAxisAlignment.center,
+///         children: <Widget>[
+///           // A group that is ordered with a numerical order, from left to right.
+///           FocusTraversalGroup(
+///             policy: OrderedTraversalPolicy(),
+///             child: Row(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: List<Widget>.generate(3, (int index) {
+///                 return OrderedButton<num>(
+///                   name: 'num: $index',
+///                   // TRY THIS: change this to "3 - index" and see how the order changes.
+///                   order: index,
+///                 );
+///               }),
+///             ),
+///           ),
+///           // A group that is ordered with a lexical order, from right to left.
+///           FocusTraversalGroup(
+///             policy: OrderedTraversalPolicy(),
+///             child: Row(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: List<Widget>.generate(3, (int index) {
+///                 // Order as "C" "B", "A".
+///                 String order =
+///                     String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
+///                 return OrderedButton<String>(
+///                   name: 'String: $order',
+///                   order: order,
+///                 );
+///               }),
+///             ),
+///           ),
+///           // A group that orders in widget order, regardless of what the order is set to.
+///           FocusTraversalGroup(
+///             // Note that because this is NOT an OrderedTraversalPolicy, the
+///             // assigned order of these OrderedButtons is ignored, and they
+///             // are traversed in widget order. TRY THIS: change this to
+///             // "OrderedTraversalPolicy()" and see that it now follows the
+///             // numeric order set on them instead of the widget order.
+///             policy: WidgetOrderTraversalPolicy(),
+///             child: Row(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: List<Widget>.generate(3, (int index) {
+///                 return OrderedButton<num>(
+///                   name: 'ignored num: ${3 - index}',
+///                   order: 3 - index,
+///                 );
+///               }),
+///             ),
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
