@@ -1540,8 +1540,12 @@ void main() {
     // This test checks that the live image tracking does not hold on to a
     // pending image that will never complete because it has been evicted from
     // the cache.
-    // The scenario may arise if a caller that previously tried to precached the
-    // decides it has to invalidate the attempt and try again.
+    // The scenario may arise in a test harness that is trying to load real
+    // images using `tester.runAsync()`, and wants to make sure that widgets
+    // under test have not also tried to resolve the image in a FakeAsync zone.
+    // The image loaded in the FakeAsync zone will never complete, and the
+    // runAsync call wants to make sure it gets a load attempt from the correct
+    // zone.
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage provider = MemoryImage(bytes);
 

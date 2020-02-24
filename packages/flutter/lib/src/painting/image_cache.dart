@@ -162,13 +162,19 @@ class ImageCache {
   int get currentSizeBytes => _currentSizeBytes;
   int _currentSizeBytes = 0;
 
-  /// Evicts all entries from the cache.
+  /// Evicts all pending and keepAlive entries from the cache.
   ///
   /// This is useful if, for instance, the root asset bundle has been updated
   /// and therefore new images must be obtained.
   ///
   /// Images which have not finished loading yet will not be removed from the
   /// cache, and when they complete they will be inserted as normal.
+  ///
+  /// This method does not clear live references to images, since clearing those
+  /// would not reduce memory pressure. Such images still have listeners in the
+  /// application code, and will still remain resident in memory.
+  ///
+  /// To clear live references, use [clearLiveImages].
   void clear() {
     if (!kReleaseMode) {
       Timeline.instantSync(
@@ -187,11 +193,23 @@ class ImageCache {
   }
 
   /// Evicts a single entry from the cache, returning true if successful.
-  /// Pending images waiting for completion are removed as well, returning true
-  /// if successful.
   ///
-  /// When a pending image is removed the listener on it is removed as well to
-  /// prevent it from adding itself to the cache if it eventually completes.
+  /// Pending images waiting for completion are removed as well, returning true
+  /// if successful. When a pending image is removed the listener on it is
+  /// removed as well to prevent it from adding itself to the cache if it
+  /// eventually completes.
+  ///
+  /// If this method removes a pending image, it will also remove
+  /// the corresponding live tracking of the image, since it is no longer clear
+  /// if the image will ever complete or have any listeners, and failing to
+  /// remove the live reference could leave the cache in a state where all
+  /// subsequent calls to [putIfAbsent] will return an [ImageStreamCompleter]
+  /// that will never complete.
+  ///
+  /// If this method removes a completed image, it will _not_ remove the live
+  /// reference to the image, which will only be cleared when the listener
+  /// count on the completer drops to zero. To clear live image references,
+  /// whether completed or not, use [clearLiveImages].
   ///
   /// The `key` must be equal to an object used to cache an image in
   /// [ImageCache.putIfAbsent].
