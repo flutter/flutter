@@ -60,6 +60,7 @@ class ReorderableListView extends StatefulWidget {
   ReorderableListView({
     Key key,
     this.header,
+    this.footer,
     @required this.children,
     @required this.onReorder,
     this.scrollController,
@@ -79,6 +80,11 @@ class ReorderableListView extends StatefulWidget {
   ///
   /// If null, no header will appear before the list.
   final Widget header;
+
+  /// A non-reorderable footer widget to show after the list.
+  ///
+  /// If null, no footer will appear after the list.
+  final Widget footer;
 
   /// The widgets to display.
   final List<Widget> children;
@@ -149,6 +155,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       builder: (BuildContext context) {
         return _ReorderableListContent(
           header: widget.header,
+          footer: widget.footer,
           children: widget.children,
           scrollController: widget.scrollController,
           scrollDirection: widget.scrollDirection,
@@ -175,6 +182,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
 class _ReorderableListContent extends StatefulWidget {
   const _ReorderableListContent({
     @required this.header,
+    @required this.footer,
     @required this.children,
     @required this.scrollController,
     @required this.scrollDirection,
@@ -184,6 +192,7 @@ class _ReorderableListContent extends StatefulWidget {
   });
 
   final Widget header;
+  final Widget footer;
   final List<Widget> children;
   final ScrollController scrollController;
   final Axis scrollDirection;
@@ -584,6 +593,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
             if (widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
             if (widget.header != null) widget.header,
             for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
+            if (widget.footer != null) widget.footer,
             if (!widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
           ],
         ),
