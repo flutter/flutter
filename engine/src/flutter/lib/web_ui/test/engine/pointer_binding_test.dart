@@ -1782,7 +1782,7 @@ void main() {
 
       expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
       expect(packets[0].data[1].pointerIdentifier, equals(1));
-      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].synthesized, equals(true));
       expect(packets[0].data[1].physicalX, equals(40.0));
       expect(packets[0].data[1].physicalY, equals(30.0));
       expect(packets[0].data[1].physicalDeltaX, equals(0.0));
