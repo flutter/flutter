@@ -1215,6 +1215,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
+  void deactivate() {
+    super.deactivate();
+    currentAutofillScope?.unregister(widget.uniqueIdentifier);
+  }
+
+  @override
   void dispose() {
     widget.controller.removeListener(_didChangeTextEditingValue);
     _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
@@ -1450,8 +1456,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue localValue = _value;
       _lastFormattedUnmodifiedTextEditingValue = localValue;
 
-      _textInputConnection = currentAutofillScope?.attach(this)
-        ?? TextInput.attach(this, textInputConfiguration);
+      _textInputConnection = widget.uniqueIdentifier != null
+        ? currentAutofillScope?.attach(this) ?? TextInput.attach(this, textInputConfiguration)
+        : TextInput.attach(this, textInputConfiguration);
       _textInputConnection.show();
 
       _updateSizeAndTransform();
@@ -1873,7 +1880,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  ExampleAutofillFormState get currentAutofillScope => ExampleAutofillForm.of(context);
+  ExampleAutofillFormState get currentAutofillScope {
+    return widget.uniqueIdentifier == null
+      ? null
+      : ExampleAutofillForm.of(context);
+  }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
     return widget.selectionEnabled && copyEnabled && _hasFocus && controls?.canCopy(this) == true
@@ -1898,6 +1909,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(debugCheckHasMediaQuery(context));
     _focusAttachment.reparent();
     super.build(context); // See AutomaticKeepAliveClientMixin.
+    currentAutofillScope?.register(this);
 
     final TextSelectionControls controls = widget.selectionControls;
     return Scrollable(
