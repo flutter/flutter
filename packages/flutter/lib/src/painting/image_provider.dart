@@ -642,9 +642,19 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// This function is used by [load].
   @protected
   Future<ui.Codec> _loadAsync(AssetBundleImageKey key, DecoderCallback decode) async {
-    final ByteData data = await key.bundle.load(key.name);
-    if (data == null)
-      throw 'Unable to read data';
+    ByteData data;
+    // Hot reload/restart could change whether an asset bundle or key in a
+    // bundle are available, or if it is a network backed bundle.
+    try {
+      data = await key.bundle.load(key.name);
+    } on FlutterError {
+      PaintingBinding.instance.imageCache.evict(key);
+      rethrow;
+    }
+    if (data == null) {
+      PaintingBinding.instance.imageCache.evict(key);
+      throw StateError('Unable to read data');
+    }
     return await decode(data.buffer.asUint8List());
   }
 }
@@ -827,8 +837,12 @@ class FileImage extends ImageProvider<FileImage> {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
-    if (bytes.lengthInBytes == 0)
+
+    if (bytes.lengthInBytes == 0) {
+      // The file may become available later.
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
+    }
 
     return await decode(bytes);
   }
