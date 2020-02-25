@@ -95,6 +95,14 @@ class _CanvasPool extends _SaveStackTracking {
         width: _widthInBitmapPixels,
         height: _heightInBitmapPixels,
       );
+      if (_canvas == null) {
+        // Evict BitmapCanvas(s) and retry.
+        _reduceCanvasMemoryUsage();
+        _canvas = html.CanvasElement(
+          width: _widthInBitmapPixels,
+          height: _heightInBitmapPixels,
+        );
+      }
       _canvas.style
         ..position = 'absolute'
         ..width = '${cssWidth}px'
