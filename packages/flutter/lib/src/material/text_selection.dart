@@ -246,6 +246,15 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     double width = 0.0;
     visitChildren((RenderObject renderObjectChild) {
       i++;
+
+      // No need to layout children inside the overflow menu when it's closed.
+      // The opposite is not true. It is necessary to layout the children that
+      // don't overflow when the overflow menu is open in order to calculate
+      // _lastIndexThatFits.
+      if (_lastIndexThatFits != -1 && !overflowOpen) {
+        return;
+      }
+
       final RenderBox child = renderObjectChild as RenderBox;
       child.layout(constraints.loosen(), parentUsesSize: true);
       width += child.size.width;
