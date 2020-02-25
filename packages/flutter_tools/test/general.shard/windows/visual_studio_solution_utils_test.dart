@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/windows/visual_studio_solution_utils.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   group('Visual Studio Solution Utils', () {
@@ -232,13 +231,13 @@ EndGlobal''');
       return plugin;
     }
 
-    testUsingContext('Adding the first plugin to a solution adds the expected references', () async {
+    test('Adding the first plugin to a solution adds the expected references', () async {
       writeSolutionWithoutPlugins();
 
       final List<Plugin> plugins = <Plugin>[
         getMockPlugin('plugin_a', pluginAGuid),
       ];
-      await updatePluginsInSolution(project, plugins);
+      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -258,19 +257,16 @@ EndGlobal''');
       // - A plugin folder, and a child reference for the plugin.
       expect(newSolutionContents, contains('Project("{$solutionTypeGuidFolder}") = "Flutter Plugins", "Flutter Plugins", "{$flutterPluginSolutionFolderGuid}"'));
       expect(newSolutionContents, contains('{$pluginAGuid} = {$flutterPluginSolutionFolderGuid}'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Removing a plugin removes entries as expected', () async {
+    test('Removing a plugin removes entries as expected', () async {
       writeSolutionWithPlugins();
 
       final List<Plugin> plugins = <Plugin>[
         getMockPlugin('plugin_a', pluginAGuid),
         getMockPlugin('plugin_c', pluginCGuid),
       ];
-      await updatePluginsInSolution(project, plugins);
+      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -284,17 +280,14 @@ EndGlobal''');
         expect(newSolutionContents, contains('{$guid}.Debug|x64.ActiveCfg = Debug|x64'));
         expect(newSolutionContents, contains('{$guid} = {$flutterPluginSolutionFolderGuid}'));
       }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Removing all plugins works', () async {
+    test('Removing all plugins works', () async {
       writeSolutionWithPlugins();
 
       final List<Plugin> plugins = <Plugin>[
       ];
-      await updatePluginsInSolution(project, plugins);
+      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -304,12 +297,9 @@ EndGlobal''');
       expect(newSolutionContents.contains(pluginCGuid), false);
       // Nor any plugins in the Flutter Plugins folder.
       expect(newSolutionContents.contains('= {$flutterPluginSolutionFolderGuid}'), false);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Adjusting the plugin list by adding and removing adjusts entries as expected', () async {
+    test('Adjusting the plugin list by adding and removing adjusts entries as expected', () async {
       writeSolutionWithPlugins();
 
       final List<Plugin> plugins = <Plugin>[
@@ -317,7 +307,7 @@ EndGlobal''');
         getMockPlugin('plugin_c', pluginCGuid),
         getMockPlugin('plugin_d', pluginDGuid),
       ];
-      await updatePluginsInSolution(project, plugins);
+      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -347,12 +337,9 @@ EndGlobal''');
       expect(newSolutionContents, contains('{$pluginDGuid}.Release|x64.Build.0 = Release|x64'));
       // - A child reference for the plugin in the Flutter Plugins folder.
       expect(newSolutionContents, contains('{$pluginDGuid} = {$flutterPluginSolutionFolderGuid}'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Adding plugins doesn\'t create duplicate entries', () async {
+    test('Adding plugins doesn\'t create duplicate entries', () async {
       writeSolutionWithPlugins();
 
       final List<Plugin> plugins = <Plugin>[
@@ -361,7 +348,7 @@ EndGlobal''');
         getMockPlugin('plugin_c', pluginCGuid),
         getMockPlugin('plugin_d', pluginDGuid),
       ];
-      await updatePluginsInSolution(project, plugins);
+      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
       // There should only be:
@@ -375,12 +362,9 @@ EndGlobal''');
       expect('{$pluginAGuid} = {$pluginAGuid}'.allMatches(newSolutionContents).length, 1);
       // - one copy of plugin A in Flutter Plugins.
       expect('{$pluginAGuid} = {$flutterPluginSolutionFolderGuid}'.allMatches(newSolutionContents).length, 1);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Adding plugins doesn\'t change ordering', () async {
+    test('Adding plugins doesn\'t change ordering', () async {
       writeSolutionWithPlugins();
 
       final List<Plugin> plugins = <Plugin>[
@@ -389,7 +373,7 @@ EndGlobal''');
         getMockPlugin('plugin_c', pluginCGuid),
         getMockPlugin('plugin_d', pluginDGuid),
       ];
-      await updatePluginsInSolution(project, plugins);
+      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
       // Plugin A should still be before Flutter Build in the Runner dependencies.
@@ -401,24 +385,18 @@ EndGlobal''');
       // And plugin C should still be before plugin A in the Flutter Plugins nesting list.
       expect(newSolutionContents.indexOf('{$pluginCGuid} = {$flutterPluginSolutionFolderGuid}'),
           lessThan(newSolutionContents.indexOf('{$pluginAGuid} = {$flutterPluginSolutionFolderGuid}')));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Updating solution preserves BOM', () async {
+    test('Updating solution preserves BOM', () async {
       writeSolutionWithPlugins();
 
       final List<Plugin> plugins = <Plugin>[];
-      await updatePluginsInSolution(project, plugins);
+      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
 
       // Visual Studio expects sln files to start with a BOM.
       final List<int> solutionStartingBytes = project.solutionFile.readAsBytesSync().take(3).toList();
       final List<int> bomBytes = utf8.encode(String.fromCharCode(unicodeBomCharacterRune));
       expect(solutionStartingBytes, bomBytes);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }

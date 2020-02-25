@@ -1031,7 +1031,7 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
     await _writeWindowsPluginFiles(project, plugins);
-    await updatePluginsInSolution(project.windows, plugins);
+    await VisualStudioSolutionUtils(fileSystem: globals.fs).updatePlugins(project.windows, plugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {
