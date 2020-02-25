@@ -281,20 +281,16 @@ TEST_F(ShellTest, BlacklistedDartVMFlag) {
 TEST_F(ShellTest, WhitelistedDartVMFlag) {
   const std::vector<fml::CommandLine::Option> options = {
       fml::CommandLine::Option("dart-flags",
-                               "--lazy_async_stacks,--no-causal_async_stacks,"
                                "--max_profile_depth 1,--random_seed 42")};
   fml::CommandLine command_line("", options, std::vector<std::string>());
   flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
 
-  EXPECT_GE(settings.dart_flags.size(), 2u);
-  EXPECT_EQ(settings.dart_flags[0], "--lazy_async_stacks");
-  EXPECT_EQ(settings.dart_flags[1], "--no-causal_async_stacks");
 #if !FLUTTER_RELEASE
-  EXPECT_EQ(settings.dart_flags.size(), 4u);
-  EXPECT_EQ(settings.dart_flags[2], "--max_profile_depth 1");
-  EXPECT_EQ(settings.dart_flags[3], "--random_seed 42");
-#else
   EXPECT_EQ(settings.dart_flags.size(), 2u);
+  EXPECT_EQ(settings.dart_flags[0], "--max_profile_depth 1");
+  EXPECT_EQ(settings.dart_flags[1], "--random_seed 42");
+#else
+  EXPECT_EQ(settings.dart_flags.size(), 0u);
 #endif
 }
 
