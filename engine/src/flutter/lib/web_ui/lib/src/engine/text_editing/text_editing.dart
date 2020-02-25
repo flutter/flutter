@@ -819,44 +819,50 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.updateEditingState' message to the framework.
   void updateEditingState(int clientId, EditingState editingState) {
-    ui.window.onPlatformMessage(
-      'flutter/textinput',
-      const JSONMethodCodec().encodeMethodCall(
-        MethodCall('TextInputClient.updateEditingState', <dynamic>[
-          clientId,
-          editingState.toFlutter(),
-        ]),
-      ),
-      _emptyCallback,
-    );
+    if (ui.window.onPlatformMessage != null) {
+      ui.window.onPlatformMessage(
+        'flutter/textinput',
+        const JSONMethodCodec().encodeMethodCall(
+          MethodCall('TextInputClient.updateEditingState', <dynamic>[
+            clientId,
+            editingState.toFlutter(),
+          ]),
+        ),
+        _emptyCallback,
+      );
+    }
   }
 
   /// Sends the 'TextInputClient.performAction' message to the framework.
   void performAction(int clientId, String inputAction) {
-    ui.window.onPlatformMessage(
-      'flutter/textinput',
-      const JSONMethodCodec().encodeMethodCall(
-        MethodCall(
-          'TextInputClient.performAction',
-          <dynamic>[clientId, inputAction],
+    if (ui.window.onPlatformMessage != null) {
+      ui.window.onPlatformMessage(
+        'flutter/textinput',
+        const JSONMethodCodec().encodeMethodCall(
+          MethodCall(
+            'TextInputClient.performAction',
+            <dynamic>[clientId, inputAction],
+          ),
         ),
-      ),
-      _emptyCallback,
-    );
+        _emptyCallback,
+      );
+    }
   }
 
   /// Sends the 'TextInputClient.onConnectionClosed' message to the framework.
   void onConnectionClosed(int clientId) {
-    ui.window.onPlatformMessage(
-      'flutter/textinput',
-      const JSONMethodCodec().encodeMethodCall(
-        MethodCall(
-          'TextInputClient.onConnectionClosed',
-          <dynamic>[clientId],
+    if (ui.window.onPlatformMessage != null) {
+      ui.window.onPlatformMessage(
+        'flutter/textinput',
+        const JSONMethodCodec().encodeMethodCall(
+          MethodCall(
+            'TextInputClient.onConnectionClosed',
+            <dynamic>[clientId],
+          ),
         ),
-      ),
-      _emptyCallback,
-    );
+        _emptyCallback,
+      );
+    }
   }
 }
 
