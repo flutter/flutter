@@ -431,7 +431,8 @@ class FileInNamespaceBuffer final : public fml::Mapping {
   FileInNamespaceBuffer(int namespace_fd, const char* path, bool executable)
       : address_(nullptr), size_(0) {
     fuchsia::mem::Buffer buffer;
-    if (!dart_utils::VmoFromFilenameAt(namespace_fd, path, &buffer)) {
+    if (!dart_utils::VmoFromFilenameAt(namespace_fd, path, executable,
+                                       &buffer)) {
       return;
     }
     if (buffer.size == 0) {
@@ -441,17 +442,6 @@ class FileInNamespaceBuffer final : public fml::Mapping {
     uint32_t flags = ZX_VM_PERM_READ;
     if (executable) {
       flags |= ZX_VM_PERM_EXECUTE;
-
-      // VmoFromFilenameAt will return VMOs without ZX_RIGHT_EXECUTE,
-      // so we need replace_as_executable to be able to map them as
-      // ZX_VM_PERM_EXECUTE.
-      // TODO(mdempsky): Update comment once SEC-42 is fixed.
-      zx_status_t status =
-          buffer.vmo.replace_as_executable(zx::handle(), &buffer.vmo);
-      if (status != ZX_OK) {
-        FML_LOG(FATAL) << "Failed to make VMO executable: "
-                       << zx_status_get_string(status);
-      }
     }
     uintptr_t addr;
     zx_status_t status =

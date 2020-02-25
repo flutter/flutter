@@ -11,10 +11,13 @@
 
 namespace dart_utils {
 
-bool VmoFromFilename(const std::string& filename, fuchsia::mem::Buffer* buffer);
+bool VmoFromFilename(const std::string& filename,
+                     bool executable,
+                     fuchsia::mem::Buffer* buffer);
 
 bool VmoFromFilenameAt(int dirfd,
                        const std::string& filename,
+                       bool executable,
                        fuchsia::mem::Buffer* buffer);
 
 zx_status_t IsSizeValid(const fuchsia::mem::Buffer& buffer, bool* is_valid);

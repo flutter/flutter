@@ -36,7 +36,7 @@ static bool OpenVmo(fuchsia::mem::Buffer* resource_vmo,
   dart_utils::Check(path[0] != '/', LOG_TAG);
 
   if (namespc == nullptr) {
-    if (!VmoFromFilename(path, resource_vmo)) {
+    if (!VmoFromFilename(path, executable, resource_vmo)) {
       return false;
     }
   } else {
@@ -46,24 +46,11 @@ static bool OpenVmo(fuchsia::mem::Buffer* resource_vmo,
       return false;
     }
 
-    bool result = dart_utils::VmoFromFilenameAt(root_dir, path, resource_vmo);
+    bool result =
+        dart_utils::VmoFromFilenameAt(root_dir, path, executable, resource_vmo);
     close(root_dir);
     if (!result) {
       return result;
-    }
-  }
-
-  if (executable) {
-    // VmoFromFilenameAt will return VMOs without ZX_RIGHT_EXECUTE,
-    // so we need replace_as_executable to be able to map them as
-    // ZX_VM_PERM_EXECUTE.
-    // TODO(mdempsky): Update comment once SEC-42 is fixed.
-    zx_status_t status = resource_vmo->vmo.replace_as_executable(
-        zx::handle(), &resource_vmo->vmo);
-    if (status != ZX_OK) {
-      FX_LOGF(ERROR, LOG_TAG, "Failed to make VMO executable: %s",
-              zx_status_get_string(status));
-      return false;
     }
   }
 
