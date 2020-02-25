@@ -22,6 +22,7 @@ import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
+import 'ios_project_migration.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
@@ -90,6 +91,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
   }
+
+  final IOSProjectMigration migration = IOSProjectMigration(app.project, globals.logger);
+  migration.run();
 
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
