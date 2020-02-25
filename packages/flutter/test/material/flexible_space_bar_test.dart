@@ -135,7 +135,7 @@ void main() {
           titlePadding: EdgeInsets.zero,
           title: Container(
             height: height,
-            child:  Text(
+            child: Text(
               'X' * 2000,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
