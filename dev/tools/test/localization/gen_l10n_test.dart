@@ -25,7 +25,6 @@ const String singleMessageArbFileString = '''
     "description": "Title for the application"
   }
 }''';
-
 const String esArbFileName = 'app_es.arb';
 const String singleEsMessageArbFileString = '''
 {
@@ -48,10 +47,11 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
 void main() {
   MemoryFileSystem fs;
 
-  setUp(() {
+  setUp(() async {
     fs = MemoryFileSystem(
       style: Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix
     );
+    await precacheLanguageAndRegionTags();
   });
 
   group('Setters', () {
@@ -233,7 +233,7 @@ void main() {
     });
   });
 
-  group('parseArbFiles', () {
+  group('loadResources', () {
     test('correctly initializes supportedLocales and supportedLanguageCodes properties', () {
       _standardFlutterDirectoryL10nSetup(fs);
 
@@ -246,7 +246,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
         fail('Setting language and locales should not fail: \n$e');
       }
@@ -275,7 +275,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
         fail('Setting language and locales should not fail: \n$e');
       }
@@ -306,7 +306,7 @@ void main() {
           classNameString: defaultClassNameString,
           preferredSupportedLocaleString: preferredSupportedLocaleString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
         fail('Setting language and locales should not fail: \n$e');
       }
@@ -340,7 +340,7 @@ void main() {
             classNameString: defaultClassNameString,
             preferredSupportedLocaleString: preferredSupportedLocaleString,
           );
-          generator.parseArbFiles();
+          generator.loadResources();
         } on L10nException catch (e) {
           expect(
             e.message,
@@ -381,7 +381,7 @@ void main() {
             classNameString: defaultClassNameString,
             preferredSupportedLocaleString: preferredSupportedLocaleString,
           );
-          generator.parseArbFiles();
+          generator.loadResources();
         } on L10nException catch (e) {
           expect(
             e.message,
@@ -417,7 +417,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
         fail('Setting language and locales should not fail: \n$e');
       }
@@ -468,7 +468,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
         fail('Setting language and locales should not fail: \n$e');
       }
@@ -512,7 +512,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
         fail('Setting language and locales should not fail: \n$e');
       }
@@ -538,7 +538,7 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
         expect(e.message, contains('locale could not be determined'));
         return;
@@ -572,9 +572,9 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
+        generator.loadResources();
       } on L10nException catch (e) {
-        expect(e.message, contains('Multiple arb files with the same locale detected'));
+        expect(e.message, contains("Multiple arb files with the same 'en' locale detected"));
         return;
       }
 
@@ -585,11 +585,12 @@ void main() {
     });
   });
 
-  group('generateClassMethods', () {
+  group('generateCode', () {
     group('DateTime tests', () {
       test('throws an exception when improperly formatted date is passed in', () {
         const String singleDateMessageArbFileString = '''
 {
+  "@@locale": "en",
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
       "description": "The first day of spring",
@@ -614,8 +615,8 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
           expect(e.message, contains('asdf'));
           expect(e.message, contains('springStartDate'));
@@ -652,207 +653,14 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
           expect(e.message, contains('the "format" attribute needs to be set'));
           return;
         }
 
         fail('Improper date formatting should throw an exception');
-      });
-
-      test('correctly generates simple message with date along with other placeholders', () {
-        const String singleDateMessageArbFileString = '''
-{
-  "springGreetings": "Since it's {springStartDate}, it's finally spring! {helloWorld}!",
-  "@springGreetings": {
-      "description": "A realization that it's finally the spring season, followed by a greeting.",
-      "placeholders": {
-          "springStartDate": {
-              "type": "DateTime",
-              "format": "yMMMMEEEEd"
-          },
-          "helloWorld": {}
-      }
-  }
-}''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(singleDateMessageArbFileString);
-
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
-
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          r'''
-  String springGreetings(DateTime springStartDate, Object helloWorld) {
-    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
-    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
-
-    String springGreetings(Object springStartDate, Object helloWorld) {
-      return Intl.message(
-        "Since it's ${springStartDate}, it's finally spring! ${helloWorld}!",
-        locale: _localeName,
-        name: 'springGreetings',
-        desc: "A realization that it's finally the spring season, followed by a greeting.",
-        args: <Object>[springStartDate, helloWorld]
-      );
-    }
-    return springGreetings(springStartDateString, helloWorld);
-  }
-''');
-      });
-    });
-
-    group('Number tests', () {
-      test('correctly adds optional named parameters to numbers', () {
-        const Set<String> numberFormatsWithNamedParameters = <String>{
-          'compact',
-          'compactCurrency',
-          'compactSimpleCurrency',
-          'compactLong',
-          'currency',
-          'decimalPercentPattern',
-          'simpleCurrency',
-        };
-
-        for (final String numberFormat in numberFormatsWithNamedParameters) {
-          final String singleNumberMessage = '''
-{
-  "courseCompletion": "You have completed {progress} of the course.",
-  "@courseCompletion": {
-    "description": "The amount of progress the student has made in their class.",
-    "placeholders": {
-      "progress": {
-        "type": "double",
-        "format": "$numberFormat",
-        "optionalParameters": {
-          "decimalDigits": 2
-        }
-      }
-    }
-  }
-}''';
-          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-            ..createSync(recursive: true);
-          l10nDirectory.childFile(defaultTemplateArbFileName)
-            .writeAsStringSync(singleNumberMessage);
-
-          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-          try {
-            generator.initialize(
-              l10nDirectoryPath: defaultArbPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-            );
-            generator.parseArbFiles();
-            generator.generateClassMethods();
-          } on Exception catch (e) {
-            fail('Parsing template arb file should succeed: \n$e');
-          }
-
-          expect(generator.classMethods, isNotEmpty);
-          expect(
-            generator.classMethods.first,
-            '''
-  String courseCompletion(double progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(
-      locale: _localeName,
-      decimalDigits: 2,
-    );
-    final String progressString = progressNumberFormat.format(progress);
-
-    String courseCompletion(Object progress) {
-      return Intl.message(
-        'You have completed \${progress} of the course.',
-        locale: _localeName,
-        name: 'courseCompletion',
-        desc: 'The amount of progress the student has made in their class.',
-        args: <Object>[progress]
-      );
-    }
-    return courseCompletion(progressString);
-  }
-''');}
-      });
-
-      test('correctly adds optional positional parameters to numbers', () {
-        const Set<String> numberFormatsWithPositionalParameters = <String>{
-          'decimalPattern',
-          'percentPattern',
-          'scientificPattern',
-        };
-
-        for (final String numberFormat in numberFormatsWithPositionalParameters) {
-          final String singleNumberMessage = '''
-{
-  "courseCompletion": "You have completed {progress} of the course.",
-  "@courseCompletion": {
-    "description": "The amount of progress the student has made in their class.",
-    "placeholders": {
-      "progress": {
-        "type": "double",
-        "format": "$numberFormat"
-      }
-    }
-  }
-}''';
-          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-            ..createSync(recursive: true);
-          l10nDirectory.childFile(defaultTemplateArbFileName)
-            .writeAsStringSync(singleNumberMessage);
-
-          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-          try {
-            generator.initialize(
-              l10nDirectoryPath: defaultArbPathString,
-              templateArbFileName: defaultTemplateArbFileName,
-              outputFileString: defaultOutputFileString,
-              classNameString: defaultClassNameString,
-            );
-            generator.parseArbFiles();
-            generator.generateClassMethods();
-          } on Exception catch (e) {
-            fail('Parsing template arb file should succeed: \n$e');
-          }
-
-          expect(generator.classMethods, isNotEmpty);
-          expect(
-            generator.classMethods.first,
-            '''
-  String courseCompletion(double progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(_localeName);
-    final String progressString = progressNumberFormat.format(progress);
-
-    String courseCompletion(Object progress) {
-      return Intl.message(
-        'You have completed \${progress} of the course.',
-        locale: _localeName,
-        name: 'courseCompletion',
-        desc: 'The amount of progress the student has made in their class.',
-        args: <Object>[progress]
-      );
-    }
-    return courseCompletion(progressString);
-  }
-''');
-        }
       });
 
       test('throws an exception when improperly formatted number is passed in', () {
@@ -882,8 +690,8 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
           expect(e.message, contains('asdf'));
           expect(e.message, contains('progress'));
@@ -918,8 +726,8 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
           expect(e.message, contains('Check to see if the plural message is in the proper ICU syntax format'));
           return;
@@ -950,8 +758,8 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
           expect(e.message, contains('Check to see if the plural message is in the proper ICU syntax format'));
           return;
@@ -978,8 +786,8 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
           expect(e.message, contains('Resource attribute "@helloWorlds" was not found'));
           return;
@@ -1009,8 +817,8 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
           expect(e.message, contains('is not properly formatted'));
           expect(e.message, contains('Ensure that it is a map with string valued keys'));
@@ -1041,8 +849,8 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
-        generator.generateClassMethods();
+        generator.loadResources();
+        generator.generateCode();
       } on FormatException catch (e) {
         expect(e.message, contains('Unexpected character'));
         return;
@@ -1072,8 +880,8 @@ void main() {
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
         );
-        generator.parseArbFiles();
-        generator.generateClassMethods();
+        generator.loadResources();
+        generator.generateCode();
       } on L10nException catch (e) {
         expect(e.message, contains('Resource attribute "@title" was not found'));
         return;
@@ -1089,11 +897,11 @@ void main() {
       test('cannot contain non-alphanumeric symbols', () {
         const String nonAlphaNumericArbFile = '''
 {
-    "title!!": "Stocks",
-    "@title!!": {
-      "description": "Title for the Stocks application"
-    }
-  }''';
+  "title!!": "Stocks",
+  "@title!!": {
+    "description": "Title for the Stocks application"
+  }
+}''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
@@ -1107,10 +915,10 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
-          expect(e.message, contains('Invalid key format'));
+          expect(e.message, contains('Invalid ARB resource name'));
           return;
         }
 
@@ -1120,11 +928,11 @@ void main() {
       test('must start with lowercase character', () {
         const String nonAlphaNumericArbFile = '''
 {
-    "Title": "Stocks",
-    "@Title": {
-      "description": "Title for the Stocks application"
-    }
-  }''';
+  "Title": "Stocks",
+  "@Title": {
+    "description": "Title for the Stocks application"
+  }
+}''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
@@ -1138,10 +946,10 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
-          expect(e.message, contains('Invalid key format'));
+          expect(e.message, contains('Invalid ARB resource name'));
           return;
         }
 
@@ -1151,11 +959,11 @@ void main() {
       test('cannot start with a number', () {
         const String nonAlphaNumericArbFile = '''
 {
-    "123title": "Stocks",
-    "@123title": {
-      "description": "Title for the Stocks application"
-    }
-  }''';
+  "123title": "Stocks",
+  "@123title": {
+    "description": "Title for the Stocks application"
+  }
+}''';
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
         l10nDirectory.childFile(defaultTemplateArbFileName)
@@ -1169,10 +977,10 @@ void main() {
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
           );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
+          generator.loadResources();
+          generator.generateCode();
         } on L10nException catch (e) {
-          expect(e.message, contains('Invalid key format'));
+          expect(e.message, contains('Invalid ARB resource name'));
           return;
         }
 
