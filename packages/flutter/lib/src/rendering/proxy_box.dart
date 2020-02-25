@@ -260,6 +260,7 @@ class RenderConstrainedBox extends RenderProxyBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(_additionalConstraints.enforce(constraints), parentUsesSize: true);
       size = child.size;
@@ -351,6 +352,7 @@ class RenderLimitedBox extends RenderProxyBox {
   @override
   void performLayout() {
     if (child != null) {
+      final BoxConstraints constraints = this.constraints;
       child.layout(_limitConstraints(constraints), parentUsesSize: true);
       size = constraints.constrain(child.size);
     } else {

@@ -668,6 +668,7 @@ class _RenderCupertinoAlert extends RenderBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final bool hasDivider = contentSection.getMaxIntrinsicHeight(constraints.maxWidth) > 0.0
         && actionsSection.getMaxIntrinsicHeight(constraints.maxWidth) > 0.0;
     final double dividerThickness = hasDivider ? _dividerThickness : 0.0;
