@@ -35,6 +35,8 @@ void main() {
 
   tearDown(() {
     FlutterError.onError = oldError;
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
   });
 
   group('ImageProvider', () {
