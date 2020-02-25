@@ -279,18 +279,13 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
         return;
       }
 
+      // No need to place children that won't be painted.
+      if (!_shouldPaintChild(renderObjectChild, i)) {
+        return;
+      }
+
       final RenderBox child = renderObjectChild as RenderBox;
       final FlexParentData childParentData = child.parentData as FlexParentData;
-
-      // If the current child is not displayed, place it offscreen to avoid it
-      // interfering with hit detection.
-      if (_lastIndexThatFits != -1) {
-        if ((!overflowOpen && i > _lastIndexThatFits)
-          || (overflowOpen && i <= _lastIndexThatFits)) {
-          childParentData.offset = Offset(-child.size.width, -child.size.height);
-          return;
-        }
-      }
 
       if (!overflowOpen) {
         childParentData.offset = Offset(fitWidth, 0.0);
@@ -329,6 +324,23 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     size = nextSize;
   }
 
+  // Returns true when the child should be painted, false otherwise.
+  bool _shouldPaintChild(RenderObject renderObjectChild, int index) {
+    // Paint the navButton when there is overflow.
+    if (renderObjectChild == firstChild) {
+      return _lastIndexThatFits != -1;
+    }
+
+    // If there is no overflow, all children besides the navButton are painted.
+    if (_lastIndexThatFits == -1) {
+      return true;
+    }
+
+    // When there is overflow, paint if the child is in the part of the menu
+    // that is currently open.
+    return (index > _lastIndexThatFits) == overflowOpen;
+  }
+
   @override
   void performLayout() {
     _lastIndexThatFits = -1;
@@ -347,18 +359,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     bool fits = true;
     visitChildren((RenderObject renderObjectChild) {
       i++;
-
-      // Don't paint the navButton if there is no overflow.
-      if (_lastIndexThatFits == -1 && renderObjectChild == firstChild) {
-        return;
-      }
-
-      // Don't paint children that don't fit when overflow is closed, and don't
-      // paint children that do fit when overflow is open.
-      if (renderObjectChild != firstChild && fits == overflowOpen) {
-        if (fits && i == _lastIndexThatFits) {
-          fits = false;
-        }
+      if (!_shouldPaintChild(renderObjectChild, i)) {
         return;
       }
 
@@ -366,9 +367,6 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
       final RenderBox child = renderObjectChild as RenderBox;
       final FlexParentData childParentData = child.parentData as FlexParentData;
       context.paintChild(child, childParentData.offset + offset);
-      if (fits && i == _lastIndexThatFits) {
-        fits = false;
-      }
     });
   }
 
@@ -381,7 +379,32 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    return defaultHitTestChildren(result, position: position);
+    // The x, y parameters have the top left of the node's box as the origin.
+    RenderBox child = lastChild;
+    int i = childCount;
+    while (child != null) {
+      i--;
+      final FlexParentData childParentData = child.parentData as FlexParentData;
+
+      // Don't hit test children that haven't been painted.
+      if (!_shouldPaintChild(child, i)) {
+        child = childParentData.previousSibling;
+        continue;
+      }
+
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - childParentData.offset);
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit)
+        return true;
+      child = childParentData.previousSibling;
+    }
+    return false;
   }
 }
 
