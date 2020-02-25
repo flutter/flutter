@@ -386,7 +386,7 @@ void main() {
         );
         verify(mockUsage.sendEvent(
           'ios-handshake',
-          'failure',
+          'failure-other',
           label: anyNamed('label'),
           value: anyNamed('value'),
         )).called(1);
