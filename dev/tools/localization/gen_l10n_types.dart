@@ -407,6 +407,7 @@ class AppResourceBundleCollection {
 
     final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
     final Map<LocaleInfo, AppResourceBundle> localeToBundle = <LocaleInfo, AppResourceBundle>{};
+    final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
     final List<File> files = directory.listSync().whereType<File>().toList()..sort(sortFilesByPath);
     for (final File file in files) {
       if (filenameRE.hasMatch(file.path)) {
@@ -418,20 +419,25 @@ class AppResourceBundleCollection {
           );
         }
         localeToBundle[bundle.locale] = bundle;
+        languageToLocales[bundle.locale.languageCode] ??= <LocaleInfo>[];
+        languageToLocales[bundle.locale.languageCode].add(bundle.locale);
       }
     }
-
-    return AppResourceBundleCollection._(directory, localeToBundle);
+    return AppResourceBundleCollection._(directory, localeToBundle, languageToLocales);
   }
 
-  const AppResourceBundleCollection._(this._directory, this._localeToBundle);
+  const AppResourceBundleCollection._(this._directory, this._localeToBundle, this._languageToLocales);
 
   final Directory _directory;
   final Map<LocaleInfo, AppResourceBundle> _localeToBundle;
+  final Map<String, List<LocaleInfo>> _languageToLocales;
 
   Iterable<LocaleInfo> get locales => _localeToBundle.keys;
   Iterable<AppResourceBundle> get bundles => _localeToBundle.values;
   AppResourceBundle bundleFor(LocaleInfo locale) => _localeToBundle[locale];
+
+  Iterable<String> get languages => _languageToLocales.keys;
+  Iterable<LocaleInfo> localesForLanguage(String language) => _languageToLocales[language] ?? <LocaleInfo>[];
 
   @override
   String toString() {

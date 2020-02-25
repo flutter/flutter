@@ -225,60 +225,25 @@ String generateBaseClassMethod(Message message) {
     .replaceAll('@(name)', message.resourceId);
 }
 
-class LocalesForLanguage {
-  LocalesForLanguage(this.languageCode);
-  final String languageCode;
-  final List<LocaleInfo> locales = <LocaleInfo>[];
-  final List<String> scriptCodes = <String>[];
-  final List<String> countryCodes = <String>[];
-
-  Iterable<LocaleInfo> localesWithCountryCode(String countryCode) {
-    return locales.where((LocaleInfo locale) => locale.countryCode == countryCode);
-  }
-
-  Iterable<LocaleInfo> localesWithScriptCode(String scriptCode) {
-    return locales.where((LocaleInfo locale) => locale.scriptCode == scriptCode);
-  }
-}
-
-String generateLookupBody(Iterable<LocaleInfo> allLocales, String className) {
-  final Map<String, LocalesForLanguage> languageToLocales = <String, LocalesForLanguage>{};
-  for (final LocaleInfo locale in allLocales) {
-    final String languageCode = locale.languageCode;
-    languageToLocales[languageCode] ??= LocalesForLanguage(languageCode);
-    languageToLocales[languageCode].locales.add(locale);
-    if (locale.scriptCode != null)
-      languageToLocales[languageCode].scriptCodes.add(locale.scriptCode);
-    if (locale.countryCode != null)
-      languageToLocales[languageCode].countryCodes.add(locale.countryCode);
-  }
-
-  final Iterable<String> switchClauses = languageToLocales.values.map((LocalesForLanguage localesForLanguage) {
-    if (localesForLanguage.scriptCodes.isEmpty && localesForLanguage.countryCodes.isEmpty) {
-      assert(localesForLanguage.locales.length == 1);
-      final LocaleInfo locale = localesForLanguage.locales[0];
+String generateLookupBody(AppResourceBundleCollection allBundles, String className) {
+  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+    final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
+    if (locales.length == 1) {
       return switchClauseTemplate
-        .replaceAll('@(case)', localesForLanguage.languageCode)
-        .replaceAll('@(class)', '$className${locale.camelCase()}');
+        .replaceAll('@(case)', language)
+        .replaceAll('@(class)', '$className${locales.first.camelCase()}');
     }
 
-    if (localesForLanguage.scriptCodes.isEmpty) {
-      return localesForLanguage.countryCodes.map((String countryCode) {
-        final Iterable<LocaleInfo> locales = localesForLanguage.localesWithCountryCode(countryCode);
-        return countryCodeSwitchTemplate
-          .replaceAll('@(languageCode)', localesForLanguage.languageCode)
-          .replaceAll('@(class)', '$className${LocaleInfo.fromString(localesForLanguage.languageCode).camelCase()}')
-          .replaceAll('@(switchClauses)', locales.map((LocaleInfo locale) {
-            return switchClauseTemplate
-              .replaceAll('@(case)', countryCode)
-              .replaceAll('@(class)', '$className${locale.camelCase()}');
-          }).join('\n'));
-      }).join('\n');
-    }
-    assert(false, 'TBD dispatch on scriptCodes, scriptCodes AND countryCodes');
-    return '';
+    final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) => locale.countryCode != null);
+    return countryCodeSwitchTemplate
+      .replaceAll('@(languageCode)', language)
+      .replaceAll('@(class)', '$className${LocaleInfo.fromString(language).camelCase()}')
+      .replaceAll('@(switchClauses)', localesWithCountryCodes.map((LocaleInfo locale) {
+          return switchClauseTemplate
+            .replaceAll('@(case)', locale.countryCode)
+            .replaceAll('@(class)', '$className${locale.camelCase()}');
+        }).join('\n        '));
   });
-
   return switchClauses.join('\n    ');
 }
 
@@ -528,7 +493,7 @@ class LocalizationsGenerator {
     supportedLocales.addAll(allLocales);
   }
 
-  // Generate the AppLocalizations class and its LocalizationsDelegate subclass.
+  // Generate the AppLocalizations class, its LocalizationsDelegate subclass.
   String generateCode() {
     final String directory = path.basename(l10nDirectory.path);
     final String outputFileName = path.basename(outputFile.path);
@@ -552,7 +517,7 @@ class LocalizationsGenerator {
       );
     }
 
-    final String lookupBody = generateLookupBody(_allBundles.locales, className);
+    final String lookupBody = generateLookupBody(_allBundles, className);
 
     return fileTemplate
       .replaceAll('@(class)', className)

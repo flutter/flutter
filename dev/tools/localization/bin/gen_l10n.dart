@@ -84,7 +84,6 @@ Future<void> main(List<String> arguments) async {
         preferredSupportedLocaleString: preferredSupportedLocaleString,
       )
       ..loadResources()
-      ..generateCode()
       ..writeOutputFile();
   } on FileSystemException catch (e) {
     exitWithError(e.message);

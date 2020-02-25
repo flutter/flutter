@@ -188,8 +188,9 @@ const String baseClassMethodTemplate = '''
 
 const String switchClauseTemplate = '''case '@(case)': return @(class)();''';
 
-const String countryCodeSwitchTemplate = '''case '@(languageCode)':
+const String countryCodeSwitchTemplate = '''case '@(languageCode)': {
       switch (locale.countryCode) {
         @(switchClauses)
       }
-      return @(class)();''';
+      return @(class)();
+    }''';
