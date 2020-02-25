@@ -179,7 +179,6 @@ abstract class FlutterTestDriver {
   }
 
   Future<int> _killForcefully() async {
-    print('killing forcefully');
     _debugPrint('Sending SIGKILL to $_processPid..');
     ProcessSignal.SIGKILL.send(_processPid);
     await tryWaitForPidDeath(_processPid);
