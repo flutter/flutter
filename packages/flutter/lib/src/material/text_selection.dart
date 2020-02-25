@@ -57,6 +57,21 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   // The greatest width ever measured for this widget.
   double _maxWidth;
 
+  FlatButton _getItem(VoidCallback onPressed, String label) {
+    if (onPressed == null) {
+      return null;
+    }
+    return FlatButton(
+      child: Text(label),
+      onPressed: () {
+        setState(() {
+          _overflowOpen = false;
+        });
+        onPressed();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Keep track of the largest child width.
@@ -68,51 +83,16 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     }
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> items = <Widget>[];
-    if (widget.handleCut != null) {
-      items.add(FlatButton(
-        child: Text(localizations.cutButtonLabel),
-        onPressed: () {
-          setState(() {
-            _overflowOpen = false;
-          });
-          widget.handleCut();
-        },
-      ));
-    }
-    if (widget.handleCopy != null) {
-      items.add(FlatButton(
-        child: Text(localizations.copyButtonLabel),
-        onPressed: () {
-          setState(() {
-            _overflowOpen = false;
-          });
-          widget.handleCopy();
-        },
-      ));
-    }
-    if (widget.handlePaste != null) {
-      items.add(FlatButton(
-        child: Text(localizations.pasteButtonLabel),
-        onPressed: () {
-          setState(() {
-            _overflowOpen = false;
-          });
-          widget.handlePaste();
-        },
-      ));
-    }
-    if (widget.handleSelectAll != null) {
-      items.add(FlatButton(
-        child: Text(localizations.selectAllButtonLabel),
-        onPressed: () {
-          setState(() {
-            _overflowOpen = false;
-          });
-          widget.handleSelectAll();
-        },
-      ));
-    }
+    final List<Widget> items = <Widget>[
+      if (widget.handleCut != null)
+        _getItem(widget.handleCut, localizations.cutButtonLabel),
+      if (widget.handleCopy != null)
+        _getItem(widget.handleCopy, localizations.copyButtonLabel),
+      if (widget.handlePaste != null)
+        _getItem(widget.handlePaste, localizations.pasteButtonLabel),
+      if (widget.handleSelectAll != null)
+        _getItem(widget.handleSelectAll, localizations.selectAllButtonLabel),
+    ];
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
