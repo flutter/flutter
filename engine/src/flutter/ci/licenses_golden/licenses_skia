@@ -1,4 +1,4 @@
-Signature: 9545352b35f87dd4ea0cb0fd145dbb62
+Signature: b85f3ba099096321ef15a2f102ce27e8
 
 UNUSED LICENSES:
 
@@ -5659,7 +5659,6 @@ FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
 FILE: ../../../third_party/skia/gm/verifiers/gmverifier.cpp
 FILE: ../../../third_party/skia/gm/verifiers/gmverifier.h
 FILE: ../../../third_party/skia/include/core/SkM44.h
-FILE: ../../../third_party/skia/include/private/SkM44.h
 FILE: ../../../third_party/skia/modules/skottie/src/Adapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/Animator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Animator.h
