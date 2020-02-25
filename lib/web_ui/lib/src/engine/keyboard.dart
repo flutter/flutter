@@ -68,6 +68,10 @@ class Keyboard {
   static const JSONMessageCodec _messageCodec = JSONMessageCodec();
 
   void _handleHtmlEvent(html.KeyboardEvent event) {
+    if (ui.window.onPlatformMessage == null) {
+      return;
+    }
+
     if (_shouldIgnoreEvent(event)) {
       return;
     }
