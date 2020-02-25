@@ -668,7 +668,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     int exitCode = 0;
     if (_process != null) {
       _debugPrint('Waiting for process to end...');
-      exitCode = await _process.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);      
+      exitCode = await _process.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
     }
     if (_processPid != null) {
       exitCode = await _killGracefully();
