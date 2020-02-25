@@ -106,11 +106,10 @@ class TestCommand extends FlutterCommand {
         help: 'The platform to run the unit tests on. Defaults to "tester".',
       )
       ..addOption('test-randomize-ordering-seed',
-        defaultsTo: '0',
-        help: 'If positive, use this as a seed to randomize the execution of '
-              'test cases (must be a 32bit unsigned integer).\n'
+        help: 'The seed to randomize the execution order of test cases.\n'
+              'Must be a 32bit unsigned integer or "random".\n'
               'If "random", pick a random seed to use.\n'
-              'If 0 or not set, do not randomize test case execution order.',
+              'If not passed, do not randomize test case execution order.',
       )
       ..addFlag('enable-vmservice',
         defaultsTo: false,
