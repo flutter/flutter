@@ -44,6 +44,89 @@ Duration timeAction(VoidCallback action) {
   return stopwatch.elapsed;
 }
 
+/// Base class for benchmark recorders.
+///
+/// Each benchmark recorder has a [name] and a [run] method at a minimum.
+abstract class Recorder<T extends Profile<dynamic>> {
+  const Recorder._(this.name);
+
+  /// The name of the benchmark.
+  ///
+  /// The results displayed in the Flutter Dashboard will use this name as a
+  /// prefix.
+  final String name;
+
+  /// The implementation of the benchmark that will produce a [Profile].
+  Future<T> run();
+}
+
+/// A recorder for benchmarking raw execution of Dart code.
+///
+/// This is useful for benchmarks that don't need frames or widgets.
+///
+/// Example:
+///
+/// ```
+/// class BenchForLoop extends RawRecorder {
+///   BenchForLoop() : super(name: benchmarkName);
+///
+///   static const String benchmarkName = 'for_loop';
+///
+///   @override
+///   void body() {
+///     double x = 0;
+///     for (int i = 0; i < 10000000; i++) {
+///       x *= 1.5;
+///     }
+///   }
+/// }
+/// ```
+abstract class RawRecorder extends Recorder<RawProfile> {
+  RawRecorder({@required String name}) : super._(name);
+
+  /// Called before each benchmark run.
+  ///
+  /// This is useful for doing any setup work that's needed for the benchmark,
+  /// but shouldn't count towards the benchmark numbers.
+  void setUp() {}
+
+  /// Called after each benchmark run.
+  ///
+  /// This is useful for doing clean up work that shouldn't count towards
+  /// benchmark numbers.
+  void tearDown() {}
+
+  /// The body of the benchmark.
+  ///
+  /// This is the part that will be measured by the benchmark.
+  void body();
+
+  final List<Duration> _durations = <Duration>[];
+
+  @override
+  @nonVirtual
+  Future<RawProfile> run() async {
+    RawProfile profile;
+    do {
+      await Future<void>.value(null);
+      _durations.add(_runOnce());
+      profile = generateProfile();
+    } while (profile.shouldContinue());
+    return profile;
+  }
+
+  Duration _runOnce() {
+    setUp();
+    final Duration duration = timeAction(body);
+    tearDown();
+    return duration;
+  }
+
+  RawProfile generateProfile() {
+    return RawProfile.fromDurations(name: name, durations: _durations);
+  }
+}
+
 /// A recorder for benchmarking interactions with the engine without the
 /// framework by directly exercising [SceneBuilder].
 ///
@@ -52,7 +135,7 @@ Duration timeAction(VoidCallback action) {
 /// Example:
 ///
 /// ```
-/// class BenchDrawCircle extends RawRecorder {
+/// class BenchDrawCircle extends SceneBuilderRecorder {
 ///   BenchDrawCircle() : super(name: benchmarkName);
 ///
 ///   static const String benchmarkName = 'draw_circle';
@@ -69,8 +152,8 @@ Duration timeAction(VoidCallback action) {
 ///   }
 /// }
 /// ```
-abstract class RawRecorder extends Recorder {
-  RawRecorder({@required String name}) : super._(name);
+abstract class SceneBuilderRecorder extends FrameRecorder {
+  SceneBuilderRecorder({@required String name}) : super._(name);
 
   /// Called from [Window.onBeginFrame].
   @mustCallSuper
@@ -87,8 +170,8 @@ abstract class RawRecorder extends Recorder {
   void onDrawFrame(SceneBuilder sceneBuilder);
 
   @override
-  Future<Profile> run() {
-    final Completer<Profile> profileCompleter = Completer<Profile>();
+  Future<FrameProfile> run() {
+    final Completer<FrameProfile> profileCompleter = Completer<FrameProfile>();
     window.onBeginFrame = (_) {
       onBeginFrame();
     };
@@ -110,10 +193,11 @@ abstract class RawRecorder extends Recorder {
         sceneBuildDuration: sceneBuildDuration,
         windowRenderDuration: windowRenderDuration,
       ));
-      if (_shouldContinue()) {
+
+      final FrameProfile profile = generateProfile();
+      if (profile.shouldContinue()) {
         window.scheduleFrame();
       } else {
-        final Profile profile = _generateProfile();
         profileCompleter.complete(profile);
       }
     };
@@ -183,7 +267,8 @@ abstract class RawRecorder extends Recorder {
 ///   }
 /// }
 /// ```
-abstract class WidgetRecorder extends Recorder implements _RecordingWidgetsBindingListener {
+abstract class WidgetRecorder extends FrameRecorder
+    implements RecordingWidgetsBindingListener {
   WidgetRecorder({@required String name}) : super._(name);
 
   /// Creates a widget to be benchmarked.
@@ -194,7 +279,7 @@ abstract class WidgetRecorder extends Recorder implements _RecordingWidgetsBindi
   /// low.
   Widget createWidget();
 
-  final Completer<Profile> _profileCompleter = Completer<Profile>();
+  final Completer<FrameProfile> _profileCompleter = Completer<FrameProfile>();
 
   Stopwatch _drawFrameStopwatch;
 
@@ -210,10 +295,11 @@ abstract class WidgetRecorder extends Recorder implements _RecordingWidgetsBindi
       sceneBuildDuration: null,
       windowRenderDuration: null,
     ));
-    if (_shouldContinue()) {
+
+    final FrameProfile profile = generateProfile();
+    if (profile.shouldContinue()) {
       window.scheduleFrame();
     } else {
-      final Profile profile = _generateProfile();
       _profileCompleter.complete(profile);
     }
   }
@@ -224,7 +310,7 @@ abstract class WidgetRecorder extends Recorder implements _RecordingWidgetsBindi
   }
 
   @override
-  Future<Profile> run() {
+  Future<FrameProfile> run() {
     final _RecordingWidgetsBinding binding =
         _RecordingWidgetsBinding.ensureInitialized();
     final Widget widget = createWidget();
@@ -240,7 +326,8 @@ abstract class WidgetRecorder extends Recorder implements _RecordingWidgetsBindi
 /// another frame that clears the screen. It repeats this process, measuring the
 /// performance of frames that render the widget and ignoring the frames that
 /// clear the screen.
-abstract class WidgetBuildRecorder extends Recorder implements _RecordingWidgetsBindingListener {
+abstract class WidgetBuildRecorder extends FrameRecorder
+    implements RecordingWidgetsBindingListener {
   WidgetBuildRecorder({@required String name}) : super._(name);
 
   /// Creates a widget to be benchmarked.
@@ -250,7 +337,7 @@ abstract class WidgetBuildRecorder extends Recorder implements _RecordingWidgets
   /// consider using [WidgetRecorder].
   Widget createWidget();
 
-  final Completer<Profile> _profileCompleter = Completer<Profile>();
+  final Completer<FrameProfile> _profileCompleter = Completer<FrameProfile>();
 
   Stopwatch _drawFrameStopwatch;
 
@@ -285,11 +372,12 @@ abstract class WidgetBuildRecorder extends Recorder implements _RecordingWidgets
         windowRenderDuration: null,
       ));
     }
-    if (_shouldContinue()) {
+
+    final FrameProfile profile = generateProfile();
+    if (profile.shouldContinue()) {
       _showWidget = !_showWidget;
       _hostState._setStateTrampoline();
     } else {
-      final Profile profile = _generateProfile();
       _profileCompleter.complete(profile);
     }
   }
@@ -300,7 +388,7 @@ abstract class WidgetBuildRecorder extends Recorder implements _RecordingWidgets
   }
 
   @override
-  Future<Profile> run() {
+  Future<FrameProfile> run() {
     final _RecordingWidgetsBinding binding =
         _RecordingWidgetsBinding.ensureInitialized();
     binding._beginRecording(this, _WidgetBuildRecorderHost(this));
@@ -315,7 +403,8 @@ class _WidgetBuildRecorderHost extends StatefulWidget {
   final WidgetBuildRecorder recorder;
 
   @override
-  State<StatefulWidget> createState() => recorder._hostState = _WidgetBuildRecorderHostState();
+  State<StatefulWidget> createState() =>
+      recorder._hostState = _WidgetBuildRecorderHostState();
 }
 
 class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
@@ -333,40 +422,78 @@ class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
 }
 
 /// Pumps frames and records frame metrics.
-abstract class Recorder {
-  Recorder._(this.name);
-
-  /// The name of the benchmark being recorded.
-  final String name;
+abstract class FrameRecorder extends Recorder<FrameProfile> {
+  FrameRecorder._(String name) : super._(name);
 
   /// Frame metrics recorded during a single benchmark run.
   final List<FrameMetrics> _frames = <FrameMetrics>[];
 
-  /// Runs the benchmark and records a profile containing frame metrics.
-  Future<Profile> run();
+  FrameProfile generateProfile() {
+    return FrameProfile.fromFrames(name: name, frames: _frames);
+  }
+}
+
+/// Base class for a profile collected from running a benchmark.
+@immutable
+abstract class Profile<T> {
+  Profile._(this.name, this.entirePopulation)
+      : assert(name != null),
+        assert(entirePopulation != null),
+        measuredPopulation = _getMeasuredSample(entirePopulation);
+
+  /// The name of the benchmark that produced this profile.
+  final String name;
+
+  /// The entire population collected in the benchmark.
+  final List<T> entirePopulation;
+
+  /// Subset of [entirePopulation] that is considered for benchmark measurement.
+  final List<T> measuredPopulation;
+
+  /// List of times in μs mapped from [measuredPopulation].
+  List<int> get measuredMicros =>
+      measuredPopulation.map(getMicrosFromValue).toList();
+
+  double get _average => _computeMean(measuredMicros);
+
+  double get _standardDeviation =>
+      _computeStandardDeviationForPopulation(measuredMicros);
+
+  double get _noise => _standardDeviation / _average;
+
+  String get _noiseString => '${(_noise * 100).toStringAsFixed(2)}%';
+
+  /// Returns the time in μs for the given value from the population.
+  int getMicrosFromValue(T value);
+
+  /// Returns a JSON representation of the profile that will be sent to the
+  /// server.
+  Map<String, dynamic> toJson();
+
+  /// Returns a description of the [Profile] that will be formatted and printed
+  /// to the console/terminal.
+  List<String> toDescription();
 
   /// Decides whether the data collected so far is sufficient to stop, or
   /// whether the benchmark should continue collecting more data.
   ///
   /// The signals used are sample size, noise, and duration.
-  bool _shouldContinue() {
-    // Run through a minimum number of frames.
-    if (_frames.length < _kMinSampleCount) {
+  bool shouldContinue() {
+    // Collect enough population before considering to stop.
+    if (entirePopulation.length < _kMinSampleCount) {
       return true;
     }
 
-    final Profile profile = _generateProfile();
-
     // Is it still too noisy?
-    if (profile.drawFrameDurationNoise > _kNoiseThreshold) {
+    if (_noise > _kNoiseThreshold) {
       // If the benchmark has run long enough, stop it, even if it's noisy under
       // the assumption that this benchmark is always noisy and there's nothing
       // we can do about it.
-      if (_frames.length > _kMaxSampleCount) {
+      if (entirePopulation.length > _kMaxSampleCount) {
         print(
           'WARNING: Benchmark noise did not converge below ${_kNoiseThreshold * 100}%. '
           'Stopping because it reached the maximum number of samples $_kMaxSampleCount. '
-          'Noise level is ${profile.drawFrameDurationNoise * 100}%.',
+          'Noise level is $_noiseString.',
         );
         return false;
       }
@@ -377,78 +504,87 @@ abstract class Recorder {
 
     print(
       'SUCCESS: Benchmark converged below ${_kNoiseThreshold * 100}%. '
-      'Noise level is ${profile.drawFrameDurationNoise * 100}%.',
+      'Noise level is $_noiseString.',
     );
     return false;
   }
 
-  Profile _generateProfile() {
-    final List<FrameMetrics> measuredFrames =
-        _frames.sublist(_frames.length - _kMeasuredSampleCount);
-    final Iterable<double> noiseCheckDrawFrameTimes =
-        measuredFrames.map<double>((FrameMetrics metric) =>
-            metric.drawFrameDuration.inMicroseconds.toDouble());
-    final double averageDrawFrameDurationMicros =
-        _computeMean(noiseCheckDrawFrameTimes);
-    final double standardDeviation =
-        _computeStandardDeviationForPopulation(noiseCheckDrawFrameTimes);
-    final double drawFrameDurationNoise =
-        standardDeviation / averageDrawFrameDurationMicros;
+  @override
+  String toString() {
+    return _formatToStringLines(toDescription());
+  }
+}
 
-    return Profile._(
-      name: name,
-      averageDrawFrameDuration:
-          Duration(microseconds: averageDrawFrameDurationMicros.toInt()),
-      drawFrameDurationNoise: drawFrameDurationNoise,
-      frames: measuredFrames,
-    );
+/// Contains metrics for raw benchmark runs that only record durations.
+@immutable
+class RawProfile extends Profile<Duration> {
+  RawProfile.fromDurations({
+    @required String name,
+    @required List<Duration> durations,
+  }) : super._(name, durations);
+
+  @override
+  int getMicrosFromValue(Duration value) => value.inMicroseconds;
+
+  @override
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'benchmarkScoreKeys': <String>['average'],
+      'name': name,
+      'average': _average,
+      'noise': _noise,
+      'durations': measuredMicros,
+    };
+  }
+
+  @override
+  List<String> toDescription() {
+    return <String>[
+      'benchmark: $name',
+      'average: $_average μs',
+      'noise: $_noiseString',
+      'durations:',
+      ...measuredMicros.map((int duration) => '- $duration μs'),
+    ];
   }
 }
 
 /// Contains metrics for a series of rendered frames.
 @immutable
-class Profile {
-  Profile._({
-    @required this.name,
-    @required this.drawFrameDurationNoise,
-    @required this.averageDrawFrameDuration,
+class FrameProfile extends Profile<FrameMetrics> {
+  FrameProfile.fromFrames({
+    @required String name,
     @required List<FrameMetrics> frames,
-  }) : frames = List<FrameMetrics>.unmodifiable(frames);
+  }) : super._(name, frames);
 
-  /// The name of the benchmark that produced this profile.
-  final String name;
+  @override
+  int getMicrosFromValue(FrameMetrics value) {
+    return value.drawFrameDuration.inMicroseconds;
+  }
 
-  /// Average amount of time [Window.onDrawFrame] took.
-  final Duration averageDrawFrameDuration;
-
-  /// The noise, as a fraction of [averageDrawFrameDuration], measure from the [frames].
-  final double drawFrameDurationNoise;
-
-  /// Frame metrics recorded during a single benchmark run.
-  final List<FrameMetrics> frames;
-
+  @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'name': name,
-      'scoreKeys': <String>['averageDrawFrameDuration'],
-      'averageDrawFrameDuration': averageDrawFrameDuration.inMicroseconds,
-      'drawFrameDurationNoise': drawFrameDurationNoise,
-      'frames': frames
+      'benchmarkScoreKeys': <String>['averageDrawFrameDuration'],
+      'averageDrawFrameDuration': _average,
+      'drawFrameDurationNoise': _noise,
+      'frames': measuredPopulation
           .map((FrameMetrics frameMetrics) => frameMetrics.toJson())
           .toList(),
     };
   }
 
   @override
-  String toString() {
-    return _formatToStringLines(<String>[
+  List<String> toDescription() {
+    return <String>[
       'benchmark: $name',
-      'averageDrawFrameDuration: ${averageDrawFrameDuration.inMicroseconds}μs',
-      'drawFrameDurationNoise: ${drawFrameDurationNoise * 100}%',
+      'averageDrawFrameDuration: $_average μs',
+      'drawFrameDurationNoise: $_noiseString',
       'frames:',
-      ...frames.expand((FrameMetrics frame) =>
+      ...measuredPopulation.expand((FrameMetrics frame) =>
           '$frame\n'.split('\n').map((String line) => '- $line\n')),
-    ]);
+    ];
   }
 }
 
@@ -498,9 +634,20 @@ String _formatToStringLines(List<String> lines) {
       .join('\n');
 }
 
+List<T> _getMeasuredSample<T>(List<T> population) {
+  if (population.length <= _kMeasuredSampleCount) {
+    return List<T>.unmodifiable(population);
+  }
+
+  // We only want the last [_kMeasuredSampleCount] items.
+  return List<T>.unmodifiable(
+    population.sublist(population.length - _kMeasuredSampleCount),
+  );
+}
+
 /// Computes the arithmetic mean (or average) of given [values].
-double _computeMean(Iterable<double> values) {
-  final double sum = values.reduce((double a, double b) => a + b);
+double _computeMean(Iterable<num> values) {
+  final num sum = values.reduce((num a, num b) => a + b);
   return sum / values.length;
 }
 
@@ -511,20 +658,20 @@ double _computeMean(Iterable<double> values) {
 /// See also:
 ///
 /// * https://en.wikipedia.org/wiki/Standard_deviation
-double _computeStandardDeviationForPopulation(Iterable<double> population) {
+double _computeStandardDeviationForPopulation(Iterable<num> population) {
   final double mean = _computeMean(population);
   final double sumOfSquaredDeltas = population.fold<double>(
     0.0,
-    (double previous, double value) => previous += math.pow(value - mean, 2),
+    (double previous, num value) => previous += math.pow(value - mean, 2),
   );
   return math.sqrt(sumOfSquaredDeltas / population.length);
 }
 
 /// Implemented by recorders that use [_RecordingWidgetsBinding] to receive
 /// frame life-cycle calls.
-abstract class _RecordingWidgetsBindingListener {
-  /// Whether the binding should continue pumping frames.
-  bool _shouldContinue();
+abstract class RecordingWidgetsBindingListener {
+  /// Generate a profile for the benchmark runs up to this point in time.
+  Profile<dynamic> generateProfile();
 
   /// Called just before calling [SchedulerBinding.handleDrawFrame].
   void _frameWillDraw();
@@ -563,10 +710,10 @@ class _RecordingWidgetsBinding extends BindingBase
     return WidgetsBinding.instance as _RecordingWidgetsBinding;
   }
 
-  _RecordingWidgetsBindingListener _listener;
+  RecordingWidgetsBindingListener _listener;
   bool _hasErrored = false;
 
-  void _beginRecording(_RecordingWidgetsBindingListener recorder, Widget widget) {
+  void _beginRecording(RecordingWidgetsBindingListener recorder, Widget widget) {
     final FlutterExceptionHandler originalOnError = FlutterError.onError;
 
     // Fail hard and fast on errors. Benchmarks should not have any errors.
@@ -582,7 +729,7 @@ class _RecordingWidgetsBinding extends BindingBase
     runApp(widget);
   }
 
-  /// To avoid calling [Recorder._shouldContinue] every time [scheduleFrame] is
+  /// To avoid calling [Profile.shouldContinue] every time [scheduleFrame] is
   /// called, we cache this value at the beginning of the frame.
   bool _benchmarkStopped = false;
 
@@ -592,7 +739,7 @@ class _RecordingWidgetsBinding extends BindingBase
     if (_hasErrored) {
       return;
     }
-    _benchmarkStopped = !_listener._shouldContinue();
+    _benchmarkStopped = !_listener.generateProfile().shouldContinue();
     super.handleBeginFrame(rawTimeStamp);
   }
 

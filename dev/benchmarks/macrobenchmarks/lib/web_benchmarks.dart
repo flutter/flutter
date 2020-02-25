@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:html' as html;
 
+import 'package:macrobenchmarks/src/web/bench_text_layout.dart';
 import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
 
 import 'src/web/bench_build_material_checkbox.dart';
@@ -15,7 +16,7 @@ import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
 import 'src/web/recorder.dart';
 
-typedef RecorderFactory = Recorder Function();
+typedef RecorderFactory = Recorder<Profile<dynamic>> Function();
 
 /// List of all benchmarks that run in the devicelab.
 ///
@@ -27,6 +28,8 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
+  BenchTextDomLayout.benchmarkName: () => BenchTextDomLayout(),
+  BenchTextDomCachedLayout.benchmarkName: () => BenchTextDomCachedLayout(),
 };
 
 /// Whether we fell back to manual mode.
@@ -66,10 +69,10 @@ Future<void> _runBenchmark(String benchmarkName) async {
     return;
   }
 
-  final Recorder recorder = recorderFactory();
+  final Recorder<Profile<dynamic>> recorder = recorderFactory();
 
   try {
-    final Profile profile = await recorder.run();
+    final Profile<dynamic> profile = await recorder.run();
     if (!isInManualMode) {
       final html.HttpRequest request = await html.HttpRequest.request(
         '/profile-data',
