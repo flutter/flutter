@@ -124,34 +124,28 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       height: _overflowOpen ? null : _kToolbarHeight,
       child: Material(
         elevation: 1.0,
-        child: AnimatedSize(
-          vsync: this,
-          // This duration was eyeballed on a Pixel 2 emulator running Android
-          // API 28.
-          duration: const Duration(milliseconds: 140),
-          child: _TextSelectionToolbarItems(
-            isAbove: widget.isAbove,
-            overflowOpen: _overflowOpen,
-            children: <Widget>[
-              // The navButton that shows and hides the overflow menu is the first
-              // child.
-              Material(
-                child: IconButton(
-                  // TODO(justinmc): This should be an AnimatedIcon, but
-                  // AnimatedIcons doesn't yet support arrow_back to more_vert.
-                  // https://github.com/flutter/flutter/issues/51209
-                  icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
-                  onPressed: () {
-                    setState(() {
-                      _overflowOpen = !_overflowOpen;
-                    });
-                  },
-                  tooltip: _overflowOpen ? 'Back' : 'More',
-                ),
+        child: _TextSelectionToolbarItems(
+          isAbove: widget.isAbove,
+          overflowOpen: _overflowOpen,
+          children: <Widget>[
+            // The navButton that shows and hides the overflow menu is the first
+            // child.
+            Material(
+              child: IconButton(
+                // TODO(justinmc): This should be an AnimatedIcon, but
+                // AnimatedIcons doesn't yet support arrow_back to more_vert.
+                // https://github.com/flutter/flutter/issues/51209
+                icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
+                onPressed: () {
+                  setState(() {
+                    _overflowOpen = !_overflowOpen;
+                  });
+                },
+                tooltip: _overflowOpen ? 'Back' : 'More',
               ),
-              ...items,
-            ],
-          ),
+            ),
+            ...items,
+          ],
         ),
       ),
     );
