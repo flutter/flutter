@@ -170,6 +170,17 @@ void main() {
       ProcessManager: () => MockProcessManager(failGitTag: true),
       Stdio: () => mockStdio,
     });
+
+    testUsingContext('Does not run pub when outside a project', () async {
+      final VersionCommand command = VersionCommand();
+      await createTestCommandRunner(command).run(<String>[
+        'version',
+      ]);
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => MockProcessManager(),
+      Stdio: () => mockStdio,
+    });
   });
 }
 
