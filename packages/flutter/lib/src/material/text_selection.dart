@@ -339,7 +339,6 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   @override
   void paint(PaintingContext context, Offset offset) {
     int i = -1;
-    bool fits = true;
     visitChildren((RenderObject renderObjectChild) {
       i++;
       if (!_shouldPaintChild(renderObjectChild, i)) {
