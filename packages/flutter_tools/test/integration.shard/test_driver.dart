@@ -17,6 +17,7 @@ import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
 import '../src/common.dart';
+import 'test_utils.dart';
 
 // Set this to true for debugging to get verbose logs written to stdout.
 // The logs include the following:
@@ -173,7 +174,7 @@ abstract class FlutterTestDriver {
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     ProcessSignal.SIGTERM.send(_processPid);
-    await _tryWaitForPidDeath(_processPid);
+    await tryWaitForPidDeath(_processPid);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
@@ -181,46 +182,9 @@ abstract class FlutterTestDriver {
     print('killing forcefully');
     _debugPrint('Sending SIGKILL to $_processPid..');
     ProcessSignal.SIGKILL.send(_processPid);
-    await _tryWaitForPidDeath(_processPid);
+    await tryWaitForPidDeath(_processPid);
     return _process.exitCode;
   }
-
-  // TODO(dnfield): This is racy. If dart-lang/sdk#40759 can be resolved, we
-  // should remove this.
-  Future<void> _tryWaitForPidDeath(int pid, { int tries = 10 }) {
-    if (globals.platform.isWindows) {
-      return _tryWaitForWindowsPidDeath(pid, tries);
-    }
-    return _tryWaitForPosixPidDeath(pid, tries);
-  }
-
-  Future<void> _tryWaitForPosixPidDeath(int pid, int tries) async {
-    for (int i = 0; i < tries; i+= 1) {
-      final ProcessResult result = await globals.processManager.run(<String>[
-        'kill',
-        '-0',
-        pid.toString(),
-      ]);
-      if (result.exitCode != 0) {
-        return;
-      }
-    }
-  }
-
-  Future<void> _tryWaitForWindowsPidDeath(int pid, int tries) async {
-    for (int i = 0; i < tries; i += 1) {
-      final ProcessResult result = await globals.processManager.run(<String>[
-        'tasklist',
-        '/fi',
-        'PID eq $pid',
-      ]);
-      if ((result.stdout as String).contains('INFO: No tasks are running which match the specified criteria.')) {
-        return;
-      }
-      await Future<void>.delayed(const Duration(seconds: 1));
-    }
-  }
-
 
   String _flutterIsolateId;
   Future<String> _getFlutterIsolateId() async {
