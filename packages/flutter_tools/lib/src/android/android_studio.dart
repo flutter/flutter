@@ -41,14 +41,14 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     String studioPath = globals.fs.path.join(bundlePath, 'Contents');
     String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
-    Map<String, dynamic> plistValues = PlistParser.instance.parseFile(plistFile);
+    Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
     // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
     // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
     final String jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'] as String;
     if (jetBrainsToolboxAppBundlePath != null) {
       studioPath = globals.fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
       plistFile = globals.fs.path.join(studioPath, 'Info.plist');
-      plistValues = PlistParser.instance.parseFile(plistFile);
+      plistValues = globals.plistParser.parseFile(plistFile);
     }
 
     final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String;
