@@ -2,22 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
 import '../base/file_system.dart';
-import '../globals.dart' as globals;
 
 /// A utility class for interacting with Visual Studio project files (e.g.,
 /// .vcxproj).
 class VisualStudioProject {
   /// Creates a project object from the project file at [file].
-  VisualStudioProject(this.file) {
+  VisualStudioProject(this.file, {
+    @required FileSystem fileSystem,
+  }): _fileSystem = fileSystem {
     try {
       content = xml.parse(file.readAsStringSync());
     } on xml.XmlParserException {
       // Silently continue; formatUnderstood will return false.
     }
   }
+
+  final FileSystem _fileSystem;
 
   /// The file corresponding to this object.
   final File file;
@@ -31,8 +35,14 @@ class VisualStudioProject {
   /// it's an unsupported project type.
   bool get formatUnderstood => content != null;
 
+  String _guid;
+
   /// Returns the ProjectGuid for the project, or null if it's not present.
   String get guid {
+    return _guid ??= _findGuid();
+  }
+
+  String _findGuid() {
     if (!formatUnderstood) {
       return null;
     }
@@ -46,11 +56,17 @@ class VisualStudioProject {
     }
   }
 
+  String _name;
+
   /// Returns the ProjectName for the project.
   ///
   /// If not explicitly set in the project, uses the basename of the project
   /// file.
   String get name {
+    return _name ??= _findName();
+  }
+
+  String _findName() {
     if (!formatUnderstood) {
       return null;
     }
@@ -58,7 +74,7 @@ class VisualStudioProject {
       return content.findAllElements('ProjectName').first.text.trim();
     } on StateError {
       // If there is no name, fall back to filename.
-      return globals.fs.path.basenameWithoutExtension(file.path);
+      return _fileSystem.path.basenameWithoutExtension(file.path);
     }
   }
 }

@@ -5,11 +5,9 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/windows/visual_studio_project.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   group('Visual Studio Project', () {
@@ -55,63 +53,53 @@ void main() {
 </Project>''';
     }
 
-    testUsingContext('Property extraction works on a simple vcxproj', () async {
+    test('Property extraction works on a simple vcxproj', () async {
+      final FileSystem fileSystem = MemoryFileSystem();
       const String guid = '017C4BAC-FEBA-406D-8A2C-3099FFE9D811';
       const String name = 'Test';
-      final File projectFile = globals.fs.file('aproject.vcxproj');
+      final File projectFile = fileSystem.file('aproject.vcxproj');
       projectFile.writeAsStringSync(generateProjectContents(guid: guid, name: name));
 
-      final VisualStudioProject project = VisualStudioProject(projectFile);
+      final VisualStudioProject project = VisualStudioProject(projectFile, fileSystem: fileSystem);
       expect(project.formatUnderstood, true);
       expect(project.guid, guid);
       expect(project.name, name);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Missing GUID returns null', () async {
-      final File projectFile = globals.fs.file('aproject.vcxproj');
+    test('Missing GUID returns null', () async {
+      final FileSystem fileSystem = MemoryFileSystem();
+      final File projectFile = fileSystem.file('aproject.vcxproj');
       projectFile.writeAsStringSync(generateProjectContents());
 
-      final VisualStudioProject project = VisualStudioProject(projectFile);
+      final VisualStudioProject project = VisualStudioProject(projectFile, fileSystem: fileSystem);
       expect(project.formatUnderstood, true);
       expect(project.guid, null);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Missing project name uses filename', () async {
-      final File projectFile = globals.fs.file('aproject.vcxproj');
+    test('Missing project name uses filename', () async {
+      final FileSystem fileSystem = MemoryFileSystem();
+      final File projectFile = fileSystem.file('aproject.vcxproj');
       projectFile.writeAsStringSync(generateProjectContents());
 
-      final VisualStudioProject project = VisualStudioProject(projectFile);
+      final VisualStudioProject project = VisualStudioProject(projectFile, fileSystem: fileSystem);
       expect(project.formatUnderstood, true);
       expect(project.name, 'aproject');
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Unknown file contents creates an object, and return false for formatUnderstood', () async {
-      final File projectFile = globals.fs.file('aproject.vcxproj');
+    test('Unknown file contents creates an object, and return false for formatUnderstood', () async {
+      final FileSystem fileSystem = MemoryFileSystem();
+      final File projectFile = fileSystem.file('aproject.vcxproj');
       projectFile.writeAsStringSync('This is not XML!');
 
-      final VisualStudioProject project = VisualStudioProject(projectFile);
+      final VisualStudioProject project = VisualStudioProject(projectFile, fileSystem: fileSystem);
       expect(project.formatUnderstood, false);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Missing project file throws on creation', () async {
-      final File projectFile = globals.fs.file('aproject.vcxproj');
+    test('Missing project file throws on creation', () async {
+      final FileSystem fileSystem = MemoryFileSystem();
+      final File projectFile = fileSystem.file('aproject.vcxproj');
 
-      expect(() => VisualStudioProject(projectFile), throwsFileSystemException());
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+      expect(() => VisualStudioProject(projectFile, fileSystem: fileSystem), throwsFileSystemException());
     });
   });
 }

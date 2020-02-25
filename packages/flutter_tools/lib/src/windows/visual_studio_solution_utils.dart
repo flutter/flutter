@@ -12,24 +12,24 @@ import 'visual_studio_project.dart';
 
 // Constants corresponding to specific reference types in a solution file.
 // These values are defined by the .sln format.
-const String _solutionTypeGuidFolder = '2150E333-8FDC-42A3-9474-1A3956D46DE8';
-const String _solutionTypeGuidVcxproj = '8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942';
+const String _kSolutionTypeGuidFolder = '2150E333-8FDC-42A3-9474-1A3956D46DE8';
+const String _kSolutionTypeGuidVcxproj = '8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942';
 
 // The GUID for the folder above, managed by this class. This is an arbitrary
 // value that was randomly generated, but it should not be changed since that
 // would cause issues for existing Flutter projects.
-const String _flutterPluginSolutionFolderGuid = '5C2E738A-1DD3-445A-AAC8-EEB9648DD07C';
+const String _kFlutterPluginSolutionFolderGuid = '5C2E738A-1DD3-445A-AAC8-EEB9648DD07C';
 // The FlutterBuild project GUID. This is an arbitrary
 // value that was randomly generated, but it should not be changed since that
 // would cause issues for existing Flutter projects.
-const String _flutterBuildProjectGuid = '6419BF13-6ECD-4CD2-9E85-E566A1F03F8F';
+const String _kFlutterBuildProjectGuid = '6419BF13-6ECD-4CD2-9E85-E566A1F03F8F';
 
 /// Extracts and stores the plugin name and vcxproj GUID for [plugin].
 class _PluginProjectInfo {
   _PluginProjectInfo(Plugin plugin) {
     name = plugin.name;
     final File projectFile = globals.fs.directory(plugin.path).childDirectory('windows').childFile('plugin.vcxproj');
-    guid = VisualStudioProject(projectFile).guid;
+    guid = VisualStudioProject(projectFile, fileSystem: globals.fs).guid;
     if (guid == null) {
       throwToolExit('Unable to find a plugin.vcxproj for plugin "$name"');
     }
@@ -67,8 +67,8 @@ Future<void> updatePluginsInSolution(WindowsProject project, List<Plugin> plugin
   final Set<String> removedPlugins = existingPlugins.difference(currentPlugins);
   final Set<String> addedPlugins = currentPlugins.difference(existingPlugins);
 
-  final RegExp projectStartPattern = RegExp(r'^Project\("{' + _solutionTypeGuidVcxproj + r'}"\)\s*=\s*".*",\s*"(.*)",\s*"{([A-Fa-f0-9\-]*)}"\s*$');
-  final RegExp pluginsFolderProjectStartPattern = RegExp(r'^Project\("{' + _solutionTypeGuidFolder + r'}"\)\s*=.*"{' + _flutterPluginSolutionFolderGuid + r'}"\s*$');
+  final RegExp projectStartPattern = RegExp(r'^Project\("{' + _kSolutionTypeGuidVcxproj + r'}"\)\s*=\s*".*",\s*"(.*)",\s*"{([A-Fa-f0-9\-]*)}"\s*$');
+  final RegExp pluginsFolderProjectStartPattern = RegExp(r'^Project\("{' + _kSolutionTypeGuidFolder + r'}"\)\s*=.*"{' + _kFlutterPluginSolutionFolderGuid + r'}"\s*$');
   final RegExp projectEndPattern = RegExp(r'^EndProject\s*$');
   final RegExp globalStartPattern = RegExp(r'^Global\s*$');
   final RegExp globalEndPattern = RegExp(r'^EndGlobal\s*$');
@@ -186,9 +186,9 @@ void _skipUntil(Iterator<String> iterator, RegExp pattern) {
 /// [name].
 void _writePluginProjectEntry(String guid, String name, StringBuffer output) {
   output.write('''
-Project("{$_solutionTypeGuidVcxproj}") = "$name", "Flutter\\ephemeral\\.plugin_symlinks\\$name\\windows\\plugin.vcxproj", "{$guid}"\r
+Project("{$_kSolutionTypeGuidVcxproj}") = "$name", "Flutter\\ephemeral\\.plugin_symlinks\\$name\\windows\\plugin.vcxproj", "{$guid}"\r
 \tProjectSection(ProjectDependencies) = postProject\r
-\t\t{$_flutterBuildProjectGuid} = {$_flutterBuildProjectGuid}\r
+\t\t{$_kFlutterBuildProjectGuid} = {$_kFlutterBuildProjectGuid}\r
 \tEndProjectSection\r
 EndProject\r
 ''');
@@ -198,7 +198,7 @@ EndProject\r
 void _writePluginFolderProjectEntry(StringBuffer output) {
   const String folderName = 'Flutter Plugins';
   output.write('''
-Project("{$_solutionTypeGuidFolder}") = "$folderName", "$folderName", "{$_flutterPluginSolutionFolderGuid}"\r
+Project("{$_kSolutionTypeGuidFolder}") = "$folderName", "$folderName", "{$_kFlutterPluginSolutionFolderGuid}"\r
 EndProject\r
 ''');
 }
@@ -219,7 +219,7 @@ Set<String> _findPreviousPluginGuids(String solutionContent) {
   // Each line in that section has the form:
   //   {project GUID} = {solution folder GUID}
   final RegExp pluginFolderChildrenPattern = RegExp(
-      r'^\s*{([A-Fa-f0-9\-]*)}\s*=\s*{' + _flutterPluginSolutionFolderGuid + r'}\s*$',
+      r'^\s*{([A-Fa-f0-9\-]*)}\s*=\s*{' + _kFlutterPluginSolutionFolderGuid + r'}\s*$',
       multiLine: true,
   );
   return pluginFolderChildrenPattern
@@ -305,7 +305,7 @@ void _writePluginConfigurationEntries(String guid, StringBuffer output) {
 /// Should be called within the context of writing
 /// GlobalSection(NestedProjects).
 void _writePluginNestingEntry(String guid, StringBuffer output) {
-  output.writeln('\t\t{$guid} = {$_flutterPluginSolutionFolderGuid}\r');
+  output.writeln('\t\t{$guid} = {$_kFlutterPluginSolutionFolderGuid}\r');
 }
 
 /// Writes the entrie to make a project depend on another project with the
