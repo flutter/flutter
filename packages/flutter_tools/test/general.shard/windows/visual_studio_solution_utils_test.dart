@@ -398,6 +398,30 @@ EndGlobal''');
       final List<int> bomBytes = utf8.encode(String.fromCharCode(unicodeBomCharacterRune));
       expect(solutionStartingBytes, bomBytes);
     });
+
+    test('Updating solution dosen\'t introduce unexpected whitespace', () async {
+      writeSolutionWithPlugins();
+
+      final List<Plugin> plugins = <Plugin>[
+        getMockPlugin('plugin_a', pluginAGuid),
+        getMockPlugin('plugin_b', pluginBGuid),
+      ];
+      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
+
+      final String newSolutionContents = project.solutionFile.readAsStringSync();
+      // Project, EndProject, Global, and EndGlobal should be at the start of
+      // lines.
+      expect(RegExp(r'^[ \t]+Project\(', multiLine: true).hasMatch(newSolutionContents), false);
+      expect(RegExp(r'^[ \t]+EndProject\s*$', multiLine: true).hasMatch(newSolutionContents), false);
+      expect(RegExp(r'^[ \t]+Global\s*$', multiLine: true).hasMatch(newSolutionContents), false);
+      expect(RegExp(r'^[ \t]+EndGlobal\s*$', multiLine: true).hasMatch(newSolutionContents), false);
+      // ProjectSection, GlobalSection, and their ends should be indented
+      // exactly one tab.
+      expect(RegExp(r'^([ \t]+\t|\t[ \t]+)ProjectSection\(', multiLine: true).hasMatch(newSolutionContents), false);
+      expect(RegExp(r'^([ \t]+\t|\t[ \t]+)EndProjectSection\s*$', multiLine: true).hasMatch(newSolutionContents), false);
+      expect(RegExp(r'^([ \t]+\t|\t[ \t]+)GlobalSection\(\s*$', multiLine: true).hasMatch(newSolutionContents), false);
+      expect(RegExp(r'^([ \t]+\t|\t[ \t]+)EndGlobalSection\s*$', multiLine: true).hasMatch(newSolutionContents), false);
+    });
   });
 }
 

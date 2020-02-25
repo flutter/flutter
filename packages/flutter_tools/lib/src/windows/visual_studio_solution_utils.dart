@@ -202,21 +202,21 @@ class VisualStudioSolutionUtils {
   /// [name].
   void _writePluginProjectEntry(String guid, String name, StringBuffer output) {
     output.write('''
-  Project("{$_kSolutionTypeGuidVcxproj}") = "$name", "Flutter\\ephemeral\\.plugin_symlinks\\$name\\windows\\plugin.vcxproj", "{$guid}"\r
-  \tProjectSection(ProjectDependencies) = postProject\r
-  \t\t{$_kFlutterBuildProjectGuid} = {$_kFlutterBuildProjectGuid}\r
-  \tEndProjectSection\r
-  EndProject\r
-  ''');
+Project("{$_kSolutionTypeGuidVcxproj}") = "$name", "Flutter\\ephemeral\\.plugin_symlinks\\$name\\windows\\plugin.vcxproj", "{$guid}"\r
+\tProjectSection(ProjectDependencies) = postProject\r
+\t\t{$_kFlutterBuildProjectGuid} = {$_kFlutterBuildProjectGuid}\r
+\tEndProjectSection\r
+EndProject\r
+''');
   }
 
   /// Writes the main project entry for the Flutter Plugins solution folder.
   void _writePluginFolderProjectEntry(StringBuffer output) {
     const String folderName = 'Flutter Plugins';
     output.write('''
-  Project("{$_kSolutionTypeGuidFolder}") = "$folderName", "$folderName", "{$_kFlutterPluginSolutionFolderGuid}"\r
-  EndProject\r
-  ''');
+Project("{$_kSolutionTypeGuidFolder}") = "$folderName", "$folderName", "{$_kFlutterPluginSolutionFolderGuid}"\r
+EndProject\r
+''');
   }
 
   /// Writes a project dependencies section, depending on all the GUIDs in
