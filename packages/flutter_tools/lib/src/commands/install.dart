@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/io.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -54,11 +55,15 @@ Future<bool> installApp(Device device, ApplicationPackage package, { bool uninst
     return false;
   }
 
-  if (uninstall && await device.isAppInstalled(package)) {
-    globals.printStatus('Uninstalling old version...');
-    if (!await device.uninstallApp(package)) {
-      globals.printError('Warning: uninstalling old version failed');
+  try {
+    if (uninstall && await device.isAppInstalled(package)) {
+      globals.printStatus('Uninstalling old version...');
+      if (!await device.uninstallApp(package)) {
+        globals.printError('Warning: uninstalling old version failed');
+      }
     }
+  } on ProcessException catch (e) {
+    globals.printError('Error accessing device ${device.id}:\n${e.message}');
   }
 
   return device.installApp(package);
