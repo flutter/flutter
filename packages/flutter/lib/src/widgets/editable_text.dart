@@ -189,7 +189,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
   set selection(TextSelection newSelection) {
-    if (!isSelectionValid(newSelection))
+    if (!isSelectionWithinTextBounds(newSelection))
       throw FlutterError('invalid text selection: $newSelection');
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
@@ -221,9 +221,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     value = value.copyWith(composing: TextRange.empty);
   }
 
-  /// Check that the [selection] is valid, and not outside of the bounds of
-  /// [text].
-  bool isSelectionValid(TextSelection selection) {
+  /// Check that the [selection] is inside of the bounds of [text].
+  bool isSelectionWithinTextBounds(TextSelection selection) {
     return selection.start <= text.length && selection.end <= text.length;
   }
 }
@@ -1539,7 +1538,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // We return early if the selection is not valid. This can happen when the
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
-    if (!widget.controller.isSelectionValid(selection))
+    if (!widget.controller.isSelectionWithinTextBounds(selection))
       return;
 
     widget.controller.selection = selection;

@@ -3391,7 +3391,7 @@ void main() {
           controller: controller,
           decoration: InputDecoration(
             suffixIcon: IconButton(
-              icon: Icon(Icons.close),
+              icon: const Icon(Icons.close),
               onPressed: controller.clear,
             ),
           ),
