@@ -40,7 +40,7 @@ Future<void> _ensurePidDeathWindows(int pid, int tries) async {
     }
     await Future<void>.delayed(const Duration(seconds: 1));
   }
-  globals.printStatus('$pid still running after $tries seconds. Forcefully killing.');
+  print('$pid still running after $tries seconds. Forcefully killing.');
   await globals.processManager.run(<String>[
     'kill',
     '-9',
@@ -60,7 +60,7 @@ Future<void> _ensurePidDeathPosix(int pid, int tries) async {
     }
     await Future<void>.delayed(const Duration(seconds: 1));
   }
-  globals.printStatus('$pid still running after $tries seconds. Forcefully killing.');
+  print('$pid still running after $tries seconds. Forcefully killing.');
   await globals.processManager.run(<String>[
     'taskkill',
     '/pid',
