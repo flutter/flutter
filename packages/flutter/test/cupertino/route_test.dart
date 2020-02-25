@@ -11,10 +11,19 @@ import 'package:mockito/mockito.dart';
 
 import '../widgets/semantics_tester.dart';
 
+class _KeyClass {
+  const _KeyClass();
+}
+
 void main() {
   MockNavigatorObserver navigatorObserver;
 
+  Expando<Route<dynamic> Function()> routeMap = Expando<Route<dynamic> Function()>();
+
   setUp(() {
+    _KeyClass cupertinoPageRouteKey = _KeyClass();
+    routeMap[cupertinoPageRouteKey] = () => CupertinoPageRoute<dynamic>(builder: null);
+
     navigatorObserver = MockNavigatorObserver();
   });
 

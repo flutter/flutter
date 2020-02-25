@@ -319,7 +319,7 @@ class Container extends StatelessWidget {
        assert(clipBehavior != null),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'To provide both, use "decoration: new BoxDecoration(color: color)".'
+         'To provide both, use "decoration: BoxDecoration(color: color)".'
        ),
        constraints =
         (width != null || height != null)
