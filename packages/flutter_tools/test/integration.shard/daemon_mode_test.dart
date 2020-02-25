@@ -70,7 +70,9 @@ void main() {
     expect(result, isList);
     expect(result, isNotEmpty);
 
-    tryToDelete(tempDir);
     process.kill();
+    await process.exitCode;
+
+    tryToDelete(tempDir);
   });
 }
