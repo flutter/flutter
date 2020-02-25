@@ -483,6 +483,7 @@ task:
     MEMORY: 8G
   setup_script:
     - date
+    - ifconfig
     - which flutter
     - bundle --version
     - bundle config set system 'true'
@@ -499,6 +500,7 @@ task:
     failure_script:
       - date
       - which flutter
+      - ifconfig
   matrix:
     - name: framework_tests-widgets-macos
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
