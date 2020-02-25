@@ -149,7 +149,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Container(
-            width: 300,
+            width: width,
             child: CustomScrollView(
               primary: true,
               slivers: <Widget>[
