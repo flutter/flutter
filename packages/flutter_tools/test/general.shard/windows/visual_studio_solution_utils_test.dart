@@ -237,7 +237,7 @@ EndGlobal''');
       final List<Plugin> plugins = <Plugin>[
         getMockPlugin('plugin_a', pluginAGuid),
       ];
-      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -266,7 +266,7 @@ EndGlobal''');
         getMockPlugin('plugin_a', pluginAGuid),
         getMockPlugin('plugin_c', pluginCGuid),
       ];
-      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -287,7 +287,7 @@ EndGlobal''');
 
       final List<Plugin> plugins = <Plugin>[
       ];
-      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins( plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -307,7 +307,7 @@ EndGlobal''');
         getMockPlugin('plugin_c', pluginCGuid),
         getMockPlugin('plugin_d', pluginDGuid),
       ];
-      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
 
@@ -348,7 +348,7 @@ EndGlobal''');
         getMockPlugin('plugin_c', pluginCGuid),
         getMockPlugin('plugin_d', pluginDGuid),
       ];
-      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
       // There should only be:
@@ -373,7 +373,7 @@ EndGlobal''');
         getMockPlugin('plugin_c', pluginCGuid),
         getMockPlugin('plugin_d', pluginDGuid),
       ];
-      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
 
       final String newSolutionContents = project.solutionFile.readAsStringSync();
       // Plugin A should still be before Flutter Build in the Runner dependencies.
@@ -391,7 +391,7 @@ EndGlobal''');
       writeSolutionWithPlugins();
 
       final List<Plugin> plugins = <Plugin>[];
-      await VisualStudioSolutionUtils(fileSystem: fs).updatePlugins(project, plugins);
+      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
 
       // Visual Studio expects sln files to start with a BOM.
       final List<int> solutionStartingBytes = project.solutionFile.readAsBytesSync().take(3).toList();

@@ -47,19 +47,22 @@ class _PluginProjectInfo {
 
 class VisualStudioSolutionUtils {
   const VisualStudioSolutionUtils({
+    @required WindowsProject project,
     @required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem;
+  }) : _project = project,
+       _fileSystem = fileSystem;
 
+  final WindowsProject _project;
   final FileSystem _fileSystem;
 
   /// Updates the solution file for [project] to have the project references and
   /// dependencies to include [plugins], removing any previous plugins from the
   /// solution.
-  Future<void> updatePlugins(WindowsProject project, List<Plugin> plugins) async {
-    final String solutionContent = await project.solutionFile.readAsString();
+  Future<void> updatePlugins(List<Plugin> plugins) async {
+    final String solutionContent = await _project.solutionFile.readAsString();
 
     // Map of GUID to name for the current plugin list.
-    final Map<String, String> currentPluginInfo = _getWindowsPluginNamesByGuid(plugins, project.pluginConfigKey);
+    final Map<String, String> currentPluginInfo = _getWindowsPluginNamesByGuid(plugins);
 
     // Find any plugins referenced in the project that are no longer used, and
     // any that are new.
@@ -109,7 +112,7 @@ class VisualStudioSolutionUtils {
           // Drop the stale plugin project.
           _skipUntil(lineIterator, projectEndPattern);
           continue;
-        } else if (projectStartMatch.group(1) == project.vcprojFile.basename) {
+        } else if (projectStartMatch.group(1) == _project.vcprojFile.basename) {
           foundRunnerProject = true;
           // Update the Runner project's dependencies on the plugins.
           // Skip to the dependencies section, or if there isn't one the end of
@@ -175,10 +178,10 @@ class VisualStudioSolutionUtils {
     if (!foundRunnerProject) {
       throwToolExit(
           'Could not add plugins to Windows project:\n'
-          'Unable to find a "${project.vcprojFile.basename}" project in ${project.solutionFile.path}');
+          'Unable to find a "${_project.vcprojFile.basename}" project in ${_project.solutionFile.path}');
     }
 
-    await project.solutionFile.writeAsString(newSolutionContent.toString().trimRight());
+    await _project.solutionFile.writeAsString(newSolutionContent.toString().trimRight());
   }
 
   /// Advances [iterator] it reaches an element that matches [pattern].
@@ -239,10 +242,10 @@ class VisualStudioSolutionUtils {
 
   /// Returns a mapping of plugin project GUID to name for all the Windows plugins
   /// in [plugins].
-  Map<String, String> _getWindowsPluginNamesByGuid(List<Plugin> plugins, String platformKey) {
+  Map<String, String> _getWindowsPluginNamesByGuid(List<Plugin> plugins) {
     final Map<String, String> currentPluginInfo = <String, String>{};
     for (final Plugin plugin in plugins) {
-      if (plugin.platforms.containsKey(platformKey)) {
+      if (plugin.platforms.containsKey(_project.pluginConfigKey)) {
         final _PluginProjectInfo info = _PluginProjectInfo(plugin, fileSystem: _fileSystem);
         if (currentPluginInfo.containsKey(info.guid)) {
           throwToolExit('The plugins "${currentPluginInfo[info.guid]}" and "${info.name}" '
