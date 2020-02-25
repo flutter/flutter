@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
@@ -173,14 +174,54 @@ abstract class FlutterTestDriver {
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     ProcessSignal.SIGTERM.send(_processPid);
+    await _ensureDead(_processPid, 10);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
-  Future<int> _killForcefully() {
+  Future<int> _killForcefully() async {
+    print('killing forcefully');
     _debugPrint('Sending SIGKILL to $_processPid..');
     ProcessSignal.SIGKILL.send(_processPid);
+    await _ensureDead(_processPid, 10);
     return _process.exitCode;
   }
+
+  // TODO(dnfield): This is racy. If dart-lang/sdk#40759 can be resolved, we
+  // should remove this.
+  Future<void> _ensureDead(int pid, int tries) {
+    if (globals.platform.isWindows) {
+      return _ensureWindowsDead(pid, tries);
+    }
+    return _ensurePosixDead(pid, tries);
+  }
+
+  Future<void> _ensurePosixDead(int pid, int tries) async {
+    for (int i = 0; i < tries; i+= 1) {
+      final ProcessResult result = await globals.processManager.run(<String>[
+        'kill',
+        '-0',
+        pid.toString(),
+      ]);
+      if (result.exitCode != 0) {
+        return;
+      }
+    }
+  }
+
+  Future<void> _ensureWindowsDead(int pid, int tries) async {
+    for (int i = 0; i < tries; i += 1) {
+      final ProcessResult result = await globals.processManager.run(<String>[
+        'tasklist',
+        '/fi',
+        'PID eq $pid',
+      ]);
+      if ((result.stdout as String).contains('INFO: No tasks are running which match the specified criteria.')) {
+        return;
+      }
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+  }
+
 
   String _flutterIsolateId;
   Future<String> _getFlutterIsolateId() async {
@@ -624,11 +665,15 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       );
       _currentRunningAppId = null;
     }
+    int exitCode = 0;
     if (_process != null) {
       _debugPrint('Waiting for process to end...');
-      return _process.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
+      exitCode = await _process.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);      
     }
-    return 0;
+    if (_processPid != null) {
+      exitCode = await _killGracefully();
+    }
+    return exitCode;
   }
 
   int id = 1;

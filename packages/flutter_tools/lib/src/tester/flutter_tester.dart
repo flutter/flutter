@@ -203,6 +203,7 @@ class FlutterTesterDevice extends Device {
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
     _process?.kill();
+    await _process?.exitCode;
     _process = null;
     return true;
   }

@@ -25,14 +25,7 @@ export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Def
 test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 void tryToDelete(Directory directory) {
-  // This should not be necessary, but it turns out that
-  // on Windows it's common for deletions to fail due to
-  // bogus (we think) "access denied" errors.
-  try {
-    directory.deleteSync(recursive: true);
-  } on FileSystemException catch (error) {
-    print('Failed to delete ${directory.path}: $error');
-  }
+  directory.deleteSync(recursive: true);
 }
 
 /// Gets the path to the root of the Flutter repository.
