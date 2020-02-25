@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
@@ -174,7 +173,7 @@ abstract class FlutterTestDriver {
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     ProcessSignal.SIGTERM.send(_processPid);
-    await _ensureDead(_processPid, 10);
+    await _tryWaitForPidDeath(_processPid);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
@@ -182,20 +181,20 @@ abstract class FlutterTestDriver {
     print('killing forcefully');
     _debugPrint('Sending SIGKILL to $_processPid..');
     ProcessSignal.SIGKILL.send(_processPid);
-    await _ensureDead(_processPid, 10);
+    await _tryWaitForPidDeath(_processPid);
     return _process.exitCode;
   }
 
   // TODO(dnfield): This is racy. If dart-lang/sdk#40759 can be resolved, we
   // should remove this.
-  Future<void> _ensureDead(int pid, int tries) {
+  Future<void> _tryWaitForPidDeath(int pid, { int tries = 10 }) {
     if (globals.platform.isWindows) {
-      return _ensureWindowsDead(pid, tries);
+      return _tryWaitForWindowsPidDeath(pid, tries);
     }
-    return _ensurePosixDead(pid, tries);
+    return _tryWaitForPosixPidDeath(pid, tries);
   }
 
-  Future<void> _ensurePosixDead(int pid, int tries) async {
+  Future<void> _tryWaitForPosixPidDeath(int pid, int tries) async {
     for (int i = 0; i < tries; i+= 1) {
       final ProcessResult result = await globals.processManager.run(<String>[
         'kill',
@@ -208,7 +207,7 @@ abstract class FlutterTestDriver {
     }
   }
 
-  Future<void> _ensureWindowsDead(int pid, int tries) async {
+  Future<void> _tryWaitForWindowsPidDeath(int pid, int tries) async {
     for (int i = 0; i < tries; i += 1) {
       final ProcessResult result = await globals.processManager.run(<String>[
         'tasklist',
