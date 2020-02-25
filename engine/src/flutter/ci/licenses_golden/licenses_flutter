@@ -754,6 +754,7 @@ FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.h
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/basic_message_channel_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/byte_stream_wrappers.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/encodable_value_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/engine_method_result.cc
@@ -776,6 +777,7 @@ FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/json_message_codec.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/json_method_codec.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/method_call_unittests.cc
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/method_channel_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/plugin_registrar.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/plugin_registrar_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/standard_codec.cc
