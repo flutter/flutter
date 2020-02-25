@@ -23,6 +23,7 @@ class TestApi : public testing::StubFlutterApi {
     last_data_sent_ = message;
     return message_engine_result;
   }
+
   bool MessengerSendWithReply(const char* channel,
                               const uint8_t* message,
                               const size_t message_size,
@@ -32,15 +33,27 @@ class TestApi : public testing::StubFlutterApi {
     return message_engine_result;
   }
 
+  // Called for FlutterDesktopMessengerSetCallback.
+  void MessengerSetCallback(const char* channel,
+                            FlutterDesktopMessageCallback callback,
+                            void* user_data) override {
+    last_callback_set_ = callback;
+  }
+
   const uint8_t* last_data_sent() { return last_data_sent_; }
+  FlutterDesktopMessageCallback last_callback_set() {
+    return last_callback_set_;
+  }
 
  private:
   const uint8_t* last_data_sent_ = nullptr;
+  FlutterDesktopMessageCallback last_callback_set_ = nullptr;
 };
 
 }  // namespace
 
-// Tests that the registrar returns a messenger that calls through to the C API.
+// Tests that the registrar returns a messenger that passes Send through to the
+// C API.
 TEST(MethodCallTest, MessengerSend) {
   testing::ScopedStubFlutterApi scoped_api_stub(std::make_unique<TestApi>());
   auto test_api = static_cast<TestApi*>(scoped_api_stub.stub());
@@ -53,6 +66,30 @@ TEST(MethodCallTest, MessengerSend) {
   std::vector<uint8_t> message = {1, 2, 3, 4};
   messenger->Send("some_channel", &message[0], message.size());
   EXPECT_EQ(test_api->last_data_sent(), &message[0]);
+}
+
+// Tests that the registrar returns a messenger that passes callback
+// registration and unregistration through to the C API.
+TEST(MethodCallTest, MessengerSetMessageHandler) {
+  testing::ScopedStubFlutterApi scoped_api_stub(std::make_unique<TestApi>());
+  auto test_api = static_cast<TestApi*>(scoped_api_stub.stub());
+
+  auto dummy_registrar_handle =
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1);
+  PluginRegistrar registrar(dummy_registrar_handle);
+  BinaryMessenger* messenger = registrar.messenger();
+  const std::string channel_name("foo");
+
+  // Register.
+  BinaryMessageHandler binary_handler = [](const uint8_t* message,
+                                           const size_t message_size,
+                                           BinaryReply reply) {};
+  messenger->SetMessageHandler(channel_name, std::move(binary_handler));
+  EXPECT_NE(test_api->last_callback_set(), nullptr);
+
+  // Unregister.
+  messenger->SetMessageHandler(channel_name, nullptr);
+  EXPECT_EQ(test_api->last_callback_set(), nullptr);
 }
 
 }  // namespace flutter
