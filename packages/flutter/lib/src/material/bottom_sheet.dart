@@ -107,10 +107,19 @@ class BottomSheet extends StatefulWidget {
   /// Default is true.
   final bool enableDrag;
 
-  /// Called when the user begins dragging the bottom sheet vertically.
+  /// Called when the user begins dragging the bottom sheet vertically, if
+  /// [enableDrag] is true.
+  ///
+  /// Would typically be used to change the bottom sheet animation curve so
+  /// that it tracks the user's finger accurately.
   final BottomSheetDragStartHandler onDragStart;
 
-  /// Called when the user stops dragging the bottom sheet.
+  /// Called when the user stops dragging the bottom sheet, if [enableDrag]
+  /// is true.
+  ///
+  /// Would typically be used to reset the bottom sheet animation curve, so
+  /// that it animates non-linearly. Called before [onClosing] if the bottom
+  /// sheet is closing.
   final BottomSheetDragEndHandler onDragEnd;
 
   /// The bottom sheet's background color.
@@ -201,13 +210,11 @@ class _BottomSheetState extends State<BottomSheet> {
         widget.animationController.fling(velocity: flingVelocity);
       }
       if (flingVelocity < 0.0) {
-        widget.onClosing();
         isClosing = true;
       }
     } else if (widget.animationController.value < _closeProgressThreshold) {
       if (widget.animationController.value > 0.0)
         widget.animationController.fling(velocity: -1.0);
-      widget.onClosing();
       isClosing = true;
     } else {
       widget.animationController.forward();
@@ -218,6 +225,7 @@ class _BottomSheetState extends State<BottomSheet> {
         details,
         isClosing: isClosing,
       );
+      widget.onClosing();
     }
   }
 

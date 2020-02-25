@@ -14,6 +14,8 @@ import 'package:flutter/animation.dart';
 ///
 /// See also:
 /// * <https://material.io/design/motion/speed.html#easing>
+/// * [Curves.fastOutSlowIn], another name for this curve.
+///
 const Curve standardEasing = Cubic(0.4, 0.0, 0.2, 1);
 
 /// The accelerate easing curve in the Material specification.
