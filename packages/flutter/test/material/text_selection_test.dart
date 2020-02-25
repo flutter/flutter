@@ -104,8 +104,6 @@ void main() {
       expect(endpoints.length, 1);
       final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
       await tester.tapAt(handlePos, pointer: 7);
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
       expect(find.text('CUT'), findsNothing);
       expect(find.text('COPY'), findsNothing);
@@ -160,8 +158,6 @@ void main() {
       // Long press to show the menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
       await tester.longPressAt(textOffset);
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
 
       // The last button is missing, and a more button is shown.
@@ -232,8 +228,6 @@ void main() {
       // Long press to show the menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
       await tester.longPressAt(textOffset);
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
 
       // The last two buttons are missing, and a more button is shown.
@@ -297,8 +291,6 @@ void main() {
       // Long press to show the menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
       await tester.longPressAt(textOffset);
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
 
       // The last button is missing, and a more button is shown.
@@ -377,8 +369,6 @@ void main() {
       expect(endpoints.length, 1);
       final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
       await tester.tapAt(handlePos, pointer: 7);
-      // Selection menu renders one frame offstage, so pump twice.
-      await tester.pump();
       await tester.pump();
       expect(find.text('CUT'), findsNothing);
       expect(find.text('COPY'), findsNothing);
