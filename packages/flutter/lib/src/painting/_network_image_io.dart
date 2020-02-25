@@ -8,8 +8,8 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 
+import 'binding.dart';
 import 'debug.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
