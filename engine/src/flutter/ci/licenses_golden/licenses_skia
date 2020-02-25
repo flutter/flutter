@@ -1,4 +1,4 @@
-Signature: 5c745241ca796ad9c80b02f5641f06eb
+Signature: 6b214ebe718d9ae0ebed5a5137f9f654
 
 UNUSED LICENSES:
 
@@ -6376,16 +6376,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/modules/canvaskit/canvaskit/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/NotoSerif-Regular.ttf
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.ttf
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/brickwork-texture.jpg
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/brickwork_normal-map.jpg
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/red_line.skp
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/test.png
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
 FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/example.html
