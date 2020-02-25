@@ -21,27 +21,34 @@ import '../src/common.dart';
 /// want to clean up at the end of a test.
 // TODO(dnfield): This is racy. If dart-lang/sdk#40759 can be resolved, we
 // should remove this.
-Future<void> tryWaitForPidDeath(int pid, { int tries = 10 }) {
+Future<void> ensurePidDeath(int pid, { int tries = 10 }) {
   if (globals.platform.isWindows) {
-    return _tryWaitForWindowsPidDeath(pid, tries);
+    return _ensurePidDeathPosix(pid, tries);
   }
-  return _tryWaitForPosixPidDeath(pid, tries);
+  return _ensurePidDeathWindows(pid, tries);
 }
 
-Future<void> _tryWaitForPosixPidDeath(int pid, int tries) async {
+Future<void> _ensurePidDeathWindows(int pid, int tries) async {
   for (int i = 0; i < tries; i+= 1) {
     final ProcessResult result = await globals.processManager.run(<String>[
       'kill',
       '-0',
       pid.toString(),
     ]);
-    if (result.exitCode != 0) {
+    if (result.exitCode == 0) {
       return;
     }
+    await Future<void>.delayed(const Duration(seconds: 1));
   }
+  globals.printStatus('$pid still running after $tries seconds. Forcefully killing.');
+  await globals.processManager.run(<String>[
+    'kill',
+    '-9',
+    pid.toString(),
+  ]);
 }
 
-Future<void> _tryWaitForWindowsPidDeath(int pid, int tries) async {
+Future<void> _ensurePidDeathPosix(int pid, int tries) async {
   for (int i = 0; i < tries; i += 1) {
     final ProcessResult result = await globals.processManager.run(<String>[
       'tasklist',
@@ -53,6 +60,13 @@ Future<void> _tryWaitForWindowsPidDeath(int pid, int tries) async {
     }
     await Future<void>.delayed(const Duration(seconds: 1));
   }
+  globals.printStatus('$pid still running after $tries seconds. Forcefully killing.');
+  await globals.processManager.run(<String>[
+    'taskkill',
+    '/pid',
+    pid.toString(),
+    '/f',
+  ]);
 }
 
 

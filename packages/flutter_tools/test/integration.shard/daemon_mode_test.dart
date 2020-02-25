@@ -73,7 +73,7 @@ void main() {
 
     process.kill();
     await process.exitCode;
-    await tryWaitForPidDeath(dartVmPid);
+    await ensurePidDeath(dartVmPid);
 
     tryToDelete(tempDir);
   });
