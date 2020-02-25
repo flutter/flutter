@@ -45,6 +45,9 @@ class _PluginProjectInfo {
   String guid;
 }
 
+// TODO(stuartmorgan): Consider replacing this class with a real parser. See
+// https://github.com/flutter/flutter/issues/51430.
+
 class VisualStudioSolutionUtils {
   const VisualStudioSolutionUtils({
     @required WindowsProject project,
