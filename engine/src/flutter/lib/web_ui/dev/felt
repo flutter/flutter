@@ -53,6 +53,14 @@ install_deps() {
   (cd "$FLUTTER_DIR/web_sdk/web_engine_tester"; $PUB_PATH get)
 }
 
+KERNEL_NAME=`uname`
+if [[ $KERNEL_NAME == *"Darwin"* ]]
+then
+     echo "Running on MacOS. Increase the user limits"
+     ulimit -n 10000
+     ulimit -u 2048
+fi
+
 if [[ "$FELT_USE_SNAPSHOT" == "false" || "$FELT_USE_SNAPSHOT" == "0" ]]; then
   echo "[Snapshot mode: off]"
   # Running without snapshot means there is high likelyhood of local changes. In
@@ -78,4 +86,3 @@ else
 
   $DART_SDK_DIR/bin/dart --packages="$WEB_UI_DIR/.packages" "$SNAPSHOT_PATH" $@
 fi
-
