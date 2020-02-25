@@ -3379,6 +3379,30 @@ void main() {
     }
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/35848
+  testWidgets('Clearing text field does not cause exception', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Prefilled text.',
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            suffixIcon: IconButton(
+              icon: Icon(Icons.close),
+              onPressed: controller.clear,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(IconButton));
+    expect(controller.text, null);
+  });
+
   testWidgets('maxLength limits input.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
 
