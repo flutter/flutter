@@ -75,6 +75,8 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Name',
+      uniqueIdentifier: 'name',
+      autofillHints: <String>['name'],
     );
   }
 
@@ -93,6 +95,8 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Email',
+      uniqueIdentifier: 'email',
+      autofillHints: <String>['email'],
     );
   }
 
@@ -111,6 +115,8 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Location',
+      uniqueIdentifier: 'location',
+      autofillHints: <String>['address-level1'],
     );
   }
 
@@ -130,6 +136,8 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         border: Border(bottom: BorderSide(width: 0.0, color: CupertinoColors.inactiveGray)),
       ),
       placeholder: 'Create a PIN',
+      uniqueIdentifier: 'pin',
+      autofillHints: <String>['new-password'],
     );
   }
 
@@ -167,25 +175,28 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
           middle: Text('Text Fields'),
         ),
         child: CupertinoScrollbar(
-          child: ListView(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-                child: Column(
-                  children: <Widget>[
-                    _buildNameField(),
-                    _buildEmailField(),
-                    _buildLocationField(),
-                    _buildPinField(),
-                    _buildTagsField(),
-                  ],
+          child: ExampleAutofillForm(
+            uniqueIdentifier: 'Form',
+            child: ListView(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+                  child: Column(
+                    children: <Widget>[
+                      _buildNameField(),
+                      _buildEmailField(),
+                      _buildLocationField(),
+                      _buildPinField(),
+                      _buildTagsField(),
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-                child: _buildChatTextField(),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+                  child: _buildChatTextField(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
