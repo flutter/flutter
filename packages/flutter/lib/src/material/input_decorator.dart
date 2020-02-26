@@ -1106,7 +1106,7 @@ class _RenderDecoration extends RenderBox {
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy/2.0;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy / 2.0;
 
     // The three main alignments for the baseline when an outline is present are
     //

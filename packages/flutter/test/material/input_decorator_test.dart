@@ -1535,7 +1535,7 @@ void main() {
 
     // The hint's opacity animates from 0.0 to 1.0.
     // The animation's duration is 200ms.
-        {
+    {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
       expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
@@ -1570,7 +1570,7 @@ void main() {
 
     // The hint's opacity animates from 1.0 to 0.0.
     // The animation's duration is 200ms.
-        {
+    {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
       expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
@@ -1630,7 +1630,7 @@ void main() {
 
     // The hint's opacity animates from 0.0 to 1.0.
     // The animation's duration is 200ms.
-        {
+    {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
       expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
@@ -1665,7 +1665,7 @@ void main() {
 
     // The hint's opacity animates from 1.0 to 0.0.
     // The animation's duration is 200ms.
-        {
+    {
       await tester.pump(const Duration(milliseconds: 50));
       final double hintOpacity50ms = getOpacity(tester, 'hint');
       expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
