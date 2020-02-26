@@ -248,9 +248,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     return _ExtendedNavigationRailAnimation(
       animation: _extendedAnimation,
       child: !_contentMeasured ?
-          SizedBox(
-          width: railWidth,
-          child: Stack(
+          Stack(
             overflow: Overflow.visible,
             children: <Widget>[
               for (int i = 0; i < widget.destinations.length; i++)
@@ -293,8 +291,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                   ),
                 ],
           ],
-        ),
-      ) : Material(
+        ) : Material(
         elevation: elevation,
         child: Container(
           width: railWidth,
