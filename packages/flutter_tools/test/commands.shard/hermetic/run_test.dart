@@ -84,47 +84,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Forces fast start off for devices that do not support it', () async {
-      final MockDevice mockDevice = MockDevice(TargetPlatform.android_arm);
-      when(mockDevice.name).thenReturn('mockdevice');
-      when(mockDevice.supportsFastStart).thenReturn(false);
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async => false);
-      when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
-      when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) {
-        return Future<List<Device>>.value(<Device>[mockDevice]);
-      });
-      when(deviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Future<List<Device>>.value(<Device>[mockDevice]);
-      });
-      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
-
-      final RunCommand command = RunCommand();
-      applyMocksToCommand(command);
-      try {
-        await createTestCommandRunner(command).run(<String>[
-          'run',
-          '--fast-start',
-          '--no-pub',
-        ]);
-        fail('Expect exception');
-      } catch (e) {
-        expect(e, isA<ToolExit>());
-      }
-
-      final BufferLogger bufferLogger = globals.logger as BufferLogger;
-      expect(bufferLogger.statusText, isNot(contains(
-        'Using --fast-start option with device mockdevice, but this device '
-        'does not support it. Overriding the setting to false.'
-      )));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => MockDeviceManager(),
-    });
-
     testUsingContext('Walks upward looking for a pubspec.yaml and succeeds if found', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages')
