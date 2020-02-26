@@ -177,6 +177,9 @@ class Plugin {
   }
 
   static List<String> validatePluginYaml(YamlMap yaml) {
+    if (yaml == null) {
+      return <String>['Invalid "plugin" specification.'];
+    }
 
     final bool usesOldPluginFormat = const <String>{
       'androidPackage',
