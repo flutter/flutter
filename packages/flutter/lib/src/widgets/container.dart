@@ -431,8 +431,7 @@ class Container extends StatelessWidget {
       current = Padding(padding: effectivePadding, child: current);
 
     if (color != null)
-      // current = ColoredBox(color: color, child: current);
-      current = DecoratedBox(decoration: BoxDecoration(color: color), child: current);
+      current = ColoredBox(color: color, child: current);
 
     if (decoration != null)
       current = DecoratedBox(decoration: decoration, child: current);
