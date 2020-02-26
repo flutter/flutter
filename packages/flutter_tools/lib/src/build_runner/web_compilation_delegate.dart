@@ -9,7 +9,6 @@ import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
 
 import '../artifacts.dart';
@@ -17,6 +16,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
