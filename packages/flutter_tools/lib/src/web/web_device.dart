@@ -80,7 +80,7 @@ class ChromeDevice extends Device {
   Future<String> get emulatorId async => null;
 
   @override
-  bool isSupported() =>  featureFlags.isWebEnabled && chromeLauncher.canFindChrome();
+  bool isSupported() =>  featureFlags.isWebEnabled && globals.chromeLauncher.canFindChrome();
 
   @override
   String get name => 'Chrome';
@@ -109,7 +109,7 @@ class ChromeDevice extends Device {
         }
       }
     } else {
-      final String chrome = findChromeExecutable();
+      final String chrome = findChromeExecutable(globals.platform, globals.fs);
       final ProcessResult result = await globals.processManager.run(<String>[
         chrome,
         '--version',
@@ -136,7 +136,7 @@ class ChromeDevice extends Device {
     final String url = platformArgs['uri'] as String;
     final bool launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
-      _chrome = await chromeLauncher.launch(
+      _chrome = await globals.chromeLauncher.launch(
         url,
         dataDir: globals.fs.currentDirectory
             .childDirectory('.dart_tool')
@@ -177,7 +177,7 @@ class ChromeDevice extends Device {
 class WebDevices extends PollingDeviceDiscovery {
   WebDevices() : super('chrome');
 
-  final bool _chromeIsAvailable = chromeLauncher.canFindChrome();
+  final bool _chromeIsAvailable = globals.chromeLauncher.canFindChrome();
   final ChromeDevice _webDevice = ChromeDevice();
   final WebServerDevice _webServerDevice = WebServerDevice();
 

@@ -642,7 +642,7 @@ class BrowserManager {
     bool headless = true,
   }) async {
     final Chrome chrome =
-        await chromeLauncher.launch(url.toString(), headless: headless);
+        await globals.chromeLauncher.launch(url.toString(), headless: headless);
 
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 

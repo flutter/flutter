@@ -5,17 +5,16 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
-
-/// The [ChromeLauncher] instance.
-ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 
 /// An environment variable used to override the location of chrome.
 const String kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -30,37 +29,36 @@ const String kMacOSExecutable =
 /// The expected executable name on Windows.
 const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
 
-/// The possible locations where the chrome executable can be located on windows.
-final List<String> kWindowsPrefixes = <String>[
-  globals.platform.environment['LOCALAPPDATA'],
-  globals.platform.environment['PROGRAMFILES'],
-  globals.platform.environment['PROGRAMFILES(X86)'],
-];
-
 /// Find the chrome executable on the current platform.
 ///
 /// Does not verify whether the executable exists.
-String findChromeExecutable() {
-  if (globals.platform.environment.containsKey(kChromeEnvironment)) {
-    return globals.platform.environment[kChromeEnvironment];
+String findChromeExecutable(Platform platform, FileSystem fileSystem) {
+  if (platform.environment.containsKey(kChromeEnvironment)) {
+    return platform.environment[kChromeEnvironment];
   }
-  if (globals.platform.isLinux) {
+  if (platform.isLinux) {
     return kLinuxExecutable;
   }
-  if (globals.platform.isMacOS) {
+  if (platform.isMacOS) {
     return kMacOSExecutable;
   }
-  if (globals.platform.isWindows) {
+  if (platform.isWindows) {
+    /// The possible locations where the chrome executable can be located on windows.
+    final List<String> kWindowsPrefixes = <String>[
+      platform.environment['LOCALAPPDATA'],
+      platform.environment['PROGRAMFILES'],
+      platform.environment['PROGRAMFILES(X86)'],
+    ];
     final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
       if (prefix == null) {
         return false;
       }
-      final String path = globals.fs.path.join(prefix, kWindowsExecutable);
-      return globals.fs.file(path).existsSync();
+      final String path = fileSystem.path.join(prefix, kWindowsExecutable);
+      return fileSystem.file(path).existsSync();
     }, orElse: () => '.');
-    return globals.fs.path.join(windowsPrefix, kWindowsExecutable);
+    return fileSystem.path.join(windowsPrefix, kWindowsExecutable);
   }
-  throwToolExit('Platform ${globals.platform.operatingSystem} is not supported.');
+  throwToolExit('Platform ${platform.operatingSystem} is not supported.');
   return null;
 }
 
@@ -76,7 +74,23 @@ void launchChromeInstance(Chrome chrome) {
 
 /// Responsible for launching chrome with devtools configured.
 class ChromeLauncher {
-  const ChromeLauncher();
+  const ChromeLauncher({
+    @required FileSystem fileSystem,
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required Logger logger,
+  }) : _fileSystem = fileSystem,
+       _platform = platform,
+       _processManager = processManager,
+       _operatingSystemUtils = operatingSystemUtils,
+       _logger = logger;
+
+  final FileSystem _fileSystem;
+  final Platform _platform;
+  final ProcessManager _processManager;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final Logger _logger;
 
   static bool get hasChromeInstance => _currentCompleter.isCompleted;
 
@@ -84,9 +98,9 @@ class ChromeLauncher {
 
   /// Whether we can locate the chrome executable.
   bool canFindChrome() {
-    final String chrome = findChromeExecutable();
+    final String chrome = findChromeExecutable(_platform, _fileSystem);
     try {
-      return globals.processManager.canRun(chrome);
+      return _processManager.canRun(chrome);
     } on ArgumentError {
       return false;
     }
@@ -105,14 +119,14 @@ class ChromeLauncher {
     // This is a JSON file which contains configuration from the
     // browser session, such as window position. It is located
     // under the Chrome data-dir folder.
-    final String preferencesPath = globals.fs.path.join('Default', 'preferences');
+    final String preferencesPath = _fileSystem.path.join('Default', 'preferences');
 
-    final String chromeExecutable = findChromeExecutable();
-    final Directory activeDataDir = globals.fs.systemTempDirectory.createTempSync('flutter_tool.');
+    final String chromeExecutable = findChromeExecutable(_platform, _fileSystem);
+    final Directory activeDataDir = _fileSystem.systemTempDirectory.createTempSync('flutter_tool.');
     // Seed data dir with previous state.
 
-    final File savedPreferencesFile = globals.fs.file(globals.fs.path.join(dataDir?.path ?? '', preferencesPath));
-    final File destinationFile = globals.fs.file(globals.fs.path.join(activeDataDir.path, preferencesPath));
+    final File savedPreferencesFile = _fileSystem.file(_fileSystem.path.join(dataDir?.path ?? '', preferencesPath));
+    final File destinationFile = _fileSystem.file(_fileSystem.path.join(activeDataDir.path, preferencesPath));
     if (dataDir != null) {
       if (savedPreferencesFile.existsSync()) {
         destinationFile.parent.createSync(recursive: true);
@@ -120,7 +134,7 @@ class ChromeLauncher {
       }
     }
 
-    final int port = debugPort ?? await globals.os.findFreePort();
+    final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
     final List<String> args = <String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
@@ -143,7 +157,7 @@ class ChromeLauncher {
       url,
     ];
 
-    final Process process = await globals.processManager.start(args);
+    final Process process = await _processManager.start(args);
 
     // When the process exits, copy the user settings back to the provided
     // data-dir.
@@ -164,7 +178,7 @@ class ChromeLauncher {
       .transform(utf8.decoder)
       .transform(const LineSplitter())
       .listen((String line) {
-        globals.printTrace('[CHROME]: $line');
+        _logger.printTrace('[CHROME]: $line');
       });
 
     // Wait until the DevTools are listening before trying to connect.
@@ -172,7 +186,7 @@ class ChromeLauncher {
       .transform(utf8.decoder)
       .transform(const LineSplitter())
       .map((String line) {
-        globals.printTrace('[CHROME]:$line');
+        _logger.printTrace('[CHROME]:$line');
         return line;
       })
       .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
