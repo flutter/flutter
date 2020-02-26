@@ -42,7 +42,7 @@ void main() {
     );
   });
 
-  test('WebValidator can find executable on macOS', () async {
+  testWithoutContext('WebValidator can find executable on macOS', () async {
     when(processManager.canRun(kMacOSExecutable)).thenReturn(true);
 
     final ValidationResult result = await webValidator.validate();
@@ -50,7 +50,7 @@ void main() {
     expect(result.type, ValidationType.installed);
   });
 
-  test('WebValidator Can notice missing macOS executable ', () async {
+  testWithoutContext('WebValidator Can notice missing macOS executable ', () async {
     when(processManager.canRun(kMacOSExecutable)).thenReturn(false);
 
     final ValidationResult result = await webValidator.validate();
@@ -58,7 +58,7 @@ void main() {
     expect(result.type, ValidationType.missing);
   });
 
-  test('WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ', () async {
+  testWithoutContext('WebValidator does not warn about CHROME_EXECUTABLE unless it cant find chrome ', () async {
     when(processManager.canRun(kMacOSExecutable)).thenReturn(false);
 
     final ValidationResult result = await webValidator.validate();
