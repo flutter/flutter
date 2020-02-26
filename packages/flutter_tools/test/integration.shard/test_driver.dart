@@ -739,15 +739,16 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }
 
   Future<void> waitForCompletion() async {
-    final done = Completer<bool>();
+    final Completer<bool> done = Completer<bool>();
     // Waiting for `{"success":true,"type":"done",...}` line indicating
     // end of test run.
-    final subscription = _stdout.stream.listen((String line) async {
-      final Map<String, dynamic> json = _parseJsonResponse(line);
-      if (json != null && json['type'] != null && json['success'] != null) {
-        done.complete(json['type'] == 'done' && json['success'] == true);
-      }
-    });
+    final StreamSubscription<String> subscription = _stdout.stream.listen(
+        (String line) async {
+          final Map<String, dynamic> json = _parseJsonResponse(line);
+          if (json != null && json['type'] != null && json['success'] != null) {
+            done.complete(json['type'] == 'done' && json['success'] == true);
+          }
+        });
 
     await resume();
 
