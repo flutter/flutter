@@ -443,6 +443,20 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
     ).send();
   }
 
+  // Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS.
+  // or
+  // Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator.
+  if (result.stdout?.contains('Building for iOS') == true
+      && result.stdout?.contains('but the linked and embedded framework') == true
+      && result.stdout?.contains('was built for iOS') == true) {
+    globals.printError('');
+    globals.printError('Your Xcode project requires migration. See https://github.com/flutter/flutter/issues/50568 for details.');
+    globals.printError('');
+    globals.printError('You can temporarily work around this issue by running:');
+    globals.printError('  rm -rf ios/Flutter/App.framework');
+    return;
+  }
+
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&

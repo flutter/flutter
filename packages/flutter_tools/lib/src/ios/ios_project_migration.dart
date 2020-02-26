@@ -119,12 +119,16 @@ class IOSProjectMigration {
     for (final String line in lines) {
       final String newProjectLine = processLine(line);
       if (newProjectLine == null) {
-        _logger.printTrace('Migrating $basename, removing:\n    $line');
+        _logger.printTrace('Migrating $basename, removing:');
+        _logger.printTrace('    $line');
         migrationRequired = true;
         continue;
       }
       if (newProjectLine != line) {
-        _logger.printTrace('Migrating $basename, replacing:\n    $line\nwith:    $newProjectLine');
+        _logger.printTrace('Migrating $basename, replacing:');
+        _logger.printTrace('    $line');
+        _logger.printTrace('with:');
+        _logger.printTrace('    $newProjectLine');
         migrationRequired = true;
       }
       newProjectContents.writeln(newProjectLine);
