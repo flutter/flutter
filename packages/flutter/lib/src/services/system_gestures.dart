@@ -37,6 +37,9 @@ class SystemGestures {
   /// edge of the screen to perform a system action. Hence, this API is meant
   /// to be an escape hatch there is no alternative.
   ///
+  /// To clear the system gesture exclusion rects, call this function with
+  /// [rects] set to null.
+  ///
   /// The [devicePixelRatio] must not be null, and is typically received by
   /// calling MediaQuery.of(context).devicePixelRatio.
   static Future<void> setSystemGestureExclusionRects({
@@ -54,7 +57,7 @@ class SystemGestures {
         ),
       );
     } on Exception catch (error) {
-      throw 'Failed to set systemGestureExclusionRects: $error';
+      throw 'Failed to set system gesture exclusion rects: $error';
     }
   }
 
@@ -99,7 +102,7 @@ class SystemGestures {
         devicePixelRatio: devicePixelRatio,
       );
     } on Exception catch (error) {
-      throw 'Failed to set systemGestureExclusionRects: $error';
+      throw 'Failed to get system gesture exclusion rects: $error';
     }
   }
 
