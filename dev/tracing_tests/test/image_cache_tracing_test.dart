@@ -20,7 +20,7 @@ void main() {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
     if (info.serverUri == null) {
-      fail('This test _must_ be run with --enable-vmservice.');
+      throw TestFailure('This test _must_ be run with --enable-vmservice.');
     }
     await timelineObtainer.connect(info.serverUri);
     await timelineObtainer.setDartFlags();
@@ -58,8 +58,7 @@ void main() {
           'name': 'ImageCache.clear',
           'args': <String, dynamic>{
             'pendingImages': 1,
-            'keepAliveImages': 0,
-            'liveImages': 1,
+            'cachedImages': 0,
             'currentSizeInBytes': 0,
             'isolateId': isolateId,
           }
@@ -150,7 +149,7 @@ class TimelineObtainer {
 
   Future<void> close() async {
     expect(_completers, isEmpty);
-    await _observatorySocket?.close();
+    await _observatorySocket.close();
   }
 }
 
