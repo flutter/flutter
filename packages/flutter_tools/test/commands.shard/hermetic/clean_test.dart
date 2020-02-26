@@ -44,7 +44,12 @@ void main() {
 
         projectUnderTest.dartTool.createSync(recursive: true);
         projectUnderTest.android.ephemeralDirectory.createSync(recursive: true);
+
         projectUnderTest.ios.ephemeralDirectory.createSync(recursive: true);
+        projectUnderTest.ios.generatedXcodePropertiesFile.createSync(recursive: true);
+        projectUnderTest.ios.generatedEnvironmentVariableExportScript.createSync(recursive: true);
+        projectUnderTest.ios.compiledDartFramework.createSync(recursive: true);
+
         projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
         projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
@@ -57,7 +62,12 @@ void main() {
         expect(buildDirectory.existsSync(), isFalse);
         expect(projectUnderTest.dartTool.existsSync(), isFalse);
         expect(projectUnderTest.android.ephemeralDirectory.existsSync(), isFalse);
+
         expect(projectUnderTest.ios.ephemeralDirectory.existsSync(), isFalse);
+        expect(projectUnderTest.ios.generatedXcodePropertiesFile.existsSync(), isFalse);
+        expect(projectUnderTest.ios.generatedEnvironmentVariableExportScript.existsSync(), isFalse);
+        expect(projectUnderTest.ios.compiledDartFramework.existsSync(), isFalse);
+
         expect(projectUnderTest.linux.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.macos.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.windows.ephemeralDirectory.existsSync(), isFalse);

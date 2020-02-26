@@ -352,8 +352,8 @@ class XcodeProjectInterpreter {
     }
   }
 
-  void cleanWorkspace(String workspacePath, String scheme) {
-    _processUtils.runSync(<String>[
+  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
+    await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,
