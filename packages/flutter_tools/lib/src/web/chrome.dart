@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -14,6 +12,8 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
 import '../convert.dart';
 
 /// An environment variable used to override the location of chrome.
