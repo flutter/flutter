@@ -31,7 +31,7 @@ class SystemGesture {
 
   static List<Map<String, int>> _convertToListOfMaps({
     List<Rect> rects,
-    double devicePixelRatio = 1.0,
+    @required double devicePixelRatio,
   }) {
     assert(devicePixelRatio != null);
 
@@ -46,5 +46,40 @@ class SystemGesture {
       }).toList();
     }
     return <Map<String, int>>[];
+  }
+
+  static Future<List<Rect>> getSystemGestureExclusionRects({
+    @required double devicePixelRatio,
+  }) async {
+    assert(devicePixelRatio != null);
+
+    try {
+      final List<dynamic> rects = await SystemChannels.platform.invokeMethod(
+        'SystemGestures.getSystemGestureExclusionRects',
+      );
+      return _convertToListOfRects(
+        rects: rects,
+        devicePixelRatio: devicePixelRatio,
+      );
+    } on Exception catch (error) {
+      throw 'Failed to set systemGestureExclusionRects: $error';
+    }
+  }
+
+  static List<Rect> _convertToListOfRects({
+    List<dynamic> rects,
+    @required double devicePixelRatio,
+  }) {
+    assert(devicePixelRatio != null);
+
+    return rects.map((dynamic rect) {
+      final Map<String, dynamic> exclusionMap = rect as Map<String, dynamic>;
+      final double left = (exclusionMap['left'] as int).toDouble() / devicePixelRatio;
+      final double top = (exclusionMap['top'] as int).toDouble() / devicePixelRatio;
+      final double right = (exclusionMap['right'] as int).toDouble() / devicePixelRatio;
+      final double bottom = (exclusionMap['bottom'] as int).toDouble() / devicePixelRatio;
+
+      return Rect.fromLTRB(left, top, right, bottom);
+    }).toList();
   }
 }
