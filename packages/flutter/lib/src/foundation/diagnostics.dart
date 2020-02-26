@@ -3047,6 +3047,10 @@ class DiagnosticPropertiesBuilder {
 ///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
 ///    nodes without properties or children. There are many
 ///    [DiagnosticsProperty] subclasses to handle common use cases.
+@Deprecated(
+  'Use "with DiagnosticableMixin" instead of "extends Diagnosticable"'
+  'This feature was deprecated after v1.7.11.'
+)
 abstract class Diagnosticable with DiagnosticableMixin {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
