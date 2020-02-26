@@ -234,6 +234,10 @@ void main() {
     Usage: () => MockUsage(),
   }));
 
+  test('ResidentRunner copies dill file from build output into temp directory', () => testbed.run(() async {
+    expect(residentRunner.artifactDirectory.childFile('app.dill').readAsStringSync(), 'ABC');
+  }));
+
   test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
