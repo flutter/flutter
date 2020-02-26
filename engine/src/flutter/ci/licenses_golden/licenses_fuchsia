@@ -1,4 +1,4 @@
-Signature: 26a2b7ac3932400ae47b8a1bac1ef7f8
+Signature: cb13f8a75811f4b1fbfd31056e6eea8e
 
 UNUSED LICENSES:
 
@@ -464,6 +464,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
@@ -1371,6 +1372,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/cast_system_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time_service.fidl
@@ -2183,6 +2185,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
@@ -3381,6 +3384,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/resour
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/types.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/types.h
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/interface.dart
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/component_runner.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/font_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/math.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/problem.fidl
