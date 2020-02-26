@@ -128,7 +128,7 @@ class _SystemFontsNotifier extends Listenable {
   final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
 
   void notifyListeners () {
-    for (VoidCallback callback in _systemFontsCallbacks) {
+    for (final VoidCallback callback in _systemFontsCallbacks) {
       callback();
     }
   }

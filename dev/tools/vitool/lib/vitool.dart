@@ -59,7 +59,7 @@ class Animation {
     sb.write('const $className $varName = const $className(\n');
     sb.write('${kIndent}const Size(${size.x}, ${size.y}),\n');
     sb.write('${kIndent}const <_PathFrames>[\n');
-    for (PathAnimation path in paths)
+    for (final PathAnimation path in paths)
       sb.write(path.toDart());
     sb.write('$kIndent],\n');
     sb.write(');');
@@ -87,9 +87,9 @@ class PathAnimation {
         final String currentCommandType = frame.paths[pathIdx].commands[commandIdx].type;
         if (commandType != currentCommandType)
           throw Exception(
-              'Paths must be built from the same commands in all frames'
-              'command $commandIdx at frame 0 was of type \'$commandType\''
-              'command $commandIdx at frame $i was of type \'$currentCommandType\''
+              'Paths must be built from the same commands in all frames '
+              "command $commandIdx at frame 0 was of type '$commandType' "
+              "command $commandIdx at frame $i was of type '$currentCommandType'"
           );
         for (int j = 0; j < numPointsInCommand; j += 1)
           points[j].add(frame.paths[pathIdx].commands[commandIdx].points[j]);
@@ -117,11 +117,11 @@ class PathAnimation {
     final StringBuffer sb = StringBuffer();
     sb.write('${kIndent * 2}const _PathFrames(\n');
     sb.write('${kIndent * 3}opacities: const <double>[\n');
-    for (double opacity in opacities)
+    for (final double opacity in opacities)
       sb.write('${kIndent * 4}$opacity,\n');
     sb.write('${kIndent * 3}],\n');
     sb.write('${kIndent * 3}commands: const <_PathCommand>[\n');
-    for (PathCommandAnimation command in commands)
+    for (final PathCommandAnimation command in commands)
       sb.write(command.toDart());
     sb.write('${kIndent * 3}],\n');
     sb.write('${kIndent * 2}),\n');
@@ -166,9 +166,9 @@ class PathCommandAnimation {
     }
     final StringBuffer sb = StringBuffer();
     sb.write('${kIndent * 4}const $dartCommandClass(\n');
-    for (List<Point<double>> pointFrames in points) {
+    for (final List<Point<double>> pointFrames in points) {
       sb.write('${kIndent * 5}const <Offset>[\n');
-      for (Point<double> point in pointFrames)
+      for (final Point<double> point in pointFrames)
         sb.write('${kIndent * 6}const Offset(${point.x}, ${point.y}),\n');
       sb.write('${kIndent * 5}],\n');
     }
@@ -201,7 +201,7 @@ FrameData interpretSvg(String svgFilePath) {
 
 List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
   final List<SvgPath> paths = <SvgPath>[];
-  for (XmlNode node in children) {
+  for (final XmlNode node in children) {
     if (node.nodeType != XmlNodeType.ELEMENT)
       continue;
     final XmlElement element = node as XmlElement;
@@ -268,7 +268,7 @@ class FrameData {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is FrameData
         && other.size == size
@@ -292,7 +292,7 @@ class SvgPath {
   final List<SvgPathCommand> commands;
   final double opacity;
 
-  static const String _pathCommandAtom = ' *([a-zA-Z]) *([\-\.0-9 ,]*)';
+  static const String _pathCommandAtom = r' *([a-zA-Z]) *([\-\.0-9 ,]*)';
   static final RegExp _pathCommandValidator = RegExp('^($_pathCommandAtom)*\$');
   static final RegExp _pathCommandMatcher = RegExp(_pathCommandAtom);
 
@@ -304,7 +304,7 @@ class SvgPath {
     final SvgPathCommandBuilder commandsBuilder = SvgPathCommandBuilder();
     if (!_pathCommandValidator.hasMatch(dAttr))
       throw Exception('illegal or unsupported path d expression: $dAttr');
-    for (Match match in _pathCommandMatcher.allMatches(dAttr)) {
+    for (final Match match in _pathCommandMatcher.allMatches(dAttr)) {
       final String commandType = match.group(1);
       final String pointStr = match.group(2);
       commands.add(commandsBuilder.build(commandType, parsePoints(pointStr)));
@@ -320,7 +320,7 @@ class SvgPath {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is SvgPath
         && other.id == id
@@ -369,7 +369,7 @@ class SvgPathCommand {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is SvgPathCommand
         && other.type == type
@@ -460,7 +460,7 @@ class _Transform {
 }
 
 
-const String _transformCommandAtom = ' *([^(]+)\\(([^)]*)\\)';
+const String _transformCommandAtom = r' *([^(]+)\(([^)]*)\)';
 final RegExp _transformValidator = RegExp('^($_transformCommandAtom)*\$');
 final RegExp _transformCommand = RegExp(_transformCommandAtom);
 
@@ -469,7 +469,7 @@ Matrix3 _parseSvgTransform(String transform) {
     throw Exception('illegal or unsupported transform: $transform');
   final Iterable<Match> matches =_transformCommand.allMatches(transform).toList().reversed;
   Matrix3 result = Matrix3.identity();
-  for (Match m in matches) {
+  for (final Match m in matches) {
     final String command = m.group(1);
     final String params = m.group(2);
     if (command == 'translate') {
@@ -522,14 +522,14 @@ Matrix3 _matrix(double a, double b, double c, double d, double e, double f) {
 
 // Matches a pixels expression e.g "14px".
 // First group is just the number.
-final RegExp _pixelsExp = RegExp('^([0-9]+)px\$');
+final RegExp _pixelsExp = RegExp(r'^([0-9]+)px$');
 
 /// Parses a pixel expression, e.g "14px", and returns the number.
 /// Throws an [ArgumentError] if the given string doesn't match the pattern.
 int parsePixels(String pixels) {
   if (!_pixelsExp.hasMatch(pixels))
     throw ArgumentError(
-      'illegal pixels expression: \'$pixels\''
+      "illegal pixels expression: '$pixels'"
       ' (the tool currently only support pixel units).');
   return int.parse(_pixelsExp.firstMatch(pixels).group(1));
 }
@@ -540,7 +540,7 @@ String _extractAttr(XmlElement element, String name) {
         .value;
   } catch (e) {
     throw ArgumentError(
-        'Can\'t find a single \'$name\' attributes in ${element.name}, '
+        "Can't find a single '$name' attributes in ${element.name}, "
         'attributes were: ${element.attributes}'
     );
   }

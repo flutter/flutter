@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -59,6 +60,41 @@ Future<void> main() async {
         );
       });
 
+      section('Create plugin C without android/ directory');
+
+      final Directory pluginCDirectory = Directory(path.join(tempDir.path, 'plugin_c'));
+      await inDirectory(tempDir, () async {
+        await flutter(
+          'create',
+          options: <String>[
+            '--org',
+            'io.flutter.devicelab.plugin_c',
+            '--template=plugin',
+            pluginCDirectory.path,
+          ],
+        );
+      });
+
+      final File pluginCpubspec = File(path.join(pluginCDirectory.path, 'pubspec.yaml'));
+      await pluginCpubspec.writeAsString('''
+name: plugin_c
+version: 0.0.1
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: Plugin_cPlugin
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+environment:
+  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+  flutter: ">=1.5.0 <2.0.0"
+''', flush: true);
+
       section('Write dummy Kotlin code in plugin B');
 
       final File pluginBKotlinClass = File(path.join(
@@ -81,17 +117,19 @@ public class DummyPluginBClass {
 }
 ''', flush: true);
 
-      section('Make plugin A depend on plugin B');
+      section('Make plugin A depend on plugin B and plugin C');
 
-      final File pubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
-      content = content.replaceFirst(
+      final File pluginApubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
+      String pluginApubspecContent = await pluginApubspec.readAsString();
+      pluginApubspecContent = pluginApubspecContent.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n'
         '  plugin_b:\n'
-        '    path: ${pluginBDirectory.path}\n',
+        '    path: ${pluginBDirectory.path}\n'
+        '  plugin_c:\n'
+        '    path: ${pluginCDirectory.path}\n',
       );
-      await pubspec.writeAsString(content, flush: true);
+      await pluginApubspec.writeAsString(pluginApubspecContent, flush: true);
 
       section('Write Kotlin code in plugin A that references Kotlin code from plugin B');
 
@@ -132,30 +170,36 @@ public class DummyPluginAClass {
           File(path.join(exampleApp.path, '.flutter-plugins-dependencies'));
 
       if (!flutterPluginsDependenciesFile.existsSync()) {
-        return TaskResult.failure('${flutterPluginsDependenciesFile.path} doesn\'t exist');
+        return TaskResult.failure("${flutterPluginsDependenciesFile.path} doesn't exist");
       }
 
       final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile.readAsStringSync();
-      const String kExpectedPluginsDependenciesContent =
-        '{'
-          '\"_info\":\"// This is a generated file; do not edit or check into version control.\",'
-          '\"dependencyGraph\":['
-            '{'
-              '\"name\":\"plugin_a\",'
-              '\"dependencies\":[\"plugin_b\"]'
-            '},'
-            '{'
-              '\"name\":\"plugin_b\",'
-              '\"dependencies\":[]'
-            '}'
-          ']'
-        '}';
 
-      if (flutterPluginsDependenciesFileContent != kExpectedPluginsDependenciesContent) {
+      final Map<String, dynamic> jsonContent = json.decode(flutterPluginsDependenciesFileContent) as Map<String, dynamic>;
+
+      // Verify the dependencyGraph object is valid. The rest of the contents of this file are not relevant to the
+      // dependency graph and are tested by unit tests.
+      final List<dynamic> dependencyGraph = jsonContent['dependencyGraph'] as List<dynamic>;
+      const String kExpectedPluginsDependenciesContent =
+        '['
+          '{'
+            '"name":"plugin_a",'
+            '"dependencies":["plugin_b","plugin_c"]'
+          '},'
+          '{'
+            '"name":"plugin_b",'
+            '"dependencies":[]'
+          '},'
+          '{'
+            '"name":"plugin_c",'
+            '"dependencies":[]'
+          '}'
+        ']';
+      final String graphString = json.encode(dependencyGraph);
+      if (graphString != kExpectedPluginsDependenciesContent) {
         return TaskResult.failure(
           'Unexpected file content in ${flutterPluginsDependenciesFile.path}: '
-          'Found "$flutterPluginsDependenciesFileContent" instead of '
-          '"$kExpectedPluginsDependenciesContent"'
+          'Found "$graphString" instead of "$kExpectedPluginsDependenciesContent"'
         );
       }
 

@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../base/utils.dart';
 import '../device.dart';
 import '../doctor.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
@@ -27,26 +27,26 @@ class DevicesCommand extends FlutterCommand {
         exitCode: 1);
     }
 
-    final List<Device> devices = await deviceManager.getAllConnectedDevices().toList();
+    final List<Device> devices = await deviceManager.getAllConnectedDevices();
 
     if (devices.isEmpty) {
-      printStatus(
+      globals.printStatus(
         'No devices detected.\n\n'
         "Run 'flutter emulators' to list and start any available device emulators.\n\n"
         'Or, if you expected your device to be detected, please run "flutter doctor" to diagnose '
         'potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
-        printStatus('');
-        for (String diagnostic in diagnostics) {
-          printStatus('• $diagnostic', hangingIndent: 2);
+        globals.printStatus('');
+        for (final String diagnostic in diagnostics) {
+          globals.printStatus('• $diagnostic', hangingIndent: 2);
         }
       }
     } else {
-      printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
+      globals.printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
       await Device.printDevices(devices);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

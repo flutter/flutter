@@ -5,15 +5,15 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/asset.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
   group('Assets', () {
-    final String dataPath = fs.path.join(
+    final String dataPath = globals.fs.path.join(
       getFlutterRoot(),
       'packages',
       'flutter_tools',
@@ -31,8 +31,8 @@ void main() {
     testUsingContext('app font uses local font file', () async {
       final AssetBundle asset = AssetBundleFactory.instance.createBundle();
       await asset.build(
-        manifestPath : fs.path.join(dataPath, 'main', 'pubspec.yaml'),
-        packagesPath: fs.path.join(dataPath, 'main', '.packages'),
+        manifestPath : globals.fs.path.join(dataPath, 'main', 'pubspec.yaml'),
+        packagesPath: globals.fs.path.join(dataPath, 'main', '.packages'),
         includeDefaultFonts: false,
       );
 
@@ -45,7 +45,7 @@ void main() {
     });
 
     testUsingContext('handles empty pubspec with .packages', () async {
-      final String dataPath = fs.path.join(
+      final String dataPath = globals.fs.path.join(
         getFlutterRoot(),
         'packages',
         'flutter_tools',
@@ -55,8 +55,8 @@ void main() {
       );
       final AssetBundle asset = AssetBundleFactory.instance.createBundle();
       await asset.build(
-        manifestPath : fs.path.join(dataPath, 'main', 'pubspec.yaml'), // file doesn't exist
-        packagesPath: fs.path.join(dataPath, 'main', '.packages'),
+        manifestPath : globals.fs.path.join(dataPath, 'main', 'pubspec.yaml'), // file doesn't exist
+        packagesPath: globals.fs.path.join(dataPath, 'main', '.packages'),
         includeDefaultFonts: false,
       );
       expect(asset.wasBuiltOnce(), true);

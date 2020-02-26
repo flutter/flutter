@@ -101,7 +101,7 @@ mixin ServicesBinding on BindingBase {
     final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
     final List<LicenseEntry> result = <LicenseEntry>[];
     final List<String> licenses = rawLicenses.split(_licenseSeparator);
-    for (String license in licenses) {
+    for (final String license in licenses) {
       final int split = license.indexOf('\n\n');
       if (split >= 0) {
         result.add(LicenseEntryWithLineBreaks(

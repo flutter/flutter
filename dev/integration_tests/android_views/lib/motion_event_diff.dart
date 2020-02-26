@@ -122,7 +122,7 @@ void diffMaps(
         '${messagePrefix}keys (expected: ${expected.keys} actual: ${actual.keys} ');
     return;
   }
-  for (String key in expected.keys) {
+  for (final String key in expected.keys) {
     if (excludeKeys.contains(key))
       continue;
     if (doublesApproximatelyMatch(expected[key], actual[key]))

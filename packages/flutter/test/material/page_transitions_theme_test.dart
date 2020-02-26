@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,11 +12,16 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: Text('home')));
     final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
     expect(theme.builders, isNotNull);
-    expect(theme.builders[TargetPlatform.android], isNotNull);
-    expect(theme.builders[TargetPlatform.iOS], isNotNull);
+    for (final TargetPlatform platform in TargetPlatform.values) {
+      if (platform == TargetPlatform.fuchsia) {
+        // No builder on Fuchsia.
+        continue;
+      }
+      expect(theme.builders[platform], isNotNull, reason: 'theme builder for $platform is null');
+    }
   });
 
-  testWidgets('Default PageTransitionsTheme builds a CupertionPageTransition for iOS', (WidgetTester tester) async {
+  testWidgets('Default PageTranstionsTheme builds a CupertionPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: FlatButton(
@@ -28,19 +34,18 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
         routes: routes,
       ),
     );
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.iOS);
+    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Default PageTransitionsTheme builds a _ZoomPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -55,7 +60,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
         routes: routes,
       ),
     );
@@ -90,7 +94,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          platform: TargetPlatform.android,
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: <TargetPlatform, PageTransitionsBuilder>{
               TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(), // creates a _FadeUpwardsPageTransition
@@ -131,7 +134,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          platform: TargetPlatform.android,
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: <TargetPlatform, PageTransitionsBuilder>{
               TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(), // creates a _OpenUpwardsPageTransition

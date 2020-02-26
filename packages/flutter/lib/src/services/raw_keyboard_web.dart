@@ -192,7 +192,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   @override
   String toString() {
-    return '$runtimeType(keyLabel: $keyLabel, code: $code, '
+    return '${objectRuntimeType(this, 'RawKeyEventDataWeb')}(keyLabel: $keyLabel, code: $code, '
         'metaState: $metaState, modifiers down: $modifiersPressed)';
   }
 }

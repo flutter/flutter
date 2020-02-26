@@ -38,7 +38,7 @@ void validateEnglishLocalizations(File file) {
 
   final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 
-  for (String resourceId in bundle.keys) {
+  for (final String resourceId in bundle.keys) {
     if (resourceId.startsWith('@'))
       continue;
 
@@ -55,7 +55,7 @@ void validateEnglishLocalizations(File file) {
     errorMessages.writeln('A value was not specified for @$resourceId');
   }
 
-  for (String atResourceId in bundle.keys) {
+  for (final String atResourceId in bundle.keys) {
     if (!atResourceId.startsWith('@'))
       continue;
 

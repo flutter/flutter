@@ -84,18 +84,19 @@ class InlineSpanSemanticsInformation {
   final bool requiresOwnNode;
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! InlineSpanSemanticsInformation) {
-      return false;
-    }
-    return other.text == text && other.semanticsLabel == semanticsLabel && other.recognizer == recognizer && other.isPlaceholder == isPlaceholder;
+  bool operator ==(Object other) {
+    return other is InlineSpanSemanticsInformation
+        && other.text == text
+        && other.semanticsLabel == semanticsLabel
+        && other.recognizer == recognizer
+        && other.isPlaceholder == isPlaceholder;
   }
 
   @override
   int get hashCode => hashValues(text, semanticsLabel, recognizer, isPlaceholder);
 
   @override
-  String toString() => '$runtimeType{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
+  String toString() => '${objectRuntimeType(this, 'InlineSpanSemanticsInformation')}{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
 }
 
 /// An immutable span of inline content which forms part of a paragraph.
@@ -108,7 +109,7 @@ class InlineSpanSemanticsInformation {
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a tree of [InlineSpan]s that make a query asking for a
 /// name with a [TextField] embedded inline.
@@ -354,7 +355,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   RenderComparison compareTo(InlineSpan other);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)

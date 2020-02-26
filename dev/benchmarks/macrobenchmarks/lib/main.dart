@@ -7,12 +7,15 @@ import 'package:macrobenchmarks/src/large_images.dart';
 import 'package:macrobenchmarks/src/picture_cache.dart';
 
 import 'common.dart';
+import 'src/animated_placeholder.dart';
 import 'src/backdrop_filter.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
+import 'src/text.dart';
 
-const String kMacrobenchmarks ='Macrobenchmarks';
+const String kMacrobenchmarks = 'Macrobenchmarks';
 
 void main() => runApp(const MacrobenchmarksApp());
 
@@ -29,9 +32,12 @@ class MacrobenchmarksApp extends StatelessWidget {
         kCullOpacityRouteName: (BuildContext context) => CullOpacityPage(),
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
+        kPostBackdropFilterRouteName: (BuildContext context) => PostBackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
         kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
         kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
+        kTextRouteName: (BuildContext context) => TextPage(),
+        kAnimatedPlaceholderRouteName: (BuildContext context) => AnimatedPlaceholderPage(),
       },
     );
   }
@@ -68,6 +74,13 @@ class HomePage extends StatelessWidget {
             },
           ),
           RaisedButton(
+            key: const Key(kPostBackdropFilterRouteName),
+            child: const Text('Post Backdrop Filter'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPostBackdropFilterRouteName);
+            },
+          ),
+          RaisedButton(
             key: const Key(kSimpleAnimationRouteName),
             child: const Text('Simple Animation'),
             onPressed: () {
@@ -86,6 +99,20 @@ class HomePage extends StatelessWidget {
             child: const Text('Large Images'),
             onPressed: () {
               Navigator.pushNamed(context, kLargeImagesRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kTextRouteName),
+            child: const Text('Text'),
+            onPressed: () {
+              Navigator.pushNamed(context, kTextRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kAnimatedPlaceholderRouteName),
+            child: const Text('Animated Placeholder'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedPlaceholderRouteName);
             },
           ),
         ],

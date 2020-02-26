@@ -24,6 +24,8 @@ class MySliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({ Key key }) : super(key: key);
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -73,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
 void main() {
   testWidgets('Tabbed CustomScrollViews, warp from tab 1 to 3', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: MyHomePage()));
+    await tester.pumpWidget(const MaterialApp(home: MyHomePage()));
 
     // should not crash.
     await tester.tap(find.text('Tab 2'));

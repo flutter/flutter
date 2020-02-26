@@ -37,7 +37,7 @@ Future<void> main() async {
         );
       });
 
-      section('Delete plugin\'s Android folder');
+      section("Delete plugin's Android folder");
 
       final File androidFolder = File(path.join(
         projectDir.path,
@@ -50,7 +50,7 @@ Future<void> main() async {
       final String pubspecString = pubspecFile.readAsStringSync();
 
       final StringBuffer iosOnlyPubspec = StringBuffer();
-      for (String line in pubspecString.split('\n')) {
+      for (final String line in pubspecString.split('\n')) {
         if (line.startsWith('    androidPackage:')) {
           continue;
         }

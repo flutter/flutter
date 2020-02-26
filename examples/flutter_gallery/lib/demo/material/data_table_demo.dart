@@ -113,11 +113,11 @@ class DessertDataSource extends DataTableSource {
         }
       },
       cells: <DataCell>[
-        DataCell(Text('${dessert.name}')),
+        DataCell(Text(dessert.name)),
         DataCell(Text('${dessert.calories}')),
-        DataCell(Text('${dessert.fat.toStringAsFixed(1)}')),
+        DataCell(Text(dessert.fat.toStringAsFixed(1))),
         DataCell(Text('${dessert.carbs}')),
-        DataCell(Text('${dessert.protein.toStringAsFixed(1)}')),
+        DataCell(Text(dessert.protein.toStringAsFixed(1))),
         DataCell(Text('${dessert.sodium}')),
         DataCell(Text('${dessert.calcium}%')),
         DataCell(Text('${dessert.iron}%')),
@@ -135,7 +135,7 @@ class DessertDataSource extends DataTableSource {
   int get selectedRowCount => _selectedCount;
 
   void _selectAll(bool checked) {
-    for (Dessert dessert in _desserts)
+    for (final Dessert dessert in _desserts)
       dessert.selected = checked;
     _selectedCount = checked ? _desserts.length : 0;
     notifyListeners();

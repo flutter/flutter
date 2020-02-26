@@ -66,9 +66,15 @@ class Trigger {
 }
 
 class TriggerableWidget extends StatefulWidget {
-  const TriggerableWidget({ this.trigger, this.counter });
+  const TriggerableWidget({
+    Key key,
+    this.trigger,
+    this.counter,
+  }) : super(key: key);
+
   final Trigger trigger;
   final Counter counter;
+
   @override
   TriggerableState createState() => TriggerableState();
 }

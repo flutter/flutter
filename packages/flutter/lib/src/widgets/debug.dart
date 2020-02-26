@@ -108,7 +108,7 @@ bool debugHighlightDeprecatedWidgets = false;
 
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
-  for (Widget widget in widgets) {
+  for (final Widget widget in widgets) {
     assert(widget != null);
     if (widget.key == null)
       continue;
@@ -136,13 +136,11 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(children);
     if (nonUniqueKey != null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Duplicate keys found.'),
-        ErrorDescription(
-          'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-          '$parent has multiple children with key $nonUniqueKey.'
-        ),
-      ]);
+      throw FlutterError(
+        'Duplicate keys found.\n'
+        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        '$parent has multiple children with key $nonUniqueKey.'
+      );
     }
     return true;
   }());
@@ -165,9 +163,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(items);
     if (nonUniqueKey != null)
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Duplicate key found: $nonUniqueKey.'),
-      ]);
+      throw FlutterError('Duplicate key found: $nonUniqueKey.');
     return true;
   }());
   return false;
@@ -315,7 +311,7 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('$reason')]);
+      throw FlutterError(reason);
     }
     return true;
   }());

@@ -16,7 +16,7 @@ void main() {
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];
       int i = 0;
-      for (OffsetLayer layer in layers) {
+      for (final OffsetLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i, size: const Size(200.0, 100.0)));
         containerLayer.append(layer);
         i += 1;
@@ -35,7 +35,7 @@ void main() {
         ClipRectLayer(clipRect: const Rect.fromLTRB(0.0, 200.0, 100.0, 300.0)),
       ];
       int i = 0;
-      for (ClipRectLayer layer in layers) {
+      for (final ClipRectLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i));
         containerLayer.append(layer);
         i += 1;
@@ -55,7 +55,7 @@ void main() {
         ClipRRectLayer(clipRRect: RRect.fromLTRBR(0.0, 200.0, 100.0, 300.0, const Radius.circular(4.0))),
       ];
       int i = 0;
-      for (ClipRRectLayer layer in layers) {
+      for (final ClipRRectLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i));
         containerLayer.append(layer);
         i += 1;
@@ -80,7 +80,7 @@ void main() {
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];
       int i = 0;
-      for (OffsetLayer layer in layers) {
+      for (final OffsetLayer layer in layers) {
         final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size(100.0, 100.0));
         layer.append(annotatedRegionLayer);
         transformLayer.append(layer);
@@ -145,7 +145,7 @@ void main() {
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];
       int i = 0;
-      for (OffsetLayer layer in layers) {
+      for (final OffsetLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i, size: const Size(200.0, 100.0)));
         containerLayer.append(layer);
         i += 1;
@@ -164,7 +164,7 @@ void main() {
         ClipRectLayer(clipRect: const Rect.fromLTRB(0.0, 200.0, 100.0, 300.0)),
       ];
       int i = 0;
-      for (ClipRectLayer layer in layers) {
+      for (final ClipRectLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i));
         containerLayer.append(layer);
         i += 1;
@@ -184,7 +184,7 @@ void main() {
         ClipRRectLayer(clipRRect: RRect.fromLTRBR(0.0, 200.0, 100.0, 300.0, const Radius.circular(4.0))),
       ];
       int i = 0;
-      for (ClipRRectLayer layer in layers) {
+      for (final ClipRRectLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i));
         containerLayer.append(layer);
         i += 1;
@@ -209,7 +209,7 @@ void main() {
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];
       int i = 0;
-      for (OffsetLayer layer in layers) {
+      for (final OffsetLayer layer in layers) {
         final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size(100.0, 100.0));
         layer.append(annotatedRegionLayer);
         transformLayer.append(layer);
@@ -231,7 +231,7 @@ void main() {
         AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0)),
         AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0)),
       ];
-      for (ContainerLayer layer in layers) {
+      for (final ContainerLayer layer in layers) {
         final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0));
         layer.append(annotatedRegionLayer);
         parent.append(layer);

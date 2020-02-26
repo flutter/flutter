@@ -60,6 +60,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   void forgetChild(Element child) {
     assert(child == _child);
     _child = null;
+    super.forgetChild(child);
   }
 
   @override
@@ -237,6 +238,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     layoutAndBuildChild();
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);

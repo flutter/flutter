@@ -160,7 +160,7 @@ class FlutterCompactFormatter {
   void finish() {
     final List<String> skipped = <String>[];
     final List<String> failed = <String>[];
-    for (TestResult result in _tests.values) {
+    for (final TestResult result in _tests.values) {
       switch (result.status) {
         case TestStatus.started:
           failed.add('${_red}Unexpectedly failed to complete a test!');

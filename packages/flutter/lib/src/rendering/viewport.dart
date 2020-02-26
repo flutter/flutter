@@ -30,8 +30,9 @@ enum CacheExtentStyle {
 /// the framework recognize such render objects and interact with them without
 /// having specific knowledge of all the various types of viewports.
 abstract class RenderAbstractViewport extends RenderObject {
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory RenderAbstractViewport._() => null;
 
   /// Returns the [RenderAbstractViewport] that most tightly encloses the given
@@ -137,7 +138,7 @@ class RevealedOffset {
 
   @override
   String toString() {
-    return '$runtimeType(offset: $offset, rect: $rect)';
+    return '${objectRuntimeType(this, 'RevealedOffset')}(offset: $offset, rect: $rect)';
   }
 }
 
@@ -505,7 +506,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @override
   Rect describeApproximatePaintClip(RenderSliver child) {
     final Rect viewportClip = Offset.zero & size;
-    if (child.constraints.overlap == 0) {
+    // The child's viewportMainAxisExtent can be infinite when a
+    // RenderShrinkWrappingViewport is given infinite constraints, such as when
+    // it is the child of a Row or Column (depending on orientation).
+    //
+    // For example, a shrink wrapping render sliver may have infinite
+    // constraints along the viewport's main axis but may also have bouncing
+    // scroll physics, which will allow for some scrolling effect to occur.
+    // We should just use the viewportClip - the start of the overlap is at
+    // double.infinity and so it is effectively meaningless.
+    if (child.constraints.overlap == 0 || !child.constraints.viewportMainAxisExtent.isFinite) {
       return viewportClip;
     }
 
@@ -572,7 +582,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    for (RenderSliver child in childrenInPaintOrder) {
+    for (final RenderSliver child in childrenInPaintOrder) {
       if (child.geometry.visible)
         context.paintChild(child, offset + paintOffsetOf(child));
     }
@@ -622,7 +632,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(mainAxisPosition != null);
     assert(crossAxisPosition != null);
     final SliverHitTestResult sliverResult = SliverHitTestResult.wrap(result);
-    for (RenderSliver child in childrenInHitTestOrder) {
+    for (final RenderSliver child in childrenInHitTestOrder) {
       if (!child.geometry.visible) {
         continue;
       }
@@ -1260,7 +1270,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
               throw FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Horizontal viewport was given unbounded width.'),
                 ErrorDescription(
-                  'Viewports expand in the scrolling direction to fill their container.'
+                  'Viewports expand in the scrolling direction to fill their container. '
                   'In this case, a horizontal viewport was given an unlimited amount of '
                   'horizontal space in which to expand. This situation typically happens '
                   'when a scrollable widget is nested inside another scrollable widget.'
@@ -1689,6 +1699,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (firstChild == null) {
       switch (axis) {
         case Axis.vertical:
@@ -1756,6 +1767,11 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   }
 
   double _attemptLayout(double mainAxisExtent, double crossAxisExtent, double correctedOffset) {
+    // We can't assert mainAxisExtent is finite, because it could be infinite if
+    // it is within a column or row for example. In such a case, there's not
+    // even any scrolling to do, although some scroll physics (i.e.
+    // BouncingScrollPhysics) could still temporarily scroll the content in a
+    // simulation.
     assert(!mainAxisExtent.isNaN);
     assert(mainAxisExtent >= 0.0);
     assert(crossAxisExtent.isFinite);

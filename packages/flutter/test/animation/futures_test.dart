@@ -172,10 +172,10 @@ void main() {
     final TickerFuture f = controller1.forward();
     await tester.pump(); // start ticker
     await tester.pump(const Duration(milliseconds: 200)); // end ticker
-    expect(f.asStream().single, isInstanceOf<Future<void>>());
+    expect(f.asStream().single, isA<Future<void>>());
     await f.catchError((dynamic e) { throw 'do not reach'; });
     expect(await f.then<bool>((_) => true), isTrue);
-    expect(f.whenComplete(() => false), isInstanceOf<Future<void>>());
-    expect(f.timeout(const Duration(seconds: 5)), isInstanceOf<Future<void>>());
+    expect(f.whenComplete(() => false), isA<Future<void>>());
+    expect(f.timeout(const Duration(seconds: 5)), isA<Future<void>>());
   });
 }

@@ -165,18 +165,18 @@ class FloatingActionButtonThemeData extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final FloatingActionButtonThemeData otherData = other;
-    return otherData.foregroundColor == foregroundColor
-        && otherData.backgroundColor == backgroundColor
-        && otherData.focusColor == focusColor
-        && otherData.hoverColor == hoverColor
-        && otherData.splashColor == splashColor
-        && otherData.elevation == elevation
-        && otherData.focusElevation == focusElevation
-        && otherData.hoverElevation == hoverElevation
-        && otherData.disabledElevation == disabledElevation
-        && otherData.highlightElevation == highlightElevation
-        && otherData.shape == shape;
+    return other is FloatingActionButtonThemeData
+        && other.foregroundColor == foregroundColor
+        && other.backgroundColor == backgroundColor
+        && other.focusColor == focusColor
+        && other.hoverColor == hoverColor
+        && other.splashColor == splashColor
+        && other.elevation == elevation
+        && other.focusElevation == focusElevation
+        && other.hoverElevation == hoverElevation
+        && other.disabledElevation == disabledElevation
+        && other.highlightElevation == highlightElevation
+        && other.shape == shape;
   }
 
   @override

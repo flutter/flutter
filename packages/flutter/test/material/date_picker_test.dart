@@ -742,7 +742,7 @@ void _tests() {
 
     // Initial chevron animation state should be dismissed
     // An AlwaysStoppedAnimation is also found and is ignored
-    for (RenderAnimatedOpacity renderer in chevronRenderers) {
+    for (final RenderAnimatedOpacity renderer in chevronRenderers) {
       expect(renderer.opacity.value, equals(1.0));
       expect(renderer.opacity.status, equals(AnimationStatus.dismissed));
     }
@@ -751,7 +751,7 @@ void _tests() {
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await gesture.moveBy(const Offset(50.0, 100.0));
     await tester.pumpAndSettle();
-    for (RenderAnimatedOpacity renderer in chevronRenderers) {
+    for (final RenderAnimatedOpacity renderer in chevronRenderers) {
       expect(renderer.opacity.value, equals(0.0));
       expect(renderer.opacity.status, equals(AnimationStatus.completed));
     }
@@ -759,7 +759,7 @@ void _tests() {
     // Release the drag and test for the opacity to return to original value
     await gesture.up();
     await tester.pumpAndSettle();
-    for (RenderAnimatedOpacity renderer in chevronRenderers) {
+    for (final RenderAnimatedOpacity renderer in chevronRenderers) {
       expect(renderer.opacity.value, equals(1.0));
       expect(renderer.opacity.status, equals(AnimationStatus.dismissed));
     }

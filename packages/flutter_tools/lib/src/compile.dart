@@ -10,16 +10,13 @@ import 'package:usage/uuid/uuid.dart';
 import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
-import 'base/file_system.dart';
 import 'base/io.dart';
-import 'base/platform.dart';
-import 'base/process_manager.dart';
 import 'base/terminal.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'project.dart';
 
 KernelCompilerFactory get kernelCompilerFactory => context.get<KernelCompilerFactory>();
@@ -91,7 +88,7 @@ enum StdoutState { CollectDiagnostic, CollectDependencies }
 
 /// Handles stdin/stdout communication with the frontend server.
 class StdoutHandler {
-  StdoutHandler({this.consumer = printError}) {
+  StdoutHandler({this.consumer = globals.printError}) {
     reset();
   }
 
@@ -179,7 +176,7 @@ class StdoutHandler {
           sources.remove(Uri.parse(message.substring(1)));
           break;
         default:
-          printTrace('Unexpected prefix for $message uri - ignoring');
+          globals.printTrace('Unexpected prefix for $message uri - ignoring');
       }
     }
   }
@@ -199,9 +196,10 @@ class StdoutHandler {
 /// Converts filesystem paths to package URIs.
 class PackageUriMapper {
   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
-    final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
-    for (String packageName in packageMap.keys) {
+    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath)).map;
+    final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
+    final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
+    for (final String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
       // Only perform a multi-root mapping if there are multiple roots.
       if (fileSystemScheme != null
@@ -210,7 +208,7 @@ class PackageUriMapper {
         && prefix.contains(fileSystemScheme)) {
         _packageName = packageName;
         _uriPrefixes = fileSystemRoots
-          .map((String name) => Uri.file(name, windows: platform.isWindows).toString())
+          .map((String name) => Uri.file(name, windows:globals.platform.isWindows).toString())
           .toList();
         return;
       }
@@ -229,8 +227,8 @@ class PackageUriMapper {
     if (_packageName == null) {
       return null;
     }
-    final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
-    for (String uriPrefix in _uriPrefixes) {
+    final String scriptUri = Uri.file(scriptPath, windows: globals.platform.isWindows).toString();
+    for (final String uriPrefix in _uriPrefixes) {
       if (scriptUri.startsWith(uriPrefix)) {
         return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
       }
@@ -280,7 +278,6 @@ class KernelCompiler {
     @required BuildMode buildMode,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    bool causalAsyncStacks = true,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
@@ -290,15 +287,15 @@ class KernelCompiler {
     String platformDill,
     @required List<String> dartDefines,
   }) async {
-    final String frontendServer = artifacts.getArtifactPath(
+    final String frontendServer = globals.artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
     }
-    final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    if (!processManager.canRun(engineDartPath)) {
+    final String engineDartPath = globals.artifacts.getArtifactPath(Artifact.engineDartBinary);
+    if (!globals.processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
     Uri mainUri;
@@ -307,8 +304,8 @@ class KernelCompiler {
     }
     // TODO(jonahwilliams): The output file must already exist, but this seems
     // unnecessary.
-    if (outputFilePath != null && !fs.isFileSync(outputFilePath)) {
-      fs.file(outputFilePath).createSync(recursive: true);
+    if (outputFilePath != null && !globals.fs.isFileSync(outputFilePath)) {
+      globals.fs.file(outputFilePath).createSync(recursive: true);
     }
     final List<String> command = <String>[
       engineDartPath,
@@ -316,8 +313,8 @@ class KernelCompiler {
       '--sdk-root',
       sdkRoot,
       '--target=$targetModel',
-      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
-      for (Object dartDefine in dartDefines)
+      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
+      for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       ..._buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
@@ -339,7 +336,7 @@ class KernelCompiler {
         depFilePath,
       ],
       if (fileSystemRoots != null)
-        for (String root in fileSystemRoots) ...<String>[
+        for (final String root in fileSystemRoots) ...<String>[
           '--filesystem-root',
           root,
         ],
@@ -359,18 +356,18 @@ class KernelCompiler {
       mainUri?.toString() ?? mainPath,
     ];
 
-    printTrace(command.join(' '));
-    final Process server = await processManager
+    globals.printTrace(command.join(' '));
+    final Process server = await globals.processManager
       .start(command)
       .catchError((dynamic error, StackTrace stack) {
-        printError('Failed to start frontend server $error, $stack');
+        globals.printError('Failed to start frontend server $error, $stack');
       });
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
 
     server.stderr
       .transform<String>(utf8.decoder)
-      .listen(printError);
+      .listen(globals.printError);
     server.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
@@ -454,7 +451,6 @@ class _RejectRequest extends _CompilationRequest {
 abstract class ResidentCompiler {
   factory ResidentCompiler(String sdkRoot, {
     @required BuildMode buildMode,
-    bool causalAsyncStacks,
     bool trackWidgetCreation,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -468,6 +464,10 @@ abstract class ResidentCompiler {
     List<String> dartDefines,
   }) = DefaultResidentCompiler;
 
+  // TODO(jonahwilliams): find a better way to configure additional file system
+  // roots from the runner.
+  // See: https://github.com/flutter/flutter/issues/50494
+  void addFileSystemRoot(String root);
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -515,12 +515,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(
     String sdkRoot, {
     @required this.buildMode,
-    this.causalAsyncStacks = true,
     this.trackWidgetCreation = true,
     this.packagesPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
-    CompilerMessageConsumer compilerMessageConsumer = printError,
+    CompilerMessageConsumer compilerMessageConsumer = globals.printError,
     this.initializeFromDill,
     this.targetModel = TargetModel.flutter,
     this.unsafePackageSerialization,
@@ -534,7 +533,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
 
   final BuildMode buildMode;
-  final bool causalAsyncStacks;
   final bool trackWidgetCreation;
   final String packagesPath;
   final TargetModel targetModel;
@@ -544,6 +542,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final bool unsafePackageSerialization;
   final List<String> experimentalFlags;
   final List<String> dartDefines;
+
+  @override
+  void addFileSystemRoot(String root) {
+    fileSystemRoots.add(root);
+  }
 
   /// The path to the root of the Dart SDK used to compile.
   ///
@@ -610,12 +613,14 @@ class DefaultResidentCompiler implements ResidentCompiler {
         ? _mapFilename(request.mainPath, packageUriMapper) + ' '
         : '';
     _server.stdin.writeln('recompile $mainUri$inputKey');
-    printTrace('<- recompile $mainUri$inputKey');
-    for (Uri fileUri in request.invalidatedFiles) {
-      _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
+    globals.printTrace('<- recompile $mainUri$inputKey');
+    for (final Uri fileUri in request.invalidatedFiles) {
+      final String message = _mapFileUri(fileUri.toString(), packageUriMapper);
+      _server.stdin.writeln(message);
+      globals.printTrace(message);
     }
     _server.stdin.writeln(inputKey);
-    printTrace('<- $inputKey');
+    globals.printTrace('<- $inputKey');
 
     return _stdoutHandler.compilerOutput.future;
   }
@@ -642,18 +647,18 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String outputPath,
     String packagesFilePath,
   ) async {
-    final String frontendServer = artifacts.getArtifactPath(
+    final String frontendServer = globals.artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
     final List<String> command = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       frontendServer,
       '--sdk-root',
       sdkRoot,
       '--incremental',
       '--target=$targetModel',
-      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
-      for (Object dartDefine in dartDefines)
+      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
+      for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       if (outputPath != null) ...<String>[
         '--output-dill',
@@ -669,7 +674,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ..._buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (fileSystemRoots != null)
-        for (String root in fileSystemRoots) ...<String>[
+        for (final String root in fileSystemRoots) ...<String>[
           '--filesystem-root',
           root,
         ],
@@ -689,8 +694,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if ((experimentalFlags != null) && experimentalFlags.isNotEmpty)
         '--enable-experiment=${experimentalFlags.join(',')}',
     ];
-    printTrace(command.join(' '));
-    _server = await processManager.start(command);
+    globals.printTrace(command.join(' '));
+    _server = await globals.processManager.start(command);
     _server.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
@@ -708,7 +713,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
-      .listen((String message) { printError(message); });
+      .listen((String message) { globals.printError(message); });
 
     unawaited(_server.exitCode.then((int code) {
       if (code != 0) {
@@ -717,7 +722,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }));
 
     _server.stdin.writeln('compile $scriptUri');
-    printTrace('<- compile $scriptUri');
+    globals.printTrace('<- compile $scriptUri');
 
     return _stdoutHandler.compilerOutput.future;
   }
@@ -770,7 +775,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   void accept() {
     if (_compileRequestNeedsConfirmation) {
       _server.stdin.writeln('accept');
-      printTrace('<- accept');
+      globals.printTrace('<- accept');
     }
     _compileRequestNeedsConfirmation = false;
   }
@@ -792,7 +797,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
     _stdoutHandler.reset(expectSources: false);
     _server.stdin.writeln('reject');
-    printTrace('<- reject');
+    globals.printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;
     return _stdoutHandler.compilerOutput.future;
   }
@@ -800,7 +805,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   @override
   void reset() {
     _server?.stdin?.writeln('reset');
-    printTrace('<- reset');
+    globals.printTrace('<- reset');
   }
 
   String _mapFilename(String filename, PackageUriMapper packageUriMapper) {
@@ -826,7 +831,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     if (fileSystemRoots != null) {
-      for (String root in fileSystemRoots) {
+      for (final String root in fileSystemRoots) {
         if (filename.startsWith(root)) {
           return Uri(
               scheme: fileSystemScheme, path: filename.substring(root.length))
@@ -834,8 +839,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
         }
       }
     }
-    if (platform.isWindows && fileSystemRoots != null && fileSystemRoots.length > 1) {
-      return Uri.file(filename, windows: platform.isWindows).toString();
+    if (globals.platform.isWindows && fileSystemRoots != null && fileSystemRoots.length > 1) {
+      return Uri.file(filename, windows: globals.platform.isWindows).toString();
     }
     return null;
   }
@@ -846,7 +851,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     if (_server == null) {
       return 0;
     }
-    printTrace('killing pid ${_server.pid}');
+    globals.printTrace('killing pid ${_server.pid}');
     _server.kill();
     return _server.exitCode;
   }

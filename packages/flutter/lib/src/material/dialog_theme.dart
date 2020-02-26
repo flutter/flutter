@@ -19,7 +19,7 @@ import 'theme.dart';
 /// a border radius of 2.0 on all corners.
 ///
 /// [titleTextStyle] and [contentTextStyle] are used in [AlertDialog]s.
-/// If null, they default to [TextTheme.title] and [TextTheme.subhead],
+/// If null, they default to [TextTheme.headline6] and [TextTheme.subtitle1],
 /// respectively.
 ///
 /// See also:
@@ -53,12 +53,12 @@ class DialogTheme extends Diagnosticable {
 
   /// Used to configure the [DefaultTextStyle] for the [AlertDialog.title] widget.
   ///
-  /// If null, defaults to [ThemeData.textTheme.title].
+  /// If null, defaults to [ThemeData.textTheme.headline6].
   final TextStyle titleTextStyle;
 
   /// Used to configure the [DefaultTextStyle] for the [AlertDialog.content] widget.
   ///
-  /// If null, defaults to [ThemeData.textTheme.subhead].
+  /// If null, defaults to [ThemeData.textTheme.subtitle1].
   final TextStyle contentTextStyle;
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -104,17 +104,17 @@ class DialogTheme extends Diagnosticable {
   int get hashCode => shape.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final DialogTheme typedOther = other;
-    return typedOther.backgroundColor == backgroundColor
-        && typedOther.elevation == elevation
-        && typedOther.shape == shape
-        && typedOther.titleTextStyle == titleTextStyle
-        && typedOther.contentTextStyle == contentTextStyle;
+    return other is DialogTheme
+        && other.backgroundColor == backgroundColor
+        && other.elevation == elevation
+        && other.shape == shape
+        && other.titleTextStyle == titleTextStyle
+        && other.contentTextStyle == contentTextStyle;
   }
 
   @override

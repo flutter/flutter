@@ -13,7 +13,7 @@ export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 // TODO(ianh): Remove this file once https://github.com/dart-lang/matcher/issues/98 is fixed
 
 /// A matcher that compares the type of the actual value to the type argument T.
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
+test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that

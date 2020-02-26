@@ -44,7 +44,7 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['aar', '--verbose'],
+          options: <String>['aar', '--verbose', '--release'],
         );
       });
 

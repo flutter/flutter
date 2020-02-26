@@ -73,7 +73,7 @@ void main() {
     );
   });
 
-  testWidgets('Doesn\'t overflow because of floating point accumulated error', (WidgetTester tester) async {
+  testWidgets("Doesn't overflow because of floating point accumulated error", (WidgetTester tester) async {
     // both of these cases have failed in the past due to floating point issues
     await tester.pumpWidget(
       Center(

@@ -11,7 +11,7 @@ const String _kBinaryNameVariable = 'BINARY_NAME=';
 ///
 /// Returns `null` if it cannot be found.
 String makefileExecutableName(LinuxProject project) {
-  for (String line in project.makeFile.readAsLinesSync()) {
+  for (final String line in project.makeFile.readAsLinesSync()) {
     if (line.startsWith(_kBinaryNameVariable)) {
       return line.split(_kBinaryNameVariable).last.trim();
     }

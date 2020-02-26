@@ -17,7 +17,7 @@ void main() {
     final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
     SystemChannels.accessibility.setMockMessageHandler((Object mockMessage) async {
-      final Map<dynamic, dynamic> message = mockMessage;
+      final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
       log.add(message);
     });
 

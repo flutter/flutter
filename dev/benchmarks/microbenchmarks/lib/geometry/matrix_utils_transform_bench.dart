@@ -10,8 +10,8 @@ import 'package:vector_math/vector_math_64.dart';
 
 import '../common.dart';
 
-const int _kNumIterations = 1000000;
-const int _kNumWarmUp = 10000;
+const int _kNumIterations = 10000000;
+const int _kNumWarmUp = 100000;
 
 void main() {
   assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");

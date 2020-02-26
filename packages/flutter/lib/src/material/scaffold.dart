@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(shihaohong): remove ignoring deprecated member use analysis
+// when Scaffold.shouldSnackBarIgnoreFABRect parameter is removed.
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
@@ -178,7 +182,7 @@ class _TransitionSnapshotFabLocation extends FloatingActionButtonLocation {
 
   @override
   String toString() {
-    return '$runtimeType(begin: $begin, end: $end, progress: $progress)';
+    return '${objectRuntimeType(this, '_TransitionSnapshotFabLocation')}(begin: $begin, end: $end, progress: $progress)';
   }
 }
 
@@ -261,7 +265,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
       if (renderObject == null || !renderObject.owner.debugDoingPaint)
         throw FlutterError(
             'Scaffold.geometryOf() must only be accessed during the paint phase.\n'
-            'The ScaffoldGeometry is only available during the paint phase, because\n'
+            'The ScaffoldGeometry is only available during the paint phase, because '
             'its value is computed during the animation and layout phases prior to painting.'
         );
       return true;
@@ -314,12 +318,12 @@ class _BodyBoxConstraints extends BoxConstraints {
   // If the height of the bottom widgets has changed, even though the constraints'
   // min and max values have not, we still want performLayout to happen.
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (super != other)
       return false;
-    final _BodyBoxConstraints typedOther = other;
-    return bottomWidgetsHeight == typedOther.bottomWidgetsHeight
-        && appBarHeight == typedOther.appBarHeight;
+    return other is _BodyBoxConstraints
+        && other.bottomWidgetsHeight == bottomWidgetsHeight
+        && other.appBarHeight == appBarHeight;
   }
 
   @override
@@ -356,7 +360,7 @@ class _BodyBuilder extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final _BodyBoxConstraints bodyConstraints = constraints;
+        final _BodyBoxConstraints bodyConstraints = constraints as _BodyBoxConstraints;
         final MediaQueryData metrics = MediaQuery.of(context);
 
         final double bottom = extendBody
@@ -547,9 +551,19 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       if (snackBarSize == Size.zero) {
         snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
       }
-      final double snackBarYOffsetBase = floatingActionButtonRect != null && isSnackBarFloating
-        ? floatingActionButtonRect.top
-        : contentBottom;
+
+      double snackBarYOffsetBase;
+      if (Scaffold.shouldSnackBarIgnoreFABRect) {
+        if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating)
+          snackBarYOffsetBase = floatingActionButtonRect.top;
+        else
+          snackBarYOffsetBase = contentBottom;
+      } else {
+        snackBarYOffsetBase = floatingActionButtonRect != null && isSnackBarFloating
+          ? floatingActionButtonRect.top
+          : contentBottom;
+      }
+
       positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
     }
 
@@ -741,10 +755,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 
   bool _isExtendedFloatingActionButton(Widget widget) {
-    if (widget is! FloatingActionButton)
-      return false;
-    final FloatingActionButton fab = widget;
-    return fab.isExtended;
+    return widget is FloatingActionButton
+        && widget.isExtended;
   }
 
   @override
@@ -805,7 +817,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
 /// The [body] is a [Text] placed in a [Center] in order to center the text
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
@@ -834,7 +846,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
 /// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
 /// order to center the text within the [Scaffold]. The [FloatingActionButton]
@@ -864,7 +876,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
 /// to center the text within the [Scaffold]. The [FloatingActionButton] is
@@ -934,7 +946,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// scaffold with a differently titled AppBar. It would be better to add a
 /// listener to the [TabController] that updates the AppBar.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Add a listener to the app's tab controller so that the [AppBar] title of the
 /// app's one and only scaffold is reset each time a new tab is selected.
 ///
@@ -999,6 +1011,8 @@ class Scaffold extends StatefulWidget {
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
+    this.drawerEnableOpenDragGesture = true,
+    this.endDrawerEnableOpenDragGesture = true,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1094,20 +1108,120 @@ class Scaffold extends StatefulWidget {
   /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
   /// right-to-left ([TextDirection.rtl])
   ///
-  /// In the uncommon case that you wish to open the drawer manually, use the
-  /// [ScaffoldState.openDrawer] function.
-  ///
   /// Typically a [Drawer].
+  ///
+  /// To open the drawer, use the [ScaffoldState.openDrawer] function.
+  ///
+  /// To close the drawer, use [Navigator.pop].
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  /// To disable the drawer edge swipe, set the
+  /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
+  /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
+  /// it.
+  ///
+  /// ```dart
+  /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  ///
+  /// void _openDrawer() {
+  ///   _scaffoldKey.currentState.openDrawer();
+  /// }
+  ///
+  /// void _closeDrawer() {
+  ///   Navigator.of(context).pop();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     key: _scaffoldKey,
+  ///     appBar: AppBar(title: const Text('Drawer Demo')),
+  ///     body: Center(
+  ///       child: RaisedButton(
+  ///         onPressed: _openDrawer,
+  ///         child: const Text('Open Drawer'),
+  ///       ),
+  ///     ),
+  ///     drawer: Drawer(
+  ///       child: Center(
+  ///         child: Column(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             const Text('This is the Drawer'),
+  ///             RaisedButton(
+  ///               onPressed: _closeDrawer,
+  ///               child: const Text('Close Drawer'),
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     ),
+  ///     // Disable opening the drawer with a swipe gesture.
+  ///     drawerEnableOpenDragGesture: false,
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   final Widget drawer;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from right-to-left ([TextDirection.ltr]) or
   /// left-to-right ([TextDirection.rtl])
   ///
-  /// In the uncommon case that you wish to open the drawer manually, use the
-  /// [ScaffoldState.openEndDrawer] function.
-  ///
   /// Typically a [Drawer].
+  ///
+  /// To open the drawer, use the [ScaffoldState.openEndDrawer] function.
+  ///
+  /// To close the drawer, use [Navigator.pop].
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  /// To disable the drawer edge swipe, set the
+  /// [Scaffold.endDrawerEnableOpenDragGesture] to false. Then, use
+  /// [ScaffoldState.openEndDrawer] to open the drawer and [Navigator.pop] to
+  /// close it.
+  ///
+  /// ```dart
+  /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  ///
+  /// void _openEndDrawer() {
+  ///   _scaffoldKey.currentState.openEndDrawer();
+  /// }
+  ///
+  /// void _closeEndDrawer() {
+  ///   Navigator.of(context).pop();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     key: _scaffoldKey,
+  ///     appBar: AppBar(title: Text('Drawer Demo')),
+  ///     body: Center(
+  ///       child: RaisedButton(
+  ///         onPressed: _openEndDrawer,
+  ///         child: Text('Open End Drawer'),
+  ///       ),
+  ///     ),
+  ///     endDrawer: Drawer(
+  ///       child: Center(
+  ///         child: Column(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             const Text('This is the Drawer'),
+  ///             RaisedButton(
+  ///               onPressed: _closeEndDrawer,
+  ///               child: const Text('Close Drawer'),
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     ),
+  ///     // Disable opening the end drawer with a swipe gesture.
+  ///     endDrawerEnableOpenDragGesture: false,
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   final Widget endDrawer;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
@@ -1205,9 +1319,32 @@ class Scaffold extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double drawerEdgeDragWidth;
 
+  /// Determines if the [Scaffold.drawer] can be opened with a drag
+  /// gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool drawerEnableOpenDragGesture;
+
+  /// Determines if the [Scaffold.endDrawer] can be opened with a
+  /// drag gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool endDrawerEnableOpenDragGesture;
+
+  /// This flag is deprecated and fixes and issue with incorrect clipping
+  /// and positioning of the [SnackBar] set to [SnackBarBehavior.floating].
+  @Deprecated(
+    'This property controls whether to clip and position the snackbar as '
+    'if there is always a floating action button, even if one is not present. '
+    'It exists to provide backwards compatibility to ease migrations, and will '
+    'eventually be removed. '
+    'This feature was deprecated after v1.15.3.'
+  )
+  static bool shouldSnackBarIgnoreFABRect = false;
+
   /// The state from the closest instance of this class that encloses the given context.
   ///
-  /// {@tool snippet --template=freeform}
+  /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
   ///
@@ -1260,7 +1397,7 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool snippet --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material}
   /// When the [Scaffold] is actually created in the same `build` function, the
   /// `context` argument to the `build` function can't be used to find the
   /// [Scaffold] (since it's "above" the widget being returned in the widget
@@ -1695,7 +1832,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
         throw FlutterError(
-          'Scaffold.bottomSheet cannot be specified while a bottom sheet'
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet '
           'displayed with showBottomSheet() is still visible.\n'
           'Rebuild the Scaffold with a null bottomSheet before calling showBottomSheet().'
         );
@@ -1815,9 +1952,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// of the app. Modal bottom sheets can be created and displayed with the
   /// [showModalBottomSheet] function.
   ///
-  /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_bottom_sheet.mp4}
-  ///
-  /// {@tool snippet --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   ///
   /// This example demonstrates how to use `showBottomSheet` to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to
@@ -1875,7 +2010,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(() {
       if (widget.bottomSheet != null) {
         throw FlutterError(
-          'Scaffold.bottomSheet cannot be specified while a bottom sheet'
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet '
           'displayed with showBottomSheet() is still visible.\n'
           'Rebuild the Scaffold with a null bottomSheet before calling showBottomSheet().'
         );
@@ -1897,7 +2032,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         clipBehavior: clipBehavior,
       );
     });
-    return _currentBottomSheet;
+    return _currentBottomSheet as PersistentBottomSheetController<T>;
   }
 
   // Floating Action Button API
@@ -1919,7 +2054,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _floatingActionButtonVisibilityController.value = newValue.clamp(
       _floatingActionButtonVisibilityController.lowerBound,
       _floatingActionButtonVisibilityController.upperBound,
-    );
+    ) as double;
   }
 
   /// Shows the [Scaffold.floatingActionButton].
@@ -2053,7 +2188,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     _geometryNotifier.dispose();
-    for (_StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
+    for (final _StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
       bottomSheet.animationController?.dispose();
     }
     if (_currentBottomSheet != null) {
@@ -2113,6 +2248,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
+          enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2137,6 +2273,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
+          enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -2576,11 +2713,12 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Stan
 
 class _ScaffoldScope extends InheritedWidget {
   const _ScaffoldScope({
+    Key key,
     @required this.hasDrawer,
     @required this.geometryNotifier,
     @required Widget child,
   }) : assert(hasDrawer != null),
-       super(child: child);
+       super(key: key, child: child);
 
   final bool hasDrawer;
   final _ScaffoldGeometryNotifier geometryNotifier;

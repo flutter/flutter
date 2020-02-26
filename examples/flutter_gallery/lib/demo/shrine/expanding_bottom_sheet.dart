@@ -476,7 +476,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
       return;
     }
 
-    for (int product in difference) {
+    for (final int product in difference) {
       if (_internalList.length < _list.length) {
         _list.remove(product);
       } else if (_internalList.length > _list.length) {

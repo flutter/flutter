@@ -7,4 +7,3 @@
 
 @interface AppDelegate : FlutterAppDelegate
 @end
-

@@ -162,7 +162,7 @@ const Matcher hasAGoodToStringDeep = _HasGoodToStringDeep();
 
 /// A matcher for functions that throw [FlutterError].
 ///
-/// This is equivalent to `throwsA(isInstanceOf<FlutterError>())`.
+/// This is equivalent to `throwsA(isA<FlutterError>())`.
 ///
 /// If you are trying to test whether a call to [WidgetTester.pumpWidget]
 /// results in a [FlutterError], see [TestWidgetsFlutterBinding.takeException].
@@ -176,7 +176,7 @@ final Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
 ///
-/// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
+/// This is equivalent to `throwsA(isA<AssertionError>())`.
 ///
 /// If you are trying to test whether a call to [WidgetTester.pumpWidget]
 /// results in an [AssertionError], see
@@ -197,7 +197,7 @@ final Matcher throwsAssertionError = throwsA(isAssertionError);
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-final Matcher isFlutterError = isInstanceOf<FlutterError>();
+final test_package.TypeMatcher<FlutterError> isFlutterError = isA<FlutterError>();
 
 /// A matcher for [AssertionError].
 ///
@@ -207,11 +207,11 @@ final Matcher isFlutterError = isInstanceOf<FlutterError>();
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-final Matcher isAssertionError = isInstanceOf<AssertionError>();
+final test_package.TypeMatcher<AssertionError> isAssertionError = isA<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
+test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -327,7 +327,7 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// The master golden image files that are tested against can be created or
 /// updated by running `flutter test --update-goldens` on the test.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Sample invocations of [matchesGoldenFile].
 ///
 /// ```dart
@@ -1184,7 +1184,7 @@ class _IsMethodCall extends Matcher {
   bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
     if (a.length != b.length)
       return false;
-    for (dynamic key in a.keys) {
+    for (final dynamic key in a.keys) {
       if (!b.containsKey(key) || !_deepEquals(a[key], b[key]))
         return false;
     }
@@ -1782,7 +1782,7 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with custom hints: $hintOverrides');
     if (children != null) {
       description.add(' with children:\n');
-      for (_MatchesSemanticsData child in children.cast<_MatchesSemanticsData>())
+      for (final _MatchesSemanticsData child in children.cast<_MatchesSemanticsData>())
         child.describe(description);
     }
     return description;
@@ -1824,11 +1824,11 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     if (actions != null) {
       int actionBits = 0;
-      for (SemanticsAction action in actions)
+      for (final SemanticsAction action in actions)
         actionBits |= action.index;
       if (actionBits != data.actions) {
         final List<String> actionSummary = <String>[
-          for (SemanticsAction action in SemanticsAction.values.values)
+          for (final SemanticsAction action in SemanticsAction.values.values)
             if ((data.actions & action.index) != 0)
               describeEnum(action),
         ];
@@ -1858,11 +1858,11 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (flags != null) {
       int flagBits = 0;
-      for (SemanticsFlag flag in flags)
+      for (final SemanticsFlag flag in flags)
         flagBits |= flag.index;
       if (flagBits != data.flags) {
         final List<String> flagSummary = <String>[
-          for (SemanticsFlag flag in SemanticsFlag.values.values)
+          for (final SemanticsFlag flag in SemanticsFlag.values.values)
             if ((data.flags & flag.index) != 0)
               describeEnum(flag),
         ];

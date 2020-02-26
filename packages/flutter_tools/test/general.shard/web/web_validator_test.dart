@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_validator.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -46,7 +46,7 @@ void main() {
       expect(result.type, ValidationType.missing);
     }));
 
-    test('Doesn\'t warn about CHROME_EXECUTABLE unless it cant find chrome ', () => testbed.run(() async {
+    test("Doesn't warn about CHROME_EXECUTABLE unless it cant find chrome ", () => testbed.run(() async {
       when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(false);
       final ValidationResult result = await webValidator.validate();
       expect(result.messages, <ValidationMessage>[

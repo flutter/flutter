@@ -21,29 +21,31 @@ void loadDateIntlDataIfNotLoaded() {
     // This can only happen if a locale with a stripped scriptCode has already
     // been initialzed. This should be removed when scriptCode stripping is removed.
     final Set<String> initializedLocales = <String>{};
-    date_localizations.dateSymbols.forEach((String locale, dynamic data) {
-      // Strip scriptCode from the locale, as we do not distinguish between scripts
-      // for dates.
-      final List<String> codes = locale.split('_');
-      String countryCode;
-      if (codes.length == 2) {
-        countryCode = codes[1].length < 4 ? codes[1] : null;
-      } else if (codes.length == 3) {
-        countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
-      }
-      locale = codes[0] + (countryCode != null ? '_' + countryCode : '');
-      if (initializedLocales.contains(locale))
-        return;
-      initializedLocales.add(locale);
-      // Perform initialization.
-      assert(date_localizations.datePatterns.containsKey(locale));
-      final intl.DateSymbols symbols = intl.DateSymbols.deserializeFromMap(data);
-      date_symbol_data_custom.initializeDateFormattingCustom(
-        locale: locale,
-        symbols: symbols,
-        patterns: date_localizations.datePatterns[locale],
-      );
-    });
+    date_localizations.dateSymbols
+      .cast<String, Map<String, dynamic>>()
+      .forEach((String locale, Map<String, dynamic> data) {
+        // Strip scriptCode from the locale, as we do not distinguish between scripts
+        // for dates.
+        final List<String> codes = locale.split('_');
+        String countryCode;
+        if (codes.length == 2) {
+          countryCode = codes[1].length < 4 ? codes[1] : null;
+        } else if (codes.length == 3) {
+          countryCode = codes[1].length < codes[2].length ? codes[1] : codes[2];
+        }
+        locale = codes[0] + (countryCode != null ? '_' + countryCode : '');
+        if (initializedLocales.contains(locale))
+          return;
+        initializedLocales.add(locale);
+        // Perform initialization.
+        assert(date_localizations.datePatterns.containsKey(locale));
+        final intl.DateSymbols symbols = intl.DateSymbols.deserializeFromMap(data);
+        date_symbol_data_custom.initializeDateFormattingCustom(
+          locale: locale,
+          symbols: symbols,
+          patterns: date_localizations.datePatterns[locale],
+        );
+      });
     _dateIntlDataInitialized = true;
   }
 }

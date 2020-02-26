@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -31,7 +32,7 @@ void main() {
   setUp(() {
     mockFileSystem = MockFileSystem();
     mockFile = MockFile();
-    when(mockFileSystem.path).thenReturn(fs.path);
+    when(mockFileSystem.path).thenReturn(globals.fs.path);
     when(mockFileSystem.file(any)).thenReturn(mockFile);
     when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(packagesContents) as Uint8List);
   });
@@ -65,7 +66,7 @@ void main() {
   testUsingContext('multi-root maps main file from same package on multiroot scheme', () async {
     final MockFileSystem mockFileSystem = MockFileSystem();
     final MockFile mockFile = MockFile();
-    when(mockFileSystem.path).thenReturn(fs.path);
+    when(mockFileSystem.path).thenReturn(globals.fs.path);
     when(mockFileSystem.file(any)).thenReturn(mockFile);
     when(mockFile.readAsBytesSync())
         .thenReturn(utf8.encode(multiRootPackagesContents) as Uint8List);

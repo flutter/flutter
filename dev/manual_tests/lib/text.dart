@@ -343,7 +343,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     if (node.children == null || node.children.isEmpty)
       return 0;
     int result = 0;
-    for (TextSpan child in node.children.cast<TextSpan>())
+    for (final TextSpan child in node.children.cast<TextSpan>())
       result = math.max(result, depthOf(child));
     return result;
   }
@@ -582,7 +582,7 @@ class _UnderlinesState extends State<Underlines> {
                 child: ListBody(
                   children: <Widget>[
                     _wrap(null),
-                    for (TextDecorationStyle style in TextDecorationStyle.values) _wrap(style),
+                    for (final TextDecorationStyle style in TextDecorationStyle.values) _wrap(style),
                   ],
                 ),
               ),
@@ -675,7 +675,7 @@ class _FallbackState extends State<Fallback> {
                   child: IntrinsicWidth(
                     child: ListBody(
                       children: <Widget>[
-                        for (String font in androidFonts)
+                        for (final String font in androidFonts)
                           Text(
                             multiScript,
                             style: style.copyWith(

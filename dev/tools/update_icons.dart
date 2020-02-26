@@ -182,7 +182,7 @@ void main(List<String> args) {
 String regenerateIconsFile(String iconData, String codepointData) {
   final StringBuffer buf = StringBuffer();
   bool generating = false;
-  for (String line in LineSplitter.split(iconData)) {
+  for (final String line in LineSplitter.split(iconData)) {
     if (!generating)
       buf.writeln(line);
     if (line.contains(kBeginGeneratedMark)) {

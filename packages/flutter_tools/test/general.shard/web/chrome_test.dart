@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart';
@@ -23,12 +23,13 @@ void main() {
 
   setUp(() {
     final MockPlatform platform = MockPlatform();
+    final MockOperatingSystemUtils os = MockOperatingSystemUtils();
     exitCompleter = Completer<int>.sync();
     when(platform.isWindows).thenReturn(false);
     testbed = Testbed(overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Platform: () => platform,
-      OperatingSystemUtils: () => MockOperatingSystemUtils(),
+      OperatingSystemUtils: () => os,
     }, setup: () {
       when(os.findFreePort()).thenAnswer((Invocation invocation) async {
         return 1234;
@@ -36,7 +37,7 @@ void main() {
       when(platform.environment).thenReturn(<String, String>{
         kChromeEnvironment: 'example_chrome',
       });
-      when(processManager.start(any))
+      when(globals.processManager.start(any))
         .thenAnswer((Invocation invocation) async {
         return FakeProcess(
           exitCode: exitCompleter.future,
@@ -53,10 +54,10 @@ void main() {
     resetChromeForTesting();
   });
 
-  test('can launch chrome and connect to the devtools', () => testbed.run(() async {
-    const List<String> expected = <String>[
+  List<String> expectChromeArgs({int debugPort = 1234}) {
+    return <String>[
       'example_chrome',
-      '--remote-debugging-port=1234',
+      '--remote-debugging-port=$debugPort',
       '--disable-background-timer-throttling',
       '--disable-extensions',
       '--disable-popup-blocking',
@@ -67,15 +68,35 @@ void main() {
       '--disable-translate',
       'example_url',
     ];
+  }
 
+  test('can launch chrome and connect to the devtools', () => testbed.run(() async {
     await chromeLauncher.launch('example_url', skipCheck: true);
-    final VerificationResult result = verify(processManager.start(captureAny));
 
-    expect(result.captured.single, containsAll(expected));
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
+    expect(result.captured.single, containsAll(expectChromeArgs()));
+    expect(result.captured.single, isNot(contains('--window-size=2400,1800')));
   }));
 
+  test('can launch chrome with a custom debug port', () => testbed.run(() async {
+    await chromeLauncher.launch('example_url', skipCheck: true, debugPort: 10000);
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
+
+    expect(result.captured.single, containsAll(expectChromeArgs(debugPort: 10000)));
+    expect(result.captured.single, isNot(contains('--window-size=2400,1800')));
+  }));
+
+  test('can launch chrome headless', () => testbed.run(() async {
+    await chromeLauncher.launch('example_url', skipCheck: true, headless: true);
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
+
+    expect(result.captured.single, containsAll(expectChromeArgs()));
+    expect(result.captured.single, contains('--window-size=2400,1800'));
+  }));
+
+
   test('can seed chrome temp directory with existing preferences', () => testbed.run(() async {
-    final Directory dataDir = fs.directory('chrome-stuff');
+    final Directory dataDir = globals.fs.directory('chrome-stuff');
     final File preferencesFile = dataDir
       .childDirectory('Default')
       .childFile('preferences');
@@ -84,10 +105,10 @@ void main() {
       ..writeAsStringSync('example');
 
     await chromeLauncher.launch('example_url', skipCheck: true, dataDir: dataDir);
-    final VerificationResult result = verify(processManager.start(captureAny));
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
     final String arg = (result.captured.single as List<String>)
       .firstWhere((String arg) => arg.startsWith('--user-data-dir='));
-    final Directory tempDirectory = fs.directory(arg.split('=')[1]);
+    final Directory tempDirectory = globals.fs.directory(arg.split('=')[1]);
     final File tempFile = tempDirectory
       .childDirectory('Default')
       .childFile('preferences');
@@ -107,4 +128,3 @@ void main() {
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockPlatform extends Mock implements Platform {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-

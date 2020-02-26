@@ -4,10 +4,8 @@
 
 import 'package:meta/meta.dart';
 
-import 'base/config.dart';
 import 'base/context.dart';
-import 'base/platform.dart';
-import 'version.dart';
+import 'globals.dart' as globals;
 
 /// The current [FeatureFlags] implementation.
 ///
@@ -39,27 +37,24 @@ class FeatureFlags {
   /// Whether the Android embedding V2 is enabled.
   bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
 
-  /// Whether the web incremental compiler is enabled.
-  bool get isWebIncrementalCompilerEnabled => isEnabled(flutterWebIncrementalCompiler);
-
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
   bool isEnabled(Feature feature) {
-    final String currentChannel = FlutterVersion.instance.channel;
+    final String currentChannel = globals.flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
       return false;
     }
     bool isEnabled = featureSetting.enabledByDefault;
     if (feature.configSetting != null) {
-      final bool configOverride = Config.instance.getValue(feature.configSetting) as bool;
+      final bool configOverride = globals.config.getValue(feature.configSetting) as bool;
       if (configOverride != null) {
         isEnabled = configOverride;
       }
     }
     if (feature.environmentOverride != null) {
-      if (platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
+      if (globals.platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
         isEnabled = true;
       }
     }
@@ -74,7 +69,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
   flutterAndroidEmbeddingV2Feature,
-  flutterWebIncrementalCompiler,
 ];
 
 /// The [Feature] for flutter web.
@@ -153,21 +147,6 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
   stable: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
-  ),
-);
-
-/// The [Feature] for using the incremental compiler instead of build runner.
-const Feature flutterWebIncrementalCompiler = Feature(
-  name: 'Enable the incremental compiler for web builds',
-  configSetting: 'enable-web-incremental-compiler',
-  environmentOverride: 'WEB_INCREMENTAL_COMPILER',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
-  dev: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
   ),
 );
 

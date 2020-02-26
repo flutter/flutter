@@ -91,6 +91,11 @@ typedef GenerateAppTitle = String Function(BuildContext context);
 /// Creates a [PageRoute] using the given [RouteSettings] and [WidgetBuilder].
 typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, WidgetBuilder builder);
 
+/// The signature of [WidgetsApp.onGenerateInitialRoutes].
+///
+/// Creates a series of one or more initial routes.
+typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRoute);
+
 /// A convenience widget that wraps a number of widgets that are commonly
 /// required for an application.
 ///
@@ -164,6 +169,7 @@ class WidgetsApp extends StatefulWidget {
     Key key,
     this.navigatorKey,
     this.onGenerateRoute,
+    this.onGenerateInitialRoutes,
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.initialRoute,
@@ -191,6 +197,12 @@ class WidgetsApp extends StatefulWidget {
     this.actions,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
+       assert(
+         home == null ||
+         onGenerateInitialRoutes == null,
+         'If onGenerateInitialRoutes is specifiied, the home argument will be '
+         'redundant.'
+       ),
        assert(
          home == null ||
          !routes.containsKey(Navigator.defaultRouteName),
@@ -289,6 +301,16 @@ class WidgetsApp extends StatefulWidget {
   /// be set, and the [pageRouteBuilder] must also be set so that the
   /// default handler will know what routes and [PageRoute]s to build.
   final RouteFactory onGenerateRoute;
+
+  /// {@template flutter.widgets.widgetsApp.onGenerateInitialRoutes}
+  /// The routes generator callback used for generating initial routes if
+  /// [initialRoute] is provided.
+  ///
+  /// If this property is not set, the underlying
+  /// [Navigator.onGenerateInitialRoutes] will default to
+  /// [Navigator.defaultGenerateInitialRoutes].
+  /// {@endtemplate}
+  final InitialRouteListFactory onGenerateInitialRoutes;
 
   /// The [PageRoute] generator callback used when the app is navigated to a
   /// named route.
@@ -707,7 +729,7 @@ class WidgetsApp extends StatefulWidget {
   /// By default, this is set to [WidgetsApp.defaultShortcuts].
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single shortcut for
   /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
   /// add your own [Shortcuts] widget.
@@ -756,7 +778,7 @@ class WidgetsApp extends StatefulWidget {
   /// widget.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single action handling an
   /// [ActivateAction] to the default actions without needing to
   /// add your own [Actions] widget.
@@ -825,6 +847,7 @@ class WidgetsApp extends StatefulWidget {
     // Activation
     LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
     LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.gameButtonA): const Intent(ActivateAction.key),
 
     // Keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
@@ -995,14 +1018,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     final Route<dynamic> result = widget.onUnknownRoute(settings);
     assert(() {
       if (result == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The onUnknownRoute callback returned null.'),
-          ErrorDescription(
-            'When the $runtimeType requested the route $settings from its '
-            'onUnknownRoute callback, the callback returned null. Such callbacks '
-            'must never return null.'
-          )
-        ]);
+        throw FlutterError(
+          'The onUnknownRoute callback returned null.\n'
+          'When the $runtimeType requested the route $settings from its '
+          'onUnknownRoute callback, the callback returned null. Such callbacks '
+          'must never return null.'
+        );
       }
       return true;
     }());
@@ -1110,7 +1131,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
     final Map<String, Locale> languageLocales = HashMap<String, Locale>();
     final Map<String, Locale> countryLocales = HashMap<String, Locale>();
-    for (Locale locale in supportedLocales) {
+    for (final Locale locale in supportedLocales) {
       allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
       languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
       languageAndCountryLocales['${locale.languageCode}_${locale.countryCode}'] ??= locale;
@@ -1209,7 +1230,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(() {
       final Set<Type> unsupportedTypes =
         _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
-      for (LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
+      for (final LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
         if (!unsupportedTypes.contains(delegate.type))
           continue;
         if (delegate.isSupported(appLocale))
@@ -1227,10 +1248,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       final StringBuffer message = StringBuffer();
       message.writeln('\u2550' * 8);
       message.writeln(
-        'Warning: This application\'s locale, $appLocale, is not supported by all of its\n'
+        "Warning: This application's locale, $appLocale, is not supported by all of its\n"
         'localization delegates.'
       );
-      for (Type unsupportedType in unsupportedTypes) {
+      for (final Type unsupportedType in unsupportedTypes) {
         // Currently the Cupertino library only provides english localizations.
         // Remove this when https://github.com/flutter/flutter/issues/23847
         // is fixed.
@@ -1242,7 +1263,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       }
       message.writeln(
         'See https://flutter.dev/tutorials/internationalization/ for more\n'
-        'information about configuring an app\'s locale, supportedLocales,\n'
+        "information about configuring an app's locale, supportedLocales,\n"
         'and localizationsDelegates parameters.'
       );
       message.writeln('\u2550' * 8);
@@ -1265,6 +1286,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             ? WidgetsBinding.instance.window.defaultRouteName
             : widget.initialRoute ?? WidgetsBinding.instance.window.defaultRouteName,
         onGenerateRoute: _onGenerateRoute,
+        onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
+          ? Navigator.defaultGenerateInitialRoutes
+          : (NavigatorState navigator, String initialRouteName) {
+            return widget.onGenerateInitialRoutes(initialRouteName);
+          },
         onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers,
       );
@@ -1364,9 +1390,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(_debugCheckLocalizations(appLocale));
     return Shortcuts(
       shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+      debugLabel: '<Default WidgetsApp Shortcuts>',
       child: Actions(
         actions: widget.actions ?? WidgetsApp.defaultActions,
-        child: DefaultFocusTraversal(
+        child: FocusTraversalGroup(
           policy: ReadingOrderTraversalPolicy(),
           child: _MediaQueryFromWindow(
             child: Localizations(

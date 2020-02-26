@@ -5,6 +5,7 @@
 import '../base/context.dart';
 import '../base/user_messages.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import 'xcode.dart';
 
 XcodeValidator get xcodeValidator => context.get<XcodeValidator>();
@@ -18,36 +19,36 @@ class XcodeValidator extends DoctorValidator {
     ValidationType xcodeStatus = ValidationType.missing;
     String xcodeVersionInfo;
 
-    if (xcode.isInstalled) {
+    if (globals.xcode.isInstalled) {
       xcodeStatus = ValidationType.installed;
 
-      messages.add(ValidationMessage(userMessages.xcodeLocation(xcode.xcodeSelectPath)));
+      messages.add(ValidationMessage(userMessages.xcodeLocation(globals.xcode.xcodeSelectPath)));
 
-      xcodeVersionInfo = xcode.versionText;
+      xcodeVersionInfo = globals.xcode.versionText;
       if (xcodeVersionInfo.contains(',')) {
         xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
       }
-      messages.add(ValidationMessage(xcode.versionText));
+      messages.add(ValidationMessage(globals.xcode.versionText));
 
-      if (!xcode.isInstalledAndMeetsVersionCheck) {
+      if (!globals.xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(
             userMessages.xcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
         ));
       }
 
-      if (!xcode.eulaSigned) {
+      if (!globals.xcode.eulaSigned) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.xcodeEula));
       }
-      if (!xcode.isSimctlInstalled) {
+      if (!globals.xcode.isSimctlInstalled) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.xcodeMissingSimct));
       }
 
     } else {
       xcodeStatus = ValidationType.missing;
-      if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
+      if (globals.xcode.xcodeSelectPath == null || globals.xcode.xcodeSelectPath.isEmpty) {
         messages.add(ValidationMessage.error(userMessages.xcodeMissing));
       } else {
         messages.add(ValidationMessage.error(userMessages.xcodeIncomplete));

@@ -73,7 +73,7 @@ void main() {
     }
 
     Color containerColor() {
-      final BoxDecoration decoration = tester.widget<Container>(find.byKey(primaryContainerKey)).decoration;
+      final BoxDecoration decoration = tester.widget<Container>(find.byKey(primaryContainerKey)).decoration as BoxDecoration;
       return decoration.color;
     }
 
@@ -227,7 +227,7 @@ void main() {
     Color bannerColor() {
       final BoxDecoration decoration = tester.widget<Container>(
         find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first,
-      ).decoration;
+      ).decoration as BoxDecoration;
       return decoration.color;
     }
 
@@ -318,7 +318,7 @@ void main() {
     BorderSide dividerBorder() {
       final BoxDecoration decoration = tester.widget<Container>(
         find.descendant(of: find.byType(Divider), matching: find.byType(Container)).first,
-      ).decoration;
+      ).decoration as BoxDecoration;
       return decoration.border.bottom;
     }
 

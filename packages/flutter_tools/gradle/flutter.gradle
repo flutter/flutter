@@ -331,15 +331,24 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    // Returns `true` if the given path contains an `android/build.gradle` file.
+    //
+    // TODO(egarciad): Fix https://github.com/flutter/flutter/issues/39657.
+    // Android Studio may create empty android directories due to the logic in <app>/android/settings.gradle,
+    // which imports all plugins regardless of whether they support the android platform.
+    private Boolean doesSupportAndroidPlatform(String path) {
+        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
+        return editableAndroidProject.exists()
+    }
+
     // Add the dependencies on other plugin projects to the plugin project.
     // A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
     // making the Gradle plugin project A depend on the Gradle plugin project B.
     private void configurePluginDependencies(Object dependencyObject) {
         assert dependencyObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${dependencyObject.name}")
-        if (pluginProject == null) {
-            // Ignore plugins that don't have a project since most likely they don't
-            // have an android/ directory.
+        if (pluginProject == null ||
+            !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
             return
         }
         assert dependencyObject.dependencies instanceof List
@@ -349,7 +358,8 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (dependencyProject == null) {
+            if (dependencyProject == null ||
+                !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
                 return
             }
             // Wait for the Android plugin to load and add the dependency to the plugin project.
@@ -366,8 +376,7 @@ class FlutterPlugin implements Plugin<Project> {
         Properties allPlugins = readPropertiesIfExist(pluginsFile)
         Properties androidPlugins = new Properties()
         allPlugins.each { name, path ->
-            File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
-            if (editableAndroidProject.exists()) {
+            if (doesSupportAndroidPlatform(path)) {
                 androidPlugins.setProperty(name, path)
             }
             // TODO(amirh): log an error if this plugin was specified to be an Android
@@ -471,6 +480,15 @@ class FlutterPlugin implements Plugin<Project> {
         }
         return false
     }
+
+    /// Whether to build the debug app in "fast-start" mode.
+    private Boolean isFastStart() {
+        if (project.hasProperty("fast-start")) {
+            return project.property("fast-start").toBoolean()
+        }
+        return false
+    }
+
 
     private static Boolean shouldShrinkResources(Project project) {
         if (project.hasProperty("shrink")) {
@@ -585,6 +603,14 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
+        String splitDebugInfoValue = null
+        if (project.hasProperty('split-debug-info')) {
+            splitDebugInfoValue = project.property('split-debug-info')
+        }
+        Boolean treeShakeIconsOptionsValue = false
+        if (project.hasProperty('tree-shake-icons')) {
+            treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -610,6 +636,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 verbose isVerbose()
+                fastStart isFastStart()
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
@@ -618,6 +645,17 @@ class FlutterPlugin implements Plugin<Project> {
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
+                splitDebugInfo splitDebugInfoValue
+                treeShakeIcons treeShakeIconsOptionsValue
+                doLast {
+                    project.exec {
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                            commandLine('cmd', '/c', "attrib -r ${assetsDirectory}/* /s")
+                        } else {
+                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
+                        }
+                    }
+                }
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -726,8 +764,12 @@ abstract class BaseFlutterTask extends DefaultTask {
     File flutterRoot
     File flutterExecutable
     String buildMode
+    @Optional @Input
     String localEngine
+    @Optional @Input
     String localEngineSrcPath
+    @Input
+    Boolean fastStart
     @Input
     String targetPath
     @Optional
@@ -746,6 +788,10 @@ abstract class BaseFlutterTask extends DefaultTask {
     String extraFrontEndOptions
     @Optional @Input
     String extraGenSnapshotOptions
+    @Optional @Input
+    String splitDebugInfo
+    @Optional @Input
+    Boolean treeShakeIcons
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -769,9 +815,13 @@ abstract class BaseFlutterTask extends DefaultTask {
         // cache.
         String[] ruleNames;
         if (buildMode == "debug") {
-          ruleNames = ["debug_android_application"]
+            if (fastStart) {
+                ruleNames = ["faststart_android_application"]
+            } else {
+                ruleNames = ["debug_android_application"]
+            }
         } else {
-          ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
+            ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }
         project.exec {
             executable flutterExecutable.absolutePath
@@ -788,14 +838,24 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "assemble"
             args "--depfile", "${intermediateDir}/flutter_build.d"
             args "--output", "${intermediateDir}"
-            args "-dTargetFile=${targetPath}"
+            if (!fastStart || buildMode != "debug") {
+                args "-dTargetFile=${targetPath}"
+            } else {
+                args "-dTargetFile=${Paths.get(flutterRoot.absolutePath, "examples", "splash", "lib", "main.dart")}"
+            }
             args "-dTargetPlatform=android"
             args "-dBuildMode=${buildMode}"
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
+            if (splitDebugInfo != null) {
+                args "-dSplitDebugInfo=${splitDebugInfo}"
+            }
+            if (treeShakeIcons == true) {
+                args "-dTreeShakeIcons=true"
+            }
             if (extraGenSnapshotOptions != null) {
-                args "-dExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
+                args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
             args ruleNames
         }
@@ -806,6 +866,10 @@ class FlutterTask extends BaseFlutterTask {
     @OutputDirectory
     File getOutputDirectory() {
         return intermediateDir
+    }
+
+    String getAssetsDirectory() {
+        return "${outputDirectory}/flutter_assets"
     }
 
     CopySpec getAssets() {
@@ -827,13 +891,13 @@ class FlutterTask extends BaseFlutterTask {
         }
     }
 
-    FileCollection readDependencies(File dependenciesFile) {
+    FileCollection readDependencies(File dependenciesFile, Boolean inputs) {
       if (dependenciesFile.exists()) {
         // Dependencies file has Makefile syntax:
         //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
         String depText = dependenciesFile.text
         // So we split list of files by non-escaped(by backslash) space,
-        def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
+        def matcher = depText.split(': ')[inputs ? 1 : 0] =~ /(\\ |[^\s])+/
         // then we replace all escaped spaces with regular spaces
         def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
         return project.files(depList)
@@ -845,9 +909,18 @@ class FlutterTask extends BaseFlutterTask {
     FileCollection getSourceFiles() {
         FileCollection sources = project.files()
         for (File depfile in getDependenciesFiles()) {
-          sources += readDependencies(depfile)
+          sources += readDependencies(depfile, true)
         }
         return sources + project.files('pubspec.yaml')
+    }
+
+    @OutputFiles
+    FileCollection getOutputFiles() {
+        FileCollection sources = project.files()
+        for (File depfile in getDependenciesFiles()) {
+          sources += readDependencies(depfile, false)
+        }
+        return sources
     }
 
     @TaskAction

@@ -160,7 +160,7 @@ class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
 }
 
-class LayoutWithMissingId extends ParentDataWidget<CustomMultiChildLayout> {
+class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
   const LayoutWithMissingId({
     Key key,
     @required Widget child,
@@ -169,6 +169,9 @@ class LayoutWithMissingId extends ParentDataWidget<CustomMultiChildLayout> {
 
   @override
   void applyParentData(RenderObject renderObject) {}
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => CustomMultiChildLayout;
 }
 
 void main() {

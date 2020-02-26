@@ -33,7 +33,7 @@ import 'image_provider.dart';
 ///
 /// The [border] paints over the body; the [boxShadow], naturally, paints below it.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following applies a [BoxDecoration] to a [Container] widget to draw an
 /// [image] of an owl with a thick black [border] and rounded corners.
@@ -97,7 +97,7 @@ class BoxDecoration extends Decoration {
   }) : assert(shape != null),
        assert(
          backgroundBlendMode == null || color != null || gradient != null,
-         'backgroundBlendMode applies to BoxDecoration\'s background color or '
+         "backgroundBlendMode applies to BoxDecoration's background color or "
          'gradient, but no color or gradient was provided.'
        );
 
@@ -309,10 +309,10 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is BoxDecoration
         && other.color == color
@@ -433,7 +433,7 @@ class _BoxDecorationPainter extends BoxPainter {
   void _paintShadows(Canvas canvas, Rect rect, TextDirection textDirection) {
     if (_decoration.boxShadow == null)
       return;
-    for (BoxShadow boxShadow in _decoration.boxShadow) {
+    for (final BoxShadow boxShadow in _decoration.boxShadow) {
       final Paint paint = boxShadow.toPaint();
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
       _paintBox(canvas, bounds, paint, textDirection);

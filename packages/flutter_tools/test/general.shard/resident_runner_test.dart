@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,8 +15,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -42,7 +42,7 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      fs.file(fs.path.join('build', 'app.dill'))
+      globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
       residentRunner = HotRunner(
@@ -154,6 +154,41 @@ void main() {
     expect(onAppStart.isCompleted, true);
   }));
 
+  test('ResidentRunner can attach to device successfully with --fast-start', () => testbed.run(() async {
+    when(mockDevice.supportsHotRestart).thenReturn(true);
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, fastStart: true, startPaused: true),
+    );
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    final Future<int> result = residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    );
+    final Future<DebugConnectionInfo> connectionInfo = onConnectionInfo.future;
+
+    expect(await result, 0);
+
+    verify(mockFlutterDevice.initLogReader()).called(1);
+
+    expect(onConnectionInfo.isCompleted, true);
+    expect((await connectionInfo).baseUri, 'foo://bar');
+    expect(onAppStart.isCompleted, true);
+  }));
+
   test('ResidentRunner can handle an RPC exception from hot reload', () => testbed.run(() async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
@@ -197,10 +232,6 @@ void main() {
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
-  }));
-
-  test('ResidentRunner copies dill file from build output into temp directory', () => testbed.run(() async {
-    expect(residentRunner.artifactDirectory.childFile('app.dill').readAsStringSync(), 'ABC');
   }));
 
   test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
@@ -317,7 +348,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      dillOutputPath: fs.path.join('foobar', 'app.dill'),
+      dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
@@ -328,23 +359,37 @@ void main() {
 
     residentRunner.printHelp(details: true);
 
+    final CommandHelp commandHelp = residentRunner.commandHelp;
+
     // supports service protocol
     expect(residentRunner.supportsServiceProtocol, true);
-    expect(testLogger.statusText, contains('"w"'));
-    expect(testLogger.statusText, contains('"t"'));
-    expect(testLogger.statusText, contains('"P"'));
-    expect(testLogger.statusText, contains('"a"'));
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
-    expect(testLogger.statusText, contains('"L"'));
-    expect(testLogger.statusText, contains('"S"'));
-    expect(testLogger.statusText, contains('"U"'));
-    expect(testLogger.statusText, contains('"i"'));
-    expect(testLogger.statusText, contains('"p"'));
-    expect(testLogger.statusText, contains('"o"'));
-    expect(testLogger.statusText, contains('"z"'));
-    // screenshot
-    expect(testLogger.statusText, contains('"s"'));
+    // commands
+    expect(testLogger.statusText, equals(
+        <dynamic>[
+          'Flutter run key commands.',
+          commandHelp.r,
+          commandHelp.R,
+          commandHelp.h,
+          commandHelp.c,
+          commandHelp.q,
+          commandHelp.s,
+          commandHelp.w,
+          commandHelp.t,
+          commandHelp.L,
+          commandHelp.S,
+          commandHelp.U,
+          commandHelp.i,
+          commandHelp.p,
+          commandHelp.o,
+          commandHelp.z,
+          commandHelp.P,
+          commandHelp.a,
+          'An Observatory debugger and profiler on null is available at: null',
+          ''
+        ].join('\n')
+    ));
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
@@ -373,6 +418,15 @@ void main() {
     expect(testLogger.errorText, contains('Error'));
   }));
 
+  test('ResidentTunner clears the screen when it should', () => testbed.run(() async {
+    const String message = 'This should be cleared';
+    expect(testLogger.statusText, equals(''));
+    testLogger.printStatus(message);
+    expect(testLogger.statusText, equals(message + '\n'));  // printStatus makes a newline
+    residentRunner.clearScreen();
+    expect(testLogger.statusText, equals(''));
+  }));
+
   test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws post', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockIsolate.flutterDebugAllowBanner(true)).thenThrow(Exception());
@@ -391,11 +445,11 @@ void main() {
     expect(testLogger.errorText, contains('Error'));
   }));
 
-  test('ResidentRunner can\'t take screenshot on device without support', () => testbed.run(() {
+  test("ResidentRunner can't take screenshot on device without support", () => testbed.run(() {
     when(mockDevice.supportsScreenshot).thenReturn(false);
 
     expect(() => residentRunner.screenshot(mockFlutterDevice),
-        throwsA(isInstanceOf<AssertionError>()));
+        throwsAssertionError);
   }));
 
   test('ResidentRunner does not toggle banner in non-debug mode', () => testbed.run(() async {
@@ -531,7 +585,7 @@ void main() {
   }));
 
   test('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -547,13 +601,13 @@ void main() {
     });
     await residentRunner.run();
 
-    expect(await fs.file('foo').readAsString(), testUri.toString());
+    expect(await globals.fs.file('foo').readAsString(), testUri.toString());
   }));
 
   test('HotRunner unforwards device ports', () => testbed.run(() async {
     final MockDevicePortForwarder mockPortForwarder = MockDevicePortForwarder();
     when(mockDevice.portForwarder).thenReturn(mockPortForwarder);
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -578,7 +632,7 @@ void main() {
   }));
 
   test('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -601,7 +655,7 @@ void main() {
 
 
   test('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -617,7 +671,7 @@ void main() {
     });
     await residentRunner.run();
 
-    expect(await fs.file('foo').readAsString(), testUri.toString());
+    expect(await globals.fs.file('foo').readAsString(), testUri.toString());
   }));
 
   test('FlutterDevice uses dartdevc configuration when targeting web', () => testbed.run(() async {
@@ -636,14 +690,12 @@ void main() {
 
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
-      artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
+      globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
     expect(
       residentCompiler.platformDill,
-      fs.file(artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug))
+      globals.fs.file(globals.artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug))
         .absolute.uri.toString(),
     );
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
   test('connect sets up log reader', () => testbed.run(() async {
@@ -664,10 +716,19 @@ void main() {
       ReloadSources reloadSources,
       Restart restart,
       CompileExpression compileExpression,
+      ReloadMethod reloadMethod,
       io.CompressionOptions compression,
       Device device,
     }) async => mockVMService,
   }));
+
+  test('nextPlatform moves through expected platforms', () {
+    expect(nextPlatform('android', TestFeatureFlags()), 'iOS');
+    expect(nextPlatform('iOS', TestFeatureFlags()), 'fuchsia');
+    expect(nextPlatform('fuchsia', TestFeatureFlags()), 'android');
+    expect(nextPlatform('fuchsia', TestFeatureFlags(isMacOSEnabled: true)), 'macOS');
+    expect(() => nextPlatform('unknown', TestFeatureFlags()), throwsAssertionError);
+  });
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}

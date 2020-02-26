@@ -256,7 +256,7 @@ class GestureArenaManager {
     assert(state.eagerWinner == null || state.eagerWinner == member);
     assert(!state.isOpen);
     _arenas.remove(pointer);
-    for (GestureArenaMember rejectedMember in state.members) {
+    for (final GestureArenaMember rejectedMember in state.members) {
       if (rejectedMember != member)
         rejectedMember.rejectGesture(pointer);
     }

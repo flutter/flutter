@@ -193,7 +193,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       }
       return;
     }
-    for (HitTestEntry entry in hitTestResult.path) {
+    for (final HitTestEntry entry in hitTestResult.path) {
       try {
         entry.target.handleEvent(event.transformed(entry.transform), entry);
       } catch (exception, stack) {

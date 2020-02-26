@@ -366,10 +366,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
     final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
-    final BoxConstraints effectiveConstraints = widget.constraints.copyWith(
-      minWidth: widget.constraints.minWidth != null ? (widget.constraints.minWidth + densityAdjustment.dx).clamp(0.0, double.infinity) : null,
-      minHeight: widget.constraints.minWidth != null ? (widget.constraints.minHeight + densityAdjustment.dy).clamp(0.0, double.infinity) : null,
-    );
+    final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
     final EdgeInsetsGeometry padding = widget.padding.add(
       EdgeInsets.only(
         left: densityAdjustment.dx,
@@ -512,13 +509,14 @@ class _RenderInputPadding extends RenderShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
       final double height = math.max(child.size.width, minSize.width);
       final double width = math.max(child.size.height, minSize.height);
       size = constraints.constrain(Size(height, width));
-      final BoxParentData childParentData = child.parentData;
-      childParentData.offset = Alignment.center.alongOffset(size - child.size);
+      final BoxParentData childParentData = child.parentData as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child.size as Offset);
     } else {
       size = Size.zero;
     }

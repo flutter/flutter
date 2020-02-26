@@ -185,7 +185,7 @@ class _InternalCombinedCondition implements WaitCondition {
   @override
   Future<void> wait() async {
     while (!condition) {
-      for (WaitCondition condition in conditions) {
+      for (final WaitCondition condition in conditions) {
         assert (condition != null);
         await condition.wait();
       }

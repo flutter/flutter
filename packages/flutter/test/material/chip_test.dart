@@ -64,10 +64,10 @@ dynamic getRenderChip(WidgetTester tester) {
   return element.renderObject;
 }
 
-double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.checkmarkAnimation?.value;
-double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerAnimation?.value;
-double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerAnimation?.value;
-double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAnimation?.value;
+double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.checkmarkAnimation?.value as double;
+double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerAnimation?.value as double;
+double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerAnimation?.value as double;
+double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAnimation?.value as double;
 
 /// Adds the basic requirements for a Chip.
 Widget _wrapForChip({
@@ -225,8 +225,8 @@ PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
     ..something((Symbol method, List<dynamic> arguments) {
         if (method != #drawCircle)
           return false;
-        final Offset center = arguments[0];
-        final double radius = arguments[1];
+        final Offset center = arguments[0] as Offset;
+        final double radius = arguments[1] as double;
         return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
       }
     );
@@ -240,8 +240,8 @@ PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
     ..everything((Symbol method, List<dynamic> arguments) {
         if (method != #drawCircle)
           return true;
-        final Offset center = arguments[0];
-        final double radius = arguments[1];
+        final Offset center = arguments[0] as Offset;
+        final double radius = arguments[1] as double;
         if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
           return true;
         throw '''
@@ -1620,6 +1620,50 @@ void main() {
                       TestSemantics(
                         label: 'test',
                         textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+      semanticsTester.dispose();
+    });
+
+    testWidgets('delete', (WidgetTester tester) async {
+      final SemanticsTester semanticsTester = SemanticsTester(tester);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: RawChip(
+            label: const Text('test'),
+            onDeleted: () { },
+          ),
+        ),
+      ));
+
+      expect(semanticsTester, hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        label: 'test',
+                        textDirection: TextDirection.ltr,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Delete',
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),

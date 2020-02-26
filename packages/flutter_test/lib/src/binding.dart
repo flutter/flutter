@@ -147,6 +147,13 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
 ///
 /// When using these bindings, certain features are disabled. For
 /// example, [timeDilation] is reset to 1.0 on initialization.
+///
+/// In non-browser tests, the binding overrides `HttpClient` creation with a
+/// fake client that always returns a status code of 400. This is to prevent
+/// tests from making network calls, which could introduce flakiness. A test
+/// that actually needs to make a network call should provide its own
+/// `HttpClient` to the code making the call, so that it can appropriately mock
+/// or fake responses.
 abstract class TestWidgetsFlutterBinding extends BindingBase
   with ServicesBinding,
        SchedulerBinding,
@@ -1119,7 +1126,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       }
 
       debugPrint('Pending timers:');
-      for (String timerInfo in _currentFakeAsync.pendingTimersDebugInfo) {
+      for (final String timerInfo in _currentFakeAsync.pendingTimersDebugInfo) {
         final int firstLineEnd = timerInfo.indexOf('\n');
         assert(firstLineEnd != -1);
 
@@ -1657,7 +1664,7 @@ class _LiveTestRenderView extends RenderView {
         ..strokeWidth = radius / 10.0
         ..style = PaintingStyle.stroke;
       bool dirty = false;
-      for (int pointer in _pointers.keys) {
+      for (final int pointer in _pointers.keys) {
         final _LiveTestPointerRecord record = _pointers[pointer];
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position), paint);

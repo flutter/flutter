@@ -216,7 +216,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     // If the device has a maximum pressure of less than or equal to 1, it
     // doesn't have touch pressure sensing capabilities. Do not participate
     // in the gesture arena.
-    if (!(event is PointerUpEvent) && event.pressureMax <= 1.0) {
+    if (event is! PointerUpEvent && event.pressureMax <= 1.0) {
       resolve(GestureDisposition.rejected);
     } else {
       startTrackingPointer(event.pointer, event.transform);

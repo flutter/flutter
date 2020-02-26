@@ -23,6 +23,9 @@ class ClipboardData {
 
 /// Utility methods for interacting with the system's clipboard.
 class Clipboard {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   Clipboard._();
 
   // Constants for common [getData] [format] types.

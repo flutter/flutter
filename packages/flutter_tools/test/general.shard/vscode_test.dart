@@ -7,7 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/vscode/vscode.dart';
 
 import '../src/common.dart';
@@ -15,9 +15,9 @@ import '../src/context.dart';
 
 void main() {
   testUsingContext('VsCode.fromDirectory does not crash when packages.json is malformed', () {
-    final BufferLogger bufferLogger = logger as BufferLogger;
+    final BufferLogger bufferLogger = globals.logger as BufferLogger;
     // Create invalid JSON file.
-    fs.file(fs.path.join('', 'resources', 'app', 'package.json'))
+    globals.fs.file(globals.fs.path.join('', 'resources', 'app', 'package.json'))
       ..createSync(recursive: true)
       ..writeAsStringSync('{');
 

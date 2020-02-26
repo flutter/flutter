@@ -136,10 +136,10 @@ class DecorationImage {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is DecorationImage
         && other.image == image
@@ -172,7 +172,7 @@ class DecorationImage {
       if (matchTextDirection)
         'match text direction',
     ];
-    return '$runtimeType(${properties.join(", ")})';
+    return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
 }
 
@@ -222,7 +222,7 @@ class DecorationImagePainter {
         // when the image is ready.
         if (configuration.textDirection == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('ImageDecoration.matchTextDirection can only be used when a TextDirection is available.'),
+            ErrorSummary('DecorationImage.matchTextDirection can only be used when a TextDirection is available.'),
             ErrorDescription(
               'When DecorationImagePainter.paint() was called, there was no text direction provided '
               'in the ImageConfiguration object to match.'
@@ -291,7 +291,7 @@ class DecorationImagePainter {
 
   @override
   String toString() {
-    return '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
+    return '${objectRuntimeType(this, 'DecorationImagePainter')}(stream: $_imageStream, image: $_image) for $_details';
   }
 }
 
@@ -443,14 +443,14 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
         canvas.drawImageRect(image, sourceRect, tileRect, paint);
     }
   } else {
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageNine(image, centerSlice, destinationRect, paint);
     } else {
-      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
         canvas.drawImageNine(image, centerSlice, tileRect, paint);
     }
   }

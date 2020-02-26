@@ -16,7 +16,7 @@ Future<void> main() async {
 
     final List<String> benchmarkScoreKeys = <String>[];
     final Map<String, dynamic> data = <String, dynamic>{};
-    for (String key in withSemantics.benchmarkScoreKeys) {
+    for (final String key in withSemantics.benchmarkScoreKeys) {
       final String deltaKey = 'delta_$key';
       data[deltaKey] = withSemantics.data[key] - withoutSemantics.data[key];
       data['semantics_$key'] = withSemantics.data[key];

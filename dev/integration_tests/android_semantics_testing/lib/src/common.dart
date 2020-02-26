@@ -149,7 +149,7 @@ class AndroidSemanticsNode  {
 
   /// Gets a list of [AndroidSemanticsActions] which are defined for the node.
   List<AndroidSemanticsAction> getActions() => <AndroidSemanticsAction>[
-    for (int id in (_values['actions'] as List<dynamic>).cast<int>()) AndroidSemanticsAction.deserialize(id),
+    for (final int id in (_values['actions'] as List<dynamic>).cast<int>()) AndroidSemanticsAction.deserialize(id),
   ];
 
   @override

@@ -56,7 +56,7 @@ class _HoverDemoState extends State<HoverDemo> {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return DefaultTextStyle(
-      style: textTheme.display1,
+      style: textTheme.headline4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Hover Demo'),

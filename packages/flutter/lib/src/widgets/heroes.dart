@@ -755,7 +755,7 @@ class HeroController extends NavigatorObserver {
 
     // Treat these invalidated flights as dismissed. Calling _handleAnimationUpdate
     // will also remove the flight from _flights.
-    for (_HeroFlight flight in invalidFlights) {
+    for (final _HeroFlight flight in invalidFlights) {
       flight._handleAnimationUpdate(AnimationStatus.dismissed);
     }
   }
@@ -834,7 +834,7 @@ class HeroController extends NavigatorObserver {
     // animation value back to what it was before it was "moved" offstage.
     to.offstage = false;
 
-    for (Object tag in fromHeroes.keys) {
+    for (final Object tag in fromHeroes.keys) {
       if (toHeroes[tag] != null) {
         final HeroFlightShuttleBuilder fromShuttleBuilder = fromHeroes[tag].widget.flightShuttleBuilder;
         final HeroFlightShuttleBuilder toShuttleBuilder = toHeroes[tag].widget.flightShuttleBuilder;
@@ -866,7 +866,7 @@ class HeroController extends NavigatorObserver {
 
     // If the from hero is gone, the flight won't start and the to hero needs to
     // be put on stage again.
-    for (Object tag in toHeroes.keys) {
+    for (final Object tag in toHeroes.keys) {
       if (fromHeroes[tag] == null)
         toHeroes[tag].ensurePlaceholderIsHidden();
     }

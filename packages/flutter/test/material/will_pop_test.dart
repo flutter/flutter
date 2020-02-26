@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 bool willPopValue = false;
 
 class SamplePage extends StatefulWidget {
+  const SamplePage({ Key key }) : super(key: key);
   @override
   SamplePageState createState() => SamplePageState();
 }
@@ -86,7 +87,7 @@ void main() {
                   onPressed: () {
                     showDialog<void>(
                       context: context,
-                      builder: (BuildContext context) => SamplePage(),
+                      builder: (BuildContext context) => const SamplePage(),
                     );
                   },
                 ),

@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import '../base/io.dart';
-import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../macos/application_package.dart';
 import '../project.dart';
 import 'build_macos.dart';
@@ -59,7 +58,7 @@ class MacOSDevice extends DesktopDevice {
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enoug along in
     // the launch process for 'open' to foreground it.
-    processManager.run(<String>[
+    globals.processManager.run(<String>[
       'open', package.applicationBundle(buildMode),
     ]).then((ProcessResult result) {
       if (result.exitCode != 0) {
@@ -73,7 +72,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices() : super('macOS devices');
 
   @override
-  bool get supportsPlatform => platform.isMacOS;
+  bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
   bool get canListAnything => macOSWorkflow.canListDevices;

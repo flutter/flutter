@@ -7,23 +7,17 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:async/async.dart';
 import 'package:coverage/coverage.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:path/path.dart' as path;
-import 'package:pedantic/pedantic.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
-import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
-import 'package:vm_service_client/vm_service_client.dart'; // ignore: deprecated_member_use
-import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 
@@ -35,7 +29,8 @@ import 'package:flutter_tools/src/test/coverage_collector.dart';
 Future<void> main(List<String> arguments) async {
   return runInContext(() async {
     final VMPlatform vmPlatform = VMPlatform();
-    hack.registerPlatformPlugin(
+    const TestWrapper test = TestWrapper();
+    test.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
       () => vmPlatform,
     );
@@ -110,12 +105,11 @@ class VMPlatform extends PlatformPlugin {
         },
       ));
 
-    VMEnvironment environment;
     final RunnerSuiteController controller = deserializeSuite(
       codePath,
       platform,
       suiteConfig,
-      environment,
+      null,
       channel,
       message,
     );
@@ -160,34 +154,5 @@ class VMPlatform extends PlatformPlugin {
     File(outputLcovPath)
       ..createSync(recursive: true)
       ..writeAsStringSync(result);
-  }
-}
-
-class VMEnvironment implements Environment {
-  VMEnvironment(this.observatoryUrl, this._isolate);
-
-  @override
-  final bool supportsDebugging = false;
-
-  @override
-  final Uri observatoryUrl;
-
-  /// The VM service isolate object used to control this isolate.
-  final VMIsolateRef _isolate;
-
-  @override
-  Uri get remoteDebuggerUrl => null;
-
-  @override
-  Stream<void> get onRestart => StreamController<dynamic>.broadcast().stream;
-
-  @override
-  CancelableOperation<void> displayPause() {
-    final CancelableCompleter<dynamic> completer = CancelableCompleter<dynamic>(onCancel: () => _isolate.resume());
-
-    completer.complete(_isolate.pause().then((dynamic _) => _isolate.onPauseOrResume
-        .firstWhere((VMPauseEvent event) => event is VMResumeEvent)));
-
-    return completer.operation;
   }
 }

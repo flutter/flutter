@@ -189,7 +189,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// it causes the widget to be automatically rebuilt when the brightness
   /// changes.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// Querying [Window.platformBrightness].
   ///
   /// ```dart
@@ -197,7 +197,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// Querying [MediaQuery] directly. Preferred.
   ///
   /// ```dart
@@ -205,7 +205,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// Querying [MediaQueryData].
   ///
   /// ```dart

@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -12,7 +14,7 @@ import 'edge_insets.dart';
 /// A rectangular border with smooth continuous transitions between the straight
 /// sides and the rounded corners.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
@@ -148,8 +150,8 @@ class ContinuousRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is ContinuousRectangleBorder
         && other.side == side
@@ -161,6 +163,6 @@ class ContinuousRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '${objectRuntimeType(this, 'ContinuousRectangleBorder')}($side, $borderRadius)';
   }
 }

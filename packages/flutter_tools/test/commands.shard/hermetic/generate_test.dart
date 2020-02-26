@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/codegen.dart';
 import 'package:flutter_tools/src/commands/generate.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -47,10 +47,10 @@ void main() {
   test('Outputs error information from flutter generate', () => testbed.run(() async {
     final GenerateCommand command = GenerateCommand();
     applyMocksToCommand(command);
-    fs.file(fs.path.join('lib', 'main.dart'))
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
 
-    fs.currentDirectory
+    globals.fs.currentDirectory
       .childDirectory('.dart_tool')
       .childDirectory('build')
       .childDirectory('abcdefg')

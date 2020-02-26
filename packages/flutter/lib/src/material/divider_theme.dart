@@ -105,17 +105,17 @@ class DividerThemeData extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final DividerThemeData typedOther = other;
-    return typedOther.color == color
-        && typedOther.space == space
-        && typedOther.thickness == thickness
-        && typedOther.indent == indent
-        && typedOther.endIndent == endIndent;
+    return other is DividerThemeData
+        && other.color == color
+        && other.space == space
+        && other.thickness == thickness
+        && other.indent == indent
+        && other.endIndent == endIndent;
   }
 
   @override

@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -182,8 +181,10 @@ void main() {
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug)..devFS = mockDevFs,
         FlutterDevice(mockHotDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug)..devFS = mockDevFs,
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final HotRunner hotRunner = HotRunner(devices);
+      final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart was successful.
+      expect(hotRunner.uri, mockDevFs.baseUri);
       expect(result.isOk, true);
       expect(result.message, isNot('hotRestart not supported'));
     }, overrides: <Type, Generator>{
@@ -217,8 +218,10 @@ void main() {
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug)..devFS = mockDevFs,
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final HotRunner hotRunner = HotRunner(devices);
+      final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart successful.
+      expect(hotRunner.uri, mockDevFs.baseUri);
       expect(result.isOk, true);
       expect(result.message, isNot('setupHotRestart failed'));
     }, overrides: <Type, Generator>{
@@ -269,12 +272,10 @@ void main() {
 
   group('hot attach', () {
     MockResidentCompiler residentCompiler = MockResidentCompiler();
-    BufferLogger mockLogger;
     MockLocalEngineArtifacts mockArtifacts;
 
     setUp(() {
       residentCompiler = MockResidentCompiler();
-      mockLogger = BufferLogger();
       mockArtifacts = MockLocalEngineArtifacts();
     });
 
@@ -298,13 +299,12 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ).attach();
       expect(exitCode, 2);
-      expect(mockLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
+      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
           'consider using an emulator running API level 29 or lower.'));
-      expect(mockLogger.statusText, contains('Learn more about the status of this issue on '
+      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
           'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      Logger: () => mockLogger,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
@@ -327,13 +327,12 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ).attach();
       expect(exitCode, 2);
-      expect(mockLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
+      expect(testLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
           'consider using an emulator running API level 29 or lower.'));
-      expect(mockLogger.statusText, contains('Learn more about the status of this issue on '
+      expect(testLogger.statusText, contains('Learn more about the status of this issue on '
           'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      Logger: () => mockLogger,
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
   });
@@ -397,6 +396,7 @@ class TestFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
   }) async {
     throw exception;
   }

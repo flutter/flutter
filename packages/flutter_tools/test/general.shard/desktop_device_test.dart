@@ -9,10 +9,10 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -95,7 +95,7 @@ void main() {
 
     testUsingContext('Uses OS name as SDK name', () async {
       final FakeDesktopDevice device = FakeDesktopDevice();
-      expect(await device.sdkNameAndVersion, os.name);
+      expect(await device.sdkNameAndVersion, globals.os.name);
     });
   });
 

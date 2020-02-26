@@ -552,13 +552,14 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    final _OutlineBorder typedOther = other;
-    return side == typedOther.side && shape == typedOther.shape;
+    return other is _OutlineBorder
+        && other.side == side
+        && other.shape == shape;
   }
 
   @override

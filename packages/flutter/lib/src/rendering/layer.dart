@@ -30,13 +30,13 @@ class AnnotationEntry<T> {
   /// The annotation object that is found.
   final T annotation;
 
-  /// The target location described by the local coordinate space of the layer
-  /// that contains the annotation.
+  /// The target location described by the local coordinate space of the
+  /// annotation object.
   final Offset localPosition;
 
   @override
   String toString() {
-    return '$runtimeType(annotation: $annotation, localPostion: $localPosition)';
+    return '${objectRuntimeType(this, 'AnnotationEntry')}(annotation: $annotation, localPostion: $localPosition)';
   }
 }
 
@@ -70,7 +70,7 @@ class AnnotationResult<T> {
   ///
   /// It is similar to [entries] but does not contain other information.
   Iterable<T> get annotations sync* {
-    for (AnnotationEntry<T> entry in _entries)
+    for (final AnnotationEntry<T> entry in _entries)
       yield entry.annotation;
   }
 }
@@ -134,7 +134,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(
       !alwaysNeedsAddToScene,
       '$runtimeType with alwaysNeedsAddToScene set called markNeedsAddToScene.\n'
-      'The layer\'s alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.',
+      "The layer's alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.",
     );
 
     // Already marked. Short-circuit.
@@ -460,6 +460,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
     properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<String>('engine layer', describeIdentity(_engineLayer)));
   }
 }
 
@@ -535,6 +536,11 @@ class PictureLayer extends Layer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
+    properties.add(DiagnosticsProperty<String>('picture', describeIdentity(_picture)));
+    properties.add(DiagnosticsProperty<String>(
+      'raster cache hints',
+      'isComplex = $isComplexHint, willChange = $willChangeHint'),
+    );
   }
 
   @override
@@ -672,9 +678,9 @@ class PlatformViewLayer extends Layer {
     if (hoverAnnotation == null || !rect.contains(localPosition)) {
       return false;
     }
-    if (MouseTrackerAnnotation == S) {
+    if (S == MouseTrackerAnnotation) {
       final Object untypedValue = hoverAnnotation;
-      final S typedValue = untypedValue;
+      final S typedValue = untypedValue as S;
       result.add(AnnotationEntry<S>(
         annotation: typedValue,
         localPosition: localPosition,
@@ -804,7 +810,7 @@ class ContainerLayer extends Layer {
       // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
       // or continuing to render stale outlines.
       if (temporaryLayers != null) {
-        for (PictureLayer temporaryLayer in temporaryLayers) {
+        for (final PictureLayer temporaryLayer in temporaryLayers) {
           temporaryLayer.remove();
         }
       }
@@ -1548,6 +1554,48 @@ class ColorFilterLayer extends ContainerLayer {
   }
 }
 
+/// A composite layer that applies an [ImageFilter] to its children.
+class ImageFilterLayer extends ContainerLayer {
+  /// Creates a layer that applies an [ImageFilter] to its children.
+  ///
+  /// The [imageFilter] property must be non-null before the compositing phase
+  /// of the pipeline.
+  ImageFilterLayer({
+    ui.ImageFilter imageFilter,
+  }) : _imageFilter = imageFilter;
+
+  /// The image filter to apply to children.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ui.ImageFilter get imageFilter => _imageFilter;
+  ui.ImageFilter _imageFilter;
+  set imageFilter(ui.ImageFilter value) {
+    assert(value != null);
+    if (value != _imageFilter) {
+      _imageFilter = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(imageFilter != null);
+    engineLayer = builder.pushImageFilter(
+      imageFilter,
+      oldLayer: _engineLayer as ui.ImageFilterEngineLayer,
+    );
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('imageFilter', imageFilter));
+  }
+}
+
 /// A composited layer that applies a given transformation matrix to its
 /// children.
 ///
@@ -1613,9 +1661,8 @@ class TransformLayer extends OffsetLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
-    final Vector4 result = _invertedTransform.transform(vector);
-    return Offset(result[0], result[1]);
+
+    return MatrixUtils.transformPoint(_invertedTransform, localPosition);
   }
 
   @override
@@ -2423,16 +2470,15 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// met.
   final T value;
 
-  /// The size of an optional clipping rectangle, used to control whether a
-  /// position is contained by the annotation.
+  /// The size of the annotated object.
   ///
-  /// If [size] is provided, then the annotation is only added if the target
+  /// If [size] is provided, then the annotation is found only if the target
   /// position is contained by the rectangle formed by [size] and [offset].
   /// Otherwise no such restriction is applied, and clipping can only be done by
   /// the ancestor layers.
   final Size size;
 
-  /// The offset of the optional clipping rectangle that is indicated by [size].
+  /// The position of the annotated object.
   ///
   /// The [offset] defaults to [Offset.zero] if not provided, and is ignored if
   /// [size] is not set.
@@ -2502,7 +2548,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
       final S typedValue = untypedValue as S;
       result.add(AnnotationEntry<S>(
         annotation: typedValue,
-        localPosition: localPosition,
+        localPosition: localPosition - offset,
       ));
     }
     return isAbsorbed;
