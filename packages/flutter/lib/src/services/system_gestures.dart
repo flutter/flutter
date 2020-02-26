@@ -25,6 +25,12 @@ class SystemGestures {
   /// developer may want to set exclusion rects where the drag handles are if
   /// they get too close to the edges of the screen.
   ///
+  /// The system also puts a limit of 200 pixels on the vertical extent of the
+  /// exclusions it takes into account on each edge. For example, if 400
+  /// vertical pixels were requested from the left edge of the screen, only
+  /// the top 200 pixels will be excluded, while the bottom 200 pixels will
+  /// continue to be reserved for system level gestures.
+  ///
   /// While this gesture exclusions API can fix gesture conflicts for some
   /// applications, it is better to avoid using this API if possible. Using
   /// this API can cause confusion for users who expect a swipe from the
