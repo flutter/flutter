@@ -156,7 +156,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
-  testWidgets('Disabled button doesn\'t animate', (WidgetTester tester) async {
+  testWidgets("Disabled button doesn't animate", (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       child: Text('Tap me'),
       onPressed: null,

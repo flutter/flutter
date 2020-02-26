@@ -73,7 +73,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
-        const WebValidator(),
+        WebValidator(
+          chromeLauncher: globals.chromeLauncher,
+          platform: globals.platform,
+          fileSystem: globals.fs,
+        ),
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(),
       if (windowsWorkflow.appliesToHostPlatform)
@@ -878,7 +882,7 @@ class DeviceValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<Device> devices = await deviceManager.getAllConnectedDevices().toList();
+    final List<Device> devices = await deviceManager.getAllConnectedDevices();
     List<ValidationMessage> messages;
     if (devices.isEmpty) {
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();

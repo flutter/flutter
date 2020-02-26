@@ -700,6 +700,15 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  animated_placeholder_perf:
+    description: >
+      Measures frame build and rasterizer times, as well as frame build counts
+      for a grid of images that uses FadeInImage with an animated gif as the
+      placeholder.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   analyzer_benchmark:
     description: >
       Measures the speed of Dart analyzer.
@@ -711,16 +720,12 @@ tasks:
       Runs Web benchmarks on Chrome on a Linux machine using the HTML rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
-    # TODO(yjbanov): This is a new test. Marking temporarily as flaky while debugging on devicelab.
-    flaky: true
 
   web_benchmarks_canvaskit:
     description: >
       Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
-    # TODO(yjbanov): This is a new test. Marking temporarily as flaky while debugging on devicelab.
-    flaky: true
 
   # run_without_leak_linux:
   #   description: >

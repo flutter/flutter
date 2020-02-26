@@ -575,6 +575,7 @@ class RenderParagraph extends RenderBox
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
     _setParentData();

@@ -345,7 +345,7 @@ void main() {
       ),
     });
 
-    test('takeScreenshot throws if file isn\'t .ppm', () async {
+    test("takeScreenshot throws if file isn't .ppm", () async {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.invalid')),
@@ -435,7 +435,7 @@ void main() {
       ),
     }, testOn: 'posix');
 
-    testUsingContext('takeScreenshot prints error if can\'t delete file from device', () async {
+    testUsingContext("takeScreenshot prints error if can't delete file from device", () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
 
       when(mockProcessManager.run(

@@ -802,6 +802,30 @@ void main() {
     );
   });
 
+  test('toString test', () {
+    final TestTree tree = TestTree(
+      properties: <DiagnosticsNode>[
+        StringProperty('stringProperty1', 'value1', quoted: false),
+        DoubleProperty('doubleProperty1', 42.5),
+        DoubleProperty('roundedProperty', 1.0 / 3.0),
+        StringProperty('DO_NOT_SHOW', 'DO_NOT_SHOW', level: DiagnosticLevel.hidden, quoted: false),
+        StringProperty('DEBUG_ONLY', 'DEBUG_ONLY', level: DiagnosticLevel.debug, quoted: false),
+      ],
+      // child to verify that children are not included in the toString.
+      children: <TestTree>[TestTree(name: 'node A')],
+    );
+
+    expect(
+      tree.toString(),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3)'),
+    );
+
+    expect(
+      tree.toString(minLevel: DiagnosticLevel.debug),
+      equalsIgnoringHashCodes('TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, DEBUG_ONLY: DEBUG_ONLY)'),
+    );
+  });
+
   test('transition test', () {
     // Test multiple styles integrating together in the same tree due to using
     // transition to go between styles that would otherwise be incompatible.

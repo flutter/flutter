@@ -309,7 +309,7 @@ class DoesNotHitRenderBox extends Matcher {
 
   @override
   Description describe(Description description) =>
-    description.add('hit test result doesn\'t contain ').addDescriptionOf(renderBox);
+    description.add("hit test result doesn't contain ").addDescriptionOf(renderBox);
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {

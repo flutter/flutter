@@ -35,7 +35,7 @@ import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
 import 'globals.dart' as globals;
-import 'ios/devices.dart' show IOSDeploy;
+import 'ios/ios_deploy.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/simulators.dart';
@@ -61,9 +61,18 @@ Future<T> runInContext<T>(
   FutureOr<T> runner(), {
   Map<Type, Generator> overrides,
 }) async {
+
+  // Wrap runner with any asynchronous initialization that should run with the
+  // overrides and callbacks.
+  bool runningOnBot;
+  FutureOr<T> runnerWrapper() async {
+    runningOnBot = await globals.isRunningOnBot;
+    return runner();
+  }
+
   return await context.run<T>(
     name: 'global fallbacks',
-    body: runner,
+    body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
       AndroidLicenseValidator: () => AndroidLicenseValidator(),
@@ -92,7 +101,13 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
-      ChromeLauncher: () => const ChromeLauncher(),
+      ChromeLauncher: () => ChromeLauncher(
+        fileSystem: globals.fs,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+      ),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => Config(
@@ -116,7 +131,13 @@ Future<T> runInContext<T>(
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => IMobileDevice(),
-      IOSDeploy: () => const IOSDeploy(),
+      IOSDeploy: () => IOSDeploy(
+        artifacts: globals.artifacts,
+        cache: globals.cache,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
@@ -159,7 +180,9 @@ Future<T> runInContext<T>(
       Stdio: () => const Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
-      Usage: () => Usage(),
+      Usage: () => Usage(
+        runningOnBot: runningOnBot,
+      ),
       UserMessages: () => UserMessages(),
       VisualStudio: () => VisualStudio(),
       VisualStudioValidator: () => const VisualStudioValidator(),

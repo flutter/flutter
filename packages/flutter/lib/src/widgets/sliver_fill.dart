@@ -122,6 +122,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
       assert(viewportFraction >= 0),
       _viewportFraction = viewportFraction;
 
+  SliverConstraints _lastResolvedConstraints;
+
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double newValue) {
@@ -142,10 +144,12 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   }
 
   void _resolve() {
-    if (_resolvedPadding != null)
+    if (_resolvedPadding != null && _lastResolvedConstraints == constraints)
       return;
+
     assert(constraints.axis != null);
     final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
+    _lastResolvedConstraints = constraints;
     switch (constraints.axis) {
       case Axis.horizontal:
         _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);

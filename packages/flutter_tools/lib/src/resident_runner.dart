@@ -52,7 +52,7 @@ class FlutterDevice {
          ),
          buildMode: buildMode,
          trackWidgetCreation: trackWidgetCreation,
-         fileSystemRoots: fileSystemRoots,
+         fileSystemRoots: fileSystemRoots ?? <String>[],
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
          experimentalFlags: experimentalFlags,
@@ -79,14 +79,15 @@ class FlutterDevice {
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
-    if (featureFlags.isWebIncrementalCompilerEnabled &&
-        targetPlatform == TargetPlatform.web_javascript) {
+    if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildMode),
         buildMode: buildMode,
         trackWidgetCreation: trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots,
-        fileSystemScheme: fileSystemScheme,
+        fileSystemRoots: fileSystemRoots ?? <String>[],
+        // Override the filesystem scheme so that the frontend_server can find
+        // the generated entrypoint code.
+        fileSystemScheme: 'org-dartlang-app',
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
@@ -109,13 +110,15 @@ class FlutterDevice {
         experimentalFlags: experimentalFlags,
         dartDefines: dartDefines,
       );
-      if (flutterProject.hasBuilders) {
-        generator = await CodeGeneratingResidentCompiler.create(
-          residentCompiler: generator,
-          flutterProject: flutterProject,
-        );
-      }
     }
+
+    if (flutterProject.hasBuilders) {
+      generator = await CodeGeneratingResidentCompiler.create(
+        residentCompiler: generator,
+        flutterProject: flutterProject,
+      );
+    }
+
     return FlutterDevice(
       device,
       trackWidgetCreation: trackWidgetCreation,
@@ -626,16 +629,6 @@ abstract class ResidentRunner {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
-    // TODO(jonahwilliams): this is a temporary work around to regain some of
-    // the initialize from dill performance. Longer term, we should have a
-    // better way to determine where the appropriate dill file is, as this
-    // doesn't work for Android or macOS builds.}
-    if (dillOutputPath == null) {
-      final File existingDill = globals.fs.file(globals.fs.path.join('build', 'app.dill'));
-      if (existingDill.existsSync()) {
-        existingDill.copySync(globals.fs.path.join(artifactDirectory.path, 'app.dill'));
-      }
-    }
   }
 
   @protected
@@ -676,6 +669,13 @@ abstract class ResidentRunner {
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+
+  // Returns the Uri of the first connected device for mobile,
+  // and only connected device for web.
+  //
+  // Would be null if there is no device connected or
+  // there is no devFS associated with the first device.
+  Uri get uri => flutterDevices.first?.devFS?.baseUri;
 
   /// Returns [true] if the resident runner exited after invoking [exit()].
   bool get exited => _exited;

@@ -379,9 +379,9 @@ class FuchsiaDevice extends Device {
         await fuchsiaDeviceTools.amberCtl.pkgCtlRepoRemove(this, fuchsiaPackageServer);
       }
       // Shutdown the package server and delete the package repo;
-      globals.printTrace('Shutting down the tool\'s package server.');
+      globals.printTrace("Shutting down the tool's package server.");
       fuchsiaPackageServer?.stop();
-      globals.printTrace('Removing the tool\'s package repo: at ${packageRepo.path}');
+      globals.printTrace("Removing the tool's package repo: at ${packageRepo.path}");
       try {
         packageRepo.deleteSync(recursive: true);
       } catch (e) {

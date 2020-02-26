@@ -44,6 +44,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
   @override
   void performLayout() {
+    final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 

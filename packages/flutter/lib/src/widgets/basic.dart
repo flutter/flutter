@@ -144,7 +144,7 @@ class Directionality extends InheritedWidget {
 /// ```dart
 /// Opacity(
 ///   opacity: _visible ? 1.0 : 0.0,
-///   child: const Text('Now you see me, now you don\'t!'),
+///   child: const Text("Now you see me, now you don't!"),
 /// )
 /// ```
 /// {@end-tool}
@@ -1214,7 +1214,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
 
-  /// The origin of the coordinate system (relative to the upper left corder of
+  /// The origin of the coordinate system (relative to the upper left corner of
   /// this render object) in which to apply the matrix.
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
@@ -4029,7 +4029,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// Row(
 ///   children: <Widget>[
 ///     const FlutterLogo(),
-///     const Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///     const Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     const Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
@@ -4057,7 +4057,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   children: <Widget>[
 ///     const FlutterLogo(),
 ///     const Expanded(
-///       child: Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
 ///     const Icon(Icons.sentiment_very_satisfied),
 ///   ],

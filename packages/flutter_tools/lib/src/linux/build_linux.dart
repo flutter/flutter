@@ -9,6 +9,7 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
+import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 
@@ -38,6 +39,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   linuxProject.generatedMakeConfigFile
     ..createSync(recursive: true)
     ..writeAsStringSync(buffer.toString());
+  createPluginSymlinks(linuxProject.project);
 
   if (!buildInfo.isDebug) {
     const String warning = '🚧 ';
@@ -64,7 +66,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
       'BUILD=$buildFlag',
     ], trace: true);
   } on ArgumentError {
-    throwToolExit('make not found. Run \'flutter doctor\' for more information.');
+    throwToolExit("make not found. Run 'flutter doctor' for more information.");
   } finally {
     status.cancel();
   }

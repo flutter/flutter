@@ -89,7 +89,7 @@ void main() {
     );
   });
 
-  test('ContainerLayer.findAllAnnotations returns children\'s opacity (true)', () {
+  test("ContainerLayer.findAllAnnotations returns children's opacity (true)", () {
     final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         ContainerLayer(),
@@ -107,7 +107,7 @@ void main() {
     );
   });
 
-  test('ContainerLayer.findAllAnnotations returns children\'s opacity (false)', () {
+  test("ContainerLayer.findAllAnnotations returns children's opacity (false)", () {
     final Layer root = _withBackgroundAnnotation(1000,
       _Layers(
         ContainerLayer(),
@@ -574,7 +574,7 @@ void main() {
   });
 
   test('AnnotatedRegionLayer.findAllAnnotations should still check children and return '
-    'children\'s opacity (false) during a failed hit', () {
+    "children's opacity (false) during a failed hit", () {
     const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(1000,
@@ -596,7 +596,7 @@ void main() {
   });
 
   test('AnnotatedRegionLayer.findAllAnnotations should still check children and return '
-    'children\'s opacity (true) during a failed hit', () {
+    "children's opacity (true) during a failed hit", () {
     const Offset position = Offset(5, 5);
 
     final Layer root = _withBackgroundAnnotation(1000,
@@ -616,7 +616,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAllAnnotations should not add to children\'s opacity '
+  test("AnnotatedRegionLayer.findAllAnnotations should not add to children's opacity "
     'during a successful hit if it is not opaque', () {
     const Offset position = Offset(5, 5);
 
@@ -639,7 +639,7 @@ void main() {
     );
   });
 
-  test('AnnotatedRegionLayer.findAllAnnotations should add to children\'s opacity '
+  test("AnnotatedRegionLayer.findAllAnnotations should add to children's opacity "
     'during a successful hit if it is opaque', () {
     const Offset position = Offset(5, 5);
 

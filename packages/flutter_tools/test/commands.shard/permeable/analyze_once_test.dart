@@ -41,7 +41,8 @@ void main() {
       } else {
         flutterRootUri.write(canonicalizedFlutterRootPath);
       }
-      final String dotPackagesSrc = '''# Generated
+      final String dotPackagesSrc = '''
+# Generated
 flutter:$flutterRootUri/packages/flutter/lib/
 sky_engine:$flutterRootUri/bin/cache/pkg/sky_engine/lib/
 flutter_project:lib/
@@ -124,7 +125,7 @@ flutter_project:lib/
             'Analyzing',
             'info $analyzerSeparator Avoid empty else statements',
             'info $analyzerSeparator Avoid empty statements',
-            'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
+            "info $analyzerSeparator The declaration '_incrementCounter' isn't",
           ],
           exitMessageContains: '3 issues found.',
           toolExit: true,
@@ -160,7 +161,7 @@ flutter_project:lib/
             arguments: <String>['analyze', '--no-pub'],
             statusTextContains: <String>[
               'Analyzing',
-              'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
+              "info $analyzerSeparator The declaration '_incrementCounter' isn't",
               'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
             ],
             exitMessageContains: '2 issues found.',
@@ -357,7 +358,8 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ''';
 
-const String pubspecYamlSrc = r'''name: flutter_project
+const String pubspecYamlSrc = r'''
+name: flutter_project
 environment:
   sdk: ">=2.1.0 <3.0.0"
 

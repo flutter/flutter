@@ -143,7 +143,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in release mode', () {
+    testUsingContext("Finds app bundle when flavor doesn't contain underscores in release mode", () {
       final FlutterProject project = generateFakeAppBundle('fooRelease', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
@@ -173,7 +173,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in debug mode', () {
+    testUsingContext("Finds app bundle when flavor doesn't contain underscores in debug mode", () {
       final FlutterProject project = generateFakeAppBundle('fooDebug', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
@@ -203,7 +203,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in profile mode', () {
+    testUsingContext("Finds app bundle when flavor doesn't contain underscores in profile mode", () {
       final FlutterProject project = generateFakeAppBundle('fooProfile', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo', treeShakeIcons: false));
       expect(bundle, isNotNull);
@@ -291,8 +291,8 @@ void main() {
         },
         throwsToolExit(
           message:
-            'Gradle build failed to produce an .aab file. It\'s likely that this file '
-            'was generated under ${project.android.buildDirectory.path}, but the tool couldn\'t find it.'
+            "Gradle build failed to produce an .aab file. It's likely that this file "
+            "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."
         )
       );
       verify(
@@ -395,8 +395,8 @@ void main() {
         },
         throwsToolExit(
           message:
-            'Gradle build failed to produce an .apk file. It\'s likely that this file '
-            'was generated under ${project.android.buildDirectory.path}, but the tool couldn\'t find it.'
+            "Gradle build failed to produce an .apk file. It's likely that this file "
+            "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."
         )
       );
       verify(
@@ -503,7 +503,7 @@ include ':app'
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('create settings_aar.gradle when current settings.gradle doesn\'t load plugins', () {
+    testUsingContext("create settings_aar.gradle when current settings.gradle doesn't load plugins", () {
       const String currentSettingsGradle = '''
 include ':app'
 ''';
@@ -1609,7 +1609,7 @@ plugin1=${plugin1.path}
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('doesn\'t indicate how to consume an AAR when printHowToConsumeAaar is false', () async {
+    testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAaar is false", () async {
       final File manifestFile = fileSystem.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync('''
@@ -1669,8 +1669,8 @@ plugin1=${plugin1.path}
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
         ..createSync(recursive: true)
-        ..writeAsStringSync(
-'''<?xml version="1.0" encoding="UTF-8"?>
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
 <project>
   <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
   <dependencies>
@@ -1761,8 +1761,8 @@ plugin1=${plugin1.path}
 
       fileSystem.file('out/android_arm/flutter_embedding_release.pom')
         ..createSync(recursive: true)
-        ..writeAsStringSync(
-'''<?xml version="1.0" encoding="UTF-8"?>
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
 <project>
   <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
   <dependencies>
@@ -1870,19 +1870,19 @@ plugin1=${plugin1.path}
           '\n'
           '      repositories {\n'
           '        maven {\n'
-          '            url \'build/\'\n'
+          "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          '            url \'http://download.flutter.io\'\n'
+          "            url 'http://download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      releaseImplementation \'com.mycompany:flutter_release:2.2\'\n'
-          '      debugImplementation \'com.mycompany:flutter_debug:2.2\'\n'
-          '      profileImplementation \'com.mycompany:flutter_profile:2.2\'\n'
+          "      releaseImplementation 'com.mycompany:flutter_release:2.2'\n"
+          "      debugImplementation 'com.mycompany:flutter_debug:2.2'\n"
+          "      profileImplementation 'com.mycompany:flutter_profile:2.2'\n"
           '    }\n'
           '\n'
           '\n'
@@ -1922,17 +1922,17 @@ plugin1=${plugin1.path}
           '\n'
           '      repositories {\n'
           '        maven {\n'
-          '            url \'build/\'\n'
+          "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          '            url \'http://download.flutter.io\'\n'
+          "            url 'http://download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      releaseImplementation \'com.mycompany:flutter_release:1.0\'\n'
+          "      releaseImplementation 'com.mycompany:flutter_release:1.0'\n"
           '    }\n'
           '\n'
           'To learn more, visit https://flutter.dev/go/build-aar\n'
@@ -1961,17 +1961,17 @@ plugin1=${plugin1.path}
           '\n'
           '      repositories {\n'
           '        maven {\n'
-          '            url \'build/\'\n'
+          "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          '            url \'http://download.flutter.io\'\n'
+          "            url 'http://download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      debugImplementation \'com.mycompany:flutter_debug:1.0\'\n'
+          "      debugImplementation 'com.mycompany:flutter_debug:1.0'\n"
           '    }\n'
           '\n'
           'To learn more, visit https://flutter.dev/go/build-aar\n'
@@ -2001,17 +2001,17 @@ plugin1=${plugin1.path}
           '\n'
           '      repositories {\n'
           '        maven {\n'
-          '            url \'build/\'\n'
+          "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          '            url \'http://download.flutter.io\'\n'
+          "            url 'http://download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      profileImplementation \'com.mycompany:flutter_profile:1.0\'\n'
+          "      profileImplementation 'com.mycompany:flutter_profile:1.0'\n"
           '    }\n'
           '\n'
           '\n'

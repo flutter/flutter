@@ -747,7 +747,7 @@ class _TextStyleProxy implements TextStyle {
   List<ui.FontFeature> get fontFeatures => _delegate.fontFeatures;
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) =>
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
       super.toString();
 
   @override

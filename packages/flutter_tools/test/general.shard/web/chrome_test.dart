@@ -54,10 +54,10 @@ void main() {
     resetChromeForTesting();
   });
 
-  test('can launch chrome and connect to the devtools', () => testbed.run(() async {
-    const List<String> expected = <String>[
+  List<String> expectChromeArgs({int debugPort = 1234}) {
+    return <String>[
       'example_chrome',
-      '--remote-debugging-port=1234',
+      '--remote-debugging-port=$debugPort',
       '--disable-background-timer-throttling',
       '--disable-extensions',
       '--disable-popup-blocking',
@@ -68,12 +68,32 @@ void main() {
       '--disable-translate',
       'example_url',
     ];
+  }
 
-    await chromeLauncher.launch('example_url', skipCheck: true);
+  test('can launch chrome and connect to the devtools', () => testbed.run(() async {
+    await globals.chromeLauncher.launch('example_url', skipCheck: true);
+
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
+    expect(result.captured.single, containsAll(expectChromeArgs()));
+    expect(result.captured.single, isNot(contains('--window-size=2400,1800')));
+  }));
+
+  test('can launch chrome with a custom debug port', () => testbed.run(() async {
+    await globals.chromeLauncher.launch('example_url', skipCheck: true, debugPort: 10000);
     final VerificationResult result = verify(globals.processManager.start(captureAny));
 
-    expect(result.captured.single, containsAll(expected));
+    expect(result.captured.single, containsAll(expectChromeArgs(debugPort: 10000)));
+    expect(result.captured.single, isNot(contains('--window-size=2400,1800')));
   }));
+
+  test('can launch chrome headless', () => testbed.run(() async {
+    await globals.chromeLauncher.launch('example_url', skipCheck: true, headless: true);
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
+
+    expect(result.captured.single, containsAll(expectChromeArgs()));
+    expect(result.captured.single, contains('--window-size=2400,1800'));
+  }));
+
 
   test('can seed chrome temp directory with existing preferences', () => testbed.run(() async {
     final Directory dataDir = globals.fs.directory('chrome-stuff');
@@ -84,7 +104,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('example');
 
-    await chromeLauncher.launch('example_url', skipCheck: true, dataDir: dataDir);
+    await globals.chromeLauncher.launch('example_url', skipCheck: true, dataDir: dataDir);
     final VerificationResult result = verify(globals.processManager.start(captureAny));
     final String arg = (result.captured.single as List<String>)
       .firstWhere((String arg) => arg.startsWith('--user-data-dir='));

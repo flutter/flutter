@@ -81,6 +81,15 @@ TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/animated_placeholder_perf.dart',
+    'animated_placeholder_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
 TaskFunction createPictureCachePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',

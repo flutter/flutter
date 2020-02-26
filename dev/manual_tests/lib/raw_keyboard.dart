@@ -136,6 +136,11 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
               }
             }
           }
+          final List<String> pressed = <String>['Pressed:'];
+          for (final LogicalKeyboardKey key in RawKeyboard.instance.keysPressed) {
+            pressed.add(key.debugName);
+          }
+          dataText.add(Text(pressed.join(' ')));
           return DefaultTextStyle(
             style: textTheme.subtitle1,
             child: Column(

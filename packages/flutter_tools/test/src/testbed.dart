@@ -722,7 +722,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
     this.isAndroidEmbeddingV2Enabled = false,
-    this.isWebIncrementalCompilerEnabled = false,
 });
 
   @override
@@ -741,9 +740,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isAndroidEmbeddingV2Enabled;
 
   @override
-  final bool isWebIncrementalCompilerEnabled;
-
-  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -756,8 +752,6 @@ class TestFeatureFlags implements FeatureFlags {
         return isWindowsEnabled;
       case flutterAndroidEmbeddingV2Feature:
         return isAndroidEmbeddingV2Enabled;
-      case flutterWebIncrementalCompiler:
-        return isWebIncrementalCompilerEnabled;
     }
     return false;
   }

@@ -279,6 +279,7 @@ class RenderFlow extends RenderBox
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     size = _getSize(constraints);
     int i = 0;
     _randomAccessChildren.clear();
@@ -318,13 +319,11 @@ class RenderFlow extends RenderBox
     final FlowParentData childParentData = child.parentData as FlowParentData;
     assert(() {
       if (childParentData._transform != null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Cannot call paintChild twice for the same child.'),
-          ErrorDescription(
-            'The flow delegate of type ${_delegate.runtimeType} attempted to '
-            'paint child $i multiple times, which is not permitted.'
-          )
-        ]);
+        throw FlutterError(
+          'Cannot call paintChild twice for the same child.\n'
+          'The flow delegate of type ${_delegate.runtimeType} attempted to '
+          'paint child $i multiple times, which is not permitted.'
+        );
       }
       return true;
     }());

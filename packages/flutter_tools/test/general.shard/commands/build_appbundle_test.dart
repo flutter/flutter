@@ -303,7 +303,7 @@ void main() {
       Usage: () => mockUsage,
     });
 
-    testUsingContext('reports when the app isn\'t using AndroidX', () async {
+    testUsingContext("reports when the app isn't using AndroidX", () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--no-androidx', '--template=app']);
 
@@ -334,7 +334,7 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, contains('Your app isn\'t using AndroidX'));
+      expect(testLogger.statusText, contains("Your app isn't using AndroidX"));
       expect(testLogger.statusText, contains(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
@@ -385,7 +385,7 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText.contains('Your app isn\'t using AndroidX'), isFalse);
+      expect(testLogger.statusText.contains("Your app isn't using AndroidX"), isFalse);
       expect(
         testLogger.statusText.contains(
           'To avoid potential build failures, you can quickly migrate your app by '

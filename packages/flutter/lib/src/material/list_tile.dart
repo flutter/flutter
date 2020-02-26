@@ -265,7 +265,7 @@ enum ListTileControlAffinity {
 /// // ...
 /// ListTile(
 ///   leading: const Icon(Icons.flight_land),
-///   title: const Text('Trix\'s airplane'),
+///   title: const Text("Trix's airplane"),
 ///   subtitle: _act != 2 ? const Text('The airplane is only in Act II.') : null,
 ///   enabled: _act == 2,
 ///   onTap: () { /* react to the tile being tapped */ }
@@ -1328,6 +1328,7 @@ class _RenderListTile extends RenderBox {
   // https://material.io/design/components/lists.html#specs
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final bool hasLeading = leading != null;
     final bool hasSubtitle = subtitle != null;
     final bool hasTrailing = trailing != null;

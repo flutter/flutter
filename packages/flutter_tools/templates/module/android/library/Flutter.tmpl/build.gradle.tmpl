@@ -37,12 +37,6 @@ android {
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        {{#androidX}}
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        {{/androidX}}
-        {{^androidX}}
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        {{/androidX}}
     }
 }
 
@@ -51,7 +45,6 @@ flutter {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.12'
     {{#androidX}}
     implementation 'androidx.appcompat:appcompat:1.0.2'
     {{/androidX}}

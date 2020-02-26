@@ -40,7 +40,8 @@ class GitHubTemplateCreator {
       String doctorText
     ) async {
     final String title = '[tool_crash] $errorString';
-    final String body = '''## Command
+    final String body = '''
+## Command
 ```
 $command
 ```

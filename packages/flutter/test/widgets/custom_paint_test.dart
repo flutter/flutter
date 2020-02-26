@@ -162,7 +162,7 @@ void main() {
     expect(error.toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   Failed to update the list of CustomPainterSemantics:\n'
-      '   - duplicate key [<\'0\'>] found at position 1\n'
+      "   - duplicate key [<'0'>] found at position 1\n"
     ));
   });
 

@@ -46,7 +46,7 @@ void main() {
     });
 
     // Ensure we don't send anything when analytics is disabled.
-    testUsingContext('doesn\'t send when disabled', () async {
+    testUsingContext("doesn't send when disabled", () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
@@ -69,11 +69,12 @@ void main() {
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
+        runningOnBot: true,
       ),
     });
 
     // Ensure we don't send for the 'flutter config' command.
-    testUsingContext('config doesn\'t send', () async {
+    testUsingContext("config doesn't send", () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
@@ -91,13 +92,14 @@ void main() {
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
+        runningOnBot: true,
       ),
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
       when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting) as bool)
           .thenReturn(true);
-      final Usage usage = Usage();
+      final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
@@ -119,7 +121,7 @@ void main() {
           .thenReturn(true);
       when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting) as bool)
           .thenReturn(true);
-      final Usage usage = Usage();
+      final Usage usage = Usage(runningOnBot: true);
       usage.sendCommand('test');
 
       final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
@@ -213,7 +215,10 @@ void main() {
       mockTimes = <int>[kMillis];
       // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
       // will be written to a file.
-      final Usage usage = Usage(versionOverride: 'test');
+      final Usage usage = Usage(
+        versionOverride: 'test',
+        runningOnBot: true,
+      );
       usage.suppressAnalytics = false;
       usage.enabled = true;
 
@@ -239,7 +244,10 @@ void main() {
       mockTimes = <int>[kMillis];
       // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
       // will be written to a file.
-      final Usage usage = Usage(versionOverride: 'test');
+      final Usage usage = Usage(
+        versionOverride: 'test',
+        runningOnBot: true,
+      );
       usage.suppressAnalytics = false;
       usage.enabled = true;
 
@@ -272,7 +280,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testUsingContext('don\'t send on bots', () async {
+    testUsingContext("don't send on bots with unknown version", () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
@@ -283,10 +291,11 @@ void main() {
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/unknown',
         configDirOverride: tempDir.path,
+        runningOnBot: false,
       ),
     });
 
-    testUsingContext('don\'t send on bots even when opted in', () async {
+    testUsingContext("don't send on bots even when opted in", () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
       flutterUsage.enabled = true;
@@ -298,6 +307,7 @@ void main() {
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/unknown',
         configDirOverride: tempDir.path,
+        runningOnBot: false,
       ),
     });
   });

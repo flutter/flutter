@@ -37,8 +37,8 @@ class _SaltedKey<S, V> extends LocalKey {
 
   @override
   String toString() {
-    final String saltString = S == String ? '<\'$salt\'>' : '<$salt>';
-    final String valueString = V == String ? '<\'$value\'>' : '<$value>';
+    final String saltString = S == String ? "<'$salt'>" : '<$salt>';
+    final String valueString = V == String ? "<'$value'>" : '<$value>';
     return '[$saltString $valueString]';
   }
 }
