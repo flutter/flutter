@@ -71,16 +71,29 @@ void main() {
   }
 
   test('can launch chrome and connect to the devtools', () => testbed.run(() async {
-    await chromeLauncher.launch('example_url', skipCheck: true);
+    await globals.chromeLauncher.launch('example_url', skipCheck: true);
+
     final VerificationResult result = verify(globals.processManager.start(captureAny));
     expect(result.captured.single, containsAll(expectChromeArgs()));
+    expect(result.captured.single, isNot(contains('--window-size=2400,1800')));
   }));
 
   test('can launch chrome with a custom debug port', () => testbed.run(() async {
-    await chromeLauncher.launch('example_url', skipCheck: true, debugPort: 10000);
+    await globals.chromeLauncher.launch('example_url', skipCheck: true, debugPort: 10000);
     final VerificationResult result = verify(globals.processManager.start(captureAny));
+
     expect(result.captured.single, containsAll(expectChromeArgs(debugPort: 10000)));
+    expect(result.captured.single, isNot(contains('--window-size=2400,1800')));
   }));
+
+  test('can launch chrome headless', () => testbed.run(() async {
+    await globals.chromeLauncher.launch('example_url', skipCheck: true, headless: true);
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
+
+    expect(result.captured.single, containsAll(expectChromeArgs()));
+    expect(result.captured.single, contains('--window-size=2400,1800'));
+  }));
+
 
   test('can seed chrome temp directory with existing preferences', () => testbed.run(() async {
     final Directory dataDir = globals.fs.directory('chrome-stuff');
@@ -91,7 +104,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('example');
 
-    await chromeLauncher.launch('example_url', skipCheck: true, dataDir: dataDir);
+    await globals.chromeLauncher.launch('example_url', skipCheck: true, dataDir: dataDir);
     final VerificationResult result = verify(globals.processManager.start(captureAny));
     final String arg = (result.captured.single as List<String>)
       .firstWhere((String arg) => arg.startsWith('--user-data-dir='));

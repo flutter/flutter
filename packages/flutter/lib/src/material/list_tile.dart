@@ -1328,6 +1328,7 @@ class _RenderListTile extends RenderBox {
   // https://material.io/design/components/lists.html#specs
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final bool hasLeading = leading != null;
     final bool hasSubtitle = subtitle != null;
     final bool hasTrailing = trailing != null;

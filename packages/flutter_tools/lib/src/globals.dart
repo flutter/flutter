@@ -20,10 +20,12 @@ import 'base/os.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'cache.dart';
+import 'ios/ios_deploy.dart';
 import 'ios/mac.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'version.dart';
+import 'web/chrome.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
 Cache get cache => context.get<Cache>();
@@ -62,6 +64,7 @@ AndroidStudio get androidStudio => context.get<AndroidStudio>();
 AndroidSdk get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
+IOSDeploy get iosDeploy => context.get<IOSDeploy>();
 UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
 
@@ -146,3 +149,6 @@ final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
 
 /// The global Stdio wrapper.
 Stdio get stdio => context.get<Stdio>() ?? const Stdio();
+
+/// The [ChromeLauncher] instance.
+ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();

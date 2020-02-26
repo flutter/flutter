@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -34,6 +35,7 @@ void main() {
 
   tearDown(() {
     FlutterError.onError = oldError;
+    PaintingBinding.instance.imageCache.clear();
   });
 
   group('ImageProvider', () {
@@ -41,6 +43,44 @@ void main() {
       tearDown(() {
         imageCache.clear();
       });
+
+      test('AssetImageProvider - evicts on failure to load', () async {
+        final Completer<FlutterError> error = Completer<FlutterError>();
+        FlutterError.onError = (FlutterErrorDetails details) {
+          error.complete(details.exception as FlutterError);
+        };
+
+        const ImageProvider provider = ExactAssetImage('does-not-exist');
+        final Object key = await provider.obtainKey(ImageConfiguration.empty);
+        expect(imageCache.containsKey(provider), false);
+
+        provider.resolve(ImageConfiguration.empty);
+
+        expect(imageCache.containsKey(key), true);
+
+        await error.future;
+
+        expect(imageCache.containsKey(provider), false);
+      }, skip: isBrowser);
+
+      test('AssetImageProvider - evicts on null load', () async {
+        final Completer<StateError> error = Completer<StateError>();
+        FlutterError.onError = (FlutterErrorDetails details) {
+          error.complete(details.exception as StateError);
+        };
+
+        final ImageProvider provider = ExactAssetImage('does-not-exist', bundle: TestAssetBundle());
+        final Object key = await provider.obtainKey(ImageConfiguration.empty);
+        expect(imageCache.containsKey(key), false);
+
+        provider.resolve(ImageConfiguration.empty);
+
+        expect(imageCache.containsKey(key), true);
+
+        await error.future;
+
+        expect(imageCache.containsKey(key), false);
+      }, skip: isBrowser);
 
       test('ImageProvider can evict images', () async {
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
@@ -157,7 +197,7 @@ void main() {
       expect(uncaught, false);
     });
 
-    test('File image with empty file throws expected error - (image cache)', () async {
+    test('File image with empty file throws expected error and evicts from cache', () async {
       final Completer<StateError> error = Completer<StateError>();
       FlutterError.onError = (FlutterErrorDetails details) {
         print(details.exception);
@@ -167,9 +207,14 @@ void main() {
       final File file = fs.file('/empty.png')..createSync(recursive: true);
       final FileImage provider = FileImage(file);
 
+      expect(imageCache.containsKey(provider), false);
+
       provider.resolve(ImageConfiguration.empty);
 
+      expect(imageCache.containsKey(provider), true);
+
       expect(await error.future, isStateError);
+      expect(imageCache.containsKey(provider), false);
     });
 
     group(NetworkImage, () {
@@ -184,7 +229,7 @@ void main() {
         debugNetworkImageHttpClientProvider = null;
       });
 
-      test('Expect thrown exception with statusCode', () async {
+      test('Expect thrown exception with statusCode - evicts from cache', () async {
         final int errorStatusCode = HttpStatus.notFound;
         const String requestUrl = 'foo-url';
 
@@ -197,13 +242,21 @@ void main() {
         final Completer<dynamic> caughtError = Completer<dynamic>();
 
         final ImageProvider imageProvider = NetworkImage(nonconst(requestUrl));
+        expect(imageCache.containsKey(imageProvider), false);
+
         final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+
+        expect(imageCache.containsKey(imageProvider), true);
+
         result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
         }, onError: (dynamic error, StackTrace stackTrace) {
           caughtError.complete(error);
         }));
 
         final dynamic err = await caughtError.future;
+
+        expect(imageCache.containsKey(imageProvider), false);
+
         expect(
           err,
           isA<NetworkImageLoadException>()
@@ -455,3 +508,10 @@ class AsyncKeyMemoryImage extends MemoryImage {
 class MockHttpClient extends Mock implements HttpClient {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+
+class TestAssetBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async {
+    return null;
+  }
+}
