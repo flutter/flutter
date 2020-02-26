@@ -391,7 +391,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///  * [TextStyle](https://api.flutter.dev/flutter/dart-ui/TextStyle-class.html), the class in the [dart:ui] library.
 ///
 @immutable
-class TextStyle with DiagnosticableMixin {
+class TextStyle with Diagnosticable {
   /// Creates a text style.
   ///
   /// The `package` argument must be non-null if the font family is defined in a

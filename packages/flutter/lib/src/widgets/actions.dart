@@ -25,7 +25,7 @@ typedef ActionFactory = Action Function();
 ///
 /// If this intent returns false from [isEnabled], then its associated action will
 /// not be invoked if requested.
-class Intent with DiagnosticableMixin {
+class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
   ///
   /// The [key] argument must not be null.
@@ -73,7 +73,7 @@ class Intent with DiagnosticableMixin {
 ///    and allows redefining of actions for its descendants.
 ///  * [ActionDispatcher], a class that takes an [Action] and invokes it using a
 ///    [FocusNode] for context.
-abstract class Action with DiagnosticableMixin {
+abstract class Action with Diagnosticable {
   /// A const constructor for an [Action].
   ///
   /// The [intentKey] parameter must not be null.
@@ -140,7 +140,7 @@ class CallbackAction extends Action {
 }
 
 /// An action manager that simply invokes the actions given to it.
-class ActionDispatcher with DiagnosticableMixin {
+class ActionDispatcher with Diagnosticable {
   /// Const constructor so that subclasses can be const.
   const ActionDispatcher();
 

@@ -326,7 +326,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
 /// See [FlutterError.onError].
-class FlutterErrorDetails with DiagnosticableMixin {
+class FlutterErrorDetails with Diagnosticable {
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
   ///

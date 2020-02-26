@@ -26,7 +26,7 @@ import 'package:flutter/rendering.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class FloatingActionButtonThemeData with DiagnosticableMixin {
+class FloatingActionButtonThemeData with Diagnosticable {
   /// Creates a theme that can be used for
   /// [ThemeData.floatingActionButtonTheme].
   const FloatingActionButtonThemeData({

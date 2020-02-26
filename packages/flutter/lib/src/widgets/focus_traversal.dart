@@ -115,7 +115,7 @@ enum TraversalDirection {
 ///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
 ///    focus traversal in a direction.
 @immutable
-abstract class FocusTraversalPolicy with DiagnosticableMixin {
+abstract class FocusTraversalPolicy with Diagnosticable {
   /// A const constructor so subclasses can be const.
   const FocusTraversalPolicy();
 
@@ -806,7 +806,7 @@ class WidgetOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFo
 //
 // It's also a convenient place to put some utility functions having to do with
 // the sort data.
-class _ReadingOrderSortData with DiagnosticableMixin {
+class _ReadingOrderSortData with Diagnosticable {
   _ReadingOrderSortData(this.node)
       : assert(node != null),
         rect = node.rect,
@@ -886,7 +886,7 @@ class _ReadingOrderSortData with DiagnosticableMixin {
 
 // A class for containing group data while sorting in reading order while taking
 // into account the ambient directionality.
-class _ReadingOrderDirectionalGroupData with DiagnosticableMixin {
+class _ReadingOrderDirectionalGroupData with Diagnosticable {
   _ReadingOrderDirectionalGroupData(this.members);
 
   final List<_ReadingOrderSortData> members;
@@ -1105,7 +1105,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 ///  * [LexicalFocusOrder], a focus order that assigns a string-based lexical
 ///    traversal order to a [FocusTraversalOrder] widget.
 @immutable
-abstract class FocusOrder with DiagnosticableMixin implements Comparable<FocusOrder> {
+abstract class FocusOrder with Diagnosticable implements Comparable<FocusOrder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const FocusOrder();

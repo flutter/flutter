@@ -3018,9 +3018,9 @@ class DiagnosticPropertiesBuilder {
 }
 
 // Examples can assume:
-// class ExampleSuperclass with DiagnosticableMixin { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
+// class ExampleSuperclass with Diagnosticable { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
 
-/// A base class for providing string and [DiagnosticsNode] debug
+/// A mixin for providing string and [DiagnosticsNode] debug
 /// representations describing the properties of an object.
 ///
 /// The string debug representation is generated from the intermediate
@@ -3033,8 +3033,7 @@ class DiagnosticPropertiesBuilder {
 ///  * [DiagnosticableTree], which extends this class to also describe the
 ///    children of a tree structured object.
 ///  * [DiagnosticableMixin], which provides the implementation for
-///    [Diagnosticable], and can be used to add diagnostics to classes which
-///    already have a base class.
+///    [Diagnosticable].
 ///  * [DiagnosticableMixin.debugFillProperties], which lists best practices
 ///    for specifying the properties of a [DiagnosticsNode]. The most common use
 ///    case is to override [debugFillProperties] defining custom properties for
@@ -3047,15 +3046,7 @@ class DiagnosticPropertiesBuilder {
 ///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
 ///    nodes without properties or children. There are many
 ///    [DiagnosticsProperty] subclasses to handle common use cases.
-@Deprecated(
-  'Use "with DiagnosticableMixin" instead of "extends Diagnosticable"'
-  'This feature was deprecated after v1.7.11.'
-)
-abstract class Diagnosticable with DiagnosticableMixin {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const Diagnosticable();
-}
+mixin Diagnosticable on DiagnosticableMixin { }
 
 /// A mixin class for providing string and [DiagnosticsNode] debug
 /// representations describing the properties of an object.
@@ -3342,7 +3333,7 @@ mixin DiagnosticableMixin {
 ///  * [DiagnosticableTreeMixin], a mixin that implements this class.
 ///  * [DiagnosticableMixin], which should be used instead of this class to
 ///    provide diagnostics for objects without children.
-abstract class DiagnosticableTree with DiagnosticableMixin {
+abstract class DiagnosticableTree with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const DiagnosticableTree();

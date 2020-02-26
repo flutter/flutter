@@ -3547,7 +3547,7 @@ class InputDecoration {
 /// The [InputDecoration.applyDefaults] method is used to combine a input
 /// decoration theme with an [InputDecoration] object.
 @immutable
-class InputDecorationTheme with DiagnosticableMixin {
+class InputDecorationTheme with Diagnosticable {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
   ///
