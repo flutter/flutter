@@ -992,7 +992,6 @@ class RenderTable extends RenderBox {
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
     final int rows = this.rows;
     final int columns = this.columns;
     assert(_children.length == rows * columns);

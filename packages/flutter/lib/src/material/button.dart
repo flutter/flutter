@@ -509,7 +509,6 @@ class _RenderInputPadding extends RenderShiftedBox {
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
       final double height = math.max(child.size.width, minSize.width);
