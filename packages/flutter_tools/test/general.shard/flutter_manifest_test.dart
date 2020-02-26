@@ -387,7 +387,8 @@ flutter:
       expect(flutterManifest.isPlugin, true);
       expect(flutterManifest.androidPackage, 'com.example');
     });
-    test('allows a multi-plat plugin declaration', () async {
+
+    test('allows a multi-plat plugin declaration with android only', () async {
       const String manifest = '''
 name: test
 flutter:
@@ -400,6 +401,20 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isPlugin, true);
       expect(flutterManifest.androidPackage, 'com.example');
+    });
+
+    test('allows a multi-plat plugin declaration with ios only', () async {
+      const String manifest = '''
+name: test
+flutter:
+    plugin:
+      platforms:
+        ios:
+          pluginClass: HelloPlugin
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isPlugin, true);
+      expect(flutterManifest.androidPackage, isNull);
     });
 
     testUsingContext('handles an invalid plugin declaration', () async {

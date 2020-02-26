@@ -376,7 +376,7 @@ class SemanticsData extends Diagnosticable {
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
 
   @override
-  String toStringShort() => '${objectRuntimeType(this, 'SemanticsData')}';
+  String toStringShort() => objectRuntimeType(this, 'SemanticsData');
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1150,7 +1150,7 @@ class SemanticsProperties extends DiagnosticableTree {
   }
 
   @override
-  String toStringShort() => '${objectRuntimeType(this, 'SemanticsProperties')}'; // the hashCode isn't important since we're immutable
+  String toStringShort() => objectRuntimeType(this, 'SemanticsProperties'); // the hashCode isn't important since we're immutable
 }
 
 /// In tests use this function to reset the counter used to generate
@@ -1361,7 +1361,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         final List<DiagnosticsNode> mutationErrors = <DiagnosticsNode>[];
         if (newChildren.length != _debugPreviousSnapshot.length) {
           mutationErrors.add(ErrorDescription(
-            'The list\'s length has changed from ${_debugPreviousSnapshot.length} '
+            "The list's length has changed from ${_debugPreviousSnapshot.length} "
             'to ${newChildren.length}.'
           ));
         } else {

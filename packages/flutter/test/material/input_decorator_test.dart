@@ -1433,6 +1433,43 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
   });
 
+  testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          prefixIcon: Icon(Icons.pages),
+          prefixIconConstraints: BoxConstraints(
+            minWidth: 32,
+            minHeight: 32,
+          ),
+          suffixIcon: Icon(Icons.satellite),
+          suffixIconConstraints: BoxConstraints(
+            minWidth: 25,
+            minHeight: 25,
+          ),
+          isDense: true, // has to be true to go below 48px height
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 32px because the prefix icon
+    // is now a custom value
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 32.0));
+    expect(tester.getSize(find.text('text')).height, 16.0);
+    expect(tester.getSize(find.byIcon(Icons.pages)).height, 32.0);
+    expect(tester.getSize(find.byIcon(Icons.satellite)).height, 25.0);
+
+    // (InputDecorator height - Text widget height) / 2
+    expect(tester.getTopLeft(find.text('text')).dy, (32.0 - 16.0) / 2);
+    // prefixIcon should take up the entire height of InputDecorator
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, 0.0);
+    // (InputDecorator height - suffixIcon height) / 2
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, (32.0 - 25.0) / 2);
+    expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
+  });
+
   testWidgets('prefix/suffix icons are centered when smaller than 48 by 48', (WidgetTester tester) async {
     const Key prefixKey = Key('prefix');
     await tester.pumpWidget(

@@ -730,6 +730,15 @@ void main() {
     expect(painter.inlinePlaceholderBoxes[13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
   }, skip: isBrowser);
 
+  // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
+  test('TextPainter set TextHeightBehavior null test', () {
+    final TextPainter painter = TextPainter(textHeightBehavior: null)
+      ..textDirection = TextDirection.ltr;
+
+    painter.textHeightBehavior = const TextHeightBehavior();
+    painter.textHeightBehavior = null;
+  });
+
   test('TextPainter line metrics', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;

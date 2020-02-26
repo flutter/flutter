@@ -120,8 +120,10 @@ class _TextSelectionHandlePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()..color = color;
     final double radius = size.width/2.0;
-    canvas.drawCircle(Offset(radius, radius), radius, paint);
-    canvas.drawRect(Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
+    final Rect circle = Rect.fromCircle(center: Offset(radius, radius), radius: radius);
+    final Rect point = Rect.fromLTWH(0.0, 0.0, radius, radius);
+    final Path path = Path()..addOval(circle)..addRect(point);
+    canvas.drawPath(path, paint);
   }
 
   @override

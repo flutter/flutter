@@ -22,7 +22,6 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_api/src/backend/suite_platform.dart';
-import 'package:test_api/src/util/stack_trace_mapper.dart';
 import 'package:test_core/src/runner/configuration.dart';
 import 'package:test_core/src/runner/environment.dart';
 import 'package:test_core/src/runner/platform.dart';
@@ -301,9 +300,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Map<Runtime, Future<BrowserManager>> _browserManagers =
       <Runtime, Future<BrowserManager>>{};
 
-  // Mappers for Dartifying stack traces, indexed by test path.
-  final Map<String, StackTraceMapper> _mappers = <String, StackTraceMapper>{};
-
   // A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
     final String path = globals.fs.path.fromUri(request.url);
@@ -346,7 +342,7 @@ class FlutterWebPlatform extends PlatformPlugin {
             globals.fs.path.relative(path, from: globals.fs.path.join(_root, 'test'))) +
         '.html'));
     final RunnerSuite suite = await browserManager
-        .load(path, suiteUrl, suiteConfig, message, mapper: _mappers[path]);
+        .load(path, suiteUrl, suiteConfig, message);
     if (_closed) {
       return null;
     }
@@ -696,9 +692,8 @@ class BrowserManager {
     String path,
     Uri url,
     SuiteConfiguration suiteConfig,
-    Object message, {
-    StackTraceMapper mapper,
-  }) async {
+    Object message,
+  ) async {
     url = url.replace(fragment: Uri.encodeFull(jsonEncode(<String, Object>{
       'metadata': suiteConfig.metadata.serialize(),
       'browser': _runtime.identifier,
@@ -737,7 +732,6 @@ class BrowserManager {
       try {
         controller = deserializeSuite(path, SuitePlatform(Runtime.chrome),
             suiteConfig, await _environment, suiteChannel, message);
-        controller.channel('test.browser.mapper').sink.add(mapper?.serialize());
 
         _controllers.add(controller);
         return await controller.suite;

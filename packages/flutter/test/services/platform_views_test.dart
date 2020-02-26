@@ -128,7 +128,7 @@ void main() {
 
     });
 
-    test('change Android view\'s directionality before creation', () async {
+    test("change Android view's directionality before creation", () async {
       viewsController.registerViewType('webview');
       final AndroidViewController viewController =
       PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.rtl);
@@ -141,7 +141,7 @@ void main() {
           ]));
     });
 
-    test('change Android view\'s directionality after creation', () async {
+    test("change Android view's directionality after creation", () async {
       viewsController.registerViewType('webview');
       final AndroidViewController viewController =
       PlatformViewsService.initAndroidView(id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr);

@@ -29,7 +29,7 @@ class _StockSymbolView extends StatelessWidget {
           Row(
             children: <Widget>[
               Text(
-                '${stock.symbol}',
+                stock.symbol,
                 key: ValueKey<String>('${stock.symbol}_symbol_name'),
                 style: Theme.of(context).textTheme.headline3,
               ),
@@ -43,7 +43,7 @@ class _StockSymbolView extends StatelessWidget {
             height: 8.0
           ),
           Text('Market Cap', style: headings),
-          Text('${stock.marketCap}'),
+          Text(stock.marketCap),
           Container(
             height: 8.0
           ),

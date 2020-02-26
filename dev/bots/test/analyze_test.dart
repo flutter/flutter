@@ -49,7 +49,7 @@ void main() {
         'test/analyze-test-input/root/packages/foo/deprecation.dart:41: Deprecation notice does not match required pattern.\n'
         'test/analyze-test-input/root/packages/foo/deprecation.dart:48: End of deprecation notice does not match required pattern.\n'
         'test/analyze-test-input/root/packages/foo/deprecation.dart:51: Unexpected deprecation notice indent.\n'
-        .replaceAll('/', Platform.isWindows ? '\\' : '/')
+        .replaceAll('/', Platform.isWindows ? r'\' : '/')
       )
       +
       'See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes\n'
@@ -65,7 +65,7 @@ void main() {
       (
         'The following 1 file does not have the right license header:\n'
         'test/analyze-test-input/root/packages/foo/foo.dart\n'
-        .replaceAll('/', Platform.isWindows ? '\\' : '/')
+        .replaceAll('/', Platform.isWindows ? r'\' : '/')
       )
       +
       'The expected license header is:\n'
@@ -85,7 +85,7 @@ void main() {
       (
         'test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character\n'
         'test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line\n'
-        .replaceAll('/', Platform.isWindows ? '\\' : '/')
+        .replaceAll('/', Platform.isWindows ? r'\' : '/')
       )
       +
       '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'

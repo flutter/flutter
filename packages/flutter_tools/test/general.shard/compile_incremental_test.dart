@@ -126,13 +126,13 @@ void main() {
     await _recompile(streamController, generator, mockFrontendServerStdIn,
       'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
 
-    await _accept(streamController, generator, mockFrontendServerStdIn, '^accept\\n\$');
+    await _accept(streamController, generator, mockFrontendServerStdIn, r'^accept\n$');
 
     await _recompile(streamController, generator, mockFrontendServerStdIn,
       'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
     // No sources returned from reject command.
     await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\n',
-      '^reject\\n\$');
+      r'^reject\n$');
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
     expect(testLogger.errorText, equals(
@@ -193,7 +193,7 @@ Future<void> _recompile(
   );
   expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   final String commands = mockFrontendServerStdIn.getAndClear();
-  final RegExp re = RegExp('^recompile (.*)\\n/path/to/main.dart\\n(.*)\\n\$');
+  final RegExp re = RegExp(r'^recompile (.*)\n/path/to/main.dart\n(.*)\n$');
   expect(commands, matches(re));
   final Match match = re.firstMatch(commands);
   expect(match[1] == match[2], isTrue);

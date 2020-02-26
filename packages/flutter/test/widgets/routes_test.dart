@@ -788,6 +788,43 @@ void main() {
       expect(trainHopper2.currentTrain, isNull); // Has been disposed.
     });
 
+    testWidgets('secondary animation is triggered when pop initial route', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      Animation<double> secondaryAnimationOfRouteOne;
+      Animation<double> primaryAnimationOfRouteTwo;
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: navigator,
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+                if (settings.name == '/')
+                  secondaryAnimationOfRouteOne = secondaryAnimation;
+                else
+                  primaryAnimationOfRouteTwo = animation;
+                return const Text('Page');
+              },
+            );
+          },
+          initialRoute: '/a',
+        )
+      );
+      // The secondary animation of the bottom route should be chained with the
+      // primary animation of top most route.
+      expect(secondaryAnimationOfRouteOne.value, 1.0);
+      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
+      // Pops the top most route and verifies two routes are still chained.
+      navigator.currentState.pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 30));
+      expect(secondaryAnimationOfRouteOne.value, 0.9);
+      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
+      await tester.pumpAndSettle();
+      expect(secondaryAnimationOfRouteOne.value, 0.0);
+      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
+    });
+
     testWidgets('showGeneralDialog uses root navigator by default', (WidgetTester tester) async {
       final DialogObserver rootObserver = DialogObserver();
       final DialogObserver nestedObserver = DialogObserver();

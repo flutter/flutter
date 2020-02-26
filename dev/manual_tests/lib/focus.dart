@@ -142,7 +142,7 @@ class _FocusDemoState extends State<FocusDemo> {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    return DefaultFocusTraversal(
+    return FocusTraversalGroup(
       policy: ReadingOrderTraversalPolicy(),
       child: FocusScope(
         debugLabel: 'Scope',

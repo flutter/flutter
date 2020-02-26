@@ -62,4 +62,40 @@ void main() {
       expect(cupertinoTextSelectionControls.canSelectAll(key.currentState), false);
     });
   });
+
+  group('cupertino handles', () {
+    testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(RepaintBoundary(
+        child: CupertinoTheme(
+          data: const CupertinoThemeData(
+            primaryColor: Color(0x550000AA),
+          ),
+          child: Builder(
+            builder: (BuildContext context) {
+              return Container(
+                color: CupertinoColors.white,
+                height: 800,
+                width: 800,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 250),
+                  child: FittedBox(
+                    child: cupertinoTextSelectionControls.buildHandle(
+                      context,
+                      TextSelectionHandleType.right,
+                      10.0,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byType(RepaintBoundary),
+        matchesGoldenFile('text_selection.handle.transparent.png'),
+      );
+    });
+  });
 }

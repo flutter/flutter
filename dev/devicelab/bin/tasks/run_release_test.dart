@@ -78,8 +78,8 @@ void main() {
 
       _findNextMatcherInList(
         stdout,
-        (String line) => line.startsWith('Running Gradle task \'assembleRelease\'...'),
-        'Running Gradle task \'assembleRelease\'...',
+        (String line) => line.startsWith("Running Gradle task 'assembleRelease'..."),
+        "Running Gradle task 'assembleRelease'...",
       );
 
       _findNextMatcherInList(

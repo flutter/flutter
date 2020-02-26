@@ -29,7 +29,7 @@ void main() {
       '   No Material widget found.\n'
       '   ListTile widgets require a Material widget ancestor.\n'
       '   In material design, most widgets are conceptually "printed" on a\n'
-      '   sheet of material. In Flutter\'s material library, that material\n'
+      "   sheet of material. In Flutter's material library, that material\n"
       '   is represented by the Material widget. It is the Material widget\n'
       '   that renders ink splashes, for instance. Because of this, many\n'
       '   material library widgets require that there be a Material widget\n'
@@ -84,6 +84,13 @@ void main() {
       'debugCheckHasScaffold control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
         home: Builder(
           builder: (BuildContext context) {
             showBottomSheet<void>(context: context,
@@ -116,7 +123,7 @@ void main() {
       '   The ancestors of this widget were:\n'
       '     Semantics\n'
       '     Builder\n'
-      '     RepaintBoundary-[GlobalKey#2d465]\n'
+      '     RepaintBoundary-[GlobalKey#00000]\n'
       '     IgnorePointer\n'
       '     AnimatedBuilder\n'
       '     FadeTransition\n'
@@ -131,18 +138,19 @@ void main() {
       '     PageStorage\n'
       '     Offstage\n'
       '     _ModalScopeStatus\n'
-      '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#969b7]\n'
+      '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
+      '     _EffectiveTickerMode\n'
       '     TickerMode\n'
-      '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#545d0]\n'
+      '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'
       '     _Theatre\n'
-      '     Overlay-[LabeledGlobalKey<OverlayState>#31a52]\n'
+      '     Overlay-[LabeledGlobalKey<OverlayState>#00000]\n'
       '     _FocusMarker\n'
       '     Semantics\n'
       '     FocusScope\n'
       '     AbsorbPointer\n'
       '     _PointerListener\n'
       '     Listener\n'
-      '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#10579]\n'
+      '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
       '     IconTheme\n'
       '     IconTheme\n'
       '     _InheritedCupertinoTheme\n'
@@ -157,19 +165,22 @@ void main() {
       '     CheckedModeBanner\n'
       '     Title\n'
       '     Directionality\n'
-      '     _LocalizationsScope-[GlobalKey#a51e3]\n'
+      '     _LocalizationsScope-[GlobalKey#00000]\n'
       '     Semantics\n'
       '     Localizations\n'
       '     MediaQuery\n'
       '     _MediaQueryFromWindow\n'
-      '     DefaultFocusTraversal\n'
+      '     _FocusMarker\n'
+      '     Focus\n'
+      '     _FocusTraversalGroupMarker\n'
+      '     FocusTraversalGroup\n'
       '     Actions\n'
       '     _ShortcutsMarker\n'
       '     Semantics\n'
       '     _FocusMarker\n'
       '     Focus\n'
       '     Shortcuts\n'
-      '     WidgetsApp-[GlobalObjectKey _MaterialAppState#38e79]\n'
+      '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
       '     ScrollConfiguration\n'
       '     MaterialApp\n'
       '     [root]\n'

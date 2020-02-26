@@ -138,7 +138,7 @@ void main() {
         expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
         expect(
           project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
-          contains('new File(settingsDir.parentFile, \'.android/include_flutter.groovy\')'),
+          contains("new File(settingsDir.parentFile, '.android/include_flutter.groovy')"),
         );
       });
       testInMemory('can be redone after deletion', () async {
@@ -225,6 +225,20 @@ void main() {
       testUsingContext('injects plugins for Windows', () async {
         final FlutterProject project = await someProject();
         project.windows.managedDirectory.createSync(recursive: true);
+        project.windows.solutionFile.createSync(recursive: true);
+        // Just enough solution file to allow injection to pass.
+        // TODO(stuartmorgan): Consider allowing injecting a mock solution util
+        // class into the test environment instead.
+        project.windows.solutionFile.writeAsStringSync('''
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Runner", "Runner.vcxproj", "{3842E94C-E348-463A-ADBE-625A2B69B628}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6419BF13-6ECD-4CD2-9E85-E566A1F03F8F} = {6419BF13-6ECD-4CD2-9E85-E566A1F03F8F}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+	EndGlobalSection
+EndGlobal''');
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
@@ -388,7 +402,7 @@ apply plugin: 'kotlin-android'
               });
             }
         );
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
 
@@ -403,7 +417,7 @@ apply plugin: 'kotlin-android'
             });
           }
         );
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
       });
       testWithMocks('empty surrounded by quotes', () async {
@@ -423,7 +437,7 @@ apply plugin: 'kotlin-android'
       testWithMocks('surrounded by single quotes', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
@@ -442,7 +456,7 @@ apply plugin: 'kotlin-android'
       testInMemory('is populated from iOS bundle identifier', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
         expect(await project.organizationNames, <String>['io.flutter']);
       });
@@ -457,7 +471,7 @@ apply plugin: 'kotlin-android'
       testInMemory('is populated from iOS bundle identifier in plugin example', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.example.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
+          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
         });
         expect(await project.organizationNames, <String>['io.flutter']);
       });

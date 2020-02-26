@@ -40,7 +40,7 @@ import 'theme_data.dart';
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ![RadioListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile.png)
 ///
@@ -92,7 +92,7 @@ import 'theme_data.dart';
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ![Radio list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_semantics.png)
 ///
@@ -196,7 +196,7 @@ import 'theme_data.dart';
 /// combining [Radio] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// ![Custom radio list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_custom.png)
 ///

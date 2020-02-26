@@ -85,7 +85,7 @@ Future<bool> run(List<String> arguments) async {
       if (parsedArguments.rest.isEmpty) {
         print('Error: No file arguments specified.');
       } else if (files.isEmpty) {
-        print('Error: File arguments ("${parsedArguments.rest.join("\", \"")}") did not identify any real files.');
+        print('Error: File arguments ("${parsedArguments.rest.join('", "')}") did not identify any real files.');
       }
     }
     return help;
@@ -173,7 +173,11 @@ Future<bool> run(List<String> arguments) async {
     } finally {
       if (verbose)
         print('Deleting temporary directory...');
-      checkout.deleteSync(recursive: true);
+      try {
+        checkout.deleteSync(recursive: true);
+      } on FileSystemException {
+        print('Failed to delete "${checkout.path}".');
+      }
     }
     if (verbose)
       print('');
@@ -255,9 +259,9 @@ class TestFile {
   const TestFile._(this.contacts, this.fetch, this.update, this.tests);
 
   // (e-mail regexp from HTML standard)
-  static final RegExp _email = RegExp(r'''^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$''');
-  static final RegExp _fetch1 = RegExp(r'^git clone https://github.com/[-a-zA-Z0-9]+/[-_a-zA-Z0-9]+.git tests$');
-  static final RegExp _fetch2 = RegExp(r'^git -C tests checkout [0-9a-f]+$');
+  static final RegExp _email = RegExp(r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
+  static final RegExp _fetch1 = RegExp(r'^git(?: -c core.longPaths=true)? clone https://github.com/[-a-zA-Z0-9]+/[-_a-zA-Z0-9]+.git tests$');
+  static final RegExp _fetch2 = RegExp(r'^git(?: -c core.longPaths=true)? -C tests checkout [0-9a-f]+$');
 
   final List<String> contacts;
   final List<String> fetch;
@@ -272,7 +276,7 @@ Future<bool> shell(String command, Directory directory, { bool verbose = false, 
     print('>> $command');
   Process process;
   if (Platform.isWindows) {
-    process = await Process.start('CMD.EXE', <String>['/S', '/C', '$command'], workingDirectory: directory.path);
+    process = await Process.start('CMD.EXE', <String>['/S', '/C', command], workingDirectory: directory.path);
   } else {
     final List<String> segments = command.trim().split(_spaces);
     process = await Process.start(segments.first, segments.skip(1).toList(), workingDirectory: directory.path);

@@ -97,8 +97,11 @@ class ChromeLauncher {
   /// `headless` defaults to false, and controls whether we open a headless or
   /// a `headfull` browser.
   ///
+  /// `debugPort` is Chrome's debugging protocol port. If null, a random free
+  /// port is picked automatically.
+  ///
   /// `skipCheck` does not attempt to make a devtools connection before returning.
-  Future<Chrome> launch(String url, { bool headless = false, bool skipCheck = false, Directory dataDir }) async {
+  Future<Chrome> launch(String url, { bool headless = false, int debugPort, bool skipCheck = false, Directory dataDir }) async {
     // This is a JSON file which contains configuration from the
     // browser session, such as window position. It is located
     // under the Chrome data-dir folder.
@@ -117,7 +120,7 @@ class ChromeLauncher {
       }
     }
 
-    final int port = await globals.os.findFreePort();
+    final int port = debugPort ?? await globals.os.findFreePort();
     final List<String> args = <String>[
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
@@ -135,9 +138,8 @@ class ChromeLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      '--window-size=2400,1800',
       if (headless)
-        ...<String>['--headless', '--disable-gpu', '--no-sandbox'],
+        ...<String>['--headless', '--disable-gpu', '--no-sandbox', '--window-size=2400,1800'],
       url,
     ];
 
@@ -158,17 +160,24 @@ class ChromeLauncher {
       }));
     }
 
+    process.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen((String line) {
+        globals.printTrace('[CHROME]: $line');
+      });
+
     // Wait until the DevTools are listening before trying to connect.
     await process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-          return 'Failed to spawn stderr';
-        })
-        .timeout(const Duration(seconds: 60), onTimeout: () {
-          throwToolExit('Unable to connect to Chrome DevTools.');
-          return null;
-        });
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .map((String line) {
+        globals.printTrace('[CHROME]:$line');
+        return line;
+      })
+      .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
+        return 'Failed to spawn stderr';
+      });
     final Uri remoteDebuggerUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
     return _connect(Chrome._(
       port,
