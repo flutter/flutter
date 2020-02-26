@@ -73,7 +73,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
-        const WebValidator(),
+        WebValidator(
+          chromeLauncher: globals.chromeLauncher,
+          platform: globals.platform,
+          fileSystem: globals.fs,
+        ),
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(),
       if (windowsWorkflow.appliesToHostPlatform)

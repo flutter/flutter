@@ -158,7 +158,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String icudtlPath,
     Directory coverageDirectory,
     bool web = false,
-    String randomSeed = '0',
+    String randomSeed,
   }) async {
     lastEnableObservatoryValue = enableObservatory;
     return exitCode;

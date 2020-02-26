@@ -279,6 +279,7 @@ class RenderFlow extends RenderBox
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     size = _getSize(constraints);
     int i = 0;
     _randomAccessChildren.clear();
