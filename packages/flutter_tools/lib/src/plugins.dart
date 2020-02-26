@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -23,8 +22,8 @@ import 'windows/property_sheet.dart';
 import 'windows/visual_studio_solution_utils.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
-  final String renderedTemplate =
-     mustache.Template(template, htmlEscapeValues: false).renderString(context);
+  final String renderedTemplate = globals.templateRenderer
+    .renderString(template, context, htmlEscapeValues: false);
   final File file = globals.fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);

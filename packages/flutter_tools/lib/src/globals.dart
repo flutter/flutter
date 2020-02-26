@@ -17,6 +17,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
+import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'cache.dart';
@@ -148,3 +149,6 @@ final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
 
 /// The global Stdio wrapper.
 Stdio get stdio => context.get<Stdio>() ?? const Stdio();
+
+/// The global template renderer
+TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();
