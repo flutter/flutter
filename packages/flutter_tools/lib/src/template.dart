@@ -6,6 +6,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
 import 'globals.dart' as globals;
+import 'package:mustache/mustache.dart' as m;
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All other
@@ -48,6 +49,9 @@ class Template {
       }
     }
   }
+
+  /// Forcing package usage for frob.
+  m.Template mTemplate;
 
   factory Template.fromName(String name) {
     // All named templates are placed in the 'templates' directory
