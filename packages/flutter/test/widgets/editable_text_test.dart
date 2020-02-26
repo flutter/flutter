@@ -2971,16 +2971,11 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-<<<<<<< HEAD
-      final List<FadeTransition> transitions =
-        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-=======
       final List<FadeTransition> transitions = find.descendant(
         of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
         matching: find.byType(FadeTransition),
       ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
       expect(transitions.length, 2);
->>>>>>> 55072246d013f1b8913a6f6d97d3e5a4a912557b
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
 
