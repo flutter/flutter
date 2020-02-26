@@ -629,6 +629,16 @@ abstract class ResidentRunner {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
+    // TODO(jonahwilliams): this is a temporary work around to regain some of
+    // the initialize from dill performance. Longer term, we should have a
+    // better way to determine where the appropriate dill file is, as this
+    // doesn't work for Android or macOS builds.}
+    if (dillOutputPath == null) {
+      final File existingDill = globals.fs.file(globals.fs.path.join('build', 'app.dill'));
+      if (existingDill.existsSync()) {
+        existingDill.copySync(globals.fs.path.join(artifactDirectory.path, 'app.dill'));
+      }
+    }
   }
 
   @protected
