@@ -9,7 +9,30 @@ import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
 
+/// Provides access to Android APIs involving system gestures.
+///
+/// Starting from Android 10, Android users can enable system gesture
+/// navigation, reserving the edges of the device's screen
+/// for system level gestures. These APIs provide a way to resolve
+/// gesture conflicts and receive system gesture information from the
+/// device.
 class SystemGestures {
+  /// Sets system gesture exclusion rectangles for Android devices.
+  ///
+  /// Sets a list of [Rect]s within the application where the system should not
+  /// intercept touch or other pointing device gestures. A sample use-case for
+  /// this API is an image editing app with drag handles to crop an image. A
+  /// developer may want to set exclusion rects where the drag handles are if
+  /// they get too close to the edges of the screen.
+  ///
+  /// While this gesture exclusions API can fix gesture conflicts for some
+  /// applications, it is better to avoid using this API if possible. Using
+  /// this API can cause confusion for users who expect a swipe from the
+  /// edge of the screen to perform a system action. Hence, this API is meant
+  /// to be an escape hatch there is no alternative.
+  ///
+  /// The [devicePixelRatio] must not be null, and is typically received by
+  /// calling MediaQuery.of(context).devicePixelRatio.
   static Future<void> setSystemGestureExclusionRects({
     @required List<Rect> rects,
     @required double devicePixelRatio,
@@ -48,6 +71,14 @@ class SystemGestures {
     return <Map<String, int>>[];
   }
 
+  /// Gets system gesture exclusion rectangles for Android devices.
+  ///
+  /// Receives a list of [Rect]s within the application where the system will
+  /// not intercept touch or other pointing device gestures. It returns an
+  /// empty list if no system gesture exclusion rects have been set.
+  ///
+  /// The [devicePixelRatio] must not be null, and is typically received by
+  /// calling MediaQuery.of(context).devicePixelRatio.
   static Future<List<Rect>> getSystemGestureExclusionRects({
     @required double devicePixelRatio,
   }) async {
