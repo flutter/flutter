@@ -71,14 +71,14 @@ void main() {
       );
     }
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.android);
+    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
     expect(findZoomPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findZoomPageTransition(), findsOneWidget);
-  });
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('pageTransitionsTheme override builds a _FadeUpwardsTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
