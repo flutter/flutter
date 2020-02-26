@@ -274,7 +274,7 @@ abstract class AotElfBase extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
-    final String dartObfuscationInfo = environment.defines[kDartObfuscation];
+    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
@@ -284,7 +284,7 @@ abstract class AotElfBase extends Target {
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       splitDebugInfo: splitDebugInfo,
-      dartObfuscationInfo: dartObfuscationInfo,
+      dartObfuscation: dartObfuscation,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

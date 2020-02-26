@@ -344,8 +344,8 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.buildInfo.treeShakeIcons) {
     command.add('-Ptree-shake-icons=true');
   }
-  if (androidBuildInfo.buildInfo.dartObfuscation != null) {
-    command.add('-Pdart-obfuscation=${androidBuildInfo.buildInfo.dartObfuscation}');
+  if (androidBuildInfo.buildInfo.dartObfuscation) {
+    command.add('-Pdart-obfuscation=true');
   }
   command.add(assembleTask);
 

@@ -319,6 +319,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  android_obfuscate_test:
+    description: >
+      Builds an obfuscated APK and verifies a dart identifier cannot be found
+    stage: devicelab
+    flaky: true
+    required_agent_capabilities: ["linux/android"]
+
   complex_layout_semantics_perf:
     description: >
       Measures duration of building the initial semantics tree.
@@ -389,6 +396,13 @@ tasks:
     required_agent_capabilities: ["linux/android"]
 
   # iOS on-device tests
+
+  ios_obfuscate_test:
+    description: >
+      Builds an obfuscated APK and verifies a dart identifier cannot be found
+    stage: devicelab
+    flaky: true
+    required_agent_capabilities: ["mac/ios"]
 
   tiles_scroll_perf_ios__timeline_summary:
     description: >

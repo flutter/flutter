@@ -607,9 +607,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('split-debug-info')) {
             splitDebugInfoValue = project.property('split-debug-info')
         }
-        String dartObfuscationValue = null
+        Boolean dartObfuscationValue = false
         if (project.hasProperty('dart-obfuscation')) {
-            dartObfuscationValue = project.property('dart-obfuscation')
+            dartObfuscationValue = project.property('dart-obfuscation').toBoolean();
         }
         Boolean treeShakeIconsOptionsValue = false
         if (project.hasProperty('tree-shake-icons')) {
@@ -798,7 +798,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean treeShakeIcons
     @Optional @Input
-    String dartObfuscation
+    Boolean dartObfuscation
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -861,8 +861,8 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (treeShakeIcons == true) {
                 args "-dTreeShakeIcons=true"
             }
-            if (dartObfuscation != null) {
-                args "-dDartObfuscation=${dartObfuscation}"
+            if (dartObfuscation == true) {
+                args "-dDartObfuscation=true"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
