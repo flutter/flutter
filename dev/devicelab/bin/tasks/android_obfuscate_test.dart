@@ -19,7 +19,8 @@ Future<void> main() async {
           await flutter('build', options: <String>[
             'apk',
             '--target-platform=android-arm',
-            '--obfuscate'
+            '--obfuscate',
+            '--split-debug-info=foo/',
           ]);
         });
         final String outputDirectory = path.join(

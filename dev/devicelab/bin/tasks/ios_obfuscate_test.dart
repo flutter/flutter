@@ -20,7 +20,8 @@ Future<void> main() async {
           await flutter('build', options: <String>[
             'ios',
             '--release',
-            '--obfuscate'
+            '--obfuscate',
+            '--split-debug-info=foo/',
           ]);
         });
         final String outputFramework = path.join(

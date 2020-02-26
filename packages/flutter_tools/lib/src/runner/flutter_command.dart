@@ -398,7 +398,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(FlutterOptions.kDartObfuscationOption,
       help: 'In a release build, this flag removes identifiers and replaces them '
         'with randomized values for the purposes of source code obfuscation. This '
-        'flag should always be combined with "--split-debug-info" option, the '
+        'flag must always be combined with "--split-debug-info" option, the '
         'mapping between the values and the original identifiers is stored in the '
         'symbol map created in the specified directory. For an app built with this '
         'flag, the \'flutter symbolize\' command with the right program '
@@ -496,6 +496,10 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  /// Compute the [BuildInfo] for the current flutter command.
+  ///
+  /// Throws a [ToolExit] if the current set of options is not compatible with
+  /// eachother.
   BuildInfo getBuildInfo() {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
@@ -520,6 +524,20 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    final bool dartObfuscation = argParser.options.containsKey(FlutterOptions.kDartObfuscationOption)
+      && boolArg(FlutterOptions.kDartObfuscationOption);
+
+    final String splitDebugInfoPath = argParser.options.containsKey(FlutterOptions.kSplitDebugInfoOption)
+      ? stringArg(FlutterOptions.kSplitDebugInfoOption)
+      : null;
+
+    if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
+      throwToolExit(
+        '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
+        'combination with "--${FlutterOptions.kSplitDebugInfoOption}"',
+      );
+    }
+
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? stringArg('flavor')
@@ -539,14 +557,11 @@ abstract class FlutterCommand extends Command<void> {
       buildName: argParser.options.containsKey('build-name')
           ? stringArg('build-name')
           : null,
-      splitDebugInfoPath: argParser.options.containsKey(FlutterOptions.kSplitDebugInfoOption)
-          ? stringArg(FlutterOptions.kSplitDebugInfoOption)
-          : null,
       treeShakeIcons: argParser.options.containsKey('tree-shake-icons')
           ? boolArg('tree-shake-icons')
           : kIconTreeShakerEnabledDefault,
-      dartObfuscation: argParser.options.containsKey(FlutterOptions.kDartObfuscationOption)
-          && boolArg(FlutterOptions.kDartObfuscationOption)
+      splitDebugInfoPath: splitDebugInfoPath,
+      dartObfuscation: dartObfuscation,
     );
   }
 
