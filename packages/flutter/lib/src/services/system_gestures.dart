@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
 
-class SystemGesture {
+class SystemGestures {
   static Future<void> setSystemGestureExclusionRects({
     @required List<Rect> rects,
     @required double devicePixelRatio,
