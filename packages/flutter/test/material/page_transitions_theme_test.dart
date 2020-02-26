@@ -21,7 +21,7 @@ void main() {
     }
   });
 
-  testWidgets('Default PageTranstionsTheme builds a CupertionPageTransition', (WidgetTester tester) async {
+  testWidgets('Default PageTransitionsTheme builds a CupertionPageTransition', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: FlatButton(

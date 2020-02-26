@@ -1683,7 +1683,6 @@ Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDir
 }
 
 double _getOpacity(WidgetTester tester, String textValue) {
-  // debugDumpApp();
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
       find.ancestor(
         of: find.text(textValue),
