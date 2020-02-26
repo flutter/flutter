@@ -111,14 +111,14 @@ void main() {
       );
     }
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.android);
+    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
     expect(findFadeUpwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findFadeUpwardsPageTransition(), findsOneWidget);
-  });
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('pageTransitionsTheme override builds a _OpenUpwardsPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
