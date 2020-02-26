@@ -101,7 +101,13 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
-      ChromeLauncher: () => const ChromeLauncher(),
+      ChromeLauncher: () => ChromeLauncher(
+        fileSystem: globals.fs,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+      ),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => Config(

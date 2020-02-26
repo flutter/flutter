@@ -26,6 +26,7 @@ import 'ios/mac.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'version.dart';
+import 'web/chrome.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
 Cache get cache => context.get<Cache>();
@@ -149,6 +150,9 @@ final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
 
 /// The global Stdio wrapper.
 Stdio get stdio => context.get<Stdio>() ?? const Stdio();
+
+/// The [ChromeLauncher] instance.
+ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 
 /// The global template renderer
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();
