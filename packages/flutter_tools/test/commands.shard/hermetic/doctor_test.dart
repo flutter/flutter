@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -66,6 +67,19 @@ void main() {
       expect(message.message, contains('Flutter plugin version 0.1.3'));
       expect(message.message, contains('recommended minimum version'));
     }, overrides: noColorTerminalOverride);
+
+    testUsingContext('intellij plugins path checking on mac', () async {
+      final String pathViaToolbox = globals.fs.path.join('test', 'data', 'intellij', 'mac_via_toolbox');
+      final String pathNotViaToolbox = globals.fs.path.join('test', 'data', 'intellij', 'mac_not_via_toolbox');
+
+      final IntelliJValidatorOnMac validatorViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathViaToolbox);
+      expect(validatorViaToolbox.plistFile, 'test/data/intellij/mac_via_toolbox/Contents/Info.plist');
+
+      final IntelliJValidatorOnMac validatorNotViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathNotViaToolbox);
+      expect(validatorNotViaToolbox.plistFile, 'test/data/intellij/mac_not_via_toolbox/Contents/Info.plist');
+    }, overrides: <Type, Generator>{
+      PlistParser: () => const PlistParser(),
+    });
 
     testUsingContext('vs code validator when both installed', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
