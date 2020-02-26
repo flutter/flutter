@@ -1257,7 +1257,6 @@ class _RenderDecoration extends RenderBox {
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
     _labelTransform = null;
     final _RenderDecorationLayout layout = _layout(constraints);
 

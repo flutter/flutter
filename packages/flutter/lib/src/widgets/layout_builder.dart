@@ -238,7 +238,6 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
     layoutAndBuildChild();
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);

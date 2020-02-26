@@ -63,7 +63,6 @@ class RenderListBody extends RenderBox
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
     assert(() {
       switch (mainAxis) {
         case Axis.horizontal:

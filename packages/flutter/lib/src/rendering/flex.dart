@@ -636,8 +636,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   void performLayout() {
     assert(_debugHasNecessaryDirections);
-    final BoxConstraints constraints = this.constraints;
-
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlex = 0;
     int totalChildren = 0;

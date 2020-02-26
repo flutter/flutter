@@ -1540,7 +1540,6 @@ class _RenderCupertinoDialogActions extends RenderBox
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
     if (_isSingleButtonRow(dialogWidth)) {
       if (childCount == 1) {
         // We have 1 button. Our size is the width of the dialog and the height
