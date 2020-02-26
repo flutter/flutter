@@ -9,5 +9,6 @@ void main() {
   test('defines match expectations per platform', () {
     expect(kIsWeb, !const bool.fromEnvironment('dart.library.io'));
     expect(kIsWeb, !const bool.fromEnvironment('dart.library.isolate'));
+    expect(kIsWeb, const bool.fromEnvironment('dart.library.html'));
   });
 }
