@@ -104,7 +104,10 @@ void main() {
         await longPressDrag(
           tester,
           tester.getCenter(find.text('Item 4')),
-          tester.getCenter(find.text('Item 1')),
+          // the list item needs to be dragged a good amout above the first item
+          // so that it reaches the finalDropArea otherwise the bug described 
+          // in https://github.com/flutter/flutter/issues/51359 doesn't happen
+          tester.getCenter(find.text('Item 1')) - const Offset(0, itemHeight * 2),
         );
         expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
       });
