@@ -13,6 +13,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'input_border.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
@@ -496,6 +497,9 @@ class _Decoration {
     @required this.floatingLabelProgress,
     this.border,
     this.borderGap,
+    this.alignLabelWithHint,
+    this.isDense,
+    this.visualDensity,
     this.icon,
     this.input,
     this.label,
@@ -507,8 +511,6 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
-    this.alignLabelWithHint,
-    this.isDense,
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
@@ -522,6 +524,7 @@ class _Decoration {
   final _InputBorderGap borderGap;
   final bool alignLabelWithHint;
   final bool isDense;
+  final VisualDensity visualDensity;
   final Widget icon;
   final Widget input;
   final Widget label;
@@ -542,10 +545,14 @@ class _Decoration {
       return false;
     return other is _Decoration
         && other.contentPadding == contentPadding
+        && other.isCollapsed == isCollapsed
         && other.floatingLabelHeight == floatingLabelHeight
         && other.floatingLabelProgress == floatingLabelProgress
         && other.border == border
         && other.borderGap == borderGap
+        && other.alignLabelWithHint == alignLabelWithHint
+        && other.isDense == isDense
+        && other.visualDensity == visualDensity
         && other.icon == icon
         && other.input == input
         && other.label == label
@@ -556,8 +563,7 @@ class _Decoration {
         && other.suffixIcon == suffixIcon
         && other.helperError == helperError
         && other.counter == counter
-        && other.container == container
-        && other.alignLabelWithHint == alignLabelWithHint;
+        && other.container == container;
   }
 
   @override
@@ -568,6 +574,9 @@ class _Decoration {
       floatingLabelProgress,
       border,
       borderGap,
+      alignLabelWithHint,
+      isDense,
+      visualDensity,
       icon,
       input,
       label,
@@ -579,7 +588,6 @@ class _Decoration {
       helperError,
       counter,
       container,
-      alignLabelWithHint,
     );
   }
 }
@@ -1045,6 +1053,7 @@ class _RenderDecoration extends RenderBox {
     );
 
     // Calculate the height of the input text container.
+    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     final double prefixIconHeight = prefixIcon == null ? 0 : prefixIcon.size.height;
     final double suffixIconHeight = suffixIcon == null ? 0 : suffixIcon.size.height;
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
@@ -1055,12 +1064,13 @@ class _RenderDecoration extends RenderBox {
       + fixAboveInput
       + inputHeight
       + fixBelowInput
-      + contentPadding.bottom,
+      + contentPadding.bottom
+      + densityOffset.dy,
     );
     final double minContainerHeight = decoration.isDense || expands
       ? 0.0
-      : kMinInteractiveDimension;
-    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
+      : kMinInteractiveDimension + densityOffset.dy;
+    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight + densityOffset.dy;
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
@@ -1096,7 +1106,7 @@ class _RenderDecoration extends RenderBox {
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy / 2.0;
 
     // The three main alignments for the baseline when an outline is present are
     //
@@ -2201,9 +2211,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
-          constraints: decoration.prefixIconConstraints ?? const BoxConstraints(
-            minWidth: kMinInteractiveDimension,
-            minHeight: kMinInteractiveDimension,
+          constraints: decoration.prefixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
+            const BoxConstraints(
+              minWidth: kMinInteractiveDimension,
+              minHeight: kMinInteractiveDimension,
+            ),
           ),
           child: IconTheme.merge(
             data: IconThemeData(
@@ -2220,9 +2232,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
-          constraints: decoration.suffixIconConstraints ?? const BoxConstraints(
-            minWidth: kMinInteractiveDimension,
-            minHeight: kMinInteractiveDimension,
+          constraints: decoration.suffixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
+            const BoxConstraints(
+              minWidth: kMinInteractiveDimension,
+              minHeight: kMinInteractiveDimension,
+            ),
           ),
           child: IconTheme.merge(
             data: IconThemeData(
@@ -2300,11 +2314,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         floatingLabelProgress: _floatingLabelController.value,
         border: border,
         borderGap: _borderGap,
+        alignLabelWithHint: decoration.alignLabelWithHint,
+        isDense: decoration.isDense,
+        visualDensity: themeData.visualDensity,
         icon: icon,
         input: widget.child,
         label: label,
-        alignLabelWithHint: decoration.alignLabelWithHint,
-        isDense: decoration.isDense,
         hint: hint,
         prefix: prefix,
         suffix: suffix,
