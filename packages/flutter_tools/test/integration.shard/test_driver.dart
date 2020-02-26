@@ -679,7 +679,6 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       'test',
       '--disable-service-auth-codes',
       '--machine',
-      '--start-paused',
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile, beforeStart: beforeStart);
   }
 
