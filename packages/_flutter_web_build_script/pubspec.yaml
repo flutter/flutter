@@ -20,7 +20,7 @@ dependencies:
   dart_style: 1.3.3
   code_builder: 3.2.1
   build: 1.2.2
-  build_modules: 2.8.0
+  build_modules: 2.8.1
   build_daemon: 2.1.3
   build_web_compilers: 2.9.0
 
@@ -95,4 +95,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 158e
+# PUBSPEC CHECKSUM: 5b8f

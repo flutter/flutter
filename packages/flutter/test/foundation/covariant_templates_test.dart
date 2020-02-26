@@ -18,6 +18,6 @@ void main() {
     final A<X> ayAsAx = ay;
     expect(() {
       ayAsAx.u = X();
-    }, throwsAssertionError);
+    }, throwsA(isA<TypeError>()));
   });
 }

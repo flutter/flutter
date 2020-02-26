@@ -218,7 +218,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// Some subtypes of [ScrollView] can infer this value automatically. For
   /// example [ListView] will use the number of widgets in the child list,
-  /// while the [new ListView.separated] constructor will use half that amount.
+  /// while the [ListView.separated] constructor will use half that amount.
   ///
   /// For [CustomScrollView] and other types which do not receive a builder
   /// or list of widgets, the child count must be explicitly provided. If the
@@ -415,11 +415,11 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// This semantic index is not necessarily the same as the index of the widget in
 /// the scrollable, because some widgets may not contribute semantic
-/// information. Consider a [new ListView.separated()]: every other widget is a
+/// information. Consider a [ListView.separated]: every other widget is a
 /// divider with no semantic information. In this case, only odd numbered
 /// widgets have a semantic index (equal to the index ~/ 2). Furthermore, the
 /// total number of children in this example would be half the number of
-/// widgets. (The [new ListView.separated()] constructor handles this
+/// widgets. (The [ListView.separated] constructor handles this
 /// automatically; this is only used here as an example.)
 ///
 /// The total number of visible children can be provided by the constructor
@@ -443,7 +443,7 @@ abstract class ScrollView extends StatelessWidget {
 class CustomScrollView extends ScrollView {
   /// Creates a [ScrollView] that creates custom scroll effects using slivers.
   ///
-  /// See the [new ScrollView] constructor for more details on these arguments.
+  /// See the [ScrollView] constructor for more details on these arguments.
   const CustomScrollView({
     Key key,
     Axis scrollDirection = Axis.vertical,
@@ -768,9 +768,9 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// The [childrenDelegate] property on [ListView] corresponds to the
 /// [SliverList.delegate] (or [SliverFixedExtentList.delegate]) property. The
-/// [new ListView] constructor's `children` argument corresponds to the
+/// [ListView] constructor's `children` argument corresponds to the
 /// [childrenDelegate] being a [SliverChildListDelegate] with that same
-/// argument. The [new ListView.builder] constructor's `itemBuilder` and
+/// argument. The [ListView.builder] constructor's `itemBuilder` and
 /// `itemCount` arguments correspond to the [childrenDelegate] being a
 /// [SliverChildBuilderDelegate] with the equivalent arguments.
 ///
@@ -849,8 +849,8 @@ class ListView extends BoxScrollView {
   /// child that could possibly be displayed in the list view instead of just
   /// those children that are actually visible.
   ///
-  /// It is usually more efficient to create children on demand using [new
-  /// ListView.builder].
+  /// It is usually more efficient to create children on demand using
+  /// [ListView.builder].
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
@@ -911,9 +911,9 @@ class ListView extends BoxScrollView {
   /// The `itemBuilder` should actually create the widget instances when called.
   /// Avoid using a builder that returns a previously-constructed widget; if the
   /// list view's children are created in advance, or all at once when the
-  /// [ListView] itself is created, it is more efficient to use [new ListView].
-  /// Even more efficient, however, is to create the instances on demand using
-  /// this constructor's `itemBuilder` callback.
+  /// [ListView] itself is created, it is more efficient to use the [ListView]
+  /// constructor. Even more efficient, however, is to create the instances on
+  /// demand using this constructor's `itemBuilder` callback.
   ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
@@ -987,7 +987,7 @@ class ListView extends BoxScrollView {
   /// widget instances when called. Avoid using a builder that returns a
   /// previously-constructed widget; if the list view's children are created in
   /// advance, or all at once when the [ListView] itself is created, it is more
-  /// efficient to use [new ListView].
+  /// efficient to use the [ListView] constructor.
   ///
   /// {@tool snippet}
   ///
@@ -1266,17 +1266,17 @@ class ListView extends BoxScrollView {
 /// [SliverGrid.delegate] property, and the [gridDelegate] property on the
 /// [GridView] corresponds to the [SliverGrid.gridDelegate] property.
 ///
-/// The [new GridView], [new GridView.count], and [new GridView.extent]
+/// The [GridView], [GridView.count], and [GridView.extent]
 /// constructors' `children` arguments correspond to the [childrenDelegate]
-/// being a [SliverChildListDelegate] with that same argument. The [new
-/// GridView.builder] constructor's `itemBuilder` and `childCount` arguments
+/// being a [SliverChildListDelegate] with that same argument. The
+/// [GridView.builder] constructor's `itemBuilder` and `childCount` arguments
 /// correspond to the [childrenDelegate] being a [SliverChildBuilderDelegate]
 /// with the matching arguments.
 ///
-/// The [new GridView.count] and [new GridView.extent] constructors create
+/// The [GridView.count] and [GridView.extent] constructors create
 /// custom grid delegates, and have equivalently named constructors on
-/// [SliverGrid] to ease the transition: [new SliverGrid.count] and [new
-/// SliverGrid.extent] respectively.
+/// [SliverGrid] to ease the transition: [SliverGrid.count] and
+/// [SliverGrid.extent] respectively.
 ///
 /// The [padding] property corresponds to having a [SliverPadding] in the
 /// [CustomScrollView.slivers] property instead of the grid itself, and having
@@ -1564,7 +1564,7 @@ class GridView extends BoxScrollView {
   ///
   /// See also:
   ///
-  ///  * [new SliverGrid.count], the equivalent constructor for [SliverGrid].
+  ///  * [SliverGrid.count], the equivalent constructor for [SliverGrid].
   GridView.count({
     Key key,
     Axis scrollDirection = Axis.vertical,
@@ -1624,7 +1624,7 @@ class GridView extends BoxScrollView {
   ///
   /// See also:
   ///
-  ///  * [new SliverGrid.extent], the equivalent constructor for [SliverGrid].
+  ///  * [SliverGrid.extent], the equivalent constructor for [SliverGrid].
   GridView.extent({
     Key key,
     Axis scrollDirection = Axis.vertical,

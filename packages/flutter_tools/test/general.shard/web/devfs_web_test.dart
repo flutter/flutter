@@ -87,8 +87,9 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
 
     expect(response.headers, allOf(<Matcher>[
-      containsPair('content-length', source.lengthSync().toString()),
-      containsPair('content-type', 'application/javascript'),
+      containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
+      containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
+      containsPair(HttpHeaders.etagHeader, isNotNull)
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
@@ -102,10 +103,28 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
 
     expect(response.headers, allOf(<Matcher>[
-      containsPair('content-length', '9'),
-      containsPair('content-type', 'application/javascript'),
+      containsPair(HttpHeaders.contentLengthHeader, '9'),
+      containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
+      containsPair(HttpHeaders.etagHeader, isNotNull),
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
     ]));
     expect((await response.read().toList()).first, utf8.encode('main() {}'));
+  }));
+
+  test('Returns notModified when the ifNoneMatch header matches the etag', () => testbed.run(() async {
+    webAssetServer.writeFile('/foo.js', 'main() {}');
+
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
+    final String etag = response.headers[HttpHeaders.etagHeader];
+
+    final Response cachedResponse = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js'), headers: <String, String>{
+        HttpHeaders.ifNoneMatchHeader: etag
+      }));
+
+    expect(cachedResponse.statusCode, HttpStatus.notModified);
+    expect(await cachedResponse.read().toList(), isEmpty);
   }));
 
   test('handles missing JavaScript files from in memory cache', () => testbed.run(() async {
@@ -141,8 +160,10 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://localhost/foo.js')));
 
     expect(response.headers, allOf(<Matcher>[
-      containsPair('content-length', source.lengthSync().toString()),
-      containsPair('content-type', 'application/javascript'),
+      containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
+      containsPair(HttpHeaders.contentTypeHeader, 'application/javascript'),
+      containsPair(HttpHeaders.etagHeader, isNotNull),
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{
@@ -157,8 +178,10 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/abcd%25E8%25B1%25A1%25E5%25BD%25A2%25E5%25AD%2597.png')));
 
     expect(response.headers, allOf(<Matcher>[
-      containsPair('content-length', source.lengthSync().toString()),
-      containsPair('content-type', 'image/png'),
+      containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
+      containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
+      containsPair(HttpHeaders.etagHeader, isNotNull),
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -171,8 +194,10 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo.png')));
 
     expect(response.headers, allOf(<Matcher>[
-      containsPair('content-length', source.lengthSync().toString()),
-      containsPair('content-type', 'image/png'),
+      containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
+      containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
+      containsPair(HttpHeaders.etagHeader, isNotNull),
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type,  Generator>{
@@ -187,7 +212,7 @@ void main() {
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.dart')));
 
-    expect(response.headers, containsPair('content-length', source.lengthSync().toString()));
+    expect(response.headers, containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type,  Generator>{
     Platform: () => linux,
@@ -209,8 +234,8 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo.png')));
 
     expect(response.headers, allOf(<Matcher>[
-      containsPair('content-length', source.lengthSync().toString()),
-      containsPair('content-type', 'image/png'),
+      containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
+      containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -224,8 +249,8 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo')));
 
     expect(response.headers, allOf(<Matcher>[
-      containsPair('content-length', '100'),
-      containsPair('content-type', 'application/octet-stream'),
+      containsPair(HttpHeaders.contentLengthHeader, '100'),
+      containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -239,8 +264,8 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/foo')));
 
     expect(response.headers, allOf(<Matcher>[
-      containsPair('content-length', '3'),
-      containsPair('content-type', 'application/octet-stream'),
+      containsPair(HttpHeaders.contentLengthHeader, '3'),
+      containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
@@ -264,8 +289,8 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http:///packages/flutter_tools/foo.dart')));
 
     expect(response.headers, allOf(<Matcher>[
-      containsPair('content-length', '3'),
-      containsPair('content-type', 'application/octet-stream'),
+      containsPair(HttpHeaders.contentLengthHeader, '3'),
+      containsPair(HttpHeaders.contentTypeHeader, 'application/octet-stream'),
     ]));
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
