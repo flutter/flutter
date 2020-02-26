@@ -93,7 +93,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final IOSProjectMigration migration = IOSProjectMigration(app.project, globals.logger);
-  migration.run();
+  migration.migrate();
 
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {

@@ -6,9 +6,9 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../project.dart';
 
-// Return null if line should be deleted.
-typedef _ProjectFileLineProcessor = String Function(String line);
-
+/// iOS project is generated from a template on Flutter project creation.
+/// Sometimes (due to behavior changes in Xcode, CocoaPods, etc) these files need to be altered
+/// from the original template.
 class IOSProjectMigration {
   IOSProjectMigration(IosProject project, Logger logger) :
         _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
@@ -19,7 +19,8 @@ class IOSProjectMigration {
   final File _podfile;
   final Logger _logger;
 
-  void run() {
+  /// Inspect [project] for necessary migrations and rewrite files as needed.
+  void migrate() {
     _migrateXcodeProjectInfoFile();
     _migratePodfile();
   }
@@ -109,7 +110,8 @@ class IOSProjectMigration {
     });
   }
 
-  void _processFileLines(File file, _ProjectFileLineProcessor processLine) {
+  /// [processLine] should return null if the line should be deleted.
+  void _processFileLines(File file, String Function(String) processLine) {
     final List<String> lines = file.readAsLinesSync();
 
     final StringBuffer newProjectContents = StringBuffer();

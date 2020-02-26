@@ -42,7 +42,7 @@ void main () {
 
     testWithoutContext('skipped if files are missing', () {
       final IOSProjectMigration iosProjectMigration = IOSProjectMigration(mockIosProject, testLogger);
-      iosProjectMigration.run();
+      iosProjectMigration.migrate();
 
       expect(xcodeProjectInfoFile.existsSync(), isFalse);
       expect(podfile.existsSync(), isFalse);
@@ -60,7 +60,7 @@ void main () {
       final DateTime podfileLastModified = podfile.lastModifiedSync();
 
       final IOSProjectMigration iosProjectMigration = IOSProjectMigration(mockIosProject, testLogger);
-      iosProjectMigration.run();
+      iosProjectMigration.migrate();
 
       expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
       expect(xcodeProjectInfoFile.readAsStringSync(), contents);
@@ -87,7 +87,7 @@ keep this 2
 ''');
 
       final IOSProjectMigration iosProjectMigration = IOSProjectMigration(mockIosProject, testLogger);
-      iosProjectMigration.run();
+      iosProjectMigration.migrate();
 
       expect(xcodeProjectInfoFile.readAsStringSync(), '''
 keep this 1
@@ -111,7 +111,7 @@ post_install do |installer|
 ''');
 
     final IOSProjectMigration iosProjectMigration = IOSProjectMigration(mockIosProject, testLogger);
-    iosProjectMigration.run();
+    iosProjectMigration.migrate();
 
     expect(podfile.readAsStringSync(), '''
   end
