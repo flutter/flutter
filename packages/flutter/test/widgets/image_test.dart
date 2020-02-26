@@ -8,7 +8,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,18 +23,6 @@ Future<ui.Image> createTestImage([List<int> bytes = kTransparentImage]) async {
 }
 
 void main() {
-  int originalCacheSize;
-
-  setUp(() {
-    originalCacheSize = imageCache.maximumSize;
-    imageCache.clear();
-    imageCache.clearLiveImages();
-  });
-
-  tearDown(() {
-    imageCache.maximumSize = originalCacheSize;
-  });
-
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestImageProvider imageProvider1 = TestImageProvider();
@@ -776,7 +763,7 @@ void main() {
     expect(isSync, isTrue);
   });
 
-  testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143', (WidgetTester tester) async {
+  testWidgets('Precache remove listeners immediately after future completes, does not crash on successive calls #25143', (WidgetTester tester) async {
     final TestImageStreamCompleter imageStreamCompleter = TestImageStreamCompleter();
     final TestImageProvider provider = TestImageProvider(streamCompleter: imageStreamCompleter);
 
@@ -1377,197 +1364,6 @@ void main() {
     expect(imageProviders.skip(309 - 15).every(loadCalled), true);
     expect(imageProviders.take(309 - 15).every(loadNotCalled), true);
   });
-
-  testWidgets('Same image provider in multiple parts of the tree, no cache room left', (WidgetTester tester) async {
-    imageCache.maximumSize = 0;
-
-    final ui.Image image = await tester.runAsync(createTestImage);
-    final TestImageProvider provider1 = TestImageProvider();
-    final TestImageProvider provider2 = TestImageProvider();
-
-    expect(provider1.loadCallCount, 0);
-    expect(provider2.loadCallCount, 0);
-    expect(imageCache.liveImageCount, 0);
-
-    await tester.pumpWidget(Column(
-      children: <Widget>[
-        Image(image: provider1),
-        Image(image: provider2),
-        Image(image: provider1),
-        Image(image: provider1),
-        Image(image: provider2),
-      ],
-    ));
-
-    expect(imageCache.liveImageCount, 2);
-    expect(imageCache.statusForKey(provider1).live, true);
-    expect(imageCache.statusForKey(provider1).pending, false);
-    expect(imageCache.statusForKey(provider1).keepAlive, false);
-    expect(imageCache.statusForKey(provider2).live, true);
-    expect(imageCache.statusForKey(provider2).pending, false);
-    expect(imageCache.statusForKey(provider2).keepAlive, false);
-
-    expect(provider1.loadCallCount, 1);
-    expect(provider2.loadCallCount, 1);
-
-    provider1.complete(image);
-    await tester.idle();
-
-    provider2.complete(image);
-    await tester.idle();
-
-    expect(imageCache.liveImageCount, 2);
-    expect(imageCache.currentSize, 0);
-
-    await tester.pumpWidget(Image(image: provider2));
-    await tester.idle();
-    expect(imageCache.statusForKey(provider1).untracked, true);
-    expect(imageCache.statusForKey(provider2).live, true);
-    expect(imageCache.statusForKey(provider2).pending, false);
-    expect(imageCache.statusForKey(provider2).keepAlive, false);
-    expect(imageCache.liveImageCount, 1);
-
-    await tester.pumpWidget(const SizedBox());
-    await tester.idle();
-    expect(provider1.loadCallCount, 1);
-    expect(provider2.loadCallCount, 1);
-    expect(imageCache.liveImageCount, 0);
-  });
-
-  testWidgets('precacheImage does not hold weak ref for more than a frame', (WidgetTester tester) async {
-    imageCache.maximumSize = 0;
-    final TestImageProvider provider = TestImageProvider();
-    Future<void> precache;
-    await tester.pumpWidget(
-      Builder(
-        builder: (BuildContext context) {
-          precache = precacheImage(provider, context);
-          return Container();
-        }
-      )
-    );
-    provider.complete();
-    await precache;
-
-    // Should have ended up with only a weak ref, not in cache because cache size is 0
-    expect(imageCache.liveImageCount, 1);
-    expect(imageCache.containsKey(provider), false);
-
-    final ImageCacheStatus providerLocation = await provider.obtainCacheStatus(configuration: ImageConfiguration.empty);
-
-    expect(providerLocation, isNotNull);
-    expect(providerLocation.live, true);
-    expect(providerLocation.keepAlive, false);
-    expect(providerLocation.pending, false);
-
-    // Check that a second resolve of the same image is synchronous.
-    expect(provider._lastResolvedConfiguration, isNotNull);
-    final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
-    bool isSync;
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
-
-    // Still have live ref because frame has not pumped yet.
-    await tester.pump();
-    expect(imageCache.liveImageCount, 1);
-
-    SchedulerBinding.instance.scheduleFrame();
-    await tester.pump();
-    // Live ref should be gone - we didn't listen to the stream.
-    expect(imageCache.liveImageCount, 0);
-    expect(imageCache.currentSize, 0);
-
-    stream.addListener(listener);
-    expect(isSync, true); // because the stream still has the image.
-
-    expect(imageCache.liveImageCount, 0);
-    expect(imageCache.currentSize, 0);
-
-    expect(provider.loadCallCount, 1);
-  });
-
-  testWidgets('precacheImage allows time to take over weak refernce', (WidgetTester tester) async {
-    final TestImageProvider provider = TestImageProvider();
-    Future<void> precache;
-    await tester.pumpWidget(
-      Builder(
-        builder: (BuildContext context) {
-          precache = precacheImage(provider, context);
-          return Container();
-        }
-      )
-    );
-    provider.complete();
-    await precache;
-
-    // Should have ended up in the cache and have a weak reference.
-    expect(imageCache.liveImageCount, 1);
-    expect(imageCache.currentSize, 1);
-    expect(imageCache.containsKey(provider), true);
-
-    // Check that a second resolve of the same image is synchronous.
-    expect(provider._lastResolvedConfiguration, isNotNull);
-    final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
-    bool isSync;
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
-
-    // Should have ended up in the cache and still have a weak reference.
-    expect(imageCache.liveImageCount, 1);
-    expect(imageCache.currentSize, 1);
-    expect(imageCache.containsKey(provider), true);
-
-    stream.addListener(listener);
-    expect(isSync, true);
-
-    expect(imageCache.liveImageCount, 1);
-    expect(imageCache.currentSize, 1);
-    expect(imageCache.containsKey(provider), true);
-
-    SchedulerBinding.instance.scheduleFrame();
-    await tester.pump();
-
-    expect(imageCache.liveImageCount, 1);
-    expect(imageCache.currentSize, 1);
-    expect(imageCache.containsKey(provider), true);
-    stream.removeListener(listener);
-
-    expect(imageCache.liveImageCount, 0);
-    expect(imageCache.currentSize, 1);
-    expect(imageCache.containsKey(provider), true);
-    expect(provider.loadCallCount, 1);
-  });
-
-  testWidgets('evict an image during precache', (WidgetTester tester) async {
-    // This test checks that the live image tracking does not hold on to a
-    // pending image that will never complete because it has been evicted from
-    // the cache.
-    // The scenario may arise in a test harness that is trying to load real
-    // images using `tester.runAsync()`, and wants to make sure that widgets
-    // under test have not also tried to resolve the image in a FakeAsync zone.
-    // The image loaded in the FakeAsync zone will never complete, and the
-    // runAsync call wants to make sure it gets a load attempt from the correct
-    // zone.
-    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MemoryImage provider = MemoryImage(bytes);
-
-    await tester.runAsync(() async {
-      final List<Future<void>> futures = <Future<void>>[];
-      await tester.pumpWidget(Builder(builder: (BuildContext context) {
-        futures.add(precacheImage(provider, context));
-        imageCache.evict(provider);
-        futures.add(precacheImage(provider, context));
-        return const SizedBox.expand();
-      }));
-      await Future.wait<void>(futures);
-      expect(imageCache.statusForKey(provider).keepAlive, true);
-      expect(imageCache.statusForKey(provider).live, true);
-
-      // Schedule a frame to get precacheImage to stop listening.
-      SchedulerBinding.instance.scheduleFrame();
-      await tester.pump();
-      expect(imageCache.statusForKey(provider).keepAlive, true);
-      expect(imageCache.statusForKey(provider).live, false);
-    });
-  });
 }
 
 class ConfigurationAwareKey {
@@ -1609,9 +1405,8 @@ class TestImageProvider extends ImageProvider<Object> {
   ImageStreamCompleter _streamCompleter;
   ImageConfiguration _lastResolvedConfiguration;
 
-  bool get loadCalled => _loadCallCount > 0;
-  int get loadCallCount => _loadCallCount;
-  int _loadCallCount = 0;
+  bool get loadCalled => _loadCalled;
+  bool _loadCalled = false;
 
   @override
   Future<Object> obtainKey(ImageConfiguration configuration) {
@@ -1626,13 +1421,12 @@ class TestImageProvider extends ImageProvider<Object> {
 
   @override
   ImageStreamCompleter load(Object key, DecoderCallback decode) {
-    _loadCallCount += 1;
+    _loadCalled = true;
     return _streamCompleter;
   }
 
-  void complete([ui.Image image]) {
-    image ??= TestImage();
-    _completer.complete(ImageInfo(image: image));
+  void complete() {
+    _completer.complete(ImageInfo(image: TestImage()));
   }
 
   void fail(dynamic exception, StackTrace stackTrace) {

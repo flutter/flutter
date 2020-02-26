@@ -36,7 +36,6 @@ void main() {
   tearDown(() {
     FlutterError.onError = oldError;
     PaintingBinding.instance.imageCache.clear();
-    PaintingBinding.instance.imageCache.clearLiveImages();
   });
 
   group('ImageProvider', () {
@@ -53,18 +52,15 @@ void main() {
 
         const ImageProvider provider = ExactAssetImage('does-not-exist');
         final Object key = await provider.obtainKey(ImageConfiguration.empty);
-        expect(imageCache.statusForKey(provider).untracked, true);
-        expect(imageCache.pendingImageCount, 0);
+        expect(imageCache.containsKey(provider), false);
 
         provider.resolve(ImageConfiguration.empty);
 
-        expect(imageCache.statusForKey(key).pending, true);
-        expect(imageCache.pendingImageCount, 1);
+        expect(imageCache.containsKey(key), true);
 
         await error.future;
 
-        expect(imageCache.statusForKey(provider).untracked, true);
-        expect(imageCache.pendingImageCount, 0);
+        expect(imageCache.containsKey(provider), false);
       }, skip: isBrowser);
 
       test('AssetImageProvider - evicts on null load', () async {
@@ -75,18 +71,15 @@ void main() {
 
         final ImageProvider provider = ExactAssetImage('does-not-exist', bundle: TestAssetBundle());
         final Object key = await provider.obtainKey(ImageConfiguration.empty);
-        expect(imageCache.statusForKey(provider).untracked, true);
-        expect(imageCache.pendingImageCount, 0);
+        expect(imageCache.containsKey(key), false);
 
         provider.resolve(ImageConfiguration.empty);
 
-        expect(imageCache.statusForKey(key).pending, true);
-        expect(imageCache.pendingImageCount, 1);
+        expect(imageCache.containsKey(key), true);
 
         await error.future;
 
-        expect(imageCache.statusForKey(provider).untracked, true);
-        expect(imageCache.pendingImageCount, 0);
+        expect(imageCache.containsKey(key), false);
       }, skip: isBrowser);
 
       test('ImageProvider can evict images', () async {
@@ -158,17 +151,6 @@ void main() {
       expect(await caughtError.future, true);
     });
 
-    test('obtainKey errors will be caught - check location', () async {
-      final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
-      final Completer<bool> caughtError = Completer<bool>();
-      FlutterError.onError = (FlutterErrorDetails details) {
-        caughtError.complete(true);
-      };
-      await imageProvider.obtainCacheStatus(configuration: ImageConfiguration.empty);
-
-      expect(await caughtError.future, true);
-    });
-
     test('resolve sync errors will be caught', () async {
       bool uncaught = false;
       final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
@@ -218,26 +200,24 @@ void main() {
     test('File image with empty file throws expected error and evicts from cache', () async {
       final Completer<StateError> error = Completer<StateError>();
       FlutterError.onError = (FlutterErrorDetails details) {
+        print(details.exception);
         error.complete(details.exception as StateError);
       };
       final MemoryFileSystem fs = MemoryFileSystem();
       final File file = fs.file('/empty.png')..createSync(recursive: true);
       final FileImage provider = FileImage(file);
 
-      expect(imageCache.statusForKey(provider).untracked, true);
-      expect(imageCache.pendingImageCount, 0);
+      expect(imageCache.containsKey(provider), false);
 
       provider.resolve(ImageConfiguration.empty);
 
-      expect(imageCache.statusForKey(provider).pending, true);
-      expect(imageCache.pendingImageCount, 1);
+      expect(imageCache.containsKey(provider), true);
 
       expect(await error.future, isStateError);
-      expect(imageCache.statusForKey(provider).untracked, true);
-      expect(imageCache.pendingImageCount, 0);
+      expect(imageCache.containsKey(provider), false);
     });
 
-    group('NetworkImage', () {
+    group(NetworkImage, () {
       MockHttpClient httpClient;
 
       setUp(() {
@@ -262,13 +242,11 @@ void main() {
         final Completer<dynamic> caughtError = Completer<dynamic>();
 
         final ImageProvider imageProvider = NetworkImage(nonconst(requestUrl));
-        expect(imageCache.pendingImageCount, 0);
-        expect(imageCache.statusForKey(imageProvider).untracked, true);
+        expect(imageCache.containsKey(imageProvider), false);
 
         final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
 
-        expect(imageCache.pendingImageCount, 1);
-        expect(imageCache.statusForKey(imageProvider).pending, true);
+        expect(imageCache.containsKey(imageProvider), true);
 
         result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
         }, onError: (dynamic error, StackTrace stackTrace) {
@@ -277,8 +255,7 @@ void main() {
 
         final dynamic err = await caughtError.future;
 
-        expect(imageCache.pendingImageCount, 0);
-        expect(imageCache.statusForKey(imageProvider).untracked, true);
+        expect(imageCache.containsKey(imageProvider), false);
 
         expect(
           err,
