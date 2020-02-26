@@ -876,7 +876,8 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       return _pluginsPath;
     }
 
-    final String altLocation = PlistParser.instance.getValueFromFile(plistFile, 'JetBrainsToolboxApp');
+    final String altLocation = globals.plistParser
+      .getValueFromFile(plistFile, 'JetBrainsToolboxApp');
 
     if (altLocation != null) {
       _pluginsPath = altLocation + '.plugins';
