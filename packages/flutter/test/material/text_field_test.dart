@@ -6999,14 +6999,6 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-<<<<<<< HEAD
-    final List<Widget> transitions =
-      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
-    expect(transitions.length, 2);
-    final FadeTransition left = transitions[0];
-    final FadeTransition right = transitions[1];
-
-=======
     final List<FadeTransition> transitions = find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
       matching: find.byType(FadeTransition),
@@ -7014,7 +7006,6 @@ void main() {
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0];
     final FadeTransition right = transitions[1];
->>>>>>> 55072246d013f1b8913a6f6d97d3e5a4a912557b
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
   });
