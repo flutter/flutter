@@ -1584,10 +1584,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_relayoutBoundary != this) {
       _relayoutBoundary = null;
       _needsLayout = true;
-      visitChildren((RenderObject child) {
-        child._cleanRelayoutBoundary();
-      });
+      visitChildren(_cleanChildRelayoutBoundary);
     }
+  }
+
+  // Reduces closure allocation for visitChildren use cases.
+  static void _cleanChildRelayoutBoundary(RenderObject child) {
+    child._cleanRelayoutBoundary();
   }
 
   /// Bootstrap the rendering pipeline by scheduling the very first layout.
@@ -1724,9 +1727,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       // The local relayout boundary has changed, must notify children in case
       // they also need updating. Otherwise, they will be confused about what
       // their actual relayout boundary is later.
-      visitChildren((RenderObject child) {
-        child._cleanRelayoutBoundary();
-      });
+      visitChildren(_cleanChildRelayoutBoundary);
     }
     _relayoutBoundary = relayoutBoundary;
     assert(!_debugMutationsLocked);
