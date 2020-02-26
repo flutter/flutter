@@ -590,11 +590,25 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         reverse: widget.reverse,
         child: _buildContainerForScrollDirection(
           children: <Widget>[
+            // 0 must be the first index at the start of the reversed list,
+            // so that items which get dragged to the start are ordered to start
             if (widget.reverse) _wrap(finalDropArea, 0, constraints),
             if (widget.header != null) widget.header,
             for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
-            if (widget.footer != null) widget.footer,
-            if (!widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+            if (widget.footer != null)
+              // We need to wrap the widget.footer so we can reorder an item between
+              // the last item of the list and the footer itself
+              _wrap(SizedBox(
+                  key: Key('footer'),
+                  child: widget.footer,
+                ),
+                widget.children.length,
+                constraints,
+              ),
+            // We don't need a final drop area when a footer is present
+            // as the footer should provide enough space to drag a list item
+            // to the last position of the list, which is above the footer.
+            if (!widget.reverse && widget.footer == null) _wrap(finalDropArea, widget.children.length, constraints),
           ],
         ),
       );

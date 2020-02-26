@@ -35,6 +35,7 @@ void main() {
       Widget footer,
       Axis scrollDirection = Axis.vertical,
       TextDirection textDirection = TextDirection.ltr,
+      bool reverse = false,
     }) {
       return MaterialApp(
         home: Directionality(
@@ -43,6 +44,7 @@ void main() {
             height: itemHeight * 10,
             width: itemHeight * 10,
             child: ReorderableListView(
+              reverse: reverse,
               header: header,
               footer: footer,
               children: listItems.map<Widget>(listItemToWidget).toList(),
@@ -94,6 +96,19 @@ void main() {
         expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
       });
 
+      testWidgets('allows reordering from the very bottom to the very top in reverse', (WidgetTester tester) async {
+        await tester.pumpWidget(build(
+          reverse: true,
+        ));
+        expect(listItems, orderedEquals(originalListItems));
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 4')),
+          tester.getCenter(find.text('Item 1')),
+        );
+        expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
+      });
+
       testWidgets('allows reordering inside the middle of the widget', (WidgetTester tester) async {
         await tester.pumpWidget(build());
         expect(listItems, orderedEquals(originalListItems));
@@ -119,14 +134,23 @@ void main() {
       });
 
       testWidgets('properly reorders with a footer', (WidgetTester tester) async {
-        await tester.pumpWidget(build(footer: const Text('Footer Text')));
+        await tester.pumpWidget(
+          build(
+            footer: const SizedBox(
+              child: Text('Footer Text'),
+              height: itemHeight,
+            ),
+          ),
+        );
         expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(originalListItems));
         await longPressDrag(
           tester,
           tester.getCenter(find.text('Item 1')),
-          tester.getCenter(find.text('Item 4')) + const Offset(0.0, itemHeight * 2),
+          // drag it right before the footer
+          tester.getCenter(find.text('Item 4')) + const Offset(0.0, itemHeight),
         );
+        await tester.pumpAndSettle();
         expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
       });
@@ -620,30 +644,36 @@ void main() {
       });
 
       testWidgets('properly reorders with a footer', (WidgetTester tester) async {
-        await tester.pumpWidget(build(
-          footer: const SizedBox(
-            width: itemHeight,
-            child: Text('Footer'),
+        await tester.pumpWidget(
+          build(
+            footer: const Text('Footer Text'),
+            scrollDirection: Axis.horizontal,
           ),
-          scrollDirection: Axis.horizontal),
         );
-        expect(find.text('Footer'), findsOneWidget);
+        expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(originalListItems));
         await longPressDrag(
           tester,
           tester.getCenter(find.text('Item 1')),
-          tester.getCenter(find.text('Item 4')) + const Offset(itemHeight * 2, 0.0),
+          // drag the first item right before the footer
+          tester.getCenter(find.text('Item 4')) + const Offset(itemHeight, 0.0),
         );
         await tester.pumpAndSettle();
-        expect(find.text('Footer'), findsOneWidget);
+        expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
-        await tester.pumpWidget(build(footer: const Text('Footer'), scrollDirection: Axis.horizontal));
+        await tester.pumpWidget(
+          build(
+            footer: const Text('Footer Text'),
+            scrollDirection: Axis.horizontal,
+          ),
+        );
         await longPressDrag(
           tester,
           tester.getCenter(find.text('Item 4')),
           tester.getCenter(find.text('Item 3')),
         );
-        expect(find.text('Footer'), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
       });
 
