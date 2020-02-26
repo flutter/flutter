@@ -1699,7 +1699,6 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
     if (firstChild == null) {
       switch (axis) {
         case Axis.vertical:

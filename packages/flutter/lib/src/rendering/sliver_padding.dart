@@ -118,7 +118,6 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
 
   @override
   void performLayout() {
-    final SliverConstraints constraints = this.constraints;
     assert(resolvedPadding != null);
     final double beforePadding = this.beforePadding;
     final double afterPadding = this.afterPadding;

@@ -505,7 +505,6 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
     if (child == null) {
       size = constraints.smallest;
     } else {

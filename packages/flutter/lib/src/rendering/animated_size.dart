@@ -170,7 +170,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   void performLayout() {
     _lastValue = _controller.value;
     _hasVisualOverflow = false;
-    final BoxConstraints constraints = this.constraints;
+
     if (child == null || constraints.isTight) {
       _controller.stop();
       size = _sizeTween.begin = _sizeTween.end = constraints.smallest;
