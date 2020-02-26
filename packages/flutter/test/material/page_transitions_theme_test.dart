@@ -151,12 +151,12 @@ void main() {
       );
     }
 
-    expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.android);
+    expect(Theme.of(tester.element(find.text('push'))).platform, debugDefaultTargetPlatformOverride);
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
     expect(findOpenUpwardsPageTransition(), findsOneWidget);
-  });
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
