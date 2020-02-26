@@ -119,8 +119,6 @@ void main() {
     expect(selectedIcon.fontSize, equals(24.0));
     expect(unselectedIcon.color, equals(captionColor));
     expect(unselectedIcon.fontSize, equals(24.0));
-<<<<<<< HEAD
-=======
     // There should not be any [Opacity] or [FadeTransition] widgets
     // since showUnselectedLabels and showSelectedLabels are true.
     final Finder findOpacity = find.descendant(
@@ -133,7 +131,6 @@ void main() {
     );
     expect(findOpacity, findsNothing);
     expect(findFadeTransition, findsNothing);
->>>>>>> 55072246d013f1b8913a6f6d97d3e5a4a912557b
     expect(_getMaterial(tester).elevation, equals(8.0));
   });
 
@@ -486,8 +483,6 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(selectedColor));
     expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.color, equals(unselectedColor));
-<<<<<<< HEAD
-=======
     // There should not be any [Opacity] or [FadeTransition] widgets
     // since showUnselectedLabels and showSelectedLabels are true.
     final Finder findOpacity = find.descendant(
@@ -500,7 +495,6 @@ void main() {
     );
     expect(findOpacity, findsNothing);
     expect(findFadeTransition, findsNothing);
->>>>>>> 55072246d013f1b8913a6f6d97d3e5a4a912557b
   });
 
 
