@@ -53,6 +53,12 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
         }
         collectedProfiles.add(profile);
         return Response.ok('Profile received');
+      } else if (request.requestedUri.path.endsWith('/on-error')) {
+        final Map<String, dynamic> errorDetails = json.decode(await request.readAsString()) as Map<String, dynamic>;
+        server.close();
+        // Keep the stack trace as a string. It's thrown in the browser, not this Dart VM.
+        profileData.completeError('${errorDetails['error']}\n${errorDetails['stackTrace']}');
+        return Response.ok('');
       } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
         if (benchmarks == null) {
           benchmarks = (json.decode(await request.readAsString()) as List<dynamic>).cast<String>();
