@@ -1026,7 +1026,7 @@ typedef StateSetter = void Function(VoidCallback fn);
 ///    be read by descendant widgets.
 ///  * [Widget], for an overview of widgets in general.
 @optionalTypeArgs
-abstract class State<T extends StatefulWidget> extends Diagnosticable {
+abstract class State<T extends StatefulWidget> with DiagnosticableMixin {
   /// The current configuration.
   ///
   /// A [State] object's configuration is the corresponding [StatefulWidget]

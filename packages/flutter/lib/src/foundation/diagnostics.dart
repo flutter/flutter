@@ -3018,7 +3018,7 @@ class DiagnosticPropertiesBuilder {
 }
 
 // Examples can assume:
-// class ExampleSuperclass extends Diagnosticable { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
+// class ExampleSuperclass with DiagnosticableMixin { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
 
 /// A base class for providing string and [DiagnosticsNode] debug
 /// representations describing the properties of an object.
@@ -3338,7 +3338,7 @@ mixin DiagnosticableMixin {
 ///  * [DiagnosticableTreeMixin], a mixin that implements this class.
 ///  * [DiagnosticableMixin], which should be used instead of this class to
 ///    provide diagnostics for objects without children.
-abstract class DiagnosticableTree extends Diagnosticable {
+abstract class DiagnosticableTree with DiagnosticableMixin {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const DiagnosticableTree();
