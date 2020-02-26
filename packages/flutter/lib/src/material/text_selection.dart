@@ -52,9 +52,13 @@ class _TextSelectionToolbar extends StatefulWidget {
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
   final GlobalKey _key = GlobalKey();
 
-  // Whether or not the overflow menu is open.
+  // Whether or not the overflow menu is open.  When it is closed, the menu
+  // items that don't overflow are shown. When it is open, only the overflowing
+  // menu items are shown.
   bool _overflowOpen = false;
-  // The greatest width ever measured for this widget.
+  // The greatest width ever measured for this widget. This is used to position
+  // the overflow menu when it is open, since it is usually not as wide as the
+  // closed menu.
   double _maxWidth;
 
   FlatButton _getItem(VoidCallback onPressed, String label) {
@@ -320,7 +324,9 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     }
 
     // When there is overflow, paint if the child is in the part of the menu
-    // that is currently open.
+    // that is currently open. Overflowing children are painted when the
+    // overflow menu is open, and the children that fit are painted when the
+    // overflow menu is closed.
     return (index > _lastIndexThatFits) == overflowOpen;
   }
 
