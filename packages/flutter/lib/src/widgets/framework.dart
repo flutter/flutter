@@ -2062,7 +2062,7 @@ abstract class BuildContext {
   ///
   /// Othwerwise, it will return `false`.
   ///
-  /// Always Returns `null` in release mode.
+  /// Always returns `false` in release mode.
   bool get debugDoingBuild;
 
   /// The current [RenderObject] for the widget. If the widget is a
