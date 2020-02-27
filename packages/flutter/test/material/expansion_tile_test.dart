@@ -298,4 +298,76 @@ void main() {
     expect(iconColor(expandedIconKey), collapsedIconColor);
     expect(iconColor(collapsedIconKey), expandedIconColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+
+  testWidgets('ExpansionTile mixed custom and default tween colors', (WidgetTester tester) async {
+    final Key expandedTitleKey = UniqueKey();
+    final Key collapsedTitleKey = UniqueKey();
+    final Key expandedIconKey = UniqueKey();
+    final Key collapsedIconKey = UniqueKey();
+    const Color expandedTitleColor = Colors.blue;
+    const Color collapsedTitleColor = Colors.red;
+    const Color expandedIconColor = Colors.green;
+    const Color collapsedIconColor = Colors.orange;
+    final ColorTween headerColorTween = ColorTween(
+      begin: collapsedTitleColor,
+    );
+    final ColorTween iconColorTween = ColorTween(
+      end: expandedIconColor,
+    );
+    final ThemeData theme = ThemeData(
+      accentColor: expandedTitleColor,
+      unselectedWidgetColor: collapsedIconColor,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                const ListTile(title: Text('Top')),
+                ExpansionTile(
+                  initiallyExpanded: true,
+                  headerColorTween: headerColorTween,
+                  iconColorTween: iconColorTween,
+                  title: TestText('Expanded', key: expandedTitleKey),
+                  children: const <Widget>[ListTile(title: Text('0'))],
+                  trailing: TestIcon(key: expandedIconKey),
+                ),
+                ExpansionTile(
+                  initiallyExpanded: false,
+                  headerColorTween: headerColorTween,
+                  iconColorTween: iconColorTween,
+                  title: TestText('Collapsed', key: collapsedTitleKey),
+                  children: const <Widget>[ListTile(title: Text('0'))],
+                  trailing: TestIcon(key: collapsedIconKey),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color;
+    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color;
+
+    expect(textColor(expandedTitleKey), expandedTitleColor);
+    expect(textColor(collapsedTitleKey), collapsedTitleColor);
+    expect(iconColor(expandedIconKey), expandedIconColor);
+    expect(iconColor(collapsedIconKey), collapsedIconColor);
+
+    // Tap both tiles to change their state: collapse and expand respectively
+    await tester.tap(find.text('Expanded'));
+    await tester.tap(find.text('Collapsed'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(textColor(expandedTitleKey), collapsedTitleColor);
+    expect(textColor(collapsedTitleKey), expandedTitleColor);
+    expect(iconColor(expandedIconKey), collapsedIconColor);
+    expect(iconColor(collapsedIconKey), expandedIconColor);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 }
