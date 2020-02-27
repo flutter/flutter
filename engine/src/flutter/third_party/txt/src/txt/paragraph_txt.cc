@@ -1538,7 +1538,7 @@ void ParagraphTxt::PaintDecorations(SkCanvas* canvas,
                   kDoubleDecorationSpacing / -2.0;
       y_offset +=
           (metrics.fFlags &
-           SkFontMetrics::FontMetricsFlags::kStrikeoutThicknessIsValid_Flag)
+           SkFontMetrics::FontMetricsFlags::kStrikeoutPositionIsValid_Flag)
               ? metrics.fStrikeoutPosition
               // Backup value if the strikeoutposition metric is not
               // available:
