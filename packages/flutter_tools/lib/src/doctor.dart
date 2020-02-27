@@ -81,7 +81,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           fileSystem: globals.fs,
         ),
       if (linuxWorkflow.appliesToHostPlatform)
-        LinuxDoctorValidator(),
+        LinuxDoctorValidator(
+          processManager: globals.processManager,
+        ),
       if (windowsWorkflow.appliesToHostPlatform)
         visualStudioValidator,
       if (ideValidators.isNotEmpty)

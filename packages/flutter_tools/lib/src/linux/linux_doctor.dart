@@ -2,14 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+
 import '../base/io.dart';
 import '../base/version.dart';
 import '../doctor.dart';
-import '../globals.dart' as globals;
 
 /// A validator that checks for Clang and Make build dependencies
 class LinuxDoctorValidator extends DoctorValidator {
-  LinuxDoctorValidator() : super('Linux toolchain - develop for Linux desktop');
+  LinuxDoctorValidator({
+    @required ProcessManager processManager,
+  }) : _processManager = processManager,
+       super('Linux toolchain - develop for Linux desktop');
+
+  final ProcessManager _processManager;
 
   /// The minimum version of clang supported.
   final Version minimumClangVersion = Version(3, 4, 0);
@@ -21,7 +28,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     /// Check for a minimum version of Clang.
     ProcessResult clangResult;
     try {
-      clangResult = await globals.processManager.run(const <String>[
+      clangResult = await _processManager.run(const <String>[
         'clang++',
         '--version',
       ]);
@@ -48,7 +55,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     // a better idea about what is supported.
     ProcessResult makeResult;
     try {
-      makeResult = await globals.processManager.run(const <String>[
+      makeResult = await _processManager.run(const <String>[
         'make',
         '--version',
       ]);
