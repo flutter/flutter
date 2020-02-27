@@ -448,7 +448,7 @@ String decodeSyslog(String line) {
       }
     }
     return utf8.decode(out);
-  } on Exception {
+  } catch (_) {
     // Unable to decode line: return as-is.
     return line;
   }

@@ -117,7 +117,7 @@ class _DefaultSignals implements Signals {
     for (final SignalHandler handler in _handlersList[s]) {
       try {
         await asyncGuard<void>(() async => handler(s));
-      } on Exception catch (e) {
+      } catch (e) {
         if (_errorStreamController.hasListener) {
           _errorStreamController.add(e);
         }

@@ -177,7 +177,7 @@ class AndroidDevice extends Device {
       } finally {
         console.destroy();
       }
-    } on Exception catch (e) {
+    } catch (e) {
       globals.printTrace('Failed to fetch avd name for emulator at $host:$port: $e');
       // If we fail to connect to the device, we should not fail so just return
       // an empty name. This data is best-effort.
@@ -299,7 +299,7 @@ class AndroidDevice extends Device {
         return true;
       }
       globals.printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.39 or later.');
-    } on Exception catch (error, trace) {
+    } catch (error, trace) {
       globals.printError('Error running ADB: $error', stackTrace: trace);
     }
 
@@ -335,7 +335,7 @@ class AndroidDevice extends Device {
       }
 
       return true;
-    } on Exception catch (e, stacktrace) {
+    } catch (e, stacktrace) {
       globals.printError('Unexpected failure from adb: $e');
       globals.printError('Stacktrace: $stacktrace');
       return false;
@@ -366,7 +366,7 @@ class AndroidDevice extends Device {
     try {
       final RunResult listOut = await runAdbCheckedAsync(<String>['shell', 'pm', 'list', 'packages', app.id]);
       return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
-    } on Exception catch (error) {
+    } catch (error) {
       globals.printTrace('$error');
       return false;
     }
@@ -432,7 +432,7 @@ class AndroidDevice extends Device {
         throwOnError: true,
       );
       uninstallOut = uninstallResult.stdout;
-    } on Exception catch (error) {
+    } catch (error) {
       globals.printError('adb uninstall failed: $error');
       return false;
     }
@@ -631,7 +631,7 @@ class AndroidDevice extends Device {
       }
 
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
-    } on Exception catch (error) {
+    } catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {
@@ -696,7 +696,7 @@ class AndroidDevice extends Device {
       output = runAdbCheckedSync(<String>[
         'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
       ]);
-    } on Exception catch (error) {
+    } catch (error) {
       globals.printError('Failed to extract the most recent timestamp from the Android log: $error.');
       return null;
     }

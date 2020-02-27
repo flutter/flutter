@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
@@ -16,7 +15,6 @@ import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  FlutterCommandRunner.initFlutterRoot();
   Cache.disableLocking();
   final Testbed testbed = Testbed(overrides: <Type, Generator>{
     BuildSystem: ()  => MockBuildSystem(),
