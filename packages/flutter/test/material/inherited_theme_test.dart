@@ -73,8 +73,7 @@ void main() {
     }
 
     Color containerColor() {
-      final BoxDecoration decoration = tester.widget<Container>(find.byKey(primaryContainerKey)).decoration as BoxDecoration;
-      return decoration.color;
+      return tester.widget<Container>(find.byKey(primaryContainerKey)).color;
     }
 
     await tester.pumpWidget(buildFrame());
@@ -225,10 +224,9 @@ void main() {
     }
 
     Color bannerColor() {
-      final BoxDecoration decoration = tester.widget<Container>(
+      return tester.widget<Container>(
         find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first,
-      ).decoration as BoxDecoration;
-      return decoration.color;
+      ).color;
     }
 
     TextStyle getTextStyle(String text) {

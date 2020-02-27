@@ -294,17 +294,16 @@ class Container extends StatelessWidget {
   ///
   /// The `height` and `width` values include the padding.
   ///
-  /// The `color` argument is a shorthand for `decoration: new
-  /// BoxDecoration(color: color)`, which means you cannot supply both a `color`
-  /// and a `decoration` argument. If you want to have both a `color` and a
-  /// `decoration`, you can pass the color as the `color` argument to the
-  /// `BoxDecoration`.
+  /// The `color` and `decoration` arguments cannot both be supplied, since
+  /// it would potentially result in the decoration drawing over the background
+  /// color. To supply a decoration with a color, use `decoration:
+  /// BoxDecoration(color: color)`.
   Container({
     Key key,
     this.alignment,
     this.padding,
-    Color color,
-    Decoration decoration,
+    this.color,
+    this.decoration,
     this.foregroundDecoration,
     double width,
     double height,
@@ -320,9 +319,8 @@ class Container extends StatelessWidget {
        assert(clipBehavior != null),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
+         'To provide both, use "decoration: BoxDecoration(color: color)".'
        ),
-       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
@@ -363,11 +361,20 @@ class Container extends StatelessWidget {
   /// see [Decoration.padding].
   final EdgeInsetsGeometry padding;
 
+  /// The color to paint behind the [child].
+  ///
+  /// This property should be preferred when the background is a simple color.
+  /// For other cases, such as gradients or images, use the [decoration]
+  /// property.
+  ///
+  /// If the [decoration] is used, this property must be null. A background
+  /// color may still be painted by the [decoration] even if this property is
+  /// null.
+  final Color color;
+
   /// The decoration to paint behind the [child].
   ///
-  /// A shorthand for specifying just a solid color is available in the
-  /// constructor: set the `color` argument instead of the `decoration`
-  /// argument.
+  /// Use the [color] property to specify a simple solid color.
   ///
   /// The [child] is not clipped to the decoration. To clip a child to the shape
   /// of a particular [ShapeDecoration], consider using a [ClipPath] widget.
@@ -422,6 +429,9 @@ class Container extends StatelessWidget {
     final EdgeInsetsGeometry effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
       current = Padding(padding: effectivePadding, child: current);
+
+    if (color != null)
+      current = ColoredBox(color: color, child: current);
 
     if (decoration != null)
       current = DecoratedBox(decoration: decoration, child: current);
