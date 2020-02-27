@@ -142,6 +142,14 @@ static void InitDartIO(Dart_Handle builtin_library,
   Dart_Handle result =
       Dart_SetField(platform_type, ToDart("_localeClosure"), locale_closure);
   PropagateIfError(result);
+
+  // Register dart:io service extensions used for network profiling.
+  Dart_Handle network_profiling_type =
+      Dart_GetType(io_lib, ToDart("_NetworkProfiling"), 0, nullptr);
+  PropagateIfError(network_profiling_type);
+  result = Dart_Invoke(network_profiling_type,
+                       ToDart("_registerServiceExtension"), 0, nullptr);
+  PropagateIfError(result);
 }
 
 void DartRuntimeHooks::Install(bool is_ui_isolate,
