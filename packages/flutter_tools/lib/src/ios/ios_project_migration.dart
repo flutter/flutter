@@ -137,6 +137,7 @@ class IOSProjectMigration {
     }
 
     if (migrationRequired) {
+      _logger.printStatus('Upgrading $basename');
       file.writeAsStringSync(newProjectContents.toString());
     }
   }

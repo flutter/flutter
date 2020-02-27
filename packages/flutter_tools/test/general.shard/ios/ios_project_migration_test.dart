@@ -49,6 +49,7 @@ void main () {
 
       expect(testLogger.traceText, contains('Xcode project not found, skipping migration'));
       expect(testLogger.traceText, contains('Podfile not found, skipping migration'));
+      expect(testLogger.statusText, isEmpty);
     });
 
     testWithoutContext('skipped if nothing to upgrade', () {
@@ -67,6 +68,7 @@ void main () {
 
       expect(podfile.lastModifiedSync(), podfileLastModified);
       expect(podfile.readAsStringSync(), contents);
+      expect(testLogger.statusText, isEmpty);
     });
 
     testWithoutContext('Xcode project is migrated', () {
@@ -95,6 +97,7 @@ keep this 1
 keep this 2
 
 ''');
+      expect(testLogger.statusText, contains('Upgrading project.pbxproj'));
     });
 
   testWithoutContext('Podfile is migrated', () {
@@ -123,6 +126,7 @@ post_install do |installer|
     target.build_configurations.each do |config|
 
 ''');
+    expect(testLogger.statusText, contains('Upgrading Podfile'));
   });
 });
 }
