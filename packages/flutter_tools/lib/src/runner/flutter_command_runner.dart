@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -189,7 +190,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       if (script.contains('flutter/examples/')) {
         return script.substring(0, script.indexOf('flutter/examples/') + 8);
       }
-    } catch (error) {
+    } on Exception catch (error) {
       // we don't have a logger at the time this is run
       // (which is why we don't use printTrace here)
       print(userMessages.runnerNoRoot('$error'));
@@ -421,6 +422,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
+  @visibleForTesting
   static void initFlutterRoot() {
     Cache.flutterRoot ??= defaultFlutterRoot;
   }

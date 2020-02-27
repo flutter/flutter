@@ -75,7 +75,7 @@ class CleanCommand extends FlutterCommand {
       for (final String scheme in projectInfo.schemes) {
         xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme);
       }
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printTrace('Could not clean Xcode workspace: $error');
     } finally {
       xcodeStatus?.stop();

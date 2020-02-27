@@ -93,7 +93,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       installPath = globals.fs
           .file(globals.fs.path.join(homeDotDir.path, 'system', '.home'))
           .readAsStringSync();
-    } catch (e) {
+    } on Exception {
       // ignored, installPath will be null, which is handled below
     }
     if (installPath != null && globals.fs.isDirectorySync(installPath)) {
@@ -200,7 +200,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
             _checkForStudio(directory.path);
           }
         }
-      } catch (e) {
+      } on Exception catch (e) {
         globals.printTrace('Exception while looking for Android Studio: $e');
       }
     }

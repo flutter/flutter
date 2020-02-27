@@ -186,7 +186,7 @@ class HotRunner extends ResidentRunner {
         final Map<String, dynamic> firstReport = reports.first;
         await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
       }
-    } catch (error) {
+    } on Exception catch (error) {
       return OperationResult(1, error.toString());
     }
 
@@ -215,14 +215,25 @@ class HotRunner extends ResidentRunner {
         compileExpression: _compileExpressionService,
         reloadMethod: reloadMethod,
       );
-    } catch (error) {
+    // Catches all exceptions, non-Exception objects are rethrown.
+    } catch (error) { // ignore: avoid_catches_without_on_clauses
+      if (error is! Exception && error is! String) {
+        rethrow;
+      }
       globals.printError('Error connecting to the service protocol: $error');
       // https://github.com/flutter/flutter/issues/33050
-      // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
+      // TODO(blasten): Remove this check once
+      // https://issuetracker.google.com/issues/132325318 has been fixed.
       if (await hasDeviceRunningAndroidQ(flutterDevices) &&
           error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        globals.printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
-        globals.printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318.');
+        globals.printStatus(
+          '🔨 If you are using an emulator running Android Q Beta, '
+          'consider using an emulator running API level 29 or lower.',
+        );
+        globals.printStatus(
+          'Learn more about the status of this issue on '
+          'https://issuetracker.google.com/issues/132325318.',
+        );
       }
       return 2;
     }
@@ -242,7 +253,7 @@ class HotRunner extends ResidentRunner {
           ),
         );
       }
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
@@ -872,7 +883,7 @@ class HotRunner extends ResidentRunner {
         return OperationResult(errorCode, errorMessage);
       }
       return OperationResult(errorCode, '$errorMessage (error code: $errorCode)');
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       globals.printTrace('Hot reload failed: $error\n$stackTrace');
       return OperationResult(1, '$error');
     }
@@ -936,7 +947,7 @@ class HotRunner extends ResidentRunner {
         () async {
           try {
             await view.uiIsolate.flutterReassemble();
-          } catch (error) {
+          } on Exception catch (error) {
             failedReassemble = true;
             globals.printError('Reassembling ${view.uiIsolate.name} failed: $error');
             return;
