@@ -410,7 +410,7 @@ void main() {
   });
 
   testWidgets('DefaultTextStyleTransition builds fully featured DefaultTextStyle', (WidgetTester tester) async {
-    final DefaultTextStyleTransition styleTransition = DefaultTextStyleTransition(
+    const DefaultTextStyleTransition styleTransition = DefaultTextStyleTransition(
       style: AlwaysStoppedAnimation<TextStyle>(TextStyle()),
       child: Text('step on legos!'),
       textAlign: TextAlign.right,
@@ -430,12 +430,12 @@ void main() {
     expect(styleTransition.overflow, TextOverflow.fade);
     expect(styleTransition.maxLines, 5);
     expect(styleTransition.textWidthBasis, TextWidthBasis.longestLine);
-    expect(styleTransition.textHeightBehavior, TextHeightBehavior(
+    expect(styleTransition.textHeightBehavior, const TextHeightBehavior(
       applyHeightToFirstAscent: false,
       applyHeightToLastDescent: false,
     ));
 
-    final DefaultTextStyle style = styleTransition.build(null);
+    final DefaultTextStyle style = styleTransition.build(null) as DefaultTextStyle;
 
     expect((style.child as Text).data, 'step on legos!');
     expect(style.textAlign, TextAlign.right);
@@ -443,7 +443,7 @@ void main() {
     expect(style.overflow, TextOverflow.fade);
     expect(style.maxLines, 5);
     expect(style.textWidthBasis, TextWidthBasis.longestLine);
-    expect(style.textHeightBehavior, TextHeightBehavior(
+    expect(style.textHeightBehavior, const TextHeightBehavior(
       applyHeightToFirstAscent: false,
       applyHeightToLastDescent: false,
     ));
