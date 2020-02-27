@@ -347,8 +347,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             case TargetPlatform.macOS:
               title = widget.title;
               break;
-            case TargetPlatform.fuchsia:
             case TargetPlatform.android:
+            case TargetPlatform.fuchsia:
             case TargetPlatform.linux:
             case TargetPlatform.windows:
               title = Semantics(

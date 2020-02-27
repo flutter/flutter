@@ -16,9 +16,11 @@ void main() {
     }
   });
 
-  test('Typography on Android, Fuchsia defaults to Roboto', () {
+  test('Typography on non-Apple platforms defaults to Roboto', () {
     expect(Typography.material2018(platform: TargetPlatform.android).black.headline6.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.headline6.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.linux).black.headline6.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.windows).black.headline6.fontFamily, 'Roboto');
   });
 
   // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/

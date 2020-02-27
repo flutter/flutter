@@ -903,6 +903,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         // Matches Android implementation of material slider.
         return 0.05;
     }
+    assert(false, 'Unhandled TargetPlatform $_platform');
     return 0.0;
   }
 
