@@ -1003,6 +1003,9 @@ class LinuxProject extends FlutterProjectPlatform {
   /// the build.
   File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
 
+  /// Makefile with rules and variables for plugin builds.
+  File get generatedPluginMakeFile => managedDirectory.childFile('generated_plugins.mk');
+
   /// The directory to write plugin symlinks.
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
