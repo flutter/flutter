@@ -50,16 +50,10 @@ class _TextSelectionToolbar extends StatefulWidget {
 }
 
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
-  final GlobalKey _key = GlobalKey();
-
   // Whether or not the overflow menu is open.  When it is closed, the menu
   // items that don't overflow are shown. When it is open, only the overflowing
   // menu items are shown.
   bool _overflowOpen = false;
-  // The greatest width ever measured for this widget. This is used to position
-  // the overflow menu when it is open, since it is usually not as wide as the
-  // closed menu.
-  double _maxWidth;
 
   FlatButton _getItem(VoidCallback onPressed, String label) {
     if (onPressed == null) {
@@ -78,14 +72,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
 
   @override
   Widget build(BuildContext context) {
-    // Keep track of the largest child width.
-    if (_key.currentContext != null) {
-      final RenderBox renderBoxChild = _key.currentContext.findRenderObject() as RenderBox;
-      if (_maxWidth == null || renderBoxChild.size.width > _maxWidth) {
-        _maxWidth = renderBoxChild.size.width;
-      }
-    }
-
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> items = <Widget>[
       if (widget.handleCut != null)
@@ -103,50 +89,45 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return Container(width: 0.0, height: 0.0);
     }
 
-    final Container child = Container(
-      key: _key,
-      height: _overflowOpen ? null : _kToolbarHeight,
-      child: Material(
-        elevation: 1.0,
-        child: _TextSelectionToolbarItems(
-          isAbove: widget.isAbove,
-          overflowOpen: _overflowOpen,
-          children: <Widget>[
-            // The navButton that shows and hides the overflow menu is the first
-            // child.
-            Material(
-              child: IconButton(
-                // TODO(justinmc): This should be an AnimatedIcon, but
-                // AnimatedIcons doesn't yet support arrow_back to more_vert.
-                // https://github.com/flutter/flutter/issues/51209
-                icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
-                onPressed: () {
-                  setState(() {
-                    _overflowOpen = !_overflowOpen;
-                  });
-                },
-                tooltip: _overflowOpen ? 'Back' : 'More',
+    final Align child = Align(
+      alignment: Alignment.topRight,
+      heightFactor: 1.0,
+      widthFactor: 1.0,
+      child: AnimatedSize(
+        vsync: this,
+        // This duration was eyeballed on a Pixel 2 emulator running Android
+        // API 28.
+        duration: const Duration(milliseconds: 140),
+        child: Material(
+          elevation: 1.0,
+          child: _TextSelectionToolbarItems(
+            isAbove: widget.isAbove,
+            overflowOpen: _overflowOpen,
+            children: <Widget>[
+              // The navButton that shows and hides the overflow menu is the
+              // first child.
+              Material(
+                child: IconButton(
+                  // TODO(justinmc): This should be an AnimatedIcon, but
+                  // AnimatedIcons doesn't yet support arrow_back to more_vert.
+                  // https://github.com/flutter/flutter/issues/51209
+                  icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
+                  onPressed: () {
+                    setState(() {
+                      _overflowOpen = !_overflowOpen;
+                    });
+                  },
+                  tooltip: _overflowOpen ? 'Back' : 'More',
+                ),
               ),
-            ),
-            ...items,
-          ],
+              ...items,
+            ],
+          ),
         ),
       ),
     );
 
-    // When the menu shrinks as the overflow is opened, then it occupies the
-    // same size as it did with overflow closed and aligns itself to the right
-    // of its original size.
-    return _maxWidth == null ? child : SizedBox(
-      width: _maxWidth,
-      child: Align(
-        alignment: Alignment.topRight,
-        heightFactor: 1.0,
-        widthFactor: 1.0,
-        child: child,
-      ),
-    );
-
+    return _overflowOpen ? IntrinsicWidth(child: child) : child;
   }
 }
 
@@ -195,6 +176,13 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
        _overflowOpen = overflowOpen,
        super();
 
+  // This is static so that it can be preserved between instances. The
+  // IntrinsicWidth widget is added and removed above this in the tree, causing
+  // it to be recreated, but _intrinsicWidth is needed immediately when the
+  // overflow menu is open.
+  static double _intrinsicWidth;
+
+  // The index of the last item that doesn't overflow.
   int _lastIndexThatFits = -1;
 
   bool _isAbove;
@@ -222,6 +210,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   void _layoutChildren() {
     int i = -1;
     double width = 0.0;
+    _intrinsicWidth = null;
     visitChildren((RenderObject renderObjectChild) {
       i++;
 
@@ -239,8 +228,13 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
 
       if (width > constraints.maxWidth && _lastIndexThatFits == -1) {
         _lastIndexThatFits = i - 1;
+        _intrinsicWidth = width - child.size.width + firstChild.size.width;
       }
     });
+
+    if (_intrinsicWidth == null) {
+      _intrinsicWidth = width;
+    }
 
     // If the last child overflows, but only because of the width of the
     // overflow button, then just show it and hide the overflow button.
@@ -340,6 +334,19 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
 
     _layoutChildren();
     _placeChildren();
+  }
+
+  // The intrinsic width is always the size of the menu when the overflow menu
+  // is closed. This allows the right edge of the menu to be aligned when open
+  // or closed.
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return _intrinsicWidth ?? 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return _intrinsicWidth ?? 0.0;
   }
 
   @override
