@@ -11,13 +11,14 @@ import 'theme.dart';
 /// A modal route that replaces the entire screen with a platform-adaptive
 /// transition.
 ///
-/// For Android, the entrance transition for the page slides the page upwards
-/// and fades it in. The exit transition is the same, but in reverse.
+/// For Android, the entrance transition for the page zooms in while the
+/// exiting page zooms and fades out. The exit transition is similar, but in
+/// reverse.
 ///
-/// The transition is adaptive to the platform and on iOS, the page slides in
-/// from the right and exits in reverse. The page also shifts to the left in
-/// parallax when another page enters to cover it. (These directions are flipped
-/// in environments with a right-to-left reading direction.)
+/// For iOS, the page slides in from the right and exits in reverse. The page
+/// also shifts to the left in parallax when another page enters to cover it.
+/// (These directions are flipped in environments with a right-to-left reading
+/// direction.)
 ///
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set
