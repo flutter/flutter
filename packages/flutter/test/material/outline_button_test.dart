@@ -783,7 +783,7 @@ void main() {
             alignment: Alignment.topLeft,
             child: OutlineButton(
               key: buttonKey,
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                   color: Colors.black12,
                   width: thickness),
               onPressed: () {},
