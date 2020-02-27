@@ -1,4 +1,4 @@
-Signature: 4b4a33d66a6e32ca303d5744f5de0bdf
+Signature: ac462f9276e1e95a927b94350c07f38a
 
 UNUSED LICENSES:
 
@@ -1183,6 +1183,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Release-All-Android_NoGPUThreads.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus7-CPU-Tegra3-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-P30-GPU-MaliG76-arm64-Release-All-Android_Vulkan.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Pixel3-GPU-Adreno630-arm64-Release-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Pixel3a-GPU-Adreno615-arm64-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-ChromeOS-Clang-ASUSChromebookFlipC100-GPU-MaliT764-arm-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-ChromeOS-Clang-AcerChromebook13_CB5_311-GPU-TegraK1-arm-Release-All.json
@@ -1501,6 +1502,7 @@ FILE: ../../../third_party/skia/src/sksl/sksl_frag.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_geom.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_gpu.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_interp.inc
+FILE: ../../../third_party/skia/src/sksl/sksl_interp_inline.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_pipeline.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.inc
 ----------------------------------------------------------------------------------------------------
@@ -3982,6 +3984,11 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrDeviceSpaceEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDeviceSpaceEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDeviceSpaceEffect.h
 FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.h
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLSPIRVtoHLSL.h
