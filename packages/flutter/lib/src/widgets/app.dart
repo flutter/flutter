@@ -919,6 +919,8 @@ class WidgetsApp extends StatefulWidget {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return _defaultShortcuts;
       case TargetPlatform.macOS:
         return _defaultMacOsShortcuts;

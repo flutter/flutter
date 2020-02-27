@@ -180,6 +180,8 @@ class Typography extends Diagnosticable {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         black ??= blackMountainView;
         white ??= whiteMountainView;
     }
