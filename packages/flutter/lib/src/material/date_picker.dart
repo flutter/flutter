@@ -1026,23 +1026,26 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
             case Orientation.landscape:
               return Container(
                 color: theme.dialogBackgroundColor,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Flexible(child: header),
-                    Flexible(
-                      flex: 2, // have the picker take up 2/3 of the dialog width
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          Flexible(child: picker),
-                          actions,
-                        ],
+                child: IntrinsicHeight(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Flexible(child: header),
+                      Flexible(
+                        flex: 2,
+                        // have the picker take up 2/3 of the dialog width
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            Flexible(child: picker),
+                            actions,
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
           }
