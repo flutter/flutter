@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -33,84 +34,94 @@ const String base64PlistJson =
     'HV0dGVyLmZsdXR0ZXIuYXBwIn0=';
 
 void main() {
-  group('PlistUtils', () {
-    // The tests herein explicitly don't use `MemoryFileSystem` or a mocked
-    // `ProcessManager` because doing so wouldn't actually test what we want to
-    // test, which is that the underlying tool we're using to parse Plist files
-    // works with the way we're calling it.
-    final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
-      ProcessManager: () => const LocalProcessManager(),
-    };
+  // The tests herein explicitly don't use `MemoryFileSystem` or a mocked
+  // `ProcessManager` because doing so wouldn't actually test what we want to
+  // test, which is that the underlying tool we're using to parse Plist files
+  // works with the way we're calling it.
+  FileSystem fileSystem;
+  ProcessManager processManager;
+  File file;
+  PlistParser parser;
+  BufferLogger logger;
 
-    const PlistParser parser = PlistParser();
-
-    if (Platform.isMacOS) {
-      group('getValueFromFile', () {
-        File file;
-
-        setUp(() {
-          file = globals.fs.file('foo.plist')..createSync();
-        });
-
-        tearDown(() {
-          file.deleteSync();
-        });
-
-        testUsingContext('works with xml file', () async {
-          file.writeAsBytesSync(base64.decode(base64PlistXml));
-          expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-          expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-          expect(testLogger.statusText, isEmpty);
-          expect(testLogger.errorText, isEmpty);
-        }, overrides: overrides);
-
-        testUsingContext('works with binary file', () async {
-          file.writeAsBytesSync(base64.decode(base64PlistBinary));
-          expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-          expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-          expect(testLogger.statusText, isEmpty);
-          expect(testLogger.errorText, isEmpty);
-        }, overrides: overrides);
-
-        testUsingContext('works with json file', () async {
-          file.writeAsBytesSync(base64.decode(base64PlistJson));
-          expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-          expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
-          expect(testLogger.statusText, isEmpty);
-          expect(testLogger.errorText, isEmpty);
-        }, overrides: overrides);
-
-        testUsingContext('returns null for non-existent plist file', () async {
-          expect(parser.getValueFromFile('missing.plist', 'CFBundleIdentifier'), null);
-          expect(testLogger.statusText, isEmpty);
-          expect(testLogger.errorText, isEmpty);
-        }, overrides: overrides);
-
-        testUsingContext('returns null for non-existent key within plist', () async {
-          file.writeAsBytesSync(base64.decode(base64PlistXml));
-          expect(parser.getValueFromFile(file.path, 'BadKey'), null);
-          expect(parser.getValueFromFile(file.absolute.path, 'BadKey'), null);
-          expect(testLogger.statusText, isEmpty);
-          expect(testLogger.errorText, isEmpty);
-        }, overrides: overrides);
-
-        testUsingContext('returns null for malformed plist file', () async {
-          file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
-          expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), null);
-          expect(testLogger.statusText, isNotEmpty);
-          expect(testLogger.errorText, isEmpty);
-        }, overrides: overrides);
-      });
-    } else {
-      testUsingContext('throws when /usr/bin/plutil is not found', () async {
-        expect(
-          () => parser.getValueFromFile('irrelevant.plist', 'ununsed'),
-          throwsA(isA<FileNotFoundException>()),
-        );
-        expect(testLogger.statusText, isEmpty);
-        expect(testLogger.errorText, isEmpty);
-      }, overrides: overrides);
-    }
+  setUp(() {
+    logger = BufferLogger(
+      outputPreferences: OutputPreferences.test(),
+      terminal: AnsiTerminal(
+        platform: const LocalPlatform(),
+        stdio: null,
+      ),
+    );
+    fileSystem = const LocalFileSystemBlockingSetCurrentDirectory();
+    processManager = const LocalProcessManager();
+    parser = PlistParser(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+    );
+    file = fileSystem.file('foo.plist')..createSync();
   });
+
+  tearDown(() {
+    file.deleteSync();
+  });
+
+  testWithoutContext('PlistParser.getValueFromFile works with xml file', () {
+    file.writeAsBytesSync(base64.decode(base64PlistXml));
+
+    expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
+    expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
+    expect(logger.statusText, isEmpty);
+    expect(logger.errorText, isEmpty);
+  }, skip: !io.Platform.isMacOS);
+
+  testWithoutContext('PlistParser.getValueFromFile works with binary file', () {
+    file.writeAsBytesSync(base64.decode(base64PlistBinary));
+
+    expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
+    expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
+    expect(logger.statusText, isEmpty);
+    expect(logger.errorText, isEmpty);
+  }, skip: !io.Platform.isMacOS);
+
+  testWithoutContext('PlistParser.getValueFromFile works with json file', () {
+    file.writeAsBytesSync(base64.decode(base64PlistJson));
+
+    expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
+    expect(parser.getValueFromFile(file.absolute.path, 'CFBundleIdentifier'), 'io.flutter.flutter.app');
+    expect(logger.statusText, isEmpty);
+    expect(logger.errorText, isEmpty);
+  }, skip: !io.Platform.isMacOS);
+
+  testWithoutContext('PlistParser.getValueFromFile returns null for non-existent plist file', () {
+    expect(parser.getValueFromFile('missing.plist', 'CFBundleIdentifier'), null);
+    expect(logger.statusText, isEmpty);
+    expect(logger.errorText, isEmpty);
+  }, skip: !io.Platform.isMacOS);
+
+  testWithoutContext('PlistParser.getValueFromFile returns null for non-existent key within plist', () {
+    file.writeAsBytesSync(base64.decode(base64PlistXml));
+
+    expect(parser.getValueFromFile(file.path, 'BadKey'), null);
+    expect(parser.getValueFromFile(file.absolute.path, 'BadKey'), null);
+    expect(logger.statusText, isEmpty);
+    expect(logger.errorText, isEmpty);
+  }, skip: !io.Platform.isMacOS);
+
+  testWithoutContext('PlistParser.getValueFromFile returns null for malformed plist file', () {
+    file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
+
+    expect(parser.getValueFromFile(file.path, 'CFBundleIdentifier'), null);
+    expect(logger.statusText, isNotEmpty);
+    expect(logger.errorText, isEmpty);
+  }, skip: !io.Platform.isMacOS);
+
+  testWithoutContext('PlistParser.getValueFromFile throws when /usr/bin/plutil is not found', () async {
+    expect(
+      () => parser.getValueFromFile('irrelevant.plist', 'ununsed'),
+      throwsA(isA<FileNotFoundException>()),
+    );
+    expect(logger.statusText, isEmpty);
+    expect(logger.errorText, isEmpty);
+  }, skip: io.Platform.isMacOS);
 }

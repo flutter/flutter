@@ -402,7 +402,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     // Try parsing the default, first.
     if (defaultInfoPlist.existsSync()) {
       try {
-        fromPlist = PlistParser.instance.getValueFromFile(
+        fromPlist = globals.plistParser.getValueFromFile(
           defaultHostInfoPlist.path,
           PlistParser.kCFBundleIdentifierKey,
         );
