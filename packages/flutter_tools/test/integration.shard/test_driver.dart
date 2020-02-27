@@ -17,7 +17,6 @@ import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
 import '../src/common.dart';
-import 'test_utils.dart';
 
 // Set this to true for debugging to get verbose logs written to stdout.
 // The logs include the following:
@@ -174,14 +173,12 @@ abstract class FlutterTestDriver {
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     ProcessSignal.SIGTERM.send(_processPid);
-    await ensurePidDeath(_processPid);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
   Future<int> _killForcefully() async {
     _debugPrint('Sending SIGKILL to $_processPid..');
     ProcessSignal.SIGKILL.send(_processPid);
-    await ensurePidDeath(_processPid);
     return _process.exitCode;
   }
 

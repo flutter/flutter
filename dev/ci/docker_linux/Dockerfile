@@ -27,8 +27,7 @@ RUN apt-get install -y --no-install-recommends \
   unzip \
   apt-transport-https \
   ca-certificates \
-  gnupg \
-  procps
+  gnupg
 
 # Add repo for chrome stable
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -

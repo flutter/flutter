@@ -41,7 +41,6 @@ void main() {
 
     Map<String, dynamic> response = await stream.first;
     expect(response['event'], 'daemon.connected');
-    final int dartVmPid = response['params']['pid'] as int;
 
     // start listening for devices
     process.stdin.writeln('[${jsonEncode(<String, dynamic>{
@@ -73,7 +72,6 @@ void main() {
 
     process.kill();
     await process.exitCode;
-    await ensurePidDeath(dartVmPid);
 
     tryToDelete(tempDir);
   });

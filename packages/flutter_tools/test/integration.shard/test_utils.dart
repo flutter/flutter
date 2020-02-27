@@ -10,66 +10,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 
-/// Attempt to wait N tries with a one second delay between tries for a PID to
-/// disappear.
-///
-/// This is racy and should generally be avoided wherever possible. It is used
-/// for invocations of the `flutter` script that launch a Dart VM as a child
-/// process. The Dart VM may take slightly longer after the exit code is
-/// returned from the shell script. This is a problem on Windows in particular,
-/// where the Dart process will hold exclusive locks on file system objects we
-/// want to clean up at the end of a test.
-// TODO(dnfield): This is racy. If dart-lang/sdk#40759 can be resolved, we
-// should remove this.
-Future<void> ensurePidDeath(int pid, { int tries = 10 }) {
-  if (globals.platform.isWindows) {
-    return _ensurePidDeathPosix(pid, tries);
-  }
-  return _ensurePidDeathWindows(pid, tries);
-}
-
-Future<void> _ensurePidDeathWindows(int pid, int tries) async {
-  for (int i = 0; i < tries; i+= 1) {
-    final ProcessResult result = await globals.processManager.run(<String>[
-      'kill',
-      '-0',
-      pid.toString(),
-    ]);
-    if (result.exitCode == 0) {
-      return;
-    }
-    await Future<void>.delayed(const Duration(seconds: 1));
-  }
-  print('$pid still running after $tries seconds. Forcefully killing.');
-  await globals.processManager.run(<String>[
-    'kill',
-    '-9',
-    pid.toString(),
-  ]);
-}
-
-Future<void> _ensurePidDeathPosix(int pid, int tries) async {
-  for (int i = 0; i < tries; i += 1) {
-    final ProcessResult result = await globals.processManager.run(<String>[
-      'tasklist',
-      '/fi',
-      'PID eq $pid',
-    ]);
-    if ((result.stdout as String).contains('INFO: No tasks are running which match the specified criteria.')) {
-      return;
-    }
-    await Future<void>.delayed(const Duration(seconds: 1));
-  }
-  print('$pid still running after $tries seconds. Forcefully killing.');
-  await globals.processManager.run(<String>[
-    'taskkill',
-    '/pid',
-    pid.toString(),
-    '/f',
-  ]);
-}
-
-
 /// Creates a temporary directory but resolves any symlinks to return the real
 /// underlying path to avoid issues with breakpoints/hot reload.
 /// https://github.com/flutter/flutter/pull/21741
