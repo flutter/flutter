@@ -95,7 +95,7 @@ class FlutterDevice {
           .absolute.uri.toString(),
         dartDefines: dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
-          .getArtifactPath(Artifact.platformLibrariesJson)).uri.toString()
+          .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString()
       );
     } else {
       generator = ResidentCompiler(
