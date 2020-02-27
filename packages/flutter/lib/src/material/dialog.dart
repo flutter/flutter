@@ -872,6 +872,9 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// By default, `useRootNavigator` is `true` and the dialog route created by
 /// this method is pushed to the root navigator.
 ///
+/// The `routeSettings` argument is passed to [showGeneralDialog],
+/// see [RouteSettings] for details.
+///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -900,6 +903,7 @@ Future<T> showDialog<T>({
   Widget child,
   WidgetBuilder builder,
   bool useRootNavigator = true,
+  RouteSettings routeSettings,
 }) {
   assert(child == null || builder == null);
   assert(useRootNavigator != null);
@@ -926,5 +930,6 @@ Future<T> showDialog<T>({
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,
     useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
   );
 }
