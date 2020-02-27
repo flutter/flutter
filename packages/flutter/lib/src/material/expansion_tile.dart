@@ -41,10 +41,8 @@ class ExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
-    this.headerColorTweenBegin,
-    this.headerColorTweenEnd,
-    this.iconColorTweenBegin,
-    this.iconColorTweenEnd,
+    this.headerColorTween,
+    this.iconColorTween,
   }) : assert(initiallyExpanded != null),
        super(key: key);
 
@@ -84,21 +82,15 @@ class ExpansionTile extends StatefulWidget {
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
 
-  /// The color of the header when the tile is collapsed.
-  /// Default value is theme.textTheme.subtitle1.color
-  final Color headerColorTweenBegin;
+  /// The tween to control the color of the header.
+  /// begin defaults to theme.textTheme.subtitle1.color
+  /// end defaults to theme.accentColor
+  final ColorTween headerColorTween;
 
-  /// The color of the header when the tile is expanded.
-  /// Default value is theme.accentColor
-  final Color headerColorTweenEnd;
-
-  /// The color of the icon when the tile is collapsed.
-  /// Default value is theme.unselectedWidgetColor
-  final Color iconColorTweenBegin;
-
-  /// The color of the icon when the tile is expanded.
-  /// Default value is theme.accentColor;
-  final Color iconColorTweenEnd;
+  /// The tween to control the color of the header.
+  /// begin defaults to theme.unselectedWidgetColor
+  /// end defaults to theme.accentColor
+  final ColorTween iconColorTween;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -110,10 +102,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
 
   final ColorTween _borderColorTween = ColorTween();
-  final ColorTween _headerColorTween = ColorTween();
-  final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
 
+  ColorTween _headerColorTween;
+  ColorTween _iconColorTween;
   AnimationController _controller;
   Animation<double> _iconTurns;
   Animation<double> _heightFactor;
@@ -127,6 +119,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
+    _headerColorTween = widget.headerColorTween ?? ColorTween();
+    _iconColorTween = widget.iconColorTween ?? ColorTween();
     _controller = AnimationController(duration: _kExpand, vsync: this);
     _heightFactor = _controller.drive(_easeInTween);
     _iconTurns = _controller.drive(_halfTween.chain(_easeInTween));
@@ -210,11 +204,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ThemeData theme = Theme.of(context);
     _borderColorTween.end = theme.dividerColor;
     _headerColorTween
-      ..begin = widget.headerColorTweenBegin ?? theme.textTheme.subtitle1.color
-      ..end = widget.headerColorTweenEnd ?? theme.accentColor;
+      ..begin = widget.headerColorTween?.begin ?? theme.textTheme.subtitle1.color
+      ..end = widget.headerColorTween?.end ?? theme.accentColor;
     _iconColorTween
-      ..begin = widget.iconColorTweenBegin ?? theme.unselectedWidgetColor
-      ..end = widget.iconColorTweenEnd ?? theme.accentColor;
+      ..begin = widget.iconColorTween?.begin ?? theme.unselectedWidgetColor
+      ..end = widget.iconColorTween?.end ?? theme.accentColor;
     _backgroundColorTween.end = widget.backgroundColor;
     super.didChangeDependencies();
   }
