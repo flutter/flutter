@@ -4,99 +4,126 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
-import '../../src/testbed.dart';
+import '../../src/context.dart';
+
+const List<String> _kChromeArgs = <String>[
+  '--disable-background-timer-throttling',
+  '--disable-extensions',
+  '--disable-popup-blocking',
+  '--bwsi',
+  '--no-first-run',
+  '--no-default-browser-check',
+  '--disable-default-apps',
+  '--disable-translate',
+];
+
+const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
 
 void main() {
-  Testbed testbed;
-  Completer<int> exitCompleter;
+  ChromeLauncher chromeLauncher;
+  FileSystem fileSystem;
+  Platform platform;
+  FakeProcessManager processManager;
+  OperatingSystemUtils operatingSystemUtils;
+  MockLogger logger;
 
   setUp(() {
-    final MockPlatform platform = MockPlatform();
-    final MockOperatingSystemUtils os = MockOperatingSystemUtils();
-    exitCompleter = Completer<int>.sync();
-    when(platform.isWindows).thenReturn(false);
-    testbed = Testbed(overrides: <Type, Generator>{
-      ProcessManager: () => MockProcessManager(),
-      Platform: () => platform,
-      OperatingSystemUtils: () => os,
-    }, setup: () {
-      when(os.findFreePort()).thenAnswer((Invocation invocation) async {
-        return 1234;
-      });
-      when(platform.environment).thenReturn(<String, String>{
-        kChromeEnvironment: 'example_chrome',
-      });
-      when(globals.processManager.start(any))
+    logger = MockLogger();
+    operatingSystemUtils = MockOperatingSystemUtils();
+    when(operatingSystemUtils.findFreePort())
         .thenAnswer((Invocation invocation) async {
-        return FakeProcess(
-          exitCode: exitCompleter.future,
-          stdout: const Stream<List<int>>.empty(),
-          stderr: Stream<List<int>>.fromIterable(<List<int>>[
-            utf8.encode('\n\nDevTools listening\n\n'),
-          ]),
-        );
-      });
+      return 1234;
     });
+    platform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{
+      kChromeEnvironment: 'example_chrome',
+    });
+    fileSystem = MemoryFileSystem.test();
+    processManager = FakeProcessManager.list(<FakeCommand>[]);
+    chromeLauncher = ChromeLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      logger: logger,
+    );
   });
 
   tearDown(() {
     resetChromeForTesting();
   });
 
-  List<String> expectChromeArgs({int debugPort = 1234}) {
-    return <String>[
-      'example_chrome',
-      '--remote-debugging-port=$debugPort',
-      '--disable-background-timer-throttling',
-      '--disable-extensions',
-      '--disable-popup-blocking',
-      '--bwsi',
-      '--no-first-run',
-      '--no-default-browser-check',
-      '--disable-default-apps',
-      '--disable-translate',
+  test('can launch chrome and connect to the devtools', () async {
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tool.rand0',
+        '--remote-debugging-port=1234',
+        ..._kChromeArgs,
+        'example_url',
+      ],
+      stderr: kDevtoolsStderr,
+    ));
+
+    await chromeLauncher.launch(
       'example_url',
-    ];
-  }
+      skipCheck: true,
+    );
+  });
 
-  test('can launch chrome and connect to the devtools', () => testbed.run(() async {
-    await globals.chromeLauncher.launch('example_url', skipCheck: true);
+  test('can launch chrome with a custom debug port', () async {
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tool.rand0',
+        '--remote-debugging-port=10000',
+        ..._kChromeArgs,
+        'example_url',
+      ],
+      stderr: kDevtoolsStderr,
+    ));
 
-    final VerificationResult result = verify(globals.processManager.start(captureAny));
-    expect(result.captured.single, containsAll(expectChromeArgs()));
-    expect(result.captured.single, isNot(contains('--window-size=2400,1800')));
-  }));
+    await chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      debugPort: 10000,
+    );
+  });
 
-  test('can launch chrome with a custom debug port', () => testbed.run(() async {
-    await globals.chromeLauncher.launch('example_url', skipCheck: true, debugPort: 10000);
-    final VerificationResult result = verify(globals.processManager.start(captureAny));
+  test('can launch chrome headless', () async {
+    processManager.addCommand(const FakeCommand(
+      command: <String>[
+        'example_chrome',
+        '--user-data-dir=/.tmp_rand0/flutter_tool.rand0',
+        '--remote-debugging-port=1234',
+        ..._kChromeArgs,
+        '--headless',
+        '--disable-gpu',
+        '--no-sandbox',
+        '--window-size=2400,1800',
+        'example_url',
+      ],
+      stderr: kDevtoolsStderr,
+    ));
 
-    expect(result.captured.single, containsAll(expectChromeArgs(debugPort: 10000)));
-    expect(result.captured.single, isNot(contains('--window-size=2400,1800')));
-  }));
+    await chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      headless: true,
+    );
+  });
 
-  test('can launch chrome headless', () => testbed.run(() async {
-    await globals.chromeLauncher.launch('example_url', skipCheck: true, headless: true);
-    final VerificationResult result = verify(globals.processManager.start(captureAny));
-
-    expect(result.captured.single, containsAll(expectChromeArgs()));
-    expect(result.captured.single, contains('--window-size=2400,1800'));
-  }));
-
-
-  test('can seed chrome temp directory with existing preferences', () => testbed.run(() async {
-    final Directory dataDir = globals.fs.directory('chrome-stuff');
+  test('can seed chrome temp directory with existing preferences', () async {
+    final Completer<void> exitCompleter = Completer<void>.sync();
+    final Directory dataDir = fileSystem.directory('chrome-stuff');
     final File preferencesFile = dataDir
       .childDirectory('Default')
       .childFile('preferences');
@@ -104,12 +131,22 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('example');
 
-    await globals.chromeLauncher.launch('example_url', skipCheck: true, dataDir: dataDir);
-    final VerificationResult result = verify(globals.processManager.start(captureAny));
-    final String arg = (result.captured.single as List<String>)
-      .firstWhere((String arg) => arg.startsWith('--user-data-dir='));
-    final Directory tempDirectory = globals.fs.directory(arg.split('=')[1]);
-    final File tempFile = tempDirectory
+    processManager.addCommand(FakeCommand(command: const <String>[
+      'example_chrome',
+      '--user-data-dir=/.tmp_rand0/flutter_tool.rand0',
+      '--remote-debugging-port=1234',
+      ..._kChromeArgs,
+      'example_url',
+    ], completer: exitCompleter));
+
+    await chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      dataDir: dataDir,
+    );
+
+    final File tempFile = fileSystem
+      .directory('.tmp_rand0/flutter_tool.rand0')
       .childDirectory('Default')
       .childFile('preferences');
 
@@ -118,13 +155,12 @@ void main() {
 
     // write crash to file:
     tempFile.writeAsStringSync('"exit_type":"Crashed"');
-    exitCompleter.complete(0);
+    exitCompleter.complete();
 
     // writes non-crash back to dart_tool
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
-  }));
+  });
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockPlatform extends Mock implements Platform {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockLogger extends Mock implements Logger {}

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show ProcessSignal;
 
@@ -26,6 +27,7 @@ class FakeCommand {
     this.exitCode = 0,
     this.stdout = '',
     this.stderr = '',
+    this.completer,
   }) : assert(command != null),
        assert(duration != null),
        assert(exitCode != null),
@@ -78,6 +80,10 @@ class FakeCommand {
   /// returned in one go.
   final String stderr;
 
+  /// If provided, allows the command completion to be blocked until the future
+  /// resolves.
+  final Completer<void> completer;
+
   static bool _listEquals<T>(List<T> a, List<T> b) {
     if (a == null) {
       return b == null;
@@ -123,9 +129,13 @@ class _FakeProcess implements Process {
     this._stderr,
     this.stdin,
     this._stdout,
+    Completer<void> completer,
   ) : exitCode = Future<void>.delayed(duration).then((void value) {
         if (onRun != null) {
           onRun();
+        }
+        if (completer != null) {
+          return completer.future.then((void _) => _exitCode);
         }
         return _exitCode;
       }),
@@ -184,6 +194,14 @@ abstract class FakeProcessManager implements ProcessManager {
 
   FakeProcessManager._();
 
+  /// Adds a new [FakeCommand] to the current process manager.
+  ///
+  /// This can be used to configure test expectations after the [ProcessManager] has been
+  /// provided to another interface.
+  ///
+  /// This is a no-op on [FakeProcessManager.any].
+  void addCommand(FakeCommand command);
+
   @protected
   FakeCommand findCommand(List<String> command, String workingDirectory, Map<String, String> environment);
 
@@ -200,6 +218,7 @@ abstract class FakeProcessManager implements ProcessManager {
       fakeCommand.stderr,
       null, // stdin
       fakeCommand.stdout,
+      fakeCommand.completer,
     );
   }
 
@@ -277,6 +296,9 @@ class _FakeAnyProcessManager extends FakeProcessManager {
       stderr: '',
     );
   }
+
+  @override
+  void addCommand(FakeCommand command) { }
 }
 
 class _SequenceProcessManager extends FakeProcessManager {
@@ -297,5 +319,10 @@ class _SequenceProcessManager extends FakeProcessManager {
               '(in ${_commands.first.workingDirectory}, with environment ${_commands.first.environment})}.'
     );
     return _commands.removeAt(0);
+  }
+
+  @override
+  void addCommand(FakeCommand command) {
+    _commands.add(command);
   }
 }
