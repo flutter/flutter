@@ -224,12 +224,12 @@ void main() {
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
       'FLUTTER_XCODE_ARCHS': 'arm64'
     });
-    when(processManager.runSync(
+    when(processManager.run(
       any,
       workingDirectory: anyNamed('workingDirectory')))
-      .thenReturn(ProcessResult(1, 0, '', ''));
-    xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Runner');
-    final List<dynamic> captured = verify(processManager.runSync(
+      .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', '')));
+    await xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Runner');
+    final List<dynamic> captured = verify(processManager.run(
       captureAny,
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'))).captured;

@@ -386,7 +386,8 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  void cleanWorkspace(String workspacePath, String scheme) {
+  Future<void> cleanWorkspace(String workspacePath, String scheme) {
+    return null;
   }
 
   @override
