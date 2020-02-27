@@ -201,17 +201,27 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   @override
   void didChangeDependencies() {
-    final ThemeData theme = Theme.of(context);
-    _borderColorTween.end = theme.dividerColor;
-    _headerColorTween
-      ..begin = widget.headerColorTween?.begin ?? theme.textTheme.subtitle1.color
-      ..end = widget.headerColorTween?.end ?? theme.accentColor;
-    _iconColorTween
-      ..begin = widget.iconColorTween?.begin ?? theme.unselectedWidgetColor
-      ..end = widget.iconColorTween?.end ?? theme.accentColor;
-    _backgroundColorTween.end = widget.backgroundColor;
+    _updateColorTweens();
     super.didChangeDependencies();
   }
+
+  @override
+  void didUpdateWidget(ExpansionTile oldWidget) {
+    _updateColorTweens();
+    super.didUpdateWidget(oldWidget);
+  }
+
+    void _updateColorTweens() {
+      final ThemeData theme = Theme.of(context);
+      _borderColorTween.end = theme.dividerColor;
+      _headerColorTween
+        ..begin = widget.headerColorTween?.begin ?? theme.textTheme.subtitle1.color
+        ..end = widget.headerColorTween?.end ?? theme.accentColor;
+      _iconColorTween
+        ..begin = widget.iconColorTween?.begin ?? theme.unselectedWidgetColor
+        ..end = widget.iconColorTween?.end ?? theme.accentColor;
+      _backgroundColorTween.end = widget.backgroundColor;
+    }
 
   @override
   Widget build(BuildContext context) {
