@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
@@ -77,8 +76,6 @@ void main() {
 
       final IntelliJValidatorOnMac validatorNotViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathNotViaToolbox);
       expect(validatorNotViaToolbox.plistFile, 'test/data/intellij/mac_not_via_toolbox/Contents/Info.plist');
-    }, overrides: <Type, Generator>{
-      PlistParser: () => const PlistParser(),
     });
 
     testUsingContext('vs code validator when both installed', () async {

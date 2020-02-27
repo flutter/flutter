@@ -22,6 +22,7 @@ import 'base/user_messages.dart';
 import 'cache.dart';
 import 'ios/ios_deploy.dart';
 import 'ios/mac.dart';
+import 'ios/plist_parser.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'version.dart';
@@ -149,6 +150,13 @@ final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
 
 /// The global Stdio wrapper.
 Stdio get stdio => context.get<Stdio>() ?? const Stdio();
+
+PlistParser get plistParser => context.get<PlistParser>() ?? (_defaultInstance ??= PlistParser(
+  fileSystem: fs,
+  processManager: processManager,
+  logger: logger,
+));
+PlistParser _defaultInstance;
 
 /// The [ChromeLauncher] instance.
 ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
