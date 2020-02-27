@@ -47,7 +47,6 @@ void main() {
 
     await pumpTest(tester, TargetPlatform.linux);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
-    // Scroll starts ease into the scroll on iOS.
     expect(getCurrentOffset(), dragOffset);
     await tester.pump(); // trigger fling
     expect(getCurrentOffset(), dragOffset);
@@ -56,7 +55,6 @@ void main() {
 
     await pumpTest(tester, TargetPlatform.windows);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
-    // Scroll starts ease into the scroll on iOS.
     expect(getCurrentOffset(), dragOffset);
     await tester.pump(); // trigger fling
     expect(getCurrentOffset(), dragOffset);
