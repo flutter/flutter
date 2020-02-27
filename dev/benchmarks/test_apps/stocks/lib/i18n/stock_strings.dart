@@ -60,10 +60,6 @@ import 'package:intl/intl.dart' as intl;
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
 abstract class StockStrings {
-  StockStrings(String locale) : assert(locale != null), _localeName = intl.Intl.canonicalizedLocale(locale.toString());
-
-  final String _localeName;
-
   static StockStrings of(BuildContext context) {
     return Localizations.of<StockStrings>(context, StockStrings);
   }
@@ -89,8 +85,9 @@ abstract class StockStrings {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
     Locale('en, US'),
-    Locale('es, ES')
+    Locale('es')
   ];
 
   // Title for the Stocks application
@@ -118,10 +115,8 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
   bool shouldReload(_StockStringsDelegate old) => false;
 }
 
-/// The translations for English, as used in the United States (`en_US`).
-class StockStringsEnUs extends StockStringsEn {
-  StockStringsEnUs([String locale = 'en_US']) : super(locale);
-
+/// The translations for English (`en`).
+class StockStringsEn extends StockStrings {
   @override
   String get title => 'Stocks';
 
@@ -132,10 +127,20 @@ class StockStringsEnUs extends StockStringsEn {
   String get portfolio => 'PORTFOLIO';
 }
 
-/// The translations for Spanish Castilian, as used in Spain (`es_ES`).
-class StockStringsEsEs extends StockStringsEs {
-  StockStringsEsEs([String locale = 'es_ES']) : super(locale);
+/// The translations for English, as used in the United States (`en_US`).
+class StockStringsEnUs extends StockStringsEn {
+  @override
+  String get title => 'Stocks';
 
+  @override
+  String get market => 'MARKET';
+
+  @override
+  String get portfolio => 'PORTFOLIO';
+}
+
+/// The translations for Spanish Castilian (`es`).
+class StockStringsEs extends StockStrings {
   @override
   String get title => 'Acciones';
 
@@ -148,8 +153,13 @@ class StockStringsEsEs extends StockStringsEs {
 
 StockStrings _lookupStockStrings(Locale locale) {
   switch(locale.languageCode) {
-    case 'en': return StockStringsEnUs();
-    case 'es': return StockStringsEsEs();
+    case 'en': {
+      switch (locale.countryCode) {
+        case 'US': return StockStringsEnUs();
+      }
+      return StockStringsEn();
+    }
+    case 'es': return StockStringsEs();
   }
   assert(false, 'StockStrings.delegate failed to load unsupported locale "$locale"');
   return null;
