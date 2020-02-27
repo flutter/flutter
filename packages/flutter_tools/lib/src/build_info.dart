@@ -395,8 +395,7 @@ DarwinArch getIOSArchForName(String arch) {
     case 'x86_64':
       return DarwinArch.x86_64;
   }
-  assert(false);
-  return null;
+  throw Exception('Unsupported iOS arch name "$arch"');
 }
 
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}) {
@@ -477,8 +476,7 @@ AndroidArch getAndroidArchForName(String platform) {
     case 'android-x86':
       return AndroidArch.x86;
   }
-  assert(false);
-  return null;
+  throw Exception('Unsupported Android arch name "$platform"');
 }
 
 String getNameForAndroidArch(AndroidArch arch) {

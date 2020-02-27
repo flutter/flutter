@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mockito/mockito.dart';
 
 void main() {
   group('PhysicalShape', () {
@@ -278,6 +279,90 @@ void main() {
       equals('UnconstrainedBox(alignment: topRight, constrainedAxis: horizontal, textDirection: rtl)'),
     );
   });
+
+  group('ColoredBox', () {
+    _MockCanvas mockCanvas;
+    _MockPaintingContext mockContext;
+    const Color colorToPaint = Color(0xFFABCDEF);
+
+    setUp(() {
+      mockContext = _MockPaintingContext();
+      mockCanvas = _MockCanvas();
+      when(mockContext.canvas).thenReturn(mockCanvas);
+    });
+
+    testWidgets('ColoredBox - no size, no child', (WidgetTester tester) async {
+      await tester.pumpWidget(Flex(
+        direction: Axis.horizontal,
+        textDirection: TextDirection.ltr,
+        children: const <Widget>[
+          SizedBox.shrink(
+            child: ColoredBox(color: colorToPaint),
+          ),
+        ],
+      ));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      verifyNever(mockCanvas.drawRect(any, any));
+      verifyNever(mockContext.paintChild(any, any));
+    });
+
+    testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
+      const ValueKey<int> key = ValueKey<int>(0);
+      const Widget child = SizedBox.expand(key: key);
+      await tester.pumpWidget(Flex(
+        direction: Axis.horizontal,
+        textDirection: TextDirection.ltr,
+        children: const <Widget>[
+          SizedBox.shrink(
+            child: ColoredBox(color: colorToPaint, child: child),
+          ),
+        ],
+      ));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+      final RenderObject renderSizedBox = tester.renderObject(find.byKey(key));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      verifyNever(mockCanvas.drawRect(any, any));
+      verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
+    });
+
+    testWidgets('ColoredBox - size, no child', (WidgetTester tester) async {
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      final List<dynamic> drawRect = verify(mockCanvas.drawRect(captureAny, captureAny)).captured;
+      expect(drawRect.length, 2);
+      expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
+      expect(drawRect[1].color, colorToPaint);
+      verifyNever(mockContext.paintChild(any, any));
+    });
+
+    testWidgets('ColoredBox - size, child', (WidgetTester tester) async {
+      const ValueKey<int> key = ValueKey<int>(0);
+      const Widget child = SizedBox.expand(key: key);
+      await tester.pumpWidget(const ColoredBox(color: colorToPaint, child: child));
+      expect(find.byType(ColoredBox), findsOneWidget);
+      final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
+      final RenderObject renderSizedBox = tester.renderObject(find.byKey(key));
+
+      renderColoredBox.paint(mockContext, Offset.zero);
+
+      final List<dynamic> drawRect = verify(mockCanvas.drawRect(captureAny, captureAny)).captured;
+      expect(drawRect.length, 2);
+      expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
+      expect(drawRect[1].color, colorToPaint);
+      verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
+      });
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
@@ -319,3 +404,6 @@ class DoesNotHitRenderBox extends Matcher {
     ).isEmpty;
   }
 }
+
+class _MockPaintingContext extends Mock implements PaintingContext {}
+class _MockCanvas extends Mock implements Canvas {}

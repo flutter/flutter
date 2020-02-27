@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart' as vm_service_io;
 
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../device.dart';
 import '../mdns_discovery.dart';
@@ -120,19 +121,14 @@ class FallbackDiscovery {
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
       _logger.printTrace('Failed to connect directly, falling back to mDNS');
-      UsageEvent(
-        _kEventName,
-        'failure',
-        label: err.toString(),
-        value: hostPort,
-      ).send();
+      _sendFailureEvent(err, assumedDevicePort);
       return null;
     }
 
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
     const int kDelaySeconds = 2;
-    Object firstException;
+    Exception firstException;
     while (attempts < 5) {
       try {
         final VmService vmService = await _vmServiceConnectUri(assumedWsUri.toString());
@@ -163,12 +159,27 @@ class FallbackDiscovery {
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
+    _sendFailureEvent(firstException, assumedDevicePort);
+    return null;
+  }
+
+  void _sendFailureEvent(Exception err, int assumedDevicePort) {
+    String eventAction;
+    String eventLabel;
+    if (err == null) {
+      eventAction = 'failure-attempts-exhausted';
+      eventLabel = assumedDevicePort.toString();
+    } else if (err is HttpException) {
+      eventAction = 'failure-http';
+      eventLabel = '${err.message}, device port = $assumedDevicePort';
+    } else {
+      eventAction = 'failure-other';
+      eventLabel = '$err, device port = $assumedDevicePort';
+    }
     UsageEvent(
       _kEventName,
-      'failure',
-      label: firstException?.toString() ?? 'Connection attempts exhausted',
-      value: hostPort,
+      eventAction,
+      label: eventLabel,
     ).send();
-    return null;
   }
 }

@@ -54,7 +54,7 @@ void main() {
       expect(portForwarder.forwardedPorts.length, 2);
       try {
         await portForwarder.dispose();
-      } catch (e) {
+      } on Exception catch (e) {
         fail('Encountered exception: $e');
       }
       expect(portForwarder.forwardedPorts.length, 0);
@@ -498,7 +498,7 @@ void main() {
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
       final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
-      when(PlistParser.instance.getValueFromFile(any, any)).thenReturn('correct');
+      when(globals.plistParser.getValueFromFile(any, any)).thenReturn('correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);

@@ -67,6 +67,17 @@ void main() {
       expect(message.message, contains('recommended minimum version'));
     }, overrides: noColorTerminalOverride);
 
+    testUsingContext('intellij plugins path checking on mac', () async {
+      final String pathViaToolbox = globals.fs.path.join('test', 'data', 'intellij', 'mac_via_toolbox');
+      final String pathNotViaToolbox = globals.fs.path.join('test', 'data', 'intellij', 'mac_not_via_toolbox');
+
+      final IntelliJValidatorOnMac validatorViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathViaToolbox);
+      expect(validatorViaToolbox.plistFile, 'test/data/intellij/mac_via_toolbox/Contents/Info.plist');
+
+      final IntelliJValidatorOnMac validatorNotViaToolbox = IntelliJValidatorOnMac('Test', 'Test', pathNotViaToolbox);
+      expect(validatorNotViaToolbox.plistFile, 'test/data/intellij/mac_not_via_toolbox/Contents/Info.plist');
+    });
+
     testUsingContext('vs code validator when both installed', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
       expect(result.type, ValidationType.installed);

@@ -318,7 +318,7 @@ void main() {
       expect(imageCache.liveImageCount, 0);
     });
 
-    test('Evicting a pending image clears the live image', () async {
+    test('Evicting a pending image clears the live image by default', () async {
       const TestImage testImage = TestImage(width: 8, height: 8);
 
       final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
@@ -332,7 +332,40 @@ void main() {
       expect(imageCache.statusForKey(testImage).untracked, true);
     });
 
-    test('Evicting a completed image does not clear the live image', () async {
+    test('Evicting a pending image does clear the live image when includeLive is false and only cache listening', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, true);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+
+      imageCache.evict(testImage, includeLive: false);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, false);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+    });
+
+    test('Evicting a pending image does clear the live image when includeLive is false and some other listener', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, true);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+
+      completer1.addListener(ImageStreamListener((_, __) {}));
+      imageCache.evict(testImage, includeLive: false);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+    });
+
+    test('Evicting a completed image does clear the live image by default', () async {
       const TestImage testImage = TestImage(width: 8, height: 8);
 
       final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
@@ -345,6 +378,22 @@ void main() {
       expect(imageCache.statusForKey(testImage).keepAlive, true);
 
       imageCache.evict(testImage);
+      expect(imageCache.statusForKey(testImage).untracked, true);
+    });
+
+    test('Evicting a completed image does not clear the live image when includeLive is set to false', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+        ..testSetImage(testImage)
+        ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+
+      imageCache.evict(testImage, includeLive: false);
       expect(imageCache.statusForKey(testImage).pending, false);
       expect(imageCache.statusForKey(testImage).live, true);
       expect(imageCache.statusForKey(testImage).keepAlive, false);

@@ -217,10 +217,28 @@ class ImageCache {
   /// If the key is not immediately available, as is common, consider using
   /// [ImageProvider.evict] to call this method indirectly instead.
   ///
+  /// The `includeLive` argument determines whether images that still have
+  /// listeners in the tree should be evicted as well. This parameter should be
+  /// set to true in cases where the image may be corrupted and needs to be
+  /// completely discarded by the cache. It should be set to false when calls
+  /// to evict are trying to relieve memory pressure, since an image with a
+  /// listener will not actually be evicted from memory, and subsequent attempts
+  /// to load it will end up allocating more memory for the image again. The
+  /// argument must not be null.
+  ///
   /// See also:
   ///
   ///  * [ImageProvider], for providing images to the [Image] widget.
-  bool evict(Object key) {
+  bool evict(Object key, { bool includeLive = true }) {
+    assert(includeLive != null);
+    if (includeLive) {
+      // Remove from live images - the cache will not be able to mark
+      // it as complete, and it might be getting evicted because it
+      // will never complete, e.g. it was loaded in a FakeAsync zone.
+      // In such a case, we need to make sure subsequent calls to
+      // putIfAbsent don't return this image that may never complete.
+      _liveImages.remove(key);
+    }
     final _PendingImage pendingImage = _pendingImages.remove(key);
     if (pendingImage != null) {
       if (!kReleaseMode) {
@@ -229,12 +247,6 @@ class ImageCache {
         });
       }
       pendingImage.removeListener();
-      // Remove from live images - the cache will not be able to mark
-      // it as complete, and it might be getting evicted because it
-      // will never complete, e.g. it was loaded in a FakeAsync zone.
-      // In such a case, we need to make sure subsequent calls to
-      // putIfAbsent don't return this image that may never complete.
-      _liveImages.remove(key);
       return true;
     }
     final _CachedImage image = _cache.remove(key);
@@ -262,7 +274,10 @@ class ImageCache {
   /// Resizes the cache as appropriate to maintain the constraints of
   /// [maximumSize] and [maximumSizeBytes].
   void _touch(Object key, _CachedImage image, TimelineTask timelineTask) {
-    assert(timelineTask != null);
+    // TODO(dnfield): Some customers test in release mode with asserts enabled.
+    // This is bound to cause problems, b/150295238 is tracking that. For now,
+    // avoid this being a point of failure.
+    assert(kReleaseMode || timelineTask != null);
     if (image.sizeBytes != null && image.sizeBytes <= maximumSizeBytes) {
       _currentSizeBytes += image.sizeBytes;
       _cache[key] = image;

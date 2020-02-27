@@ -403,7 +403,7 @@ class Cache {
     if (!cachedFile.existsSync()) {
       try {
         await downloadFile(url, cachedFile);
-      } catch (e) {
+      } on Exception catch (e) {
         throwToolExit('Failed to fetch third-party artifact $url: $e');
       }
     }
@@ -597,7 +597,8 @@ abstract class CachedArtifact extends ArtifactSet {
         try {
           await cache.downloadFile(url, tempFile);
           status.stop();
-        } catch (exception) {
+        // The exception is rethrown, so don't catch only Exceptions.
+        } catch (exception) { // ignore: avoid_catches_without_on_clauses
           status.cancel();
           rethrow;
         }
@@ -1261,9 +1262,7 @@ class IosUsbArtifacts extends CachedArtifact {
     'usbmuxd',
     'libplist',
     'openssl',
-    'ideviceinstaller',
     'ios-deploy',
-    'libzip',
   ];
 
   // For unknown reasons, users are getting into bad states where libimobiledevice is
