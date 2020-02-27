@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 
-import 'messages_all.dart';
+// ignore_for_file: unnecessary_brace_in_string_interps
 
 /// Callers can lookup localized strings with an instance of StockStrings returned
 /// by `StockStrings.of(context)`.
@@ -58,15 +59,10 @@ import 'messages_all.dart';
 /// you wish to add from the pop-up menu in the Value field. This list should
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
-class StockStrings {
-  StockStrings(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
+abstract class StockStrings {
+  StockStrings(String locale) : assert(locale != null), _localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String _localeName;
-
-  static Future<StockStrings> load(Locale locale) {
-    return initializeMessages(locale.toString())
-      .then<StockStrings>((_) => StockStrings(locale));
-  }
 
   static StockStrings of(BuildContext context) {
     return Localizations.of<StockStrings>(context, StockStrings);
@@ -80,6 +76,10 @@ class StockStrings {
   /// Returns a list of localizations delegates containing this delegate along with
   /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
   /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
@@ -89,48 +89,68 @@ class StockStrings {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('en', 'US'),
-    Locale('es', 'ES'),
+    Locale('en, US'),
+    Locale('es, ES')
   ];
 
-  String get market {
-    return Intl.message(
-      r'MARKET',
-      locale: _localeName,
-      name: 'market',
-      desc: r'Label for the Market tab'
-    );
-  }
+  // Title for the Stocks application
+  String get title;
 
-  String get portfolio {
-    return Intl.message(
-      r'PORTFOLIO',
-      locale: _localeName,
-      name: 'portfolio',
-      desc: r'Label for the Portfolio tab'
-    );
-  }
+  // Label for the Market tab
+  String get market;
 
-  String get title {
-    return Intl.message(
-      r'Stocks',
-      locale: _localeName,
-      name: 'title',
-      desc: r'Title for the Stocks application'
-    );
-  }
-
+  // Label for the Portfolio tab
+  String get portfolio;
 }
 
 class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
   const _StockStringsDelegate();
 
   @override
-  Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
+  Future<StockStrings> load(Locale locale) {
+    return SynchronousFuture<StockStrings>(_lookupStockStrings(locale));
+  }
 
   @override
   bool isSupported(Locale locale) => <String>['en', 'es'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_StockStringsDelegate old) => false;
+}
+
+/// The translations for English, as used in the United States (`en_US`).
+class StockStringsEnUs extends StockStringsEn {
+  StockStringsEnUs([String locale = 'en_US']) : super(locale);
+
+  @override
+  String get title => 'Stocks';
+
+  @override
+  String get market => 'MARKET';
+
+  @override
+  String get portfolio => 'PORTFOLIO';
+}
+
+/// The translations for Spanish Castilian, as used in Spain (`es_ES`).
+class StockStringsEsEs extends StockStringsEs {
+  StockStringsEsEs([String locale = 'es_ES']) : super(locale);
+
+  @override
+  String get title => 'Acciones';
+
+  @override
+  String get market => 'MERCADO';
+
+  @override
+  String get portfolio => 'CARTERA';
+}
+
+StockStrings _lookupStockStrings(Locale locale) {
+  switch(locale.languageCode) {
+    case 'en': return StockStringsEnUs();
+    case 'es': return StockStringsEsEs();
+  }
+  assert(false, 'StockStrings.delegate failed to load unsupported locale "$locale"');
+  return null;
 }
