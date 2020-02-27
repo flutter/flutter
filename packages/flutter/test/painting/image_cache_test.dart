@@ -9,13 +9,14 @@ import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-  group(ImageCache, () {
+  group('ImageCache', () {
     setUpAll(() {
       TestRenderingFlutterBinding(); // initializes the imageCache
     });
 
     tearDown(() {
       imageCache.clear();
+      imageCache.clearLiveImages();
       imageCache.maximumSize = 1000;
       imageCache.maximumSizeBytes = 10485760;
     });
@@ -169,7 +170,14 @@ void main() {
         return completer1;
       }) as TestImageStreamCompleter;
 
+      expect(imageCache.statusForKey(testImage).pending, true);
+      expect(imageCache.statusForKey(testImage).live, true);
       imageCache.clear();
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      imageCache.clearLiveImages();
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, false);
 
       final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
         return completer2;
@@ -240,7 +248,155 @@ void main() {
 
       expect(resultingCompleter1, completer1);
       expect(imageCache.containsKey(testImage), true);
+    });
 
+    test('putIfAbsent updates LRU properties of a live image', () async {
+      imageCache.maximumSize = 1;
+      const TestImage testImage = TestImage(width: 8, height: 8);
+      const TestImage testImage2 = TestImage(width: 10, height: 10);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()..testSetImage(testImage);
+      final TestImageStreamCompleter completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
+
+      completer1.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+
+      final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
+        return completer1;
+      }) as TestImageStreamCompleter;
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage2).untracked, true);
+      final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage2, () {
+        return completer2;
+      }) as TestImageStreamCompleter;
+
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).keepAlive, false); // evicted
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage2).pending, false);
+      expect(imageCache.statusForKey(testImage2).keepAlive, true); // took the LRU spot.
+      expect(imageCache.statusForKey(testImage2).live, false); // no listeners
+
+      expect(resultingCompleter1, completer1);
+      expect(resultingCompleter2, completer2);
+    });
+
+    test('Live image cache avoids leaks of unlistened streams', () async {
+      imageCache.maximumSize = 3;
+
+      const TestImageProvider(1, 1)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(2, 2)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(3, 3)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(4, 4)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(5, 5)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(6, 6)..resolve(ImageConfiguration.empty);
+
+      // wait an event loop to let image resolution process.
+      await null;
+
+      expect(imageCache.currentSize, 3);
+      expect(imageCache.liveImageCount, 0);
+    });
+
+    test('Disabled image cache does not leak live images', () async {
+      imageCache.maximumSize = 0;
+
+      const TestImageProvider(1, 1)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(2, 2)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(3, 3)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(4, 4)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(5, 5)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(6, 6)..resolve(ImageConfiguration.empty);
+
+      // wait an event loop to let image resolution process.
+      await null;
+
+      expect(imageCache.currentSize, 0);
+      expect(imageCache.liveImageCount, 0);
+    });
+
+    test('Evicting a pending image clears the live image by default', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, true);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+
+      imageCache.evict(testImage);
+      expect(imageCache.statusForKey(testImage).untracked, true);
+    });
+
+    test('Evicting a pending image does clear the live image when includeLive is false and only cache listening', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, true);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+
+      imageCache.evict(testImage, includeLive: false);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, false);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+    });
+
+    test('Evicting a pending image does clear the live image when includeLive is false and some other listener', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter();
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, true);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+
+      completer1.addListener(ImageStreamListener((_, __) {}));
+      imageCache.evict(testImage, includeLive: false);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+    });
+
+    test('Evicting a completed image does clear the live image by default', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+        ..testSetImage(testImage)
+        ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+
+      imageCache.evict(testImage);
+      expect(imageCache.statusForKey(testImage).untracked, true);
+    });
+
+    test('Evicting a completed image does not clear the live image when includeLive is set to false', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+        ..testSetImage(testImage)
+        ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+
+      imageCache.evict(testImage, includeLive: false);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
     });
   });
 }
