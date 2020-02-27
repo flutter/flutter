@@ -2054,7 +2054,11 @@ abstract class BuildContext {
 
   /// Determines if [widget] is in the process of updating.
   ///
-  /// This flag will return `true` if [widget] is in one of those life-cycles:
+  /// This flag will return `true` if [widget] is in a life-cycles that both:
+  /// - declaratively updates a tree ([Widget] tree, [RenderObject] tree)
+  /// - can consume an [InheritedWidget]
+  /// 
+  /// This includes:
   /// - [StatelessWidget.build]
   /// - [State.build]
   /// - [RenderObjectWidget.createRenderObject]
