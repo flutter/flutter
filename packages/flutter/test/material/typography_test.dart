@@ -20,10 +20,12 @@ void main() {
     expect(Typography.material2018(platform: TargetPlatform.android).black.headline6.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.headline6.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.linux).black.headline6.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.linux).black.headline6.fontFamilyFallback, <String>['DejaVu Sans', 'Liberation Sans', 'Arial']);
     expect(Typography.material2018(platform: TargetPlatform.windows).black.headline6.fontFamily, 'Segoe UI');
     expect(Typography.material2018(platform: TargetPlatform.android).white.headline6.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.fuchsia).white.headline6.fontFamily, 'Roboto');
     expect(Typography.material2018(platform: TargetPlatform.linux).white.headline6.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.linux).white.headline6.fontFamilyFallback, <String>['DejaVu Sans', 'Liberation Sans', 'Arial']);
     expect(Typography.material2018(platform: TargetPlatform.windows).white.headline6.fontFamily, 'Segoe UI');
   });
 
