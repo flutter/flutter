@@ -72,12 +72,15 @@ task:
   pub_cache:
     folder: $HOME/.pub-cache
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+    reupload_on_changes: false
   flutter_pkg_cache:
     folder: bin/cache/pkg
     fingerprint_script: echo $OS; cat bin/internal/*.version
+    reupload_on_changes: false
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/*.version
+    reupload_on_changes: false
   setup_script:
     - date
     - git clean -xffd --exclude=bin/cache/
@@ -314,12 +317,15 @@ task:
     folder: $APPDATA\Pub\Cache
     fingerprint_script:
       - ps: $Environment:OS; Get-ChildItem -Path "$Environment:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
+    reupload_on_changes: false
   flutter_pkg_cache:
     folder: bin\cache\pkg
     fingerprint_script: echo %OS% & type bin\internal\*.version
+    reupload_on_changes: false
   artifacts_cache:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\*.version
+    reupload_on_changes: false
   setup_script:
     - git clean -xffd --exclude=bin/cache/ # git wants forward slash path separators, even on Windows.
     - git fetch origin
