@@ -87,6 +87,7 @@ void main() {
       when(linuxProject.managedDirectory).thenReturn(linuxManagedDirectory);
       when(linuxProject.ephemeralDirectory).thenReturn(linuxEphemeralDirectory);
       when(linuxProject.pluginSymlinkDirectory).thenReturn(linuxEphemeralDirectory.childDirectory('.plugin_symlinks'));
+      when(linuxProject.makeFile).thenReturn(linuxManagedDirectory.parent.childFile('Makefile'));
       when(linuxProject.generatedPluginMakeFile).thenReturn(linuxManagedDirectory.childFile('generated_plugins.mk'));
       when(linuxProject.existsSync()).thenReturn(false);
 
