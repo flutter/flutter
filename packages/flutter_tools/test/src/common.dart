@@ -139,8 +139,7 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
     fail('ToolExit expected, but nothing thrown');
   } on ToolExit catch(e) {
     expect(e.message, messageMatcher);
-  // Catch all exceptions to give a better test failure message.
-  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
+  } catch(e, trace) {
     fail('ToolExit expected, got $e\n$trace');
   }
 }

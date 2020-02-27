@@ -91,6 +91,6 @@ void main() {
     expect(getIOSArchForName('arm64'), DarwinArch.arm64);
     expect(getIOSArchForName('arm64e'), DarwinArch.arm64);
     expect(getIOSArchForName('x86_64'), DarwinArch.x86_64);
-    expect(() => getIOSArchForName('bogus'), throwsException);
+    expect(() => getIOSArchForName('bogus'), throwsAssertionError);
   });
 }

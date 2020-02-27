@@ -136,7 +136,7 @@ void main() {
       const int kFailedAttempts = 5;
       when(httpRequest.close()).thenAnswer((Invocation invocation) {
         if (nRequest++ < kFailedAttempts) {
-          throw Exception('Connection resert by peer');
+          throw 'Connection resert by peer';
         }
         return Future<HttpClientResponse>.value(httpClientResponse);
       });

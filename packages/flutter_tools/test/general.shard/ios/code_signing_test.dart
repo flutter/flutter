@@ -229,9 +229,9 @@ void main() {
       Map<String, String> signingConfigs;
       try {
         signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
-      } on Exception catch (e) {
+      } catch (e) {
         // This should not throw
-        fail('Code signing threw: $e');
+        expect(true, false);
       }
 
       expect(testLogger.statusText, contains('Apple Development: Profile 1 (1111AAAA11)'));

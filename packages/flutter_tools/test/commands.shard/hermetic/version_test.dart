@@ -163,7 +163,7 @@ void main() {
       try {
         await command.getTags();
         fail('ToolExit expected');
-      } on Exception catch (e) {
+      } catch(e) {
         expect(e, isA<ToolExit>());
       }
     }, overrides: <Type, Generator>{
