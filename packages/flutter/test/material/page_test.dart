@@ -14,6 +14,13 @@ void main() {
   testWidgets('test page transition', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: {
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
         home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
