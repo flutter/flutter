@@ -14,13 +14,6 @@ void main() {
   testWidgets('test page transition', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          pageTransitionsTheme: const PageTransitionsTheme(
-            builders: {
-              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-            },
-          ),
-        ),
         home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
@@ -30,27 +23,26 @@ void main() {
       ),
     );
 
-    final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
-
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    ScaleTransition widget1Scale = tester.element(
+      find.text('Page 1'),
+    ).findAncestorWidgetOfExactType<ScaleTransition>();
+    ScaleTransition widget2Scale = tester.element(
+      find.text('Page 2'),
+    ).findAncestorWidgetOfExactType<ScaleTransition>();
+    FadeTransition widget2Opacity = tester.element(
+      find.text('Page 2'),
+    ).findAncestorWidgetOfExactType<FadeTransition>();
+
+    expect(widget1Scale.scale.value, greaterThan(1.0));
+    expect(widget2Scale.scale.value, lessThan(1.0));
+    expect(widget2Opacity.opacity.value, lessThan(1.0));
+
+    await tester.pump(const Duration(milliseconds: 250));
     await tester.pump(const Duration(milliseconds: 1));
-
-    FadeTransition widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
-    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-    final Size widget2Size = tester.getSize(find.text('Page 2'));
-
-    // Android transition is vertical only.
-    expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
-    // Page 1 is above page 2 mid-transition.
-    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-    // Animation begins 3/4 of the way up the page.
-    expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
-    // Animation starts with page 2 being near transparent.
-    expect(widget2Opacity.opacity.value < 0.01, true);
-
-    await tester.pump(const Duration(milliseconds: 300));
 
     // Page 2 covers page 1.
     expect(find.text('Page 1'), findsNothing);
@@ -58,18 +50,24 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    widget1Scale = tester.element(
+      find.text('Page 1'),
+    ).findAncestorWidgetOfExactType<ScaleTransition>();
+    widget2Scale = tester.element(
+      find.text('Page 2'),
+    ).findAncestorWidgetOfExactType<ScaleTransition>();
+    widget2Opacity = tester.element(
+      find.text('Page 2'),
+    ).findAncestorWidgetOfExactType<FadeTransition>();
+
+    expect(widget1Scale.scale.value, greaterThan(1.0));
+    expect(widget2Scale.scale.value, lessThan(1.0));
+    expect(widget2Opacity.opacity.value, lessThan(1.0));
+
+    await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 1));
-
-    widget2Opacity =
-        tester.element(find.text('Page 2')).findAncestorWidgetOfExactType<FadeTransition>();
-    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-
-    // Page 2 starts to move down.
-    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-    // Page 2 starts to lose opacity.
-    expect(widget2Opacity.opacity.value < 1.0, true);
-
-    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
