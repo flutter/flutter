@@ -61,9 +61,8 @@ void main() {
     });
 
     testUsingContext('signal handler error goes on error stream', () async {
-      final Exception exn = Exception('Error');
       signals.addHandler(signalUnderTest, (ProcessSignal s) {
-        throw exn;
+        throw 'Error';
       });
 
       final Completer<void> completer = Completer<void>();
@@ -76,7 +75,7 @@ void main() {
       controller.add(mockSignal);
       await completer.future;
       await errSub.cancel();
-      expect(errList, contains(exn));
+      expect(errList, <Object>['Error']);
     }, overrides: <Type, Generator>{
       Signals: () => Signals(),
     });

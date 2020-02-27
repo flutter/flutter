@@ -355,7 +355,7 @@ void main() {
           engineDir: 'engine/path',
         );
         fail('ToolExit expected');
-      } on Exception catch (e) {
+      } catch(e) {
         expect(e, isA<ToolExit>());
         verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
@@ -404,7 +404,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
           engineDir: 'engine/path',
         );
         fail('ToolExit expected');
-      } on Exception catch (e) {
+      } catch (e) {
         expect(e, isA<ToolExit>());
         expect(
           testLogger.errorText,

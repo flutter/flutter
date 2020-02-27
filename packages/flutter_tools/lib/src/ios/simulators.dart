@@ -291,7 +291,7 @@ class IOSSimulator extends Device {
       final IOSApp iosApp = app;
       await SimControl.instance.install(id, iosApp.simulatorBundlePath);
       return true;
-    } on Exception {
+    } catch (e) {
       return false;
     }
   }
@@ -301,7 +301,7 @@ class IOSSimulator extends Device {
     try {
       await SimControl.instance.uninstall(id, app.id);
       return true;
-    } on Exception {
+    } catch (e) {
       return false;
     }
   }
@@ -395,7 +395,7 @@ class IOSSimulator extends Device {
       final String bundleIdentifier = globals.plistParser.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
       await SimControl.instance.launch(id, bundleIdentifier, args);
-    } on Exception catch (error) {
+    } catch (error) {
       globals.printError('$error');
       return LaunchResult.failed();
     }
@@ -411,7 +411,7 @@ class IOSSimulator extends Device {
     try {
       final Uri deviceUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: deviceUri);
-    } on Exception catch (error) {
+    } catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {

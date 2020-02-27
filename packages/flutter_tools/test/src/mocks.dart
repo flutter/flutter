@@ -398,8 +398,7 @@ class MemoryIOSink implements IOSink {
       (List<int> data) {
         try {
           add(data);
-        // Catches all exceptions to propagate them to the completer.
-        } catch (err, stack) { // ignore: avoid_catches_without_on_clauses
+        } catch (err, stack) {
           sub.cancel();
           completer.completeError(err, stack);
         }

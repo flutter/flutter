@@ -73,8 +73,7 @@ class VMPlatform extends PlatformPlugin {
     Isolate isolate;
     try {
       isolate = await _spawnIsolate(codePath, receivePort.sendPort);
-    // This catch rethrows, so doesn't need to catch only Exception.
-    } catch (error) { // ignore: avoid_catches_without_on_clauses
+    } catch (error) {
       receivePort.close();
       rethrow;
     }

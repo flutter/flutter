@@ -114,7 +114,7 @@ class AttachCommand extends FlutterCommand {
     }
     try {
       return int.parse(stringArg('debug-port'));
-    } on Exception catch (error) {
+    } catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
     return null;
@@ -222,7 +222,7 @@ class AttachCommand extends FlutterCommand {
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
           observatoryUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
-        } on Exception {
+        } catch (_) {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
           for (final ForwardedPort port in ports) {
@@ -292,7 +292,7 @@ class AttachCommand extends FlutterCommand {
             globals.fs.currentDirectory,
             LaunchMode.attach,
           );
-        } on Exception catch (error) {
+        } catch (error) {
           throwToolExit(error.toString());
         }
         result = await app.runner.waitForAppToFinish();
