@@ -974,7 +974,7 @@ void main() {
         child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData(padding: EdgeInsets.symmetric(vertical: 100.0)),
+          data: const MediaQueryData(padding: EdgeInsets.symmetric(vertical: 100.0)),
           child: Scaffold(
             primary: true,
             body: Column(
