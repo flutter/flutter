@@ -37,7 +37,7 @@ void main() {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['clang++', '--version'],
-        stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
+        stdout: 'clang version 2.0.1-10 (tags/RELEASE_401/final)\njunk',
       ),
       const FakeCommand(
         command: <String>['make', '--version'],
