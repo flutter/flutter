@@ -327,8 +327,7 @@ void main() {
       try {
         await pub.get(context: PubContext.flutterTests, checkLastModified: true);
         expect(true, isFalse, reason: 'pub.get did not throw');
-      } catch (error) {
-        expect(error, isA<Exception>());
+      } on ToolExit catch (error) {
         expect(error.message, '/: unexpected concurrent modification of pubspec.yaml while running pub.');
       }
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
