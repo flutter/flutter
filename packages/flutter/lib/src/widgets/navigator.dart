@@ -418,7 +418,6 @@ class RouteSettings {
   /// Creates data used to construct routes.
   const RouteSettings({
     this.name,
-    this.isInitialRoute = false,
     this.arguments,
   });
 
@@ -438,19 +437,6 @@ class RouteSettings {
   ///
   /// If null, the route is anonymous.
   final String name;
-
-  /// Whether this route is the very first route being pushed onto this [Navigator].
-  ///
-  /// The initial route typically skips any entrance transition to speed startup.
-  ///
-  /// This property has been deprecated. Uses [Navigator.onGenerateInitialRoutes]
-  /// to customize initial routes instead. This feature was deprecated after
-  /// v1.14.1.
-  @Deprecated(
-    'Uses onGenerateInitialRoutes to customize initial routes instead. '
-    'This feature was deprecated after v1.14.1.'
-  )
-  final bool isInitialRoute;
 
   /// The arguments passed to this route.
   ///
@@ -2178,7 +2164,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }());
     final RouteSettings settings = RouteSettings(
       name: name,
-      isInitialRoute: _history.isEmpty,
       arguments: arguments,
     );
     Route<T> route = widget.onGenerateRoute(settings) as Route<T>;
