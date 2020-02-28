@@ -406,7 +406,7 @@ action("pom_embedding") {
 }
 
 # To build and run:
-#   testing/run_tests.py [--type=java] [--filter=io.flutter.TestClassName]
+#   testing/run_tests.py [--type=java] [--java-filter=io.flutter.TestClassName]
 action("robolectric_tests") {
   script = "//build/android/gyp/javac.py"
   depfile = "$target_gen_dir/$target_name.d"
