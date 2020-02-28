@@ -124,10 +124,33 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
       print('Received profile data');
       for (final Map<String, dynamic> profile in profiles) {
         final String benchmarkName = profile['name'] as String;
-        final String benchmarkScoreKey = '$benchmarkName.$backend.averageDrawFrameDuration';
-        taskResult[benchmarkScoreKey] = profile['averageDrawFrameDuration'].toDouble(); // micros
-        taskResult['$benchmarkName.$backend.drawFrameDurationNoise'] = profile['drawFrameDurationNoise'].toDouble(); // micros
-        benchmarkScoreKeys.add(benchmarkScoreKey);
+        if (benchmarkName.isEmpty) {
+          throw 'Benchmark name is empty';
+        }
+
+        final String namespace = '$benchmarkName.$backend';
+        final List<String> scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
+        if (scoreKeys == null || scoreKeys.isEmpty) {
+          throw 'No score keys in benchmark "$benchmarkName"';
+        }
+        for (final String scoreKey in scoreKeys) {
+          if (scoreKey == null || scoreKey.isEmpty) {
+            throw 'Score key is empty in benchmark "$benchmarkName". '
+                'Received [${scoreKeys.join(', ')}]';
+          }
+          if (scoreKey.contains('.')) {
+            throw 'Score key contain dots in benchmark "$benchmarkName". '
+                'Received [${scoreKeys.join(', ')}]';
+          }
+          benchmarkScoreKeys.add('$namespace.$scoreKey');
+        }
+
+        for (final String key in profile.keys) {
+          if (key == 'name' || key == 'scoreKeys') {
+            continue;
+          }
+          taskResult['$namespace.$key'] = profile[key];
+        }
       }
       return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
     } finally {
