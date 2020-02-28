@@ -15,6 +15,7 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
 import 'globals.dart' as globals;
 import 'ios/devices.dart';
@@ -74,7 +75,10 @@ class DeviceManager {
     FuchsiaDevices(),
     FlutterTesterDevices(),
     MacOSDevices(),
-    LinuxDevices(),
+    LinuxDevices(
+      platform: globals.platform,
+      featureFlags: featureFlags,
+    ),
     WindowsDevices(),
     WebDevices(),
   ]);

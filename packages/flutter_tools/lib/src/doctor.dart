@@ -20,6 +20,7 @@ import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
+import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
 import 'intellij/intellij.dart';
@@ -67,6 +68,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators,
       ...VsCodeValidator.installedValidators,
     ];
+    final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+      platform: globals.platform,
+      featureFlags: featureFlags,
+    );
 
     _validators = <DoctorValidator>[
       FlutterValidator(),
@@ -115,6 +120,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _workflows.add(fuchsiaWorkflow);
       }
 
+      final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+        platform: globals.platform,
+        featureFlags: featureFlags,
+      );
       if (linuxWorkflow.appliesToHostPlatform) {
         _workflows.add(linuxWorkflow);
       }
